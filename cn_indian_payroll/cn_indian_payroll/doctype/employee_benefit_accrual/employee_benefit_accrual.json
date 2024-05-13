@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:BEN-{employee}-{####}",
+ "creation": "2024-05-09 16:39:20.531561",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_i0lg",
+  "amended_from",
+  "employee",
+  "employee_name",
+  "payroll_entry",
+  "amount",
+  "column_break_vfdg",
+  "salary_component",
+  "payroll_period",
+  "benefit_accrual_date",
+  "allow_claim_across_outside_payroll_period",
+  "salary_slip"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_i0lg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Benefit Accrual",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Link",
+   "label": "Payroll Entry",
+   "options": "Payroll Entry"
+  },
+  {
+   "fieldname": "column_break_vfdg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_claim_across_outside_payroll_period",
+   "fieldtype": "Check",
+   "label": "Allow Claim Across Outside Payroll Period"
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Payroll Period",
+   "options": "Payroll Period"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "benefit_accrual_date",
+   "fieldtype": "Date",
+   "label": "Benefit Accrual Date"
+  },
+  {
+   "fieldname": "salary_slip",
+   "fieldtype": "Link",
+   "label": "Salary Slip",
+   "options": "Salary Slip"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-05-11 17:49:34.015178",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Employee Benefit Accrual",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

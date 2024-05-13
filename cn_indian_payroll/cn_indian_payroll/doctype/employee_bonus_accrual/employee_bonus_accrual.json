@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ACC.{employee}-{####}",
+ "creation": "2024-05-08 13:44:19.896889",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_fznz",
+  "company",
+  "employee",
+  "accrual_date",
+  "column_break_yukg",
+  "salary_structure",
+  "salary_structure_assignment",
+  "salary_component",
+  "payroll_entry",
+  "amended_from",
+  "section_break_lapc",
+  "currency",
+  "amount",
+  "bonus_paid_date",
+  "is_paid"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_fznz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "accrual_date",
+   "fieldtype": "Date",
+   "label": "Accrual Date"
+  },
+  {
+   "fieldname": "column_break_yukg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_structure",
+   "fieldtype": "Link",
+   "label": "Salary Structure",
+   "options": "Salary Structure"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Bonus Accrual",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "salary_structure_assignment",
+   "fieldtype": "Link",
+   "label": "Salary Structure Assignment",
+   "options": "Salary Structure Assignment"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "section_break_lapc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "bonus_paid_date",
+   "fieldtype": "Date",
+   "label": "Bonus Paid Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_paid",
+   "fieldtype": "Check",
+   "label": "Is Paid"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Link",
+   "label": "Payroll Entry",
+   "options": "Payroll Entry"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-05-10 14:09:32.779491",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Employee Bonus Accrual",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

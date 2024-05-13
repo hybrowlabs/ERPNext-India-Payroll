@@ -1,8 +1,8 @@
 app_name = "cn_indian_payroll"
-app_title = "cn-indian-payroll"
-app_publisher = "hybrowlabs"
+app_title = "Indian Payroll"
+app_publisher = "Hybrowlabs technologies"
 app_description = "cn-indian-payroll"
-app_email = "chinmay@hybrowlabs"
+app_email = "chinmay@hybrowlabs.com"
 app_license = "mit"
 # required_apps = []
 
@@ -227,3 +227,24 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+fixtures = [
+    {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}}
+    
+]
+doctype_js = {
+                "Payroll Entry" : "public/js/payroll.js",
+                "Employee Benefit Claim" : "public/js/employee_benefit_claim.js",
+                "Employee" : "public/js/employee.js",
+              
+              }
+
+override_doctype_class = {
+
+    # "Payroll Entry":"cn_indian_payroll.cn_indian_payroll.overrides.payroll.CustomPayrollEntry",
+
+    # "Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.accual_benefit_claim.CustomSalarySlip",
+    "Employee Benefit Claim":"cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
+	"Employee": "cn_indian_payroll.cn_indian_payroll.overrides.employee.CustomEmployee",
+    "Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
+    # "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip"
+}

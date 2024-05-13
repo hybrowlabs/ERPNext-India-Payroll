@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-05-09 14:03:25.743959",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "lop_reversal_details_section",
+  "employee",
+  "payroll_entry",
+  "auto_submit",
+  "column_break_sucb",
+  "additional_salary_date",
+  "number_of_days",
+  "salary_component",
+  "amended_from",
+  "section_break_pttm",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "lop_reversal_details_section",
+   "fieldtype": "Section Break",
+   "label": "LOP Reversal Details"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Link",
+   "label": "Payroll Entry",
+   "options": "Payroll Entry"
+  },
+  {
+   "fieldname": "column_break_sucb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "additional_salary_date",
+   "fieldtype": "Date",
+   "label": "Additional Salary Date"
+  },
+  {
+   "fieldname": "number_of_days",
+   "fieldtype": "Float",
+   "label": "Number of Days"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "LOP Reversal",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_submit",
+   "fieldtype": "Check",
+   "label": "Auto Submit"
+  },
+  {
+   "fieldname": "section_break_pttm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-05-09 14:13:19.045575",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "LOP Reversal",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
