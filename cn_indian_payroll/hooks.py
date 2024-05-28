@@ -239,7 +239,9 @@ doctype_js = {
                 "Payroll Entry" : "public/js/payroll.js",
                 "Employee Benefit Claim" : "public/js/employee_benefit_claim.js",
                 "Employee" : "public/js/employee.js",
-                "Salary Structure Assignment": "public/js/salary_structure_assignment.js"
+                "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
+                "Employee Tax Exemption Declaration":"public/js/tax_declaration.js"
+
               
               }
 override_doctype_class = {
@@ -250,6 +252,8 @@ override_doctype_class = {
     "Employee Benefit Claim":"meril.meril.overrides.benefit_claim.CustomEmployeeBenefitClaim",
 	# "Employee": "meril.meril.overrides.employee.CustomEmployee",
     "Salary Slip":"meril.meril.overrides.salary_slip.CustomSalarySlip",
-    "Salary Structure Assignment":"meril.meril.overrides.salary_structure_assignment.CustomSalaryStructureAssignment"
+    "Salary Structure Assignment":"meril.meril.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
+    "Employee Tax Exemption Declaration":"meril.meril.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration"
+
     # "Salary Slip": "meril.meril.overrides.salary_slip.CustomSalarySlip"
 }

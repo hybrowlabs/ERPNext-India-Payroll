@@ -112,14 +112,17 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
     def set_cpl(self):
-        components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]
+        # components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]
         array=[]
         
         if self.custom_employee_reimbursements:
             for i in self.custom_employee_reimbursements:
-                if i.reimbursements in components:
-                    
-                    array.append(i.reimbursements)
+                doc1 = frappe.get_doc('Salary Component', i.reimbursements)
+                if(doc1.custom_is_reimbursement==1):
+                   
+                    array.append(doc1.name)
+
+
 
             
             if len(array)==3:
