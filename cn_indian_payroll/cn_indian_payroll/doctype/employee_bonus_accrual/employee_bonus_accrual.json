@@ -116,7 +116,7 @@
  "links": [],
  "modified": "2024-05-13 13:58:34.707818",
  "modified_by": "Administrator",
- "module": "meril",
+ "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",
  "naming_rule": "Expression",
  "owner": "Administrator",
