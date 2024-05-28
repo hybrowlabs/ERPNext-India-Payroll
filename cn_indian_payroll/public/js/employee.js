@@ -1,42 +1,86 @@
 frappe.ui.form.on('Employee', {
     refresh(frm) {
         
-        frm.add_custom_button(__("Tax Excemption Declaration"),function()
+        frm.add_custom_button(__("Tax Exemption Declaration"),function()
             {
+
+                frappe.call({
+        
+                    method: "frappe.client.get_list",
+                    args: {
+                        doctype: "Employee Tax Exemption Declaration",
+                        filters: { "employee": frm.doc.employee, "docstatus": 1 },
+                        fields: ["name"],
+                        limit: 1,
+                       
+                    },
+                    callback: function(res) {
+
+                       
+                        if (res.message.length>0)
+                        {
+                            frappe.set_route("Form", "Employee Tax Exemption Declaration", res.message[0].name);
+
+                        }
+                        else{
+                            msgprint("Please Create Employee Tax Exemption Declaration")
+                        }
+                       
+
+                    }
+                })
+
+
+
                 
-                 frappe.set_route("Form", "Employee Tax Exemption Declaration", 'new-employee-tax-exemption-declaration');
+                //  frappe.set_route("Form", "Employee Tax Exemption Declaration", 'new-employee-tax-exemption-declaration');
                 
             })
-        // Your code here
+
+
+
+
+            frm.add_custom_button(__("Assign CTC"),function()
+            {
+
+                frappe.call({
+        
+                    method: "frappe.client.get_list",
+                    args: {
+                        doctype: "Salary Structure Assignment",
+                        filters: { "employee": frm.doc.employee, "docstatus": 1 },
+                        fields: ["name"],
+                        limit: 1,
+                       
+                    },
+                    callback: function(res) {
+
+                        
+                        if (res.message.length>0)
+                        {
+                            frappe.set_route("Form", "Salary Structure Assignment", res.message[0].name);
+
+                        }
+                        else
+                        {
+                            
+
+                            frappe.set_route("Form", "Salary Structure Assignment", 'new-salary-structure-assignment');
+                        }
+                       
+
+                    }
+                })
+
+
+
+                
+               
+                
+            })
     },
     
-    custom_nps_percent(frm) {
-        if (frm.doc.custom_is_nps == 1 && frm.doc.custom_nps_percent )
-        
-        {
-        
-        if(frm.doc.custom_nps_percent <= 10) 
-        {
-            base_value(frm, function(amount) 
-            {
-                
-                
-                // console.log(amount, "99");
-                
-                var nps_value=(amount*frm.doc.custom_nps_percent)/100
-                frm.set_value("custom_nps_values",nps_value)
-            });
-        }
-        
-        else
-        {
-            msgprint("you cant put percentage greater than 10")
-            frm.set_value("custom_nps_values",undefined)
-            frm.set_value("custom_nps_percent",undefined)
-        }
-        
-        }
-    },
+    
     
     // custom_nps_values(frm) {
     //     if (frm.doc.custom_is_nps == 1 && frm.doc.custom_nps_values) {
@@ -95,38 +139,10 @@ frappe.ui.form.on('Employee', {
     
     
     
-    custom_cubic_capacity_of_company(frm)
-    {
-       
-        
-            if(frm.doc.custom_cubic_capacity_of_company=="Car < 1600 CC" )
-            {
-                frm.set_value("custom_car_perquisite_as_per_rules",1800)
-                
-            }
-            
-            else if (frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
-            {
-                
-                 frm.set_value("custom_car_perquisite_as_per_rules",2400)
-                
-            }
-        
-
-    },
+   
     
     
-    custom_is_driver_provided_by_company(frm)
-    {
-        if(frm.doc.custom_is_driver_provided_by_company==1)
-        {
-            frm.set_value("custom_driver_perquisite_as_per_rules",900)
-        }
-        else
-        {
-            frm.set_value("custom_driver_perquisite_as_per_rules",undefined) 
-        }
-    }
+    
 });
 
 function base_value(frm, callback) 

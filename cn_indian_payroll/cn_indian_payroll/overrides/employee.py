@@ -15,7 +15,7 @@ class CustomEmployee(Employee):
 
 
     def set_cpl(self):
-        components = ["Car Allowance", "Petrol Reimbursement", "Leave Travel Allowance"]
+        components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]
         array=[]
         
         if self.custom_employee_reimbursements:

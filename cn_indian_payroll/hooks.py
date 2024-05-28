@@ -228,23 +228,28 @@ app_license = "mit"
 # }
 
 fixtures = [
-    {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}}
+    {"dt": "Custom Field", "filters": {"module": "meril"}},
+	{"dt":"Print Format","filters":{"module": "meril"}}
     
 ]
+
+
+
 doctype_js = {
                 "Payroll Entry" : "public/js/payroll.js",
                 "Employee Benefit Claim" : "public/js/employee_benefit_claim.js",
                 "Employee" : "public/js/employee.js",
+                "Salary Structure Assignment": "public/js/salary_structure_assignment.js"
               
               }
-
 override_doctype_class = {
 
-    # "Payroll Entry":"cn_indian_payroll.cn_indian_payroll.overrides.payroll.CustomPayrollEntry",
+    # "Payroll Entry":"meril.meril.overrides.payroll.CustomPayrollEntry",
 
-    # "Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.accual_benefit_claim.CustomSalarySlip",
-    "Employee Benefit Claim":"cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
-	"Employee": "cn_indian_payroll.cn_indian_payroll.overrides.employee.CustomEmployee",
-    "Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
-    # "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip"
+    # "Salary Slip":"meril.meril.overrides.accual_benefit_claim.CustomSalarySlip",
+    "Employee Benefit Claim":"meril.meril.overrides.benefit_claim.CustomEmployeeBenefitClaim",
+	# "Employee": "meril.meril.overrides.employee.CustomEmployee",
+    "Salary Slip":"meril.meril.overrides.salary_slip.CustomSalarySlip",
+    "Salary Structure Assignment":"meril.meril.overrides.salary_structure_assignment.CustomSalaryStructureAssignment"
+    # "Salary Slip": "meril.meril.overrides.salary_slip.CustomSalarySlip"
 }

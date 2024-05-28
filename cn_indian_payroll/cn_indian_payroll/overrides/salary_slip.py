@@ -4,11 +4,16 @@ from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
 
 class CustomSalarySlip(SalarySlip):
+
+    
+
+
+
     def after_insert(self):
         # super().validate()
         self.employee_accrual_insert()
+        # pass
         
-
 
     def on_submit(self):
         super().on_submit()
@@ -17,12 +22,9 @@ class CustomSalarySlip(SalarySlip):
 
 
     def before_save(self):
-        
         self.calculate_grosspay()
 
     def compute_ctc(self):
-        print(self.previous_taxable_earnings_before_exemption,self.current_structured_taxable_earnings_before_exemption,self.future_structured_taxable_earnings_before_exemption,self.current_additional_earnings,self.other_incomes,self.unclaimed_taxable_benefits,self.non_taxable_earnings)
-
         if hasattr(self, "previous_taxable_earnings"):
             return (
 				self.previous_taxable_earnings_before_exemption
@@ -36,11 +38,24 @@ class CustomSalarySlip(SalarySlip):
         return 0
 
     def employee_accrual_insert(self) :  
-        
         if self.employee:
-            employee_data = frappe.get_doc('Employee', self.employee)
-            if employee_data:
-                for i in employee_data.custom_employee_reimbursements:
+
+
+            ss_assignment = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=['name'],
+                        order_by='from_date desc',
+                        limit=1
+                    )
+
+            if ss_assignment:
+             
+
+                child_doc = frappe.get_doc('Salary Structure Assignment',ss_assignment[0].name)
+
+                
+           
+                for i in child_doc.custom_employee_reimbursements:
                     
                     accrual_insert = frappe.get_doc({
                         'doctype': 'Employee Benefit Accrual',
@@ -91,6 +106,17 @@ class CustomSalarySlip(SalarySlip):
         self.custom_statutory_grosspay=gross_pay_sum
         
         self.custom_statutory_year_to_date=gross_pay_year_sum
+
+
+
+
+    # def custom_set_salary_structure(self,_salary_structure_assignment):
+
+
+
+   
+
+
 
 
                 

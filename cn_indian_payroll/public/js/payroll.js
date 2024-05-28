@@ -87,7 +87,7 @@ frappe.ui.form.on('Payroll Entry', {
 
                      frappe.call({
 
-                        "method":"cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.get_submit",
+                        "method":"meril.meril.overrides.accrual_bonus.get_submit",
                         args:{
 
                             payroll_entry: frm.doc.name
@@ -131,8 +131,8 @@ frappe.ui.form.on('Payroll Entry', {
                     frm.add_custom_button(__('Create Additional Salary'), function() {
                     
                             frappe.call({
-                                // method: 'cn_indian_payroll.payroll.get_additional_salary',
-                                method: 'cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.get_additional_salary',
+                                // method: 'meril.payroll.get_additional_salary',
+                                method: 'meril.meril.overrides.additional_salary.get_additional_salary',
                                 args: {
                                     payroll_id:frm.doc.name
                                 },
@@ -164,7 +164,7 @@ frappe.ui.form.on('Payroll Entry', {
     
                         frappe.call({
     
-                            "method":"cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.additional_salary_submit",
+                            "method":"meril.meril.overrides.additional_salary.additional_salary_submit",
                             args:{
     
                                 additional: frm.doc.name
@@ -361,7 +361,7 @@ function create_bonus_accrual_entry(frm)
 
          frappe.call({
 
-            "method":"cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.accrual_created",
+            "method":"meril.meril.overrides.accrual_bonus.accrual_created",
             args:{
 
                 payroll_entry_doc_id: frm.doc.name,

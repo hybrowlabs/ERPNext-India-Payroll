@@ -97,7 +97,7 @@
  "links": [],
  "modified": "2024-05-11 17:49:34.015178",
  "modified_by": "Administrator",
- "module": "cn-indian-payroll",
+ "module": "meril",
  "name": "Employee Benefit Accrual",
  "naming_rule": "Expression",
  "owner": "Administrator",
