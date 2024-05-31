@@ -246,11 +246,9 @@ doctype_js = {
               }
 override_doctype_class = {
 
-    # "Payroll Entry":"meril.meril.overrides.payroll.CustomPayrollEntry",
-
-    # "Salary Slip":"meril.meril.overrides.accual_benefit_claim.CustomSalarySlip",
+    
     "Employee Benefit Claim":"cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
-	# "Employee": "meril.meril.overrides.employee.CustomEmployee",
+
     "Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
     "Salary Structure Assignment":"cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
     "Employee Tax Exemption Declaration":"cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration"

@@ -110,10 +110,6 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    # def custom_set_salary_structure(self,_salary_structure_assignment):
-
-
-
    
 
 

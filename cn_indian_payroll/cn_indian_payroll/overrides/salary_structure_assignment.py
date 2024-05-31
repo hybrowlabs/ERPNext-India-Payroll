@@ -16,7 +16,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def on_submit(self):
         self.insert_tax_declaration()
-        # super().on_submit()
+       
 
 
 
