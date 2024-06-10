@@ -1101,7 +1101,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -1266,7 +1266,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -1431,7 +1431,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -1541,7 +1541,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -1871,7 +1871,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -2201,7 +2201,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -2586,7 +2586,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -2861,7 +2861,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -3026,7 +3026,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
@@ -3136,7 +3136,7 @@
  },
  {
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 1,
+  "allow_on_submit": 0,
   "bold": 0,
   "collapsible": 0,
   "collapsible_depends_on": null,
