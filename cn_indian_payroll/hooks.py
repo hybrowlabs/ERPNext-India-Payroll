@@ -242,7 +242,6 @@ doctype_js = {
                 "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
                 "Employee Tax Exemption Declaration":"public/js/tax_declaration.js"
 
-              
               }
 override_doctype_class = {
 
