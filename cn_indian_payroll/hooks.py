@@ -253,5 +253,5 @@ override_doctype_class = {
     "Salary Structure Assignment":"cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
     "Employee Tax Exemption Declaration":"cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration"
 
-    # "Salary Slip": "meril.meril.overrides.salary_slip.CustomSalarySlip"
+    # "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip"
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2024, meril and Contributors
+# Copyright (c) 2024, cn_indian_payroll and Contributors
 # See license.txt
 
 # import frappe

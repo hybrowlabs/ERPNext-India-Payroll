@@ -131,7 +131,7 @@ frappe.ui.form.on('Payroll Entry', {
                     frm.add_custom_button(__('Create Additional Salary'), function() {
                     
                             frappe.call({
-                                // method: 'meril.payroll.get_additional_salary',
+                                // method: 'cn_indian_payroll.payroll.get_additional_salary',
                                 method: 'cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.get_additional_salary',
                                 args: {
                                     payroll_id:frm.doc.name
