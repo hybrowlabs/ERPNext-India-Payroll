@@ -50,7 +50,7 @@
   "margin_right": 15.0,
   "margin_top": 15.0,
   "modified": "2024-05-28 16:38:03.511896",
-  "module": "cn_indian_payroll",
+  "module": "cn-indian-payroll",
   "name": "Payslip",
   "page_number": "Hide",
   "print_format_builder": 0,
