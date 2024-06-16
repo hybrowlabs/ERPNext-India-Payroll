@@ -241,19 +241,22 @@ doctype_js = {
                 "Employee" : "public/js/employee.js",
                 "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
                 "Employee Tax Exemption Declaration":"public/js/tax_declaration.js"
-
-              
               }
+
+
 override_doctype_class = {
-
-    # "Payroll Entry":"meril.meril.overrides.payroll.CustomPayrollEntry",
-
-    # "Salary Slip":"meril.meril.overrides.accual_benefit_claim.CustomSalarySlip",
     "Employee Benefit Claim":"cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
-	# "Employee": "meril.meril.overrides.employee.CustomEmployee",
-    "Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
+	"Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
     "Salary Structure Assignment":"cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
     "Employee Tax Exemption Declaration":"cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration"
 
-    # "Salary Slip": "meril.meril.overrides.salary_slip.CustomSalarySlip"
+   
+}
+
+doc_events = {
+	"Job Offer": {
+        "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.job_offer.on_update_after_submit",
+        
+	},
+    
 }
