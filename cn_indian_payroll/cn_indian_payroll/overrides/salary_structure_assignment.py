@@ -19,6 +19,41 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         # super().on_submit()
 
 
+    def on_cancel(self):
+        self.cancel_declaration()
+
+
+
+    def cancel_declaration(self):
+        data=frappe.db.get_list('Employee Tax Exemption Declaration',
+            filters={
+                'payroll_period': self.custom_payroll_period,
+                'docstatus': ['in', [0, 1]],
+                'employee':self.employee
+            },
+            fields=['name','docstatus'],
+            
+        )
+
+        
+
+        data_doc=frappe.get_doc('Employee Tax Exemption Declaration',data[0].name)
+       
+
+        if data_doc.docstatus==0:
+            frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
+
+        if data_doc.docstatus==1:
+            data_doc.docstatus=2
+
+            data_doc.save()
+            frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
+
+
+        
+
+
+
 
 
     def insert_tax_declaration(self):

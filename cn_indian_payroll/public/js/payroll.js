@@ -82,7 +82,7 @@ frappe.ui.form.on('Payroll Entry', {
             if (frm.doc.custom_bonus_payment_mode == "Bonus Accrual" )
             {
 
-            frm.add_custom_button(__("Sumbit Bonus Accrual"),function()
+            frm.add_custom_button(__("Submit Bonus Accrual"),function()
                 {
 
                      frappe.call({
