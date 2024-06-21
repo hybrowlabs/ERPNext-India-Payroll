@@ -7,24 +7,15 @@ frappe.ui.form.on('Payroll Entry', {
     {
 
         
-        
-            // frm.add_custom_button(__("test"),function(frm)
-            //     {
-            //         frappe.call({
-            //             method: 'payrollset',
-            //             // doc: frm.doc,
-            //             args: {
-            //                 value1: frm.doc.name
-            //             },
-            //             callback: function(r) {
-            //                 if (r.message) {
-            //                     frappe.msgprint(r.message);
-            //                 }
-            //             }
-            //         });
-                    
-            //     })
 
+        if(frm.doc.docstatus==1)
+            {
+                frm.add_custom_button(__("View Salary Register"),function(frm)
+                {
+
+                    frappe.set_route("query-report", "Salary Register",);
+                })
+            }
 
 
             

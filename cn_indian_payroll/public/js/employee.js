@@ -59,11 +59,15 @@ frappe.ui.form.on('Employee', {
                         if (res.message.length>0)
                         {
                             frappe.set_route("Form", "Salary Structure Assignment", res.message[0].name);
+                            
 
                         }
                         else
                         {
-                            
+
+                           
+
+                            frappe.route_options = {"employee": frm.doc.name};
 
                             frappe.set_route("Form", "Salary Structure Assignment", 'new-salary-structure-assignment');
                         }
