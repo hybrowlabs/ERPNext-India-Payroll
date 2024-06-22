@@ -229,7 +229,10 @@ app_license = "mit"
 
 fixtures = [
     {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}},
-	{"dt":"Print Format","filters":{"module": "cn-indian-payroll"}}
+	{"dt":"Print Format","filters":{"module": "cn-indian-payroll"}},
+    {"dt":"Salary Component"},
+    {"dt":"Salary Structure"},
+
     
 ]
 

@@ -37,17 +37,21 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
         
 
-        data_doc=frappe.get_doc('Employee Tax Exemption Declaration',data[0].name)
-       
+        if len(data)>0:
 
-        if data_doc.docstatus==0:
-            frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
+        
 
-        if data_doc.docstatus==1:
-            data_doc.docstatus=2
+            data_doc=frappe.get_doc('Employee Tax Exemption Declaration',data[0].name)
+        
 
-            data_doc.save()
-            frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
+            if data_doc.docstatus==0:
+                frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
+
+            if data_doc.docstatus==1:
+                data_doc.docstatus=2
+
+                data_doc.save()
+                frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
 
 
         
@@ -66,7 +70,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                        
                     )
 
-                if component:
+                if len(component)>0:
                     for i in component:
                         array.append(i.name)
 
@@ -77,7 +81,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                        
                     )
 
-                if component:
+                if len(component)>0:
                     for i in component:
                         array.append(i.name)
 
@@ -88,7 +92,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                        
                     )
 
-                if component:
+                if len(component)>0:
                     for i in component:
                         array.append(i.name)
 
@@ -100,7 +104,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                        
                     )
 
-                if component:
+                if len(component)>0:
                     for i in component:
                         array.append(i.name)
 
@@ -111,9 +115,22 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                        
                     )
 
-                if component:
+                if len(component)>0:
                     for i in component:
                         array.append(i.name)
+
+
+
+            
+            component = frappe.get_list('Employee Tax Exemption Sub Category',
+                        filters={'custom_is_standard_':1},
+                        fields=['name'],
+                       
+                    )
+
+            if len(component)>0:
+                for i in component:
+                    array.append(i.name)
 
 
 
