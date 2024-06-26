@@ -1,0 +1,115 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Payroll Entry",
+  "is_active": 1,
+  "modified": "2024-06-20 12:47:45.972299",
+  "name": "Payroll Entry",
+  "override_status": 0,
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "Payroll manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Pending",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": "1"
+   },
+   {
+    "allow_edit": "Finance Head",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "processed",
+    "update_field": "",
+    "update_value": "",
+    "workflow_builder_id": "2"
+   },
+   {
+    "allow_edit": "HR Head",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "update_field": "",
+    "update_value": "",
+    "workflow_builder_id": "3"
+   },
+   {
+    "allow_edit": "HR Head",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Cencelled",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": "4"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Finance Head",
+    "condition": null,
+    "next_state": "processed",
+    "parent": "Payroll Entry",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Pending",
+    "workflow_builder_id": "action-1"
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "HR Head",
+    "condition": null,
+    "next_state": "Approved",
+    "parent": "Payroll Entry",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "processed",
+    "workflow_builder_id": "action-2"
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "HR Head",
+    "condition": null,
+    "next_state": "Cencelled",
+    "parent": "Payroll Entry",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "workflow_builder_id": "action-3"
+   }
+  ],
+  "workflow_data": "[{\"type\":\"state\",\"dimensions\":{\"width\":106,\"height\":53},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":49.56247965494792,\"y\":-11.200002034505209,\"width\":7,\"height\":7},{\"id\":\"right\",\"position\":\"right\",\"x\":110.32501220703125,\"y\":22.800013224283855,\"width\":7,\"height\":7},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":49.56247965494792,\"y\":56.80002848307292,\"width\":7,\"height\":7},{\"id\":\"left\",\"position\":\"left\",\"x\":-11.200052897135418,\"y\":22.800013224283855,\"width\":7,\"height\":7}]},\"computedPosition\":{\"x\":125.97327565662863,\"y\":66.70619586198626,\"z\":0},\"id\":\"1\",\"position\":{\"x\":125.97327565662863,\"y\":66.70619586198626}},{\"type\":\"state\",\"dimensions\":{\"width\":122,\"height\":53},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":57.287495930989586,\"y\":-11.200002034505209,\"width\":7,\"height\":7},{\"id\":\"right\",\"position\":\"right\",\"x\":125.77504475911459,\"y\":22.79998779296875,\"width\":7,\"height\":7},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":57.287495930989586,\"y\":56.80002848307292,\"width\":7,\"height\":7},{\"id\":\"left\",\"position\":\"left\",\"x\":-11.199951171875,\"y\":22.79998779296875,\"width\":7,\"height\":7}]},\"computedPosition\":{\"x\":389.30660898996206,\"y\":151.70619586198623,\"z\":0},\"id\":\"2\",\"position\":{\"x\":389.30660898996206,\"y\":151.70619586198623}},{\"type\":\"state\",\"dimensions\":{\"width\":116,\"height\":53},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":54.724934895833336,\"y\":-11.200002034505209,\"width\":7,\"height\":7},{\"id\":\"right\",\"position\":\"right\",\"x\":120.66243489583334,\"y\":22.79998779296875,\"width\":7,\"height\":7},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":54.724934895833336,\"y\":56.80002848307292,\"width\":7,\"height\":7},{\"id\":\"left\",\"position\":\"left\",\"x\":-11.199849446614584,\"y\":22.79998779296875,\"width\":7,\"height\":7}]},\"computedPosition\":{\"x\":694.8715835189063,\"y\":254.52819504141036,\"z\":0},\"id\":\"3\",\"position\":{\"x\":694.8715835189063,\"y\":254.52819504141036}},{\"type\":\"state\",\"dimensions\":{\"width\":119,\"height\":53},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":55.837605794270836,\"y\":-11.200052897135418,\"width\":7,\"height\":7},{\"id\":\"right\",\"position\":\"right\",\"x\":122.8875732421875,\"y\":22.79998779296875,\"width\":7,\"height\":7},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":55.837605794270836,\"y\":56.79997762044271,\"width\":7,\"height\":7},{\"id\":\"left\",\"position\":\"left\",\"x\":-11.199849446614584,\"y\":22.79998779296875,\"width\":7,\"height\":7}]},\"computedPosition\":{\"x\":788.2049168522395,\"y\":424.5281950414103,\"z\":0},\"id\":\"4\",\"position\":{\"x\":788.2049168522395,\"y\":424.5281950414103}},{\"type\":\"action\",\"dimensions\":{\"width\":78,\"height\":33},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":35.92498779296875,\"y\":-2.199961344401042,\"width\":6,\"height\":6},{\"id\":\"right\",\"position\":\"right\",\"x\":74.04998779296875,\"y\":13.300018310546875,\"width\":6,\"height\":6},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":35.92498779296875,\"y\":28.800048828125,\"width\":6,\"height\":6},{\"id\":\"left\",\"position\":\"left\",\"x\":-2.20001220703125,\"y\":13.300018310546875,\"width\":6,\"height\":6}]},\"computedPosition\":{\"x\":274.1399423232954,\"y\":76.70619586198626,\"z\":0},\"id\":\"action-1\",\"position\":{\"x\":274.1399423232954,\"y\":76.70619586198626},\"data\":{\"from_id\":\"1\",\"to_id\":\"2\"}},{\"type\":\"action\",\"dimensions\":{\"width\":78,\"height\":33},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":35.92498779296875,\"y\":-2.20001220703125,\"width\":6,\"height\":6},{\"id\":\"right\",\"position\":\"right\",\"x\":74.04998779296875,\"y\":13.299967447916668,\"width\":6,\"height\":6},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":35.92498779296875,\"y\":28.799997965494793,\"width\":6,\"height\":6},{\"id\":\"left\",\"position\":\"left\",\"x\":-2.20001220703125,\"y\":13.299967447916668,\"width\":6,\"height\":6}]},\"computedPosition\":{\"x\":561.0890962544341,\"y\":161.70619586198623,\"z\":0},\"id\":\"action-2\",\"position\":{\"x\":561.0890962544341,\"y\":161.70619586198623},\"data\":{\"from_id\":\"2\",\"to_id\":\"3\"}},{\"type\":\"action\",\"dimensions\":{\"width\":68,\"height\":33},\"handleBounds\":{\"source\":[{\"id\":\"top\",\"position\":\"top\",\"x\":31.062520345052086,\"y\":-2.20001220703125,\"width\":6,\"height\":6},{\"id\":\"right\",\"position\":\"right\",\"x\":64.32505289713542,\"y\":13.300018310546875,\"width\":6,\"height\":6},{\"id\":\"bottom\",\"position\":\"bottom\",\"x\":31.062520345052086,\"y\":28.799997965494793,\"width\":6,\"height\":6},{\"id\":\"left\",\"position\":\"left\",\"x\":-2.1999104817708335,\"y\":13.300018310546875,\"width\":6,\"height\":6}]},\"computedPosition\":{\"x\":759.7882501855729,\"y\":264.52819504141036,\"z\":0},\"id\":\"action-3\",\"position\":{\"x\":759.7882501855729,\"y\":264.52819504141036},\"data\":{\"from_id\":\"3\",\"to_id\":\"4\"}},{\"sourceHandle\":\"right\",\"targetHandle\":\"left\",\"type\":\"transition\",\"source\":\"1\",\"target\":\"action-1\",\"updatable\":true,\"animated\":true,\"id\":\"vueflow__edge-1right-action-1left\",\"sourceX\":243.29828786365988,\"sourceY\":93.00620908627012,\"targetX\":271.9399301162641,\"targetY\":93.00621417253313},{\"sourceHandle\":\"right\",\"targetHandle\":\"top\",\"type\":\"transition\",\"source\":\"action-1\",\"target\":\"2\",\"updatable\":true,\"animated\":true,\"id\":\"vueflow__edge-action-1right-2top\",\"sourceX\":354.1899301162641,\"sourceY\":93.00621417253313,\"targetX\":450.0941049209516,\"targetY\":140.506193827481,\"markerEnd\":{\"type\":\"arrow\",\"width\":15,\"height\":15,\"strokeWidth\":1.5,\"color\":\"#687178\"}},{\"sourceHandle\":\"right\",\"targetHandle\":\"left\",\"type\":\"transition\",\"source\":\"2\",\"target\":\"action-2\",\"updatable\":true,\"animated\":true,\"id\":\"vueflow__edge-2right-action-2left\",\"sourceX\":522.0816537490766,\"sourceY\":178.00618365495498,\"targetX\":558.8890840474029,\"targetY\":178.0061633099029},{\"sourceHandle\":\"right\",\"targetHandle\":\"top\",\"type\":\"transition\",\"source\":\"action-2\",\"target\":\"3\",\"updatable\":true,\"animated\":true,\"id\":\"vueflow__edge-action-2right-3top\",\"sourceX\":641.1390840474029,\"sourceY\":178.0061633099029,\"targetX\":753.0965184147396,\"targetY\":243.32819300690514,\"markerEnd\":{\"type\":\"arrow\",\"width\":15,\"height\":15,\"strokeWidth\":1.5,\"color\":\"#687178\"}},{\"sourceHandle\":\"bottom\",\"targetHandle\":\"left\",\"type\":\"transition\",\"source\":\"3\",\"target\":\"action-3\",\"updatable\":true,\"animated\":true,\"id\":\"vueflow__edge-3bottom-action-3left\",\"sourceX\":753.0965184147396,\"sourceY\":318.3282235244833,\"targetX\":757.588339703802,\"targetY\":280.82821335195723},{\"sourceHandle\":\"right\",\"targetHandle\":\"top\",\"type\":\"transition\",\"source\":\"action-3\",\"target\":\"4\",\"updatable\":true,\"animated\":true,\"id\":\"vueflow__edge-action-3right-4top\",\"sourceX\":830.1133030827083,\"sourceY\":280.82821335195723,\"targetX\":847.5425226465104,\"targetY\":413.32814214427486,\"markerEnd\":{\"type\":\"arrow\",\"width\":15,\"height\":15,\"strokeWidth\":1.5,\"color\":\"#687178\"}}]",
+  "workflow_name": "Payroll Entry",
+  "workflow_state_field": "workflow_state"
+ }
+]
