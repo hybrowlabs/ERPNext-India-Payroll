@@ -117,7 +117,7 @@ class CustomSalarySlip(SalarySlip):
         for component in self.earnings:
             component_check = frappe.get_doc('Salary Component',component.salary_component)
             
-            if component_check.custom_is_accrual==0 and component_check.custom_is_reimbursement==0 and component_check.custom_is_food_coupon==0 and component_check.custom_perquisite==0:
+            if component_check.custom_is_accrual==0 and component_check.custom_is_reimbursement==0 and component_check.custom_is_food_coupon==0 and component_check.custom_perquisite==0 and component_check.custom_is_allowance==0:
                 
                 
                
@@ -132,6 +132,17 @@ class CustomSalarySlip(SalarySlip):
                 
                 
                 total_value.append(component.amount*12)
+            
+        for component in self.earnings:
+            component_check = frappe.get_doc('Salary Component',component.salary_component)
+            
+            if component_check.custom_is_allowance==1:
+                
+                
+                
+                total_value.append(component.amount)
+
+
 
         for component in self.deductions:
             component_check = frappe.get_doc('Salary Component',component.salary_component)
@@ -142,14 +153,16 @@ class CustomSalarySlip(SalarySlip):
                 
                 total_value.append(component.amount*12)
 
-        
-
-
-        
+        # frappe.msgprint(str(total_value))
 
         
 
 
+        
+
+        
+
+
 
         
 
@@ -158,7 +171,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-        self.custom_taxable_amount=5959120
+        # self.custom_taxable_amount=5959120
         from_amount=[]
         to_amount=[]
         percentage=[]
@@ -287,6 +300,9 @@ class CustomSalarySlip(SalarySlip):
 
                     self.custom_surcharge=0
                     self.custom_education_cess=(self.custom_surcharge+self.custom_total_tax_on_income)*4/100
+
+
+                self.custom_total_amount=self.custom_surcharge+self.custom_education_cess+self.custom_total_tax_on_income
                 
             
                 self.custom_tax_slab = []
