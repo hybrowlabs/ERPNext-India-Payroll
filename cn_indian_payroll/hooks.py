@@ -232,10 +232,13 @@ fixtures = [
 	{"dt":"Print Format","filters":{"module": "cn-indian-payroll"}},
     
     {"dt":"Report","filters":{"module": "cn-indian-payroll"}},
-    {"dt":"Workflow","filters":{"name":"Payroll Entry"}}
-
-    
+    {"dt":"Workflow","filters":{"name":"Payroll Entry"}},
+    {"dt": "Workflow State", "filters": {"name": ["in", ["Cancelled", "Processed"]]}},
+    {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}}
 ]
+    
+    
+
 
 
 

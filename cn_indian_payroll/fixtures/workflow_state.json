@@ -1,0 +1,11 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-06-29 08:30:18.260574",
+  "name": "processed",
+  "style": "",
+  "workflow_state_name": "processed"
+ }
+]
