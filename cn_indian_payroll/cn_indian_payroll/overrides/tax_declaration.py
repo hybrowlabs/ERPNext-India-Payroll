@@ -1,3 +1,4 @@
+
 import frappe
 from hrms.payroll.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration import EmployeeTaxExemptionDeclaration
 
@@ -23,13 +24,32 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 if i.exemption_category == "Section 80C":
                     array.append(i.amount)
         array_sum = sum(array)
-        # frappe.msgprint(str(array_sum))
 
-        doc1 = frappe.get_doc('Employee Tax Exemption Category', 'Section 80C')
-        # frappe.msgprint(str(doc1.max_amount)) 
 
-        if(doc1.max_amount<array_sum):
-            frappe.throw("You Cant Enter Amount Greater than "+str(doc1.max_amount))
+        category=frappe.db.get_list('Employee Tax Exemption Category',
+            filters={
+                'name': 'Section 80C'
+            },
+            fields=['*'],
+            
+            
+        )
+
+        
+
+        
+
+        if len(category)>0:
+           
+
+            if(category[0].max_amount<array_sum):
+             
+                frappe.throw("You Cant Enter Amount Greater than "+str(category[0].max_amount))
+
+        
+           
+
+        
 
         
            
