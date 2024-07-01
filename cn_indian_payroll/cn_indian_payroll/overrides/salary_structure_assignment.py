@@ -16,7 +16,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def on_submit(self):
         self.insert_tax_declaration()
-        # super().on_submit()
+       
 
 
     def on_cancel(self):
@@ -64,72 +64,72 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         array=[]
         if self.employee:
             if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
-                component = frappe.get_list('Employee Tax Exemption Sub Category',
+                uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
                         filters={'custom_is_uniform':1},
                         fields=['name'],
                        
                     )
 
-                if len(component)>0:
-                    for i in component:
+                if len(uniform_component)>0:
+                    for i in uniform_component:
                         array.append(i.name)
 
             if self.custom_is_medical_allowance and self.custom_medical_allowance_value:
-                component = frappe.get_list('Employee Tax Exemption Sub Category',
+                medical_component = frappe.get_list('Employee Tax Exemption Sub Category',
                         filters={'custom_is_medical':1},
                         fields=['name'],
                        
                     )
 
-                if len(component)>0:
-                    for i in component:
+                if len(medical_component)>0:
+                    for i in medical_component:
                         array.append(i.name)
 
             if self.custom_is_epf:
-                component = frappe.get_list('Employee Tax Exemption Sub Category',
+                epf_component = frappe.get_list('Employee Tax Exemption Sub Category',
                         filters={'custom_is_epf':1},
                         fields=['name'],
                        
                     )
 
-                if len(component)>0:
-                    for i in component:
+                if len(epf_component)>0:
+                    for i in epf_component:
                         array.append(i.name)
 
 
             if self.custom_is_nps:
-                component = frappe.get_list('Employee Tax Exemption Sub Category',
+                nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
                         filters={'custom_is_nps':1},
                         fields=['name'],
                        
                     )
 
-                if len(component)>0:
-                    for i in component:
+                if len(nps_component)>0:
+                    for i in nps_component:
                         array.append(i.name)
 
             if self.custom_state:
-                component = frappe.get_list('Employee Tax Exemption Sub Category',
+                pt_component = frappe.get_list('Employee Tax Exemption Sub Category',
                         filters={'custom_is_pt':1},
                         fields=['name'],
                        
                     )
 
-                if len(component)>0:
-                    for i in component:
+                if len(pt_component)>0:
+                    for i in pt_component:
                         array.append(i.name)
 
 
 
             
-            component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_standard_':1},
+            standard_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                        filters={'custom_is_standard':1},
                         fields=['name'],
                        
                     )
 
-            if len(component)>0:
-                for i in component:
+            if len(standard_component)>0:
+                for i in standard_component:
                     array.append(i.name)
 
 
@@ -164,8 +164,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
     def set_cpl(self):
-        # components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]
+        # components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]//twa is depends upon these components
         array=[]
+
+        
         
         if len(self.custom_employee_reimbursements)>0:
             for i in self.custom_employee_reimbursements:
@@ -187,7 +189,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def reimbursement_amount(self):
         total_amount = 0
-        if self.custom_employee_reimbursements:
+        if len(self.custom_employee_reimbursements)>0:
             for reimbursement in self.custom_employee_reimbursements:
                 total_amount += reimbursement.monthly_total_amount
 
