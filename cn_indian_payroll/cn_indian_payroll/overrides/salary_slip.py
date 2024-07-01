@@ -209,6 +209,10 @@ class CustomSalarySlip(SalarySlip):
 
             self.custom_taxable_amount=total_tds_ctc-latest_declaration[0].total_declared_amount
 
+        else:
+            self.custom_total_tax_exemption_declaration=0
+            self.custom_taxable_amount=0
+
 
         
         if latest_salary_structure[0].income_tax_slab:
@@ -330,9 +334,10 @@ class CustomSalarySlip(SalarySlip):
                     }
                 
                     total_array.append(array_list)
-                # frappe.msgprint(str(total_array))
+                
 
                 for slab in total_array:
+                
                     if slab['from'] <= self.custom_taxable_amount <= slab['to']:
 
                         t1=self.custom_taxable_amount-slab['from']
