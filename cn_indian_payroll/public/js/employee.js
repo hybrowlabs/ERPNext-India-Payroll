@@ -1,6 +1,8 @@
 frappe.ui.form.on('Employee', {
     refresh(frm) {
 
+        //#
+
         if(!frm.is_new())
             {
         
