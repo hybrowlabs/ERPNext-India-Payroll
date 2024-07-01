@@ -1,5 +1,8 @@
 frappe.ui.form.on('Employee', {
     refresh(frm) {
+
+        if(!frm.is_new())
+            {
         
         frm.add_custom_button(__("Tax Exemption Declaration"),function()
             {
@@ -9,7 +12,7 @@ frappe.ui.form.on('Employee', {
                     method: "frappe.client.get_list",
                     args: {
                         doctype: "Employee Tax Exemption Declaration",
-                        filters: { "employee": frm.doc.employee, "docstatus": 1 },
+                        filters: { "employee": frm.doc.employee, "docstatus": ["in", [0, 1]]},
                         fields: ["name"],
                         limit: 1,
                        
@@ -38,6 +41,11 @@ frappe.ui.form.on('Employee', {
             })
 
 
+
+
+
+
+        
 
 
             frm.add_custom_button(__("Assign CTC"),function()
@@ -82,6 +90,9 @@ frappe.ui.form.on('Employee', {
                
                 
             })
+
+
+        }
     },
     
     
