@@ -347,10 +347,10 @@ class CustomSalarySlip(SalarySlip):
                         t2=slab['percent']
                         t3=(t1*t2)/100
 
-                        # frappe.msgprint(str(t3))
+                       
 
                         remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
-                        # frappe.msgprint(str(remaining_slabs[0]['percent']))
+                        
                         for remaining_slab in remaining_slabs:
                             from_amount.append(remaining_slab['from'])
                             to_amount.append(remaining_slab['to'])
