@@ -194,6 +194,8 @@ class CustomSalarySlip(SalarySlip):
         
         self.custom_salary_structure_assignment=latest_salary_structure[0].name
         self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
+        self.custom_employee_state=latest_salary_structure[0].custom_state
+        self.custom_annual_ctc=latest_salary_structure[0].base
 
         latest_declaration = frappe.get_list('Employee Tax Exemption Declaration',
                         filters={'employee': self.employee,'docstatus':1,"payroll_period":latest_salary_structure[0].custom_payroll_period},
