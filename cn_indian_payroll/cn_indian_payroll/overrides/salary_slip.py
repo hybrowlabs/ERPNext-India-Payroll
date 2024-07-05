@@ -107,6 +107,9 @@ class CustomSalarySlip(SalarySlip):
         
         self.custom_statutory_year_to_date=gross_pay_year_sum
 
+       
+        self.custom_net_pay_amount=gross_pay_sum-self.total_deduction
+
 
 
 
