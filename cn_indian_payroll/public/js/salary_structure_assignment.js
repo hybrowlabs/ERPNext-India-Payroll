@@ -333,6 +333,17 @@ frappe.ui.form.on('Salary Structure Assignment', {
             
         }
     }
+
+
+    frm.fields_dict['custom_employee_reimbursements'].grid.get_field('reimbursements').get_query = function(doc, cdt, cdn) {
+        var child = locals[cdt][cdn];
+        
+        return {    
+            filters:[
+                ['custom_is_reimbursement', '=', 1]
+            ]
+        }
+    }
         
     },
 
