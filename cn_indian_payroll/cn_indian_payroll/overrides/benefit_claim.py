@@ -28,6 +28,9 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
             if accrual_list:
                 total_amount = sum(accrual['amount'] for accrual in accrual_list)
 
+
+               
+
                 if self.claimed_amount > total_amount:
                     
                     frappe.throw("Claimed Amount Cannot Exceed Total Accrued Amount")
