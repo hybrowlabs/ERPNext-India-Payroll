@@ -13,7 +13,7 @@ frappe.ui.form.on('Payroll Entry', {
                 frm.add_custom_button(__("View Salary Register"),function(frm)
                 {
 
-                    frappe.set_route("query-report", "Salary Register",);
+                    frappe.set_route("query-report", "Salary Slip Registers",);
                 })
             }
 
