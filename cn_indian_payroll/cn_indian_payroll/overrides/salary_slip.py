@@ -5,7 +5,7 @@ from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
 class CustomSalarySlip(SalarySlip):
 
-    
+
 
 
 
