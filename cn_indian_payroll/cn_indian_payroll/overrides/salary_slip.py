@@ -96,7 +96,9 @@ class CustomSalarySlip(SalarySlip):
 
         gross_pay_year_sum=0 
 
-        net_pay_sum=0
+        reimbursement_sum=0
+
+        total_income=0
 
         if self.earnings:
             for i in self.earnings:
@@ -107,14 +109,24 @@ class CustomSalarySlip(SalarySlip):
 
 
                 if component.custom_is_reimbursement == 1:
-                    net_pay_sum += i.amount 
+                    reimbursement_sum += i.amount 
+
+                if component.do_not_include_in_total==1 and component.custom_is_reimbursement==0:
+                    total_income+=i.amount
+           
+
+
+
         
         self.custom_statutory_grosspay=gross_pay_sum
         
         self.custom_statutory_year_to_date=gross_pay_year_sum
 
+
+        self.custom_total_income=total_income+gross_pay_sum
+
        
-        self.custom_net_pay_amount=(gross_pay_sum-self.total_deduction)+net_pay_sum
+        self.custom_net_pay_amount=(total_income+gross_pay_sum)-self.total_deduction+reimbursement_sum
 
 
 
