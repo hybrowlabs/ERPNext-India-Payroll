@@ -6,6 +6,11 @@ from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 class CustomSalarySlip(SalarySlip):
 
 
+    def on_update(self):
+        super().on_update()
+        self.accrual_update()
+        
+
 
 
 
@@ -25,6 +30,49 @@ class CustomSalarySlip(SalarySlip):
         self.calculate_grosspay()
 
         self.tax_calculation()
+
+
+
+    def accrual_update(self):
+        if self.leave_without_pay>0:
+
+            ss_assignment = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=['name'],
+                        order_by='from_date desc',
+                        limit=1
+                    )
+
+            if ss_assignment:
+             
+
+                child_doc = frappe.get_doc('Salary Structure Assignment',ss_assignment[0].name)
+
+                
+           
+                for i in child_doc.custom_employee_reimbursements:
+                    
+                    get_benefit_accrual=frappe.db.get_list('Employee Benefit Accrual',
+                        filters={
+                            'salary_slip': self.name,'salary_component':i.reimbursements
+                        },
+                        fields=['name'],
+                        
+                    )
+
+                    if get_benefit_accrual:
+
+                        for j in get_benefit_accrual:
+                            accrual_doc = frappe.get_doc('Employee Benefit Accrual', j.name)
+                            
+                            amount=i.monthly_total_amount/self.total_working_days
+                            eligible_amount=amount*self.payment_days
+                        
+                            accrual_doc.amount =round(eligible_amount)
+                            accrual_doc.save()
+
+
+
 
     def compute_ctc(self):
         if hasattr(self, "previous_taxable_earnings"):

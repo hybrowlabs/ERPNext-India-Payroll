@@ -12,18 +12,18 @@ frappe.ui.form.on('Employee Benefit Claim', {
                 method: "frappe.client.get_list",
                 args: {
                     doctype: "Employee Benefit Accrual",
-                    filters: { "employee": frm.doc.employee, "salary_component": frm.doc.earning_component },
+                    filters: { "employee": frm.doc.employee, "salary_component": frm.doc.earning_component,docstatus:1},
                     fields: ["name", "amount"],
                     limit: 99999999
                 },
                 callback: function(res) {
                     if (res.message) {
-                        // console.log(res.message);
+                       
     
                         var sum = 0;
                         $.each(res.message, function(i, v) {
                             console.log(v.amount);
-                            sum += v.amount; // Corrected sum calculation
+                            sum += v.amount; 
                         });
     
                         console.log(sum);
