@@ -272,6 +272,7 @@ doc_events = {
 
     "LOP Reversal": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
+        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
         
 	},
 

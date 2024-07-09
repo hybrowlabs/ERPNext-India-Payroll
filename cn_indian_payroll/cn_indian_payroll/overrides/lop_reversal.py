@@ -34,6 +34,24 @@ def on_submit(self,method):
                 'amount':j.amount,
                 'docstatus':1
             })
+
             additional_doc.insert()
+
+def on_cancel(self,method):
+
+    get_additional_arrears=frappe.db.get_list('Additional Salary',
+                filters={
+                    'custom_payroll_entry': self.payroll_entry
+                },
+                fields=['*'],
+                
+            )
+
+    if len(get_additional_arrears)>0:
+        for j in get_additional_arrears:
+            arrear_doc = frappe.get_doc('Additional Salary', j.name)
+            arrear_doc.docstatus = 2
+            arrear_doc.save()
+
 
     

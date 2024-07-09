@@ -68,6 +68,7 @@
   {
    "fieldname": "salary_component",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salary Component",
    "options": "Salary Component"
   },
@@ -94,6 +95,7 @@
   {
    "fieldname": "amount",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Amount"
   },
   {
@@ -147,7 +149,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-08 22:23:20.644079",
+ "modified": "2024-07-09 15:51:26.016291",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
