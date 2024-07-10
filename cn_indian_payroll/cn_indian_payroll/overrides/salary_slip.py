@@ -29,7 +29,7 @@ class CustomSalarySlip(SalarySlip):
     def before_save(self):
         self.calculate_grosspay()
 
-        self.tax_calculation()
+        # self.tax_calculation()
 
 
 
