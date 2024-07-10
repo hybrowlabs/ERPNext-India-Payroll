@@ -159,7 +159,7 @@ class CustomSalarySlip(SalarySlip):
                 if component.custom_is_reimbursement == 1:
                     reimbursement_sum += i.amount 
 
-                if component.do_not_include_in_total==1 and component.custom_is_reimbursement==0 and component.custom_is_part_of_gross_pay==0:
+                if component.do_not_include_in_total==1 and component.custom_is_reimbursement==0 and component.custom_is_part_of_gross_pay==0 and component.custom_is_accrual==0 and component.custom_perquisite==0:
                     total_income+=i.amount
                     
            
@@ -175,6 +175,21 @@ class CustomSalarySlip(SalarySlip):
 
        
         self.custom_net_pay_amount=(total_income+gross_pay_sum)-self.total_deduction+reimbursement_sum
+
+
+
+        latest_salary_structure = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=["*"],
+                        order_by='from_date desc',
+                        limit=1
+                    )
+        
+        
+        self.custom_salary_structure_assignment=latest_salary_structure[0].name
+        self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
+        self.custom_employee_state=latest_salary_structure[0].custom_state
+        self.custom_annual_ctc=latest_salary_structure[0].base
 
 
 
