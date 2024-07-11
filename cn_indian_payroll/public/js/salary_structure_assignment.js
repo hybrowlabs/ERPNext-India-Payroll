@@ -3,11 +3,61 @@
 frappe.ui.form.on('Salary Structure Assignment', {
     
 
+    // employee:function(frm)
+    // {
+    //     if(frm.doc.employee)
 
+    //         {
+
+    //             frappe.call({
+    //                 method: "frappe.client.get",
+    //                 args: {
+    //                     doctype: "Employee",
+    //                     filters: { name: frm.doc.employee },
+    //                     fields: ["*"]
+    //                 },
+    //                 callback: function(res) {
+    //                     if (res.message)
+    //                     {
+
+    //                         console.log(res.message,"222")
+
+    //                         frm.clear_table("custom_additional_component");
+    //                         frm.refresh_field("custom_additional_component");
+
+    //                         $.each(res.message.custom_additional_salary_component,function(i,v)
+    //                             {
+
+    //                                 console.log(v.amount)
+
+    //                                 let child = frm.add_child("custom_additional_component");
+    //                                 frappe.model.set_value(child.doctype, child.name, "salary_component", v.salary_component);
+    //                                 frappe.model.set_value(child.doctype, child.name, "amount", v.amount);
+
+                                
+                            
+                                
+                                    
+    //                             })
+
+    //                             frm.refresh_field("custom_additional_component");
+
+    //                     }
+    //                 }
+
+    //             })
+
+    //         }
+
+    // },
 
 
     refresh(frm)
     {
+
+       
+
+       
         var array=[];
         var array1=[];
         var totalMonthlyEarnings = 0
@@ -152,17 +202,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
-
-
-
-                   
-
-                  
-                       
-
-                    
-
-                    
         
                     $.each(response.message.deductions, function(i, k) {
 
@@ -314,6 +353,68 @@ frappe.ui.form.on('Salary Structure Assignment', {
                                 
                     }
 
+
+
+
+
+
+                    if (frm.doc.custom_is_special_hra || frm.doc.custom_is_special_conveyance || frm.doc.custom_is_car_allowance) {
+                        let additional_component = `
+                            <table class="table table-bordered small"> 
+                                <thead> 
+                                    <tr> 
+                                        <th style="width: 16%">Additional Component</th> 
+                                        <th style="width: 16%" class="text-right">Monthly Amount</th> 
+                                        <th style="width: 16%" class="text-right">Annual Amount</th> 
+                                    </tr> 
+                                </thead> 
+                                <tbody id="additional_breakup_body">   
+                                </tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>`;
+                        document.getElementById("additional_component").innerHTML = additional_component;
+                    
+                        let tableBody3 = document.getElementById("additional_breakup_body");
+                    
+                        let component = [];
+                        let component_amount = [];
+                    
+                        if (frm.doc.custom_is_special_hra == 1) {
+                            component.push("Special HRA");
+                            component_amount.push(frm.doc.custom_special_hra_amount_annual);
+                        }
+                    
+                        if (frm.doc.custom_is_special_conveyance == 1) {
+                            component.push("Special Conveyance");
+                            component_amount.push(frm.doc.custom_special_conveyance_amount_annual);
+                        }
+                    
+                        if (frm.doc.custom_is_car_allowance == 1) {
+                            component.push("Car Allowance");
+                            component_amount.push(frm.doc.custom_car_allowance_amount_annual);
+                        }
+                    
+                        console.log(component);
+                        console.log(component_amount);
+                    
+                        $.each(component, function (i, b) {
+                            let newRow = tableBody3.insertRow();
+                            let componentCell = newRow.insertCell();
+                            componentCell.textContent = b;
+                    
+                            let amountCell = newRow.insertCell();
+                            amountCell.className = "text-right";
+                            let monthlyAmount = component_amount[i] / 12;
+                            amountCell.textContent = monthlyAmount.toLocaleString();
+                    
+                            let annualAmountCell = newRow.insertCell();
+                            annualAmountCell.className = "text-right";
+                            annualAmountCell.textContent = component_amount[i].toLocaleString();
+                        });
+                    }
+                    
+
                     
                 }
             });
@@ -462,4 +563,25 @@ custom_nps_amount(frm) {
 },
 
 })
+
+
+// function additional_component(frm)
+// {
+
+//     if(frm.is_new())
+//             {
+//                 frm.clear_table("custom_additional_component");
+//                 frm.refresh_field("custom_additional_component");
+            
+//                 let additional_component_array = ["Car Allowance", "Special HRA", "Special Conveyance"];
+            
+//                 $.each(additional_component_array, function(i, v) {
+//                     let child = frm.add_child("custom_additional_component");
+//                     frappe.model.set_value(child.doctype, child.name, "salary_component", v);
+//                 });
+            
+//                 frm.refresh_field("custom_additional_component");
+//             }
+
+// }
 
