@@ -5,7 +5,12 @@ from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
 class CustomSalarySlip(SalarySlip):
 
-    
+
+    def on_update(self):
+        super().on_update()
+        self.accrual_update()
+        
+
 
 
 
@@ -24,7 +29,50 @@ class CustomSalarySlip(SalarySlip):
     def before_save(self):
         self.calculate_grosspay()
 
-        self.tax_calculation()
+        # self.tax_calculation()
+
+
+
+    def accrual_update(self):
+        if self.leave_without_pay>0:
+
+            ss_assignment = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=['name'],
+                        order_by='from_date desc',
+                        limit=1
+                    )
+
+            if ss_assignment:
+             
+
+                child_doc = frappe.get_doc('Salary Structure Assignment',ss_assignment[0].name)
+
+                
+           
+                for i in child_doc.custom_employee_reimbursements:
+                    
+                    get_benefit_accrual=frappe.db.get_list('Employee Benefit Accrual',
+                        filters={
+                            'salary_slip': self.name,'salary_component':i.reimbursements
+                        },
+                        fields=['name'],
+                        
+                    )
+
+                    if get_benefit_accrual:
+
+                        for j in get_benefit_accrual:
+                            accrual_doc = frappe.get_doc('Employee Benefit Accrual', j.name)
+                            
+                            amount=i.monthly_total_amount/self.total_working_days
+                            eligible_amount=amount*self.payment_days
+                        
+                            accrual_doc.amount =round(eligible_amount)
+                            accrual_doc.save()
+
+
+
 
     def compute_ctc(self):
         if hasattr(self, "previous_taxable_earnings"):
@@ -96,16 +144,52 @@ class CustomSalarySlip(SalarySlip):
 
         gross_pay_year_sum=0 
 
+        reimbursement_sum=0
+
+        total_income=0
+
         if self.earnings:
             for i in self.earnings:
                 component = frappe.get_doc('Salary Component', i.salary_component)
                 if component.custom_is_part_of_gross_pay == 1:
                     gross_pay_sum += i.amount 
                     gross_pay_year_sum +=i.year_to_date
+
+
+                if component.custom_is_reimbursement == 1:
+                    reimbursement_sum += i.amount 
+
+                if component.do_not_include_in_total==1 and component.custom_is_reimbursement==0 and component.custom_is_part_of_gross_pay==0 and component.custom_is_accrual==0 and component.custom_perquisite==0:
+                    total_income+=i.amount
+                    
+           
+
+
         
         self.custom_statutory_grosspay=gross_pay_sum
         
         self.custom_statutory_year_to_date=gross_pay_year_sum
+
+
+        self.custom_total_income=total_income+gross_pay_sum
+
+       
+        self.custom_net_pay_amount=(total_income+gross_pay_sum)-self.total_deduction+reimbursement_sum
+
+
+
+        latest_salary_structure = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=["*"],
+                        order_by='from_date desc',
+                        limit=1
+                    )
+        
+        
+        self.custom_salary_structure_assignment=latest_salary_structure[0].name
+        self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
+        self.custom_employee_state=latest_salary_structure[0].custom_state
+        self.custom_annual_ctc=latest_salary_structure[0].base
 
 
 

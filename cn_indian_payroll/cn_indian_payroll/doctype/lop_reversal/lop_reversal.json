@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:EMP-LOP-{####}",
  "creation": "2024-05-09 14:03:25.743959",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,13 +10,21 @@
   "employee",
   "payroll_entry",
   "auto_submit",
+  "salary_structure",
+  "company",
   "column_break_sucb",
+  "lop_month_reversal",
   "additional_salary_date",
   "number_of_days",
+  "working_days",
   "salary_component",
   "amended_from",
   "section_break_pttm",
-  "amount"
+  "amount",
+  "section_break_apdq",
+  "arrear_breakup",
+  "section_break_wrkh",
+  "arrear_deduction_breakup"
  ],
  "fields": [
   {
@@ -26,14 +35,18 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Employee",
-   "options": "Employee"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "fieldname": "payroll_entry",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Payroll Entry",
-   "options": "Payroll Entry"
+   "options": "Payroll Entry",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_sucb",
@@ -42,16 +55,20 @@
   {
    "fieldname": "additional_salary_date",
    "fieldtype": "Date",
-   "label": "Additional Salary Date"
+   "in_list_view": 1,
+   "label": "Additional Salary Date",
+   "reqd": 1
   },
   {
    "fieldname": "number_of_days",
    "fieldtype": "Float",
-   "label": "Number of Days"
+   "label": "Number of Days",
+   "reqd": 1
   },
   {
    "fieldname": "salary_component",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salary Component",
    "options": "Salary Component"
   },
@@ -78,16 +95,65 @@
   {
    "fieldname": "amount",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Amount"
+  },
+  {
+   "fieldname": "lop_month_reversal",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "LOP Month Reversal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_apdq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "arrear_breakup",
+   "fieldtype": "Table",
+   "label": "Arrear Breakup",
+   "options": "LOP Reversal Child"
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_wrkh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "arrear_deduction_breakup",
+   "fieldtype": "Table",
+   "label": "Arrear Deduction BreakUp",
+   "options": "LOP Reversal Deduction Child"
+  },
+  {
+   "fieldname": "salary_structure",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Salary Structure",
+   "options": "Salary Structure"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-09 14:13:19.045575",
+ "modified": "2024-07-09 15:51:26.016291",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

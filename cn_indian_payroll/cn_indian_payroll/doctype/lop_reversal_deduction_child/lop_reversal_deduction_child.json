@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-08 17:48:32.201300",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "salary_component",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-08 17:49:21.275889",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "LOP Reversal Deduction Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
