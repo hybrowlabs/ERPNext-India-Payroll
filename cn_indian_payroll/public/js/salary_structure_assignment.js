@@ -55,6 +55,18 @@ frappe.ui.form.on('Salary Structure Assignment', {
     refresh(frm)
     {
 
+        if(!frm.is_new())
+            {
+
+                frm.add_custom_button(__("Estimate Tax BreakUp"),function()
+                    {
+
+                        frappe.set_route("Form", "income-tax-calculato");
+
+                    })
+            }
+        
+
        
 
        
