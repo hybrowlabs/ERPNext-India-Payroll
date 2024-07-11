@@ -262,8 +262,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
-                                        document.getElementById("total_monthly_deductions").textContent = (frm.doc.base / 12).toLocaleString();
-                                        document.getElementById("total_annual_deductions").textContent =  frm.doc.base.toLocaleString();
+                                        
             
 
 
@@ -284,7 +283,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
                         }
 
 
-
+                                        document.getElementById("total_monthly_deductions").textContent = (frm.doc.base / 12).toLocaleString();
+                                        document.getElementById("total_annual_deductions").textContent =  frm.doc.base.toLocaleString();
                         
                     }
 
