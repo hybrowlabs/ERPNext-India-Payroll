@@ -5,14 +5,9 @@ from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignmen
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def before_save(self):
 
-        
-
-    
-
         self.set_cpl()
-
         self.reimbursement_amount()
-        self.insert_tax_declaration()
+        
 
 
     def on_submit(self):
