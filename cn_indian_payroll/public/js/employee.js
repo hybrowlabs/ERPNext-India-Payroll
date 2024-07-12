@@ -57,14 +57,6 @@ frappe.ui.form.on('Employee', {
                 
             })
 
-
-
-
-
-
-        
-
-
             frm.add_custom_button(__("Assign CTC"),function()
             {
 
