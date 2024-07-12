@@ -37,6 +37,31 @@ def on_submit(self,method):
 
             additional_doc.insert()
 
+
+    if self.payroll_entry:
+
+
+        payroll_entry_doc=frappe.db.get_list('Salary Slip',
+                filters={
+                    'payroll_entry': self.payroll_entry,
+                    'employee':self.employee
+                },
+                fields=["*"],
+                
+            )
+
+       
+        if len(payroll_entry_doc)>0:
+            payroll_entry_doc1 = frappe.get_doc('Salary Slip', payroll_entry_doc[0].name)
+            payroll_entry_doc1.custom_lop_updated = 1
+            payroll_entry_doc1.save()
+
+
+
+
+        
+
+
 def on_cancel(self,method):
 
     get_additional_arrears=frappe.db.get_list('Additional Salary',

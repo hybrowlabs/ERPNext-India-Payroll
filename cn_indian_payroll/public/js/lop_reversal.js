@@ -109,6 +109,58 @@ frappe.ui.form.on('LOP Reversal', {
     employee:function(frm)
     {
 
+        if(frm.doc.employee)
+
+            {
+        var array=[]
+        var array1=[" "]
+
+        
+
+frappe.call({
+    method: "frappe.client.get_list",
+    args: {
+        doctype: "Salary Slip",
+        filters: [
+            ["employee", "=", frm.doc.employee],
+            ["leave_without_pay", ">", 0],
+            ["custom_lop_updated", "=", 0]
+        ],
+        fields: ["payroll_entry"], // Fetch only the necessary field
+    },
+    callback: function(res) {
+        if (res.message.length > 0) {
+            $.each(res.message, function(i, v) {
+                array.push(v.payroll_entry);
+            });
+
+            frm.set_query("payroll_entry", function() {
+                return {
+                    filters: {
+                        name: ["in", array]
+                    }
+                };
+            });
+        }
+
+        else{
+            frm.set_query("payroll_entry", function() {
+                return {
+                    filters: {
+                        name: ["in", array1]
+                    }
+                };
+            });
+
+        }
+    }
+});
+
+            }
+
+
+        
+
         if(frm.doc.payroll_entry && frm.doc.employee)
             {
                 frappe.call({
