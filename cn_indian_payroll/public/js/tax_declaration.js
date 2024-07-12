@@ -1,4 +1,12 @@
 frappe.ui.form.on('Employee Tax Exemption Declaration', {
+
+    refresh:function(frm)
+    {
+        if(frm.doc.custom_income_tax=="New Regime")
+            {
+                frm.set_df_property('declarations',  'read_only',  1);
+            }
+    }
    
 });
 
