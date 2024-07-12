@@ -1,0 +1,47 @@
+<div>
+    <table id = "calctable" class="table table-hover">
+        <thead>
+            <tr>
+                <th style="width:180px;background-color:black;color: white;"></th>
+                <th style="text-align: right;background-color:black;color: white;">Old Regime</th>
+                <th style="text-align: right;background-color:black;color: white;">New Regime</th>
+            </tr>
+        </thead>
+        
+        <tr>
+            <th style="text-align: left;">Total Income</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["total_income"],0) }}</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["total_income"],0) }}</th>
+        </tr>
+        <tr>
+            <th style="text-align: left;">Total Deduction</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["deduction"],0) }}</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> 50,000</th>
+        </tr>
+        <tr>
+            <th style="text-align: left;">Standard Deduction</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> 50,000</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> 50,000</th>
+        </tr>
+        <tr>
+            <th style="text-align: left;">Taxable Income</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["taxable_amount"],0) }}</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["total_income"]| int -50000,0) }}</th>
+        </tr>
+        <tr>
+            <th style="text-align: left;">Tax</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["old_regime_tax"],0) }}</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["new_regime_tax"],0) }}</th>
+        </tr>
+        <tr>
+            <th style="text-align: left;">Ed.Cess</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["old_cess"],0) }}</th>
+            <th style="text-align: right;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["new_cess"],0) }}</th>
+        </tr>
+        <tr>
+            <th style="text-align: left;background-color: red;color: white;">Total Tax</th>
+            <th style="text-align: right;background-color: red;color: white;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["old_total_tax"],0) }}</th>
+            <th style="text-align: right;background-color: red;color: white;"><i class="fa fa-inr"></i> {{ frappe.utils.fmt_money(dict["new_total_tax"],0) }}</th>
+        </tr>
+    </table>
+</div>

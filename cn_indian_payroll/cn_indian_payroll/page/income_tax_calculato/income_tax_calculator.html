@@ -1,0 +1,161 @@
+<div class="container mt-2">
+  <div class="row">
+      <!-- Section 1 -->
+      <div class="col-md-4 income">
+          <form >
+              <div class="mb-4">
+                  <label for="salaryincome" class="form-label">Salary Income</label>
+                  <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="salaryincome">
+              </div>
+              <div class="mb-3">
+                  <label for="otherincome" class="form-label">Other Income</label>
+                  <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="otherincome">
+              </div>
+          </form>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="col-md-4 deduction"style="margin-left: 20px;"> <!-- Add margin-top to create space between sections -->
+          <form>
+              <div class="row mb-3">
+                  <div class="col-md-6">
+                      <label for="80c" class="form-label">80C</label>
+                      <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="80c">
+                  </div>
+                  <div class="col-md-6">
+                      <label for="hra" class="form-label">HRA</label>
+                      <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="hra">
+                  </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="80d" class="form-label">80D</label>
+                    <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="80d">
+                </div>
+                <div class="col-md-6">
+                    <label for="nps" class="form-label">NPS</label>
+                    <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="nps">
+                </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                  <label for="stdeduction" class="form-label">Standard Deduction</label>
+                  <div class="form-control" id="stdeduction"></div>
+              </div>
+              <div class="col-md-6">
+                  <label for="otherdeduction" class="form-label">Other Deduction</label>
+                  <input autocomplete="off" type="text" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?$"  data-type="currency" placeholder="₹1,000,000,00" class="form-control" id="otherdeduction">
+              </div>
+          </div>
+          <div class="mb-3">
+            <label for="totaldeduction" class="form-label">Total Deduction</label>
+            <div class="form-control" id="totaldeduction">0.0</div>
+        </div>
+          </form>
+      </div>
+      
+      <div style="padding-left: 35px;">
+        <button onClick="calculatetax()" class="btn btn-primary btn-block" id="calculatetax">Calculate Tax</button><br><br>
+        <table id="tableblock">
+          <tr>
+            <th style="width:180px;text-align:left">
+              Old Regime
+            </th>
+            <th style="width:180px;text-align:left">
+              New Regime
+            </th>
+          </tr>
+          <tr>
+            <td style="padding-top: 10px;">
+              <div id="oldtaxableincome" class="card" style="border-radius: 10px;width:140px;height: 80px;
+        border-top: 0.5px solid #168B03;
+        border-right: 0.5px solid #168B03;
+        border-bottom: 7px solid #168B03;
+        border-left: 0.5px solid #168B03;
+        box-shadow: 6px 6px 6px 0px rgba(0, 0, 0, 0.25);">
+        <h5 style="margin-top:10px;margin-left:10px">Taxable Income</h5>
+        <p style="text-align:center">0.0</p>  
+        </div>
+            </td>
+            <td style="padding-top: 10px;">
+              <div id="newtaxableincome" class="card" style="border-radius: 10px;width:140px;height: 80px;
+        border-top: 0.5px solid #168B03;
+        border-right: 0.5px solid #168B03;
+        border-bottom: 7px solid #168B03;
+        border-left: 0.5px solid #168B03;
+       
+        box-shadow: 6px 6px 6px 0px rgba(0, 0, 0, 0.25);">
+        <h5 style="margin-top:10px;margin-left:10px">Taxable Income</h5>
+        <p style="text-align:center">0.0</p>  
+        </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 10px;">
+              <div id="oldtotaltax" class="card">
+        <h5 style="margin-top:10px;margin-left:10px">Total Tax</h5>
+        <p style="text-align:center">0.0</p>  
+        </div>
+            </td>
+            <td style="padding-top: 10px;">
+              <div id="newtotaltax" class="card">Total Tax</h5>
+        <p style="text-align:center">0.0</p>  
+        </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+  </div>
+</div>
+<!-- <div class="container mt-4">
+  <div class="row">
+    <div class="col-md-3">
+      <button onClick="calculatetax()" class="btn btn-primary btn-block" id="calculatetax">Calculate Tax</button>
+    </div>
+    <div class="col-md-6">
+      Div with space
+      
+      <div class="card" style="height:70px;margin-left: 230px;">
+        <div class="card-body" id ="taxableincome">
+        </div>
+      </div>
+    </div>
+  </div>
+</div><br> -->
+<div id="calculations"></div><br>
+<style>
+  .income {
+      position: relative;
+      border: 2px solid ;
+      padding: 20px;
+      margin-bottom: 20px;
+  }
+
+  .income::before {
+      content: "Income";
+      position: absolute;
+      font-weight: bold;
+      top: -15px;
+      left: 20%;
+      transform: translateX(-50%);
+      background-color: whitesmoke;
+      padding: 0 10px;
+  }
+  .deduction {
+      position: relative;
+      border: 2px solid ;
+      padding: 20px;
+      margin-bottom: 20px;
+  }
+
+  .deduction::before {
+      content: "Deductions";
+      position: absolute;
+      font-weight: bold;
+      top: -15px;
+      left: 20%;
+      transform: translateX(-50%);
+      background-color:whitesmoke;
+      padding: 0 10px;
+  }
+</style>
