@@ -159,7 +159,7 @@ class CustomSalarySlip(SalarySlip):
                 if component.custom_is_reimbursement == 1:
                     reimbursement_sum += i.amount 
 
-                if component.do_not_include_in_total==1 and component.custom_is_reimbursement==0 and component.custom_is_part_of_gross_pay==0 and component.custom_is_accrual==0 and component.custom_perquisite==0:
+                if component.do_not_include_in_total==0 and component.custom_is_reimbursement==0 and component.custom_is_part_of_gross_pay==0 and component.custom_is_accrual==0 and component.custom_perquisite==0:
                     total_income+=i.amount
                     
            
