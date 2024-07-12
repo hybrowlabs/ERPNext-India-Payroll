@@ -44,7 +44,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
             if(category[0].max_amount<array_sum):
              
-                frappe.throw("You Cant Enter Amount Greater than "+str(category[0].max_amount))
+                frappe.throw("You can't enter amount in Section 80C greater than "+str(round(category[0].max_amount)))
 
         
            
