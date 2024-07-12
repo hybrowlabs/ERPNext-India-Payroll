@@ -7,20 +7,26 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                 frm.set_df_property('declarations',  'read_only',  1);
             }
 
-            // if(!frm.is_new()&& frm.doc.declarations.length>0)
-            //     {
-            //         $.each(frm.doc.declarations,function(i,v)
-            //     {
-            //         console.log(v.exemption_category)
-            //         if(v.exemption_category=="Section 80C")
-            //             {
-            //                 frm.fields_dict['declarations'].grid.toggle_enable('amount', false, row.idx - 1);
-            //             }
-            //     })
+            if(!frm.is_new()&& frm.doc.declarations.length>0)
+                {
+                    $.each(frm.doc.declarations,function(i,v)
+                {
+                    // console.log(v.exemption_category)
+                    if(v.exemption_category=="Section 80C")
+                        {
+                            console.log(v.exemption_sub_category)
+                            // frm.fields_dict['declarations'].grid.toggle_enable('amount', false, row.idx - 1);
+                            cur_frm.fields_dict.declarations.grid.fields_map.amount.read_only = true;
+
+
+                        }
+                })
 
                     
 
-            //     }
+                }
+
+            
     }
    
 });
