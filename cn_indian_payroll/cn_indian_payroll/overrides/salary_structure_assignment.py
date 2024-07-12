@@ -97,7 +97,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         for i in epf_component:
                             array.append(i.name)
 
-                        epf_amount=(self.base * 0.35)/12 * .12
+                        epf_amount=(self.base * 0.35) * .12
                         amount.append(round(epf_amount))
 
                     
@@ -115,7 +115,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         for i in nps_component:
                             array.append(i.name)
 
-                        nps_amount=((self.base * 0.35)/12 * self.custom_nps_percentage)/100
+                        nps_amount=((self.base * 0.35) * self.custom_nps_percentage)/100
                         amount.append(round(nps_amount))
 
                     
@@ -147,7 +147,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         for i in nps_component:
                             array.append(i.name)
 
-                        nps_amount=((self.base * 0.35)/12 * self.custom_nps_percentage)/100
+                        nps_amount=((self.base * 0.35) * self.custom_nps_percentage)/100
                         amount.append(round(nps_amount))
 
 
