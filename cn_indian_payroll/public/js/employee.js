@@ -1,7 +1,22 @@
 frappe.ui.form.on('Employee', {
     refresh(frm) {
 
-        //#
+        // if(frm.is_new())
+        //     {
+        //         frm.clear_table("custom_additional_salary_component");
+        //         frm.refresh_field("custom_additional_salary_component");
+            
+        //         let additional_component_array = ["Car Allowance", "Special HRA", "Special Conveyance"];
+            
+        //         $.each(additional_component_array, function(i, v) {
+        //             let child = frm.add_child("custom_additional_salary_component");
+        //             frappe.model.set_value(child.doctype, child.name, "salary_component", v);
+        //         });
+            
+        //         frm.refresh_field("custom_additional_salary_component");
+        //     }
+
+       
 
         if(!frm.is_new())
             {
@@ -183,4 +198,20 @@ function base_value(frm, callback)
             }
         }
     });
+}
+
+function additional_component(frm) {
+   
+
+    frm.clear_table("custom_additional_component");
+    frm.refresh_field("custom_additional_component");
+
+    let additional_component_array = ["Car Allowance", "Special HRA", "Special Conveyance"];
+
+    $.each(additional_component_array, function(i, v) {
+        let child = frm.add_child("custom_additional_component");
+        frappe.model.set_value(child.doctype, child.name, "salary_component", v);
+    });
+
+    frm.refresh_field("custom_additional_component");
 }

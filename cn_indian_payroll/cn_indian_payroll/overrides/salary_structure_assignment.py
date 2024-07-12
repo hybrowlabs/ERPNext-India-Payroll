@@ -5,13 +5,9 @@ from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignmen
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def before_save(self):
 
-        
-
-    
-
         self.set_cpl()
-
         self.reimbursement_amount()
+        
 
 
     def on_submit(self):
@@ -62,98 +58,114 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def insert_tax_declaration(self):
         array=[]
+        amount=[]
         if self.employee:
-            if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
-                uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_uniform':1},
-                        fields=['name'],
-                       
-                    )
+            if self.income_tax_slab=="Old Regime":
 
-                if len(uniform_component)>0:
-                    for i in uniform_component:
-                        array.append(i.name)
+                if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
+                    uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                            filters={'custom_is_uniform':1},
+                            fields=['name'],
+                        
+                        )
 
-            if self.custom_is_medical_allowance and self.custom_medical_allowance_value:
-                medical_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_medical':1},
-                        fields=['name'],
-                       
-                    )
+                    if len(uniform_component)>0:
+                        for i in uniform_component:
+                            array.append(i.name)
+                            amount.append(0)
 
-                if len(medical_component)>0:
-                    for i in medical_component:
-                        array.append(i.name)
+                if self.custom_is_medical_allowance and self.custom_medical_allowance_value:
+                    medical_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                            filters={'custom_is_medical':1},
+                            fields=['name'],
+                        
+                        )
 
-            if self.custom_is_epf:
-                epf_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_epf':1},
-                        fields=['name'],
-                       
-                    )
+                    if len(medical_component)>0:
+                        for i in medical_component:
+                            array.append(i.name)
+                            amount.append(0)
 
-                if len(epf_component)>0:
-                    for i in epf_component:
-                        array.append(i.name)
+                if self.custom_is_epf:
+                    epf_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                            filters={'custom_is_epf':1},
+                            fields=['name'],
+                        
+                        )
 
+                    if len(epf_component)>0:
+                        for i in epf_component:
+                            array.append(i.name)
 
-            if self.custom_is_nps:
-                nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_nps':1},
-                        fields=['name'],
-                       
-                    )
+                        epf_amount=(self.base * 0.35)/12 * .12
+                        amount.append(round(epf_amount))
 
-                if len(nps_component)>0:
-                    for i in nps_component:
-                        array.append(i.name)
-
-            if self.custom_state:
-                pt_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_pt':1},
-                        fields=['name'],
-                       
-                    )
-
-                if len(pt_component)>0:
-                    for i in pt_component:
-                        array.append(i.name)
-
-
-
-            
-            standard_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                        filters={'custom_is_standard':1},
-                        fields=['name'],
-                       
-                    )
-
-            if len(standard_component)>0:
-                for i in standard_component:
-                    array.append(i.name)
-
-
-
-
-
-        
-            doc1 = frappe.get_doc({'doctype': 'Employee Tax Exemption Declaration'})
+                    
                 
+
+
+                if self.custom_is_nps:
+                    nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                            filters={'custom_is_nps':1},
+                            fields=['name'],
+                        
+                        )
+
+                    if len(nps_component)>0:
+                        for i in nps_component:
+                            array.append(i.name)
+
+                        nps_amount=((self.base * 0.35)/12 * self.custom_nps_percentage)/100
+                        amount.append(round(nps_amount))
+
+                    
+                if self.custom_state:
+                    pt_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                            filters={'custom_is_pt':1},
+                            fields=['name'],
+                        
+                        )
+
+                    if len(pt_component)>0:
+                        for i in pt_component:
+                            array.append(i.name)
+
+                            amount.append(2400)
+
+
+
+            if self.income_tax_slab=="New Regime":
+
+                if self.custom_is_nps:
+                    nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
+                            filters={'custom_is_nps':1},
+                            fields=['name'],
+                        
+                        )
+
+                    if len(nps_component)>0:
+                        for i in nps_component:
+                            array.append(i.name)
+
+                        nps_amount=((self.base * 0.35)/12 * self.custom_nps_percentage)/100
+                        amount.append(round(nps_amount))
+
+
+            doc1 = frappe.get_doc({'doctype': 'Employee Tax Exemption Declaration'})
+                    
             doc1.employee= self.employee,
             doc1.company= self.company,
             doc1.payroll_period= self.custom_payroll_period,
             doc1.currency= self.currency,
+            doc1.custom_income_tax=self.income_tax_slab,
 
             for x in range(len(array)):
-               
                 
+                    
                 doc2_child1 = doc1.append("declarations", {})
                 doc2_child1.exemption_sub_category = array[x]
-                
-                doc2_child1. amount= 0
-                
-                
-            
+                doc2_child1.amount = amount[x]
+                    
             doc1.insert()
 
            
@@ -164,7 +176,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
     def set_cpl(self):
-        # components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]//twa is depends upon these components
         array=[]
 
         

@@ -238,6 +238,7 @@ fixtures = [
     {"dt": "Workflow Action Master", "filters": {"name": "Cancel"}},
 
     {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}}
+    #
 ]
     
     
@@ -250,7 +251,8 @@ doctype_js = {
                 "Employee Benefit Claim" : "public/js/employee_benefit_claim.js",
                 "Employee" : "public/js/employee.js",
                 "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
-                "Employee Tax Exemption Declaration":"public/js/tax_declaration.js"
+                "Employee Tax Exemption Declaration":"public/js/tax_declaration.js",
+                "LOP Reversal":"public/js/lop_reversal.js",
               }
 
 
@@ -268,5 +270,12 @@ doc_events = {
         "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.job_offer.on_update_after_submit",
         
 	},
+
+    "LOP Reversal": {
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
+        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
+        
+	},
+
     
 }
