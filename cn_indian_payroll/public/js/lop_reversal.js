@@ -1,17 +1,104 @@
 
-
-var array=[]
+var month_array=[]
+var payroll_entry_array=[]
+var payroll_entry_array1=[" "]
 frappe.ui.form.on('LOP Reversal', {
-	onload:function(frm) {
 
-        if(frm.doc.payroll_entry && frm.doc.payroll_entry)
-            {
+    employee: function(frm) {
+        if (frm.doc.employee) {
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Salary Slip",
+                    filters: [
+                        ["employee", "=", frm.doc.employee],
+                        ["leave_without_pay", ">", 0],
+                        ["custom_lop_updated", "=", 0],
+                        ["docstatus", "=", 1],
+                    ],
+                    fields: ["*"],
+                },
+                callback: function(res) {
+                    var month_array = [];
+    
+                    if (res.message.length > 0) {
+                        
+                        $.each(res.message, function(i, v) {
+                            month_array.push(v.start_date);
+                        });
+    
+                        var month_names = [];
+    
+                        
+                        var month_map = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+                        
+                        month_array.forEach(function(date_str) {
+                            var date = new Date(date_str);
+                            var month_name = month_map[date.getMonth()];
+                            month_names.push(month_name);
+                        });
+    
+                        
+    
+                        
+                        frm.set_df_property('lop_month_reversal', 'options', month_names.join('\n'));
+                        frm.refresh_field('lop_month_reversal');
+    
+                        
+                    } 
+                    else 
+                    {
+                       
+                        frm.set_df_property('lop_month_reversal', 'options', "");
+                        frm.refresh_field('lop_month_reversal');
+                        
+                    }
+                }
+            });
+        }
+    },
+
+    lop_month_reversal:function(frm)
+    {
+
+        
+var month_map = {
+    "January": 0,
+    "February": 1,
+    "March": 2,
+    "April": 3,
+    "May": 4,
+    "June": 5,
+    "July": 6,
+    "August": 7,
+    "September": 8,
+    "October": 9,
+    "November": 10,
+    "December": 11
+};
+
+
+var month = frm.doc.lop_month_reversal;
+
+var current_date = new Date();
+var year = current_date.getFullYear();
+
+var month_number = month_map[month];
+
+var start_date = new Date(year, month_number, 1);
+
+var start_date_str = start_date.getFullYear() + '-' + String(start_date.getMonth() + 1).padStart(2, '0') + '-01';
+console.log(start_date_str);
+
+
+
                 frappe.call({
         
                     method: "frappe.client.get_list",
                     args: {
                         doctype: "Salary Slip",
-                        filters: { "employee": frm.doc.employee, "payroll_entry":frm.doc.payroll_entry},
+                        filters: { "employee": frm.doc.employee,"docstatus":1,"start_date":start_date_str},
                         fields: ["*"],
                         
                        
@@ -21,201 +108,42 @@ frappe.ui.form.on('LOP Reversal', {
 
                         if(res.message.length>0)
                             {
-                                var date=res.message[0].start_date
+
+                                console.log(res.message[0].name,"1111")
+
                                
-                                var date = new Date(date);
-
-                                var month = date.getMonth() + 1;
+                                frm.set_value("salary_slip",res.message[0].name)
+                                frm.set_value("payroll_entry",res.message[0].payroll_entry)
+                                frm.set_value("working_days",res.message[0].payment_days)
+                                frm.set_value("max_lop_days",res.message[0].leave_without_pay)
                                 
-                                var monthNames = [
-                                  "January", "February", "March", "April", "May", "June",
-                                  "July", "August", "September", "October", "November", "December"
-                                ];
-                                var monthName = monthNames[date.getMonth()];
 
-                                frm.set_df_property('lop_month_reversal', 'options', [monthName]);
-                                frm.refresh_field('lop_month_reversal');
                             }
                         }
                     })
 
-                }
 
-       
 
-		
-	},
 
-    payroll_entry:function(frm)
+
+
+
+
+
+    },
+
+
+    number_of_days:function(frm)
     {
-        if(frm.doc.payroll_entry && frm.doc.employee)
+        if(frm.doc.number_of_days && frm.doc.number_of_days>frm.doc.max_lop_days)
             {
-                frappe.call({
-        
-                    method: "frappe.client.get_list",
-                    args: {
-                        doctype: "Salary Slip",
-                        filters: { "employee": frm.doc.employee, "payroll_entry":frm.doc.payroll_entry},
-                        fields: ["*"],
-                        
-                       
-                    },
-                    callback: function(res) {
-
-
-                        if(res.message.length>0)
-                            {
-                                var date=res.message[0].start_date
-                               
-                                var date = new Date(date);
-
-                                var month = date.getMonth() + 1;
-                                
-                                var monthNames = [
-                                  "January", "February", "March", "April", "May", "June",
-                                  "July", "August", "September", "October", "November", "December"
-                                ];
-                                var monthName = monthNames[date.getMonth()];
-
-                                frm.set_df_property('lop_month_reversal', 'options', [monthName]);
-                                frm.refresh_field('lop_month_reversal');
-
-                                frm.set_value("number_of_days",res.message[0].leave_without_pay)
-                                frm.set_value("working_days",res.message[0].total_working_days)
-                                frm.set_value("salary_structure",res.message[0].salary_structure)
-                                frm.set_value("company",res.message[0].company)
-
-
-                                
-                            }
-
-
-                        else
-                        {
-                            frm.set_df_property('lop_month_reversal', 'options', [" "]);
-                            frm.refresh_field('lop_month_reversal');
-                            frm.set_value("number_of_days",0)
-                            frm.set_value("working_days",0)
-                            frm.set_value("salary_structure",undefined)
-                        }
-
-
-                    }
-                })
-
-            }
-    },
-
-    employee:function(frm)
-    {
-
-        if(frm.doc.employee)
-
-            {
-        var array=[]
-        var array1=[" "]
-
-        
-
-frappe.call({
-    method: "frappe.client.get_list",
-    args: {
-        doctype: "Salary Slip",
-        filters: [
-            ["employee", "=", frm.doc.employee],
-            ["leave_without_pay", ">", 0],
-            ["custom_lop_updated", "=", 0]
-        ],
-        fields: ["payroll_entry"], // Fetch only the necessary field
-    },
-    callback: function(res) {
-        if (res.message.length > 0) {
-            $.each(res.message, function(i, v) {
-                array.push(v.payroll_entry);
-            });
-
-            frm.set_query("payroll_entry", function() {
-                return {
-                    filters: {
-                        name: ["in", array]
-                    }
-                };
-            });
-        }
-
-        else{
-            frm.set_query("payroll_entry", function() {
-                return {
-                    filters: {
-                        name: ["in", array1]
-                    }
-                };
-            });
-
-        }
-    }
-});
-
+                msgprint("You can't enter days greater than maximum LOP days")
+                frm.set_value("number_of_days",undefined)
             }
 
 
-        
-
-        if(frm.doc.payroll_entry && frm.doc.employee)
-            {
-                frappe.call({
-        
-                    method: "frappe.client.get_list",
-                    args: {
-                        doctype: "Salary Slip",
-                        filters: { "employee": frm.doc.employee, "payroll_entry":frm.doc.payroll_entry},
-                        fields: ["*"],
-                        
-                       
-                    },
-                    callback: function(res) {
-
-
-                        if(res.message.length>0)
-                            {
-                                var date=res.message[0].start_date
-                               
-                                var date = new Date(date);
-
-                                var month = date.getMonth() + 1;
-                                
-                                var monthNames = [
-                                  "January", "February", "March", "April", "May", "June",
-                                  "July", "August", "September", "October", "November", "December"
-                                ];
-                                var monthName = monthNames[date.getMonth()];
-
-                                frm.set_df_property('lop_month_reversal', 'options', [monthName]);
-                                frm.refresh_field('lop_month_reversal');
-
-                                frm.set_value("number_of_days",res.message[0].leave_without_pay)
-                                frm.set_value("working_days",res.message[0].total_working_days)
-                                frm.set_value("salary_structure",res.message[0].salary_structure)
-                                
-                            }
-
-
-                        else
-                        {
-                            frm.set_df_property('lop_month_reversal', 'options', [" "]);
-                            frm.refresh_field('lop_month_reversal');
-                            frm.set_value("number_of_days",0)
-                            frm.set_value("working_days",0)
-                            frm.set_value("salary_structure",undefined)
-                        }
-
-
-                    }
-                })
-
-            }
-
     },
+    
 
    
 
@@ -231,19 +159,23 @@ frappe.call({
 
         
     
-        if (frm.doc.employee && frm.doc.working_days && frm.doc.salary_structure) {
+        if (frm.doc.employee && frm.doc.working_days && frm.doc.salary_slip) {
 
 
 
             frappe.call({
-                method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
-                args: {
-                    source_name: frm.doc.salary_structure,
-                    employee: frm.doc.employee,
-                    print_format: 'Salary Slip Standard for CTC',
-                },
+
+                method: "frappe.client.get",
+                    args: {
+                        doctype: "Salary Slip",
+                        filters: { "employee": frm.doc.employee, "name":frm.doc.salary_slip},
+                        fields: ["*"],
+                        
+                       
+                    },
+
                 callback: function(response) {
-                    console.log(response.message.earnings, "111");
+                   
                     
                     var array = [];
 

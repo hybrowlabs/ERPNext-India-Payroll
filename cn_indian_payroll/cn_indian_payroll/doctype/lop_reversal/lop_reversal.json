@@ -10,17 +10,15 @@
   "employee",
   "payroll_entry",
   "auto_submit",
-  "salary_structure",
   "company",
+  "salary_slip",
+  "working_days",
   "column_break_sucb",
   "lop_month_reversal",
   "additional_salary_date",
   "number_of_days",
-  "working_days",
-  "salary_component",
+  "max_lop_days",
   "amended_from",
-  "section_break_pttm",
-  "amount",
   "section_break_apdq",
   "arrear_breakup",
   "section_break_wrkh",
@@ -46,7 +44,7 @@
    "in_list_view": 1,
    "label": "Payroll Entry",
    "options": "Payroll Entry",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_sucb",
@@ -66,13 +64,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "salary_component",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Salary Component",
-   "options": "Salary Component"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -86,17 +77,8 @@
    "default": "0",
    "fieldname": "auto_submit",
    "fieldtype": "Check",
-   "label": "Auto Submit"
-  },
-  {
-   "fieldname": "section_break_pttm",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Float",
    "hidden": 1,
-   "label": "Amount"
+   "label": "Auto Submit"
   },
   {
    "fieldname": "lop_month_reversal",
@@ -118,7 +100,7 @@
   {
    "fieldname": "working_days",
    "fieldtype": "Float",
-   "label": "Working Days",
+   "label": "Paid Days",
    "read_only": 1
   },
   {
@@ -132,24 +114,33 @@
    "options": "LOP Reversal Deduction Child"
   },
   {
-   "fieldname": "salary_structure",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Salary Structure",
-   "options": "Salary Structure"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "salary_slip",
+   "fieldtype": "Data",
+   "label": "Salary Slip"
+  },
+  {
+   "fieldname": "max_lop_days",
+   "fieldtype": "Float",
+   "label": "Max LOP Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2024-07-09 15:51:26.016291",
+ "links": [
+  {
+   "link_doctype": "Additional Salary",
+   "link_fieldname": "custom_lop_reversal"
+  }
+ ],
+ "modified": "2024-07-14 10:10:05.738919",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
@@ -157,6 +148,8 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -165,7 +158,9 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

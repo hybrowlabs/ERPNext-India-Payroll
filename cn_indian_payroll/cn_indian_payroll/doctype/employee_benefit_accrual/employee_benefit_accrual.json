@@ -12,7 +12,7 @@
   "employee_name",
   "payroll_entry",
   "amount",
-  "eligible_amount",
+  "total_settlement",
   "column_break_vfdg",
   "salary_component",
   "payroll_period",
@@ -38,6 +38,7 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "in_filter": 1,
    "label": "Employee",
    "options": "Employee"
   },
@@ -60,6 +61,7 @@
   {
    "fieldname": "salary_component",
    "fieldtype": "Link",
+   "in_filter": 1,
    "label": "Salary Component",
    "options": "Salary Component"
   },
@@ -77,6 +79,7 @@
    "options": "Payroll Period"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "amount",
    "fieldtype": "Float",
    "label": "Amount"
@@ -93,16 +96,16 @@
    "options": "Salary Slip"
   },
   {
-   "fieldname": "eligible_amount",
+   "allow_on_submit": 1,
+   "fieldname": "total_settlement",
    "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Eligible Amount"
+   "label": "Total Settlement"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-09 13:59:24.080814",
+ "modified": "2024-07-16 10:50:17.545069",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",
