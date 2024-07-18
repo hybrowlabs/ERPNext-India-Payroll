@@ -253,6 +253,12 @@ doctype_js = {
                 "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
                 "Employee Tax Exemption Declaration":"public/js/tax_declaration.js",
                 "LOP Reversal":"public/js/lop_reversal.js",
+                "Loan":"public/js/loan.js",
+                "Loan Product":"public/js/loan_product.js",
+                "Salary Slip":"public/js/salary_slip.js",
+
+
+
               }
 
 
@@ -278,6 +284,12 @@ doc_events = {
 
         
 	},
+
+    "Loan Repayment Schedule":{
+        "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_save",
+
+        
+    }
 
     
 }

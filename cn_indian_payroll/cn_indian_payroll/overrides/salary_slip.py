@@ -32,9 +32,12 @@ class CustomSalarySlip(SalarySlip):
         self.insert_reimbursement()
         self.calculate_grosspay()
         self.insert_lop_days()
+        self.loan_perquisite()
+        self.insert_lta_reimbursement()
 
-    # def before_insert(self):
-    #     self.insert_reimbursement()
+    
+
+    
 
 
 
@@ -228,12 +231,127 @@ class CustomSalarySlip(SalarySlip):
 
         if len(benefit_application_days)>0:
             self.custom_lop_reversal_days=benefit_application_days[0].custom_lop_reversal_days
+
+
+    def insert_lta_reimbursement(self):
+        lta_tax_component = []
+        lta_tax_amount = []
+
+        
+        lta_taxable = frappe.get_list('Salary Component',
+            filters={'component_type': "LTA Taxable"},
+            fields=['name']
+        )
+        if lta_taxable:
+            lta_tax_component.append(lta_taxable[0].name)
+
+        
+        lta_non_taxable = frappe.get_list('Salary Component',
+            filters={'component_type': "LTA Non Taxable"},
+            fields=['name']
+        )
+        if lta_non_taxable:
+            lta_tax_component.append(lta_non_taxable[0].name)
+
+       
+        lta_reimbursement = frappe.get_list('LTA Claim',
+            filters={
+                'employee': self.employee,
+                "docstatus": 1,
+                'claim_date': ['between', [self.start_date, self.end_date]]
+            },
+            fields=['taxable_amount', 'non_taxable_amount']
+        )
+        if lta_reimbursement:
+            lta_tax_amount.append(lta_reimbursement[0].taxable_amount)
+            lta_tax_amount.append(lta_reimbursement[0].non_taxable_amount)
+
+
+
+        existing_components = {earning.salary_component for earning in self.earnings}
+
+        for i in range(len(lta_tax_component)):
+            if lta_tax_component[i] not in existing_components:
+                self.append("earnings", {
+                    "salary_component": lta_tax_component[i],
+                    "amount": lta_tax_amount[i]
+                })
+
+        
+        
+
+                
+
+
+
+
+
+
+        
+
+        
+
+
             
 
 
 
 
+    def loan_perquisite(self):
+        loan_Perquisite_component = []
+        perquisite_amount_array = []
 
+        
+        Perquisite_component = frappe.get_list(
+            'Salary Component',
+            filters={
+                'component_type': "Loan Perquisite"
+            },
+            fields=['name']
+        )
+
+        if Perquisite_component:
+            loan_Perquisite_component.append(Perquisite_component[0].name)
+
+        
+        loan_repayment = frappe.get_list(
+            'Loan Repayment Schedule',
+            filters={
+                'custom_employee': self.employee,
+                'status': "Active"
+            },
+            fields=['name']
+        )
+
+        if loan_repayment:
+            for d1 in loan_repayment:
+                loan_repayment_child = frappe.get_doc('Loan Repayment Schedule', d1.name)
+                for d2 in loan_repayment_child.custom_loan_perquisite:
+                    if d2.payment_date:
+                        payment_date = str(d2.payment_date)
+                        start_date = str(self.start_date)
+                        end_date = str(self.end_date)
+
+                        if start_date <= payment_date <= end_date:
+                            perquisite_amount_array.append(d2.perquisite_amount)
+
+        if perquisite_amount_array:
+            existing_components = {earning.salary_component for earning in self.earnings}
+
+            for component in loan_Perquisite_component:
+                if component not in existing_components:
+                    self.append("earnings", {
+                        "salary_component": component,
+                        "amount": sum(perquisite_amount_array)
+                    })
+             
+                            
+
+       
+
+
+
+        
 
 
     def insert_reimbursement(self):
@@ -371,9 +489,11 @@ class CustomSalarySlip(SalarySlip):
         
         min_values_list = [{'component': component, 'total_amount': total_amount} for component, total_amount in min_values.items()]
 
-        # frappe.msgprint(str(min_values_list))
+       
 
         existing_components = {earning.salary_component for earning in self.earnings}
+
+        
 
 
         
