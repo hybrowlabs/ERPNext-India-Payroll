@@ -256,6 +256,7 @@ doctype_js = {
                 "Loan":"public/js/loan.js",
                 "Loan Product":"public/js/loan_product.js",
                 "Salary Slip":"public/js/salary_slip.js",
+                "LTA Claim":"public/js/lta_claim.js",
 
 
 

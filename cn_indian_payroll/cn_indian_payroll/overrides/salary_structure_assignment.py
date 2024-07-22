@@ -8,12 +8,15 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.set_cpl()
         self.reimbursement_amount()
 
-        # self.insert_tax_declaration()
+        
+
+        
         
 
 
     def on_submit(self):
         self.insert_tax_declaration()
+        # self.update_lta_in_employee()
        
 
 
@@ -52,7 +55,41 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
 
 
+    # def update_lta_false(self):
+    #     employee_doc = frappe.get_doc('Employee', self.employee)
+    #     if employee_doc.custom_lta_applicable==1:
+    #         employee_doc.custom_lta_applicable = 0
+    #         employee_doc.save()
+
+
+
         
+
+
+
+
+    # def update_lta_in_employee(self):
+    #     if len(self.custom_employee_reimbursements)>0:
+    #         company_data=frappe.db.get_list('Company',
+    #         filters={
+    #             'name': self.company,
+    #         },
+    #         fields=['*'],
+            
+    #         )
+            
+            
+    #         if company_data[0].custom_lta_component:
+                
+    #             for lta in self.custom_employee_reimbursements:
+    #                 if company_data[0].custom_lta_component == lta.reimbursements:
+    #                     employee_doc = frappe.get_doc('Employee', self.employee)
+    #                     employee_doc.custom_lta_applicable = 1
+    #                     employee_doc.save()
+    #                     break  
+
+
+
 
 
 

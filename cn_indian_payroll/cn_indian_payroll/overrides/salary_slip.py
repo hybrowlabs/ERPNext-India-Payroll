@@ -721,10 +721,10 @@ class CustomSalarySlip(SalarySlip):
 
                 if component.do_not_include_in_total==0 and component.custom_is_reimbursement==0: 
                     total_income+=i.amount
-                    # frappe.msgprint(str(i.amount))
+                    
 
-                if component.custom_is_gross_earning == 1:
-                    gross_earning += i.amount
+                # if component.custom_is_gross_earning == 1:
+                #     gross_earning += i.amount
 
 
         total_loan_amount=0
@@ -741,7 +741,7 @@ class CustomSalarySlip(SalarySlip):
         
         self.custom_statutory_year_to_date=round(gross_pay_year_sum)
 
-        self.custom_gross_earning=gross_earning+gross_pay_sum
+        # self.custom_gross_earning=gross_earning+gross_pay_sum
 
 
         self.custom_total_income=round(total_income)
