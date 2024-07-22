@@ -13,6 +13,7 @@
   "company",
   "benefit_section",
   "claim_for",
+  "max_eligible_amount",
   "amount",
   "column_break_rovz",
   "proof",
@@ -62,11 +63,12 @@
    "label": "Benefit"
   },
   {
+   "default": "Leave Travel Allowance",
    "fieldname": "claim_for",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Claim For",
-   "options": "Salary Component",
+   "options": "Leave Travel Allowance",
    "reqd": 1
   },
   {
@@ -114,12 +116,17 @@
    "fieldname": "non_taxable_amount",
    "fieldtype": "Float",
    "label": "Non Taxable Amount"
+  },
+  {
+   "fieldname": "max_eligible_amount",
+   "fieldtype": "Float",
+   "label": "Max Eligible Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-18 20:45:04.659111",
+ "modified": "2024-07-20 14:53:31.567412",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LTA Claim",

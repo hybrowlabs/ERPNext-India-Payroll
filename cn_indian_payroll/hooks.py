@@ -289,6 +289,9 @@ doc_events = {
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_save",
 
         
+    },
+    "LTA Claim":{
+        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
     }
 
     

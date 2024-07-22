@@ -38,7 +38,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
                                        
                                         $.each(tes.message.custom_employee_reimbursements,function(i,v)
                                             {
-                                                // console.log(v.reimbursements)
+                                                
                                                 reimbursements_component.push(v.reimbursements)
 
                                             })
@@ -260,12 +260,12 @@ frappe.ui.form.on('Employee Benefit Claim', {
         }
     },
 
-    claim_date: function(frm) {
-        if (frm.doc.claim_date < frappe.datetime.now_date()) {
-            frm.set_value("claim_date", undefined);
-            frappe.msgprint(__('Claim date cannot be in the past.'));
-        }
-    }
+    // claim_date: function(frm) {
+    //     if (frm.doc.claim_date < frappe.datetime.now_date()) {
+    //         frm.set_value("claim_date", undefined);
+    //         frappe.msgprint(__('Claim date cannot be in the past.'));
+    //     }
+    // }
     
     
     

@@ -41,13 +41,41 @@ frappe.ui.form.on('Loan', {
                 }
 
                 else
-                                    {
-                                        frm.set_value("custom_loan_perquisite_rate_of_interest",0)
-        
-        
-                                    }
+                {
+                        frm.set_value("custom_loan_perquisite_rate_of_interest",0)
+                }
 
+
+            if(frm.doc.loan_application)
+                {
+                    frappe.call({
+                        "method": "frappe.client.get",
+                        args: {
+                            doctype: "Loan Application",
+                            filters: { "name":frm.doc.loan_application},
+                            
+                            
+                        },
+                        callback: function(res) {
+                            if (res.message) {
+                                // console.log(res.message,"222")
+                                frm.set_value("monthly_repayment_amount",res.message.repayment_amount)
+                            }
+                        }
+                    })
+
+                }
+
+
+
+
+        
+        
+        
+        
         }
+
+
 		
 	},
 
