@@ -158,5 +158,37 @@
   "property_type": "",
   "row_name": null,
   "value": "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax\nLoan Perquisite\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance Reimbursement"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Loan Product",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "min_auto_closure_tolerance_amount",
+  "is_system_generated": 0,
+  "modified": "2024-07-22 15:24:44.043147",
+  "module": "cn-indian-payroll",
+  "name": "Loan Product-min_auto_closure_tolerance_amount-reqd",
+  "property": "reqd",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Loan Product",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "max_auto_closure_tolerance_amount",
+  "is_system_generated": 0,
+  "modified": "2024-07-22 15:24:37.322241",
+  "module": "cn-indian-payroll",
+  "name": "Loan Product-max_auto_closure_tolerance_amount-reqd",
+  "property": "reqd",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
  }
 ]
