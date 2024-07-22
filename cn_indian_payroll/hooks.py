@@ -237,7 +237,9 @@ fixtures = [
     {"dt": "Workflow State", "filters": {"name": ["in", ["Cancelled", "Processed"]]}},
     {"dt": "Workflow Action Master", "filters": {"name": "Cancel"}},
 
-    {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}}
+    {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
+    {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
+    
     #
 ]
     
