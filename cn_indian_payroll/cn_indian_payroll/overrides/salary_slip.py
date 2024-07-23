@@ -53,6 +53,8 @@ class CustomSalarySlip(SalarySlip):
 
         self.calculate_grosspay()
 
+        self.tax_calculation()
+
     
 
     
@@ -788,44 +790,44 @@ class CustomSalarySlip(SalarySlip):
 
         total_value=[]
 
-        for component in self.earnings:
-            component_check = frappe.get_doc('Salary Component',component.salary_component)
+        # for component in self.earnings:
+        #     component_check = frappe.get_doc('Salary Component',component.salary_component)
             
-            if component_check.custom_is_accrual==0 and component_check.custom_is_reimbursement==0 and component_check.custom_is_food_coupon==0 and component_check.custom_perquisite==0 and component_check.custom_is_allowance==0:
+        #     if component_check.custom_is_accrual==0 and component_check.custom_is_reimbursement==0 and component_check.custom_is_food_coupon==0 and component_check.custom_perquisite==0 and component_check.custom_is_allowance==0:
                 
                 
                
-                total_value.append(component.amount*12)
+        #         total_value.append(component.amount*12)
 
 
-        for component in self.earnings:
-            component_check = frappe.get_doc('Salary Component',component.salary_component)
+        # for component in self.earnings:
+        #     component_check = frappe.get_doc('Salary Component',component.salary_component)
             
-            if component_check.custom_perquisite==1:
+        #     if component_check.custom_perquisite==1:
                 
                 
                 
-                total_value.append(component.amount*12)
+        #         total_value.append(component.amount*12)
             
-        for component in self.earnings:
-            component_check = frappe.get_doc('Salary Component',component.salary_component)
+        # for component in self.earnings:
+        #     component_check = frappe.get_doc('Salary Component',component.salary_component)
             
-            if component_check.custom_is_allowance==1:
+        #     if component_check.custom_is_allowance==1:
                 
                 
                 
-                total_value.append(component.amount)
+        #         total_value.append(component.amount)
 
 
 
-        for component in self.deductions:
-            component_check = frappe.get_doc('Salary Component',component.salary_component)
+        # for component in self.deductions:
+        #     component_check = frappe.get_doc('Salary Component',component.salary_component)
             
-            if component_check.custom_is_nps==1:
+        #     if component_check.custom_is_nps==1:
                 
                 
                 
-                total_value.append(component.amount*12)
+        #         total_value.append(component.amount*12)
 
         # frappe.msgprint(str(total_value))
 
@@ -856,6 +858,7 @@ class CustomSalarySlip(SalarySlip):
         print_taken=[]
 
         tax_category=" "
+
         max_amount=" "
         
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
@@ -866,28 +869,25 @@ class CustomSalarySlip(SalarySlip):
                     )
         
         
-        self.custom_salary_structure_assignment=latest_salary_structure[0].name
-        self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
-        self.custom_employee_state=latest_salary_structure[0].custom_state
-        self.custom_annual_ctc=latest_salary_structure[0].base
+       
 
-        latest_declaration = frappe.get_list('Employee Tax Exemption Declaration',
-                        filters={'employee': self.employee,'docstatus':1,"payroll_period":latest_salary_structure[0].custom_payroll_period},
-                        fields=["*"],
+        # latest_declaration = frappe.get_list('Employee Tax Exemption Declaration',
+        #                 filters={'employee': self.employee,'docstatus':1,"payroll_period":latest_salary_structure[0].custom_payroll_period},
+        #                 fields=["*"],
                         
-                        limit=1
-                    )
-        if len(latest_declaration)>0:
+        #                 limit=1
+        #             )
+        # if len(latest_declaration)>0:
         
         
-            self.custom_total_tax_exemption_declaration=latest_declaration[0].total_declared_amount
-            total_tds_ctc=sum(total_value)
+        #     self.custom_total_tax_exemption_declaration=latest_declaration[0].total_declared_amount
+        #     total_tds_ctc=sum(total_value)
 
-            self.custom_taxable_amount=total_tds_ctc-latest_declaration[0].total_declared_amount
+        self.custom_taxable_amount=self.annual_taxable_amount
 
-        else:
-            self.custom_total_tax_exemption_declaration=0
-            self.custom_taxable_amount=0
+        # else:
+        #     self.custom_total_tax_exemption_declaration=0
+        #     self.custom_taxable_amount=0
 
 
         
@@ -912,7 +912,8 @@ class CustomSalarySlip(SalarySlip):
                     
 
                     array_list={
-                    'from':i.from_amount,
+                        
+                        'from':i.from_amount,
                         'to':i.to_amount,
                         'percent':i.percent_deduction
 
@@ -958,15 +959,15 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-                if self.custom_taxable_amount<tax_category:
+                # if self.custom_taxable_amount<tax_category:
                     
-                    self.custom_tax_on_total_income=total_sum
-                    self.custom_rebate_under_section_87a=total_sum
-                    self.custom_total_tax_on_income=0
-                else:
-                    self.custom_total_tax_on_income=total_sum
-                    self.custom_rebate_under_section_87a=0
-                    self.custom_tax_on_total_income=total_sum-0
+                #     self.custom_tax_on_total_income=total_sum
+                #     self.custom_rebate_under_section_87a=total_sum
+                #     self.custom_total_tax_on_income=0
+                # else:
+                #     self.custom_total_tax_on_income=total_sum
+                #     self.custom_rebate_under_section_87a=0
+                #     self.custom_tax_on_total_income=total_sum-0
                     
 
 
@@ -995,87 +996,87 @@ class CustomSalarySlip(SalarySlip):
                     "amount":print_taken[i]     
                 })
  
-            if income_doc.name=="New Regime":
-                tax_category=income_doc.custom_taxable_income_is_less_than
-                max_amount=income_doc.custom_maximum_amount
+            # if income_doc.name=="New Regime":
+            #     tax_category=income_doc.custom_taxable_income_is_less_than
+            #     max_amount=income_doc.custom_maximum_amount
 
-                for i in income_doc.slabs:
+            #     for i in income_doc.slabs:
                     
 
-                    array_list={
-                    'from':i.from_amount,
-                        'to':i.to_amount,
-                        'percent':i.percent_deduction
+            #         array_list={
+            #         'from':i.from_amount,
+            #             'to':i.to_amount,
+            #             'percent':i.percent_deduction
 
-                    }
+            #         }
                 
-                    total_array.append(array_list)
+            #         total_array.append(array_list)
                 
 
-                for slab in total_array:
+            #     for slab in total_array:
                 
-                    if slab['from'] <= self.custom_taxable_amount <= slab['to']:
+            #         if slab['from'] <= self.custom_taxable_amount <= slab['to']:
 
-                        t1=self.custom_taxable_amount-slab['from']
+            #             t1=self.custom_taxable_amount-slab['from']
                         
                         
 
-                        t2=slab['percent']
-                        t3=(t1*t2)/100
+            #             t2=slab['percent']
+            #             t3=(t1*t2)/100
 
                        
 
-                        remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
+            #             remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
                         
-                        for remaining_slab in remaining_slabs:
-                            from_amount.append(remaining_slab['from'])
-                            to_amount.append(remaining_slab['to'])
-                            percentage.append(remaining_slab["percent"])
-                            tax_amount = remaining_slab['from'] * remaining_slabs[0]['percent'] / 100
-                            arr.append(tax_amount)
+            #             for remaining_slab in remaining_slabs:
+            #                 from_amount.append(remaining_slab['from'])
+            #                 to_amount.append(remaining_slab['to'])
+            #                 percentage.append(remaining_slab["percent"])
+            #                 tax_amount = remaining_slab['from'] * remaining_slabs[0]['percent'] / 100
+            #                 arr.append(tax_amount)
 
-                        arr.append(t3)
-                        from_amount.append(slab['from'])
-                        to_amount.append(slab['to'])
-                        percentage.append(slab['percent'])
+            #             arr.append(t3)
+            #             from_amount.append(slab['from'])
+            #             to_amount.append(slab['to'])
+            #             percentage.append(slab['percent'])
 
-                self.custom_tax_slab = []
-                for i in range(len(from_amount)):
-                    self.append("custom_tax_slab", {
-                    "from_amount": from_amount[i],
-                    "to_amount": to_amount[i], 
-                    "percentage":  percentage[i]   ,
-                    "tax_amount":arr[i]     
-                    })
-
-
-
-
-                total_sum = sum(arr)
+            #     self.custom_tax_slab = []
+            #     for i in range(len(from_amount)):
+            #         self.append("custom_tax_slab", {
+            #         "from_amount": from_amount[i],
+            #         "to_amount": to_amount[i], 
+            #         "percentage":  percentage[i]   ,
+            #         "tax_amount":arr[i]     
+            #         })
 
 
 
-                if self.custom_taxable_amount<tax_category:
+
+            #     total_sum = sum(arr)
+
+
+
+            #     if self.custom_taxable_amount<tax_category:
                     
-                    self.custom_tax_on_total_income=total_sum
-                    self.custom_rebate_under_section_87a=total_sum
-                    self.custom_total_tax_on_income=0
-                else:
-                    self.custom_total_tax_on_income=0+total_sum
-                    self.custom_tax_on_total_income=total_sum
-                    self.custom_rebate_under_section_87a=0
+            #         self.custom_tax_on_total_income=total_sum
+            #         self.custom_rebate_under_section_87a=total_sum
+            #         self.custom_total_tax_on_income=0
+            #     else:
+            #         self.custom_total_tax_on_income=0+total_sum
+            #         self.custom_tax_on_total_income=total_sum
+            #         self.custom_rebate_under_section_87a=0
 
 
-                if self.custom_taxable_amount>5000000:
+            #     if self.custom_taxable_amount>5000000:
 
-                    surcharge_m=(self.custom_total_tax_on_income*10)/100
+            #         surcharge_m=(self.custom_total_tax_on_income*10)/100
                    
-                    self.custom_surcharge=surcharge_m
-                    self.custom_education_cess=(surcharge_m+self.custom_total_tax_on_income)*4/100
-                else:
+            #         self.custom_surcharge=surcharge_m
+            #         self.custom_education_cess=(surcharge_m+self.custom_total_tax_on_income)*4/100
+            #     else:
 
-                    self.custom_surcharge=0
-                    self.custom_education_cess=(self.custom_surcharge+self.custom_total_tax_on_income)*4/100
+            #         self.custom_surcharge=0
+            #         self.custom_education_cess=(self.custom_surcharge+self.custom_total_tax_on_income)*4/100
 
                             
 

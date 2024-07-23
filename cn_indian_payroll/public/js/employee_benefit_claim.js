@@ -16,6 +16,27 @@ frappe.ui.form.on('Employee Benefit Claim', {
                 frappe.call({
                     "method": "frappe.client.get_list",
                     args: {
+                        doctype: "Company",
+                        filters: { "name":frm.doc.company},
+                        fields: ["*"],
+                       
+                    },
+                    callback: function(kes) {
+
+                        if(kes.message.length>0)
+                        {
+                            var company=kes.message[0].custom_lta_component
+                        }
+
+                        console.log(company,"-------")
+
+
+
+
+
+                frappe.call({
+                    "method": "frappe.client.get_list",
+                    args: {
                         doctype: "Salary Structure Assignment",
                         filters: { employee: frm.doc.employee ,docstatus:1},
                         fields: ["*"],
@@ -38,8 +59,13 @@ frappe.ui.form.on('Employee Benefit Claim', {
                                        
                                         $.each(tes.message.custom_employee_reimbursements,function(i,v)
                                             {
+                                                if(v.reimbursements!=company)
+                                                {
+                                                    reimbursements_component.push(v.reimbursements)
+
+                                                }
                                                 
-                                                reimbursements_component.push(v.reimbursements)
+                                               
 
                                             })
 
@@ -61,6 +87,9 @@ frappe.ui.form.on('Employee Benefit Claim', {
                         }
                     }
                 })
+
+            }
+        })
 
             }
 
