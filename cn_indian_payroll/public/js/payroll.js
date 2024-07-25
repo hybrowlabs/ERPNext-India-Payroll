@@ -209,7 +209,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 function create_bunus(frm)
 {
-    console.log("hiii")
+    // console.log("hiii")
     frm.add_custom_button(__("Create Bonus Accrual Entry"), function() {
                 if (frm.doc.employees.length > 0) {
                     $.each(frm.doc.employees, function(i, v) {
