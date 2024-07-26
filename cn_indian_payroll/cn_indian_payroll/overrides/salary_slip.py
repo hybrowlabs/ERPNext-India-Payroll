@@ -67,7 +67,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.actual_amount()
 
-        # self.remaining_day()
+        self.remaining_day()
 
 
 
@@ -111,35 +111,27 @@ class CustomSalarySlip(SalarySlip):
    
     def remaining_day(self):
         fiscal_year = frappe.get_list(
-            'Fiscal Year',
+            'Payroll Period',
             fields=['*'],
-            order_by='year_start_date desc',
+            order_by='end_date desc',
             limit=1
         )
 
-        if not fiscal_year or not self.end_date:
-            frappe.msgprint("Fiscal year or end date not found.")
-            return
+        if len(fiscal_year)>0:
 
-        t1 = fiscal_year[0].year_end_date  
-        
+            t1 = fiscal_year[0].end_date
 
-        t2 = self.end_date  
-        
+            t2 = self.end_date  
 
-       
-        t1_year = t1.year
-        t1_month = t1.month
-        t1_day = t1.day
+            t1_year = t1.year
+            t1_month = t1.month
+            t1_day = t1.day
 
-        t2_year = t2.year
-        t2_month = t2.month
-        t2_day = t2.day
-
-        
-        months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
-
-        self.custom_day_count = months_t2_to_t1
+            t2_year = t2.year
+            t2_month = t2.month
+            t2_day = t2.day
+            months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
+            self.custom_day_count = months_t2_to_t1
         
 
         
