@@ -67,7 +67,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.actual_amount()
 
-        # self.remaining_day()
+        self.remaining_day()
 
 
 
@@ -111,35 +111,39 @@ class CustomSalarySlip(SalarySlip):
    
     def remaining_day(self):
         fiscal_year = frappe.get_list(
-            'Payroll Period',
-            fields=['*'],
-            order_by='end_date desc',
-            limit=1 
+        'Payroll Period',
+        fields=['*'],
+        order_by='end_date desc',
+        limit=1
         )
 
-        if len(fiscal_year)>0:
-
+        if fiscal_year:
             t1 = fiscal_year[0].end_date
+            t2 = doc.end_date  # Assuming doc.end_date is available and a string
 
-            
-            t2 = self.end_date  
+            # Check if t1 and t2 are strings, if not, convert them to strings
+            if not isinstance(t1, str):
+                t1 = str(t1)
+            if not isinstance(t2, str):
+                t2 = str(t2)
 
-            if isinstance(t1, str):
-                t1_year, t1_month, t1_day = map(int, t1.split('-'))
-            else:
-                t1_year = t1.year
-                t1_month = t1.month
-                t1_day = t1.day
+            # Split the date strings into components
+            t1_parts = t1.split('-')
+            t2_parts = t2.split('-')
 
-            t2_year = t2.year
-            t2_month = t2.month
-            t2_day = t2.day
+            # Convert the split parts to integers
+            t1_year = int(t1_parts[0])
+            t1_month = int(t1_parts[1])
+            t1_day = int(t1_parts[2])
 
-            def months_between(y1, m1, d1, y2, m2, d2):
-                return (y1 - y2) * 12 + (m1 - m2)
+            t2_year = int(t2_parts[0])
+            t2_month = int(t2_parts[1])
+            t2_day = int(t2_parts[2])
 
-            months_t2_to_t1 = months_between(t1_year, t1_month, t1_day, t2_year, t2_month, t2_day)
-            self.custom_month_count = months_t2_to_t1
+
+            # Calculate the number of months between the two dates
+            months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
+            doc.custom_month_count=months_t2_to_t1
 
             
         
