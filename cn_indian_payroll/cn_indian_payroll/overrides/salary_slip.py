@@ -67,7 +67,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.actual_amount()
 
-        self.remaining_day()
+        # self.remaining_day()
 
 
 
@@ -114,7 +114,7 @@ class CustomSalarySlip(SalarySlip):
             'Payroll Period',
             fields=['*'],
             order_by='end_date desc',
-            limit=1
+            limit=1 
         )
 
         if len(fiscal_year)>0:
