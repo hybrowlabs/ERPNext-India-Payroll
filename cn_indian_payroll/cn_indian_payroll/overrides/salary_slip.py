@@ -67,7 +67,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.actual_amount()
 
-        # self.remaining_day()
+        self.remaining_day()
 
 
 
@@ -121,17 +121,27 @@ class CustomSalarySlip(SalarySlip):
 
             t1 = fiscal_year[0].end_date
 
+            
             t2 = self.end_date  
 
-            t1_year = t1.year
-            t1_month = t1.month
-            t1_day = t1.day
+            if isinstance(t1, str):
+                t1_year, t1_month, t1_day = map(int, t1.split('-'))
+            else:
+                t1_year = t1.year
+                t1_month = t1.month
+                t1_day = t1.day
 
             t2_year = t2.year
             t2_month = t2.month
             t2_day = t2.day
-            months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
-            self.custom_day_count = months_t2_to_t1
+
+            def months_between(y1, m1, d1, y2, m2, d2):
+                return (y1 - y2) * 12 + (m1 - m2)
+
+            months_t2_to_t1 = months_between(t1_year, t1_month, t1_day, t2_year, t2_month, t2_day)
+            self.custom_month_count = months_t2_to_t1
+
+            
         
 
         
