@@ -1,4 +1,6 @@
 import frappe
+import datetime
+
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
@@ -16,9 +18,16 @@ from frappe.utils import (
 	money_in_words,
 	rounded,
 )
+from datetime import datetime
+
 
 
 class CustomSalarySlip(SalarySlip):
+
+
+
+    # def before_insert(self):
+    #     self.actual_amount()
 
 
     def on_update(self):
@@ -56,7 +65,23 @@ class CustomSalarySlip(SalarySlip):
 
         self.tax_calculation()
 
-        # self.test()
+        self.actual_amount()
+
+        self.remaining_day()
+
+
+
+        
+
+
+
+        
+
+
+        
+        
+
+
 
     
 
@@ -80,6 +105,56 @@ class CustomSalarySlip(SalarySlip):
                 arrear_doc = frappe.get_doc('Employee Benefit Accrual', j.name)
                 arrear_doc.docstatus = 2
                 arrear_doc.save()
+
+
+
+   
+    def remaining_day(self):
+        fiscal_year = frappe.get_list(
+            'Fiscal Year',
+            fields=['*'],
+            order_by='year_start_date desc',
+            limit=1
+        )
+
+        if not fiscal_year or not self.end_date:
+            frappe.msgprint("Fiscal year or end date not found.")
+            return
+
+        t1 = fiscal_year[0].year_end_date  
+        
+
+        t2 = self.end_date  
+        
+
+       
+        t1_year = t1.year
+        t1_month = t1.month
+        t1_day = t1.day
+
+        t2_year = t2.year
+        t2_month = t2.month
+        t2_day = t2.day
+
+        
+        months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
+
+        self.custom_day_count = months_t2_to_t1
+        
+
+        
+
+
+
+
+
+
+    def actual_amount(self):
+        if self.leave_without_pay==0:
+            if len(self.earnings)>0:
+                for k in self.earnings:
+                    k.custom_actual_amount=k.amount
+                
 
 
 
@@ -935,7 +1010,6 @@ class CustomSalarySlip(SalarySlip):
                     'from':i.from_amount,
                         'to':i.to_amount,
                         'percent':i.percent_deduction
-
                     }
                 
                     total_array.append(array_list)
@@ -948,11 +1022,6 @@ class CustomSalarySlip(SalarySlip):
 
                         t1=self.annual_taxable_amount-slab['from']
                     
-
-
-                        
-                        
-
                         t2=slab['percent']
                         t3=(t1*t2)/100
                         
@@ -1133,191 +1202,7 @@ class CustomSalarySlip(SalarySlip):
                 })
 
                             
-    def test(self):
-        # Initialize variables
-        tax_slabs = []
-        tax_amounts = []
-        from_amounts = []
-        to_amounts = []
-        percentages = []
 
-        iop=[]
-
-        # Fetch the latest salary structure
-        latest_salary_structure = frappe.get_list('Salary Structure Assignment',
-                                                filters={'employee': self.employee, 'docstatus': 1},
-                                                fields=["*"],
-                                                order_by='from_date desc',
-                                                limit=1)
-
-        self.custom_taxable_amount = round(self.annual_taxable_amount)
-        self.custom_total_income_with_taxable_component = round(self.ctc - self.non_taxable_earnings)
-
-        # Check for income tax slab
-        if latest_salary_structure and latest_salary_structure[0].income_tax_slab:
-            income_doc = frappe.get_doc('Income Tax Slab', latest_salary_structure[0].income_tax_slab)
-
-            if income_doc.name == "Old Regime":
-                # Extract tax slab details
-                tax_slabs = income_doc.slabs
-
-                for slab in tax_slabs:
-                    from_amount = slab.from_amount
-                    to_amount = slab.to_amount
-                    percent = slab.percent_deduction
-
-                    if to_amount == 0.0 or self.custom_taxable_amount <= to_amount:
-                        taxable_income = max(self.custom_taxable_amount - from_amount, 0)
-                        tax_amount = (taxable_income * percent) / 100
-
-                        # Insert at the beginning of each list
-                        tax_amounts.insert(0, tax_amount)
-                        from_amounts.insert(0, from_amount)
-                        to_amounts.insert(0, to_amount)
-                        percentages.insert(0, percent)
-                        iop.insert(0,self.custom_taxable_amount-from_amount)
-                        # frappe.msgprint(str(from_amounts))
-
-                        # frappe.msgprint(str(iop))
-
-                        if to_amount != 0.0:
-                            break
-
-                
-
-                # Calculate tax for previous slabs and insert at the beginning
-                for slab in tax_slabs:
-                    if slab.from_amount < self.custom_taxable_amount and (slab.to_amount == 0 or slab.to_amount < self.custom_taxable_amount):
-                        tax_amount = (slab.to_amount - slab.from_amount) * slab.percent_deduction / 100
-
-                        # Insert at the beginning of each list
-                        tax_amounts.insert(0, tax_amount)
-                        from_amounts.insert(0, slab.from_amount)
-                        to_amounts.insert(0, slab.to_amount)
-                        percentages.insert(0, slab.percent_deduction)
-
-                        iop.insert(0,slab.from_amount)
-                        # frappe.msgprint(str(slab.from_amount))
-
-                # Store calculated tax slabs in the document
-
-                # frappe.msgprint(str(from_amounts))
-
-                # frappe.msgprint(str(iop))
-                self.custom_tax_slab = []
-                for i in range(len(from_amounts)):
-                    self.append("custom_tax_slab", {
-                        "from_amount": from_amounts[i],
-                        "to_amount": to_amounts[i],
-                        "percentage": percentages[i],
-                        "tax_amount": tax_amounts[i],
-                        "amount":iop[i]
-                    })
-
-                total_tax = sum(tax_amounts)
-
-                # Determine final tax values based on taxable income
-                if self.custom_taxable_amount < income_doc.custom_taxable_income_is_less_than:
-                    self.custom_tax_on_total_income = total_tax
-                    self.custom_rebate_under_section_87a = total_sum
-                    self.custom_total_tax_on_income = 0
-                else:
-                    self.custom_total_tax_on_income=total_sum
-                    self.custom_rebate_under_section_87a=0
-                    self.custom_tax_on_total_income=total_sum-0
-
-                # Surcharge and education cess calculations
-                if self.custom_taxable_amount > 5000000:
-                    surcharge = (self.custom_total_tax_on_income * 10) / 100
-                    self.custom_surcharge = surcharge
-                    self.custom_education_cess = (surcharge + self.custom_total_tax_on_income) * 4 / 100
-                else:
-                    self.custom_surcharge = 0
-                    self.custom_education_cess = self.custom_total_tax_on_income * 4 / 100
-
-
-            if income_doc.name == "New Regime":
-                # Extract tax slab details
-                tax_slabs = income_doc.slabs
-
-                for slab in tax_slabs:
-                    from_amount = slab.from_amount
-                    to_amount = slab.to_amount
-                    percent = slab.percent_deduction
-
-                    if to_amount == 0.0 or self.custom_taxable_amount <= to_amount:
-                        taxable_income = max(self.custom_taxable_amount - from_amount, 0)
-                        tax_amount = (taxable_income * percent) / 100
-
-                        # Insert at the beginning of each list
-                        tax_amounts.insert(0, tax_amount)
-                        from_amounts.insert(0, from_amount)
-                        to_amounts.insert(0, to_amount)
-                        percentages.insert(0, percent)
-                        iop.insert(0,self.custom_taxable_amount-from_amount)
-
-                        # frappe.msgprint(str(from_amounts))
-
-                        # frappe.msgprint(str(iop))
-
-                        if to_amount != 0.0:
-                            break
-
-                frappe.msgprint(str(from_amounts))
-
-                
-
-                
-                for slab in tax_slabs:
-                    if slab.from_amount < self.custom_taxable_amount and (slab.to_amount == 0 or slab.to_amount < self.custom_taxable_amount):
-                        tax_amount = (slab.to_amount - slab.from_amount) * slab.percent_deduction / 100
-
-                        # Insert at the beginning of each list
-                        tax_amounts.insert(0, tax_amount)
-                        from_amounts.insert(0, slab.from_amount)
-                        to_amounts.insert(0, slab.to_amount)
-                        percentages.insert(0, slab.percent_deduction)
-
-                        iop.insert(0,slab.from_amount)
-                        # frappe.msgprint(str(slab.from_amount))
-
-                # # Store calculated tax slabs in the document
-
-                frappe.msgprint(str(from_amounts))
-
-                # # frappe.msgprint(str(iop))
-                # self.custom_tax_slab = []
-                # for i in range(len(from_amounts)):
-                #     self.append("custom_tax_slab", {
-                #         "from_amount": from_amounts[i],
-                #         "to_amount": to_amounts[i],
-                #         "percentage": percentages[i],
-                #         "tax_amount": tax_amounts[i],
-                #         "amount":iop[i]
-                #     })
-
-                # total_tax = sum(tax_amounts)
-
-                # frappe.msgprint(str(total_tax))
-
-                # Determine final tax values based on taxable income
-                # if self.custom_taxable_amount < income_doc.custom_taxable_income_is_less_than:
-                #     self.custom_tax_on_total_income = total_tax
-                #     self.custom_rebate_under_section_87a = total_sum
-                #     self.custom_total_tax_on_income = 0
-                # else:
-                #     self.custom_total_tax_on_income=total_sum
-                #     self.custom_rebate_under_section_87a=0
-                #     self.custom_tax_on_total_income=total_sum-0
-
-                # # Surcharge and education cess calculations
-                # if self.custom_taxable_amount > 5000000:
-                #     surcharge = (self.custom_total_tax_on_income * 10) / 100
-                #     self.custom_surcharge = surcharge
-                #     self.custom_education_cess = (surcharge + self.custom_total_tax_on_income) * 4 / 100
-                # else:
-                #     self.custom_surcharge = 0
-                #     self.custom_education_cess = self.custom_total_tax_on_income * 4 / 100
 
 
 

@@ -13,9 +13,16 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         super().validate()
 
 
+    def on_submit(self):
+        self.set_max_amount()
+
+
 
 
     
+    def set_max_amount(self):
+        self.total_exemption_amount=self.total_declared_amount
+
 
     def validate_tax_declaration(self):
         array=[]
