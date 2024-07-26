@@ -4,8 +4,15 @@ import frappe
 
 
 @frappe.whitelist()
-def get_additional_salary(payroll_id):
+def get_additional_salary(payroll_id,company):
     if payroll_id:
+
+        company_doc = frappe.get_doc('Company',company)
+
+        # frappe.msgprint(str(company_doc.custom_bonus_salary_component))
+
+
+
         doc1 = frappe.get_doc('Payroll Entry', payroll_id)
         employee_bonus_dict = {}  
         for employee in doc1.employees:
@@ -38,11 +45,13 @@ def get_additional_salary(payroll_id):
             components = ', '.join(data['components'])
             document_names = data['documents']
 
+            # frappe.msgprint(str(total_amount))
+
             additional_salary_insert = frappe.get_doc({
                 'doctype': 'Additional Salary',
                 'employee': employee_id,
                 'company': doc1.company,
-                'salary_component': components,
+                'salary_component': company_doc.custom_bonus_salary_component,
                 'amount': total_amount,
                 'payroll_date': doc1.posting_date,
                 
@@ -51,14 +60,13 @@ def get_additional_salary(payroll_id):
             
             additional_salary_insert.insert()
 
-            # for doc_name in document_names:
-            #     bonus_doc = frappe.get_doc('Employee Bonus Accrual', doc_name)
-            #     bonus_doc.is_paid = 1
-            #     bonus_doc.save()
+            
 
-        frappe.msgprint('Additional Salary Created')
-        doc1.custom_additional_salary_created=1
-        doc1.save()
+        # frappe.msgprint('Additional Salary Created')
+        # doc1.custom_additional_salary_created=1
+        # doc1.save()
+        # doc1.reload()
+
 
                 
 

@@ -206,5 +206,21 @@
   "property_type": "Data",
   "row_name": null,
   "value": "[\"exemption_category\", \"max_amount\", \"is_active\", \"custom_is_medical\", \"custom_is_nps\", \"custom_is_uniform\", \"custom_is_epf\", \"custom_is_pt\"]"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Salary Structure Assignment",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocType",
+  "field_name": null,
+  "is_system_generated": 0,
+  "modified": "2024-07-25 13:51:41.898746",
+  "module": "cn-indian-payroll",
+  "name": "Salary Structure Assignment-main-field_order",
+  "property": "field_order",
+  "property_type": "Data",
+  "row_name": null,
+  "value": "[\"employee\", \"employee_name\", \"department\", \"designation\", \"grade\", \"column_break_6\", \"salary_structure\", \"from_date\", \"income_tax_slab\", \"custom_payroll_period\", \"column_break_11\", \"company\", \"payroll_payable_account\", \"currency\", \"section_break_7\", \"base\", \"column_break_9\", \"variable\", \"amended_from\", \"earnings_and_taxation_section\", \"taxable_earnings_till_date\", \"column_break_20\", \"tax_deducted_till_date\", \"section_break_17\", \"payroll_cost_centers\", \"custom_allowance\", \"custom_is_uniform_allowance\", \"custom_uniform_allowance_value\", \"custom_column_break_4sihi\", \"custom_is_medical_allowance\", \"custom_medical_allowance_value\", \"custom_column_break_fmuqp\", \"custom_is_food_coupon\", \"custom_epf\", \"custom_is_epf\", \"custom_column_break_pwobk\", \"custom_epf_amount\", \"custom_column_break_o4xge\", \"custom_pf_account_number\", \"custom_column_break_h9jia\", \"custom_uan\", \"custom_nps\", \"custom_is_nps\", \"custom_column_break_mkp51\", \"custom_nps_percentage\", \"custom_column_break_lcztq\", \"custom_nps_amount\", \"custom_esic\", \"custom_is_esic\", \"custom_column_break_jsryi\", \"custom_esic_applicable_period\", \"custom_column_break_oalaz\", \"custom_esic_number\", \"custom_perquisite\", \"custom__car_perquisite\", \"custom_cubic_capacity_of_company\", \"custom_car_perquisite_as_per_rules\", \"custom_column_break_3ufoi\", \"custom_driver_provided_by_company\", \"custom_driver_perquisite_as_per_rules\", \"custom_state\", \"custom_additional_components\", \"custom_is_special_hra\", \"custom_special_hra_amount_annual\", \"custom_column_break_uswhy\", \"custom_is_special_conveyance\", \"custom_special_conveyance_amount_annual\", \"custom_column_break_yovyb\", \"custom_is_car_allowance\", \"custom_car_allowance_amount_annual\", \"custom_reimbursements\", \"custom_employee_reimbursements\", \"custom_statistical_amount\", \"custom_is_car_petrol_lta\", \"custom_ctc_breakup\", \"custom_ctc__preview\", \"custom_reimbursement\", \"custom_deduction_preview\", \"custom_additional_salary_component\"]"
  }
 ]

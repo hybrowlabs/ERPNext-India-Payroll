@@ -24,6 +24,7 @@ class CustomSalarySlip(SalarySlip):
     def on_update(self):
         super().on_update()
         self.accrual_update()
+        self.insert_lta_reimbursement_lop()
         
 
 
@@ -82,6 +83,9 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+
+    
+
     def accrual_update(self):
         if self.leave_without_pay > 0:
             ss_assignment = frappe.get_list(
@@ -135,6 +139,7 @@ class CustomSalarySlip(SalarySlip):
                 if benefit_application:
                     for k in benefit_application:
                         benefit_component.append(k.earning_component)
+                        
                         benefit_component_demo.append({
                             "component":k.earning_component,
                             "amount":k.claimed_amount,
@@ -293,7 +298,83 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+    def insert_lta_reimbursement_lop(self):
+        lta_tax_component = []
+        lta_tax_amount = []
 
+        
+        lta_taxable = frappe.get_list('Salary Component',
+            filters={'component_type': "LTA Taxable"},
+            fields=['name']
+        )
+        if lta_taxable:
+            lta_tax_component.append(lta_taxable[0].name)
+
+        
+        lta_non_taxable = frappe.get_list('Salary Component',
+            filters={'component_type': "LTA Non Taxable"},
+            fields=['name']
+        )
+        if lta_non_taxable:
+            lta_tax_component.append(lta_non_taxable[0].name)
+
+
+        lta_component = frappe.get_list('Company',
+            filters={'name': self.company},
+            fields=['*']
+        )
+        if lta_component:
+            lta_tax_component.append(lta_component[0].custom_lta_component)
+
+        # frappe.msgprint(str(lta_tax_component))
+
+       
+        lta_reimbursement = frappe.get_list('LTA Claim',
+            filters={
+                'employee': self.employee,
+                "docstatus": 1,
+                'claim_date': ['between', [self.start_date, self.end_date]]
+            },
+            fields=['*']
+        )
+        if lta_reimbursement:
+            lta_tax_amount.append(lta_reimbursement[0].taxable_amount*self.payment_days)
+            lta_tax_amount.append(lta_reimbursement[0].non_taxable_amount*self.payment_days)
+            lta_tax_amount.append(lta_reimbursement[0].amount*self.payment_days)
+
+        
+
+            for earning in self.earnings:
+                if earning.salary_component==lta_taxable[0].name:
+                    tax_day_amount=earning.amount/self.total_working_days
+                    earning.amount=round(tax_day_amount*self.payment_days)
+                    
+
+
+                if earning.salary_component==lta_non_taxable[0].name:
+                    non_tax_day_amount=earning.amount/self.total_working_days
+                    earning.amount=round(non_tax_day_amount*self.payment_days)
+                    
+
+
+                if earning.salary_component==lta_component[0].custom_lta_component:
+                    total_day_amount=earning.amount/self.total_working_days
+                    earning.amount=round(total_day_amount*self.payment_days)
+                    
+        
+
+
+
+        # existing_components = {earning.salary_component for earning in self.earnings}
+
+        # if len(lta_tax_amount)>0:
+
+        #     for i in range(len(lta_tax_component)):
+        #         if lta_tax_component[i] not in existing_components:
+        #             self.append("earnings", {
+        #                 "salary_component": lta_tax_component[i],
+        #                 "amount": lta_tax_amount[i]
+        #             })
 
 
                         
@@ -506,7 +587,7 @@ class CustomSalarySlip(SalarySlip):
 
         #Pushed the component in array
 
-        # frappe.msgprint(str(benefit_component))
+            # frappe.msgprint(str(benefit_component))
 
             if len(benefit_component) > 0:
                 for component in benefit_component:

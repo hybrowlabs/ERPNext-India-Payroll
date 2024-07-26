@@ -122,14 +122,17 @@ frappe.ui.form.on('Payroll Entry', {
                     frm.add_custom_button(__('Create Additional Salary'), function() {
                     
                             frappe.call({
-                                // method: 'meril.payroll.get_additional_salary',
+                                
                                 method: 'cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.get_additional_salary',
                                 args: {
-                                    payroll_id:frm.doc.name
+                                    payroll_id:frm.doc.name,
+                                    company:frm.doc.company
                                 },
                                 callback: function(response) {
-                                    // Process the response if needed
-                                    console.log(response.message);
+
+                                    frm.set_value("custom_additional_salary_created",1)
+                                    frm.save();
+                                   
 
                                     
                                 }
@@ -163,11 +166,11 @@ frappe.ui.form.on('Payroll Entry', {
                             },
                             callback :function(res)
                             {
-                                // console.log(res.message,"111111")
+                                
                                 if(res.message)
                                     {
-                                        // frm.set_value("custom_bonus_accrual_submit",1)
-                                        // frm.save('Update');
+                                        frm.set_value("custom_bonus_accrual_submit",1)
+                                        frm.save();
                                     }
     
                             }

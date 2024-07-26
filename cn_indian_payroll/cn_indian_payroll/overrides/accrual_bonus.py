@@ -13,8 +13,17 @@ def accrual_created(payroll_entry_doc_id, company_name):
             for salary_slip in salary_slips:
                 salary_slip_doc = frappe.get_doc('Salary Slip', salary_slip.name)
                 bonus_component_amount = None
+                
                 for earning in salary_slip_doc.earnings:
-                    if earning.salary_component == company_doc.custom_bonus_salary_component:
+                    # frappe.msgprint(str(earning.salary_component))
+                    salary_component_doc = frappe.get_doc('Salary Component', earning.salary_component)
+
+                    if salary_component_doc.custom_is_accrual==1:
+                        
+                        bonus_component=salary_component_doc.name
+
+
+                    
                         bonus_component_amount = earning.amount
                         break
                 if bonus_component_amount is not None:
@@ -38,7 +47,7 @@ def accrual_created(payroll_entry_doc_id, company_name):
                                 "employee": salary_slip.employee,
                                 "company":  company_name,
                                 "accrual_date": salary_slip.posting_date,
-                                "salary_component": company_doc.custom_bonus_salary_component,
+                                "salary_component": bonus_component,
                                 "salary_structure":salary_slip.salary_structure,
                                 "salary_structure_assignment": ssa_id.name,
                                
