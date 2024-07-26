@@ -67,7 +67,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.actual_amount()
 
-        self.remaining_day()
+        # self.remaining_day()
 
 
 
