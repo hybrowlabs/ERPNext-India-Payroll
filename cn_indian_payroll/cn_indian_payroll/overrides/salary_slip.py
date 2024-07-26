@@ -139,7 +139,7 @@ class CustomSalarySlip(SalarySlip):
                 if benefit_application:
                     for k in benefit_application:
                         benefit_component.append(k.earning_component)
-                        
+
                         benefit_component_demo.append({
                             "component":k.earning_component,
                             "amount":k.claimed_amount,
@@ -871,21 +871,21 @@ class CustomSalarySlip(SalarySlip):
 
     def tax_calculation(self):
 
-        total_value=[]
-        from_amount=[]
-        to_amount=[]
-        percentage=[]
+        # total_value=[]
+        # from_amount=[]
+        # to_amount=[]
+        # percentage=[]
 
-        total_array=[]
+        # total_array=[]
 
-        arr=[]
-        print_taken=[]
+        # arr=[]
+        # print_taken=[]
 
-        tax_category=" "
+        # tax_category=" "
 
-        max_amount=" "
+        # max_amount=" "
 
-        t1=" "
+        # t1=" "
         
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
                         filters={'employee': self.employee,'docstatus':1},
@@ -909,6 +909,22 @@ class CustomSalarySlip(SalarySlip):
 
             if income_doc.name=="Old Regime":
 
+                total_value=[]
+                from_amount=[]
+                to_amount=[]
+                percentage=[]
+
+                total_array=[]
+
+                arr=[]
+                print_taken=[]
+
+                tax_category=" "
+
+                max_amount=" "
+
+                t1=" "
+
                 tax_category=income_doc.custom_taxable_income_is_less_than
                 max_amount=income_doc.custom_maximum_amount
 
@@ -924,12 +940,14 @@ class CustomSalarySlip(SalarySlip):
                 
                     total_array.append(array_list)
 
-                    # frappe.msgprint(str(array_list))
+                
 
                 for slab in total_array:
-                    if slab['from'] <= self.custom_taxable_amount <= slab['to'] or 0:
+                    
+                    if slab['from'] <= self.annual_taxable_amount <= slab['to']:
 
-                        t1=self.custom_taxable_amount-slab['from']
+                        t1=self.annual_taxable_amount-slab['from']
+                    
 
 
                         
@@ -937,6 +955,7 @@ class CustomSalarySlip(SalarySlip):
 
                         t2=slab['percent']
                         t3=(t1*t2)/100
+                        
 
                         remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
 
@@ -1005,6 +1024,22 @@ class CustomSalarySlip(SalarySlip):
 
             if income_doc.name=="New Regime":
 
+                total_value=[]
+                from_amount=[]
+                to_amount=[]
+                percentage=[]
+
+                total_array=[]
+
+                arr=[]
+                print_taken=[]
+
+                tax_category=" "
+
+                max_amount=" "
+
+                t1=" "
+
                 tax_category=income_doc.custom_taxable_income_is_less_than
                 max_amount=income_doc.custom_maximum_amount
 
@@ -1023,7 +1058,7 @@ class CustomSalarySlip(SalarySlip):
                     # frappe.msgprint(str(array_list))
 
                 for slab in total_array:
-                    if slab['from'] <= self.custom_taxable_amount <= slab['to'] or 0:
+                    if slab['from'] <= self.custom_taxable_amount <= slab['to']:
 
                         t1=self.custom_taxable_amount-slab['from']
 
@@ -1037,9 +1072,9 @@ class CustomSalarySlip(SalarySlip):
                         remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
 
                         for remaining_slab in remaining_slabs:
-                            tax_amount = remaining_slab['from'] * remaining_slab["percent"] / 100
+                            tax_amount = 300000 * remaining_slab["percent"] / 100
 
-                            print_taken.append(remaining_slab['from'])
+                            print_taken.append(300000)
                             
                             from_amount.append(remaining_slab['from'])
                             to_amount.append(remaining_slab['to'])
