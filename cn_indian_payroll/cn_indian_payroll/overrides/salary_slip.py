@@ -74,17 +74,6 @@ class CustomSalarySlip(SalarySlip):
         
 
 
-
-        
-
-
-        
-        
-
-
-
-    
-
     
 
 
