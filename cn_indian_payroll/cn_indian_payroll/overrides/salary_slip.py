@@ -67,7 +67,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.actual_amount()
 
-        self.remaining_day()
+        # self.remaining_day()
 
 
 
@@ -119,19 +119,17 @@ class CustomSalarySlip(SalarySlip):
 
         if fiscal_year:
             t1 = fiscal_year[0].end_date
-            t2 = self.end_date  # Assuming doc.end_date is available and a string
+            t2 = self.end_date  
 
-            # Check if t1 and t2 are strings, if not, convert them to strings
+            
             if not isinstance(t1, str):
                 t1 = str(t1)
             if not isinstance(t2, str):
                 t2 = str(t2)
 
-            # Split the date strings into components
             t1_parts = t1.split('-')
             t2_parts = t2.split('-')
 
-            # Convert the split parts to integers
             t1_year = int(t1_parts[0])
             t1_month = int(t1_parts[1])
             t1_day = int(t1_parts[2])
