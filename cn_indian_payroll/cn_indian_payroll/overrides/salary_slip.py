@@ -98,39 +98,39 @@ class CustomSalarySlip(SalarySlip):
 
 
    
-    def remaining_day(self):
-        fiscal_year = frappe.get_list(
-        'Payroll Period',
-        fields=['*'],
-        order_by='end_date desc',
-        limit=1
-        )
+    # def remaining_day(self):
+    #     fiscal_year = frappe.get_list(
+    #     'Payroll Period',
+    #     fields=['*'],
+    #     order_by='end_date desc',
+    #     limit=1
+    #     )
 
-        if fiscal_year:
-            t1 = fiscal_year[0].end_date
-            t2 = self.end_date  
+    #     if fiscal_year:
+    #         t1 = fiscal_year[0].end_date
+    #         t2 = self.end_date  
 
             
-            if not isinstance(t1, str):
-                t1 = str(t1)
-            if not isinstance(t2, str):
-                t2 = str(t2)
+    #         if not isinstance(t1, str):
+    #             t1 = str(t1)
+    #         if not isinstance(t2, str):
+    #             t2 = str(t2)
 
-            t1_parts = t1.split('-')
-            t2_parts = t2.split('-')
+    #         t1_parts = t1.split('-')
+    #         t2_parts = t2.split('-')
 
-            t1_year = int(t1_parts[0])
-            t1_month = int(t1_parts[1])
-            t1_day = int(t1_parts[2])
+    #         t1_year = int(t1_parts[0])
+    #         t1_month = int(t1_parts[1])
+    #         t1_day = int(t1_parts[2])
 
-            t2_year = int(t2_parts[0])
-            t2_month = int(t2_parts[1])
-            t2_day = int(t2_parts[2])
+    #         t2_year = int(t2_parts[0])
+    #         t2_month = int(t2_parts[1])
+    #         t2_day = int(t2_parts[2])
 
 
-            # Calculate the number of months between the two dates
-            months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
-            self.custom_month_count=months_t2_to_t1
+    #         # Calculate the number of months between the two dates
+    #         months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
+    #         self.custom_month_count=months_t2_to_t1
 
             
         
