@@ -119,7 +119,7 @@ class CustomSalarySlip(SalarySlip):
 
         if fiscal_year:
             t1 = fiscal_year[0].end_date
-            t2 = doc.end_date  # Assuming doc.end_date is available and a string
+            t2 = self.end_date  # Assuming doc.end_date is available and a string
 
             # Check if t1 and t2 are strings, if not, convert them to strings
             if not isinstance(t1, str):
@@ -143,7 +143,7 @@ class CustomSalarySlip(SalarySlip):
 
             # Calculate the number of months between the two dates
             months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
-            doc.custom_month_count=months_t2_to_t1
+            self.custom_month_count=months_t2_to_t1
 
             
         
