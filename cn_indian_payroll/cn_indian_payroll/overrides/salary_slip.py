@@ -128,7 +128,6 @@ class CustomSalarySlip(SalarySlip):
     #         t2_day = int(t2_parts[2])
 
 
-    #         # Calculate the number of months between the two dates
     #         months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
     #         self.custom_month_count=months_t2_to_t1
 
