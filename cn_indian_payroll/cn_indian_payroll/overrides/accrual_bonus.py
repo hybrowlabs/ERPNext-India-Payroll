@@ -46,6 +46,7 @@ def accrual_created(payroll_entry_doc_id, company_name):
 
                                 "employee": salary_slip.employee,
                                 "company":  company_name,
+                                "salary_slip":salary_slip.name,
                                 "accrual_date": salary_slip.posting_date,
                                 "salary_component": bonus_component,
                                 "salary_structure":salary_slip.salary_structure,

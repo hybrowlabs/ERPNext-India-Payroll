@@ -1,6 +1,11 @@
 import frappe
 
-def on_submit(self,method):
+def on_submit(self, method):
+    
+    
+
+
+
    
     if len(self.arrear_breakup)>0:
         for i in self.arrear_breakup:
@@ -63,8 +68,13 @@ def on_submit(self,method):
             payroll_entry_doc1.save()
 
 
+    
+    reimbursement_accrual_update(self)
+    bonus_accrual_update(self)
 
 
+
+def reimbursement_accrual_update(self):
         lop_reversal = frappe.get_list('Employee Benefit Accrual',
                         filters={'employee': self.employee,'docstatus':1,"salary_slip":self.salary_slip},
                         fields=['*'],
@@ -80,6 +90,24 @@ def on_submit(self,method):
 
                 each_doc.amount = round(eligible_amount)
                 each_doc.save()
+
+
+
+
+def bonus_accrual_update(self):
+    lop_reversal_bonus = frappe.get_list('Employee Bonus Accrual',
+                                         filters={'employee': self.employee, 'docstatus': 1, 'salary_slip': self.salary_slip},
+                                         fields=['name', 'amount'])
+
+    if lop_reversal_bonus:
+        for bonus in lop_reversal_bonus:
+            each_doc_bonus = frappe.get_doc('Employee Bonus Accrual', bonus.name)
+            lop_reversal_amount_bonus = (each_doc_bonus.amount / self.working_days) * self.number_of_days
+            eligible_amount_bonus = each_doc_bonus.amount + lop_reversal_amount_bonus
+            each_doc_bonus.amount = round(eligible_amount_bonus)
+            each_doc_bonus.save()
+
+        
 
 
         
@@ -127,6 +155,25 @@ def on_cancel(self,method):
 
             each_doc.amount = round(eligible_amount)
             each_doc.save()
+
+
+
+    lop_reversal_bonus = frappe.get_list('Employee Bonus Accrual',
+                                         filters={'employee': self.employee, 'docstatus': 1, 'salary_slip': self.salary_slip},
+                                         fields=['name', 'amount'])
+
+    if lop_reversal_bonus:
+        for bonus in lop_reversal_bonus:
+            each_doc_bonus = frappe.get_doc('Employee Bonus Accrual', bonus.name)
+            total_days=self.working_days+self.number_of_days
+            lop_reversal_amount=(each_doc_bonus.amount/total_days)
+            eligible_amount=lop_reversal_amount*self.working_days
+
+            each_doc_bonus.amount = round(eligible_amount)
+            each_doc_bonus.save()
+
+
+
 
 
     salary_slip=frappe.db.get_list('Salary Slip',
