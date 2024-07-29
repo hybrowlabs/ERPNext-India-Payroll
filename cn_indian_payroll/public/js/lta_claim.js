@@ -55,10 +55,13 @@ frappe.ui.form.on('LTA Claim', {
                                                 const months = t1.getMonth() - t2.getMonth();
                                                 const days = t1.getDate() - t2.getDate();
                 
-                                                let monthDifference = (years * 12) + months;
+                                                let monthDifference = ((years * 12) + months)+1;
+
+                                                console.log(monthDifference,"-----------")
                 
                                                 if (days < 0) {
                                                     monthDifference -= 1;
+                                                    console.log(monthDifference,"++++++++++")
                                                 }
     
                                                 frappe.call({

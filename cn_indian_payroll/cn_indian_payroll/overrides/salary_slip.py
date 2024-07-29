@@ -31,10 +31,7 @@ class CustomSalarySlip(SalarySlip):
     #     self.actual_amount()
 
 
-    def on_update(self):
-        super().on_update()
-        self.accrual_update()
-        self.insert_lta_reimbursement_lop()
+    
         
 
 
@@ -55,12 +52,15 @@ class CustomSalarySlip(SalarySlip):
     def before_save(self):
         
         
-        self.insert_reimbursement()
+        # self.insert_reimbursement()
         
         self.insert_lop_days()
         self.loan_perquisite()
-        self.insert_lta_reimbursement()
-        self.driver_reimbursement()
+
+        if self.leave_without_pay==0:
+            self.insert_lta_reimbursement()
+            self.insert_reimbursement()
+            self.driver_reimbursement()
 
         self.calculate_grosspay()
 
@@ -72,9 +72,17 @@ class CustomSalarySlip(SalarySlip):
 
         self.remaining_day()
 
+        if self.leave_without_pay>0:
+            self.insert_lta_reimbursement_lop()
+            self.accrual_update()
+            self.driver_reimbursement_lop()
 
 
-        
+
+    # def on_update(self):
+    #     super().on_update()
+    #     self.accrual_update()
+        #self.insert_lta_reimbursement_lop()  
 
 
     
@@ -355,6 +363,53 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+    def driver_reimbursement_lop(self):
+
+        driver_reimbursement_component_lop=[]
+        driver_reimbursement_component_amount_lop=[]
+
+        driver_reimbursement_application= frappe.get_list(
+                'Employee Benefit Claim',
+                filters={
+                    'employee': self.employee,
+                    'claim_date': ['between', [self.start_date, self.end_date]],
+                    'docstatus': 1
+                },
+                fields=['*']
+            )
+        if driver_reimbursement_application:
+            for k in driver_reimbursement_application:
+                component_check = frappe.get_doc('Salary Component', k.earning_component)
+                if component_check.component_type=="Vehicle Maintenance Reimbursement":
+                    driver_reimbursement_component_lop.append(k.earning_component)
+                    
+                    ss_assignment_doc = frappe.get_list(
+                    'Salary Structure Assignment',
+                    filters={'employee': self.employee, 'docstatus': 1},
+                    fields=['name'],
+                    order_by='from_date desc',
+                    limit=1
+                    )
+
+                    if ss_assignment_doc:
+                    
+                        record = frappe.get_doc('Salary Structure Assignment', ss_assignment_doc[0].name)
+                        for i in record.custom_employee_reimbursements:
+                            if i.reimbursements ==driver_reimbursement_component_lop[0]:
+                                one_day_amount=round((i.monthly_total_amount/self.total_working_days)*self.payment_days)
+                                total_amount=round(k.claimed_amount-one_day_amount)
+                                
+                                driver_reimbursement_component_amount_lop.append(total_amount)
+
+
+        if len(driver_reimbursement_component_amount_lop)>0:
+
+            for earning in self.earnings:
+                if earning.salary_component==driver_reimbursement_component_lop[0]:
+                    
+                    earning.amount=driver_reimbursement_component_amount_lop[0]
+
+
     def driver_reimbursement(self):
 
         driver_reimbursement_component=[]
@@ -376,9 +431,7 @@ class CustomSalarySlip(SalarySlip):
                     driver_reimbursement_component.append(k.earning_component)
                     driver_reimbursement_component_amount.append(k.claimed_amount)
 
-        # frappe.msgprint(str(driver_reimbursement_component))
-        # frappe.msgprint(str(driver_reimbursement_component_amount))
-
+        
         existing_components = {earning.salary_component for earning in self.earnings}
 
         for i in range(len(driver_reimbursement_component)):
@@ -431,43 +484,65 @@ class CustomSalarySlip(SalarySlip):
             fields=['*']
         )
         if lta_reimbursement:
-            lta_tax_amount.append(lta_reimbursement[0].taxable_amount*self.payment_days)
-            lta_tax_amount.append(lta_reimbursement[0].non_taxable_amount*self.payment_days)
-            lta_tax_amount.append(lta_reimbursement[0].amount*self.payment_days)
+            sum=0
+            
+            for i in lta_reimbursement:
+                sum=sum+i.amount
+            
 
-        
+            if sum>0:
+                ss_assignment = frappe.get_list(
+                    'Salary Structure Assignment',
+                    filters={'employee': self.employee, 'docstatus': 1},
+                    fields=['name'],
+                    order_by='from_date desc',
+                    limit=1
+                )
 
+                if ss_assignment:
+                
+                    record = frappe.get_doc('Salary Structure Assignment', ss_assignment[0].name)
+                    for i in record.custom_employee_reimbursements:
+                        if i.reimbursements ==lta_component[0].custom_lta_component:
+                            one_day_amount=round((i.monthly_total_amount/self.total_working_days)*self.payment_days)
+                            total_amount=round(sum-one_day_amount)
+                            
+                            lta_tax_amount.append(total_amount)
+                        
+        if len(lta_tax_amount)>0:
+            
             for earning in self.earnings:
-                if earning.salary_component==lta_taxable[0].name:
-                    tax_day_amount=earning.amount/self.total_working_days
-                    earning.amount=round(tax_day_amount*self.payment_days)
-                    
-
-
-                if earning.salary_component==lta_non_taxable[0].name:
-                    non_tax_day_amount=earning.amount/self.total_working_days
-                    earning.amount=round(non_tax_day_amount*self.payment_days)
-                    
-
-
                 if earning.salary_component==lta_component[0].custom_lta_component:
-                    total_day_amount=earning.amount/self.total_working_days
-                    earning.amount=round(total_day_amount*self.payment_days)
+                    
+                    earning.amount=lta_tax_amount[0]
+
+
+
+
+        
+
+        #     for earning in self.earnings:
+        #         if earning.salary_component==lta_taxable[0].name:
+        #             tax_day_amount=earning.amount/self.total_working_days
+        #             earning.amount=round(tax_day_amount*self.payment_days)
+                    
+
+
+        #         if earning.salary_component==lta_non_taxable[0].name:
+        #             non_tax_day_amount=earning.amount/self.total_working_days
+        #             earning.amount=round(non_tax_day_amount*self.payment_days)
+                    
+
+
+        #         if earning.salary_component==lta_component[0].custom_lta_component:
+        #             total_day_amount=earning.amount/self.total_working_days
+        #             earning.amount=round(total_day_amount*self.payment_days)
                     
         
 
 
 
-        # existing_components = {earning.salary_component for earning in self.earnings}
-
-        # if len(lta_tax_amount)>0:
-
-        #     for i in range(len(lta_tax_component)):
-        #         if lta_tax_component[i] not in existing_components:
-        #             self.append("earnings", {
-        #                 "salary_component": lta_tax_component[i],
-        #                 "amount": lta_tax_amount[i]
-        #             })
+        
 
 
                         
@@ -475,6 +550,11 @@ class CustomSalarySlip(SalarySlip):
 
 
     def insert_lta_reimbursement(self):
+
+        
+
+
+
         lta_tax_component = []
         lta_tax_amount = []
 
