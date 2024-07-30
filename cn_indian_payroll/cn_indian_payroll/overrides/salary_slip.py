@@ -77,6 +77,8 @@ class CustomSalarySlip(SalarySlip):
             self.accrual_update()
             self.driver_reimbursement_lop()
 
+        self.tax_declartion_insert()
+
 
 
     # def on_update(self):
@@ -97,14 +99,41 @@ class CustomSalarySlip(SalarySlip):
                         'employee':self.employee,
                     },
                     fields=['*'],
-                    
-                )
+                    )
 
         if len(get_benefit_accrual)>0:
             for j in get_benefit_accrual:
                 arrear_doc = frappe.get_doc('Employee Benefit Accrual', j.name)
                 arrear_doc.docstatus = 2
                 arrear_doc.save()
+
+
+
+    def tax_declartion_insert(self):
+        tax_declaration_doc=frappe.db.get_list('Employee Tax Exemption Declaration',
+                    filters={
+                        
+                        'employee':self.employee,
+                        'docstatus':1,
+                        'payroll_period':self.custom_payroll_period,
+
+                    },
+                    fields=['*'],
+                    
+                )
+        if tax_declaration_doc:
+            declaration_child_doc = frappe.get_doc('Employee Tax Exemption Declaration', tax_declaration_doc[0].name)
+            self.custom_declaration=[]
+            for k in declaration_child_doc.declarations:
+                self.append("custom_declaration", {
+                    "exemption_sub_category": k.exemption_sub_category,
+                    "exemption_category":k.exemption_category,
+                    "maximum_exempted_amount":k.max_amount,
+                    "declared_amount":k.amount
+                })
+
+
+
 
 
 
@@ -1021,6 +1050,7 @@ class CustomSalarySlip(SalarySlip):
         self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
         self.custom_employee_state=latest_salary_structure[0].custom_state
         self.custom_annual_ctc=latest_salary_structure[0].base
+        self.custom_payroll_period=latest_salary_structure[0].custom_payroll_period
 
 
         

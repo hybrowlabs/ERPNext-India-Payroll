@@ -2,10 +2,35 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
     refresh:function(frm)
     {
+
+
+
+
+
+
+
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if(frm.doc.custom_income_tax=="New Regime")
             {
                 frm.set_df_property('declarations',  'read_only',  1);
             }
+
 
             // if(!frm.is_new()&& frm.doc.declarations.length>0)
             //     {
@@ -26,8 +51,21 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
             //     }
 
+            if(frm.doc.docstatus==1)
+            {
+                frm.add_custom_button("Edit",function()
+                {
+                    edit(frm)
+                    
+                })
+            }
+
+
+
             
-    }
+    },
+
+    
    
 });
 
@@ -185,3 +223,82 @@ frappe.ui.form.on('Employee Tax Exemption Declaration Category', {
         });
     }
 })
+
+
+function edit(frm) {
+    let d = new frappe.ui.Dialog({
+        title: 'Enter details',
+        fields: [
+            
+            {
+                label: 'Details Table',
+                fieldname: 'details_table',
+                fieldtype: 'Table',
+                fields: [
+                    {
+                        label: 'Exemption Sub Category',
+                        fieldname: 'exemption_sub_category',
+                        fieldtype: 'Link',
+                        options: 'Employee Tax Exemption Sub Category',
+                        in_list_view: 1,
+                        editable: true,
+                        onchange: function() {
+                            let row = this.grid_row;
+                            if (row) {
+                                let exemption_sub_category = row.doc.exemption_sub_category;
+                                console.log(exemption_sub_category, "------------");
+
+                                
+                            }
+                        }
+                    },
+                    {
+                        label: 'Employee Tax Exemption Category',
+                        fieldname: 'employee_exemption_category',
+                        fieldtype: 'Link',
+                        options: 'Employee Tax Exemption Category',
+                        in_list_view: 1,
+                        editable: true
+                    },
+                    {
+                        label: 'Maximum Exempted Amount',
+                        fieldname: 'maximum_amount',
+                        fieldtype: 'Currency',
+                        in_list_view: 1
+                    },
+                    {
+                        label: 'Declared Amount',
+                        fieldname: 'declared_amount',
+                        fieldtype: 'Currency',
+                        in_list_view: 1,
+                        editable: true
+                    }
+                ]
+            }
+        ],
+        size: 'large',
+        primary_action_label: 'Submit',
+        primary_action(values) {
+            frm.clear_table('declarations');
+
+            values.details_table.forEach(row => {
+                let new_row = frm.add_child('declarations');
+                new_row.exemption_sub_category = row.exemption_sub_category;
+                new_row.employee_exemption_category = row.employee_exemption_category;
+                new_row.maximum_amount = row.maximum_amount;
+                new_row.declared_amount = row.declared_amount;
+            });
+
+            frm.refresh_field('declarations');
+
+            d.hide();
+        }
+    });
+
+    d.show();
+}
+
+
+
+
+

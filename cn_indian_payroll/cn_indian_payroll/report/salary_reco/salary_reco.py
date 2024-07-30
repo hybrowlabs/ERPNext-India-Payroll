@@ -1,6 +1,3 @@
-# Copyright (c) 2024, Hybrowlabs technologies and contributors
-# For license information, please see license.txt
-
 import frappe
 
 columns = [
@@ -12,6 +9,7 @@ columns = [
     {"fieldname": "previous_gross_pay", "label": "Gross Pay", "fieldtype": "Data", "width": 150},
     {"fieldname": "difference", "label": "Difference", "fieldtype": "Data", "width": 150},
     {"fieldname": "remark", "label": "Remark", "fieldtype": "Data", "width": 150},
+    {"fieldname": "status", "label": "Status", "fieldtype": "Data", "width": 150},
 ]
 
 def get_salary_slips(filters=None):
@@ -52,7 +50,7 @@ def get_salary_slips(filters=None):
         
     data_previous = frappe.get_list(
         'Salary Slip',
-        fields=["employee", "employee_name", "custom_month", "custom_statutory_grosspay"],
+        fields=["*"],
         filters=conditions1,
         order_by="name DESC",
         limit_page_length=0 
@@ -60,17 +58,20 @@ def get_salary_slips(filters=None):
 
     previous_month_data = []
     for j1 in data_previous:
+        employee_data = frappe.get_doc('Employee', j1.employee)
+
         previous_array = {
             "employee": j1.employee,
             "employee_name": j1.employee_name,
             "month": j1.custom_month,
-            "gross_pay": j1.custom_statutory_grosspay
+            "gross_pay": j1.custom_statutory_grosspay,
+            "status": employee_data.status
         }
         previous_month_data.append(previous_array)
 
     data_current = frappe.get_list(
         'Salary Slip',
-        fields=["employee", "employee_name", "custom_month", "custom_statutory_grosspay"],
+        fields=["*"],
         filters=conditions2,
         order_by="name DESC",
         limit_page_length=0  
@@ -78,11 +79,13 @@ def get_salary_slips(filters=None):
 
     current_month_data = []
     for j2 in data_current:
+        employee_data = frappe.get_doc('Employee', j2.employee)  # Fetching employee data again
         current_array = {
             "employee": j2.employee,
             "employee_name": j2.employee_name,
             "month": j2.custom_month,
-            "gross_pay": j2.custom_statutory_grosspay
+            "gross_pay": j2.custom_statutory_grosspay,
+            "status": employee_data.status  # Use the same status field
         }
         current_month_data.append(current_array)
         
@@ -98,7 +101,8 @@ def get_salary_slips(filters=None):
             'previous_gross_pay': record['gross_pay'],
             'current_month': "-",
             'current_gross_pay': 0,
-            'difference': 0
+            'difference': 0,
+            'status': record['status']  # Set status from previous data
         }
     
     for record in current_month_data:
@@ -111,19 +115,20 @@ def get_salary_slips(filters=None):
                 'previous_gross_pay': 0,
                 'current_month': record['month'],
                 'current_gross_pay': record['gross_pay'],
-                'difference': record['gross_pay']
+                'difference': record['gross_pay'],
+                'status': record['status']  # Set status from current data
             }
         else:
             final_data_map[employee_id]['current_month'] = record['month']
             final_data_map[employee_id]['current_gross_pay'] = record['gross_pay']
-            # Calculate the difference
             final_data_map[employee_id]['difference'] = (
                 final_data_map[employee_id]['current_gross_pay'] - 
                 final_data_map[employee_id]['previous_gross_pay']
             )
+            # Ensure status is consistent
+            final_data_map[employee_id]['status'] = record['status']
     
     final_array = list(final_data_map.values())
-
     return final_array
 
 def execute(filters=None):

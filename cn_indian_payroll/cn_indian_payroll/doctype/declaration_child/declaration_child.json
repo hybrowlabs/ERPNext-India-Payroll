@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-30 11:42:14.594484",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_9ayp",
+  "exemption_sub_category",
+  "exemption_category",
+  "maximum_exempted_amount",
+  "declared_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_9ayp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "exemption_sub_category",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Exemption Sub Category"
+  },
+  {
+   "fieldname": "exemption_category",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Exemption Category"
+  },
+  {
+   "fieldname": "maximum_exempted_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Maximum Exempted Amount"
+  },
+  {
+   "fieldname": "declared_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Declared Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-30 11:46:28.713402",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Declaration Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
