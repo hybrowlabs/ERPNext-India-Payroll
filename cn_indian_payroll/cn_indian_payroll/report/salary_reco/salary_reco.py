@@ -52,7 +52,7 @@ def get_salary_slips(filters=None):
         
     data_previous = frappe.get_list(
         'Salary Slip',
-        fields=["*"],
+        fields=["employee", "employee_name", "custom_month", "custom_statutory_grosspay"],
         filters=conditions1,
         order_by="name DESC",
         limit_page_length=0 
@@ -70,7 +70,7 @@ def get_salary_slips(filters=None):
 
     data_current = frappe.get_list(
         'Salary Slip',
-        fields=["*"],
+        fields=["employee", "employee_name", "custom_month", "custom_statutory_grosspay"],
         filters=conditions2,
         order_by="name DESC",
         limit_page_length=0  
@@ -91,19 +91,15 @@ def get_salary_slips(filters=None):
     
     for record in previous_month_data:
         employee_id = record['employee']
-        if employee_id not in final_data_map:
-            final_data_map[employee_id] = {
-                'employee': record['employee'], 
-                'employee_name': record['employee_name'],
-                'previous_month': record['month'],
-                'previous_gross_pay': record['gross_pay'],
-                'current_month': "-",
-                'current_gross_pay': 0,
-                'difference': 0
-            }
-        else:
-            final_data_map[employee_id]['previous_month'] = record['month']
-            final_data_map[employee_id]['previous_gross_pay'] = record['gross_pay']
+        final_data_map[employee_id] = {
+            'employee': record['employee'], 
+            'employee_name': record['employee_name'],
+            'previous_month': record['month'],
+            'previous_gross_pay': record['gross_pay'],
+            'current_month': "-",
+            'current_gross_pay': 0,
+            'difference': 0
+        }
     
     for record in current_month_data:
         employee_id = record['employee']
@@ -119,7 +115,7 @@ def get_salary_slips(filters=None):
             }
         else:
             final_data_map[employee_id]['current_month'] = record['month']
-            final_data_map[employee_id]['current_gross_pay'] = record['gross_pay']/*
+            final_data_map[employee_id]['current_gross_pay'] = record['gross_pay']
             # Calculate the difference
             final_data_map[employee_id]['difference'] = (
                 final_data_map[employee_id]['current_gross_pay'] - 
