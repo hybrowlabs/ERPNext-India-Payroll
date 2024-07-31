@@ -51,14 +51,14 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
             //     }
 
-            if(frm.doc.docstatus==1)
-            {
-                frm.add_custom_button("Edit",function()
-                {
-                    edit(frm)
+            // if(frm.doc.docstatus==1)
+            // {
+            //     frm.add_custom_button("Edit",function()
+            //     {
+            //         edit(frm)
                     
-                })
-            }
+            //     })
+            // }
 
 
 
