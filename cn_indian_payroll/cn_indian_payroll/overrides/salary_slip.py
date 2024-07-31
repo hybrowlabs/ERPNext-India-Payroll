@@ -77,7 +77,7 @@ class CustomSalarySlip(SalarySlip):
             self.accrual_update()
             self.driver_reimbursement_lop()
 
-        self.tax_declartion_insert()
+        #self.tax_declartion_insert()
 
 
 

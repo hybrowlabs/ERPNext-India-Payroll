@@ -112,7 +112,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     if len(uniform_component)>0:
                         for i in uniform_component:
                             array.append(i.name)
-                            amount.append(0)
+                            amount.append(i.max_amount)
                             
                             max_amount_category.append(i.max_amount)
 

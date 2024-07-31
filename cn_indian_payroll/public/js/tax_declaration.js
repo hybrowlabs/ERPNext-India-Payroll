@@ -243,14 +243,16 @@ function edit(frm) {
                         in_list_view: 1,
                         editable: true,
                         onchange: function() {
-                            let row = this.grid_row;
-                            if (row) {
-                                let exemption_sub_category = row.doc.exemption_sub_category;
-                                console.log(exemption_sub_category, "------------");
-
-                                
-                            }
+                            console.log(d.get_field('details_table').get_value());
                         }
+                        
+                        
+                        
+                        
+
+                        
+                       
+                        
                     },
                     {
                         label: 'Employee Tax Exemption Category',
@@ -258,7 +260,8 @@ function edit(frm) {
                         fieldtype: 'Link',
                         options: 'Employee Tax Exemption Category',
                         in_list_view: 1,
-                        editable: true
+                        editable: true,
+                       
                     },
                     {
                         label: 'Maximum Exempted Amount',
@@ -281,17 +284,24 @@ function edit(frm) {
         primary_action(values) {
             frm.clear_table('declarations');
 
+            var total_amount=0
             values.details_table.forEach(row => {
+                total_amount=total_amount+row.declared_amount
                 let new_row = frm.add_child('declarations');
                 new_row.exemption_sub_category = row.exemption_sub_category;
-                new_row.employee_exemption_category = row.employee_exemption_category;
-                new_row.maximum_amount = row.maximum_amount;
-                new_row.declared_amount = row.declared_amount;
+                new_row.exemption_category = row.employee_exemption_category;
+                new_row.max_amount = row.maximum_amount;
+                new_row.amount = row.declared_amount;
             });
 
             frm.refresh_field('declarations');
 
+            frm.set_value("total_declared_amount",total_amount)
+            frm.set_value("total_exemption_amount",total_amount)
+
             d.hide();
+            frm.save('Update');
+
         }
     });
 
