@@ -21,7 +21,7 @@ frappe.ui.form.on('Employee', {
         if(!frm.is_new())
             {
         
-        frm.add_custom_button(__("Tax Exemption Declaration"),function()
+            frm.add_custom_button(__("Tax Exemption Declaration"),function()
             {
 
                 frappe.call({
@@ -57,48 +57,53 @@ frappe.ui.form.on('Employee', {
                 
             })
 
-            frm.add_custom_button(__("Assign CTC"),function()
-            {
+            if (frappe.user.has_role("HR Manager")) 
+                {
 
-                frappe.call({
-        
-                    method: "frappe.client.get_list",
-                    args: {
-                        doctype: "Salary Structure Assignment",
-                        filters: { "employee": frm.doc.employee, "docstatus": 1 },
-                        fields: ["name"],
-                        limit: 1,
-                       
-                    },
-                    callback: function(res) {
-
-                        
-                        if (res.message.length>0)
+                        frm.add_custom_button(__("Assign CTC"),function()
                         {
-                            frappe.set_route("Form", "Salary Structure Assignment", res.message[0].name);
+
+                            frappe.call({
+                    
+                                method: "frappe.client.get_list",
+                                args: {
+                                    doctype: "Salary Structure Assignment",
+                                    filters: { "employee": frm.doc.employee, "docstatus": 1 },
+                                    fields: ["name"],
+                                    limit: 1,
+                                
+                                },
+                                callback: function(res) {
+
+                                    
+                                    if (res.message.length>0)
+                                    {
+                                        frappe.set_route("Form", "Salary Structure Assignment", res.message[0].name);
+                                        
+
+                                    }
+                                    else
+                                    {
+
+                                    
+
+                                        frappe.route_options = {"employee": frm.doc.name};
+
+                                        frappe.set_route("Form", "Salary Structure Assignment", 'new-salary-structure-assignment');
+                                    }
+                                
+
+                                }
+                            })
+
+
+
                             
+                        
+                            
+                        })
 
-                        }
-                        else
-                        {
-
-                           
-
-                            frappe.route_options = {"employee": frm.doc.name};
-
-                            frappe.set_route("Form", "Salary Structure Assignment", 'new-salary-structure-assignment');
-                        }
-                       
-
-                    }
-                })
-
-
-
-                
-               
-                
-            })
+                }
 
 
         }

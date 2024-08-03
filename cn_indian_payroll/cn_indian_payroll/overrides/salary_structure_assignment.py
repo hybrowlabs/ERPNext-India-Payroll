@@ -10,7 +10,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
         
 
-        
+    # def validate(self):
+    #     self.insert_tax_declaration()
         
 
 
@@ -228,23 +229,33 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 
 
 
-            doc1 = frappe.get_doc({'doctype': 'Employee Tax Exemption Declaration'})
-                    
-            doc1.employee= self.employee,
-            doc1.company= self.company,
-            doc1.payroll_period= self.custom_payroll_period,
-            doc1.currency= self.currency,
-            doc1.custom_income_tax=self.income_tax_slab,
+            doc1=frappe.get_list('Employee Tax Exemption Declaration',
+                            filters={'employee':self.employee,'payroll_period':self.custom_payroll_period,'docstatus': ['in', [0, 1]]},
+                            fields=['*'],
+                        
+                        )
 
-            for x in range(len(array)):
-                
+            
+
+            # frappe.msgprint(str(len(doc1)))
+            if len(doc1)==0:
+
+                doc1 = frappe.get_doc({'doctype': 'Employee Tax Exemption Declaration'})
+                doc1.employee= self.employee,
+                doc1.company= self.company,
+                doc1.payroll_period= self.custom_payroll_period,
+                doc1.currency= self.currency,
+                doc1.custom_income_tax=self.income_tax_slab,
+
+                for x in range(len(array)):
                     
-                doc2_child1 = doc1.append("declarations", {})
-                doc2_child1.exemption_sub_category = array[x]
-                doc2_child1.amount = amount[x]
-                doc2_child1.max_amount = max_amount_category[x]
-                    
-            doc1.insert()
+                        
+                    doc2_child1 = doc1.append("declarations", {})
+                    doc2_child1.exemption_sub_category = array[x]
+                    doc2_child1.amount = amount[x]
+                    doc2_child1.max_amount = max_amount_category[x]
+                        
+                doc1.insert()
 
            
                     

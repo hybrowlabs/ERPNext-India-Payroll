@@ -259,6 +259,7 @@ doctype_js = {
                 "Loan Product":"public/js/loan_product.js",
                 "Salary Slip":"public/js/salary_slip.js",
                 "LTA Claim":"public/js/lta_claim.js",
+                "Salary Appraisal Calculation":"public/js/salary_revision.js",
 
 
 

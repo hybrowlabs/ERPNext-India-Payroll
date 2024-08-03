@@ -50,9 +50,13 @@ class CustomSalarySlip(SalarySlip):
 
 
     def before_save(self):
+
+        # if self.is_new():
+        #     frappe.msgprint(str(self.leave_without_pay))
+
         
         
-        # self.insert_reimbursement()
+        
         
         self.insert_lop_days()
         self.loan_perquisite()
@@ -322,8 +326,7 @@ class CustomSalarySlip(SalarySlip):
                     'total_amount': total_amount
                 })
 
-            # frappe.msgprint(str(benefit_component_amount1))
-            # frappe.msgprint(str(benefit_component_amount))
+            
 
 
             min_values = {}
@@ -345,7 +348,7 @@ class CustomSalarySlip(SalarySlip):
             
             min_values_list = [{'component': component, 'total_amount': total_amount} for component, total_amount in min_values.items()]
 
-            # frappe.msgprint(str(min_values_list))
+            
             for component_data in min_values_list:
                 for earnings in self.earnings:
                     if earnings.salary_component == component_data['component']:
@@ -539,6 +542,8 @@ class CustomSalarySlip(SalarySlip):
                             lta_tax_amount.append(total_amount)
                         
         if len(lta_tax_amount)>0:
+           
+            
             
             for earning in self.earnings:
                 if earning.salary_component==lta_component[0].custom_lta_component:
@@ -579,11 +584,6 @@ class CustomSalarySlip(SalarySlip):
 
 
     def insert_lta_reimbursement(self):
-
-        
-
-
-
         lta_tax_component = []
         lta_tax_amount = []
 

@@ -1,0 +1,46 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-01 10:26:13.682261",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "salary_component",
+  "old_amount",
+  "new_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "old_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Old Amount"
+  },
+  {
+   "fieldname": "new_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "New Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-08-01 23:02:41.823445",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Salary Revision Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

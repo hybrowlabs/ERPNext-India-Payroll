@@ -136,9 +136,11 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     source_name: frm.doc.salary_structure,
                     employee: frm.doc.employee,
                     print_format: 'Salary Slip Standard for CTC',
-                    docstatus:frm.doc.docstatus
+                    docstatus:frm.doc.docstatus,
+                    posting_date: frm.doc.from_date
                 },
                 callback: function(response) {
+                    console.log(response,"====")
                     $.each(response.message.earnings, function(i, v) {
                          
 

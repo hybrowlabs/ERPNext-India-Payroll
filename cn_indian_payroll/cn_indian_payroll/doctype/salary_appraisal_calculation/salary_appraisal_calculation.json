@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-01 10:24:35.898361",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "old_salary_structure",
+  "salary_structure",
+  "column_break_ozck",
+  "posting_date",
+  "new_salary_structure",
+  "new_salary_structure1",
+  "section_break_ugei",
+  "old_structure_child",
+  "section_break_cwor",
+  "salary_arrear_components",
+  "section_break_jakm",
+  "reimbursement_components",
+  "section_break_ajlu",
+  "bonus_components"
+ ],
+ "fields": [
+  {
+   "fieldname": "old_salary_structure",
+   "fieldtype": "Link",
+   "label": "Old Salary Structure",
+   "options": "Salary Structure Assignment"
+  },
+  {
+   "fieldname": "column_break_ozck",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "new_salary_structure",
+   "fieldtype": "Link",
+   "label": "New Salary Structure",
+   "options": "Salary Structure Assignment"
+  },
+  {
+   "fieldname": "section_break_ugei",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "old_salary_structure.salary_structure",
+   "fieldname": "salary_structure",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Salary Structure"
+  },
+  {
+   "fetch_from": "new_salary_structure.salary_structure",
+   "fieldname": "new_salary_structure1",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "New Salary Structure"
+  },
+  {
+   "fieldname": "old_structure_child",
+   "fieldtype": "Table",
+   "label": "Old Structure Child",
+   "options": "Salary Revision Child"
+  },
+  {
+   "fieldname": "section_break_cwor",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "salary_arrear_components",
+   "fieldtype": "Table",
+   "label": "Salary Arrear Components",
+   "options": "Salary Appraisal Child"
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "section_break_jakm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reimbursement_components",
+   "fieldtype": "Table",
+   "label": "Reimbursement Components",
+   "options": "Salary Appraisal Child"
+  },
+  {
+   "fieldname": "section_break_ajlu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bonus_components",
+   "fieldtype": "Table",
+   "label": "Bonus Components",
+   "options": "Salary Appraisal Child"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-08-02 18:31:57.818100",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Salary Appraisal Calculation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
