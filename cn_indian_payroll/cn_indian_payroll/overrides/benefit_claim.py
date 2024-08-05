@@ -13,7 +13,7 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
         self.insert_future_benefit()
 
 
-    def 
+    
 
 
         

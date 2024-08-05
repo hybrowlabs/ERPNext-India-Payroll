@@ -10,6 +10,7 @@
   "salary_structure",
   "column_break_ozck",
   "posting_date",
+  "company",
   "new_salary_structure",
   "new_salary_structure1",
   "section_break_ugei",
@@ -19,7 +20,8 @@
   "section_break_jakm",
   "reimbursement_components",
   "section_break_ajlu",
-  "bonus_components"
+  "bonus_components",
+  "amended_from"
  ],
  "fields": [
   {
@@ -45,8 +47,10 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Employee",
-   "options": "Employee"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "fetch_from": "old_salary_structure.salary_structure",
@@ -82,7 +86,9 @@
    "default": "Now",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_jakm",
@@ -103,11 +109,30 @@
    "fieldtype": "Table",
    "label": "Bonus Components",
    "options": "Salary Appraisal Child"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Salary Appraisal Calculation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2024-08-02 18:31:57.818100",
+ "modified": "2024-08-05 12:16:08.184834",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",

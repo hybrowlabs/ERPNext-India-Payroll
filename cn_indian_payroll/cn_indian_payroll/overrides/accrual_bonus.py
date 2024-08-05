@@ -21,9 +21,6 @@ def accrual_created(payroll_entry_doc_id, company_name):
                     if salary_component_doc.custom_is_accrual==1:
                         
                         bonus_component=salary_component_doc.name
-
-
-                    
                         bonus_component_amount = earning.amount
                         break
                 if bonus_component_amount is not None:

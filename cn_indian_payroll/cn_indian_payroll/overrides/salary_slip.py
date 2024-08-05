@@ -54,6 +54,8 @@ class CustomSalarySlip(SalarySlip):
         # if self.is_new():
         #     frappe.msgprint(str(self.leave_without_pay))
 
+        self.update_bonus_accrual()
+
         
         
         
@@ -137,6 +139,28 @@ class CustomSalarySlip(SalarySlip):
                 })
 
 
+
+    def update_bonus_accrual(self):
+        for bonus in self.earnings:
+            bonus_component=frappe.get_doc("Salary Component",bonus.salary_component)
+            if bonus_component.custom_is_accrual==1:
+                # frappe.msgprint(str(bonus_component.name))
+
+                bonus_accrual= frappe.get_list(
+                        'Employee Bonus Accrual',
+                        filters={'salary_slip': self.name},
+                        fields=['*'],
+                        
+                    )
+
+                if len(bonus_accrual)>0:
+                    # frappe.msgprint(str(bonus_accrual[0].name))
+                    accrual_each_doc=frappe.get_doc("Employee Bonus Accrual",bonus_accrual[0].name)
+                    accrual_each_doc.amount=bonus.amount
+                    accrual_each_doc.save()
+
+        
+        
 
 
 
@@ -915,9 +939,7 @@ class CustomSalarySlip(SalarySlip):
             if ss_assignment:
              
 
-                child_doc = frappe.get_doc('Salary Structure Assignment',ss_assignment[0].name)
-
-                
+                child_doc = frappe.get_doc('Salary Structure Assignment',ss_assignment[0].name) 
            
                 for i in child_doc.custom_employee_reimbursements:
                     
