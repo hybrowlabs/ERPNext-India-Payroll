@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-06 14:57:30.619192",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_hat6",
+  "month",
+  "rent_paid",
+  "earned_basic",
+  "hra_received",
+  "excess_of_rent_paid",
+  "exemption_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_hat6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "rent_paid",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rent Paid"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "earned_basic",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "% of Earned Basic  (Metro 50%, Non- Metro 40%)"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "hra_received",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "HRA Received"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "excess_of_rent_paid",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Excess of Rent Paid Over 10% of Basic"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exemption_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Exemption Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-08-06 18:49:53.447197",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "HRA Breakup",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

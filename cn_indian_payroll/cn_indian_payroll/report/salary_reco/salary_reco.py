@@ -65,7 +65,8 @@ def get_salary_slips(filters=None):
             "employee_name": j1.employee_name,
             "month": j1.custom_month,
             "gross_pay": j1.custom_statutory_grosspay,
-            "status": employee_data.status
+            "status": employee_data.status,
+            "remark":j1.custom_new_joinee
         }
         previous_month_data.append(previous_array)
 
@@ -102,7 +103,9 @@ def get_salary_slips(filters=None):
             'current_month': "-",
             'current_gross_pay': 0,
             'difference': 0,
-            'status': record['status']  # Set status from previous data
+            'status': record['status'],
+            'remark':record['remark']
+              
         }
     
     for record in current_month_data:
@@ -116,7 +119,9 @@ def get_salary_slips(filters=None):
                 'current_month': record['month'],
                 'current_gross_pay': record['gross_pay'],
                 'difference': record['gross_pay'],
-                'status': record['status']  # Set status from current data
+                'status': record['status']  ,
+                'remark':record['remark']
+
             }
         else:
             final_data_map[employee_id]['current_month'] = record['month']

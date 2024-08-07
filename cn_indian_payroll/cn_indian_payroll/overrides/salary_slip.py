@@ -55,6 +55,7 @@ class CustomSalarySlip(SalarySlip):
         #     frappe.msgprint(str(self.leave_without_pay))
 
         self.update_bonus_accrual()
+        self.new_joinee()
 
         
         
@@ -83,7 +84,7 @@ class CustomSalarySlip(SalarySlip):
             self.accrual_update()
             self.driver_reimbursement_lop()
 
-        #self.tax_declartion_insert()
+        self.tax_declartion_insert()
 
 
 
@@ -112,6 +113,20 @@ class CustomSalarySlip(SalarySlip):
                 arrear_doc = frappe.get_doc('Employee Benefit Accrual', j.name)
                 arrear_doc.docstatus = 2
                 arrear_doc.save()
+
+    def new_joinee(self):
+        if self.employee:
+            employee_doc = frappe.get_doc("Employee", self.employee)
+            
+            start_date = frappe.utils.getdate(self.start_date)
+            end_date = frappe.utils.getdate(self.end_date)
+            
+            if start_date <= employee_doc.date_of_joining <= end_date:
+                self.custom_new_joinee="New Joinee"
+            else:
+                self.custom_new_joinee=" "
+
+            
 
 
 
@@ -528,7 +543,7 @@ class CustomSalarySlip(SalarySlip):
         if lta_component:
             lta_tax_component.append(lta_component[0].custom_lta_component)
 
-        # frappe.msgprint(str(lta_tax_component))
+        
 
        
         lta_reimbursement = frappe.get_list('LTA Claim',

@@ -246,6 +246,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 doc1.payroll_period= self.custom_payroll_period,
                 doc1.currency= self.currency,
                 doc1.custom_income_tax=self.income_tax_slab,
+                doc1.custom_salary_structure_assignment=self.name,
 
                 for x in range(len(array)):
                     

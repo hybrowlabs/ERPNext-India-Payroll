@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{employee}-{###}",
+ "creation": "2024-08-06 12:02:58.684089",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "income_tax",
+  "column_break_varb",
+  "company",
+  "posting_date",
+  "payroll_period",
+  "tax_exemption",
+  "declarations_tab",
+  "declaration_details",
+  "section_break_uyjp",
+  "monthly_house_rent",
+  "rented_in_metro_city",
+  "hra_as_per_salary_structure",
+  "column_break_pysc",
+  "annual_hra_exemption",
+  "monthly_hra_exemption",
+  "section_break_xbkl",
+  "total_declared_amount",
+  "column_break_xlfa",
+  "total_exemption_amount",
+  "section_break_hfwe",
+  "hra_breakup"
+ ],
+ "fields": [
+  {
+   "fieldname": "declaration_details",
+   "fieldtype": "Table",
+   "label": "Declaration Details",
+   "options": "Declaration Child"
+  },
+  {
+   "fieldname": "section_break_uyjp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "monthly_house_rent",
+   "fieldtype": "Currency",
+   "label": "Monthly House Rent"
+  },
+  {
+   "default": "0",
+   "fieldname": "rented_in_metro_city",
+   "fieldtype": "Check",
+   "label": " Rented in Metro City"
+  },
+  {
+   "fieldname": "hra_as_per_salary_structure",
+   "fieldtype": "Currency",
+   "label": "HRA as per Salary Structure"
+  },
+  {
+   "fieldname": "column_break_pysc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annual_hra_exemption",
+   "fieldtype": "Currency",
+   "label": "Annual HRA Exemption"
+  },
+  {
+   "fieldname": "monthly_hra_exemption",
+   "fieldtype": "Currency",
+   "label": "Monthly HRA Exemption"
+  },
+  {
+   "fieldname": "section_break_xbkl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_declared_amount",
+   "fieldtype": "Currency",
+   "label": "Total Declared Amount"
+  },
+  {
+   "fieldname": "column_break_xlfa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_exemption_amount",
+   "fieldtype": "Currency",
+   "label": "Total Exemption Amount"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "income_tax",
+   "fieldtype": "Link",
+   "label": "Income Tax",
+   "options": "Income Tax Slab"
+  },
+  {
+   "fieldname": "declarations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Declarations"
+  },
+  {
+   "fieldname": "column_break_varb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period"
+  },
+  {
+   "fieldname": "tax_exemption",
+   "fieldtype": "Data",
+   "label": "Tax Exemption"
+  },
+  {
+   "fieldname": "section_break_hfwe",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "hra_breakup",
+   "fieldtype": "Table",
+   "label": "HRA BreakUp",
+   "options": "HRA Breakup"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-08-06 17:20:14.342184",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Tax Declaration History",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
