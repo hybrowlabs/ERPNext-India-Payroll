@@ -84,7 +84,7 @@ class CustomSalarySlip(SalarySlip):
             self.accrual_update()
             self.driver_reimbursement_lop()
 
-        self.tax_declartion_insert()
+        # self.tax_declartion_insert()
 
 
 
@@ -124,7 +124,7 @@ class CustomSalarySlip(SalarySlip):
             if start_date <= employee_doc.date_of_joining <= end_date:
                 self.custom_new_joinee="New Joinee"
             else:
-                self.custom_new_joinee=" "
+                self.custom_new_joinee="-"
 
             
 
@@ -468,7 +468,8 @@ class CustomSalarySlip(SalarySlip):
                         for i in record.custom_employee_reimbursements:
                             if i.reimbursements ==driver_reimbursement_component_lop[0]:
                                 one_day_amount=round((i.monthly_total_amount/self.total_working_days)*self.payment_days)
-                                total_amount=round(k.claimed_amount-one_day_amount)
+                                monthly_reimbursement=round(i.monthly_total_amount-one_day_amount)
+                                total_amount=round(k.claimed_amount-monthly_reimbursement)
                                 
                                 driver_reimbursement_component_amount_lop.append(total_amount)
 
@@ -515,6 +516,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+
     def insert_lta_reimbursement_lop(self):
         lta_tax_component = []
         lta_tax_amount = []
@@ -556,9 +558,11 @@ class CustomSalarySlip(SalarySlip):
         )
         if lta_reimbursement:
             sum=0
+            tax_value=0
             
             for i in lta_reimbursement:
                 sum=sum+i.amount
+                tax_value=tax_value+i.taxable_amount
             
 
             if sum>0:
@@ -579,6 +583,11 @@ class CustomSalarySlip(SalarySlip):
                             total_amount=round(sum-one_day_amount)
                             
                             lta_tax_amount.append(total_amount)
+
+                            taxable_value_lop=round(tax_value-one_day_amount)
+
+                            lta_tax_amount.append(taxable_value_lop)
+
                         
         if len(lta_tax_amount)>0:
            
@@ -588,28 +597,30 @@ class CustomSalarySlip(SalarySlip):
                 if earning.salary_component==lta_component[0].custom_lta_component:
                     
                     earning.amount=lta_tax_amount[0]
+                if earning.salary_component==lta_tax_component[0]:
+                    earning.amount=lta_tax_amount[1]
 
 
 
 
         
 
-        #     for earning in self.earnings:
-        #         if earning.salary_component==lta_taxable[0].name:
-        #             tax_day_amount=earning.amount/self.total_working_days
-        #             earning.amount=round(tax_day_amount*self.payment_days)
+            # for earning in self.earnings:
+            #     if earning.salary_component==lta_taxable[0].name:
+            #         tax_day_amount=earning.amount/self.total_working_days
+            #         earning.amount=round(tax_day_amount*self.payment_days)
                     
 
 
-        #         if earning.salary_component==lta_non_taxable[0].name:
-        #             non_tax_day_amount=earning.amount/self.total_working_days
-        #             earning.amount=round(non_tax_day_amount*self.payment_days)
+            #     if earning.salary_component==lta_non_taxable[0].name:
+            #         non_tax_day_amount=earning.amount/self.total_working_days
+            #         earning.amount=round(non_tax_day_amount*self.payment_days)
                     
 
 
-        #         if earning.salary_component==lta_component[0].custom_lta_component:
-        #             total_day_amount=earning.amount/self.total_working_days
-        #             earning.amount=round(total_day_amount*self.payment_days)
+            #     if earning.salary_component==lta_component[0].custom_lta_component:
+            #         total_day_amount=earning.amount/self.total_working_days
+            #         earning.amount=round(total_day_amount*self.payment_days)
                     
         
 
