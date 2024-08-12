@@ -31,9 +31,11 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             filters={
                 'payroll_period': self.custom_payroll_period,
                 'docstatus': ['in', [0, 1]],
-                'employee':self.employee
+                'employee':self.employee,
+                'custom_salary_structure_assignment':self.name,
+
             },
-            fields=['name','docstatus'],
+            fields=['*'],
             
         )
 
@@ -56,44 +58,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 frappe.delete_doc('Employee Tax Exemption Declaration', data_doc.name)
 
 
-    # def update_lta_false(self):
-    #     employee_doc = frappe.get_doc('Employee', self.employee)
-    #     if employee_doc.custom_lta_applicable==1:
-    #         employee_doc.custom_lta_applicable = 0
-    #         employee_doc.save()
-
-
-
-        
-
-
-
-
-    # def update_lta_in_employee(self):
-    #     if len(self.custom_employee_reimbursements)>0:
-    #         company_data=frappe.db.get_list('Company',
-    #         filters={
-    #             'name': self.company,
-    #         },
-    #         fields=['*'],
-            
-    #         )
-            
-            
-    #         if company_data[0].custom_lta_component:
-                
-    #             for lta in self.custom_employee_reimbursements:
-    #                 if company_data[0].custom_lta_component == lta.reimbursements:
-    #                     employee_doc = frappe.get_doc('Employee', self.employee)
-    #                     employee_doc.custom_lta_applicable = 1
-    #                     employee_doc.save()
-    #                     break  
-
-
-
-
-
-
 
 
     def insert_tax_declaration(self):
@@ -105,7 +69,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
                 if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
                     uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_is_uniform':1},
+                            filters={'custom_salary_component':"Uniform"},
                             fields=['*'],
                         
                         )
@@ -113,26 +77,13 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     if len(uniform_component)>0:
                         for i in uniform_component:
                             array.append(i.name)
-                            amount.append(i.max_amount)
+                            amount.append(0)
                             
                             max_amount_category.append(i.max_amount)
 
                 
 
-                if self.custom_is_medical_allowance and self.custom_medical_allowance_value:
-                    medical_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_is_medical':1},
-                            fields=['*'],
-                        
-                        )
-
-                    
-                    if len(medical_component)>0:
-                        for i in medical_component:
-                            array.append(i.name)
-                            amount.append(0)
-                            
-                            max_amount_category.append(i.max_amount)
+                
                 
 
 
@@ -142,7 +93,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     epf_amount_year=round(epf_amount*12)
 
                     epf_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_is_epf':1},
+                            filters={'custom_salary_component':"Employee Provident Fund"},
                             fields=['*'],
                         
                         )
@@ -170,7 +121,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
                     nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_is_nps':1},
+                            filters={'custom_salary_component':"NPS"},
                             fields=['*'],
                         
                         )
@@ -190,7 +141,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     
                 if self.custom_state:
                     pt_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_is_pt':1},
+                            filters={'custom_salary_component':"Professional Tax (Gujarat)"},
                             fields=['*'],
                         
                         )
@@ -202,7 +153,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                            
                             amount.append(2400)
 
-                # frappe.msgprint(str(max_amount_category))
+               
 
 
 
@@ -214,7 +165,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
                     nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_is_nps':1},
+                            filters={'custom_salary_component':"NPS"},
                             fields=['*'],
                         
                         )
@@ -226,6 +177,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
                             amount.append(nps_amount_year)
 
+
+                
+
                 
 
 
@@ -235,9 +189,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         
                         )
 
-            
-
-            # frappe.msgprint(str(len(doc1)))
             if len(doc1)==0:
 
                 doc1 = frappe.get_doc({'doctype': 'Employee Tax Exemption Declaration'})
@@ -247,7 +198,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 doc1.currency= self.currency,
                 doc1.custom_income_tax=self.income_tax_slab,
                 doc1.custom_salary_structure_assignment=self.name,
-
+                doc1.custom_posting_date = frappe.utils.nowdate(),
+                
                 for x in range(len(array)):
                     
                         
@@ -255,8 +207,11 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     doc2_child1.exemption_sub_category = array[x]
                     doc2_child1.amount = amount[x]
                     doc2_child1.max_amount = max_amount_category[x]
+                
                         
                 doc1.insert()
+                doc1.submit()  
+                frappe.db.commit() 
 
            
                     

@@ -18,6 +18,11 @@ frappe.ui.form.on('LTA Claim', {
 
     employee: function(frm) {
         if (frm.doc.employee) {
+
+            find_tax_regime(frm)
+
+
+            // show_max_lta_amount(frm)
     
             function futureAndProcessData() {
                 return new Promise((resolve, reject) => {
@@ -57,7 +62,7 @@ frappe.ui.form.on('LTA Claim', {
                 
                                                 let monthDifference = ((years * 12) + months)+1;
 
-                                                console.log(monthDifference,"-----------")
+                                                // console.log(monthDifference,"-----------")
                 
                                                 if (days < 0) {
                                                     monthDifference -= 1;
@@ -217,3 +222,221 @@ frappe.ui.form.on('LTA Claim', {
     
 
 });
+
+
+
+
+function show_max_lta_amount(frm) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Salary Component",
+            filters: { "component_type": "LTA Reimbursement" },
+            fields: ["*"],
+        },
+        callback: function(res) {
+            if (res.message && res.message.length > 0) {
+                var reimbursement_amount = [];
+
+                frappe.call({
+                    method: "frappe.client.get_list",
+                    args: {
+                        doctype: "Salary Structure Assignment",
+                        filters: { employee: frm.doc.employee, docstatus: 1 },
+                        fields: ["*"],
+                        order_by: "from_date desc",
+                        limit: 1
+                    },
+                    callback: function(response) {
+                        if (response.message && response.message.length > 0) {
+                            frappe.call({
+                                method: "frappe.client.get",
+                                args: {
+                                    doctype: "Salary Structure Assignment",
+                                    name: response.message[0].name
+                                },
+                                callback: function(employee_data) {
+                                    if (employee_data.message) {
+                                        $.each(employee_data.message.custom_employee_reimbursements, function(i, v) {
+                                            if (v.reimbursements === res.message[0].name) {
+                                                reimbursement_amount.push(v.monthly_total_amount);
+                                            }
+                                            
+                                        });
+
+                                        console.log(reimbursement_amount, "-----");
+
+                                        if (reimbursement_amount.length > 0) {
+                                            frappe.call({
+                                                method: "frappe.client.get_list",
+                                                args: {
+                                                    doctype: "Payroll Period",
+                                                    filters: {
+                                                        "company": frm.doc.company,
+                                                        "start_date": ["<=", frm.doc.posting_date],
+                                                        "end_date": [">=", frm.doc.posting_date]
+                                                    },
+                                                    fields: ["start_date", "end_date"],
+                                                    limit: 1
+                                                },
+                                                callback: function(payroll_data) {
+                                                    if (payroll_data.message && payroll_data.message.length > 0) {
+                                                        console.log(payroll_data.message);
+
+                                                        frappe.call({
+                                                            method: "frappe.client.get_list",
+                                                            args: {
+                                                                doctype: "LTA Claim",
+                                                                filters: {
+                                                                    "company": frm.doc.company,
+                                                                    "claim_date": ["between", payroll_data.message[0].start_date, payroll_data.message[0].end_date],                                                                    
+                                                                    "employee": frm.doc.employee,
+                                                                    
+                                                                },
+                                                                fields: ["*"],
+                                                            },
+                                                            callback: function(lta_data) {
+                                                                var total_amount=[]
+                                                                if (lta_data.message && lta_data.message.length > 0) {
+                                                                    console.log(lta_data.message);
+                                                                    $.each(lta_data.message,function(i,k)
+                                                                        {
+                                                                            total_amount.push(k.amount)
+                                                                            
+                                                                        })
+                                                                    const sum1 = total_amount.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+                                                                    console.log(sum1,"88888")
+
+
+                                                                    var accrual_data_array = [];
+
+                                                                    frappe.call({
+                                                                        method: "frappe.client.get_list",
+                                                                        args: {
+                                                                            doctype: "Employee Benefit Accrual",
+                                                                            filters: {
+                                                                                "employee": frm.doc.employee,
+                                                                                "docstatus": 1,
+                                                                                "salary_component": res.message[0].name,
+                                                                                "payroll_period":payroll_data.message[0].name
+                                                                            },
+                                                                            fields: ["*"]
+                                                                        },
+                                                                        callback: function(accrual_data) {
+                                                                            if (accrual_data.message && accrual_data.message.length > 0) {
+
+                                                                                console.log(accrual_data.message)
+                                                                                $.each(accrual_data.message, function(i, g) {
+                                                                                    accrual_data_array.push(g.amount);
+                                                                                });
+
+                                                                                const sum = accrual_data_array.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+
+                                                                                var future_value = 12-accrual_data.message.length
+                                                                                var future_amount=future_value*reimbursement_amount[0]
+                                                                                var max_eligible_amount=future_amount+sum-
+                                                                                frm.set_value("max_eligible_amount",future_amount+sum)
+
+
+
+
+
+
+
+
+                                                                            }
+                                                                        }
+                                                                    })
+
+
+
+
+                                                                } 
+                                                                else 
+                                                                {
+                                                                    // console.log("No LTA claims found for this period.");
+
+                                                                    var accrual_data_array = [];
+
+                                                                    frappe.call({
+                                                                        method: "frappe.client.get_list",
+                                                                        args: {
+                                                                            doctype: "Employee Benefit Accrual",
+                                                                            filters: {
+                                                                                "employee": frm.doc.employee,
+                                                                                "docstatus": 1,
+                                                                                "salary_component": res.message[0].name,
+                                                                                "payroll_period":payroll_data.message[0].name
+                                                                            },
+                                                                            fields: ["*"]
+                                                                        },
+                                                                        callback: function(accrual_data) {
+                                                                            if (accrual_data.message && accrual_data.message.length > 0) {
+
+                                                                                console.log(accrual_data.message)
+                                                                                $.each(accrual_data.message, function(i, g) {
+                                                                                    accrual_data_array.push(g.amount);
+                                                                                });
+
+                                                                                const sum = accrual_data_array.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+                                                                                // console.log(sum, "Total Accrued Amount");
+
+                                                                                var future_value = 12-accrual_data.message.length
+                                                                                var future_amount=future_value*reimbursement_amount[0]
+                                                                                frm.set_value("max_eligible_amount",future_amount+sum)
+
+                                                                                // console.log(future_amount, "Future Value of LTA");
+
+                                                                            } 
+                                                                            else 
+                                                                            {
+                                                                                console.log("No accruals found for this salary component.");
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    } else {
+                                                        frappe.msgprint("This date is not included in the latest payroll period. Please create a payroll period.");
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                frappe.msgprint("There is no salary component with component type LTA Reimbursement.");
+            }
+        }
+    });
+}
+
+
+function find_tax_regime(frm)
+{
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Salary Structure Assignment",
+            filters: { employee: frm.doc.employee, docstatus: 1 },
+            fields: ["*"],
+            order_by: "from_date desc",
+            limit: 1
+        },
+        callback: function(response) {
+            if (response.message && response.message.length > 0) {
+
+                frm.set_value("income_tax_regime",response.message[0].income_tax_slab)
+
+            }
+        }
+    })
+
+}

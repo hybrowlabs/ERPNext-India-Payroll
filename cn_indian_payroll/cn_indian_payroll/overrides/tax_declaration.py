@@ -6,27 +6,32 @@ from hrms.payroll.doctype.employee_tax_exemption_declaration.employee_tax_exempt
 class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
-    def validate(self):
+    # def validate(self):
 
-        self.validate_tax_declaration()
+    #     # self.validate_tax_declaration()
         
 
-        super().validate()
+    #     super().validate()
 
 
     def on_submit(self):
-        self.set_max_amount()
+        # self.set_max_amount()
         self.insert_declaration_history()
 
 
-    def before_save(self):
-        self.calculate_hra_breakup()
+    # def before_save(self):
+    #     self.calculate_hra_breakup()
 
 
     def before_update_after_submit(self):
         self.calculate_hra_exemption()
         self.calculate_hra_breakup()
         self.update_hra_breakup()
+        
+        self.set_total_declared_amount()
+        # self.set_max_amount()
+        self.update_tax_declaration()
+        self.set_total_exemption_amount()
         
 
 
@@ -80,6 +85,56 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 each_doc.save()
                 frappe.db.commit()
 
+    def update_tax_declaration(self):
+
+        if len(self.declarations)>0:
+            tax_component = []
+            for component in self.declarations:
+                tax_component.append({
+                    "sub_category": component.exemption_sub_category,
+                    "category": component.exemption_category,
+                    "max_amount": component.max_amount,
+                    "amount": component.amount
+                    
+                })
+
+            get_latest_history = frappe.get_list(
+                'Tax Declaration History',
+                filters={'employee': self.employee},
+                fields=['*'],
+                order_by='posting_date desc',
+                limit=1 
+            )
+
+            if len(get_latest_history) > 0:
+                each_doc = frappe.get_doc("Tax Declaration History", get_latest_history[0].name)
+
+                each_doc.monthly_house_rent
+                t=self.monthly_house_rent
+                each_doc.rented_in_metro_city=self.rented_in_metro_city
+                each_doc.hra_as_per_salary_structure=self.salary_structure_hra
+                each_doc.annual_hra_exemption=self.annual_hra_exemption
+                each_doc.monthly_hra_exemption=self.monthly_hra_exemption
+                each_doc.total_declared_amount=self.total_declared_amount
+                each_doc.total_exemption_amount=self.total_exemption_amount
+
+                
+                
+                each_doc.declaration_details = []
+
+                for entry in tax_component:
+                    each_doc.append("declaration_details", {
+                        "exemption_sub_category": entry["sub_category"],
+                        "exemption_category": entry["category"],
+                        "maximum_exempted_amount": entry["max_amount"],
+                        "declared_amount": entry["amount"],
+                        
+                    })
+
+                each_doc.save()
+                frappe.db.commit()
+
+
 
 
     
@@ -104,10 +159,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             
             
         )
-
-        
-
-        
 
         if len(category)>0:
            
@@ -165,7 +216,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             
 
     def calculate_hra_breakup(self):
-        if self.monthly_house_rent:
+        if self.monthly_house_rent>0:
+
             months = ["April", "May", "June", "July", "August", "September", "October", "November", "December","January", "February", "March"]
             basic_salary=(self.monthly_house_rent-self.monthly_hra_exemption)/0.1
             earned_basic = 0

@@ -297,9 +297,9 @@ doc_events = {
 
         
     },
-    "LTA Claim":{
-        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
-    },
+    # "LTA Claim":{
+    #     "validate":"cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
+    # },
 
     "Salary Appraisal Calculation":{
         "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",

@@ -8,6 +8,7 @@
  "field_order": [
   "employee",
   "employee_name",
+  "income_tax_regime",
   "column_break_qqbu",
   "claim_date",
   "company",
@@ -98,6 +99,7 @@
    "label": "Note"
   },
   {
+   "depends_on": "eval:doc.income_tax_regime==\"Old Regime\" ||doc.income_tax_regime==\"New Regime\"",
    "fieldname": "taxable_amount",
    "fieldtype": "Float",
    "label": "Taxable Amount"
@@ -113,6 +115,7 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.income_tax_regime==\"Old Regime\"",
    "fieldname": "non_taxable_amount",
    "fieldtype": "Float",
    "label": "Non Taxable Amount"
@@ -122,12 +125,18 @@
    "fieldtype": "Float",
    "label": "Max Eligible Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "income_tax_regime",
+   "fieldtype": "Data",
+   "label": "Income Tax Regime",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-22 14:49:45.479977",
+ "modified": "2024-08-11 12:23:52.931309",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LTA Claim",
