@@ -175,11 +175,28 @@ function edit_declaration(frm) {
                                     new_row.amount = row.amount;
                                 });
 
+
                                 frm.set_value("monthly_house_rent", values.hra_amount);
                                 frm.set_value("rented_in_metro_city", values.rented_in_metro_city);
+                                frm.set_value("custom_posting_date",frappe.datetime.nowdate())
                                 frm.refresh_field('declarations');
                                 frm.save('Update');
                                 d.hide();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             }
                         }
                     });
