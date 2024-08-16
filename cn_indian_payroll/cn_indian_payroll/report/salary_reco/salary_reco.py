@@ -1,7 +1,7 @@
 import frappe
 
 columns = [
-    {"fieldname": "employee", "label": "Employee ID", "fieldtype": "Data", "width": 150},
+    {"fieldname": "employee", "label": "Employee ID", "fieldtype": "Link", "width": 150,"options":"Employee"},
     {"fieldname": "employee_name", "label": "Employee Name", "fieldtype": "Data", "width": 150},
     {"fieldname": "current_month", "label": "Current Month", "fieldtype": "Data", "width": 150},
     {"fieldname": "current_gross_pay", "label": "Gross Pay", "fieldtype": "Data", "width": 150},
@@ -66,10 +66,10 @@ def get_salary_slips(filters=None):
             "month": j1.custom_month,
             "gross_pay": j1.custom_statutory_grosspay,
             "status": employee_data.status,
-            "remark":j1.custom_new_joinee
+            # "remark":j1.custom_new_joinee
         }
         previous_month_data.append(previous_array)
-
+    
     data_current = frappe.get_list(
         'Salary Slip',
         fields=["*"],
@@ -89,7 +89,7 @@ def get_salary_slips(filters=None):
             "status": employee_data.status  # Use the same status field
         }
         current_month_data.append(current_array)
-        
+      
     # Process data
     final_data_map = {}
     
@@ -104,7 +104,7 @@ def get_salary_slips(filters=None):
             'current_gross_pay': 0,
             'difference': 0,
             'status': record['status'],
-            'remark':record['remark']
+            # 'remark':record['remark']
               
         }
     
@@ -120,7 +120,7 @@ def get_salary_slips(filters=None):
                 'current_gross_pay': record['gross_pay'],
                 'difference': record['gross_pay'],
                 'status': record['status']  ,
-                'remark':record['remark']
+                # 'remark':record['remark']
 
             }
         else:

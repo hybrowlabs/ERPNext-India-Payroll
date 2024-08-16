@@ -270,7 +270,8 @@ override_doctype_class = {
     "Employee Benefit Claim":"cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
 	"Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
     "Salary Structure Assignment":"cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
-    "Employee Tax Exemption Declaration":"cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration"
+    "Employee Tax Exemption Declaration":"cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
+    "Additional Salary":"cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary"
 
    
 }
@@ -302,7 +303,7 @@ doc_events = {
     # },
 
     "Salary Appraisal Calculation":{
-        "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
+        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.validate",
         "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
     }
 
