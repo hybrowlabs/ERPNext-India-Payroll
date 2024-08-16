@@ -11,21 +11,6 @@
   "exemption_category": "Section 10",
   "is_active": 1,
   "max_amount": 96000.0,
-  "modified": "2024-07-23 13:01:41.408349",
-  "name": "Driver Salary Allowance"
- },
- {
-  "custom_is_epf": 0,
-  "custom_is_medical": 0,
-  "custom_is_nps": 0,
-  "custom_is_pt": 0,
-  "custom_is_uniform": 0,
-  "custom_salary_component": null,
-  "docstatus": 0,
-  "doctype": "Employee Tax Exemption Sub Category",
-  "exemption_category": "Section 10",
-  "is_active": 1,
-  "max_amount": 96000.0,
   "modified": "2024-07-23 13:01:41.418835",
   "name": "Petrol Allowance"
  },
