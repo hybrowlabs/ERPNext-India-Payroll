@@ -239,10 +239,10 @@ fixtures = [
 
     {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
-    {"dt":"Employee Tax Exemption Sub Category"},
-    {"dt":"Employee Tax Exemption Category"},
+    #{"dt":"Employee Tax Exemption Sub Category"},
+    #{"dt":"Employee Tax Exemption Category"},
     {"dt":"Income Tax Slab"},
-    
+
 
     #
 ]
