@@ -1,0 +1,122 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 250000.0,
+  "modified": "2024-07-23 13:01:34.845946",
+  "name": "Section 10"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 50000.0,
+  "modified": "2024-07-23 13:01:34.925513",
+  "name": "Section 10(13A)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 200000.0,
+  "modified": "2024-07-23 13:01:34.941576",
+  "name": "Section 80U"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 200000.0,
+  "modified": "2024-07-23 13:01:34.950148",
+  "name": "Section 80DD"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 0.0,
+  "modified": "2024-07-23 13:01:34.958406",
+  "name": "Section 80E"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 50000.0,
+  "modified": "2024-07-23 13:01:34.975115",
+  "name": "Section 16(iA)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 2400.0,
+  "modified": "2024-07-23 13:01:34.983611",
+  "name": "Section 16(iii)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 0.0,
+  "modified": "2024-08-11 15:33:50.890330",
+  "name": "Section 10(5)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 200000.0,
+  "modified": "2024-07-23 13:01:34.876556",
+  "name": "Section 80EE"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 9999999.0,
+  "modified": "2024-07-23 13:01:34.898805",
+  "name": "Section 80CCD(1B)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 15000.0,
+  "modified": "2024-07-28 11:03:34.069915",
+  "name": "Section 10(14)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 250000.0,
+  "modified": "2024-07-23 13:01:34.907463",
+  "name": "Section 80D"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 0.0,
+  "modified": "2024-07-24 12:17:37.254547",
+  "name": "Section 80CCD(2)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 50000.0,
+  "modified": "2024-07-23 13:01:34.917178",
+  "name": "Section 16"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
+  "max_amount": 150000.0,
+  "modified": "2024-07-23 13:01:34.886579",
+  "name": "Section 80C"
+ }
+]
