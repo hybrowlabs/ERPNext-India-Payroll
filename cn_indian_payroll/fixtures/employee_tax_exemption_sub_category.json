@@ -10,8 +10,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 10",
   "is_active": 1,
-  "max_amount": 96000.0,
-  "modified": "2024-07-23 13:01:41.418835",
+  "max_amount": 250000.0,
+  "modified": "2024-08-16 15:28:20.859448",
   "name": "Petrol Allowance"
  },
  {
