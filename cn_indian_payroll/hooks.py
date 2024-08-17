@@ -241,7 +241,7 @@ fixtures = [
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
     #{"dt":"Employee Tax Exemption Sub Category"},
     #{"dt":"Employee Tax Exemption Category"},
-    {"dt":"Income Tax Slab"},
+    #{"dt":"Income Tax Slab"},
 
 
     #
@@ -289,10 +289,8 @@ doc_events = {
     "LOP Reversal": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
-        
+        "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.before_save",
 
-       
-        
 
         
 	},

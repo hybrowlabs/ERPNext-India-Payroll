@@ -38,6 +38,7 @@
    "options": "Declaration Child"
   },
   {
+   "depends_on": "eval:doc.income_tax==\"Old Regime\"",
    "fieldname": "section_break_uyjp",
    "fieldtype": "Section Break"
   },
@@ -138,6 +139,7 @@
    "label": "Tax Exemption"
   },
   {
+   "depends_on": "eval:doc.income_tax==\"Old Regime\"",
    "fieldname": "section_break_hfwe",
    "fieldtype": "Section Break"
   },
@@ -150,7 +152,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-06 17:20:14.342184",
+ "modified": "2024-08-17 15:24:17.017126",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Declaration History",

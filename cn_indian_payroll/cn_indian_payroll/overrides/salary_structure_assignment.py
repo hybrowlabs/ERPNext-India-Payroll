@@ -17,6 +17,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def on_submit(self):
         self.insert_tax_declaration()
+
+
+
         # self.update_lta_in_employee()
        
 
@@ -160,7 +163,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             if self.income_tax_slab=="New Regime":
 
                 if self.custom_is_nps:
-                    nps_amount=round(((self.base * 0.35)/12 * self.custom_nps_percentage)/100)
+                    basic_amount=round((self.base * 0.35)/12)
+                    nps_amount=(basic_amount*10)/100
+
                     nps_amount_year=round(nps_amount*12)
 
 
@@ -176,6 +181,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                             max_amount_category.append(nps_amount_year)
 
                             amount.append(nps_amount_year)
+
+        
 
 
                 

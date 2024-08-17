@@ -14,6 +14,7 @@ frappe.ui.form.on('LOP Reversal', {
                         ["employee", "=", frm.doc.employee],
                         ["leave_without_pay", ">", 0],
                         ["custom_lop_updated", "=", 0],
+                        
                         ["docstatus", "=", 1],
                     ],
                     fields: ["*"],
@@ -22,9 +23,14 @@ frappe.ui.form.on('LOP Reversal', {
                     var month_array = [];
     
                     if (res.message.length > 0) {
+
+                        console.log(res.message,"8888")
                         
                         $.each(res.message, function(i, v) {
+                            if(v.leave_without_pay!=v.custom_lop_reversal_days)
+                            {
                             month_array.push(v.start_date);
+                            }
                         });
     
                         var month_names = [];
@@ -109,25 +115,18 @@ console.log(start_date_str);
                         if(res.message.length>0)
                             {
 
-                                console.log(res.message[0].name,"1111")
+                                // console.log(res.message[0].name,"1111")
 
                                
                                 frm.set_value("salary_slip",res.message[0].name)
                                 frm.set_value("payroll_entry",res.message[0].payroll_entry)
                                 frm.set_value("working_days",res.message[0].payment_days)
-                                frm.set_value("max_lop_days",res.message[0].leave_without_pay)
+                                frm.set_value("max_lop_days",res.message[0].leave_without_pay-res.message[0].custom_lop_reversal_days)
                                 
 
                             }
                         }
                     })
-
-
-
-
-
-
-
 
 
     },
@@ -148,139 +147,139 @@ console.log(start_date_str);
    
 
 
-    before_save: function(frm) {
+    // before_save: function(frm) {
 
-        frm.clear_table("arrear_breakup");
-        frm.refresh_field("arrear_breakup");
+    //     frm.clear_table("arrear_breakup");
+    //     frm.refresh_field("arrear_breakup");
 
-        frm.clear_table("arrear_deduction_breakup");
-        frm.refresh_field("arrear_deduction_breakup");
+    //     frm.clear_table("arrear_deduction_breakup");
+    //     frm.refresh_field("arrear_deduction_breakup");
 
 
         
     
-        if (frm.doc.employee && frm.doc.working_days && frm.doc.salary_slip) {
+    //     if (frm.doc.employee && frm.doc.working_days && frm.doc.salary_slip) {
 
 
 
-            frappe.call({
+    //         frappe.call({
 
-                method: "frappe.client.get",
-                    args: {
-                        doctype: "Salary Slip",
-                        filters: { "employee": frm.doc.employee, "name":frm.doc.salary_slip},
-                        fields: ["*"],
+    //             method: "frappe.client.get",
+    //                 args: {
+    //                     doctype: "Salary Slip",
+    //                     filters: { "employee": frm.doc.employee, "name":frm.doc.salary_slip},
+    //                     fields: ["*"],
                         
                        
-                    },
+    //                 },
 
-                callback: function(response) {
+    //             callback: function(response) {
                    
                     
-                    var array = [];
+    //                 var array = [];
 
-                    var array1=[];
+    //                 var array1=[];
                     
-                    $.each(response.message.earnings, function(i, v) {
-                        var detail = {
-                            salary_component: v.salary_component,
-                            amount: v.amount
-                        };
-                        array.push(detail);
-                    });
+    //                 $.each(response.message.earnings, function(i, v) {
+    //                     var detail = {
+    //                         salary_component: v.salary_component,
+    //                         amount: v.amount
+    //                     };
+    //                     array.push(detail);
+    //                 });
 
-                    $.each(response.message.deductions, function(i, k) {
+    //                 $.each(response.message.deductions, function(i, k) {
 
 
-                        var detail1 = {
-                            salary_component: k.salary_component,
-                            amount: k.amount
-                        };
-                        array1.push(detail1);
+    //                     var detail1 = {
+    //                         salary_component: k.salary_component,
+    //                         amount: k.amount
+    //                     };
+    //                     array1.push(detail1);
 
-                    });
+    //                 });
 
     
-                    function fetchSalaryComponentDetails(index) {
-                        if (index < array.length) {
-                            var salaryComponent = array[index].salary_component;
+    //                 function fetchSalaryComponentDetails(index) {
+    //                     if (index < array.length) {
+    //                         var salaryComponent = array[index].salary_component;
     
-                            frappe.call({
-                                method: "frappe.client.get_list",
-                                args: {
-                                    doctype: "Salary Component",
-                                    filters: { "custom_is_arrear": 1, "custom_component": salaryComponent },
-                                    fields: ["*"]
-                                },
-                                callback: function(res) {
-                                    if (res.message[0]) {
+    //                         frappe.call({
+    //                             method: "frappe.client.get_list",
+    //                             args: {
+    //                                 doctype: "Salary Component",
+    //                                 filters: { "custom_is_arrear": 1, "custom_component": salaryComponent },
+    //                                 fields: ["*"]
+    //                             },
+    //                             callback: function(res) {
+    //                                 if (res.message[0]) {
                                         
     
                                         
     
-                                        var child = frm.add_child("arrear_breakup");
+    //                                     var child = frm.add_child("arrear_breakup");
     
-                                        frappe.model.set_value(child.doctype, child.name, "salary_component", res.message[0].name);
-                                        var amount = (array[index].amount / frm.doc.working_days) * frm.doc.number_of_days;
-                                        var roundedAmount = Math.round(amount);
+    //                                     frappe.model.set_value(child.doctype, child.name, "salary_component", res.message[0].name);
+    //                                     var amount = (array[index].amount / frm.doc.working_days) * frm.doc.number_of_days;
+    //                                     var roundedAmount = Math.round(amount);
 
-                                        frappe.model.set_value(child.doctype, child.name, "amount", roundedAmount);
+    //                                     frappe.model.set_value(child.doctype, child.name, "amount", roundedAmount);
                                         
-                                        frm.refresh_field("arrear_breakup");
-                                    }
-                                    fetchSalaryComponentDetails(index + 1);
-                                }
-                            });
-                        }
-                    }
-                    fetchSalaryComponentDetails(0);
+    //                                     frm.refresh_field("arrear_breakup");
+    //                                 }
+    //                                 fetchSalaryComponentDetails(index + 1);
+    //                             }
+    //                         });
+    //                     }
+    //                 }
+    //                 fetchSalaryComponentDetails(0);
 
 
 
-                    function fetchSalaryComponentDetailsDeduction(index) {
-                        if (index < array1.length) {
-                            var salaryComponent = array1[index].salary_component;
+    //                 function fetchSalaryComponentDetailsDeduction(index) {
+    //                     if (index < array1.length) {
+    //                         var salaryComponent = array1[index].salary_component;
             
-                            frappe.call({
-                                method: "frappe.client.get_list",
-                                args: {
-                                    doctype: "Salary Component",
-                                    filters: { "custom_is_arrear": 1, "custom_component": salaryComponent },
-                                    fields: ["*"]
-                                },
-                                callback: function(res) {
-                                    if (res.message[0]) {
+    //                         frappe.call({
+    //                             method: "frappe.client.get_list",
+    //                             args: {
+    //                                 doctype: "Salary Component",
+    //                                 filters: { "custom_is_arrear": 1, "custom_component": salaryComponent },
+    //                                 fields: ["*"]
+    //                             },
+    //                             callback: function(res) {
+    //                                 if (res.message[0]) {
                                         
     
                                         
     
-                                        var child = frm.add_child("arrear_deduction_breakup");
+    //                                     var child = frm.add_child("arrear_deduction_breakup");
     
-                                        frappe.model.set_value(child.doctype, child.name, "salary_component", res.message[0].name);
-                                        var amount = (array1[index].amount / frm.doc.working_days) * frm.doc.number_of_days;
-                                        var roundedAmount = Math.round(amount);
+    //                                     frappe.model.set_value(child.doctype, child.name, "salary_component", res.message[0].name);
+    //                                     var amount = (array1[index].amount / frm.doc.working_days) * frm.doc.number_of_days;
+    //                                     var roundedAmount = Math.round(amount);
 
-                                        frappe.model.set_value(child.doctype, child.name, "amount", roundedAmount);
+    //                                     frappe.model.set_value(child.doctype, child.name, "amount", roundedAmount);
                                         
-                                        frm.refresh_field("arrear_deduction_breakup");
-                                    }
-                                    fetchSalaryComponentDetailsDeduction(index + 1);
-                                }
-                            })
-                        }
-                    }
+    //                                     frm.refresh_field("arrear_deduction_breakup");
+    //                                 }
+    //                                 fetchSalaryComponentDetailsDeduction(index + 1);
+    //                             }
+    //                         })
+    //                     }
+    //                 }
 
-                    fetchSalaryComponentDetailsDeduction(0)
-
-
+    //                 fetchSalaryComponentDetailsDeduction(0)
 
 
-                }
-            });
 
 
-        }
-    }
+    //             }
+    //         });
+
+
+    //     }
+    // }
     
     
     

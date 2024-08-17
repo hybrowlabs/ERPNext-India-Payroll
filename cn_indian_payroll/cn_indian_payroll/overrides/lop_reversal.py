@@ -1,12 +1,15 @@
 import frappe
 
+
+
+def before_save(self,method):
+    insert_breakup_table(self)
+
+
+
 def on_submit(self, method):
     
-    
-
-
-
-   
+ 
     if len(self.arrear_breakup)>0:
         for i in self.arrear_breakup:
             
@@ -49,23 +52,23 @@ def on_submit(self, method):
             additional_doc.insert()
 
 
-    if self.payroll_entry:
+    # if self.payroll_entry:
 
 
-        payroll_entry_doc=frappe.db.get_list('Salary Slip',
-                filters={
-                    'payroll_entry': self.payroll_entry,
-                    'employee':self.employee
-                },
-                fields=["*"],
+    #     payroll_entry_doc=frappe.db.get_list('Salary Slip',
+    #             filters={
+    #                 'payroll_entry': self.payroll_entry,
+    #                 'employee':self.employee
+    #             },
+    #             fields=["*"],
                 
-            )
+    #         )
 
        
-        if len(payroll_entry_doc)>0:
-            payroll_entry_doc1 = frappe.get_doc('Salary Slip', payroll_entry_doc[0].name)
-            payroll_entry_doc1.custom_lop_updated = 1
-            payroll_entry_doc1.save()
+    #     if len(payroll_entry_doc)>0:
+    #         payroll_entry_doc1 = frappe.get_doc('Salary Slip', payroll_entry_doc[0].name)
+    #         payroll_entry_doc1.custom_lop_updated = 1
+    #         payroll_entry_doc1.save()
 
 
     
@@ -107,22 +110,78 @@ def bonus_accrual_update(self):
             each_doc_bonus.amount = round(eligible_amount_bonus)
             each_doc_bonus.save()
 
+
+
+
+def insert_breakup_table(self):
+    if self.number_of_days and self.salary_slip:
+        breakup_component_earning = []
+        breakup_component_deduction = []
+
+        # Fetch the salary slip
+        get_salary_slip = frappe.get_list('Salary Slip',
+                                          filters={'employee': self.employee, 'docstatus': 1, "name": self.salary_slip},
+                                          fields=['*'])
+
+        if get_salary_slip:
+            each_ss_doc = frappe.get_doc('Salary Slip', get_salary_slip[0].name)
+
+            # Process earnings components
+            for earning_component in each_ss_doc.earnings:
+                get_salary_component = frappe.get_list('Salary Component',
+                                                       filters={'custom_is_arrear': 1,
+                                                                "custom_component": earning_component.salary_component},
+                                                       fields=['*'])
+
+                for t in get_salary_component:
+                    earning_amount = (earning_component.amount / self.working_days) * self.number_of_days
+                    breakup_component_earning.append({
+                        "salary_component": t.name,
+                        "amount": earning_amount
+                    })
+
+            # Process deduction components
+            for deduction_component in each_ss_doc.deductions:
+                get_deduction_salary_component = frappe.get_list('Salary Component',
+                                                                 filters={'custom_is_arrear': 1,
+                                                                          "custom_component": deduction_component.salary_component},
+                                                                 fields=['*'])
+
+                for k in get_deduction_salary_component:
+                    deduction_amount = (deduction_component.amount / self.working_days) * self.number_of_days
+                    breakup_component_deduction.append({
+                        "salary_component": k.name,
+                        "amount": deduction_amount
+                    })
+
+            # Append earnings components to arrear_breakup
+            self.arrear_breakup=[]
+            for item in breakup_component_earning:
+                self.append('arrear_breakup', {
+                    "salary_component": item['salary_component'],
+                    "amount": item['amount']
+                })
+
+            # Append deduction components to arrear_deduction_breakup
+            self.arrear_deduction_breakup=[]
+            for item in breakup_component_deduction:
+                self.append('arrear_deduction_breakup', {
+                    "salary_component": item['salary_component'],
+                    "amount": item['amount']
+                })
+
         
 
 
-        
-
-
-
-
-        
+      
 
 
 def on_cancel(self,method):
 
     get_additional_arrears=frappe.db.get_list('Additional Salary',
                 filters={
-                    'custom_payroll_entry': self.payroll_entry
+                    
+                    'custom_lop_reversal':self.name
                 },
                 fields=['*'],
                 
@@ -132,7 +191,10 @@ def on_cancel(self,method):
         for j in get_additional_arrears:
             arrear_doc = frappe.get_doc('Additional Salary', j.name)
             arrear_doc.docstatus = 2
+
             arrear_doc.save()
+
+            frappe.delete_doc('Additional Salary', j.name)
 
 
 
@@ -176,20 +238,20 @@ def on_cancel(self,method):
 
 
 
-    salary_slip=frappe.db.get_list('Salary Slip',
-                filters={
-                    'name': self.salary_slip
-                },
-                fields=['*'],
+    # salary_slip=frappe.db.get_list('Salary Slip',
+    #             filters={
+    #                 'name': self.salary_slip
+    #             },
+    #             fields=['*'],
                 
-            )
+    #         )
 
-    if len(salary_slip)>0:
+    # if len(salary_slip)>0:
 
 
-        salary_slip_doc = frappe.get_doc('Salary Slip',salary_slip[0].name)
-        salary_slip_doc.custom_lop_updated = 0
-        salary_slip_doc.save()
+    #     salary_slip_doc = frappe.get_doc('Salary Slip',salary_slip[0].name)
+    #     salary_slip_doc.custom_lop_updated = 0
+    #     salary_slip_doc.save()
 
     
 

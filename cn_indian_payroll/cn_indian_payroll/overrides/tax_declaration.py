@@ -15,12 +15,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
     def on_submit(self):
-        # self.set_max_amount()
         self.insert_declaration_history()
 
 
-    # def before_save(self):
-    #     self.calculate_hra_breakup()
+    
 
 
     def before_update_after_submit(self):
@@ -29,10 +27,34 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.update_hra_breakup()
         
         self.set_total_declared_amount()
-        # self.set_max_amount()
         self.update_tax_declaration()
         self.set_total_exemption_amount()
+
+    def on_cancel(self):
+        self.cancel_declaration_history()
         
+
+
+
+
+
+    def cancel_declaration_history(self):
+        history_data=frappe.db.get_list('Tax Declaration History',
+            filters={
+                
+                'tax_exemption':self.name,
+
+            },
+            fields=['*'],
+            
+        )
+
+        if len(history_data)>0:
+            data_doc=frappe.get_doc('Tax Declaration History',history_data[0].name)
+            frappe.delete_doc('Tax Declaration History', data_doc.name)
+
+
+
 
 
 
