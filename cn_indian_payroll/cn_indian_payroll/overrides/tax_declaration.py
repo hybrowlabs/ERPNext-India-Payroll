@@ -22,13 +22,14 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
     def before_update_after_submit(self):
-        self.calculate_hra_exemption()
+        
         self.calculate_hra_breakup()
         self.update_hra_breakup()
+        self.update_tax_declaration()
         
         self.set_total_declared_amount()
-        self.update_tax_declaration()
         self.set_total_exemption_amount()
+        self.calculate_hra_exemption()
 
     def on_cancel(self):
         self.cancel_declaration_history()
@@ -41,9 +42,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def cancel_declaration_history(self):
         history_data=frappe.db.get_list('Tax Declaration History',
             filters={
-                
                 'tax_exemption':self.name,
-
             },
             fields=['*'],
             
@@ -60,7 +59,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def update_hra_breakup(self):
         if self.monthly_house_rent:
-            # Create an array to store HRA breakup details
             array = []
             for t1 in self.custom_hra_breakup:
                 array.append({
@@ -78,7 +76,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 filters={'employee': self.employee},
                 fields=['*'],
                 order_by='posting_date desc',
-                limit=1  # Only fetch the most recent record
+                limit=1  
+
             )
 
             if len(get_latest_history) > 0:
@@ -298,7 +297,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             
 
     def calculate_hra_breakup(self):
-        if self.monthly_house_rent>0:
+        
+        if self.monthly_house_rent:
 
             months = ["April", "May", "June", "July", "August", "September", "October", "November", "December","January", "February", "March"]
             basic_salary=(self.monthly_house_rent-self.monthly_hra_exemption)/0.1

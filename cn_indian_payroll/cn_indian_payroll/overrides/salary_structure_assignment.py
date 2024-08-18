@@ -91,9 +91,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
                 if self.custom_is_epf:
-
-                    epf_amount=round((self.base * 0.35)/12 * .12)
-                    epf_amount_year=round(epf_amount*12)
+                    basic_amount=(self.base * 0.35)/12
+                    epf_amount=(basic_amount*12)/100
+                    epf_amount_year=epf_amount*12
 
                     epf_component = frappe.get_list('Employee Tax Exemption Sub Category',
                             filters={'custom_salary_component':"Employee Provident Fund"},
@@ -111,17 +111,16 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                             max_amount_category.append(i.max_amount)
 
                             if epf_amount_year>i.max_amount:
-                                amount.append(round(i.max_amount))
+                                amount.append(i.max_amount)
 
                             else:
-                                amount.append(round(epf_amount_year))
+                                amount.append(epf_amount_year)
 
                 
                 if self.custom_is_nps:
-                    nps_amount=round(((self.base * 0.35)/12))
-                    nps_amount_percentage=round((nps_amount*self.custom_nps_percentage)/100)
-                    nps_amount_year=round(nps_amount_percentage*12)
-
+                    nps_amount=((self.base * 0.35)/12)
+                    nps_amount_percentage=(nps_amount*self.custom_nps_percentage)/100
+                    nps_amount_year=nps_amount_percentage*12
 
                     nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
                             filters={'custom_salary_component':"NPS"},
@@ -137,7 +136,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                             amount.append(nps_amount_year)
 
 
-
+                # frappe.msgprint(str(max_amount_category))
                             
                    
 
@@ -163,10 +162,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             if self.income_tax_slab=="New Regime":
 
                 if self.custom_is_nps:
-                    basic_amount=round((self.base * 0.35)/12)
+                    basic_amount=(self.base * 0.35)/12
                     nps_amount=(basic_amount*10)/100
 
-                    nps_amount_year=round(nps_amount*12)
+                    nps_amount_year=nps_amount*12
 
 
                     nps_component = frappe.get_list('Employee Tax Exemption Sub Category',

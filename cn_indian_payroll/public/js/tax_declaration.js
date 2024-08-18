@@ -91,14 +91,14 @@ function edit_declaration(frm) {
                                     {
                                         label: 'Maximum Exempted Amount',
                                         fieldname: 'maximum_amount',
-                                        fieldtype: 'Currency',
+                                        fieldtype: 'Data',
                                         in_list_view: 1,
                                         read_only: 1
                                     },
                                     {
                                         label: 'Declared Amount',
                                         fieldname: 'declared_amount',
-                                        fieldtype: 'Currency',
+                                        fieldtype: 'Data',
                                         in_list_view: 1,
                                         editable: true,
                                     },
@@ -185,18 +185,6 @@ function edit_declaration(frm) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
                             }
                         }
                     });
@@ -231,8 +219,8 @@ function edit_declaration(frm) {
                     // Validate declared_amount input
                     d.$wrapper.on('change', '[data-fieldname="declared_amount"] input', function() {
                         let rowIndex = $(this).closest('.grid-row').index();
-                        let selectedAmount = parseFloat($(this).val());
-                        let maxAmount = parseFloat(d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.maximum_amount);
+                        let selectedAmount = $(this).val();
+                        let maxAmount = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.maximum_amount;
                         let component = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.employee_exemption_category;
 
                         if (component == "Section 80C") {
@@ -253,7 +241,12 @@ function edit_declaration(frm) {
                                     }
                                 }
                             });
-                        } else {
+                        } 
+                        else 
+                        {
+
+                            console.log(selectedAmount,"selectedAmount")
+                            console.log(maxAmount,"maxAmount")
                             if (selectedAmount > maxAmount) {
                                 frappe.msgprint(`You can't enter an amount greater than ${maxAmount}.`);
                                 d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;

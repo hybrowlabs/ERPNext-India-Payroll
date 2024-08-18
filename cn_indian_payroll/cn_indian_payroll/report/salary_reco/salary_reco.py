@@ -66,9 +66,10 @@ def get_salary_slips(filters=None):
             "month": j1.custom_month,
             "gross_pay": j1.custom_statutory_grosspay,
             "status": employee_data.status,
-            # "remark":j1.custom_new_joinee
+            "remark":j1.custom_new_joinee
         }
         previous_month_data.append(previous_array)
+    # frappe.msgprint(str(previous_month_data))
     
     data_current = frappe.get_list(
         'Salary Slip',
@@ -86,10 +87,11 @@ def get_salary_slips(filters=None):
             "employee_name": j2.employee_name,
             "month": j2.custom_month,
             "gross_pay": j2.custom_statutory_grosspay,
-            "status": employee_data.status  # Use the same status field
+            "status": employee_data.status ,
+            # "remark":"-"
         }
         current_month_data.append(current_array)
-      
+    # frappe.msgprint(str(current_month_data))
     # Process data
     final_data_map = {}
     
@@ -104,7 +106,7 @@ def get_salary_slips(filters=None):
             'current_gross_pay': 0,
             'difference': 0,
             'status': record['status'],
-            # 'remark':record['remark']
+            'remark':record['remark']
               
         }
     
