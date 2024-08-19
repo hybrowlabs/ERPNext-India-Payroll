@@ -47,6 +47,12 @@ class CustomSalarySlip(SalarySlip):
 
         # self.update_nps()
 
+        # for kl in self.earnings:
+        #     if kl.salary_component=="Driver Perquisite":
+        #         self.remove(kl)
+        #         break
+
+
         
 
         self.update_bonus_accrual()
@@ -67,10 +73,10 @@ class CustomSalarySlip(SalarySlip):
 
         self.remaining_day()
 
-        if self.leave_without_pay>0:
-            self.insert_lta_reimbursement_lop()
-            self.accrual_update()
-            self.driver_reimbursement_lop()
+        # if self.leave_without_pay>0:
+        #     self.insert_lta_reimbursement_lop()
+        #     self.accrual_update()
+        #     self.driver_reimbursement_lop()
         if self.leave_without_pay==0:
             self.insert_lta_reimbursement()
             self.insert_reimbursement()
@@ -1072,10 +1078,6 @@ class CustomSalarySlip(SalarySlip):
 
 
     def insert_reimbursement(self):
-        
-
-
-
         if self.employee:
             benefit_component = []
             component_amount_dict = {}
@@ -1102,13 +1104,8 @@ class CustomSalarySlip(SalarySlip):
                             "amount":k.claimed_amount,
                             "settlement":0
                         })
-
-                    
-
-
-        #Pushed the component in array
-
             # frappe.msgprint(str(benefit_component))
+            # frappe.msgprint(str(benefit_component_demo))
 
             if len(benefit_component) > 0:
                 for component in benefit_component:
@@ -1117,7 +1114,8 @@ class CustomSalarySlip(SalarySlip):
                         filters={
                             'employee': self.employee,
                             'docstatus': 1,
-                            'salary_component': component
+                            'salary_component': component,
+                            'payroll_period':self.custom_payroll_period,
                         },
                         fields=['*']
                     )
@@ -1133,13 +1131,12 @@ class CustomSalarySlip(SalarySlip):
                                     'amount': j.amount,
                                     'settlement': j.total_settlement
                                 }
+                            # frappe.msgprint(str(component_amount_dict))
 
                             for demo in benefit_component_demo:
                                 if demo['component'] == j.salary_component:
                                     demo['settlement'] += j.total_settlement
                                     demo['amount']+=j.total_settlement
-                # frappe.msgprint(str(benefit_component_demo))
-        # frappe.msgprint(str(benefit_component_demo))
 
         benefit_component_amount1 = []
         for data in benefit_component_demo:
