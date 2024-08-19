@@ -143,7 +143,6 @@ class CustomSalarySlip(SalarySlip):
                     epf_component.append(all_epf_component.name)
 
 
-            # frappe.msgprint(str(epf_component))
 
 
             if self.custom_income_tax_slab == "Old Regime":
@@ -227,7 +226,6 @@ class CustomSalarySlip(SalarySlip):
                                     "amount": total_epf_sum,
                                     "max_amount": total_epf_sum
                                 })
-                # frappe.msgprint(str(update_component_array))
 
                 if update_component_array:
                     declaration = frappe.get_list(
@@ -247,6 +245,7 @@ class CustomSalarySlip(SalarySlip):
                         
                         get_each_doc.save()
                         frappe.db.commit()
+                        self.tax_exemption_declaration=get_each_doc.total_exemption_amount
                     
 
             if self.custom_income_tax_slab == "New Regime":
@@ -316,6 +315,8 @@ class CustomSalarySlip(SalarySlip):
                         
                         get_each_doc.save()
                         frappe.db.commit()
+                        self.tax_exemption_declaration=get_each_doc.total_exemption_amount
+
                                
 
 

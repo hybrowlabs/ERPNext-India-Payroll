@@ -83,7 +83,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
         if (!frm.is_new()) {
 
 
-        if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1) {
+        if (frm.doc.employee && frm.doc.salary_structure ) {
             
         
             let salary_breakup = `
