@@ -15,6 +15,7 @@
    "columns": 3,
    "fieldname": "reimbursements",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Reimbursements",
    "options": "Salary Component"
   },
@@ -22,6 +23,7 @@
    "allow_on_submit": 1,
    "fieldname": "monthly_total_amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Monthly Total Amount",
    "mandatory_depends_on": "reimbursements"
   }
@@ -29,7 +31,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-08-16 13:59:35.474556",
+ "modified": "2024-08-19 14:07:30.076802",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Reimbursements",

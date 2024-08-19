@@ -145,6 +145,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 each_doc.monthly_hra_exemption = self.monthly_hra_exemption
                 each_doc.total_declared_amount = self.total_declared_amount
                 each_doc.total_exemption_amount = self.total_exemption_amount
+                # each_doc.tds_from_previous_employer_amount = self.custom_tds_from_previous_employer_amount
 
                 each_doc.declaration_details = []
                 for entry in tax_component:

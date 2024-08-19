@@ -140,7 +140,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     posting_date: frm.doc.from_date
                 },
                 callback: function(response) {
-                    console.log(response,"====")
+                    // console.log(response,"====")
                     $.each(response.message.earnings, function(i, v) {
                          
 
@@ -174,13 +174,14 @@ frappe.ui.form.on('Salary Structure Assignment', {
                                        
                                         let componentCell = newRow.insertCell();
                                         componentCell.textContent = res.message.name;
-            
-                                        let formattedAmount = array[index].amount.toLocaleString();
+
+                                        let roundedAmount = Math.round(array[index].amount);
+                                        let formattedAmount = roundedAmount.toLocaleString();
                                         let amountCell = newRow.insertCell();
                                         amountCell.className = "text-right";
                                         amountCell.textContent = formattedAmount;
 
-                                        let annualAmount = array[index].amount * 12;
+                                        let annualAmount = Math.round(array[index].amount * 12);
                                         let formattedAnnualAmount = annualAmount.toLocaleString();
 
                                         
@@ -248,9 +249,12 @@ frappe.ui.form.on('Salary Structure Assignment', {
                                         let newRow = tableBody1.insertRow();
                                         let componentCell = newRow.insertCell();
                                         componentCell.textContent = res.message.name;
+
+                                        let roundedAmount = Math.round(array1[index].amount);
+                                        let formattedAmount = roundedAmount.toLocaleString();
                                         
-            
-                                        let formattedAmount = array1[index].amount.toLocaleString();
+                                        
+                                        // let formattedAmount = array1[index].amount.toLocaleString();
                                        
 
                                         let amountCell = newRow.insertCell();
@@ -259,7 +263,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
-                                        let annualAmount = array1[index].amount * 12;
+                                        let annualAmount = Math.round(array1[index].amount * 12);
                                         let formattedAnnualAmount = annualAmount.toLocaleString();
                                         let annualAmountCell = newRow.insertCell();
                                         annualAmountCell.className = "text-right";

@@ -28,7 +28,9 @@
   "column_break_xlfa",
   "total_exemption_amount",
   "section_break_hfwe",
-  "hra_breakup"
+  "hra_breakup",
+  "tds_from_previous_employer_section_section",
+  "tds_from_previous_employer_amount"
  ],
  "fields": [
   {
@@ -148,11 +150,22 @@
    "fieldtype": "Table",
    "label": "HRA BreakUp",
    "options": "HRA Breakup"
+  },
+  {
+   "fieldname": "tds_from_previous_employer_section_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "TDS From Previous Employer Section"
+  },
+  {
+   "fieldname": "tds_from_previous_employer_amount",
+   "fieldtype": "Float",
+   "label": "TDS from Previous Employer Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-17 15:24:17.017126",
+ "modified": "2024-08-19 11:34:43.686941",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Declaration History",
