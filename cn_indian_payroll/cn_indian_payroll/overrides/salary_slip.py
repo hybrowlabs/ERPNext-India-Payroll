@@ -73,10 +73,10 @@ class CustomSalarySlip(SalarySlip):
 
         self.remaining_day()
 
-        # if self.leave_without_pay>0:
-        #     self.insert_lta_reimbursement_lop()
-        #     self.accrual_update()
-        #     self.driver_reimbursement_lop()
+        if self.leave_without_pay>0:
+            self.insert_lta_reimbursement_lop()
+            self.accrual_update()
+            self.driver_reimbursement_lop()
         if self.leave_without_pay==0:
             self.insert_lta_reimbursement()
             self.insert_reimbursement()
