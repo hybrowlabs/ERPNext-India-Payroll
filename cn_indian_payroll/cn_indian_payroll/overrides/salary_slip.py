@@ -682,12 +682,12 @@ class CustomSalarySlip(SalarySlip):
 
             
             min_values_list = [{'component': component, 'total_amount': total_amount} for component, total_amount in min_values.items()]
-            frappe.msgprint(str(min_values_list))
             
-            # for component_data in min_values_list:
-            #     for earnings in self.earnings:
-            #         if earnings.salary_component == component_data['component']:
-            #             earnings.amount = component_data['total_amount']
+            
+            for component_data in min_values_list:
+                for earnings in self.earnings:
+                    if earnings.salary_component == component_data['component']:
+                        earnings.amount = component_data['total_amount']
 
          
 
