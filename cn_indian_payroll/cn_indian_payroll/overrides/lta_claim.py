@@ -9,14 +9,14 @@ def validate(self,method):
         component=[]
 
 
-        company_data=frappe.db.get_list('Company',
+        lta_data=frappe.db.get_list('Salary Component',
             filters={
-                'name': self.company,
+                'component_type': "LTA Reimbursement",
             },
             fields=['*'],
             
             )
-        if company_data[0].custom_lta_component:
+        if lta_data[0].name:
             
             get_salary_assignment = frappe.db.get_list('Salary Structure Assignment',
                 filters={
@@ -41,29 +41,18 @@ def validate(self,method):
 
         
 
-        if company_data[0].custom_lta_component not in component:
+        if lta_data[0].custom_lta_component not in component:
             frappe.throw("you are not eligible for claim LTA")
             
-            
 
-        
-                        
+    # if self.non_taxable_amount!=None:
+    #     amount+=self.non_taxable_amount
 
-
-
-
-
-
-
-
-    if self.non_taxable_amount!=None:
-        amount+=self.non_taxable_amount
-
-    if self.non_taxable_amount!=None:
-        amount+=self.taxable_amount
+    # if self.non_taxable_amount!=None:
+    #     amount+=self.taxable_amount
         
 
-    if self.amount>amount and amount!=0:
-        frappe.throw("Cannot enter the amount greater than the sum of taxable and non-taxable amounts")
+    # if self.amount>amount and amount!=0:
+    #     frappe.throw("Cannot enter the amount greater than the sum of taxable and non-taxable amounts")
 
     
