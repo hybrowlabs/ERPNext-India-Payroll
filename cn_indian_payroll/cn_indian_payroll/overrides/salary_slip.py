@@ -64,7 +64,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.calculate_grosspay()
 
-        self.tax_calculation1()
+        
 
         # self.actual_amount()
         self.actual_amount_ctc()
@@ -84,7 +84,9 @@ class CustomSalarySlip(SalarySlip):
 
         self.update_declaration_component()
 
-        # self.insert_reimbursement1()
+        self.tax_calculation1()
+
+        
 
 
     
@@ -106,6 +108,9 @@ class CustomSalarySlip(SalarySlip):
                 arrear_doc = frappe.get_doc('Employee Benefit Accrual', j.name)
                 arrear_doc.docstatus = 2
                 arrear_doc.save()
+
+                frappe.delete_doc('Employee Benefit Accrual', j.name)
+
 
     def new_joinee(self):
         if self.employee:
@@ -242,13 +247,14 @@ class CustomSalarySlip(SalarySlip):
                     if declaration:
                         
                         get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
+                        
                         for each_component in get_each_doc.declarations:
                             for ki in update_component_array:
                                 if each_component.exemption_sub_category == ki['component']:
                                     each_component.amount = ki['amount']
                                     each_component.max_amount = ki['max_amount']
                         
-                        
+                        get_each_doc.custom_posting_date=self.posting_date
                         get_each_doc.save()
                         frappe.db.commit()
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount
@@ -318,13 +324,20 @@ class CustomSalarySlip(SalarySlip):
                                     each_component.amount = ki['amount']
                                     each_component.max_amount = ki['max_amount']
                         
-                        
+                        get_each_doc.custom_posting_date=self.posting_date
                         get_each_doc.save()
                         frappe.db.commit()
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount
 
                                
+           
 
+            self.annual_taxable_amount=self.total_earnings - (
+			self.non_taxable_earnings
+			+ self.deductions_before_tax_calculation
+			+ self.tax_exemption_declaration
+			+ self.standard_tax_exemption_amount
+		    )
 
 
 
@@ -1071,220 +1084,7 @@ class CustomSalarySlip(SalarySlip):
                             
 
        
-    # def insert_reimbursement1(self):
-    #     if self.employee:
-    #         benefit_component = {}
-            
-    #         # Fetching Employee Benefit Claims
-    #         benefit_application = frappe.get_list(
-    #             'Employee Benefit Claim',
-    #             filters={
-    #                 'employee': self.employee,
-    #                 'claim_date': ['between', [self.start_date, self.end_date]],
-    #                 'docstatus': 1
-    #             },
-    #             fields=['*']
-    #         )
-            
-    #         if benefit_application:
-    #             for k in benefit_application:
-    #                 component_check = frappe.get_doc('Salary Component', k.earning_component)
-                    
-    #                 if component_check.component_type != "Vehicle Maintenance Reimbursement":
-                        
-    #                     benefit_accrual = frappe.get_list(
-    #                         'Employee Benefit Accrual',
-    #                         filters={
-    #                             'employee': self.employee,
-    #                             'docstatus': 1,
-    #                             'salary_component': component_check.name,
-    #                             'payroll_period': self.custom_payroll_period,
-    #                         },
-    #                         fields=['*']
-    #                     )
-                        
-    #                     accrued_sum = 0
-    #                     settlement_sum = 0
-    #                     if benefit_accrual:
-    #                         for j in benefit_accrual:
-    #                             accrued_sum += j.amount
-    #                             settlement_sum += j.total_settlement
-                            
-    #                         # Aggregate amounts per component
-    #                         if component_check.name in benefit_component:
-    #                             benefit_component[component_check.name]["amount"] += accrued_sum
-    #                             benefit_component[component_check.name]["settlement"] += settlement_sum
-    #                         else:
-    #                             benefit_component[component_check.name] = {
-    #                                 "component": component_check.name,
-    #                                 "amount": accrued_sum,
-    #                                 "settlement": settlement_sum
-    #                             }
-
-    #         benefit_component_list = list(benefit_component.values())
-            
-    #         ss_assignment = frappe.get_list(
-    #             'Salary Structure Assignment',
-    #             filters={'employee': self.employee, 'docstatus': 1},
-    #             fields=['name'],
-    #             order_by='from_date desc',
-    #             limit=1
-    #         )
-            
-    #         if ss_assignment:
-    #             child_doc = frappe.get_doc('Salary Structure Assignment', ss_assignment[0].name)
-                
-    #             for i in child_doc.custom_employee_reimbursements:
-    #                 # Calculate actual amount
-    #                 actual_amount = round((i.monthly_total_amount / self.total_working_days) * self.payment_days)
-                    
-    #                 for benefit in benefit_component_list:
-    #                     if benefit['component'] == i.reimbursements:
-    #                         benefit['amount'] += actual_amount
-    #                         break  # Exit the loop once the component is found and updated
-
-
-
-    #         frappe.msgprint(str(benefit_component_list))
-
-    #         #             actual_amount = round((i.monthly_total_amount / self.total_working_days) * self.payment_days)
-                        
-    #         #             # Iterate through benefit_component_list and update the relevant component
-    #         #             for benefit in benefit_component_list:
-    #         #                 if benefit['component'] == i.reimbursements:
-    #         #                     benefit['amount'] += actual_amount
-    #         #                     # frappe.msgprint(f"Updated Component: {benefit['component']} - Total Amount: {benefit['amount']}")
-    #         #                     break  # Exit the loop once the component is found and updated
-
-    #         # frappe.msgprint(str(benefit_component_list))
-
-
-                                    
-
-    #                             # final_total=accrued_sum-settlement_sum
-
-    #                         # frappe.msgprint(str(accrued_sum))
-    #                         # frappe.msgprint(str(settlement_sum))
-    #                         # frappe.msgprint(str(final_total)+"PPPP")
-
-    #                         # benefit_component.append({
-    #                         #     "component":component,
-    #                         #     "total_amount":final_total
-    #                         # })
-    #         # frappe.msgprint(str(benefit_component))
-
-
-
-                                
-    #         #                     if component in benefit_component:
-    #         #                         # If component already exists, add to the amount and settlement
-    #         #                         benefit_component[component]['amount'] += j.amount
-    #         #                         benefit_component[component]['settlement'] += j.total_settlement
-    #         #                     else:
-    #         #                         # If component does not exist, create a new entry
-    #         #                         benefit_component[component] = {
-    #         #                             "component": component,
-    #         #                             "amount": j.amount,
-    #         #                             "settlement": j.total_settlement
-    #         #                         }
-            
-            
-    #         # benefit_component_list = list(benefit_component.values())
-    #         # frappe.msgprint(str(benefit_component_list))
-
-
-
-
-
-
-                            #     if j.salary_component in component_amount_dict:
-                            #         component_amount_dict[j.salary_component]['amount'] += j.amount
-                            #         component_amount_dict[j.salary_component]['settlement'] += j.total_settlement
-                                
-        #                     else:
-        #                         component_amount_dict[j.salary_component] = {
-        #                             'amount': j.amount,
-        #                             'settlement': j.total_settlement
-        #                         }
-        #                     # frappe.msgprint(str(component_amount_dict))
-
-        #                     for demo in benefit_component_demo:
-        #                         if demo['component'] == j.salary_component:
-        #                             demo['settlement'] += j.total_settlement
-        #                             demo['amount']+=j.total_settlement
-
-        # benefit_component_amount1 = []
-        # for data in benefit_component_demo:
-        #     total_amount = max(0, data['amount'] - data['settlement'])
-
-        #     benefit_component_amount1.append({
-        #         'component': data['component'],
-        #         'total_amount': total_amount
-        #     })
-
-        # # # frappe.msgprint(str(benefit_component_amount1))
-
-        # if self.employee:
-        #     ss_assignment = frappe.get_list(
-        #         'Salary Structure Assignment',
-        #         filters={'employee': self.employee, 'docstatus': 1},
-        #         fields=['name'],
-        #         order_by='from_date desc',
-        #         limit=1
-        #     )
-
-        #     if ss_assignment:
-        #         child_doc = frappe.get_doc('Salary Structure Assignment', ss_assignment[0].name)
-
-        #         for i in child_doc.custom_employee_reimbursements:
-        #             if i.reimbursements in benefit_component:
-        #                 if i.reimbursements in component_amount_dict:
-        #                     component_amount_dict[i.reimbursements]['amount'] += i.monthly_total_amount
-        #                 else:
-        #                     component_amount_dict[i.reimbursements] = {
-        #                         'amount': i.monthly_total_amount,
-        #                         'settlement': 0.0
-        #                     }
-
-        # # frappe.msgprint(str(component_amount_dict))
-
-        
-        # benefit_component_amount = []
-        # for component, data in component_amount_dict.items():
-        #     total_amount = data['amount'] - data['settlement']
-        #     benefit_component_amount.append({
-        #         'component': component,
-        #         'total_amount': total_amount
-        #     })
-
-        # # frappe.msgprint(str(benefit_component_amount))
-
-        # min_values = {}
-
-        
-        # for item in benefit_component_amount1:
-        #     component = item['component']
-        #     total_amount = item['total_amount']
-        #     min_values[component] = total_amount
-
-        # for item in benefit_component_amount:
-        #     component = item['component']
-        #     total_amount = item['total_amount']
-        #     if component in min_values:
-        #         min_values[component] = min(min_values[component], total_amount)
-        #     else:
-        #         min_values[component] = total_amount
-
-        
-        # min_values_list = [{'component': component, 'total_amount': total_amount} for component, total_amount in min_values.items()]
-        # existing_components = {earning.salary_component for earning in self.earnings}
-        # for component_data in min_values_list:
-        #     if component_data['component'] not in existing_components:
-        #         self.append("earnings", {
-        #             "salary_component": component_data['component'],
-        #             "amount": component_data['total_amount']
-        #         })
-        
+   
 
 
     def insert_reimbursement(self):
@@ -1886,11 +1686,13 @@ class CustomSalarySlip(SalarySlip):
                     
                 if slab['to'] == 0.0:
                     if round(self.annual_taxable_amount) >= slab['from']:
-                        t1=round(self.annual_taxable_amount)-slab['from']
-                        t2=slab['percent']
-                        t3=round((t1*t2)/100)
-                        t4=slab['from']
-                        t5=slab['to']
+                        tt1=round(self.annual_taxable_amount)-slab['from']
+                        tt2=slab['percent']
+                        tt3=round((tt1*tt2)/100)
+                        
+                        tt4=slab['from']
+                        tt5=slab['to']
+                        
                         remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
                         for slab in remaining_slabs:
                             from_amount.append(slab['from'])
@@ -1898,11 +1700,11 @@ class CustomSalarySlip(SalarySlip):
                             percentage.append(slab["percent"])
                             difference.append(slab['to']-slab['from'])
                             total_value.append((slab['to']-slab['from'])*slab["percent"]/100)
-                        from_amount.append(t4)
-                        to_amount.append(t5)
-                        percentage.append(t2)
-                        difference.append(t1)
-                        total_value.append(t3)
+                        from_amount.append(tt4)
+                        to_amount.append(tt5)
+                        percentage.append(tt2)
+                        difference.append(tt1)
+                        total_value.append(tt3)
                     self.custom_tax_slab = []
                     for i in range(len(from_amount)):
                             self.append("custom_tax_slab", {
@@ -1915,11 +1717,11 @@ class CustomSalarySlip(SalarySlip):
  
                 else:
                     if slab['from'] <= round(self.annual_taxable_amount) <= slab['to']:
-                        t1=round(self.annual_taxable_amount)-slab['from']
-                        t2=slab['percent']
-                        t3=(t1*t2)/100
-                        t4=slab['from']
-                        t5=slab['to']
+                        tt1=round(self.annual_taxable_amount)-slab['from']
+                        tt2=slab['percent']
+                        tt3=(tt1*t2)/100
+                        tt4=slab['from']
+                        tt5=slab['to']
                         remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
                         
                         for slab in remaining_slabs:
@@ -1928,11 +1730,11 @@ class CustomSalarySlip(SalarySlip):
                             percentage.append(slab["percent"])
                             difference.append(slab['to']-slab['from'])
                             total_value.append((slab['to']-slab['from'])*slab["percent"]/100)
-                        from_amount.append(t4)
-                        to_amount.append(t5)
-                        percentage.append(t2)
-                        difference.append(t1)
-                        total_value.append(t3)
+                        from_amount.append(tt4)
+                        to_amount.append(tt5)
+                        percentage.append(tt2)
+                        difference.append(tt1)
+                        total_value.append(tt3)
 
                     self.custom_tax_slab = []
                     for i in range(len(from_amount)):

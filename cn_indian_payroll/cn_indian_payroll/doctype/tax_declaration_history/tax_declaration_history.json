@@ -138,6 +138,7 @@
   {
    "fieldname": "tax_exemption",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax Exemption"
   },
   {
@@ -165,7 +166,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-19 11:34:43.686941",
+ "modified": "2024-08-21 18:02:56.120012",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Declaration History",

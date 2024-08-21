@@ -833,18 +833,18 @@
  },
  {
   "default_value": null,
-  "doc_type": "Payroll Entry",
+  "doc_type": "Salary Structure Assignment",
   "docstatus": 0,
   "doctype": "Property Setter",
-  "doctype_or_field": "DocType",
-  "field_name": null,
+  "doctype_or_field": "DocField",
+  "field_name": "income_tax_slab",
   "is_system_generated": 0,
-  "modified": "2024-08-20 14:43:45.978677",
+  "modified": "2024-08-21 12:40:57.229895",
   "module": "cn-indian-payroll",
-  "name": "Payroll Entry-main-links_order",
-  "property": "links_order",
-  "property_type": "Small Text",
+  "name": "Salary Structure Assignment-income_tax_slab-allow_on_submit",
+  "property": "allow_on_submit",
+  "property_type": "Check",
   "row_name": null,
-  "value": "[\"nbggmhb4qa\"]"
+  "value": "1"
  }
 ]
