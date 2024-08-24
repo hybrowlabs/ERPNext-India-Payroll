@@ -3,53 +3,7 @@
 frappe.ui.form.on('Salary Structure Assignment', {
     
 
-    // employee:function(frm)
-    // {
-    //     if(frm.doc.employee)
-
-    //         {
-
-    //             frappe.call({
-    //                 method: "frappe.client.get",
-    //                 args: {
-    //                     doctype: "Employee",
-    //                     filters: { name: frm.doc.employee },
-    //                     fields: ["*"]
-    //                 },
-    //                 callback: function(res) {
-    //                     if (res.message)
-    //                     {
-
-    //                         console.log(res.message,"222")
-
-    //                         frm.clear_table("custom_additional_component");
-    //                         frm.refresh_field("custom_additional_component");
-
-    //                         $.each(res.message.custom_additional_salary_component,function(i,v)
-    //                             {
-
-    //                                 console.log(v.amount)
-
-    //                                 let child = frm.add_child("custom_additional_component");
-    //                                 frappe.model.set_value(child.doctype, child.name, "salary_component", v.salary_component);
-    //                                 frappe.model.set_value(child.doctype, child.name, "amount", v.amount);
-
-                                
-                            
-                                
-                                    
-    //                             })
-
-    //                             frm.refresh_field("custom_additional_component");
-
-    //                     }
-    //                 }
-
-    //             })
-
-    //         }
-
-    // },
+    
 
 
     refresh(frm)
@@ -58,12 +12,15 @@ frappe.ui.form.on('Salary Structure Assignment', {
         if(!frm.is_new())
             {
 
-                frm.add_custom_button(__("Estimate Tax BreakUp"),function()
-                    {
+                // frm.add_custom_button(__("Estimate Tax BreakUp"),function()
+                //     {
 
-                        frappe.set_route("Form", "income-tax-calculato");
+                //         frappe.set_route("Form", "income-tax-calculato");
 
-                    })
+                //     })
+
+                    change_regime(frm)
+                    send_to_employee(frm)
             }
         
 
@@ -602,4 +559,71 @@ custom_nps_amount(frm) {
 //             }
 
 // }
+
+function change_regime(frm)
+{
+    if(!frm.is_new() && frm.doc.income_tax_slab)
+    {
+        frm.add_custom_button("Switch Regime", function() {
+
+            let d = new frappe.ui.Dialog({
+                title: 'Enter details',
+                fields: [
+                   
+                    {
+                        label: 'Select Regime',
+                        fieldname: 'select_regime',
+                        fieldtype: 'Link',
+                        options:'Income Tax Slab',
+                        reqd:1,
+                        default:frm.doc.income_tax_slab
+                    }
+                ],
+                size: 'small', // small, large, extra-large 
+                primary_action_label: 'Submit',
+                primary_action(values) {
+                    console.log(values);
+
+                    frappe.call({
+
+                        "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.switch_regime",
+                        args:{
+
+                            doc_id: frm.doc.name,
+                            employee:frm.doc.employee,
+                            regime:values.select_regime
+
+                        },
+                        callback :function(res)
+                        {
+                            frm.reload_doc();
+                           
+
+                        }
+
+            })
+
+
+
+                    d.hide();
+                }
+            });
+            
+            d.show();
+            
+
+        });
+        frm.change_custom_button_type('Switch Regime', null, 'primary');
+    }
+}
+
+function send_to_employee(frm)
+{
+    frm.add_custom_button("Send To Employee", function() {
+
+
+    })
+    frm.change_custom_button_type('Send To Employee', null, 'primary');
+
+}
 

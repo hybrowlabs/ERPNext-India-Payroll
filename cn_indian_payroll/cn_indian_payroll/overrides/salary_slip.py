@@ -1325,7 +1325,7 @@ class CustomSalarySlip(SalarySlip):
                     gross_pay_year_sum +=i.year_to_date
 
 
-                if component.custom_is_reimbursement == 1:
+                if component.custom_is_reimbursement == 1 or component.component_type=="LTA Taxable" or component.component_type=="LTA Non Taxable":
                     reimbursement_sum += i.amount 
 
                 if component.do_not_include_in_total==0 and component.custom_is_reimbursement==0: 

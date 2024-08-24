@@ -1,9 +1,9 @@
 import frappe
 
 def on_submit(self,method):
-    # pass
 
-    # insert_additional_salary(self)
+
+    insert_additional_salary(self)
     update_bonus_accrual(self)
     update_reimbursement_accruals(self)
 
@@ -14,8 +14,8 @@ def on_cancel(self,method):
     reverse_bonus_accrual(self)
     reverse_benefit_accrual(self)
 
-def validate(self,method):
-    insert_additional_salary(self)
+# def validate(self,method):
+#     insert_additional_salary(self)
 
 
 def update_bonus_accrual(self):
