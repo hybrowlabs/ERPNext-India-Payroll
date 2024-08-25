@@ -158,7 +158,5 @@ def switch_regime(doc_id, employee, regime):
 
     
     ss_assignment.save()
-    
-    # frappe.msgprint(f"Regime switched for {employee} to {regime}")
 
     
