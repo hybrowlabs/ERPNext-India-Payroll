@@ -62,7 +62,7 @@ class CustomSalarySlip(SalarySlip):
 
         
 
-        self.calculate_grosspay()
+        
 
         
 
@@ -85,6 +85,8 @@ class CustomSalarySlip(SalarySlip):
         self.update_declaration_component()
 
         self.tax_calculation1()
+
+        self.calculate_grosspay()
 
         
 
