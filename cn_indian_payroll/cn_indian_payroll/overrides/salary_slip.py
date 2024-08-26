@@ -1719,7 +1719,7 @@ class CustomSalarySlip(SalarySlip):
                     if slab['from'] <= round(self.annual_taxable_amount) <= slab['to']:
                         tt1=round(self.annual_taxable_amount)-slab['from']
                         tt2=slab['percent']
-                        tt3=(tt1*t2)/100
+                        tt3=(tt1*tt2)/100
                         tt4=slab['from']
                         tt5=slab['to']
                         remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
