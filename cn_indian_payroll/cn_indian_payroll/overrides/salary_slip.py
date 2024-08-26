@@ -1639,12 +1639,6 @@ class CustomSalarySlip(SalarySlip):
                             
 
 
-
-
-
-
-
-
     def tax_calculation1(self):
         
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
