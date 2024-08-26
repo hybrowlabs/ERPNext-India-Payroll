@@ -1762,8 +1762,6 @@ class CustomSalarySlip(SalarySlip):
                 self.custom_rebate_under_section_87a=0
                 self.custom_tax_on_total_income=total_sum-0
                     
-
-
             if self.custom_taxable_amount>5000000:
 
                 surcharge_m=(self.custom_total_tax_on_income*10)/100
