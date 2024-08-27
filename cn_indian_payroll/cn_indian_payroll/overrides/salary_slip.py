@@ -56,42 +56,29 @@ class CustomSalarySlip(SalarySlip):
         if self.leave_without_pay==0:
             self.insert_lta_reimbursement()
             self.insert_reimbursement()
-            self.driver_reimbursement()
-
-        
+            self.driver_reimbursement()       
         self.set_payroll_period()
-        
-
         self.insert_loan_perquisite()
-        
         self.update_declaration_component()
         self.tax_calculation1()
         self.calculate_grosspay()
-        # self.calculate_taxable_amount()
 
-        # self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
+       
 
-
-
-    # def validate(self):
         
+        self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
 
-    #     super().validate()
-    #     self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
+
+
+
+
+    
 
         
 
 
     
-    # def calculate_taxable_amount(self):
-    #     self.annual_taxable_amount=self.total_earnings - (
-	# 		self.non_taxable_earnings
-	# 		+ self.deductions_before_tax_calculation
-	# 		+ self.tax_exemption_declaration
-	# 		+ self.standard_tax_exemption_amount
-           
-	# 	    ) + self.custom_perquisite_amount
-
+    
 
     def on_cancel(self):
 
