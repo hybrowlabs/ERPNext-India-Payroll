@@ -26,11 +26,6 @@ from datetime import datetime
 class CustomSalarySlip(SalarySlip):
 
 
-    
-
-    
-
-    
     def after_insert(self):
         
         self.employee_accrual_insert()
@@ -45,25 +40,13 @@ class CustomSalarySlip(SalarySlip):
 
     def before_save(self):
 
-        # self.update_nps()
-
-        # for kl in self.earnings:
-        #     if kl.salary_component=="Driver Perquisite":
-        #         self.remove(kl)
-        #         break
-
-
-        
-
         self.update_bonus_accrual()
         self.new_joinee()
         self.insert_lop_days()
-        self.loan_perquisite()
+        # self.loan_perquisite()
 
         self.actual_amount_ctc()
-
         self.set_month()
-
         self.remaining_day()
 
         if self.leave_without_pay>0:
@@ -76,12 +59,14 @@ class CustomSalarySlip(SalarySlip):
             self.driver_reimbursement()
 
         
+        self.set_payroll_period()
+        
 
-        self.tax_calculation1()
-
-        self.calculate_grosspay()
+        self.insert_loan_perquisite()
         
         self.update_declaration_component()
+        self.tax_calculation1()
+        self.calculate_grosspay()
 
         
 
@@ -190,20 +175,15 @@ class CustomSalarySlip(SalarySlip):
 
                         get_doc = frappe.get_doc("Salary Component", j.salary_component)
                         if get_doc.custom_is_arrear == 0:
-                            epf_ctc = (j.amount * self.total_working_days) / self.payment_days
+                            epf_ctc = round((j.amount * self.total_working_days) / self.payment_days)
                             
-                           
                             total_epf.append(epf_ctc * self.custom_month_count)
                             
 
-
-                
-
-
+                # frappe.msgprint(str(total_epf))
                 total_nps_sum = sum(total_nps)
                 total_epf_sum=sum(total_epf)
 
-                # frappe.msgprint(str(total_epf_sum))
 
                 for i in self.earnings:
                     components = frappe.get_list(
@@ -346,7 +326,8 @@ class CustomSalarySlip(SalarySlip):
 			+ self.deductions_before_tax_calculation
 			+ self.tax_exemption_declaration
 			+ self.standard_tax_exemption_amount
-		    )
+           
+		    ) + self.custom_perquisite_amount
 
 
 
@@ -1045,6 +1026,57 @@ class CustomSalarySlip(SalarySlip):
         #             })
 
 
+
+
+    def insert_loan_perquisite(self):
+        if self.custom_payroll_period:
+            
+            get_payroll_period = frappe.get_list(
+            'Payroll Period',
+            filters={
+                'company': self.company,
+                'name': self.custom_payroll_period
+            },
+            fields=['*']
+            )
+
+            
+            if get_payroll_period:
+                start_date = frappe.utils.getdate(get_payroll_period[0].start_date)
+                end_date = frappe.utils.getdate(get_payroll_period[0].end_date)
+
+                # frappe.msgprint(str(start_date))
+                # frappe.msgprint(str(end_date))
+
+                loan_repayments = frappe.get_list(
+                    'Loan Repayment Schedule',
+                    filters={
+                        'custom_employee': self.employee,
+                        'status': 'Active',
+                        'docstatus':1
+                    },
+                    fields=['*']
+                )
+                if loan_repayments:
+                    sum=0
+                    for repayment in loan_repayments:
+                        get_each_perquisite=frappe.get_doc("Loan Repayment Schedule",repayment.name)
+                        if len(get_each_perquisite.custom_loan_perquisite)>0:
+                            for date in get_each_perquisite.custom_loan_perquisite:
+                               
+                                payment_date = frappe.utils.getdate(date.payment_date)
+                                if start_date <= payment_date <= end_date:
+                                    # frappe.msgprint(str(date.perquisite_amount))
+                                    sum=sum+date.perquisite_amount
+                    
+                    self.custom_perquisite_amount=sum
+
+                        
+
+
+
+
+
     def loan_perquisite(self):
         loan_perquisite_component = frappe.get_value(
             'Salary Component',
@@ -1363,11 +1395,13 @@ class CustomSalarySlip(SalarySlip):
 
 
         self.custom_total_income=round(total_income)
-
-       
+  
         self.custom_net_pay_amount=round((total_income-self.custom_total_deduction_amount)+reimbursement_sum)
 
         self.custom_in_words=money_in_words(self.custom_net_pay_amount)
+
+
+    def set_payroll_period(self):
 
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
                         filters={'employee': self.employee,'docstatus':1},
