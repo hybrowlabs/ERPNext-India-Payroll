@@ -69,15 +69,15 @@ class CustomSalarySlip(SalarySlip):
         self.calculate_grosspay()
         # self.calculate_taxable_amount()
 
-        self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
+        # self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
 
 
 
-    def validate(self):
+    # def validate(self):
         
 
-        super().validate()
-        self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
+    #     super().validate()
+    #     self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
 
         
 
