@@ -26,19 +26,19 @@ from datetime import datetime
 class CustomSalarySlip(SalarySlip):
 
 
+    
+
+
     def after_insert(self):
         
         self.employee_accrual_insert()
         
-        
-
-    def on_submit(self):
-        super().on_submit()
-        self.employee_accrual_submit()
 
 
 
     def before_save(self):
+
+        
 
         self.update_bonus_accrual()
         self.new_joinee()
@@ -50,7 +50,7 @@ class CustomSalarySlip(SalarySlip):
         self.remaining_day()
 
         if self.leave_without_pay>0:
-            self.insert_lta_reimbursement_lop()
+            # self.insert_lta_reimbursement_lop()
             self.accrual_update()
             self.driver_reimbursement_lop()
         if self.leave_without_pay==0:
@@ -67,12 +67,30 @@ class CustomSalarySlip(SalarySlip):
         self.update_declaration_component()
         self.tax_calculation1()
         self.calculate_grosspay()
+        # self.calculate_taxable_amount()
+
+        self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
+
+
+
+    def validate(self):
+        
+
+        super().validate()
+        self.annual_taxable_amount=self.annual_taxable_amount+self.custom_perquisite_amount
 
         
 
 
     
-
+    # def calculate_taxable_amount(self):
+    #     self.annual_taxable_amount=self.total_earnings - (
+	# 		self.non_taxable_earnings
+	# 		+ self.deductions_before_tax_calculation
+	# 		+ self.tax_exemption_declaration
+	# 		+ self.standard_tax_exemption_amount
+           
+	# 	    ) + self.custom_perquisite_amount
 
 
     def on_cancel(self):
@@ -321,13 +339,13 @@ class CustomSalarySlip(SalarySlip):
                                
            
 
-            self.annual_taxable_amount=self.total_earnings - (
-			self.non_taxable_earnings
-			+ self.deductions_before_tax_calculation
-			+ self.tax_exemption_declaration
-			+ self.standard_tax_exemption_amount
+            # self.annual_taxable_amount=self.total_earnings - (
+			# self.non_taxable_earnings
+			# + self.deductions_before_tax_calculation
+			# + self.tax_exemption_declaration
+			# + self.standard_tax_exemption_amount
            
-		    ) + self.custom_perquisite_amount
+		    # ) + self.custom_perquisite_amount
 
 
 
@@ -1045,8 +1063,7 @@ class CustomSalarySlip(SalarySlip):
                 start_date = frappe.utils.getdate(get_payroll_period[0].start_date)
                 end_date = frappe.utils.getdate(get_payroll_period[0].end_date)
 
-                # frappe.msgprint(str(start_date))
-                # frappe.msgprint(str(end_date))
+                
 
                 loan_repayments = frappe.get_list(
                     'Loan Repayment Schedule',

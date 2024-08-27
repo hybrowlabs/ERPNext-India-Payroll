@@ -230,12 +230,12 @@ frappe.ui.form.on('LTA Claim', {
             msgprint("you cant enter amount greater than eligible amount")
         }
     },
-    claim_date: function(frm) {
-        if (frm.doc.claim_date && frm.doc.claim_date <frappe.datetime.now_date()) {
-            frm.set_value("claim_date", null);
-            frappe.msgprint(__("You can't select a past date."));
-        }
-    }
+    // claim_date: function(frm) {
+    //     if (frm.doc.claim_date && frm.doc.claim_date <frappe.datetime.now_date()) {
+    //         frm.set_value("claim_date", null);
+    //         frappe.msgprint(__("You can't select a past date."));
+    //     }
+    // }
     
 
 
