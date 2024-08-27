@@ -60,13 +60,6 @@ class CustomSalarySlip(SalarySlip):
         self.insert_lop_days()
         self.loan_perquisite()
 
-        
-
-        
-
-        
-
-        # self.actual_amount()
         self.actual_amount_ctc()
 
         self.set_month()
@@ -82,11 +75,13 @@ class CustomSalarySlip(SalarySlip):
             self.insert_reimbursement()
             self.driver_reimbursement()
 
-        self.update_declaration_component()
+        
 
         self.tax_calculation1()
 
         self.calculate_grosspay()
+        
+        self.update_declaration_component()
 
         
 
@@ -176,6 +171,7 @@ class CustomSalarySlip(SalarySlip):
 
                                 if deduction_component.salary_component in epf_component:
                                     total_epf.append(deduction_component.amount)
+                
                                 
 
                 for k in self.earnings:
@@ -186,7 +182,7 @@ class CustomSalarySlip(SalarySlip):
                         if get_doc.custom_is_arrear == 0:
                             nps_ctc = (k.amount * self.total_working_days) / self.payment_days
                             total_nps.append(nps_ctc * self.custom_month_count)
-                            total_epf.append(nps_ctc * self.custom_month_count)
+                            # total_epf.append(nps_ctc * self.custom_month_count)
 
                 for j in self.deductions:
                     if j.salary_component in epf_component:
@@ -195,11 +191,19 @@ class CustomSalarySlip(SalarySlip):
                         get_doc = frappe.get_doc("Salary Component", j.salary_component)
                         if get_doc.custom_is_arrear == 0:
                             epf_ctc = (j.amount * self.total_working_days) / self.payment_days
+                            
                            
                             total_epf.append(epf_ctc * self.custom_month_count)
+                            
+
+
+                
+
 
                 total_nps_sum = sum(total_nps)
                 total_epf_sum=sum(total_epf)
+
+                # frappe.msgprint(str(total_epf_sum))
 
                 for i in self.earnings:
                     components = frappe.get_list(
@@ -223,6 +227,7 @@ class CustomSalarySlip(SalarySlip):
                         fields=['*'],
                     )
                     if ded_components:
+                        # frappe.msgprint(str(ded_components))
                         
                         if total_epf_sum>ded_components[0].max_amount:
                            
@@ -237,8 +242,10 @@ class CustomSalarySlip(SalarySlip):
                             update_component_array.append({
                                     "component": ded_components[0].name,
                                     "amount": total_epf_sum,
-                                    "max_amount": total_epf_sum
+                                    "max_amount": ded_components[0].max_amount
                                 })
+
+                # frappe.msgprint(str(update_component_array))
 
                 if update_component_array:
                     declaration = frappe.get_list(
