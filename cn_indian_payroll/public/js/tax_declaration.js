@@ -18,7 +18,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                 frm.add_custom_button("Edit Declaration",function()
                 {
                     
-                    edit_declaration(frm)
+                    // edit_declaration(frm)
+
+                    edit(frm)
                     
                 })
             }
@@ -126,23 +128,23 @@ function edit_declaration(frm) {
                         size: 'large',
                         primary_action_label: 'Submit',
                         primary_action(values) {
-                            let total_exe_amount = 0;
-                            $.each(frm.doc.declarations, function(i, k) {
-                                if (k.exemption_category == "Section 80C") {
-                                    total_exe_amount = k.max_amount - k.amount;
-                                }
-                            });
+                            // let total_exe_amount = 0;
+                            // $.each(frm.doc.declarations, function(i, k) {
+                            //     if (k.exemption_category == "Section 80C") {
+                            //         total_exe_amount = k.max_amount - k.amount;
+                            //     }
+                            // });
 
-                            let total_80C = 0;
-                            $.each(values.details_table, function(i, m) {
-                                if (m.employee_exemption_category == "Section 80C") {
-                                    total_80C += parseFloat(m.declared_amount);
-                                }
-                            });
+                            // let total_80C = 0;
+                            // $.each(values.details_table, function(i, m) {
+                            //     if (m.employee_exemption_category == "Section 80C") {
+                            //         total_80C += parseFloat(m.declared_amount);
+                            //     }
+                            // });
 
-                            if (total_80C > total_exe_amount) {
-                                frappe.msgprint(`You can't enter an amount greater than ${total_exe_amount} for Section 80C.`);
-                            } else {
+                            // if (total_80C > total_exe_amount) {
+                            //     frappe.msgprint(`You can't enter an amount greater than ${total_exe_amount} for Section 80C.`);
+                            // } else {
                                 // Add declarations with specific sub-categories to component_array
                                 $.each(frm.doc.declarations, function(i, m) {
                                     if (["NPS Contribution by Employer", "Tax on employment (Professional Tax)", "Employee Provident Fund (Auto)","Uniform Allowance"].includes(m.exemption_sub_category)) {
@@ -187,7 +189,7 @@ function edit_declaration(frm) {
 
 
 
-                            }
+                            // }
                         }
                     });
 
@@ -219,43 +221,43 @@ function edit_declaration(frm) {
                     });
 
                     // Validate declared_amount input
-                    d.$wrapper.on('change', '[data-fieldname="declared_amount"] input', function() {
-                        let rowIndex = $(this).closest('.grid-row').index();
-                        let selectedAmount = $(this).val();
-                        let maxAmount = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.maximum_amount;
-                        let component = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.employee_exemption_category;
+                    // d.$wrapper.on('change', '[data-fieldname="declared_amount"] input', function() {
+                    //     let rowIndex = $(this).closest('.grid-row').index();
+                    //     let selectedAmount = $(this).val();
+                    //     let maxAmount = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.maximum_amount;
+                    //     let component = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.employee_exemption_category;
 
-                        if (component == "Section 80C") {
-                            $.each(frm.doc.declarations, function(i, v) {
-                                if (v.exemption_category == component) {
-                                    if (v.amount == 150000) {
-                                        frappe.msgprint("You can't enter the amount here because your Section 80C is at the maximum.");
-                                        d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
-                                        d.fields_dict.details_table.grid.refresh();
-                                    } else {
-                                        let remainingAmount = maxAmount - parseFloat(v.amount);
+                    //     if (component == "Section 80C") {
+                    //         $.each(frm.doc.declarations, function(i, v) {
+                    //             if (v.exemption_category == component) {
+                    //                 if (v.amount == 150000) {
+                    //                     frappe.msgprint("You can't enter the amount here because your Section 80C is at the maximum.");
+                    //                     d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
+                    //                     d.fields_dict.details_table.grid.refresh();
+                    //                 } else {
+                    //                     let remainingAmount = maxAmount - parseFloat(v.amount);
 
-                                        if (selectedAmount > remainingAmount) {
-                                            frappe.msgprint(`You can't enter an amount greater than ${remainingAmount}.`);
-                                            d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
-                                            d.fields_dict.details_table.grid.refresh();
-                                        }
-                                    }
-                                }
-                            });
-                        } 
-                        else 
-                        {
+                    //                     if (selectedAmount > remainingAmount) {
+                    //                         frappe.msgprint(`You can't enter an amount greater than ${remainingAmount}.`);
+                    //                         d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
+                    //                         d.fields_dict.details_table.grid.refresh();
+                    //                     }
+                    //                 }
+                    //             }
+                    //         });
+                    //     } 
+                    //     else 
+                    //     {
 
-                            console.log(selectedAmount,"selectedAmount")
-                            console.log(maxAmount,"maxAmount")
-                            if (selectedAmount > maxAmount) {
-                                frappe.msgprint(`You can't enter an amount greater than ${maxAmount}.`);
-                                d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
-                                d.fields_dict.details_table.grid.refresh();
-                            }
-                        }
-                    });
+                    //         console.log(selectedAmount,"selectedAmount")
+                    //         console.log(maxAmount,"maxAmount")
+                    //         if (selectedAmount > maxAmount) {
+                    //             frappe.msgprint(`You can't enter an amount greater than ${maxAmount}.`);
+                    //             d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
+                    //             d.fields_dict.details_table.grid.refresh();
+                    //         }
+                    //     }
+                    // });
                 } else {
                     frappe.msgprint("You can't Edit the declaration because you are in the New regime.");
                 }
@@ -263,6 +265,317 @@ function edit_declaration(frm) {
         });
     }
 }
+
+
+
+function edit(frm) {
+    var component_array = [];
+    var component_array_not_include = [];
+    var sub_category = [];
+
+    var component_from_dialogue=[]
+
+    // Collect data from frm.doc.declarations
+    $.each(frm.doc.declarations, function(i, m) {
+        if (["NPS Contribution by Employer", "Tax on employment (Professional Tax)", "Employee Provident Fund (Auto)"].includes(m.exemption_sub_category)) {
+            component_array.push({
+                "exemption_sub_category": m.exemption_sub_category,
+                "employee_exemption_category": m.exemption_category,
+                "maximum_amount": m.max_amount,
+                "declared_amount": m.amount
+            });
+        } else {
+            component_array_not_include.push({
+                "exemption_sub_category": m.exemption_sub_category,
+                "employee_exemption_category": m.exemption_category,
+                "maximum_amount": m.max_amount,
+                "declared_amount": m.amount
+            });
+        }
+    });
+
+    // Fetch active subcategories
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Employee Tax Exemption Sub Category",
+            filters: {
+                "is_active": 1,
+                "name": ["not in", ["Employee Provident Fund (Auto)", "NPS Contribution by Employer", "Tax on employment (Professional Tax)"]]
+            },
+            fields: ["name"],
+            limit_page_length: 999999999999
+        },
+        callback: function(subcategory_response) {
+            if (subcategory_response.message && subcategory_response.message.length > 0) {
+                sub_category = subcategory_response.message.map(v => v.name);
+
+                if (frm.doc.custom_income_tax === "Old Regime") {
+                    let d = new frappe.ui.Dialog({
+                        title: 'Declare Your Exemptions',
+                        fields: [
+                            {
+                                label: 'Exemptions Auto Calculated',
+                                fieldname: 'details_table',
+                                fieldtype: 'Table',
+                                cannot_add_rows: 1,
+                                cannot_delete_rows: 1,
+                                fields: [
+                                    {
+                                        label: 'Exemption Sub Category',
+                                        fieldname: 'exemption_sub_category',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        read_only: 1
+                                    },
+                                    {
+                                        label: 'Employee Tax Exemption Category',
+                                        fieldname: 'employee_exemption_category',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        read_only: 1
+                                    },
+                                    {
+                                        label: 'Maximum Exempted Amount',
+                                        fieldname: 'maximum_amount',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        read_only: 1
+                                    },
+                                    {
+                                        label: 'Declared Amount',
+                                        fieldname: 'declared_amount',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        read_only: 1
+                                    },
+                                ]
+                            },
+                            {
+                                fieldtype: 'Section Break'
+                            },
+                            {
+                                label: 'Declare Tax Exemptions',
+                                fieldname: 'custom_details_table',
+                                fieldtype: 'Table',
+                                fields: [
+                                    {
+                                        label: 'Exemption Sub Category',
+                                        fieldname: 'custom_exemption_sub_category',
+                                        fieldtype: 'Select',
+                                        in_list_view: 1,
+                                        options: sub_category.join('\n'),
+                                        editable: true
+                                    },
+                                    {
+                                        label: 'Employee Tax Exemption Category',
+                                        fieldname: 'custom_employee_exemption_category',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        read_only: 1
+                                    },
+                                    {
+                                        label: 'Maximum Exempted Amount',
+                                        fieldname: 'custom_maximum_amount',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        read_only: 1
+                                    },
+                                    {
+                                        label: 'Declared Amount',
+                                        fieldname: 'custom_declared_amount',
+                                        fieldtype: 'Data',
+                                        in_list_view: 1,
+                                        editable: true,
+                                        reqd:1
+                                    },
+                                ]
+                            },
+
+                            {
+                                fieldtype: 'Section Break'
+                            },
+                            {
+                                label: 'Monthly HRA Amount',
+                                fieldname: 'hra_amount',
+                                fieldtype: 'Currency',
+                                default:frm.doc.monthly_house_rent,
+                            },
+                            {
+                                fieldtype: 'Column Break'
+                            },
+                            {
+                                label: 'Rented in Metro City',
+                                fieldname: 'rented_in_metro_city',
+                                fieldtype: 'Check',
+                                default:frm.doc.rented_in_metro_city
+                            },
+                    
+                        ],
+                        size: 'large',
+                        primary_action_label: 'Submit',
+                        primary_action(values) {
+                            d.hide();
+
+                            // console.log(values)
+
+
+                            $.each(values.details_table, function(i, w) {
+                                component_from_dialogue.push({
+                                    "sub_category": w.exemption_sub_category,
+                                    "category": w.employee_exemption_category,
+                                    "max_amount": w.maximum_amount,
+                                    "amount": w.declared_amount
+                                });
+                            });
+
+                            $.each(values.custom_details_table, function(i, m) {
+                                component_from_dialogue.push({
+                                    "sub_category": m.custom_exemption_sub_category,
+                                    "category": m.custom_employee_exemption_category,
+                                    "max_amount": m.custom_maximum_amount,
+                                    "amount": m.custom_declared_amount
+                                });
+                            });
+
+                            // console.log(component_from_dialogue)
+
+                            frm.clear_table('declarations');
+                            component_from_dialogue.forEach(row => {
+                                    let new_row = frm.add_child('declarations');
+                                    new_row.exemption_sub_category = row.sub_category;
+                                    new_row.exemption_category = row.category;
+                                    new_row.max_amount = row.max_amount;
+                                    new_row.amount = row.amount;
+                                });
+
+
+                                frm.set_value("monthly_house_rent", values.hra_amount);
+                                frm.set_value("rented_in_metro_city", values.rented_in_metro_city);
+                                frm.set_value("custom_posting_date",frappe.datetime.nowdate())
+                                frm.refresh_field('declarations');
+                                frm.save('Update');
+                                d.hide();
+
+
+
+
+                        }
+                    });
+
+                    // Populate the dialog's first table
+                    let table_field = d.get_field('details_table');
+                    if (!table_field.df.data) {
+                        table_field.df.data = [];
+                    }
+                    component_array.forEach(item => {
+                        table_field.df.data.push({
+                            "exemption_sub_category": item.exemption_sub_category,
+                            "employee_exemption_category": item.employee_exemption_category,
+                            "maximum_amount": item.maximum_amount,
+                            "declared_amount": item.declared_amount
+                        });
+                    });
+                    table_field.grid.refresh();
+
+                    let custom_table_field = d.get_field('custom_details_table');
+                    if (!custom_table_field.df.data) {
+                        custom_table_field.df.data = [];
+                    }
+                    component_array_not_include.forEach(item => {
+                        custom_table_field.df.data.push({
+                            "custom_exemption_sub_category": item.exemption_sub_category,
+                            "custom_employee_exemption_category": item.employee_exemption_category,
+                            "custom_maximum_amount": item.maximum_amount,
+                            "custom_declared_amount": item.declared_amount
+                        });
+                    });
+                    custom_table_field.grid.refresh();
+
+                    d.show();  
+
+
+
+                    d.$wrapper.on('change', '[data-fieldname="custom_exemption_sub_category"] select', function() {
+                        let selectedValue = $(this).val();
+                        let rowIndex = $(this).closest('.grid-row').index();
+
+                        console.log(selectedValue,"7777")
+
+                        if (selectedValue) {
+                            frappe.call({
+                                method: 'frappe.client.get',
+                                args: {
+                                    doctype: "Employee Tax Exemption Sub Category",
+                                    name: selectedValue
+                                },
+                                callback: function(r) {
+                                    if (r.message) {
+                                        let category = r.message.exemption_category;
+                                        let category_max_amount = r.message.max_amount;
+                                        d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_employee_exemption_category = category;
+                                        d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_maximum_amount = category_max_amount;
+                                        d.fields_dict.custom_details_table.grid.refresh();
+                                    }
+                                }
+                            });
+
+                            
+
+
+                        }
+                    });
+
+                    d.$wrapper.on('change', '[data-fieldname="custom_declared_amount"] input', function() {
+                        let rowIndex = $(this).closest('.grid-row').index();
+                        let selectedAmount = $(this).val();
+                        
+                        let component = d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_exemption_sub_category;
+
+                        if(component=="Uniform Allowance") {
+                               
+
+                                frappe.call({
+                                    method: "frappe.client.get_list",
+                                    args: {
+                                        doctype: "Salary Structure Assignment",
+                                        filters: { employee: frm.doc.employee, 'docstatus': 1 },
+                                        fields: ["*"],
+                                        limit: 1,
+                                        order_by: "from_date desc"
+                                    },
+                                    callback: function(res) {
+                                        if (res.message && res.message.length > 0) {
+
+                                            if(res.message[0].custom_is_uniform_allowance==0)
+                                            {
+                                                msgprint("You Are Not Eligible for Uniform Allowance")
+                                                d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_declared_amount = 0;
+                                                d.fields_dict.custom_details_table.grid.refresh();
+
+                                            }
+
+                                        }
+                                    }
+                                })
+
+
+
+                            }
+                        
+                    })
+                }
+
+                else{
+                    msgprint("You Cant Edit Declaration,Because You are in The New Regime")
+                }
+            }
+        }
+    });
+}
+
+
+
 
 
 
