@@ -114,14 +114,59 @@ console.log(start_date_str);
 
                         if(res.message.length>0)
                             {
+                                console.log(res.message[0].leave_without_pay,"111")
 
-                                // console.log(res.message[0].name,"1111")
 
-                               
-                                frm.set_value("salary_slip",res.message[0].name)
-                                frm.set_value("payroll_entry",res.message[0].payroll_entry)
-                                frm.set_value("working_days",res.message[0].payment_days)
-                                frm.set_value("max_lop_days",res.message[0].leave_without_pay-res.message[0].custom_lop_reversal_days)
+                                frappe.call({
+        
+                                    method: "frappe.client.get_list",
+                                    args: {
+                                        doctype: "LOP Reversal",
+                                        filters: { "employee": frm.doc.employee,"docstatus":1,"salary_slip":frm.doc.salary_slip},
+                                        fields: ["*"],
+                                        
+                                       
+                                    },
+                                    callback: function(kes) {
+                
+                                        var days=0
+                                        
+                                        if(kes.message.length>0)
+                                        {
+                                            $.each(kes.message,function(i,v)
+                                            {
+                                                days=days+v.number_of_days
+                                                
+
+                                                
+                                            })
+
+
+                                            frm.set_value("salary_slip",res.message[0].name)
+                                            frm.set_value("payroll_entry",res.message[0].payroll_entry)
+                                            frm.set_value("working_days",res.message[0].payment_days)
+                                            frm.set_value("max_lop_days",res.message[0].leave_without_pay-days)
+
+
+                                        }
+                                        else{
+                                            frm.set_value("salary_slip",res.message[0].name)
+                                            frm.set_value("payroll_entry",res.message[0].payroll_entry)
+                                            frm.set_value("working_days",res.message[0].payment_days)
+                                            frm.set_value("max_lop_days",res.message[0].leave_without_pay)
+                                        }
+                                    }
+                                })
+
+
+
+
+
+                                
+                                // frm.set_value("salary_slip",res.message[0].name)
+                                // frm.set_value("payroll_entry",res.message[0].payroll_entry)
+                                // frm.set_value("working_days",res.message[0].payment_days)
+                                // frm.set_value("max_lop_days",res.message[0].leave_without_pay-res.message[0].custom_lop_reversal_days)
                                 
 
                             }
@@ -142,6 +187,69 @@ console.log(start_date_str);
 
 
     },
+
+    refresh:function(frm)
+    {
+        
+            if (frm.doc.employee && frm.doc.salary_slip) {
+                frappe.call({
+                    method: "frappe.client.get_list",
+                    args: {
+                        doctype: "Salary Slip",
+                        filters: [
+                            ["employee", "=", frm.doc.employee],
+                            ["name", "=", frm.doc.salary_slip],
+                            
+                            
+                            ["docstatus", "=", 1],
+                        ],
+                        fields: ["*"],
+                    },
+                    callback: function(res) {
+                        var month_array = [];
+        
+                        if (res.message.length > 0) {
+    
+                            console.log(res.message,"8888")
+                            
+                            $.each(res.message, function(i, v) {
+                                
+                                month_array.push(v.start_date);
+                                
+                            });
+        
+                            var month_names = [];
+        
+                            
+                            var month_map = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+                            
+                            month_array.forEach(function(date_str) {
+                                var date = new Date(date_str);
+                                var month_name = month_map[date.getMonth()];
+                                month_names.push(month_name);
+                            });
+        
+                            
+        
+                            
+                            frm.set_df_property('lop_month_reversal', 'options', month_names.join('\n'));
+                            frm.refresh_field('lop_month_reversal');
+        
+                            
+                        } 
+                        else 
+                        {
+                           
+                            frm.set_df_property('lop_month_reversal', 'options', "");
+                            frm.refresh_field('lop_month_reversal');
+                            
+                        }
+                    }
+                });
+            }
+        
+    }
     
 
    

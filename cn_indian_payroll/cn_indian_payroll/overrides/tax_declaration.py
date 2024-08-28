@@ -36,9 +36,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         
 
 
-
-
-
     def cancel_declaration_history(self):
         history_data=frappe.db.get_list('Tax Declaration History',
             filters={
