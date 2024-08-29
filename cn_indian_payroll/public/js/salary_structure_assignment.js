@@ -20,7 +20,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 //     })
 
                     change_regime(frm)
-                    send_to_employee(frm)
+                    // send_to_employee(frm)
             }
         
 

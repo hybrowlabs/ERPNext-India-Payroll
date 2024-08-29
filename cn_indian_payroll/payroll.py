@@ -54,7 +54,9 @@ def get_additional_salary(payroll_id):
 
 
 
-
+# def aa():
+#     declaration_id = frappe.db.get_value("Employee Tax Exemption Declaration",filters={"custom_salary_structure_assignment":'HR-SSA-24-08-00053'},fieldname="name")
+#     print(declaration_id)
 
 
 
