@@ -23,6 +23,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                     edit(frm)
                     
                 })
+                frm.change_custom_button_type('Edit Declaration', null, 'primary');
             }
 
         
