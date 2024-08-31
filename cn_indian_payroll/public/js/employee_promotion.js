@@ -173,7 +173,7 @@ function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_structu
                                 });
 
                                 Promise.all(salary_slip_calls).then(() => {
-                                    console.log(final_mapped_array, "-----------");
+                                    
 
                                     frm.set_value("custom_status","Arrears Calculated")
                                     
@@ -183,39 +183,39 @@ function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_structu
                                     
                                    
 
-                                    frappe.db.insert({
-                                        "doctype": "Salary Appraisal Calculation",
-                                        "employee": frm.doc.employee,
-                                        "employee_name": frm.doc.employee_name,
-                                        "company": frm.doc.company,
-                                        "posting_date": frm.doc.custom_additional_salary_date,
-                                        "employee_promotion_id": frm.doc.name,
-                                        "old_salary_structure": old_salary_structure,
-                                        "new_salary_structure": new_salary_structure,
-                                        "old_from_date": old_from_date,
-                                        "new_from_date": new_from_date,
-                                        "old_salary_structure_assignment_id": old_ssa_id,
-                                        "new_salary_structure_assignment_id": new_ssa_id,
+                                    // frappe.db.insert({
+                                    //     "doctype": "Salary Appraisal Calculation",
+                                    //     "employee": frm.doc.employee,
+                                    //     "employee_name": frm.doc.employee_name,
+                                    //     "company": frm.doc.company,
+                                    //     "posting_date": frm.doc.custom_additional_salary_date,
+                                    //     "employee_promotion_id": frm.doc.name,
+                                    //     "old_salary_structure": old_salary_structure,
+                                    //     "new_salary_structure": new_salary_structure,
+                                    //     "old_from_date": old_from_date,
+                                    //     "new_from_date": new_from_date,
+                                    //     "old_salary_structure_assignment_id": old_ssa_id,
+                                    //     "new_salary_structure_assignment_id": new_ssa_id,
 
-                                        "old_structure_child": final_array.map(row => ({
-                                            "salary_component": row.component,
-                                            "old_amount": row.old_amount,
-                                            "new_amount": row.new_amount
-                                        })),
+                                    //     "old_structure_child": final_array.map(row => ({
+                                    //         "salary_component": row.component,
+                                    //         "old_amount": row.old_amount,
+                                    //         "new_amount": row.new_amount
+                                    //     })),
 
-                                        "salary_arrear_components": final_mapped_array.map(row => ({
-                                            "salary_slip_id": row.salary_slip,
-                                            "salary_component": row.salary_component,
-                                            "month": row.month,
-                                            "working_days": row.working_days,
-                                            "lop_days": row.lop,
-                                            "old_amount": row.old_amount,
-                                            "expected_amount": row.new_amount,
-                                            "difference": row.new_amount - row.old_amount
-                                        })),
-                                        "docstatus":1,
-                                    });
-                                    // msgprint("Successfully Created the Arrears And Salary Appraisal Calculation")
+                                    //     "salary_arrear_components": final_mapped_array.map(row => ({
+                                    //         "salary_slip_id": row.salary_slip,
+                                    //         "salary_component": row.salary_component,
+                                    //         "month": row.month,
+                                    //         "working_days": row.working_days,
+                                    //         "lop_days": row.lop,
+                                    //         "old_amount": row.old_amount,
+                                    //         "expected_amount": row.new_amount,
+                                    //         "difference": row.new_amount - row.old_amount
+                                    //     })),
+                                    //     "docstatus":1,
+                                    // });
+                                    
                                 });
                             }
                         }
@@ -224,6 +224,118 @@ function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_structu
             }
         }
     });
+
+
+
+ var latest_structure_reimbursement_component=[]
+ var reimbursement_array=[]
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Salary Structure Assignment",
+            filters: { employee: frm.doc.employee, docstatus: 1 },
+            fields: ["*"],
+            limit: 1,
+            order_by: "from_date desc"
+        },
+        callback: function(res) {
+            if (res.message && res.message.length > 0) {
+                let date = res.message[0].from_date;
+
+                if (date) {
+                    frappe.call({
+                        method: "frappe.client.get",
+                        args: {
+                            doctype: "Salary Structure Assignment",
+                            name: res.message[0].name
+                        },
+                        callback: function(mes) {
+                            if (mes.message) {
+                                $.each(mes.message.custom_employee_reimbursements, function(i, reimbursement) {
+                                    latest_structure_reimbursement_component.push({
+                                        "component": reimbursement.reimbursements,
+                                        "amount": reimbursement.monthly_total_amount
+                                    });
+                                });
+
+                                frappe.call({
+                                    method: "frappe.client.get_list",
+                                    args: {
+                                        doctype: "Employee Benefit Accrual",
+                                        filters: {
+                                            employee: frm.doc.employee,
+                                            benefit_accrual_date: ['>', date]
+                                            
+                                        },
+                                        fields: ["*"],
+                                        limit_page_length: 999999999999
+                                    },
+                                    callback: function(accrual_response) {
+                                       
+
+                                        accrual_response.message.forEach(v => {
+                                            let component = latest_structure_reimbursement_component.find(comp => comp.component === v.salary_component);
+                                            
+                                            frappe.call({
+                                                method: "frappe.client.get",
+                                                args: {
+                                                    doctype: "Salary Slip",
+                                                    name: v.salary_slip
+                                                },
+                                                callback: function(slip_response) {
+                                                    if (slip_response.message) {
+                                                        let expected_amount = component ? component.amount : 0;
+                                                        let totalamount = (expected_amount / slip_response.message.total_working_days) * (slip_response.message.total_working_days - slip_response.message.leave_without_pay);
+
+
+                                                        let difference = totalamount - v.amount;
+
+                                                        
+
+                                                        reimbursement_array.push({
+                                                            "salary_slip_id":v.salary_slip,
+                                                            "salary_component":v.salary_component,
+                                                            "old_amount":v.amount,
+                                                            "expected_amount":totalamount,
+                                                            "difference":difference,
+                                                            "month":slip_response.message.custom_month,
+                                                            "working_days":slip_response.message.total_working_days,
+                                                            "lop_days":slip_response.message.leave_without_pay
+
+
+                                                        })
+
+
+
+                                                    }
+                                                }
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    console.log(reimbursement_array,"reimbursement_arrayreimbursement_array")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

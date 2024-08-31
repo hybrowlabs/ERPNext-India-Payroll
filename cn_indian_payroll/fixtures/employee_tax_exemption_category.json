@@ -19,8 +19,8 @@
   "docstatus": 0,
   "doctype": "Employee Tax Exemption Category",
   "is_active": 1,
-  "max_amount": 200000.0,
-  "modified": "2024-07-23 13:01:34.950148",
+  "max_amount": 300000.0,
+  "modified": "2024-08-31 23:49:00.094527",
   "name": "Section 80DD"
  },
  {
