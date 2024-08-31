@@ -6,13 +6,14 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "old_salary_structure",
-  "salary_structure",
+  "old_salary_structure_assignment_id",
+  "employee_promotion_id",
+  "old_from_date",
   "column_break_ozck",
   "posting_date",
   "company",
-  "new_salary_structure",
-  "new_salary_structure1",
+  "new_salary_structure_assignment_id",
+  "new_from_date",
   "section_break_ugei",
   "old_structure_child",
   "section_break_cwor",
@@ -25,20 +26,8 @@
  ],
  "fields": [
   {
-   "fieldname": "old_salary_structure",
-   "fieldtype": "Link",
-   "label": "Old Salary Structure",
-   "options": "Salary Structure Assignment"
-  },
-  {
    "fieldname": "column_break_ozck",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "new_salary_structure",
-   "fieldtype": "Link",
-   "label": "New Salary Structure",
-   "options": "Salary Structure Assignment"
   },
   {
    "fieldname": "section_break_ugei",
@@ -51,20 +40,6 @@
    "label": "Employee",
    "options": "Employee",
    "reqd": 1
-  },
-  {
-   "fetch_from": "old_salary_structure.salary_structure",
-   "fieldname": "salary_structure",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Salary Structure"
-  },
-  {
-   "fetch_from": "new_salary_structure.salary_structure",
-   "fieldname": "new_salary_structure1",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "New Salary Structure"
   },
   {
    "fieldname": "old_structure_child",
@@ -127,12 +102,39 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "employee_promotion_id",
+   "fieldtype": "Data",
+   "label": "Employee Promotion ID"
+  },
+  {
+   "fieldname": "old_salary_structure_assignment_id",
+   "fieldtype": "Link",
+   "label": "Old Salary Structure Assignment ID",
+   "options": "Salary Structure Assignment"
+  },
+  {
+   "fieldname": "new_salary_structure_assignment_id",
+   "fieldtype": "Link",
+   "label": "New Salary Structure Assignment ID",
+   "options": "Salary Structure Assignment"
+  },
+  {
+   "fieldname": "old_from_date",
+   "fieldtype": "Date",
+   "label": "Old From Date"
+  },
+  {
+   "fieldname": "new_from_date",
+   "fieldtype": "Date",
+   "label": "New From date"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-05 12:16:08.184834",
+ "modified": "2024-08-31 13:23:17.929016",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",

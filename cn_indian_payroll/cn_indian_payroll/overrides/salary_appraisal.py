@@ -8,14 +8,13 @@ def on_submit(self,method):
     update_reimbursement_accruals(self)
 
 
-def on_cancel(self,method):
+# def on_cancel(self,method):
 
-    cancel_additional_salary(self)
-    reverse_bonus_accrual(self)
-    reverse_benefit_accrual(self)
+#     cancel_additional_salary(self)
+#     reverse_bonus_accrual(self)
+#     reverse_benefit_accrual(self)
 
-# def validate(self,method):
-#     insert_additional_salary(self)
+
 
 
 def update_bonus_accrual(self):
@@ -103,7 +102,9 @@ def insert_additional_salary(self):
                         'currency': "INR",
                         'amount': insert['amount'],
                         'docstatus':1,
-                        'custom_salary_appraisal_calculation':self.name
+                        'custom_salary_appraisal_calculation':self.name,
+                        'custom_employee_promotion_id':self.employee_promotion_id,
+                        
                     })
                     insert_doc.insert()
 

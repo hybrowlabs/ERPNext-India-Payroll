@@ -188,6 +188,10 @@ function fetchSalaryComponentDetails(frm, ctc_array, component_dict, callback) {
     fetchDetails(0);
 }
 
+
+
+
+
 function get_salary_slip(frm) {
     if (frm.doc.posting_date) {
         let final_mapped_array = [];
@@ -287,6 +291,10 @@ function get_salary_slip(frm) {
         });
     }
 }
+
+
+
+
 
 
 

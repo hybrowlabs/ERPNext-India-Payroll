@@ -9,7 +9,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
     refresh(frm)
     {
 
-        if(!frm.is_new())
+        if(frm.doc.docstatus==1)
             {
 
                 // frm.add_custom_button(__("Estimate Tax BreakUp"),function()
@@ -20,8 +20,21 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 //     })
 
                     change_regime(frm)
-                    // send_to_employee(frm)
+                    
             }
+
+
+           
+                setTimeout(() => {
+                    
+                    frm.remove_custom_button('Payroll Entry', 'Create');
+                    frm.remove_custom_button('Preview Salary Slip', 'Actions');
+                    // frm.remove_custom_button('Chose Regime');
+                    
+                }, 10);
+
+                
+            
         
 
        

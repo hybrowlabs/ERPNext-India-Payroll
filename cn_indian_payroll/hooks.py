@@ -233,18 +233,14 @@ fixtures = [
     {"dt":"Property Setter","filters":{"module": "cn-indian-payroll"}},
     
     {"dt":"Report","filters":{"module": "cn-indian-payroll"}},
-    {"dt":"Workflow","filters":{"name":"Payroll Entry"}},
-    {"dt": "Workflow State", "filters": {"name": ["in", ["Cancelled", "Processed"]]}},
-    {"dt": "Workflow Action Master", "filters": {"name": "Cancel"}},
+    
 
     {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
-    #{"dt":"Employee Tax Exemption Sub Category"},
-    #{"dt":"Employee Tax Exemption Category"},
-    #{"dt":"Income Tax Slab"},
+    {"dt":"Employee Tax Exemption Sub Category"},
+    {"dt":"Employee Tax Exemption Category"},
+    {"dt":"Income Tax Slab"},
 
-
-    #
 ]
     
     
@@ -264,6 +260,7 @@ doctype_js = {
                 "Salary Slip":"public/js/salary_slip.js",
                 "LTA Claim":"public/js/lta_claim.js",
                 "Salary Appraisal Calculation":"public/js/salary_revision.js",
+                "Employee Promotion":"public/js/employee_promotion.js",
 
 
 
@@ -306,8 +303,13 @@ doc_events = {
 
     "Salary Appraisal Calculation":{
         "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
-        "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
-    }
+        # "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
+    },
+
+    "Employee Promotion":{
+        "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
+        "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
+    },
 
     
 }
