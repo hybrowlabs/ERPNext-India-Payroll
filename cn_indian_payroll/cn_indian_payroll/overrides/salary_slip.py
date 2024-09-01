@@ -313,7 +313,7 @@ class CustomSalarySlip(SalarySlip):
                             
 
                 
-
+                
                 total_nps_sum = sum(total_nps)
                
 

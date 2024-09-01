@@ -9,6 +9,7 @@
   "employee",
   "employee_name",
   "income_tax",
+  "tax_regime",
   "column_break_varb",
   "company",
   "posting_date",
@@ -163,11 +164,17 @@
    "fieldname": "tds_from_previous_employer_amount",
    "fieldtype": "Float",
    "label": "TDS from Previous Employer Amount"
+  },
+  {
+   "fetch_from": "income_tax.custom_select_regime",
+   "fieldname": "tax_regime",
+   "fieldtype": "Data",
+   "label": "Tax Regime"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-29 09:33:15.637675",
+ "modified": "2024-09-01 22:46:24.711380",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Declaration History",
