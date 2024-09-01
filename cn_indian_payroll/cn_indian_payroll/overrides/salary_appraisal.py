@@ -8,11 +8,11 @@ def on_submit(self,method):
     update_reimbursement_accruals(self)
 
 
-# def on_cancel(self,method):
+def on_cancel(self,method):
 
-#     cancel_additional_salary(self)
-#     reverse_bonus_accrual(self)
-#     reverse_benefit_accrual(self)
+    # cancel_additional_salary(self)
+    reverse_bonus_accrual(self)
+    reverse_benefit_accrual(self)
 
 
 
@@ -27,13 +27,8 @@ def update_bonus_accrual(self):
             if bonus_accrual:
                 for k in bonus_accrual:
                     get_doc = frappe.get_doc('Employee Bonus Accrual', k.name)
-                    if j.difference < 0:
-                        difference = 0
-                    else:
-                        difference = j.difference
 
-                    
-                    get_doc.amount += difference
+                    get_doc.amount += j.difference
                     get_doc.save()
                     
 
@@ -47,15 +42,8 @@ def update_reimbursement_accruals(self):
             if benefit_accrual:
                 for each_accrual_doc in benefit_accrual:
                     get_doc = frappe.get_doc('Employee Benefit Accrual', each_accrual_doc.name)
-                    
-                    
-                    if accrual.difference < 0:
-                        difference = 0
-                    else:
-                        difference = accrual.difference
-
-                    
-                    get_doc.amount += difference
+    
+                    get_doc.amount += accrual.difference
                     get_doc.save()
 
 
@@ -132,11 +120,13 @@ def reverse_bonus_accrual(self):
             if len(bonus_accrual)>0:
                 for k in bonus_accrual:
                     get_doc = frappe.get_doc('Employee Bonus Accrual', k.name)
-                    if j.difference < 0:
-                        difference = 0
+                    if get_doc.amount ==0:
+                        difference = j.old_amount
+                        get_doc.amount=difference
                     else:
                         difference = j.difference   
-                    get_doc.amount -= difference
+
+                        get_doc.amount -= difference
                     get_doc.save()
 
 
@@ -153,13 +143,16 @@ def reverse_benefit_accrual(self):
             if benefit_accrual:
                 for accrual in benefit_accrual:
                     get_accrued_doc = frappe.get_doc('Employee Benefit Accrual', accrual.name)
-                    if component.difference < 0:
-                        difference = 0
+                    if get_accrued_doc.amount == 0:
+                        difference = component.old_amount
+                        get_accrued_doc.amount=difference
+
                     else:
                         difference = component.difference
+                        get_accrued_doc.amount -= difference
 
                     
-                    get_accrued_doc.amount -= difference
+                    # get_accrued_doc.amount -= difference
                     get_accrued_doc.save()
                     
 

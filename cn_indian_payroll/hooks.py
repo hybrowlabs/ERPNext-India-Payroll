@@ -303,7 +303,7 @@ doc_events = {
 
     "Salary Appraisal Calculation":{
         "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
-        # "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
+        "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
     },
 
     "Employee Promotion":{
