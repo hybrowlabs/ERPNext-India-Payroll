@@ -313,7 +313,7 @@ class CustomSalarySlip(SalarySlip):
                             
 
                 
-                
+                # frappe.msgprint(str(total_nps))
                 total_nps_sum = sum(total_nps)
                
 
@@ -1450,7 +1450,19 @@ class CustomSalarySlip(SalarySlip):
         self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
         self.custom_employee_state=latest_salary_structure[0].custom_state
         self.custom_annual_ctc=latest_salary_structure[0].base
-        self.custom_payroll_period=latest_salary_structure[0].custom_payroll_period
+        # self.custom_payroll_period=latest_salary_structure[0].custom_payroll_period
+
+
+        latest_payroll_period = frappe.get_list('Payroll Period',
+            filters={'start_date': ('<', self.end_date)},
+            fields=["*"],
+            order_by='start_date desc',
+            limit=1
+        )
+        if latest_payroll_period:
+            self.custom_payroll_period=latest_payroll_period[0].name
+
+        
 
 
         

@@ -454,7 +454,7 @@ function find_tax_regime(frm)
         callback: function(response) {
             if (response.message && response.message.length > 0) {
 
-                frm.set_value("income_tax_regime",response.message[0].income_tax_slab)
+                frm.set_value("income_tax_regime",response.message[0].custom_tax_regime)
 
             }
         }
