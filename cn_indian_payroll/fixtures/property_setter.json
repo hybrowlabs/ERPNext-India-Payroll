@@ -135,7 +135,7 @@
   "doctype_or_field": "DocField",
   "field_name": "posting_date",
   "is_system_generated": 1,
-  "modified": "2024-08-09 09:28:09.315471",
+  "modified": "2024-09-02 15:13:42.137909",
   "module": "cn-indian-payroll",
   "name": "Tax Declaration History-posting_date-in_list_view",
   "property": "in_list_view",
