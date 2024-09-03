@@ -116,8 +116,11 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
     let final_mapped_array = [];
     let reimbursement_array = [];
     let latest_structure_reimbursement_component = [];
+    let bonus_array = [];
+    let latest_bonus_amount = 0;
 
     try {
+        // Get the latest Salary Structure Assignment
         const res = await frappe.call({
             method: "frappe.client.get_list",
             args: {
@@ -133,6 +136,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
             let date = res.message[0].from_date;
 
             if (date) {
+                // Get Salary Slips from the latest assignment date
                 const salary_slips_res = await frappe.call({
                     method: "frappe.client.get_list",
                     args: {
@@ -184,6 +188,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                         });
                     }
 
+                    // Get the latest Salary Structure Assignment details
                     let latest_structure = await frappe.call({
                         method: "frappe.client.get",
                         args: {
@@ -193,6 +198,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                     });
 
                     if (latest_structure.message) {
+                        // Get the latest reimbursement components
                         latest_structure.message.custom_employee_reimbursements.forEach(reimbursement => {
                             latest_structure_reimbursement_component.push({
                                 component: reimbursement.reimbursements,
@@ -275,22 +281,104 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                             await Promise.all(accrual_calls);
                         }
 
+                        // Generate Salary Slip for new salary structure
+                        let structure_response = await frappe.call({
+                            method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
+                            args: {
+                                source_name: latest_structure.message.salary_structure,
+                                employee: frm.doc.employee,
+                                print_format: 'Salary Slip Standard for CTC',
+                                docstatus: 1,
+                                posting_date: date
+                            }
+                        });
 
-                        
+                        if (structure_response.message) {
+                            let bonusPromises = structure_response.message.earnings.map(bonus => {
+                                return new Promise((resolve, reject) => {
+                                    frappe.call({
+                                        method: "frappe.client.get",
+                                        args: {
+                                            doctype: "Salary Component",
+                                            filters: { "name": bonus.salary_component }
+                                        },
+                                        callback: function(mes) {
+                                            if (mes.message.custom_is_accrual == 1) {
+                                                latest_bonus_amount = bonus.amount;
+                                            }
+                                            resolve();
+                                        }
+                                    });
+                                });
+                            });
 
+                            await Promise.all(bonusPromises);
 
+                            // Fetch Employee Bonus Accruals
+                            let res_bonus = await frappe.call({
+                                method: "frappe.client.get_list",
+                                args: {
+                                    doctype: "Employee Bonus Accrual",
+                                    filters: {
+                                        employee: frm.doc.employee,
+                                        accrual_date: ['>=', date]
+                                    },
+                                    fields: ["*"]
+                                }
+                            });
 
+                            if (res_bonus.message) {
+                                for (let d of res_bonus.message) {
+                                    if (d.salary_slip) {
+                                        let slip_response = await frappe.call({
+                                            method: "frappe.client.get",
+                                            args: {
+                                                doctype: "Salary Slip",
+                                                name: d.salary_slip
+                                            }
+                                        });
 
+                                        if (slip_response.message) {
+                                            let lop_reversal_sum = 0;
 
+                                            // Fetch LOP Reversal details again within this scope
+                                            const lop_res = await frappe.call({
+                                                method: "frappe.client.get_list",
+                                                args: {
+                                                    doctype: "LOP Reversal",
+                                                    filters: {
+                                                        employee: d.employee,
+                                                        docstatus: 1,
+                                                        salary_slip: d.salary_slip
+                                                    },
+                                                    fields: ["number_of_days"]
+                                                }
+                                            });
 
+                                            if (lop_res.message) {
+                                                lop_res.message.forEach(lop => {
+                                                    lop_reversal_sum += lop.number_of_days;
+                                                });
+                                            }
 
-
-
-
-
-
-
-
+                                            let expected_bonus_amount = (latest_bonus_amount / slip_response.message.total_working_days) * 
+                                                (slip_response.message.total_working_days - (slip_response.message.leave_without_pay - lop_reversal_sum));
+                                            bonus_array.push({
+                                                salary_slip_id: d.salary_slip,
+                                                salary_component: d.salary_component,
+                                                month: slip_response.message.custom_month,
+                                                old_amount: d.amount,
+                                                working_days: slip_response.message.total_working_days,
+                                                lop_days: slip_response.message.leave_without_pay,
+                                                lop_reversal: lop_reversal_sum,
+                                                expected_amount: expected_bonus_amount,
+                                                difference: expected_bonus_amount - d.amount
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         // Insert into Salary Appraisal Calculation
                         await frappe.db.insert({
@@ -318,16 +406,12 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                                     (row.working_days - (row.lop - row.lop_reversal));
                                 const prorated_new_amount = (row.new_amount / row.working_days) * 
                                     (row.working_days - (row.lop - row.lop_reversal));
-
                                 return {
-                                    salary_slip_id: row.salary_slip,
                                     salary_component: row.salary_component,
+                                    salary_slip_id: row.salary_slip,
                                     month: row.month,
-                                    working_days: row.working_days,
-                                    lop_days: row.lop,
-                                    lop_reversal: row.lop_reversal,
                                     old_amount: prorated_old_amount,
-                                    expected_amount: prorated_new_amount,
+                                    new_amount: prorated_new_amount,
                                     difference: prorated_new_amount - prorated_old_amount
                                 };
                             }),
@@ -335,29 +419,42 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                             reimbursement_components: reimbursement_array.map(row => ({
                                 salary_slip_id: row.salary_slip_id,
                                 salary_component: row.salary_component,
-                                month: row.month,
-                                working_days: row.working_days,
-                                lop_days: row.lop_days,
                                 old_amount: row.old_amount,
                                 expected_amount: row.expected_amount,
                                 difference: row.difference,
+                                month: row.month,
+                                working_days: row.working_days,
+                                lop_days: row.lop_days,
                                 lop_reversal: row.lop_reversal
                             })),
+
+                            bonus_components: bonus_array.map(row => ({
+                                salary_slip_id: row.salary_slip_id,
+                                salary_component: row.salary_component,
+                                month: row.month,
+                                old_amount: row.old_amount,
+                                working_days: row.working_days,
+                                lop_days: row.lop_days,
+                                lop_reversal: row.lop_reversal,
+                                expected_amount: row.expected_amount,
+                                difference: row.difference
+                            }))
                         });
 
-                        // After all operations, set status and save the form
-                        frm.set_value("custom_status", "Arrears Calculated");
-                        await frm.save();
+                        frappe.show_alert({ message: __("Salary Appraisal Calculation inserted successfully."), indicator: 'green' });
+
+                        frm.set_value("custom_status","Arrears Calculated")
+                        frm.save()
                     }
                 }
             }
         }
     } catch (error) {
-        console.error("Error in fetching and inserting appraisal data:", error);
+        console.error(error);
+        frappe.show_alert({ message: __("An error occurred."), indicator: 'red' });
     }
-
-    console.log(final_mapped_array, "final_mapped_array");
 }
+
 
 
 async function fetchOldSalaryComponents(frm, salary_structure, from_date, old_component_dict) {
@@ -433,7 +530,7 @@ async function fetchSalaryComponentDetails(frm, component_array, dict) {
                         name: v.salary_component
                     },
                     callback: function(response) {
-                        if (response.message) {
+                        if (response.message && response.message.custom_is_part_of_appraisal == 1) {
                             let amount = v.amount;
                             dict.push({
                                 component: response.message.name,
