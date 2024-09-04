@@ -22,17 +22,17 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 setTimeout(() => {
                     
                     frm.remove_custom_button('Payroll Entry', 'Create');
-                    frm.remove_custom_button('Preview Salary Slip', 'Actions');
+                    // frm.remove_custom_button('Preview Salary Slip', 'Actions');
                     // frm.remove_custom_button('Chose Regime');
                     
                 }, 10);
 
 
 
-                if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1 )
-                {
-                    processSalaryComponents(frm)
-                }
+                // if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1 )
+                // {
+                //     processSalaryComponents(frm)
+                // }
 
 
         
