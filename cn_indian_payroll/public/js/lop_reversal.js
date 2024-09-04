@@ -13,7 +13,7 @@ frappe.ui.form.on('LOP Reversal', {
                     filters: [
                         ["employee", "=", frm.doc.employee],
                         ["leave_without_pay", ">", 0],
-                        ["custom_lop_updated", "=", 0],
+                        // ["custom_lop_updated", "=", 0],
                         
                         ["docstatus", "=", 1],
                     ],
@@ -115,6 +115,10 @@ console.log(start_date_str);
                         if(res.message.length>0)
                             {
                                 console.log(res.message[0].leave_without_pay,"111")
+
+                                var total_lop=res.message[0].leave_without_pay+res.message[0].absent_days
+
+                                console.log(total_lop)
 
 
                                 frappe.call({
