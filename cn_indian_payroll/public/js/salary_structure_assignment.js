@@ -29,10 +29,10 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
-                // if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1 )
-                // {
-                //     processSalaryComponents(frm)
-                // }
+                if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1 )
+                {
+                    processSalaryComponents(frm)
+                }
 
 
         
@@ -239,6 +239,8 @@ function send_to_employee(frm)
 
 
 async function processSalaryComponents(frm) {
+
+    var total_ctc=[]
     const response = await frappe.call({
         method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
         args: {
@@ -246,7 +248,7 @@ async function processSalaryComponents(frm) {
             employee: frm.doc.employee,
             print_format: 'Salary Slip Standard for CTC',
             docstatus: frm.doc.docstatus,
-            posting_date: frm.doc.from_date
+            // posting_date: frm.doc.from_date
         }
     });
 
@@ -282,6 +284,8 @@ async function processSalaryComponents(frm) {
             });
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
+
+                total_ctc.push(v.amount)
                 let newRow = tableBody.insertRow();
                 
                 let componentCell = newRow.insertCell();
@@ -332,6 +336,8 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = component.monthly_total_amount.toLocaleString();
 
+                total_ctc.push(component.monthly_total_amount)
+
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
                 annualAmountCell.textContent = (component.monthly_total_amount * 12).toLocaleString();
@@ -372,6 +378,8 @@ async function processSalaryComponents(frm) {
             });
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
+
+                total_ctc.push(v.amount)
                 let newRow = deductionTableBody.insertRow();
                 
                 let componentCell = newRow.insertCell();
@@ -394,6 +402,12 @@ async function processSalaryComponents(frm) {
                 totalAnnualDeductions += annualAmount;
             }
         }
+
+        var sum = total_ctc.reduce(function(accumulator, currentValue) {
+            return accumulator + currentValue;
+        }, 0);
+        
+        console.log(sum);
 
 
         if (frm.doc.base) {
@@ -421,8 +435,8 @@ async function processSalaryComponents(frm) {
             let componentCell = newRow.insertCell();
             componentCell.textContent = "Total CTC";
             
-            let monthlyAmount = Math.round(frm.doc.base / 12); // Calculate monthly amount
-            let annualAmount = Math.round(frm.doc.base); // Calculate annual amount
+            let monthlyAmount = Math.round(sum); // Calculate monthly amount
+            let annualAmount = Math.round(sum*12); // Calculate annual amount
         
             let formattedMonthlyAmount = monthlyAmount.toLocaleString();
             let amountCell = newRow.insertCell();
@@ -434,6 +448,9 @@ async function processSalaryComponents(frm) {
             annualAmountCell.className = "text-right";
             annualAmountCell.textContent = formattedAnnualAmount;
         }
+
+
+        
 
         
 
