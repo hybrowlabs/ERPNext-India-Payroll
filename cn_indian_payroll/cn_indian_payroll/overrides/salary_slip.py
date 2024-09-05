@@ -95,6 +95,8 @@ class CustomSalarySlip(SalarySlip):
         self.tax_calculation()
         self.calculate_grosspay()
 
+        # self.arrear_ytd()
+
     
 
  
@@ -116,6 +118,41 @@ class CustomSalarySlip(SalarySlip):
                 arrear_doc.save()
 
                 frappe.delete_doc('Employee Benefit Accrual', j.name)
+
+
+
+    # def arrear_ytd(self):
+    #     get_arrear_component=frappe.db.get_list('Salary Slip',
+    #                 filters={
+    #                     'employee': self.employee,
+    #                     'custom_payroll_period':self.custom_payroll_period,
+    #                     'docstatus':1
+    #                 },
+    #                 fields=['*'],
+    #                 )
+
+    #     if get_arrear_component:
+    #         for arrear in get_arrear_component:
+                
+    #             if self.name!=arrear.name:
+                    
+    #                 get_arrear_doc=frappe.get_doc("Salary Slip",arrear.name)
+    #                 if get_arrear_doc.earnings:
+    #                     for j in get_arrear_doc.earnings:
+
+    #                         frappe.msgprint(str(j.salary_component))
+
+                    # frappe.msgprint(str(get_arrear_doc.earnings))
+
+
+
+
+
+
+
+
+
+
 
 
     def new_joinee(self):

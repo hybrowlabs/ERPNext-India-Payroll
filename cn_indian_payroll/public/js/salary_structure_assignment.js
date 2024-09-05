@@ -435,8 +435,10 @@ async function processSalaryComponents(frm) {
             let componentCell = newRow.insertCell();
             componentCell.textContent = "Total CTC";
             
-            let monthlyAmount = Math.round(sum); // Calculate monthly amount
-            let annualAmount = Math.round(sum*12); // Calculate annual amount
+            let monthlyAmount = Math.round(sum); 
+            let annualAmount = Math.round(monthlyAmount*12); 
+
+            
         
             let formattedMonthlyAmount = monthlyAmount.toLocaleString();
             let amountCell = newRow.insertCell();
@@ -455,7 +457,7 @@ async function processSalaryComponents(frm) {
         
 
         // Handle additional components if applicable
-        if (frm.doc.custom_is_special_hra || frm.doc.custom_is_special_conveyance || frm.doc.custom_is_car_allowance) {
+        if (frm.doc.custom_is_special_hra || frm.doc.custom_is_special_conveyance || frm.doc.custom_is_car_allowance || frm.doc.custom_is_incentive || frm.doc.custom_is_extra_driver_salary) {
             let additionalComponentTable = `
                 <table class="table table-bordered small"> 
                     <thead> 
@@ -487,6 +489,16 @@ async function processSalaryComponents(frm) {
             if (frm.doc.custom_is_car_allowance) {
                 components.push("Car Allowance");
                 componentAmounts.push(frm.doc.custom_car_allowance_amount_annual);
+            }
+
+            if (frm.doc.custom_is_incentive) {
+                components.push("Incentive");
+                componentAmounts.push(frm.doc.custom_incentive_amount_annual);
+            }
+
+            if (frm.doc.custom_is_extra_driver_salary) {
+                components.push("Extra Driver Salary");
+                componentAmounts.push(frm.doc.custom_extra_driver_salary_value);
             }
 
             
