@@ -41,7 +41,7 @@ class CustomSalarySlip(SalarySlip):
     def before_save(self):
 
         
-
+        
         self.update_bonus_accrual()
         self.new_joinee()
         self.insert_lop_days()
@@ -91,11 +91,11 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-
+        # self.arrear_ytd()
         self.tax_calculation()
         self.calculate_grosspay()
 
-        # self.arrear_ytd()
+        
 
     
 
@@ -119,30 +119,59 @@ class CustomSalarySlip(SalarySlip):
 
                 frappe.delete_doc('Employee Benefit Accrual', j.name)
 
+    def arrear_ytd(self):
+        # Fetch all Salary Slips for the employee within the payroll period
+        get_arrear_component = frappe.db.get_list('Salary Slip',
+            filters={
+                'employee': self.employee,
+                'custom_payroll_period': self.custom_payroll_period,
+                'docstatus': 1
+            },
+            fields=['name']  # Fetch only the name field for the Salary Slips
+        )
 
+        # Check if there are any Salary Slips to process
+        if get_arrear_component:
+            # Initialize a dictionary to store the sum of arrears for each component
+            arrear_ytd_sum = {}
 
-    # def arrear_ytd(self):
-    #     get_arrear_component=frappe.db.get_list('Salary Slip',
-    #                 filters={
-    #                     'employee': self.employee,
-    #                     'custom_payroll_period':self.custom_payroll_period,
-    #                     'docstatus':1
-    #                 },
-    #                 fields=['*'],
-    #                 )
-
-    #     if get_arrear_component:
-    #         for arrear in get_arrear_component:
-                
-    #             if self.name!=arrear.name:
+            # Loop through each Salary Slip
+            for arrear in get_arrear_component:
+                # Skip the current Salary Slip (to avoid summing arrears from itself)
+                if self.name != arrear.name:
+                    # Fetch the specific Salary Slip document
+                    get_arrear_doc = frappe.get_doc("Salary Slip", arrear.name)
                     
-    #                 get_arrear_doc=frappe.get_doc("Salary Slip",arrear.name)
-    #                 if get_arrear_doc.earnings:
-    #                     for j in get_arrear_doc.earnings:
+                    # Loop through the earnings in that Salary Slip
+                    if get_arrear_doc.earnings:
+                        for earning in get_arrear_doc.earnings:
+                            # Fetch the corresponding Salary Component
+                            get_arrear = frappe.get_doc("Salary Component", earning.salary_component)
+                            
+                            # Check if this component has the custom arrear flag
+                            if get_arrear.custom_component:
+                                # If the component is part of arrear, accumulate the amount
+                                arrear_component = get_arrear.custom_component
+                                
+                                # Initialize sum if this component hasn't been processed yet
+                                if arrear_component not in arrear_ytd_sum:
+                                    arrear_ytd_sum[arrear_component] = 0
+                                
+                                # Add the amount to the arrear sum for this component
+                                arrear_ytd_sum[arrear_component] += earning.amount
 
-    #                         frappe.msgprint(str(j.salary_component))
+            # Now set the custom_arrear_ytd field in the current Salary Slip for each earning
+            for current_earning in self.earnings:
+                # Check if there's an arrear sum for the current salary component
+                if current_earning.salary_component in arrear_ytd_sum:
+                    # Set the YTD arrear sum for the corresponding component
+                    current_earning.custom_arrear_ytd = arrear_ytd_sum[current_earning.salary_component]
 
-                    # frappe.msgprint(str(get_arrear_doc.earnings))
+                                            
+
+
+
+                    
 
 
 
@@ -183,6 +212,7 @@ class CustomSalarySlip(SalarySlip):
 
     def update_declaration_component(self):
         if self.employee:
+            
             total_nps = []
             total_epf=[]
             update_component_array = []
@@ -253,7 +283,7 @@ class CustomSalarySlip(SalarySlip):
                             total_epf.append(epf_ctc * self.custom_month_count)
                             
 
-                # frappe.msgprint(str(total_epf))
+                
                 total_nps_sum = sum(total_nps)
                 total_epf_sum=sum(total_epf)
 

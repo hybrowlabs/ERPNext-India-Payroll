@@ -123,7 +123,8 @@
   {
    "fieldname": "salary_slip",
    "fieldtype": "Data",
-   "label": "Salary Slip"
+   "label": "Salary Slip",
+   "read_only": 1
   },
   {
    "fieldname": "max_lop_days",
@@ -140,7 +141,7 @@
    "link_fieldname": "custom_lop_reversal"
   }
  ],
- "modified": "2024-07-14 10:10:05.738919",
+ "modified": "2024-09-06 14:42:33.793322",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",

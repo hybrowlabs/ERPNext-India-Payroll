@@ -7,7 +7,7 @@ def accrual_created(payroll_entry_doc_id, company_name):
         if company_doc:
             salary_slips = frappe.get_list('Salary Slip', 
                 filters={'payroll_entry': payroll_entry_doc_id},
-                fields=['name', 'employee', 'payroll_entry', 'salary_structure','posting_date']
+                fields=["*"]
             )
             # frappe.msgprint(str(salary_slips))
             for salary_slip in salary_slips:
@@ -22,52 +22,50 @@ def accrual_created(payroll_entry_doc_id, company_name):
                         
                         bonus_component=salary_component_doc.name
                         bonus_component_amount = earning.amount
-                        break
-                if bonus_component_amount is not None:
-                    ss_assignment = frappe.get_list('Salary Structure Assignment',
-                        filters={'employee': salary_slip.employee,'docstatus':1},
-                        fields=['name'],
-                        order_by='from_date desc',
-                        limit=1
-                    )
 
-                    if ss_assignment:
+                        if bonus_component_amount is not None:
+                            ss_assignment = frappe.get_list('Salary Structure Assignment',
+                                filters={'employee': salary_slip.employee,'docstatus':1},
+                                fields=['name'],
+                                order_by='from_date desc',
+                                limit=1
+                            )
 
-                        
-                        for ssa_id in ss_assignment:
-                           
-                            
-                            insert_bonus_accrual= frappe.get_doc({
+                            if ss_assignment:
+
                                 
-                                "doctype": "Employee Bonus Accrual",
+                                for ssa_id in ss_assignment:
+                                
+                                    
+                                    insert_bonus_accrual= frappe.get_doc({
+                                        
+                                        "doctype": "Employee Bonus Accrual",
 
-                                "employee": salary_slip.employee,
-                                "company":  company_name,
-                                "salary_slip":salary_slip.name,
-                                "accrual_date": salary_slip.posting_date,
-                                "salary_component": bonus_component,
-                                "salary_structure":salary_slip.salary_structure,
-                                "salary_structure_assignment": ssa_id.name,
-                               
-                                "payroll_entry":salary_slip.payroll_entry,
-                                                                                            
-                                "amount": bonus_component_amount
+                                        "employee": salary_slip.employee,
+                                        "company":  company_name,
+                                        "salary_slip":salary_slip.name,
+                                        "accrual_date": salary_slip.posting_date,
+                                        "salary_component": bonus_component,
+                                        "salary_structure":salary_slip.salary_structure,
+                                        "salary_structure_assignment": ssa_id.name,
+                                    
+                                        "payroll_entry":salary_slip.payroll_entry,
+                                                                                                    
+                                        "amount": bonus_component_amount
 
 
-                            })
-                            insert_bonus_accrual.insert()
+                                    })
+                                    insert_bonus_accrual.insert()
 
-                            if insert_bonus_accrual.name:
-                                frappe.response['message'] = insert_bonus_accrual.name
+                                    if insert_bonus_accrual.name:
+                                        frappe.response['message'] = insert_bonus_accrual.name
 
-                        
+                                
 
                     
 @frappe.whitelist()
 def get_submit(payroll_entry):
-
-    
-    
+ 
     if payroll_entry:
         bonus_list=frappe.db.get_list('Employee Bonus Accrual',
         filters={
