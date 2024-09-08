@@ -7374,7 +7374,7 @@
   "name": "Salary Structure Assignment-custom_state",
   "no_copy": 0,
   "non_negative": 0,
-  "options": "Gujarat\nKerala\nKarnataka\nMaharashtra\nWest Bengal\nAndra Pradesh\nDelhi\nPunjab\nTamilnadu\nTelangana",
+  "options": "Gujarat\nKerala\nKarnataka\nMaharashtra\nWest Bengal\nAndra Pradesh\nDelhi\nPunjab\nTamil Nadu\nTelangana",
   "permlevel": 0,
   "precision": "",
   "print_hide": 0,
