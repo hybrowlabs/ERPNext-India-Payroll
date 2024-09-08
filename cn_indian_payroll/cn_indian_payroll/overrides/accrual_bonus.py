@@ -9,13 +9,11 @@ def accrual_created(payroll_entry_doc_id, company_name):
                 filters={'payroll_entry': payroll_entry_doc_id},
                 fields=["*"]
             )
-            # frappe.msgprint(str(salary_slips))
             for salary_slip in salary_slips:
                 salary_slip_doc = frappe.get_doc('Salary Slip', salary_slip.name)
                 bonus_component_amount = None
                 
                 for earning in salary_slip_doc.earnings:
-                    # frappe.msgprint(str(earning.salary_component))
                     salary_component_doc = frappe.get_doc('Salary Component', earning.salary_component)
 
                     if salary_component_doc.custom_is_accrual==1:
@@ -32,11 +30,7 @@ def accrual_created(payroll_entry_doc_id, company_name):
                             )
 
                             if ss_assignment:
-
-                                
-                                for ssa_id in ss_assignment:
-                                
-                                    
+                                for ssa_id in ss_assignment:   
                                     insert_bonus_accrual= frappe.get_doc({
                                         
                                         "doctype": "Employee Bonus Accrual",

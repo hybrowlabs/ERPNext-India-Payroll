@@ -284,7 +284,7 @@ function show_max_lta_amount(frm) {
                                             
                                         });
 
-                                        console.log(reimbursement_amount, "-----");
+                                        // console.log(reimbursement_amount, "-----");
 
                                         if (reimbursement_amount.length > 0) {
                                             frappe.call({

@@ -68,7 +68,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         amount=[]
         max_amount_category=[]
         if self.employee:
-            if self.income_tax_slab=="Old Regime":
+            if self.custom_tax_regime=="Old Regime":
 
                 if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
                     uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
@@ -159,7 +159,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
 
-            if self.income_tax_slab=="New Regime":
+            if self.custom_tax_regime=="New Regime":
 
                 if self.custom_is_nps:
                     basic_amount=(self.base * 0.35)/12
@@ -202,7 +202,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 doc1.company= self.company,
                 doc1.payroll_period= self.custom_payroll_period,
                 doc1.currency= self.currency,
-                doc1.custom_income_tax=self.income_tax_slab,
+                doc1.custom_income_tax=self.custom_tax_regime,
                 doc1.custom_salary_structure_assignment=self.name,
                 doc1.custom_posting_date = frappe.utils.nowdate(),
                 

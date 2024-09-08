@@ -241,7 +241,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-            if self.custom_income_tax_slab == "Old Regime":
+            if self.custom_tax_regime == "Old Regime":
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
                     filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period},
@@ -352,7 +352,7 @@ class CustomSalarySlip(SalarySlip):
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount
                     
 
-            if self.custom_income_tax_slab == "New Regime":
+            if self.custom_tax_regime == "New Regime":
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
                     filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period},
@@ -438,7 +438,7 @@ class CustomSalarySlip(SalarySlip):
     def update_nps(self):
         if self.earnings:
             update_component_array = []
-            if self.custom_income_tax_slab == "Old Regime":
+            if self.custom_tax_regime == "Old Regime":
                 # Process earnings
                 for earning in self.earnings:
                     components = frappe.get_list(
@@ -476,7 +476,7 @@ class CustomSalarySlip(SalarySlip):
             
 
 
-            if self.custom_income_tax_slab == "New Regime":
+            if self.custom_tax_regime == "New Regime":
                 for earning in self.earnings:
                     components = frappe.get_list(
                         'Employee Tax Exemption Sub Category',
@@ -986,7 +986,7 @@ class CustomSalarySlip(SalarySlip):
                     record = frappe.get_doc('Salary Structure Assignment', ss_assignment[0].name)
                     for i in record.custom_employee_reimbursements:
                         if i.reimbursements ==reimbursement_component:
-                            if record.income_tax_slab=="Old Regime":
+                            if record.custom_tax_regime=="Old Regime":
                                 one_day_amount=round((i.monthly_total_amount/self.total_working_days)*self.payment_days)
                                 total_amount_taxable=round(taxable_sum-one_day_amount)
                                 total_amount_non_taxable=round(non_taxable_sum-one_day_amount)
@@ -1515,6 +1515,7 @@ class CustomSalarySlip(SalarySlip):
         
         self.custom_salary_structure_assignment=latest_salary_structure[0].name
         self.custom_income_tax_slab=latest_salary_structure[0].income_tax_slab
+        self.custom_tax_regime=latest_salary_structure[0].custom_tax_regime
         self.custom_employee_state=latest_salary_structure[0].custom_state
         self.custom_annual_ctc=latest_salary_structure[0].base
         # self.custom_payroll_period=latest_salary_structure[0].custom_payroll_period
