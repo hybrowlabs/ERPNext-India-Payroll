@@ -15,11 +15,11 @@ def accrual_created(payroll_entry_doc_id, company_name):
                 
                 for earning in salary_slip_doc.earnings:
                     salary_component_doc = frappe.get_doc('Salary Component', earning.salary_component)
-
                     if salary_component_doc.custom_is_accrual==1:
                         
                         bonus_component=salary_component_doc.name
                         bonus_component_amount = earning.amount
+                        bonus_paid_on=salary_component_doc.custom_accrual_paid_on
 
                         if bonus_component_amount is not None:
                             ss_assignment = frappe.get_list('Salary Structure Assignment',
@@ -45,7 +45,9 @@ def accrual_created(payroll_entry_doc_id, company_name):
                                     
                                         "payroll_entry":salary_slip.payroll_entry,
                                                                                                     
-                                        "amount": bonus_component_amount
+                                        "amount": bonus_component_amount,
+                                        "accrual_paid_on":bonus_paid_on
+
 
 
                                     })

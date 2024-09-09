@@ -63,7 +63,7 @@ def get_all_employee(filters=None):
 
             if component_name:
                 reimbursement_components[component_name] = True
-                row[component_name] = round(row.get(component_name, 0) + amount, 2)
+                row[component_name] = round(row.get(component_name, 0) + amount)
 
         # Generate the salary slip for each employee
         salary_slip = make_salary_slip(
@@ -78,7 +78,7 @@ def get_all_employee(filters=None):
             if component_name in ctc_components_set:
                 amount = earning.amount
                 salary_components[component_name] = True
-                row[component_name] = round(row.get(component_name, 0) + amount, 2)
+                row[component_name] = round(row.get(component_name, 0) + amount)
 
         # Process deductions
         for deduction in salary_slip.deductions:
@@ -86,14 +86,14 @@ def get_all_employee(filters=None):
             if component_name in ctc_components_set:
                 amount = deduction.amount
                 salary_components[component_name] = True
-                row[component_name] = round(row.get(component_name, 0) + amount, 2)
+                row[component_name] = round(row.get(component_name, 0) + amount)
 
         # Add allowances to row
-        row['special_hra'] = round(hra_amount, 2)
-        row['special_conveyance'] = round(special_amount, 2)
-        row['car_allowance'] = round(car_amount, 2)
-        row['incentive'] = round(incentive_amount, 2)
-        row['extra_driver_salary'] = round(driver_amount, 2)
+        row['special_hra'] = round(hra_amount)
+        row['special_conveyance'] = round(special_amount)
+        row['car_allowance'] = round(car_amount)
+        row['incentive'] = round(incentive_amount)
+        row['extra_driver_salary'] = round(driver_amount)
 
         data.append(row)
 

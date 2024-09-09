@@ -10,6 +10,7 @@
   "company",
   "employee",
   "accrual_date",
+  "accrual_paid_on",
   "column_break_yukg",
   "salary_structure",
   "salary_structure_assignment",
@@ -117,12 +118,19 @@
    "fieldname": "salary_slip",
    "fieldtype": "Data",
    "label": "Salary Slip"
+  },
+  {
+   "default": "Payroll",
+   "fieldname": "accrual_paid_on",
+   "fieldtype": "Select",
+   "label": "Accrual Paid on",
+   "options": "Payroll\nF and F"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-28 22:23:29.384125",
+ "modified": "2024-09-09 17:01:10.841873",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

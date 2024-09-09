@@ -21,8 +21,9 @@ def get_additional_salary(payroll_id,company):
                                                      'employee': employee.employee,
                                                      'docstatus': 1,
                                                      'is_paid': 0,
+                                                     'accrual_paid_on':"Payroll"
                                                  },
-                                                 fields=['name', 'amount', 'employee', 'salary_component', 'company']
+                                                 fields=['*']
                                                 )
 
             for bonus in employee_bonus:
