@@ -6,7 +6,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
-        if(frm.doc.custom_income_tax=="New Regime")
+        if(frm.doc.custom_tax_regime=="New Regime")
             {
                 frm.set_df_property('declarations',  'read_only',  1);
             }
@@ -67,7 +67,7 @@ function edit_declaration(frm) {
                     });
                 }
 
-                if (frm.doc.custom_income_tax === "Old Regime") {
+                if (frm.doc.custom_tax_regime === "Old Regime") {
                     let component_array = [];
 
                     let d = new frappe.ui.Dialog({
@@ -311,7 +311,7 @@ function edit(frm) {
             if (subcategory_response.message && subcategory_response.message.length > 0) {
                 sub_category = subcategory_response.message.map(v => v.name);
 
-                if (frm.doc.custom_income_tax === "Old Regime") {
+                if (frm.doc.custom_tax_regime === "Old Regime") {
                     let d = new frappe.ui.Dialog({
                         title: 'Declare Your Exemptions',
                         fields: [

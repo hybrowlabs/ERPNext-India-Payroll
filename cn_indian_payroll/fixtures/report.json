@@ -142,5 +142,59 @@
     "role": "Employee Self Service"
    }
   ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": "",
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-09-09 09:49:48.473582",
+  "module": "cn-indian-payroll",
+  "name": "CTC BreakUp",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Salary Structure Assignment",
+  "reference_report": null,
+  "report_name": "CTC BreakUp",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "CTC BreakUp",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "CTC BreakUp",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR Manager"
+   },
+   {
+    "parent": "CTC BreakUp",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "CTC BreakUp",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "CTC BreakUp",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "All"
+   }
+  ]
  }
 ]
