@@ -1522,7 +1522,7 @@ class CustomSalarySlip(SalarySlip):
 
 
         latest_payroll_period = frappe.get_list('Payroll Period',
-            filters={'start_date': ('<', self.end_date)},
+            filters={'start_date': ('<', self.end_date),'company':self.company},
             fields=["*"],
             order_by='start_date desc',
             limit=1

@@ -10,7 +10,6 @@ def get_all_employee(filters=None):
     if filters.get("employee"):
         conditions1["employee"] = filters["employee"]
 
-    # Get the list of Salary Structure Assignments based on conditions
     get_all_ssa = frappe.get_list('Salary Structure Assignment',
                 filters=conditions1,
                 fields=['*']
@@ -20,7 +19,6 @@ def get_all_employee(filters=None):
     reimbursement_components = {}
     data = []
 
-    # Fetch all salary components with custom_is_part_of_ctc == 1
     ctc_components = frappe.get_all("Salary Component", filters={"custom_is_part_of_ctc": 1}, fields=["name"])
     ctc_components_set = set(component.name for component in ctc_components)
 
