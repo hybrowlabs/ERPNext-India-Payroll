@@ -153,7 +153,7 @@ frappe.ui.form.on('Payroll Entry', {
 
                 {
 
-                    frm.add_custom_button(__("Sumbit Additional Salary"),function()
+                    frm.add_custom_button(__("Submit Additional Salary"),function()
                     {
     
                         frappe.call({
