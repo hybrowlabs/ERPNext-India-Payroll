@@ -44,14 +44,14 @@ def get_all_employee(filters=None):
         if each_employee.get("custom_is_extra_driver_salary") == 1:
             driver_amount = each_employee.get("custom_extra_driver_salary_value") / 12
 
-        # Fetch reimbursements for the current employee
+        
         reimbursements = frappe.get_all(
             'Employee Reimbursements',
             filters={"parent": each_employee.get("name")},
             fields=["reimbursements", "monthly_total_amount"]
         )
 
-        # Process reimbursements
+        
         for reimbursement in reimbursements:
             component_name = reimbursement.get("reimbursements")
             amount = reimbursement.get("monthly_total_amount")
@@ -64,10 +64,10 @@ def get_all_employee(filters=None):
         salary_slip = make_salary_slip(
             source_name=each_employee.get("salary_structure"),
             employee=each_employee.get("employee"),
-            print_format='Salary Slip Standard for CTC',  # Ensure this exists
+            print_format='Salary Slip Standard for CTC',  
         )
 
-        # Process earnings
+        
         for earning in salary_slip.earnings:
             component_name = earning.salary_component
             if component_name in ctc_components_set:

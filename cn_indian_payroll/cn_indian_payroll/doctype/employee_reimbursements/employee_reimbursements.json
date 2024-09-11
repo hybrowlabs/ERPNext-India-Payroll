@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "creation": "2024-05-08 17:14:53.452229",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "reimbursements",
@@ -30,7 +31,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-11 11:56:23.491495",
+ "modified": "2024-09-11 21:49:48.490152",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Reimbursements",
