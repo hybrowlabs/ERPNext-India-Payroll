@@ -1,5 +1,7 @@
 import frappe
 
+
+
 def validate(self, method):
     amount = 0
 
