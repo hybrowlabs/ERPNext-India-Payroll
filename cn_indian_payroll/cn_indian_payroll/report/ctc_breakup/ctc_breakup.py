@@ -15,11 +15,11 @@ def get_all_employee(filters=None):
                 fields=['*']
             )
 
-    salary_components = set()  # Using set for unique components
-    reimbursement_components = set()  # Using set for unique reimbursements
+    salary_components = set()  
+    reimbursement_components = set()  
     data = []
     
-    ctc_components = frappe.get_all("Salary Component", filters={"custom_is_part_of_ctc": 1}, fields=["name"])
+    ctc_components = frappe.get_all("Salary Component", filters={"custom_is_part_of_ctc": 1}, fields=["name"],order_by="custom_sequence asc")
     ctc_components_set = set(component.name for component in ctc_components)
 
     for each_employee in get_all_ssa:

@@ -232,7 +232,7 @@ fixtures = [
 	{"dt":"Print Format","filters":{"module": "cn-indian-payroll"}},
     {"dt":"Property Setter","filters":{"module": "cn-indian-payroll"}},
     
-    {"dt":"Report","filters":{"module": "cn-indian-payroll"}},
+    {"dt":"Report","filters":{"name": "Salary Slip Registers"}},
     
 
     {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
