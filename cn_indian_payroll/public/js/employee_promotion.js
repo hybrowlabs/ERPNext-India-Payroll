@@ -17,18 +17,13 @@ frappe.ui.form.on('Employee Promotion', {
                         if (progress < 100) {
                             frappe.show_progress('Loading...', progress, 100, 'Please wait');
                         } else {
-                            // Final progress state
-                            // frappe.show_progress('Completed...', 100, 100, 'Please wait');
-                            // clearInterval(interval);
-
-                            // Hide progress bar after a short delay to ensure it shows completed state
+                            
                             setTimeout(function() {
                                 frappe.hide_progress();
                             }, 500); // Adjust delay as necessary
                         }
                     }, 500); // 500ms interval, adjust as needed
 
-                    // Call your function to get old and new structure
                     get_old_new_structure(frm);
 
                 } else {
@@ -98,6 +93,12 @@ async function get_old_new_structure(frm) {
             });
 
             let final_array = Object.values(combinedDict);
+
+
+            // console.log(final_array,"9999")
+
+
+
 
             if (final_array.length > 0) {
                 await fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_structure, old_from_date, old_ssa_id, new_salary_structure, new_from_date, new_ssa_id);
@@ -289,7 +290,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                                 employee: frm.doc.employee,
                                 print_format: 'Salary Slip Standard for CTC',
                                 docstatus: 1,
-                                // posting_date: date
+                                posting_date: date
                             }
                         });
 
@@ -466,7 +467,7 @@ async function fetchOldSalaryComponents(frm, salary_structure, from_date, old_co
                 employee: frm.doc.employee,
                 print_format: 'Salary Slip Standard for CTC',
                 docstatus: 1,
-                // posting_date: from_date
+                posting_date: from_date
             }
         });
 
@@ -497,7 +498,7 @@ async function fetchNewSalaryComponents(frm, salary_structure, from_date, new_co
                 employee: frm.doc.employee,
                 print_format: 'Salary Slip Standard for CTC',
                 docstatus: 1,
-                posting_date: from_date
+                // posting_date: from_date
             }
         });
 
