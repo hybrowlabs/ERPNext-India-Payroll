@@ -1,6 +1,35 @@
 
 
 frappe.ui.form.on('Salary Structure Assignment', {
+
+
+
+    onload:function(frm)
+    {
+
+        if (frm.doc.custom_promotion_id)
+        {
+
+            frappe.call({
+                method: 'frappe.client.get',
+                args: {
+                    doctype: "Employee Promotion",
+                    filters:{"name":frm.doc.custom_promotion_id}
+                },
+                callback: function(r) {
+                    if (r.message) {
+
+                        console.log(r.message,"1111")
+
+                        frm.set_value("from_date",r.message.promotion_date)
+                        
+                    }
+                }
+            });
+
+        }
+
+    },
     
 
     

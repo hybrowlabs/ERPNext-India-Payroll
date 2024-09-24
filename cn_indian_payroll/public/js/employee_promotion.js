@@ -289,7 +289,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                                 employee: frm.doc.employee,
                                 print_format: 'Salary Slip Standard for CTC',
                                 docstatus: 1,
-                                posting_date: date
+                                // posting_date: date
                             }
                         });
 
@@ -466,7 +466,7 @@ async function fetchOldSalaryComponents(frm, salary_structure, from_date, old_co
                 employee: frm.doc.employee,
                 print_format: 'Salary Slip Standard for CTC',
                 docstatus: 1,
-                posting_date: from_date
+                // posting_date: from_date
             }
         });
 
