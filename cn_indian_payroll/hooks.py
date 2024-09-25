@@ -239,7 +239,7 @@ fixtures = [
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
-    # {"dt":"Salary Component"},
+    {"dt":"Salary Component"},
 
 
 ]
