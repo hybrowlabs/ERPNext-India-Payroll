@@ -10,7 +10,6 @@ def on_submit(self,method):
 
 def on_cancel(self,method):
 
-    # cancel_additional_salary(self)
     reverse_bonus_accrual(self)
     reverse_benefit_accrual(self)
 

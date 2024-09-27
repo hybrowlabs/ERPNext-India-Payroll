@@ -155,6 +155,7 @@ frappe.ui.form.on('Payroll Entry', {
 
                     frm.add_custom_button(__("Submit Additional Salary"),function()
                     {
+                        
     
                         frappe.call({
     
@@ -166,12 +167,17 @@ frappe.ui.form.on('Payroll Entry', {
                             },
                             callback :function(res)
                             {
+
+                                // console.log("HIHI")
                                 
-                                if(res.message)
-                                    {
-                                        frm.set_value("custom_bonus_accrual_submit",1)
+                                // if(res.message)
+                                //     {
+                                        
+                                        // frm.set_value("custom_bonus_accrual_submit",1)
+                                        frm.set_value("custom_additional_salary_submitted",1)
                                         frm.save();
-                                    }
+                                        // doc.reload()
+                                    // }
     
                             }
     
@@ -212,7 +218,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 function create_bunus(frm)
 {
-    // console.log("hiii")
+   
     frm.add_custom_button(__("Create Bonus Accrual Entry"), function() {
                 if (frm.doc.employees.length > 0) {
                     $.each(frm.doc.employees, function(i, v) {
