@@ -1502,6 +1502,9 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_in_words=money_in_words(self.custom_net_pay_amount)
 
+        if self.total_loan_repayment:
+            self.custom_loan_amount=self.total_loan_repayment
+
 
     def set_payroll_period(self):
 
