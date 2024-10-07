@@ -86,7 +86,6 @@ frappe.ui.form.on('Payroll Entry', {
                         },
                         callback :function(res)
                         {
-                            // console.log(res.message,"111111")
                             if(res.message)
                                 {
                                     frm.set_value("custom_bonus_accrual_submit",1)
@@ -130,8 +129,14 @@ frappe.ui.form.on('Payroll Entry', {
                                 },
                                 callback: function(response) {
 
-                                    frm.set_value("custom_additional_salary_created",1)
-                                    frm.save();
+                                    if(response.message)
+                                    {
+                                        // msgprint("Additional Salary Created Successfully")
+                                        frm.set_value("custom_additional_salary_created",1)
+                                        frm.save();
+                                    }
+
+                                    
                                    
 
                                     
@@ -168,17 +173,10 @@ frappe.ui.form.on('Payroll Entry', {
                             callback :function(res)
                             {
 
-                                // console.log("HIHI")
                                 
-                                // if(res.message)
-                                //     {
-                                        
-                                        // frm.set_value("custom_bonus_accrual_submit",1)
                                         frm.set_value("custom_additional_salary_submitted",1)
                                         frm.save();
-                                        // doc.reload()
-                                    // }
-    
+                                        
                             }
     
                         })
@@ -340,7 +338,6 @@ function create_bunus(frm)
                         });
                     });
 
-                    // msgprint("Employee Bonus Accrual Created")
                 }
                     
 
@@ -370,7 +367,6 @@ function create_bonus_accrual_entry(frm)
             },
             callback: function(res)
             {
-                // console.log(res.message,"9999")
 
 
                 msgprint("Bonus Accrual is Created")

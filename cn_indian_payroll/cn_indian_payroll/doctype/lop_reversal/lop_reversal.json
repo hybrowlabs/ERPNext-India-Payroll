@@ -114,6 +114,7 @@
    "options": "LOP Reversal Deduction Child"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -141,7 +142,7 @@
    "link_fieldname": "custom_lop_reversal"
   }
  ],
- "modified": "2024-09-11 12:21:35.107286",
+ "modified": "2024-10-01 10:24:06.892175",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
