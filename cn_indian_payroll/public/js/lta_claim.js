@@ -284,7 +284,6 @@ function show_max_lta_amount(frm) {
                                             
                                         });
 
-                                        // console.log(reimbursement_amount, "-----");
 
                                         if (reimbursement_amount.length > 0) {
                                             frappe.call({
@@ -301,7 +300,6 @@ function show_max_lta_amount(frm) {
                                                 },
                                                 callback: function(payroll_data) {
                                                     if (payroll_data.message && payroll_data.message.length > 0) {
-                                                        // console.log(payroll_data.message);
 
                                                         frappe.call({
                                                             method: "frappe.client.get_list",

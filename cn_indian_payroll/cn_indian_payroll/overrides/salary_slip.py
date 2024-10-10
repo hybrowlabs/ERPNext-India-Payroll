@@ -25,8 +25,14 @@ from datetime import datetime
 
 class CustomSalarySlip(SalarySlip):
 
-    
 
+
+
+        
+
+    
+    def before_update_after_submit(self):
+        self.tax_calculation()
 
     def after_insert(self):
         self.employee_accrual_insert()

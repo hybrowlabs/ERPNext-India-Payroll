@@ -30,6 +30,32 @@ frappe.ui.form.on('Employee Promotion', {
                     frappe.msgprint("Please Select Additional Salary Date");
                 }
             });
+
+
+
+            // frm.add_custom_button("Calculate",function()
+            //     {
+            //         frappe.call({
+
+            //             "method":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal_calculation.appraisal_calculation",
+            //             args:{
+            //                 promotion_id :frm.doc.name,
+            //                 employee_id:frm.doc.employee,
+            //                 company:frm.doc.company,
+            //                 date:frm.doc.custom_additional_salary_date,
+            //                 effective_from:frm.doc.promotion_date
+            
+            //             },
+            //             callback: function(res)
+            //             {
+            
+            
+                            
+                            
+            //             }
+            //         })
+                    
+            //     })
         }
         
         
@@ -95,7 +121,7 @@ async function get_old_new_structure(frm) {
             let final_array = Object.values(combinedDict);
 
 
-            // console.log(final_array,"9999")
+            console.log(final_array,"9999")
 
 
 
@@ -187,9 +213,10 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                                 lop_reversal: lop_reversal_sum
                             });
                         });
+
+                       
                     }
 
-                    // Get the latest Salary Structure Assignment details
                     let latest_structure = await frappe.call({
                         method: "frappe.client.get",
                         args: {
@@ -450,10 +477,18 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                 }
             }
         }
-    } catch (error) {
+    } 
+
+    
+    
+    catch (error) {
         console.error(error);
         frappe.show_alert({ message: __("An error occurred."), indicator: 'red' });
     }
+
+    // console.log(final_mapped_array,"1111111111")
+
+   
 }
 
 
