@@ -6,6 +6,9 @@ def on_submit(self,method):
     insert_additional_salary(self)
     update_bonus_accrual(self)
     update_reimbursement_accruals(self)
+    
+
+    
 
 
 def on_cancel(self,method):
@@ -32,6 +35,7 @@ def update_bonus_accrual(self):
                     
 
 def update_reimbursement_accruals(self):
+    
     if len(self.reimbursement_components) > 0:
         for accrual in self.reimbursement_components:
             benefit_accrual = frappe.get_list('Employee Benefit Accrual',
@@ -41,9 +45,31 @@ def update_reimbursement_accruals(self):
             if benefit_accrual:
                 for each_accrual_doc in benefit_accrual:
                     get_doc = frappe.get_doc('Employee Benefit Accrual', each_accrual_doc.name)
+
+                    
     
                     get_doc.amount += accrual.difference
                     get_doc.save()
+
+            else:
+                
+                if accrual.salary_slip_id:
+                    get_sl=frappe.get_doc("Salary Slip",accrual.salary_slip_id)
+
+                    insert_doc = frappe.get_doc({
+                            'doctype': 'Employee Benefit Accrual',
+                            'employee': self.employee,
+                            'amount': accrual.difference,
+                            'salary_component':accrual.salary_component,
+                            'benefit_accrual_date':get_sl.end_date,
+                            'salary_slip':accrual.salary_slip_id,
+                            'payroll_period':get_sl.custom_payroll_period,
+                            'docstatus':1,
+                        
+                            
+                        })
+                    insert_doc.insert()
+
 
 
 def insert_additional_salary(self):

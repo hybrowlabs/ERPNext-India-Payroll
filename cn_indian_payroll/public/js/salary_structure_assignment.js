@@ -7,7 +7,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
     onload:function(frm)
     {
 
-        if (frm.doc.custom_promotion_id)
+        if (frm.doc.custom_promotion_id && frm.is_new())
         {
 
             frappe.call({
@@ -19,7 +19,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 callback: function(r) {
                     if (r.message) {
 
-                        // console.log(r.message,"1111")
+                        
 
                         frm.set_value("from_date",r.message.promotion_date)
                         

@@ -26,36 +26,54 @@ frappe.ui.form.on('Employee Promotion', {
 
                     get_old_new_structure(frm);
 
-                } else {
+                } 
+                else {
                     frappe.msgprint("Please Select Additional Salary Date");
                 }
             });
 
 
 
-            // frm.add_custom_button("Calculate",function()
-            //     {
-            //         frappe.call({
+            if (!frm.is_new() && frm.doc.custom_status === "Payroll Configured") {
 
-            //             "method":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal_calculation.appraisal_calculation",
-            //             args:{
-            //                 promotion_id :frm.doc.name,
-            //                 employee_id:frm.doc.employee,
-            //                 company:frm.doc.company,
-            //                 date:frm.doc.custom_additional_salary_date,
-            //                 effective_from:frm.doc.promotion_date
+            frm.add_custom_button("Calculate",function()
+                {
+                    if (frm.doc.custom_additional_salary_date) {
+
+                    frappe.call({
+
+
+
+                        "method":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal_calculation.appraisal_calculation",
+                        args:{
+                            promotion_id :frm.doc.name,
+                            employee_id:frm.doc.employee,
+                            company:frm.doc.company,
+                            date:frm.doc.custom_additional_salary_date,
+                            effective_from:frm.doc.promotion_date
             
-            //             },
-            //             callback: function(res)
-            //             {
+                        },
+                        callback: function(res)
+                        {
             
             
                             
                             
-            //             }
-            //         })
+                        }
+                    })
+
+                    frm.set_value("custom_status","Arrears Calculated")
+                    frm.save()
+
+                }
+
+                else {
+                    frappe.msgprint("Please Select Additional Salary Date");
+                }
                     
-            //     })
+                })
+
+            }
         }
         
         
