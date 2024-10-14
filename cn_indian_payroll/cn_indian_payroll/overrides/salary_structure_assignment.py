@@ -79,6 +79,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             get_promotion_doc.custom_status="Payroll Configured"
             get_promotion_doc.save()
 
+            get_promotion_doc.reload()
+
 
 
 
@@ -91,7 +93,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
                 if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
                     uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_salary_component':"Uniform"},
+                            filters={'custom_component_type':"Uniform"},
                             fields=['*'],
                         
                         )
@@ -115,7 +117,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     epf_amount_year=epf_amount*12
 
                     epf_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_salary_component':"Employee Provident Fund"},
+                            filters={'custom_component_type':"EPF"},
                             fields=['*'],
                         
                         )
@@ -162,7 +164,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     
                 if self.custom_state:
                     pt_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_salary_component':"Professional Tax (Gujarat)"},
+                            filters={'custom_component_type':"Professional Tax"},
                             fields=['*'],
                         
                         )
@@ -188,7 +190,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
                     nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
-                            filters={'custom_salary_component':"NPS"},
+                            filters={'custom_component_type':"NPS"},
                             fields=['*'],
                         
                         )

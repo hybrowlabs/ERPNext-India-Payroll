@@ -79,7 +79,7 @@ class CustomSalarySlip(SalarySlip):
 
         
         self.custom_statutory_grosspay=gross_pay_sum
-        # frappe.msgprint(str(gross_pay_year_sum))
+        
         self.custom_statutory_year_to_date=gross_pay_year_sum
 
 

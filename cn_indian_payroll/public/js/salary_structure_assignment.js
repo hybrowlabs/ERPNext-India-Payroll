@@ -212,11 +212,15 @@ function change_regime(frm)
                     {
                         label: 'Select Regime',
                         fieldname: 'select_regime',
-                        fieldtype: 'Link',
-                        options:'Income Tax Slab',
+                        fieldtype: 'Select',
+                        options:['Old Regime','New Regime'],
                         reqd:1,
                         default:frm.doc.income_tax_slab
-                    }
+                    },
+
+                   
+
+
                 ],
                 size: 'small', // small, large, extra-large 
                 primary_action_label: 'Submit',
@@ -230,7 +234,8 @@ function change_regime(frm)
 
                             doc_id: frm.doc.name,
                             employee:frm.doc.employee,
-                            regime:values.select_regime
+                            regime:values.select_regime,
+                            company:frm.doc.company
 
                         },
                         callback :function(res)

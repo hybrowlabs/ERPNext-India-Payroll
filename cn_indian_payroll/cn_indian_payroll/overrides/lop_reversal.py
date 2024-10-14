@@ -238,20 +238,6 @@ def on_cancel(self,method):
 
 
 
-    # salary_slip=frappe.db.get_list('Salary Slip',
-    #             filters={
-    #                 'name': self.salary_slip
-    #             },
-    #             fields=['*'],
-                
-    #         )
-
-    # if len(salary_slip)>0:
-
-
-    #     salary_slip_doc = frappe.get_doc('Salary Slip',salary_slip[0].name)
-    #     salary_slip_doc.custom_lop_updated = 0
-    #     salary_slip_doc.save()
 
     
 
