@@ -85,7 +85,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
         
-        if (frm.doc.custom_is_nps==1 )
+        if (frm.doc.custom_is_nps==1)
         
         {
         
@@ -215,7 +215,7 @@ function change_regime(frm)
                         fieldtype: 'Select',
                         options:['Old Regime','New Regime'],
                         reqd:1,
-                        default:frm.doc.income_tax_slab
+                        default:frm.doc.custom_tax_regime
                     },
 
                    

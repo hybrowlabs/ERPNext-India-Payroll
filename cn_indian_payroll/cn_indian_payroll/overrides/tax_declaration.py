@@ -3,6 +3,7 @@ import frappe
 from hrms.payroll.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration import EmployeeTaxExemptionDeclaration
 
 
+
 class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 

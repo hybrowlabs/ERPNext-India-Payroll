@@ -1,5 +1,7 @@
 import frappe
 
+from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+
 @frappe.whitelist()
 def switch_regime(doc_id, employee, regime,company):
     ss_assignment = frappe.get_doc("Salary Structure Assignment", doc_id)
@@ -39,41 +41,61 @@ def switch_regime(doc_id, employee, regime,company):
 
             # Employee Provident Fund (EPF)
             if ss_assignment.custom_is_epf:
-                basic_amount = (ss_assignment.base * 0.35) / 12
-                epf_amount = (basic_amount * 12) / 100
-                epf_amount_year = epf_amount * 12
+                new_salary_slip = make_salary_slip(
+                        source_name=ss_assignment.salary_structure,
+                        employee=ss_assignment.employee,
+                        print_format='Salary Slip Standard for CTC',  
+                        posting_date=ss_assignment.from_date  
+                    )
+                for new_earning in new_salary_slip.deductions:
+                        epf_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                        if epf_component.component_type == "EPF":
 
-                epf_component = frappe.get_list(
-                    'Employee Tax Exemption Sub Category',
-                    filters={'custom_component_type': "EPF"},
-                    fields=['*']
-                )
+                            epf_amount_year=new_earning.amount*12
 
-                for i in epf_component:
-                    component_array.append(i.name)
-                    max_amount.append(i.max_amount)
+                            epf_component_subcategory = frappe.get_list('Employee Tax Exemption Sub Category',
+                                    filters={'custom_component_type':"EPF"},
+                                    fields=['*'],
+                                
+                                )
+                            if len(epf_component_subcategory)>0:
+                                for i in epf_component_subcategory:
+                                    
+                                    component_array.append(i.name)
+                                    
+                                    max_amount.append(i.max_amount)
 
-                    if epf_amount_year > i.max_amount:
-                        amount.append(i.max_amount)
-                    else:
-                        amount.append(epf_amount_year)
+                                    if epf_amount_year>i.max_amount:
+                                        amount.append(i.max_amount)
+                                    else:
+                                        amount.append(epf_amount_year)
+                
 
             # NPS (National Pension System)
             if ss_assignment.custom_is_nps:
-                nps_amount = ((ss_assignment.base * 0.35) / 12)
-                nps_amount_percentage = (nps_amount * ss_assignment.custom_nps_percentage) / 100
-                nps_amount_year = nps_amount_percentage * 12
+                new_salary_slip = make_salary_slip(
+                        source_name=ss_assignment.salary_structure,
+                        employee=ss_assignment.employee,
+                        print_format='Salary Slip Standard for CTC',  
+                        posting_date=ss_assignment.from_date  
+                    )
+                for new_earning in new_salary_slip.earnings:
+                        nps_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                        if nps_component.component_type == "NPS":
 
-                nps_component = frappe.get_list(
-                    'Employee Tax Exemption Sub Category',
-                    filters={'custom_component_type': "NPS"},
-                    fields=['*']
-                )
+                            nps_amount_year=new_earning.amount*12
 
-                for i in nps_component:
-                    component_array.append(i.name)
-                    max_amount.append(nps_amount_year)
-                    amount.append(nps_amount_year)
+
+                            nps_component = frappe.get_list(
+                                'Employee Tax Exemption Sub Category',
+                                filters={'custom_component_type': "NPS"},
+                                fields=['*']
+                            )
+
+                            for i in nps_component:
+                                component_array.append(i.name)
+                                max_amount.append(nps_amount_year)
+                                amount.append(nps_amount_year)
 
             # Professional Tax (PT)
             if ss_assignment.custom_state:
@@ -122,20 +144,28 @@ def switch_regime(doc_id, employee, regime,company):
             amount = []
             max_amount = []
             if ss_assignment.custom_is_nps:
-                nps_amount = ((ss_assignment.base * 0.35) / 12)
-                nps_amount_percentage = (nps_amount * ss_assignment.custom_nps_percentage) / 100
-                nps_amount_year = nps_amount_percentage * 12
+                new_salary_slip = make_salary_slip(
+                        source_name=ss_assignment.salary_structure,
+                        employee=ss_assignment.employee,
+                        print_format='Salary Slip Standard for CTC',  
+                        posting_date=ss_assignment.from_date  
+                    )
+                for new_earning in new_salary_slip.earnings:
+                        nps_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                        if nps_component.component_type == "NPS":
 
-                nps_component = frappe.get_list(
-                    'Employee Tax Exemption Sub Category',
-                    filters={'custom_component_type': "NPS"},
-                    fields=['*']
-                )
+                            nps_amount_year=new_earning.amount*12
 
-                for i in nps_component:
-                    component_array.append(i.name)
-                    max_amount.append(nps_amount_year)
-                    amount.append(nps_amount_year)
+                            nps_component = frappe.get_list(
+                                'Employee Tax Exemption Sub Category',
+                                filters={'custom_component_type': "NPS"},
+                                fields=['*']
+                            )
+
+                            for i in nps_component:
+                                component_array.append(i.name)
+                                max_amount.append(nps_amount_year)
+                                amount.append(nps_amount_year)
 
             update_each_doc = frappe.get_list(
                 'Employee Tax Exemption Declaration',

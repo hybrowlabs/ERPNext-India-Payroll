@@ -1,5 +1,6 @@
 import frappe
 import datetime
+from frappe.query_builder.functions import Count, Sum
 
 
 
@@ -46,11 +47,20 @@ class CustomSalarySlip(SalarySlip):
 
     def before_save(self):
 
+
+
+        
+
+        
+
         
         
         self.update_bonus_accrual()
         self.new_joinee()
         self.insert_lop_days()
+
+        # self.set_taxale()
+
         # self.loan_perquisite()
 
         self.actual_amount_ctc()
@@ -65,6 +75,7 @@ class CustomSalarySlip(SalarySlip):
             self.insert_lta_reimbursement()
             self.insert_reimbursement()
             self.driver_reimbursement()
+
                    
         self.set_payroll_period()
         self.insert_loan_perquisite()
@@ -98,10 +109,302 @@ class CustomSalarySlip(SalarySlip):
 
 
         self.arrear_ytd()
+        self.food_coupon()
         self.tax_calculation()
         self.calculate_grosspay()
 
+
+
+    
+    def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
+            taxable_earnings = 0
+            additional_income = 0
+            additional_income_with_full_tax = 0
+            flexi_benefits = 0
+            amount_exempted_from_income_tax = 0
+
+            tax_component = None
+
+            latest_salary_structure = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=["*"],
+                        order_by='from_date desc',
+                        limit=1
+                    )
         
+        
+        
+            tax_component=latest_salary_structure[0].custom_tax_regime
+        
+            for earning in self.earnings:
+
+                get_tax=frappe.get_doc("Salary Component",earning.salary_component)
+                
+
+                if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
+                    if get_tax.custom_regime=="None":
+                        earning.is_tax_applicable=get_tax.is_tax_applicable
+                        earning.custom_regime=get_tax.custom_regime
+                        earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+                    elif get_tax.custom_regime==tax_component:
+                        earning.is_tax_applicable=get_tax.is_tax_applicable
+                        earning.custom_regime=get_tax.custom_regime
+                        earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+                    elif get_tax.custom_regime!=tax_component:
+                        earning.is_tax_applicable=0
+                        earning.custom_regime=get_tax.custom_regime
+                        earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+                else:
+                    earning.is_tax_applicable=0
+                    earning.custom_regime=get_tax.custom_regime
+                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+
+                
+
+                
+
+                        
+
+
+
+                # earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+                # earning.custom_regime=get_tax.custom_regime
+                # earning.is_tax_applicable=get_tax.is_tax_applicable
+
+                # frappe.msgprint(str(tax_component))
+
+
+                # if earning.custom_regime==tax_component and earning.is_tax_applicable==1:
+                #     earning.custom_taxable=1
+
+                # if earning.custom_regime=="None" and earning.is_tax_applicable==1:
+                #     earning.custom_taxable=1
+                # if earning.custom_regime=="None" and earning.is_tax_applicable==0:
+                #     earning.custom_taxable=0
+
+
+
+
+
+
+
+
+
+
+                if based_on_payment_days:
+                    amount, additional_amount = self.get_amount_based_on_payment_days(earning)
+                else:
+                    if earning.additional_amount:
+                        amount, additional_amount = earning.amount, earning.additional_amount
+                    else:
+                        amount, additional_amount = earning.default_amount, earning.additional_amount
+                #condition for current tax  component
+                if earning.is_tax_applicable:
+                    if earning.is_flexible_benefit:
+                        flexi_benefits += amount
+                    else:
+                       
+                        taxable_earnings += amount - additional_amount
+                        additional_income += additional_amount
+
+                        # Get additional amount based on future recurring additional salary
+                        if additional_amount and earning.is_recurring_additional_salary:
+                            additional_income += self.get_future_recurring_additional_amount(
+                                earning.additional_salary, earning.additional_amount
+                            )  # Used earning.additional_amount to consider the amount for the full month
+
+                        if earning.deduct_full_tax_on_selected_payroll_date:
+                            additional_income_with_full_tax += additional_amount
+            print(taxable_earnings,"taxable_earnings------")
+
+            if allow_tax_exemption:
+                for ded in self.deductions:
+                    if ded.exempted_from_income_tax:
+                        amount, additional_amount = ded.amount, ded.additional_amount
+                        if based_on_payment_days:
+                            amount, additional_amount = self.get_amount_based_on_payment_days(ded)
+
+                        taxable_earnings -= flt(amount - additional_amount)
+                        additional_income -= additional_amount
+                        amount_exempted_from_income_tax = flt(amount - additional_amount)
+
+                        if additional_amount and ded.is_recurring_additional_salary:
+                            additional_income -= self.get_future_recurring_additional_amount(
+                                ded.additional_salary, ded.additional_amount
+                            )  # Used ded.additional_amount to consider the amount for the full month
+
+            return frappe._dict(
+                {
+                    "taxable_earnings": taxable_earnings,
+                    "additional_income": additional_income,
+                    "amount_exempted_from_income_tax": amount_exempted_from_income_tax,
+                    "additional_income_with_full_tax": additional_income_with_full_tax,
+                    "flexi_benefits": flexi_benefits,
+                }
+            )
+
+
+
+
+
+
+
+
+
+
+
+    def get_taxable_earnings_for_prev_period(self, start_date, end_date, allow_tax_exemption=False):
+        exempted_amount = 0
+        taxable_earnings = 0
+
+
+        latest_salary_structure = frappe.get_list('Salary Structure Assignment',
+                        filters={'employee': self.employee,'docstatus':1},
+                        fields=["*"],
+                        order_by='from_date desc',
+                        limit=1
+                    )
+        
+        
+        
+        custom_tax_regime=latest_salary_structure[0].custom_tax_regime
+
+        for earning in self.earnings:
+            if custom_tax_regime==earning.custom_regime:
+
+
+
+        # if custom_tax_regime=="Old Regime":
+
+
+                taxable_earnings = self.get_salary_slip_details( 
+                        start_date, end_date, parentfield="earnings", 
+                        is_tax_applicable=1, 
+                        custom_tax_exemption_applicable_based_on_regime=1, 
+                        # custom_taxable=1, 
+                        # custom_regime="None" 
+                    )
+
+            else:
+
+                taxable_earnings = self.get_salary_slip_details( 
+                        start_date, end_date, parentfield="earnings", 
+                        is_tax_applicable=1, 
+                        # custom_tax_exemption_applicable_based_on_regime=1, 
+                        # custom_taxable=1, 
+                        custom_regime="None" 
+                    )
+
+
+
+
+        #     print(taxable_earnings, "taxable_earnings-3333")
+
+        # if custom_tax_regime=="New Regime":
+
+
+        #     taxable_earnings = self.get_salary_slip_details( 
+        #             start_date, end_date, parentfield="earnings", 
+        #             is_tax_applicable=1, 
+        #             custom_tax_exemption_applicable_based_on_regime=1, 
+        #             custom_taxable=1, 
+                     
+        #         )
+
+        #     print(taxable_earnings, "taxable_earnings-44444")
+
+
+
+
+
+        # Check if tax exemption is allowed and get exempted amount
+        if allow_tax_exemption:
+            exempted_amount = self.get_salary_slip_details(
+                start_date, end_date, parentfield="deductions", exempted_from_income_tax=1
+            )
+
+        # Get opening taxable earnings for the period
+        opening_taxable_earning = self.get_opening_for("taxable_earnings_till_date", start_date, end_date)
+
+        # Calculate and return the final taxable earnings
+        return (taxable_earnings + opening_taxable_earning) - exempted_amount, exempted_amount
+
+
+    def get_salary_slip_details(
+        self,
+        start_date,
+        end_date,
+        parentfield,
+        salary_component=None,
+        is_tax_applicable=None,
+        is_flexible_benefit=0,
+        exempted_from_income_tax=0,
+        variable_based_on_taxable_salary=0,
+        field_to_select="amount",
+        custom_tax_exemption_applicable_based_on_regime=None,
+        custom_regime=None,
+        custom_taxable=None,
+        custom_tax_regime=None
+    ):
+        ss = frappe.qb.DocType("Salary Slip")
+        sd = frappe.qb.DocType("Salary Detail")
+        
+        # Select the field based on the input
+        if field_to_select == "amount":
+            field = sd.amount
+        else:
+            field = sd.additional_amount
+
+        # Build the base query
+        query = (
+            frappe.qb.from_(ss)
+            .join(sd)
+            .on(sd.parent == ss.name)
+            .select(Sum(field))
+            .where(sd.parentfield == parentfield)
+            .where(sd.is_flexible_benefit == is_flexible_benefit)
+            .where(ss.docstatus == 1)
+            .where(ss.employee == self.employee)
+            .where(ss.start_date.between(start_date, end_date))
+            .where(ss.end_date.between(start_date, end_date))
+        )
+        
+        # Add conditions if they are provided
+        if is_tax_applicable is not None:
+            query = query.where(sd.is_tax_applicable == is_tax_applicable)
+        
+        if exempted_from_income_tax:
+            query = query.where(sd.exempted_from_income_tax == exempted_from_income_tax)
+
+        if variable_based_on_taxable_salary:
+            query = query.where(sd.variable_based_on_taxable_salary == variable_based_on_taxable_salary)
+
+        if salary_component:
+            query = query.where(sd.salary_component == salary_component)
+
+        if custom_tax_exemption_applicable_based_on_regime:
+            query = query.where(sd.custom_tax_exemption_applicable_based_on_regime == custom_tax_exemption_applicable_based_on_regime)
+
+        if custom_regime:
+            query = query.where(sd.custom_regime == custom_regime)
+        
+        if custom_taxable:
+            query = query.where(sd.custom_taxable == custom_taxable)
+
+        if custom_tax_regime:
+            query = query.where(ss.custom_tax_regime == custom_tax_regime)
+
+        # Run the query and return the result
+        result = query.run()
+
+        return flt(result[0][0]) if result else 0.0
+
+
+
+
 
     
 
@@ -124,6 +427,55 @@ class CustomSalarySlip(SalarySlip):
                 arrear_doc.save()
 
                 frappe.delete_doc('Employee Benefit Accrual', j.name)
+
+
+
+
+
+    def food_coupon(self):
+        food_coupon_array = []
+
+        for food_coupon_component in self.earnings:
+            if food_coupon_component.is_tax_applicable==1 and food_coupon_component.custom_regime == "New Regime":
+
+                get_fd_component = frappe.get_list(
+                    'Salary Slip',
+                    filters={
+                        'employee': self.employee,
+                        'custom_payroll_period': self.custom_payroll_period,
+                        'docstatus': 1
+                    },
+                    fields=['name']
+                )
+
+
+                if len(get_fd_component) > 0:
+                    for k in get_fd_component:
+                        get_slip=frappe.get_doc("Salary Slip",k.name)
+                        for m in get_slip.earnings:
+                            if m.is_tax_applicable==0 and m.custom_regime == "New Regime":
+                                food_coupon_array.append(m.amount)
+
+
+            g1=sum(food_coupon_array)
+
+            food_coupon_component.custom_total_ytd=g1
+
+
+
+
+
+
+
+
+                
+
+                
+
+
+
+
+
 
     def arrear_ytd(self):
         
@@ -219,6 +571,10 @@ class CustomSalarySlip(SalarySlip):
             nps_component = []
             epf_component=[]
 
+
+            # food_coupon_component=[]
+            # total_food_coupon_amount=[]
+
             get_salary_component = frappe.get_list(
                 'Salary Component',
                 filters={"component_type": "NPS"},
@@ -238,13 +594,32 @@ class CustomSalarySlip(SalarySlip):
                 for all_epf_component in get_salary_component_epf:
                     epf_component.append(all_epf_component.name)
 
+            
+            # get_food_coupon=frappe.get_list(
+            #     'Salary Component',
+            #     filters={"custom_tax_exemption_applicable_based_on_regime":1, "custom_regime":"New Regime"},
+            #     fields=['name'],
+            # )
+            # if get_food_coupon:
+            #     for all_food_coupon_component in get_food_coupon:
+            #         food_coupon_component.append(all_food_coupon_component.name)
+
+            
+            # frappe.msgprint(str(food_coupon_component))
+
+
+
+
+
+            
+
 
 
 
             if self.custom_tax_regime == "Old Regime":
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
-                    filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period},
+                    filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period,"company":self.company},
                     fields=['name'],
                 )
                 if get_all_salary_slip:
@@ -255,12 +630,18 @@ class CustomSalarySlip(SalarySlip):
                             for earning_component in each_salary_slip.earnings:
                                 if earning_component.salary_component in nps_component:
                                     total_nps.append(earning_component.amount)
+
+                                # if earning_component.salary_component in food_coupon_component:
+                                #     total_food_coupon_amount.append(earning_component.amount)
+
                             for deduction_component in each_salary_slip.deductions:
 
                                 if deduction_component.salary_component in epf_component:
                                     total_epf.append(deduction_component.amount)
+
+                            
                 
-                                
+                # frappe.msgprint(str(total_food_coupon_amount))              
 
                 for k in self.earnings:
                     if k.salary_component in nps_component:
@@ -287,6 +668,12 @@ class CustomSalarySlip(SalarySlip):
                 total_nps_sum = sum(total_nps)
                 total_epf_sum=sum(total_epf)
 
+                # total_food_coupon=sum(total_food_coupon_amount)
+
+                # frappe.msgprint(str(total_food_coupon))
+
+
+
 
                 for i in self.earnings:
                     components = frappe.get_list(
@@ -310,7 +697,7 @@ class CustomSalarySlip(SalarySlip):
                         fields=['*'],
                     )
                     if ded_components:
-                        # frappe.msgprint(str(ded_components))
+                        
                         
                         if total_epf_sum>ded_components[0].max_amount:
                            
@@ -328,7 +715,7 @@ class CustomSalarySlip(SalarySlip):
                                     "max_amount": ded_components[0].max_amount
                                 })
 
-                # frappe.msgprint(str(update_component_array))
+                
 
                 if update_component_array:
                     declaration = frappe.get_list(
@@ -350,6 +737,71 @@ class CustomSalarySlip(SalarySlip):
                         get_each_doc.save()
                         frappe.db.commit()
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount
+
+                # if total_food_coupon:
+
+                    
+
+                #     components = frappe.get_list(
+                #         'Employee Tax Exemption Sub Category',
+                #         filters={'custom_salary_component':food_coupon_component[0]},
+                #         fields=['*'],
+                #     )
+                #     if len(components)>0:
+                      
+                #         food_coupon_sub_category=components[0].name
+
+                #         if food_coupon_sub_category:
+
+
+                #             get_declaration = frappe.get_list(
+                #                 'Employee Tax Exemption Declaration',
+                #                 filters={'employee': self.employee, 'payroll_period': self.custom_payroll_period, "docstatus": 1, "company": self.company},
+                #                 fields=['*'],
+                #             )
+
+                #             if get_declaration:
+                                
+                #                 get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", get_declaration[0].name)
+
+                               
+                #                 found = False
+                                
+                                
+                #                 for each_subcategory in get_each_doc.declarations:
+                                    
+                #                     if food_coupon_sub_category == each_subcategory.exemption_sub_category:
+                                        
+                #                         each_subcategory.amount = total_food_coupon
+                #                         found = True
+                #                         break  
+
+                                
+                #                 if not found:
+                                    
+                #                     get_each_doc.append("declarations", {
+                #                         "exemption_sub_category": food_coupon_sub_category,
+                #                         "max_amount":total_food_coupon,
+                #                         "amount": total_food_coupon  
+                #                     })
+
+                #                 get_each_doc.save()
+
+                #                 frappe.msgprint(str(get_each_doc.total_exemption_amount))
+
+                #                 frappe.db.commit()  
+
+
+                            
+
+
+
+
+
+
+
+
+
                     
 
             if self.custom_tax_regime == "New Regime":
@@ -1464,6 +1916,22 @@ class CustomSalarySlip(SalarySlip):
             self.custom_loan_amount=self.total_loan_repayment
 
 
+
+
+    def set_taxale(self):
+
+        for earning in self.earnings:
+            get_tax=frappe.get_doc("Salary Component",earning.salary_component)
+
+            earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+            earning.custom_regime=get_tax.custom_regime
+
+                
+
+
+    
+
+
     def set_payroll_period(self):
 
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
@@ -1490,6 +1958,18 @@ class CustomSalarySlip(SalarySlip):
         )
         if latest_payroll_period:
             self.custom_payroll_period=latest_payroll_period[0].name
+
+
+        # if self.custom_tax_regime:
+
+        #     for earning in self.earnings:
+
+        #         if earning.custom_regime==self.custom_tax_regime and earning.is_tax_applicable==1:
+        #             earning.custom_taxable=1
+        #         if earning.custom_regime=="None" and earning.is_tax_applicable==1:
+        #             earning.custom_taxable=1
+        #         if earning.custom_regime=="None" and earning.is_tax_applicable==0:
+        #             earning.custom_taxable=0
 
         
 
