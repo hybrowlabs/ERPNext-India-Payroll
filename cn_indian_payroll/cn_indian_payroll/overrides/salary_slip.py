@@ -651,13 +651,6 @@ class CustomSalarySlip(SalarySlip):
                 total_nps_sum = sum(total_nps)
                 total_epf_sum=sum(total_epf)
 
-                # total_food_coupon=sum(total_food_coupon_amount)
-
-                
-
-
-
-
                 for i in self.earnings:
                     components = frappe.get_list(
                         'Employee Tax Exemption Sub Category',
@@ -683,30 +676,22 @@ class CustomSalarySlip(SalarySlip):
 
                        
                         for k in ded_components:
-                            if k.custom_component_type=="NPS":
-                                if total_epf_sum>ded_components[0].max_amount:
+                            if k.custom_component_type=="EPF":
+                                if total_epf_sum>k.max_amount:
                                 
                                         update_component_array.append({
-                                            "component": ded_components[0].name,
-                                            "amount": ded_components[0].max_amount,
-                                            "max_amount": ded_components[0].max_amount
+                                            "component": k.name,
+                                            "amount": k.max_amount,
+                                            "max_amount": k.max_amount
                                         })
 
                                 else:
             
                                     update_component_array.append({
-                                            "component": ded_components[0].name,
+                                            "component": k.name,
                                             "amount": total_epf_sum,
-                                            "max_amount": ded_components[0].max_amount
+                                            "max_amount": k.max_amount
                                         })
-
-                                    
-
-                                    
-
-                
-                
-
 
                 if update_component_array:
                     declaration = frappe.get_list(
@@ -727,73 +712,7 @@ class CustomSalarySlip(SalarySlip):
                         get_each_doc.custom_posting_date=self.posting_date
                         get_each_doc.save()
                         frappe.db.commit()
-                        self.tax_exemption_declaration=get_each_doc.total_exemption_amount
-
-                # if total_food_coupon:
-
-                    
-
-                #     components = frappe.get_list(
-                #         'Employee Tax Exemption Sub Category',
-                #         filters={'custom_salary_component':food_coupon_component[0]},
-                #         fields=['*'],
-                #     )
-                #     if len(components)>0:
-                      
-                #         food_coupon_sub_category=components[0].name
-
-                #         if food_coupon_sub_category:
-
-
-                #             get_declaration = frappe.get_list(
-                #                 'Employee Tax Exemption Declaration',
-                #                 filters={'employee': self.employee, 'payroll_period': self.custom_payroll_period, "docstatus": 1, "company": self.company},
-                #                 fields=['*'],
-                #             )
-
-                #             if get_declaration:
-                                
-                #                 get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", get_declaration[0].name)
-
-                               
-                #                 found = False
-                                
-                                
-                #                 for each_subcategory in get_each_doc.declarations:
-                                    
-                #                     if food_coupon_sub_category == each_subcategory.exemption_sub_category:
-                                        
-                #                         each_subcategory.amount = total_food_coupon
-                #                         found = True
-                #                         break  
-
-                                
-                #                 if not found:
-                                    
-                #                     get_each_doc.append("declarations", {
-                #                         "exemption_sub_category": food_coupon_sub_category,
-                #                         "max_amount":total_food_coupon,
-                #                         "amount": total_food_coupon  
-                #                     })
-
-                #                 get_each_doc.save()
-
-                #                 frappe.msgprint(str(get_each_doc.total_exemption_amount))
-
-                #                 frappe.db.commit()  
-
-
-                            
-
-
-
-
-
-
-
-
-
-                    
+                        self.tax_exemption_declaration=get_each_doc.total_exemption_amount                    
 
             if self.custom_tax_regime == "New Regime":
                 get_all_salary_slip = frappe.get_list(
@@ -841,12 +760,6 @@ class CustomSalarySlip(SalarySlip):
                                 "amount": total_nps_sum,
                                 "max_amount": total_nps_sum
                         })
-
-
-                # frappe.msgprint(str(update_component_array))
-
-                
-
                 if update_component_array:
                     declaration = frappe.get_list(
                         'Employee Tax Exemption Declaration',
@@ -868,17 +781,6 @@ class CustomSalarySlip(SalarySlip):
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount
 
                                
-           
-
-            # self.annual_taxable_amount=self.total_earnings - (
-			# self.non_taxable_earnings
-			# + self.deductions_before_tax_calculation
-			# + self.tax_exemption_declaration
-			# + self.standard_tax_exemption_amount
-           
-		    # ) + self.custom_perquisite_amount
-
-
 
 
     def update_nps(self):
