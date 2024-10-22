@@ -292,7 +292,7 @@ class CustomSalarySlip(SalarySlip):
 
                 taxable_earnings = self.get_salary_slip_details( 
                         start_date, end_date, parentfield="earnings", 
-                        is_tax_applicable=1, 
+                        is_tax_applicable=1,
                         # custom_tax_exemption_applicable_based_on_regime=1, 
                         # custom_taxable=1, 
                         custom_regime="None" 
@@ -595,24 +595,7 @@ class CustomSalarySlip(SalarySlip):
                     epf_component.append(all_epf_component.name)
 
             
-            # get_food_coupon=frappe.get_list(
-            #     'Salary Component',
-            #     filters={"custom_tax_exemption_applicable_based_on_regime":1, "custom_regime":"New Regime"},
-            #     fields=['name'],
-            # )
-            # if get_food_coupon:
-            #     for all_food_coupon_component in get_food_coupon:
-            #         food_coupon_component.append(all_food_coupon_component.name)
-
-            
-            # frappe.msgprint(str(food_coupon_component))
-
-
-
-
-
-            
-
+           
 
 
 
@@ -670,7 +653,7 @@ class CustomSalarySlip(SalarySlip):
 
                 # total_food_coupon=sum(total_food_coupon_amount)
 
-                # frappe.msgprint(str(total_food_coupon))
+                
 
 
 
@@ -697,25 +680,33 @@ class CustomSalarySlip(SalarySlip):
                         fields=['*'],
                     )
                     if ded_components:
-                        
-                        
-                        if total_epf_sum>ded_components[0].max_amount:
-                           
-                                update_component_array.append({
-                                    "component": ded_components[0].name,
-                                    "amount": ded_components[0].max_amount,
-                                    "max_amount": ded_components[0].max_amount
-                                })
 
-                        else:
-    
-                            update_component_array.append({
-                                    "component": ded_components[0].name,
-                                    "amount": total_epf_sum,
-                                    "max_amount": ded_components[0].max_amount
-                                })
+                       
+                        for k in ded_components:
+                            if k.custom_component_type=="NPS":
+                                if total_epf_sum>ded_components[0].max_amount:
+                                
+                                        update_component_array.append({
+                                            "component": ded_components[0].name,
+                                            "amount": ded_components[0].max_amount,
+                                            "max_amount": ded_components[0].max_amount
+                                        })
+
+                                else:
+            
+                                    update_component_array.append({
+                                            "component": ded_components[0].name,
+                                            "amount": total_epf_sum,
+                                            "max_amount": ded_components[0].max_amount
+                                        })
+
+                                    
+
+                                    
 
                 
+                
+
 
                 if update_component_array:
                     declaration = frappe.get_list(
@@ -850,6 +841,9 @@ class CustomSalarySlip(SalarySlip):
                                 "amount": total_nps_sum,
                                 "max_amount": total_nps_sum
                         })
+
+
+                # frappe.msgprint(str(update_component_array))
 
                 
 
