@@ -283,6 +283,7 @@ async function processSalaryComponents(frm) {
             print_format: 'Salary Slip Standard for CTC',
             docstatus: frm.doc.docstatus,
             // posting_date: frm.doc.from_date
+            for_preview: 1,
         }
     });
 

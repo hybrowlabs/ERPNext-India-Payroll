@@ -163,37 +163,6 @@ class CustomSalarySlip(SalarySlip):
 
 
                 
-
-                
-
-                        
-
-
-
-                # earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-                # earning.custom_regime=get_tax.custom_regime
-                # earning.is_tax_applicable=get_tax.is_tax_applicable
-
-                # frappe.msgprint(str(tax_component))
-
-
-                # if earning.custom_regime==tax_component and earning.is_tax_applicable==1:
-                #     earning.custom_taxable=1
-
-                # if earning.custom_regime=="None" and earning.is_tax_applicable==1:
-                #     earning.custom_taxable=1
-                # if earning.custom_regime=="None" and earning.is_tax_applicable==0:
-                #     earning.custom_taxable=0
-
-
-
-
-
-
-
-
-
-
                 if based_on_payment_days:
                     amount, additional_amount = self.get_amount_based_on_payment_days(earning)
                 else:
@@ -275,11 +244,6 @@ class CustomSalarySlip(SalarySlip):
         for earning in self.earnings:
             if custom_tax_regime==earning.custom_regime:
 
-
-
-        # if custom_tax_regime=="Old Regime":
-
-
                 taxable_earnings = self.get_salary_slip_details( 
                         start_date, end_date, parentfield="earnings", 
                         is_tax_applicable=1, 
@@ -297,27 +261,6 @@ class CustomSalarySlip(SalarySlip):
                         # custom_taxable=1, 
                         custom_regime="None" 
                     )
-
-
-
-
-        #     print(taxable_earnings, "taxable_earnings-3333")
-
-        # if custom_tax_regime=="New Regime":
-
-
-        #     taxable_earnings = self.get_salary_slip_details( 
-        #             start_date, end_date, parentfield="earnings", 
-        #             is_tax_applicable=1, 
-        #             custom_tax_exemption_applicable_based_on_regime=1, 
-        #             custom_taxable=1, 
-                     
-        #         )
-
-        #     print(taxable_earnings, "taxable_earnings-44444")
-
-
-
 
 
         # Check if tax exemption is allowed and get exempted amount

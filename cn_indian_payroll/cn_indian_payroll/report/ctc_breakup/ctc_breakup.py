@@ -64,7 +64,9 @@ def get_all_employee(filters=None):
         salary_slip = make_salary_slip(
             source_name=each_employee.get("salary_structure"),
             employee=each_employee.get("employee"),
-            print_format='Salary Slip Standard for CTC',  
+            print_format='Salary Slip Standard for CTC',
+            # docstatus= each_employee.get("docstatus"),
+            for_preview= 1,  
         )
 
         
