@@ -1,0 +1,19 @@
+{
+  "name": "cn_indian_payroll",
+  "version": "1.0.0",
+  "description": "Documentation coming soon",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd tax-exemptions && yarn install",
+    "dev": "cd tax-exemptions && yarn dev",
+    "build": "concurrently -k \"npm:build:*\"",
+    "build:tax-exemptions": "cd tax-exemptions && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
