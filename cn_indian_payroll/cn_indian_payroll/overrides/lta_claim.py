@@ -24,7 +24,7 @@ def validate(self, method):
                 },
                 fields=['*'],
                 order_by='from_date desc',
-                limit=1  # Fetch only the latest record
+                limit=1  
             )
 
             if get_salary_assignment and get_salary_assignment[0].name:

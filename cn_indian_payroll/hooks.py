@@ -235,7 +235,6 @@ fixtures = [
     {"dt":"Report","filters":{"name": "Salary Slip Registers"}},
     
 
-    # {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},

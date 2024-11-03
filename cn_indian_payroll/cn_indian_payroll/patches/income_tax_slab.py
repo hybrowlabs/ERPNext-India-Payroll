@@ -118,20 +118,20 @@ def execute():
             "parentfield": "slabs",
             "parenttype": "Income Tax Slab",
             "percent_deduction": 5.0,
-            "to_amount": 600000.0
+            "to_amount": 700000.0
         },
         {
             "condition": "annual_taxable_amount > 700000",
-            "from_amount": 600000.0,
+            "from_amount": 700000.0,
             "parent": "New Regime",
             "parentfield": "slabs",
             "parenttype": "Income Tax Slab",
             "percent_deduction": 10.0,
-            "to_amount": 900000.0
+            "to_amount": 1000000.0
         },
         {
            
-            "from_amount": 900000.0,
+            "from_amount": 1000000.0,
             "parent": "New Regime",
             "parentfield": "slabs",
             "parenttype": "Income Tax Slab",
