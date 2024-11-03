@@ -229,12 +229,12 @@ app_license = "mit"
 
 fixtures = [
     {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}},
-	{"dt":"Print Format","filters":{"module": "cn-indian-payroll"}},
-    {"dt":"Property Setter","filters":{"module": "cn-indian-payroll"}},
-    
-    {"dt":"Report","filters":{"name": "Salary Slip Registers"}},
-    
+    {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
+    {"dt": "Property Setter", "filters": {"module": "cn-indian-payroll"}},
 
+    {"dt": "Report", "filters": {"name": "Salary Slip Registers"}},
+
+    # {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
@@ -242,76 +242,64 @@ fixtures = [
     # {"dt":"Income Tax Slab","filters": {"name": ["in", ["Old Regime", "New Regime"]]}},
     # {"dt":"Salary Structure"},
 
-
 ]
-    
-    
-
-
-
 
 doctype_js = {
-                "Payroll Entry" : "public/js/payroll.js",
-                "Employee Benefit Claim" : "public/js/employee_benefit_claim.js",
-                "Employee" : "public/js/employee.js",
-                "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
-                "Employee Tax Exemption Declaration":"public/js/tax_declaration.js",
-                "LOP Reversal":"public/js/lop_reversal.js",
-                "Loan":"public/js/loan.js",
-                "Loan Product":"public/js/loan_product.js",
-                "Salary Slip":"public/js/salary_slip.js",
-                "LTA Claim":"public/js/lta_claim.js",
-                "Salary Appraisal Calculation":"public/js/salary_revision.js",
-                "Employee Promotion":"public/js/employee_promotion.js",
+    "Payroll Entry": "public/js/payroll.js",
+    "Employee Benefit Claim": "public/js/employee_benefit_claim.js",
+    "Employee": "public/js/employee.js",
+    "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
+    "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
+    "LOP Reversal": "public/js/lop_reversal.js",
+    "Loan": "public/js/loan.js",
+    "Loan Product": "public/js/loan_product.js",
+    "Salary Slip": "public/js/salary_slip.js",
+    "LTA Claim": "public/js/lta_claim.js",
+    "Salary Appraisal Calculation": "public/js/salary_revision.js",
+    "Employee Promotion": "public/js/employee_promotion.js",
 
-
-
-              }
-
+}
 
 override_doctype_class = {
-    "Employee Benefit Claim":"cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
-	"Salary Slip":"cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
-    "Salary Structure Assignment":"cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
-    "Employee Tax Exemption Declaration":"cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
-    "Additional Salary":"cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary"
+    "Employee Benefit Claim": "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
+    "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
+    "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
+    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
+    "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary"
 
-   
 }
 
 doc_events = {
-	"Job Offer": {
+    "Job Offer": {
         "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.job_offer.on_update_after_submit",
-        
-	},
+
+    },
 
     "LOP Reversal": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.before_save",
 
+    },
 
-        
-	},
-
-    "Loan Repayment Schedule":{
+    "Loan Repayment Schedule": {
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_save",
 
-        
     },
-    "LTA Claim":{
-        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
-    },
-
-    "Salary Appraisal Calculation":{
-        "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
-        "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
+    "LTA Claim": {
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
     },
 
-    "Employee Promotion":{
-        "on_cancel":"cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
-        "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
+    "Salary Appraisal Calculation": {
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
+        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
     },
 
-    
+    "Employee Promotion": {
+        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
+    },
+
 }
+
+website_route_rules = [{'from_route': '/tax-exemptions/<path:app_path>', 'to_route': 'tax-exemptions'}, ]
