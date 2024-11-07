@@ -439,8 +439,6 @@ function edit(frm) {
                                 });
                             });
 
-                            // console.log(component_from_dialogue)
-
                             frm.clear_table('declarations');
                             component_from_dialogue.forEach(row => {
                                     let new_row = frm.add_child('declarations');
@@ -450,7 +448,9 @@ function edit(frm) {
                                     new_row.amount = row.amount;
                                 });
 
+                                
 
+                                frm.set_value("custom_check",0)
                                 frm.set_value("monthly_house_rent", values.hra_amount);
                                 frm.set_value("rented_in_metro_city", values.rented_in_metro_city);
                                 frm.set_value("custom_posting_date",frappe.datetime.nowdate())

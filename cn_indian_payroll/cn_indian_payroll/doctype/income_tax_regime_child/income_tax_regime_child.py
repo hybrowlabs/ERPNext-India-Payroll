@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class HRABreakup(Document):
+class IncomeTaxRegimeChild(Document):
 	pass

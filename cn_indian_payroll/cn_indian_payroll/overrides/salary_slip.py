@@ -45,15 +45,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def before_save(self):
-
-
-
-        
-
-        
-
-        
+    def before_save(self): 
         
         self.update_bonus_accrual()
         self.new_joinee()
@@ -112,6 +104,12 @@ class CustomSalarySlip(SalarySlip):
         self.food_coupon()
         self.tax_calculation()
         self.calculate_grosspay()
+
+
+
+
+
+    
 
 
 
@@ -346,10 +344,14 @@ class CustomSalarySlip(SalarySlip):
         return flt(result[0][0]) if result else 0.0
 
 
-
-
-
     
+
+
+
+
+
+
+                   
 
  
 
@@ -407,19 +409,6 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-
-
-
-
-                
-
-                
-
-
-
-
-
-
     def arrear_ytd(self):
         
         get_arrear_component = frappe.db.get_list('Salary Slip',
@@ -463,19 +452,6 @@ class CustomSalarySlip(SalarySlip):
                     current_earning.custom_arrear_ytd = arrear_ytd_sum[current_earning.salary_component]
 
                                             
-
-
-
-                    
-
-
-
-
-
-
-
-
-
 
 
 
@@ -538,11 +514,30 @@ class CustomSalarySlip(SalarySlip):
                     epf_component.append(all_epf_component.name)
 
             
+            
+
+            
            
 
 
 
             if self.custom_tax_regime == "Old Regime":
+                basic_array=[]
+                hra_array=[]
+                
+                get_company=frappe.get_doc("Company",self.company)
+                basic_component=get_company.basic_component
+                hra_component=get_company.hra_component
+                if basic_component and hra_component:
+                    for get_component in self.earnings:
+                        if get_component.salary_component==basic_component:
+                            
+                            future_basic_amount=get_component.custom_actual_amount*(self.custom_month_count)+get_component.amount
+
+                        if get_component.salary_component==hra_component:
+                            future_hra_amount=get_component.custom_actual_amount*(self.custom_month_count)+get_component.amount
+
+
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
                     filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period,"company":self.company},
@@ -556,6 +551,15 @@ class CustomSalarySlip(SalarySlip):
                             for earning_component in each_salary_slip.earnings:
                                 if earning_component.salary_component in nps_component:
                                     total_nps.append(earning_component.amount)
+                                
+                                if earning_component.salary_component==basic_component:
+                                    basic_array.append(earning_component.amount)
+
+                                if earning_component.salary_component==hra_component:
+                                    hra_array.append(earning_component.amount)
+
+
+
 
                                 # if earning_component.salary_component in food_coupon_component:
                                 #     total_food_coupon_amount.append(earning_component.amount)
@@ -567,7 +571,7 @@ class CustomSalarySlip(SalarySlip):
 
                             
                 
-                # frappe.msgprint(str(total_food_coupon_amount))              
+                            
 
                 for k in self.earnings:
                     if k.salary_component in nps_component:
@@ -593,6 +597,9 @@ class CustomSalarySlip(SalarySlip):
                 
                 total_nps_sum = sum(total_nps)
                 total_epf_sum=sum(total_epf)
+
+                basic_sum=sum(basic_array)
+                hra_sum=sum(hra_array)
 
                 for i in self.earnings:
                     components = frappe.get_list(
@@ -639,7 +646,7 @@ class CustomSalarySlip(SalarySlip):
                 if update_component_array:
                     declaration = frappe.get_list(
                         'Employee Tax Exemption Declaration',
-                        filters={'employee': self.employee, 'payroll_period': self.custom_payroll_period,"docstatus":1},
+                        filters={'employee': self.employee, 'payroll_period': self.custom_payroll_period,"docstatus":1,'company':self.company},
                         fields=['*'], 
                     )
                     if declaration:
@@ -653,6 +660,32 @@ class CustomSalarySlip(SalarySlip):
                                     each_component.max_amount = ki['max_amount']
                         
                         get_each_doc.custom_posting_date=self.posting_date
+
+                        #update hra exemption
+
+                        if get_each_doc.monthly_house_rent>0:
+
+                            percentage=(future_basic_amount+basic_sum)*10/100
+
+                            # frappe.msgprint(str(future_basic_amount+basic_sum))
+
+                            annual_hra_exemption=(get_each_doc.monthly_house_rent*12)-percentage
+
+
+                            get_each_doc.custom_check=1
+
+                            get_each_doc.custom_basic_as_per_salary_structure=round(percentage)
+                            get_each_doc.salary_structure_hra=round(future_hra_amount+hra_sum)
+                            get_each_doc.custom_basic=round(future_basic_amount+basic_sum)
+
+                            exemption=get_each_doc.total_exemption_amount-get_each_doc.annual_hra_exemption
+                            
+                            get_each_doc.total_exemption_amount=round(exemption+annual_hra_exemption)
+                            get_each_doc.annual_hra_exemption=round(annual_hra_exemption)
+                            get_each_doc.monthly_hra_exemption=round(annual_hra_exemption/12)
+
+                        
+
                         get_each_doc.save()
                         frappe.db.commit()
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount                    

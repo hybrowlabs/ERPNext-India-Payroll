@@ -1,6 +1,20 @@
 
 import frappe
 from hrms.payroll.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration import EmployeeTaxExemptionDeclaration
+from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+
+from frappe.utils import flt
+from hrms.hr.utils import (
+	calculate_annual_eligible_hra_exemption,
+	get_total_exemption_amount,
+	validate_active_employee,
+	validate_duplicate_exemption_for_payroll_period,
+	validate_tax_declaration,
+)
+
+from datetime import datetime, timedelta
+
+
 
 
 
@@ -23,6 +37,14 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
     def before_update_after_submit(self):
+
+        
+
+        
+
+        
+        if self.custom_check==0:
+            self.calculate_hra_exemption()
         
         self.calculate_hra_breakup()
         self.update_hra_breakup()
@@ -30,7 +52,19 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
-        self.calculate_hra_exemption()
+
+
+
+
+        
+
+    def set_total_exemption_amount(self):
+        self.total_exemption_amount = flt(get_total_exemption_amount(self.declarations), self.precision("total_exemption_amount"))
+        
+        # if self.custom_check == 1:
+        self.total_exemption_amount = self.total_exemption_amount + self.annual_hra_exemption
+
+        
 
     def on_cancel(self):
         self.cancel_declaration_history()
@@ -220,8 +254,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
     
-    def set_max_amount(self):
-        self.total_exemption_amount=self.total_declared_amount
+    # def set_max_amount(self):
+    #     self.total_exemption_amount=self.total_declared_amount
 
 
     def validate_tax_declaration(self):
@@ -301,28 +335,74 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         
         if self.monthly_house_rent:
 
-            months = ["April", "May", "June", "July", "August", "September", "October", "November", "December","January", "February", "March"]
-            basic_salary=(self.monthly_house_rent-self.monthly_hra_exemption)/0.1
-            earned_basic = 0
-            if self.rented_in_metro_city==1:
-                earned_basic=(basic_salary*50)/100
-            else:
-                earned_basic=(basic_salary*40)/100
+            get_company=frappe.get_doc("Company",self.company)
+            basic_component=get_company.basic_component
+
+            ss_assignment = frappe.get_list(
+                'Salary Structure Assignment',
+                filters={'employee': self.employee, 'docstatus': 1,'company':self.company},
+                fields=['*'],
+                order_by='from_date desc',
+            )
+
+            if ss_assignment:
+                start_date=ss_assignment[0].from_date
+                if ss_assignment[0].custom_payroll_period:
+                    payroll_period=frappe.get_doc("Payroll Period",ss_assignment[0].custom_payroll_period)
+                    end_date = payroll_period.end_date
+
+                    new_salary_slip = make_salary_slip(
+                        source_name=ss_assignment[0].salary_structure,
+                        employee=self.employee,
+                        print_format='Salary Slip Standard for CTC',  
+                        posting_date=ss_assignment[0].from_date,
+                        for_preview=1,
+                    )
+                    
+                    for new_earning in new_salary_slip.earnings:
+                        
+                        if new_earning.salary_component==basic_component:
+                            if self.custom_check==0:
+                                self.custom_basic=new_earning.amount*12
+                                self.custom_basic_as_per_salary_structure=(new_earning.amount*12)*10/100
+
+
+
+
+                    months = []
+                    current_date = start_date
+                    while current_date <= end_date:
+                        month_name = current_date.strftime("%B")
+                        if month_name not in months:
+                            months.append(month_name)
+                        current_date = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+
+                    
+                    earned_basic = 0
+                    if self.rented_in_metro_city==1:
+                        earned_basic=(self.custom_basic_as_per_salary_structure*10)*50/100
+                    else:
+                        earned_basic=(self.custom_basic_as_per_salary_structure*10)*40/100
             
 
-            self.custom_hra_breakup=[]
-            for i in range(len(months)):
-                self.append("custom_hra_breakup", {
-                    "month": months[i],
-                    "rent_paid": self.monthly_house_rent,
-                    "hra_received": self.salary_structure_hra / 12,
-                    "excess_of_rent_paid":round(self.monthly_hra_exemption),
-                    "exemption_amount":round(self.monthly_hra_exemption),
-                    "earned_basic":round(earned_basic)
-                })
+                    self.custom_hra_breakup=[]
+                    for i in range(len(months)):
+                        self.append("custom_hra_breakup", {
+                            "month": months[i],
+                            "rent_paid": self.monthly_house_rent*12,
+                            "hra_received": self.salary_structure_hra,
+                            "excess_of_rent_paid":round(self.monthly_house_rent*12-self.custom_basic_as_per_salary_structure),
+                            "exemption_amount":round((self.monthly_house_rent*12-self.custom_basic_as_per_salary_structure)/12),
+                            "earned_basic":round(earned_basic)
+                        })
+
+                
+      
 
         else:
+            self.custom_basic_as_per_salary_structure=None
             self.custom_hra_breakup=[]
+                  
 
    
 
