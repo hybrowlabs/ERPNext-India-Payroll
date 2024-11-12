@@ -13,34 +13,6 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
         self.insert_future_benefit()
 
 
-    
-
-
-        
-
-
-    # def validate_benefit_amount(self):
-
-       
-
-        
-    #     if self.employee:
-    #         accrual_list = frappe.get_list('Employee Benefit Accrual',
-    #             filters={'employee': self.employee,"salary_component":self.earning_component,"docstatus":1},
-    #             fields=['name', 'amount']
-    #         )
-
-    #         if accrual_list:
-    #             total_amount = sum(accrual['amount'] for accrual in accrual_list)
-
-
-               
-
-    #             if self.claimed_amount > total_amount:
-                    
-    #                 frappe.throw("Claimed Amount Cannot Exceed Total Accrued Amount")
-
-
 
     def insert_future_benefit(self):
 

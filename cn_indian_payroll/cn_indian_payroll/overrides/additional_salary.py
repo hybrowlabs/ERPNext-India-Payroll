@@ -127,11 +127,7 @@ def additional_salary_submit(additional):
                     bonus_doc1.bonus_paid_date=additional_doc.payroll_date
                     bonus_doc1.save()        
 
-        # frappe.msgprint('Additional Salary Submitted')
-        # additional_doc_list= frappe.get_doc('Payroll Entry',additional)        
-        # additional_doc_list.custom_additional_salary_submitted=1
         
-        # additional_doc_list.save()
         
 
 
