@@ -33,15 +33,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.insert_declaration_history()
 
 
-    
-
 
     def before_update_after_submit(self):
-
-        
-
-        
-
         
         if self.custom_check==0:
             self.calculate_hra_exemption()
@@ -246,43 +239,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
 
-
-
-
-
-
-
-
     
-    # def set_max_amount(self):
-    #     self.total_exemption_amount=self.total_declared_amount
-
-
-    def validate_tax_declaration(self):
-        array=[]
-        if len(self.declarations) > 0:
-            for i in self.declarations:
-                if i.exemption_category == "Section 80C":
-                    array.append(i.amount)
-        array_sum = sum(array)
-
-
-        category=frappe.db.get_list('Employee Tax Exemption Category',
-            filters={
-                'name': 'Section 80C'
-            },
-            fields=['*'],
-            
-            
-        )
-
-        if len(category)>0:
-           
-
-            if(category[0].max_amount<array_sum):
-             
-                frappe.throw("You can't enter amount in Section 80C greater than "+str(round(category[0].max_amount)))
-
         
     def insert_declaration_history(self):
         if self.employee:
