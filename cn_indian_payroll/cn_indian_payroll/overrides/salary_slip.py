@@ -513,13 +513,6 @@ class CustomSalarySlip(SalarySlip):
                 for all_epf_component in get_salary_component_epf:
                     epf_component.append(all_epf_component.name)
 
-            
-            
-
-            
-           
-
-
 
             if self.custom_tax_regime == "Old Regime":
                 basic_array=[]
