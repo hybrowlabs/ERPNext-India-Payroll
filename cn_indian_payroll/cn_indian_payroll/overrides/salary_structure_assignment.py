@@ -231,7 +231,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 insert_declaration.company= self.company,
                 insert_declaration.payroll_period= self.custom_payroll_period,
                 insert_declaration.currency= self.currency,
-                insert_declaration.custom_income_tax=self.custom_tax_regime,
+                insert_declaration.custom_income_tax=self.income_tax_slab,
                 insert_declaration.custom_salary_structure_assignment=self.name,
                 insert_declaration.custom_posting_date = frappe.utils.nowdate(),
                 

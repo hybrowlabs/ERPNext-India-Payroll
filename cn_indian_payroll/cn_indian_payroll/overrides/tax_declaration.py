@@ -55,7 +55,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.total_exemption_amount = flt(get_total_exemption_amount(self.declarations), self.precision("total_exemption_amount"))
         
         # if self.custom_check == 1:
-        self.total_exemption_amount = self.total_exemption_amount + self.annual_hra_exemption
+        if self.annual_hra_exemption:
+            self.total_exemption_amount = self.total_exemption_amount + self.annual_hra_exemption
 
         
 
@@ -307,6 +308,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 if ss_assignment[0].custom_payroll_period:
                     payroll_period=frappe.get_doc("Payroll Period",ss_assignment[0].custom_payroll_period)
                     end_date = payroll_period.end_date
+                    current_date = start_date
+
+                    month_count = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
 
                     new_salary_slip = make_salary_slip(
                         source_name=ss_assignment[0].salary_structure,
@@ -320,19 +324,22 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         
                         if new_earning.salary_component==basic_component:
                             if self.custom_check==0:
-                                self.custom_basic=new_earning.amount*12
-                                self.custom_basic_as_per_salary_structure=(new_earning.amount*12)*10/100
+                                self.custom_basic=new_earning.amount*month_count
+                                self.custom_basic_as_per_salary_structure=(new_earning.amount*month_count)*10/100
 
 
 
 
                     months = []
-                    current_date = start_date
+                    
                     while current_date <= end_date:
                         month_name = current_date.strftime("%B")
                         if month_name not in months:
                             months.append(month_name)
                         current_date = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+
+                    
+                    
 
                     
                     earned_basic = 0
@@ -342,15 +349,22 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         earned_basic=(self.custom_basic_as_per_salary_structure*10)*40/100
             
 
-                    self.custom_hra_breakup=[]
+                    
+
+                    self.custom_hra_breakup = []  
                     for i in range(len(months)):
+                        excess_of_rent_paid = round(self.monthly_house_rent * 12 - self.custom_basic_as_per_salary_structure)
+                        
+
+                        exemption_amount = min(self.salary_structure_hra, earned_basic, excess_of_rent_paid)
+                        
                         self.append("custom_hra_breakup", {
                             "month": months[i],
-                            "rent_paid": self.monthly_house_rent*12,
+                            "rent_paid": self.monthly_house_rent * 12,
                             "hra_received": self.salary_structure_hra,
-                            "excess_of_rent_paid":round(self.monthly_house_rent*12-self.custom_basic_as_per_salary_structure),
-                            "exemption_amount":round((self.monthly_house_rent*12-self.custom_basic_as_per_salary_structure)/12),
-                            "earned_basic":round(earned_basic)
+                            "earned_basic": round(earned_basic),
+                            "excess_of_rent_paid": excess_of_rent_paid,
+                            "exemption_amount": exemption_amount
                         })
 
                 
@@ -358,6 +372,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         else:
             self.custom_basic_as_per_salary_structure=None
+            self.custom_basic=None
             self.custom_hra_breakup=[]
                   
 
