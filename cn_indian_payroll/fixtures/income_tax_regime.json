@@ -1,0 +1,23 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Income Tax Regime",
+  "modified": "2024-11-04 17:17:38.635745",
+  "name": "Old Regime",
+  "title": "Old Regime"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Income Tax Regime",
+  "modified": "2024-11-04 17:17:45.917560",
+  "name": "New Regime",
+  "title": "New Regime"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Income Tax Regime",
+  "modified": "2024-11-15 14:08:10.331120",
+  "name": "All",
+  "title": "All"
+ }
+]
