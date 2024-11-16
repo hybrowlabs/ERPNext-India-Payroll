@@ -129,10 +129,9 @@ class CustomSalarySlip(SalarySlip):
                         order_by='from_date desc',
                         limit=1
                     )
-        
-        
-        
-            tax_component=latest_salary_structure[0].custom_tax_regime
+
+            if len(latest_salary_structure)>0:
+                tax_component=latest_salary_structure[0].custom_tax_regime
         
             for earning in self.earnings:
 
@@ -140,7 +139,7 @@ class CustomSalarySlip(SalarySlip):
                 
 
                 if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
-                    if get_tax.custom_regime=="None":
+                    if get_tax.custom_regime=="All":
                         earning.is_tax_applicable=get_tax.is_tax_applicable
                         earning.custom_regime=get_tax.custom_regime
                         earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
@@ -185,7 +184,7 @@ class CustomSalarySlip(SalarySlip):
 
                         if earning.deduct_full_tax_on_selected_payroll_date:
                             additional_income_with_full_tax += additional_amount
-            print(taxable_earnings,"taxable_earnings------")
+            # print(taxable_earnings,"taxable_earnings------")
 
             if allow_tax_exemption:
                 for ded in self.deductions:
@@ -246,8 +245,7 @@ class CustomSalarySlip(SalarySlip):
                         start_date, end_date, parentfield="earnings", 
                         is_tax_applicable=1, 
                         custom_tax_exemption_applicable_based_on_regime=1, 
-                        # custom_taxable=1, 
-                        # custom_regime="None" 
+                       
                     )
 
             else:
@@ -255,9 +253,7 @@ class CustomSalarySlip(SalarySlip):
                 taxable_earnings = self.get_salary_slip_details( 
                         start_date, end_date, parentfield="earnings", 
                         is_tax_applicable=1,
-                        # custom_tax_exemption_applicable_based_on_regime=1, 
-                        # custom_taxable=1, 
-                        custom_regime="None" 
+                        custom_regime="All" 
                     )
 
 
