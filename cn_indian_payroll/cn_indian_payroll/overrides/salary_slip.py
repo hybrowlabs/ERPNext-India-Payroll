@@ -1750,22 +1750,12 @@ class CustomSalarySlip(SalarySlip):
                 total_loan_amount+=ji.total_payment
 
 
-        # if self.employee=="37013":
-        #     self.custom_loan_amount=10000
 
-        self.custom_total_deduction_amount=total_loan_amount+self.total_deduction
-
-        # self.custom_total_deduction_amount=self.total_deduction+self.custom_loan_amount
-
-                
-
+        self.custom_total_deduction_amount=total_loan_amount+self.total_deduction   
                 
         self.custom_statutory_grosspay=round(gross_pay_sum)
         
         self.custom_statutory_year_to_date=round(gross_pay_year_sum)
-
-        # self.custom_gross_earning=gross_earning+gross_pay_sum
-
 
         self.custom_total_income=round(total_income)
   
