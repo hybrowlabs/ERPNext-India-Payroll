@@ -399,7 +399,7 @@ function edit(frm) {
                             {
                                 label: 'Monthly HRA Amount',
                                 fieldname: 'hra_amount',
-                                fieldtype: 'Data',
+                                fieldtype: 'Currency',
                                 default:frm.doc.monthly_house_rent,
                             },
                             {
