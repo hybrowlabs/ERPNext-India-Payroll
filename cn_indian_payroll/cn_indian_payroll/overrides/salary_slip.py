@@ -72,6 +72,7 @@ class CustomSalarySlip(SalarySlip):
         self.set_payroll_period()
         self.insert_loan_perquisite()
         self.update_declaration_component()
+        self.update_total_lop()
         
 
        
@@ -110,7 +111,8 @@ class CustomSalarySlip(SalarySlip):
 
 
     
-
+    def update_total_lop(self):
+        self.custom_total_leave_without_pay=self.absent_days+self.leave_without_pay
 
 
     

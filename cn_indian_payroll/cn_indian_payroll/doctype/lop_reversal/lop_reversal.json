@@ -17,6 +17,8 @@
   "lop_month_reversal",
   "additional_salary_date",
   "number_of_days",
+  "absent_days",
+  "lop_days",
   "max_lop_days",
   "amended_from",
   "section_break_apdq",
@@ -51,6 +53,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Choose the date on which you want to create these components as arrears.",
    "fieldname": "additional_salary_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -60,7 +63,7 @@
   {
    "fieldname": "number_of_days",
    "fieldtype": "Float",
-   "label": "Number of Days",
+   "label": "Number of Days Planning to Reverse",
    "reqd": 1
   },
   {
@@ -132,6 +135,18 @@
    "fieldtype": "Float",
    "label": "Max LOP Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "absent_days",
+   "fieldtype": "Float",
+   "label": "Absent Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lop_days",
+   "fieldtype": "Float",
+   "label": "LOP Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -142,7 +157,7 @@
    "link_fieldname": "custom_lop_reversal"
   }
  ],
- "modified": "2024-10-01 10:24:06.892175",
+ "modified": "2024-11-20 17:38:57.945680",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
