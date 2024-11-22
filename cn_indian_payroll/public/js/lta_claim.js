@@ -324,7 +324,6 @@ function show_max_lta_amount(frm) {
                                                                         })
                                                                     const sum1 = total_amount.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
-                                                                    console.log(sum1,"88888")
 
 
                                                                     var accrual_data_array = [];
@@ -351,11 +350,22 @@ function show_max_lta_amount(frm) {
 
                                                                                 const sum = accrual_data_array.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
-                                                                                console.log(sum,"99999")
-                                                                                var future_value = 12-accrual_data.message.length
+                                                                                let startDate = new Date(response.message[0].from_date);
+                                                                                let endDate = new Date(payroll_data.message[0].end_date);
+
+                                                                                // Calculate year and month difference
+                                                                                let yearDifference = endDate.getFullYear() - startDate.getFullYear();
+                                                                                let monthDifference = endDate.getMonth() - startDate.getMonth();
+
+                                                                                // Total months difference
+                                                                                let totalMonths = yearDifference * 12 + monthDifference;
+
+                                                                                // console.log("Difference in months:", totalMonths-1);
+
+                                                                                var future_value = (totalMonths)
                                                                                 
                                                                                 var future_amount=future_value*reimbursement_amount[0]
-                                                                                console.log(future_amount)
+                                                                                
                                                                                 var max_eligible_amount=(future_amount+sum)-sum1
                                                                                 frm.set_value("max_eligible_amount",max_eligible_amount)
 
@@ -379,6 +389,8 @@ function show_max_lta_amount(frm) {
 
                                                                     var accrual_data_array = [];
 
+                                                                    
+
                                                                     frappe.call({
                                                                         method: "frappe.client.get_list",
                                                                         args: {
@@ -400,9 +412,20 @@ function show_max_lta_amount(frm) {
                                                                                 });
 
                                                                                 const sum = accrual_data_array.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-                                                                                // console.log(sum, "Total Accrued Amount");
+                                                                                
+                                                                                let startDate = new Date(response.message[0].from_date);
+                                                                                let endDate = new Date(payroll_data.message[0].end_date);
 
-                                                                                var future_value = 12-accrual_data.message.length
+                                                                                // Calculate year and month difference
+                                                                                let yearDifference = endDate.getFullYear() - startDate.getFullYear();
+                                                                                let monthDifference = endDate.getMonth() - startDate.getMonth();
+
+                                                                                // Total months difference
+                                                                                let totalMonths = yearDifference * 12 + monthDifference;
+
+                                                                                console.log("Difference in months:", totalMonths-1);
+
+                                                                                var future_value = (totalMonths)
                                                                                 var future_amount=future_value*reimbursement_amount[0]
                                                                                 frm.set_value("max_eligible_amount",future_amount+sum)
 
