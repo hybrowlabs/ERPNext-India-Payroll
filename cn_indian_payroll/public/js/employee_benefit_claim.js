@@ -6,6 +6,17 @@ frappe.ui.form.on('Employee Benefit Claim', {
 		
 	},
 
+    claimed_amount:function(frm)
+    {
+        if(frm.doc.claimed_amount>frm.doc.custom_max_amount)
+            {
+                frm.set_value("claimed_amount",undefined)
+                msgprint("you cant enter amount greater than eligible amount")
+            }
+
+
+    },
+
 
     employee:function(frm)
     {
@@ -28,7 +39,6 @@ frappe.ui.form.on('Employee Benefit Claim', {
                             var company=kes.message[0].name
                         }
 
-                        // console.log(company,"-------")
 
 
 
@@ -146,7 +156,6 @@ frappe.ui.form.on('Employee Benefit Claim', {
                                             if(v.reimbursements==frm.doc.earning_component)
                                                 {
                                                     eligible_amount=v.monthly_total_amount
-                                                    console.log(eligible_amount,"eligible_amount")
 
                                                     frappe.call({
                                                         method: "frappe.client.get",
@@ -254,10 +263,44 @@ frappe.ui.form.on('Employee Benefit Claim', {
                                                                     
                                                                 });
 
-                                                                future_month_count=12-accrual_data.message.length
-                                                                // console.log(future_month_count,"future_month_count")
+                                                                console.log(accrual_sum,"accrual_sumaccrual_sum")
+
+                                                                frappe.call({
+                                                                    method: "frappe.client.get",
+                                                                    args: {
+                                                                        doctype: "Payroll Period",
+                                                                        filters: {
+                                                                            
+                                                                            "name":frm.doc.custom_payroll_period
+                                                                        },
+                                                                        fields: ["*"],
+                                                                       
+                                                                    },
+                                                                    callback: function(payroll_data) {
+                                                                       
+                                                                        if (payroll_data.message) {
+
+
+
+
+                                                                let startDate = new Date(res.message[0].from_date);
+                                                                let endDate = new Date(payroll_data.message.end_date);
+
+                                                               
+                                                                let yearDifference = endDate.getFullYear() - startDate.getFullYear();
+                                                                let monthDifference = endDate.getMonth() - startDate.getMonth();
+
+                                                                // Total months difference
+                                                                let totalMonths = yearDifference * 12 + monthDifference;
+
+                                                                // console.log("Difference in months:", totalMonths-1);
+
+                                                                var future_value = (totalMonths)
+
+                                                                future_month_count=future_value
                                                                 future_amount=future_month_count*eligible_amount
-                                                                // console.log(future_amount,"future_amount")
+
+
                                                                 frappe.call({
                                                                     method: "frappe.client.get_list",
                                                                     args: {
@@ -294,6 +337,16 @@ frappe.ui.form.on('Employee Benefit Claim', {
                                                                         }
                                                                     }
                                                                 })
+
+
+
+
+                                                                        }
+                                                                    }
+                                                                })
+
+
+
 
                                                             }
                                                         }
