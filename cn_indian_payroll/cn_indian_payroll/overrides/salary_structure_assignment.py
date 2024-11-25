@@ -17,8 +17,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_employee_promotion()
 
 
+    def before_update_after_submit(self):
+        self.reimbursement_amount()    
 
-        # self.update_lta_in_employee()
        
 
 
