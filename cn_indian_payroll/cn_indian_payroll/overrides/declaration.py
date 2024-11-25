@@ -178,6 +178,10 @@ def switch_regime(doc_id, employee, regime,company):
                     doc1 = frappe.get_doc("Employee Tax Exemption Declaration", doc.name)
                     doc1.custom_income_tax=get_tax_regime[0].name
                     doc1.custom_posting_date = frappe.utils.nowdate()
+                    doc1.monthly_house_rent=0
+                    doc1.salary_structure_hra=0
+                    doc1.annual_hra_exemption=0
+                    doc1.monthly_hra_exemption=0
                     doc1.declarations=[]
                     
                     for x in range(len(component_array)):

@@ -292,6 +292,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def calculate_hra_breakup(self):
         
         if self.monthly_house_rent:
+            
 
             get_company=frappe.get_doc("Company",self.company)
             basic_component=get_company.basic_component
