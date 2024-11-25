@@ -77,22 +77,22 @@ class CustomSalarySlip(SalarySlip):
 
        
 
-        if self.annual_taxable_amount and self.custom_perquisite_amount:
-            self.annual_taxable_amount=self.total_earnings - (
-                self.non_taxable_earnings
-                + self.deductions_before_tax_calculation
-                + self.tax_exemption_declaration
-                + self.standard_tax_exemption_amount
+        # if self.annual_taxable_amount and self.custom_perquisite_amount:
+        #     self.annual_taxable_amount=self.total_earnings - (
+        #         self.non_taxable_earnings
+        #         + self.deductions_before_tax_calculation
+        #         + self.tax_exemption_declaration
+        #         + self.standard_tax_exemption_amount
             
-                ) + self.custom_perquisite_amount
-        else:
-            self.annual_taxable_amount=self.total_earnings - (
-                self.non_taxable_earnings
-                + self.deductions_before_tax_calculation
-                + self.tax_exemption_declaration
-                + self.standard_tax_exemption_amount
+        #         ) + self.custom_perquisite_amount
+        # else:
+        #     self.annual_taxable_amount=self.total_earnings - (
+        #         self.non_taxable_earnings
+        #         + self.deductions_before_tax_calculation
+        #         + self.tax_exemption_declaration
+        #         + self.standard_tax_exemption_amount
             
-                )
+        #         )
 
         if self.is_new():
             self.add_reimbursement_taxable_new_doc()
