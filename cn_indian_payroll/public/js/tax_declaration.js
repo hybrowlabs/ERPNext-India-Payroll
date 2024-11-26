@@ -3,7 +3,7 @@ const DECLARATION_FORM = {
     "components": [
       {
         "label": "Table",
-        "cellAlignment": "center",
+        "cellAlignment": "left",
         "bordered": true,
         "key": "table",
         "type": "table",
@@ -173,7 +173,8 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "amount",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "defaultValue": 0,
                 }
               ]
             }
@@ -249,7 +250,8 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "amount3",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "defaultValue": 0,
                 }
               ]
             }
@@ -335,7 +337,8 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "hlAmount",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "defaultValue": 0,
                 }
               ]
             }
@@ -657,7 +660,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "pfValue",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -733,7 +737,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "aValue2",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -809,7 +814,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "bValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -885,7 +891,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "amount4",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -961,7 +968,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "dValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1037,7 +1045,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "eValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1113,7 +1122,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "fValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1189,7 +1199,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "gValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1265,7 +1276,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "hValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1341,7 +1353,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "iValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1417,7 +1430,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "jValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1493,7 +1507,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "kValue1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1559,7 +1574,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "kValue2",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1568,7 +1584,7 @@ const DECLARATION_FORM = {
                 },
                 {
                   "label": "total_value",
-                  "cellAlignment": "left",
+                  "cellAlignment": "center",
                   "bordered": true,
                   "key": "totalValue",
                   "type": "table",
@@ -1615,7 +1631,7 @@ const DECLARATION_FORM = {
                 },
                 {
                   "label": "Table",
-                  "cellAlignment": "center",
+                  "cellAlignment": "left",
                   "bordered": true,
                   "key": "table5",
                   "type": "table",
@@ -1705,7 +1721,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "fourValue",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1791,7 +1808,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "fiveNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1867,7 +1885,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "sixNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -1953,7 +1972,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "sevenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2029,7 +2049,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "eightNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2105,7 +2126,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "nineNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2191,7 +2213,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "tenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2277,7 +2300,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "elevenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2286,7 +2310,7 @@ const DECLARATION_FORM = {
                 },
                 {
                   "label": "Table",
-                  "cellAlignment": "center",
+                  "cellAlignment": "left",
                   "bordered": true,
                   "key": "table6",
                   "type": "table",
@@ -2336,7 +2360,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twelveNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2383,7 +2408,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "thirteenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2392,7 +2418,7 @@ const DECLARATION_FORM = {
                 },
                 {
                   "label": "Table",
-                  "cellAlignment": "center",
+                  "cellAlignment": "left",
                   "bordered": true,
                   "key": "table7",
                   "type": "table",
@@ -2482,7 +2508,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twelveNumber1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2568,7 +2595,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "fifteenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2644,7 +2672,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "sixteenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2730,7 +2759,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "seventeenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2816,7 +2846,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "eighteenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2902,7 +2933,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "nineteenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -2988,7 +3020,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twentyNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -3074,7 +3107,8 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twentyoneNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "defaultValue": 0,
                           }
                         ]
                       }
@@ -3098,7 +3132,7 @@ const DECLARATION_FORM = {
     ]
   }
 
-    
+
   
 
 
@@ -3131,24 +3165,146 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                 frm.change_custom_button_type('Edit Declaration', null, 'primary');
             }
 
-        
-            const wrapper=frm.fields_dict.custom_declaration_form.$wrapper;
-            const form=document.createElement("div")
-            wrapper.html('')
-            wrapper.append(form)
 
-            const f = Formio.createForm(form, DECLARATION_FORM, { baseUrl: window?.location?.origin || '' })
+
+            //sum of all 80C
+
+
+
+
+        const wrapper = frm.fields_dict.custom_declaration_form.$wrapper;
+        const formContainer = document.createElement("div");
+        wrapper.html('');
+        wrapper.append(formContainer);
+
+        // Create Form.io form
+        Formio.createForm(formContainer, DECLARATION_FORM, { baseUrl: window?.location?.origin || '' })
             .then((form) => {
-                window.cur_formioInstance = form
-                // form.submission = { data: JSON.parse(frm.doc.custom_operation_form_data || '{}') }
+                window.cur_formioInstance = form;
+
+                // Pre-fill the form with saved data (if available)
+                const savedData = frm.doc.custom_declaration_form_data
+                    ? JSON.parse(frm.doc.custom_declaration_form_data)
+                    : {};
+
+                // Apply default values if no saved data exists
+                const defaultData = { pfValue: 0, aValue2: 0, bValue1: 0,amount4:0,dValue1:0,eValue1:0,fValue1:0,gValue1:0,hValue1:0,iValue1:0,jValue1:0,kValue1:0,kValue2:0,...savedData };
+
+                // Set initial submission data without triggering `change` event
+                form.submission = { data: defaultData };
+
+                // Update total1 and synchronize Frappe field whenever the Form.io form changes
+                let isUpdating = false; // Prevent recursive updates
+
                 form.on('change', ({ data }) => {
-                    frm.set_value("custom_declaration_form_data", JSON.stringify(data))
-                })
+                    if (isUpdating) return; // Skip recursive updates
+                    isUpdating = true;
+
+                    // Calculate total
+                    const a = parseFloat(data.pfValue || 0);
+                    
+                    const b = parseFloat(data.aValue2 || 0);
+                    const c = parseFloat(data.bValue1 || 0);
+                    const d=parseFloat(data.amount4 || 0);
+
+                    const e=parseFloat(data.dValue1 || 0);
+
+                    const f=parseFloat(data.eValue1 || 0);
+                    const g=parseFloat(data.fValue1 || 0);
+                    const h=parseFloat(data.gValue1 || 0);
+                    const i=parseFloat(data.hValue1 || 0);
+                    const j=parseFloat(data.iValue1 || 0);
+                    const k=parseFloat(data.jValue1 || 0);
+                    const l=parseFloat(data.kValue1 || 0);
+                    const m=parseFloat(data.kValue2 || 0);
+
+                    total=a+b+c+d+e+f+g+h+i+j+k+l+m
+
+
+                    data.total80C = total;
+
+                    form.submission.data = data;
+
+                    frm.set_value("custom_declaration_form_data", JSON.stringify(data));
+
+                    isUpdating = false; // Allow further updates
+                });
             })
+            .catch((err) => {
+                console.error("Error creating Form.io form:", err);
+            });
+
+
+
+//--------------------------------------------------------------------------------------------------
+
+
+
+
+        
+        // const wrapper = frm.fields_dict.custom_declaration_form.$wrapper;
+        // const formContainer = document.createElement("div");
+        // wrapper.html('');
+        // wrapper.append(formContainer);
+
+        // // Create Form.io form
+        // Formio.createForm(formContainer, DECLARATION_FORM, { baseUrl: window?.location?.origin || '' })
+        //     .then((form) => {
+        //         window.cur_formioInstance = form;
+
+        //         // Pre-fill the form with saved data (if available)
+        //         const savedData = frm.doc.custom_declaration_form_data
+        //             ? JSON.parse(frm.doc.custom_declaration_form_data)
+        //             : {};
+
+        //         // Apply default value if no saved data exists
+        //         const defaultData = { number: 0, ...savedData };
+
+        //         if (Object.keys(defaultData).length) {
+        //             form.submission = { data: defaultData };
+        //         }
+
+
+        //         form.on('change', ({ data }) => {
+                    
+        //             frm.set_value("custom_declaration_form_data", JSON.stringify(data));
+        //         });
+        //     })
+        //     .catch((err) => {
+        //         console.error("Error creating Form.io form:", err);
+        //     });
+
+
+            //GRAVISH CODE
+
+        
+            // const wrapper=frm.fields_dict.custom_declaration_form.$wrapper;
+            // const form=document.createElement("div")
+            // wrapper.html('')
+            // wrapper.append(form)
+
+            // const f = Formio.createForm(form, DECLARATION_FORM, { baseUrl: window?.location?.origin || '' })
+            // .then((form) => {
+            //     window.cur_formioInstance = form
+            //     // form.submission = { data: JSON.parse(frm.doc.custom_operation_form_data || '{}') }
+            //     form.on('change', ({ data }) => {
+            //         frm.set_value("custom_declaration_form_data", JSON.stringify(data))
+            //     })
+            // })
+
+            // console.log(frm.doc.custom_declaration_form_data,"11111")
 
 
             
     },
+
+    before_save: function (frm) {
+        // Ensure Form.io form data is updated in the Frappe field before saving
+        if (window.cur_formioInstance) {
+            const data = window.cur_formioInstance.submission.data;
+            frm.set_value("custom_declaration_form_data", JSON.stringify(data));
+        }
+    }
 
     
    
