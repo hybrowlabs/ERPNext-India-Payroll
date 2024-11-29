@@ -9,6 +9,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
         self.set_cpl()
         self.reimbursement_amount()
+
+        # self.insert_tax_declaration()
  
 
 
@@ -248,6 +250,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 insert_declaration.insert()
                 insert_declaration.submit()  
                 frappe.db.commit() 
+
+
+
+    
 
 
 

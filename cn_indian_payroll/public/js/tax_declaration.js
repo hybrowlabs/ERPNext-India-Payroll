@@ -6,8 +6,11 @@ const DECLARATION_FORM = {
         "cellAlignment": "left",
         "bordered": true,
         "key": "table",
+        "conditional": {
+          "eq": "0"
+        },
         "type": "table",
-        "numRows": 4,
+        "numRows": 8,
         "numCols": 6,
         "input": false,
         "tableView": false,
@@ -109,7 +112,7 @@ const DECLARATION_FORM = {
             {
               "components": [
                 {
-                  "html": "<p>Mediclaim Premium</p>",
+                  "html": "<p>Mediclaim Policy for Parents</p>",
                   "label": "Mediclaim Premium",
                   "refreshOnChange": false,
                   "key": "mediclaimPremium1",
@@ -122,8 +125,8 @@ const DECLARATION_FORM = {
             {
               "components": [
                 {
-                  "html": "<p>25000</p>",
-                  "label": "25000",
+                  "html": "<p>50000</p>",
+                  "label": "50000",
                   "refreshOnChange": false,
                   "key": "m_value",
                   "type": "content",
@@ -148,7 +151,7 @@ const DECLARATION_FORM = {
             {
               "components": [
                 {
-                  "html": "<p>Mediclaim Premium</p>",
+                  "html": "<p>Mediclaim</p>",
                   "label": "Mediclaim Premium",
                   "refreshOnChange": false,
                   "key": "mediclaimPremium",
@@ -170,11 +173,13 @@ const DECLARATION_FORM = {
                   "requireDecimal": false,
                   "inputFormat": "plain",
                   "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.amount>50000){\n  value = 0;\n} ",
                   "validateWhenHidden": false,
                   "key": "amount",
                   "type": "number",
                   "input": true,
                   "defaultValue": 0,
+                  
                 }
               ]
             }
@@ -186,8 +191,8 @@ const DECLARATION_FORM = {
             {
               "components": [
                 {
-                  "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">(A) Deduction U/S 80D-Paid For Parents</span></p>",
-                  "label": "(A) Deduction U/S 80D-Paid For Parents",
+                  "html": "<p>&nbsp;Mediclaim Policy for Self, Spouse, Children for Senior Citizen</p>",
+                  "label": " Mediclaim Policy for Self, Spouse, Children for Senior Citizen",
                   "refreshOnChange": false,
                   "key": "aDeductionUS80DPaidForParents",
                   "type": "content",
@@ -225,10 +230,10 @@ const DECLARATION_FORM = {
             {
               "components": [
                 {
-                  "html": "<p>Deduction U/S 80D</p>",
-                  "label": "Deduction U/S 80D",
+                  "html": "<p>Mediclaim</p>",
+                  "label": "Mediclaim2",
                   "refreshOnChange": false,
-                  "key": "deductionUS80D",
+                  "key": "mediclaim2",
                   "type": "content",
                   "input": false,
                   "tableView": false
@@ -243,15 +248,308 @@ const DECLARATION_FORM = {
                   "hideLabel": true,
                   "mask": false,
                   "tableView": false,
+                  "defaultValue": 0,
                   "delimiter": false,
                   "requireDecimal": false,
                   "inputFormat": "plain",
                   "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.amount3>25000){\n  value = 0;\n} ",
                   "validateWhenHidden": false,
                   "key": "amount3",
                   "type": "number",
-                  "input": true,
+                  "input": true
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "components": []
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>Mediclaim Policy for Self, Spouse, Children</p>",
+                  "label": "Mediclaim Policy for Self, Spouse, Children",
+                  "refreshOnChange": false,
+                  "key": "mediclaimPolicyForSelfSpouseChildren",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>50000</p>",
+                  "label": "p_amount",
+                  "refreshOnChange": false,
+                  "key": "pAmount",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>80-D</p>",
+                  "label": "80d3",
+                  "refreshOnChange": false,
+                  "key": "D3",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>Mediclaim</p>",
+                  "label": "Mediclaim4",
+                  "refreshOnChange": false,
+                  "key": "mediclaim4",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "label": "mp_amount3",
+                  "applyMaskOn": "change",
+                  "hideLabel": true,
+                  "mask": false,
+                  "tableView": false,
                   "defaultValue": 0,
+                  "delimiter": false,
+                  "requireDecimal": false,
+                  "inputFormat": "plain",
+                  "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.mpAmount3>50000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
+                  "key": "mpAmount3",
+                  "type": "number",
+                  "input": true
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "components": []
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>Mediclaim Policy for Parents for Senior Citizen</p>",
+                  "label": "Mediclaim Policy for Parents for Senior Citizen",
+                  "refreshOnChange": false,
+                  "key": "mediclaimPolicyForParentsForSeniorCitizen",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>25000</p>",
+                  "label": "max_amount_4",
+                  "refreshOnChange": false,
+                  "key": "maxAmount4",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>80-D</p>",
+                  "label": "80d_4",
+                  "refreshOnChange": false,
+                  "key": "D4",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>Mediclaim</p>",
+                  "label": "Mediclaim4",
+                  "refreshOnChange": false,
+                  "key": "mediclaim5",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "label": "mp_amount4",
+                  "applyMaskOn": "change",
+                  "hideLabel": true,
+                  "mask": false,
+                  "tableView": false,
+                  "defaultValue": 0,
+                  "delimiter": false,
+                  "requireDecimal": false,
+                  "inputFormat": "plain",
+                  "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.mpAmount4>25000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
+                  "key": "mpAmount4",
+                  "type": "number",
+                  "input": true
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "components": []
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>Preventive Health Check-up for Parents</p>",
+                  "label": "Preventive Health Check-up for Parents",
+                  "refreshOnChange": false,
+                  "key": "preventiveHealthCheckUpForParents",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>5000</p>",
+                  "label": "5000A",
+                  "refreshOnChange": false,
+                  "key": "A",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>80-D</p>",
+                  "label": "80dA",
+                  "refreshOnChange": false,
+                  "key": "DA",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": []
+            },
+            {
+              "components": [
+                {
+                  "label": "mp_amount_5",
+                  "applyMaskOn": "change",
+                  "hideLabel": true,
+                  "mask": false,
+                  "tableView": false,
+                  "defaultValue": 0,
+                  "delimiter": false,
+                  "requireDecimal": false,
+                  "inputFormat": "plain",
+                  "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.mp5>5000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
+                  "key": "mp5",
+                  "type": "number",
+                  "input": true
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "components": []
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>Preventive Health Check-up</p>",
+                  "label": "Preventive Health Check-up",
+                  "refreshOnChange": false,
+                  "key": "preventiveHealthCheckUp",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>5000</p>",
+                  "label": "5000B",
+                  "refreshOnChange": false,
+                  "key": "B",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": [
+                {
+                  "html": "<p>80-D</p>",
+                  "label": "80db",
+                  "refreshOnChange": false,
+                  "key": "Db",
+                  "type": "content",
+                  "input": false,
+                  "tableView": false
+                }
+              ]
+            },
+            {
+              "components": []
+            },
+            {
+              "components": [
+                {
+                  "label": "mp_amount_6",
+                  "applyMaskOn": "change",
+                  "hideLabel": true,
+                  "mask": false,
+                  "tableView": false,
+                  "defaultValue": 0,
+                  "delimiter": false,
+                  "requireDecimal": false,
+                  "inputFormat": "plain",
+                  "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.mpAmount6>5000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
+                  "key": "mpAmount6",
+                  "type": "number",
+                  "input": true
                 }
               ]
             }
@@ -299,8 +597,8 @@ const DECLARATION_FORM = {
             {
               "components": [
                 {
-                  "html": "<p>24(1 )(vi)</p>",
-                  "label": "24(1 )(vi)",
+                  "html": "<p>Section 80EE</p>",
+                  "label": "Section 80EE",
                   "refreshOnChange": false,
                   "key": "hl_section",
                   "type": "content",
@@ -330,15 +628,16 @@ const DECLARATION_FORM = {
                   "hideLabel": true,
                   "mask": false,
                   "tableView": false,
+                  "defaultValue": 0,
                   "delimiter": false,
                   "requireDecimal": false,
                   "inputFormat": "plain",
                   "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.hlAmount>200000){\n  value = 0;\n} ",
                   "validateWhenHidden": false,
                   "key": "hlAmount",
                   "type": "number",
-                  "input": true,
-                  "defaultValue": 0,
+                  "input": true
                 }
               ]
             }
@@ -606,8 +905,8 @@ const DECLARATION_FORM = {
                       {
                         "components": [
                           {
-                            "html": "<p>Investments In PF</p>",
-                            "label": "Investments In PF\t",
+                            "html": "<p>Investments In PF(Auto)</p>",
+                            "label": "Investments In PF(Auto)\t",
                             "refreshOnChange": false,
                             "key": "investmentsInPf",
                             "type": "content",
@@ -657,11 +956,13 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.pfValue>200000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "pfValue",
                             "type": "number",
                             "input": true,
                             "defaultValue": 0,
+                            "disabled": true,
                           }
                         ]
                       }
@@ -734,11 +1035,11 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.aValue2>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "aValue2",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -807,15 +1108,16 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.bValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "bValue1",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -888,11 +1190,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.amount4>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "amount4",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -965,11 +1268,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.dValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "dValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1042,11 +1346,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.eValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "eValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1119,11 +1424,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.fValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "fValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1196,11 +1502,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.gValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "gValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1273,11 +1580,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.hValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "hValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1350,11 +1658,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.iValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "iValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1427,11 +1736,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.jValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "jValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1504,11 +1814,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.kValue1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "kValue1",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1571,11 +1882,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.kValue2>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "kValue2",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1718,11 +2030,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.fourValue>75000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "fourValue",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1805,11 +2118,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.fiveNumber>40000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "fiveNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -1878,6 +2192,7 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
@@ -1885,8 +2200,7 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "sixNumber",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -1969,11 +2283,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.sevenNumber>75000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "sevenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2050,7 +2365,7 @@ const DECLARATION_FORM = {
                             "key": "eightNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2072,7 +2387,7 @@ const DECLARATION_FORM = {
                       {
                         "components": [
                           {
-                            "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">Deduction U/S 80CCD(2)</span></p>",
+                            "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">NPS Deduction U/S 80CCD(2)</span></p>",
                             "label": "Deduction U/S 80CCD(2)",
                             "refreshOnChange": false,
                             "key": "deductionUS80Ccd2",
@@ -2128,6 +2443,7 @@ const DECLARATION_FORM = {
                             "type": "number",
                             "input": true,
                             "defaultValue": 0,
+                            "disabled":true
                           }
                         ]
                       }
@@ -2206,15 +2522,16 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.tenNumber>50000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "tenNumber",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -2297,11 +2614,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.elevenNumber>50000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "elevenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2361,7 +2679,7 @@ const DECLARATION_FORM = {
                             "key": "twelveNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2409,7 +2727,7 @@ const DECLARATION_FORM = {
                             "key": "thirteenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2422,7 +2740,7 @@ const DECLARATION_FORM = {
                   "bordered": true,
                   "key": "table7",
                   "type": "table",
-                  "numRows": 8,
+                  "numRows": 9,
                   "numCols": 6,
                   "input": false,
                   "tableView": false,
@@ -2501,15 +2819,16 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.twelveNumber1>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "twelveNumber1",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -2592,11 +2911,12 @@ const DECLARATION_FORM = {
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.fifteenNumber>150000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "fifteenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2673,7 +2993,7 @@ const DECLARATION_FORM = {
                             "key": "sixteenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "defaultValue": 0
                           }
                         ]
                       }
@@ -2752,15 +3072,16 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.seventeenNumber>10000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "seventeenNumber",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -2839,15 +3160,16 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.eighteenNumber>50000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "eighteenNumber",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -2926,15 +3248,17 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.nineteenNumber>2500){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "nineteenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0,
+                            "disabled":true
                           }
                         ]
                       }
@@ -3013,15 +3337,16 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.twentyNumber>60000){\n  value = 0;\n} ",
                             "validateWhenHidden": false,
                             "key": "twentyNumber",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -3100,15 +3425,93 @@ const DECLARATION_FORM = {
                             "hideLabel": true,
                             "mask": false,
                             "tableView": false,
+                            "defaultValue": 0,
+                            "delimiter": false,
+                            "requireDecimal": false,
+                            "inputFormat": "plain",
+                            "truncateMultipleSpaces": false,
+                            "calculateValue": "if (data.twentyoneNumber>25000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
+                            "key": "twentyoneNumber",
+                            "type": "number",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "components": [
+                          {
+                            "html": "<p>22</p>",
+                            "label": "twentytwenty",
+                            "refreshOnChange": false,
+                            "key": "twentytwenty",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>Uniform</p>",
+                            "label": "Uniform",
+                            "refreshOnChange": false,
+                            "key": "uniform",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>15000</p>",
+                            "label": "fifteen_thousand_uniform",
+                            "refreshOnChange": false,
+                            "key": "fifteenThousandUniform",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>10(14)</p>",
+                            "label": "10(14)",
+                            "refreshOnChange": false,
+                            "key": "ten_fourteen",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": []
+                      },
+                      {
+                        "components": [
+                          {
+                            "label": "twenty_four",
+                            "applyMaskOn": "change",
+                            "hideLabel": true,
+                            "mask": false,
+                            "tableView": false,
+                            "defaultValue": 0,
                             "delimiter": false,
                             "requireDecimal": false,
                             "inputFormat": "plain",
                             "truncateMultipleSpaces": false,
                             "validateWhenHidden": false,
-                            "key": "twentyoneNumber",
+                            "key": "twentyFour",
                             "type": "number",
-                            "input": true,
-                            "defaultValue": 0,
+                            "input": true
                           }
                         ]
                       }
@@ -3121,14 +3524,7 @@ const DECLARATION_FORM = {
         ],
         "numCols": 1
       },
-    //   {
-    //     "type": "button",
-    //     "label": "Submit",
-    //     "key": "submit",
-    //     "disableOnInvalid": true,
-    //     "input": true,
-    //     "tableView": false
-    //   }
+      
     ]
   }
 
@@ -3187,20 +3583,17 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                     ? JSON.parse(frm.doc.custom_declaration_form_data)
                     : {};
 
-                // Apply default values if no saved data exists
                 const defaultData = { pfValue: 0, aValue2: 0, bValue1: 0,amount4:0,dValue1:0,eValue1:0,fValue1:0,gValue1:0,hValue1:0,iValue1:0,jValue1:0,kValue1:0,kValue2:0,...savedData };
 
-                // Set initial submission data without triggering `change` event
                 form.submission = { data: defaultData };
 
-                // Update total1 and synchronize Frappe field whenever the Form.io form changes
-                let isUpdating = false; // Prevent recursive updates
+                let isUpdating = false; 
 
                 form.on('change', ({ data }) => {
-                    if (isUpdating) return; // Skip recursive updates
+                    if (isUpdating) return; 
                     isUpdating = true;
 
-                    // Calculate total
+
                     const a = parseFloat(data.pfValue || 0);
                     
                     const b = parseFloat(data.aValue2 || 0);

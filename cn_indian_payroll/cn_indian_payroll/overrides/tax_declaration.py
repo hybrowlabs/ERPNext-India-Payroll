@@ -14,6 +14,8 @@ from hrms.hr.utils import (
 
 from datetime import datetime, timedelta
 
+import json
+
 
 
 
@@ -29,12 +31,48 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     #     super().validate()
 
 
+    def before_save(self):
+
+        if self.custom_tax_regime=="Old Regime":
+            form_data = json.loads(self.custom_declaration_form_data or '{}')
+            
+            for k in self.declarations:
+                if k.exemption_sub_category == "Employee Provident Fund (Auto)":
+                    form_data['pfValue'] = round(k.amount)
+                
+                elif k.exemption_sub_category == "NPS Contribution by Employer":
+                    form_data['nineNumber'] = round(k.amount)
+                
+                elif k.exemption_sub_category == "Tax on employment (Professional Tax)":
+                    form_data['nineteenNumber'] = round(k.amount)
+            
+            self.custom_declaration_form_data = json.dumps(form_data)
+
+
+        if self.custom_tax_regime=="New Regime":
+            form_data = json.loads(self.custom_declaration_form_data or '{}')
+            
+            for k in self.declarations:
+                if k.exemption_sub_category == "NPS Contribution by Employer":
+                    form_data['mpAmount3'] = round(k.amount)      
+            
+            self.custom_declaration_form_data = json.dumps(form_data)
+
+    
+            
+                
+        
+
+
+
     def on_submit(self):
         self.insert_declaration_history()
 
 
 
     def before_update_after_submit(self):
+
+        self.process_form_data()
         
         if self.custom_check==0:
             self.calculate_hra_exemption()
@@ -375,15 +413,137 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             self.custom_basic_as_per_salary_structure=None
             self.custom_basic=None
             self.custom_hra_breakup=[]
-                  
-
-   
 
 
 
-        
+    def process_form_data(self):
+        if self.custom_tax_regime == "Old Regime":
+            form_data = json.loads(self.custom_declaration_form_data or '{}')
+            
+            # Extract numbers from the form data
+            numbers = [
+                {"field": "amount", "name": "Mediclaim Policy for Parents"},
+                {"field": "amount3", "name": "Mediclaim Policy for Self, Spouse, Children for Senior Citizen"},
+                {"field": "mpAmount3", "name": "Mediclaim Policy for Self, Spouse, Children"},
+                {"field": "mpAmount4", "name": "Mediclaim Policy for Parents for Senior Citizen"},
+                {"field": "mp5", "name": "Preventive Health Check-up for Parents"},
+                {"field": "mpAmount6", "name": "Preventive Health Check-up"},
+                {"field": "hlAmount", "name": "Interest Paid On Home Loan"},
 
-        
-           
 
-        
+
+                {"field": "pfValue", "name": "Employee Provident Fund (Auto)"},
+                {"field": "aValue2", "name": "Pension Scheme Investments & ULIP"},
+                {"field": "bValue1", "name": "Principal paid on Home Loan"},
+                {"field": "amount4", "name": "Public Provident Fund"},
+
+
+                {"field": "dValue1", "name": "Home Loan Account Of National Housing Bank"},
+
+                {"field": "eValue1", "name": "Life Insurance Premium"},
+
+                {"field": "fValue1", "name": "National Savings Certificates"},
+
+
+                {"field": "gValue1", "name": "Mutual Funds - Notified Under Clause 23D Of Section 10 "},
+                {"field": "hValue1", "name": "ELSS - Equity Link Saving Scheme Of Mutual Funds "},
+
+                {"field": "iValue1", "name": "Children Tuition Fees"},
+
+
+                {"field": "jValue1", "name": "Fixed Deposits In Banksn"},
+                {"field": "kValue1", "name": "5 Years Term Deposit An Account Under Post Office Term Deposit Rules "},
+                {"field": "kValue2", "name": "Others"},
+
+
+
+
+                {"field": "fourValue", "name": "Treatment of Dependent with Disability"},
+                {"field": "fiveNumber", "name": "Medical treatment (specified diseases only)"},
+                {"field": "sixNumber", "name": "Interest paid on Education Loan"},
+                {"field": "sevenNumber", "name": "Permanent Physical Disability (Self)"},
+                {"field": "eightNumber", "name": "Donation U/S 80G"},
+                # {"field": "nineNumber", "name": "NPS Contribution by Employer"},
+                {"field": "tenNumber", "name": "First HSG Loan Interest Ded.(80EE)"},
+                {"field": "elevenNumber", "name": "Additional Exemption on Voluntary NPS"},
+
+
+                {"field": "twelveNumber1", "name": "Tax Incentive for Affordable Housing for Ded U/S 80EEA"},
+                {"field": "fifteenNumber", "name": "Tax Incentives for Electric Vehicles for Ded U/S 80EEB"},
+                {"field": "sixteenNumber", "name": "Donations/contribution made to a political party or an electoral trust"},
+                {"field": "seventeenNumber", "name": "Interest on deposits in saving account for Ded U/S 80TTA"},
+                {"field": "eighteenNumber", "name": "Interest on deposits in saving account for Ded U/S 80TTB"},
+                {"field": "nineteenNumber", "name": "Profession Tax"},
+
+                {"field": "twentyNumber", "name": "Deduction U/S 80GG"},
+                {"field": "twentyoneNumber", "name": "Rajiv Gandhi Equity Saving Scheme 80CCG"},
+
+                {"field": "twentyFour", "name": "Uniform Allowance"},
+
+
+                
+
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+                 
+
+
+
+
+            ]
+            
+            # Prepare lists for child table population
+            sub_category, category, max_amount, declared_amount = [], [], [], []
+            
+            for item in numbers:
+                value = form_data.get(item["field"], 0)
+                if value > 0:
+                    # Fetch data for the sub-category
+                    get_doc1 = frappe.get_list(
+                        'Employee Tax Exemption Sub Category',
+                        filters={"is_active": 1, "name": item["name"]},
+                        fields=['name', 'exemption_category', 'max_amount']
+                    )
+                    
+                    if get_doc1:
+                        sub_category.append(get_doc1[0].name)
+                        category.append(get_doc1[0].exemption_category)
+                        max_amount.append(get_doc1[0].max_amount)
+                        declared_amount.append(value)
+            
+            # Reset and populate the `declarations` child table
+            self.declarations = []
+            for i in range(len(sub_category)):
+                self.append('declarations', {
+                    "exemption_sub_category": sub_category[i],
+                    "exemption_category": category[i],
+                    "max_amount": max_amount[i],
+                    "amount": declared_amount[i]
+                })
+
+
+
+                    
+
+    
+
+
+
+            
+
+            
+            
+
+            
