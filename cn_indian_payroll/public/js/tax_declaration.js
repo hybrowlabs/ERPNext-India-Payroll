@@ -3531,7 +3531,7 @@ const DECLARATION_FORM = {
 
   
 
-
+var array
 
 frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
@@ -3548,18 +3548,18 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
-            if(frm.doc.docstatus==1)
-            {
-                frm.add_custom_button("Edit Declaration",function()
-                {
+            // if(frm.doc.docstatus==1)
+            // {
+            //     frm.add_custom_button("Edit Declaration",function()
+            //     {
                     
-                    // edit_declaration(frm)
+            //         // edit_declaration(frm)
 
-                    edit(frm)
+            //         edit(frm)
                     
-                })
-                frm.change_custom_button_type('Edit Declaration', null, 'primary');
-            }
+            //     })
+            //     frm.change_custom_button_type('Edit Declaration', null, 'primary');
+            // }
 
 
 
@@ -3567,7 +3567,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
-
+        if(frm.doc.custom_tax_regime=="Old Regime")
+        {
+        frm.set_df_property("custom_declaration_form","hidden",0)
         const wrapper = frm.fields_dict.custom_declaration_form.$wrapper;
         const formContainer = document.createElement("div");
         wrapper.html('');
@@ -3626,6 +3628,15 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
             .catch((err) => {
                 console.error("Error creating Form.io form:", err);
             });
+
+          }
+
+        if(frm.doc.custom_tax_regime=="New Regime")
+        {
+          frm.set_df_property("custom_declaration_form","hidden",1)
+        }
+
+         
 
 
 
@@ -3691,13 +3702,31 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
             
     },
 
-    before_save: function (frm) {
-        // Ensure Form.io form data is updated in the Frappe field before saving
-        if (window.cur_formioInstance) {
-            const data = window.cur_formioInstance.submission.data;
-            frm.set_value("custom_declaration_form_data", JSON.stringify(data));
-        }
-    }
+
+
+    custom_declaration_form_data(frm)
+    {
+      
+      if(frm.doc.custom_declaration_form_data)
+      {
+        frm.set_value("custom_status","Pending")
+        frm.set_value("workflow_state","Pending")
+      }
+    },
+
+
+    
+
+   
+
+    // before_save: function (frm) {
+
+    //     if (window.cur_formioInstance) {
+    //         const data = window.cur_formioInstance.submission.data;
+    //         frm.set_value("custom_declaration_form_data", JSON.stringify(data));
+
+    //     }
+    // }
 
     
    

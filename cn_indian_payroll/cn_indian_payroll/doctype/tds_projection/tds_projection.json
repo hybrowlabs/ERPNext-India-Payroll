@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-29 14:27:10.603379",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "old_regime_value",
+  "new_regime_value"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "old_regime_value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Old Regime Value"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "new_regime_value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "New Regime Value"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-11-29 14:29:45.877680",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "TDS Projection",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

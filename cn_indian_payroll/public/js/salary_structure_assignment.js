@@ -30,6 +30,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
         }
 
     },
+
+    
     
 
     
@@ -37,6 +39,11 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
     refresh(frm)
     {
+
+        // $('[data-fieldname="custom_preview_tax_projection"]').css('color', 'black');
+
+        // $('input[data-fieldname="custom_preview_tax_projection"]').css("background-color","#FFE4C4")
+
 
         if(frm.doc.docstatus==1)
             {
@@ -58,7 +65,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
-                if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1 )
+                if (frm.doc.employee && frm.doc.docstatus==1)
                 {
                     processSalaryComponents(frm)
                 }

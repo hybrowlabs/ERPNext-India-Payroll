@@ -1,6 +1,7 @@
 import frappe
 import datetime
 from frappe.query_builder.functions import Count, Sum
+import json
 
 
 
@@ -32,8 +33,8 @@ class CustomSalarySlip(SalarySlip):
         
 
     
-    # def before_update_after_submit(self):
-    #     self.tax_calculation()
+    def before_update_after_submit(self):
+        self.tax_calculation()
 
     def after_insert(self):
         self.employee_accrual_insert()
@@ -77,22 +78,22 @@ class CustomSalarySlip(SalarySlip):
 
        
 
-        # if self.annual_taxable_amount and self.custom_perquisite_amount:
-        #     self.annual_taxable_amount=self.total_earnings - (
-        #         self.non_taxable_earnings
-        #         + self.deductions_before_tax_calculation
-        #         + self.tax_exemption_declaration
-        #         + self.standard_tax_exemption_amount
+        if self.annual_taxable_amount and self.custom_perquisite_amount:
+            self.annual_taxable_amount=self.total_earnings - (
+                self.non_taxable_earnings
+                + self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
             
-        #         ) + self.custom_perquisite_amount
-        # else:
-        #     self.annual_taxable_amount=self.total_earnings - (
-        #         self.non_taxable_earnings
-        #         + self.deductions_before_tax_calculation
-        #         + self.tax_exemption_declaration
-        #         + self.standard_tax_exemption_amount
+                ) + self.custom_perquisite_amount
+        else:
+            self.annual_taxable_amount=self.total_earnings - (
+                self.non_taxable_earnings
+                + self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
             
-        #         )
+                )
 
         if self.is_new():
             self.add_reimbursement_taxable_new_doc()
@@ -103,7 +104,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.arrear_ytd()
         self.food_coupon()
-        # self.tax_calculation()
+        self.tax_calculation()
         self.calculate_grosspay()
 
 
@@ -584,6 +585,8 @@ class CustomSalarySlip(SalarySlip):
                 basic_sum=sum(basic_array)
                 hra_sum=sum(hra_array)
 
+                # frappe.msgprint(str(total_nps_sum))
+
                 for i in self.earnings:
                     components = frappe.get_list(
                         'Employee Tax Exemption Sub Category',
@@ -626,6 +629,9 @@ class CustomSalarySlip(SalarySlip):
                                             "max_amount": k.max_amount
                                         })
 
+
+                # frappe.msgprint(str(update_component_array))
+                
                 if update_component_array:
                     declaration = frappe.get_list(
                         'Employee Tax Exemption Declaration',
@@ -633,30 +639,32 @@ class CustomSalarySlip(SalarySlip):
                         fields=['*'], 
                     )
                     if declaration:
+
+                        form_data = json.loads(declaration[0].custom_declaration_form_data or '{}')
+
                         
                         get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
                         
-                        for each_component in get_each_doc.declarations:
-                            for ki in update_component_array:
-                                if each_component.exemption_sub_category == ki['component']:
-                                    each_component.amount = ki['amount']
-                                    each_component.max_amount = ki['max_amount']
+                        
+                        for ki in update_component_array:
+                            if ki['component']=="NPS Contribution by Employer":
+                                form_data['nineNumber'] = round(ki['amount'])
+                            
+
+                            if ki['component']=="Employee Provident Fund (Auto)":
+                                form_data['pfValue'] = round(ki['amount'])
+                       
                         
                         get_each_doc.custom_posting_date=self.posting_date
+                        get_each_doc.custom_declaration_form_data = json.dumps(form_data)
 
                         #update hra exemption
 
                         if get_each_doc.monthly_house_rent>0:
 
                             percentage=(future_basic_amount+basic_sum)*10/100
-
-
-
                             annual_hra_exemption=(get_each_doc.monthly_house_rent*12)-percentage
-
-
                             get_each_doc.custom_check=1
-
                             get_each_doc.custom_basic_as_per_salary_structure=round(percentage)
                             get_each_doc.salary_structure_hra=round(future_hra_amount+hra_sum)
                             get_each_doc.custom_basic=round(future_basic_amount+basic_sum)
