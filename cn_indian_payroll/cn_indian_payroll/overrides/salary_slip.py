@@ -155,12 +155,15 @@ class CustomSalarySlip(SalarySlip):
                         earning.is_tax_applicable=0
                         earning.custom_regime=get_tax.custom_regime
                         earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-
-                else:
+                
+                elif get_tax.is_tax_applicable==0 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
                     earning.is_tax_applicable=0
                     earning.custom_regime=get_tax.custom_regime
                     earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-
+                elif get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
+                    earning.is_tax_applicable=1
+                    earning.custom_regime=get_tax.custom_regime
+                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
 
                 
                 if based_on_payment_days:
