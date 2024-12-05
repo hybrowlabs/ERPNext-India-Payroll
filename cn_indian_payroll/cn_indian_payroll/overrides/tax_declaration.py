@@ -1088,7 +1088,45 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         "amount": declared_amount[i]
                     })
 
-
+        if self.custom_tax_regime=="New Regime":
+            if self.workflow_state in ["Approved", "Pending"]:
+                form_data = json.loads(self.custom_declaration_form_data or '{}')
+                
+                # Extract numbers from the form data
+                numbers = [
+                    
+                    {"field": "nineNumber", "name": "NPS Contribution by Employer"},
+                    
+                ]
+                
+                # Prepare lists for child table population
+                sub_category, category, max_amount, declared_amount = [], [], [], []
+                
+                for item in numbers:
+                    value = form_data.get(item["field"], 0)
+                    if value > 0:
+                        # Fetch data for the sub-category
+                        get_doc1 = frappe.get_list(
+                            'Employee Tax Exemption Sub Category',
+                            filters={"is_active": 1, "name": item["name"]},
+                            fields=['name', 'exemption_category', 'max_amount']
+                        )
+                        
+                        if get_doc1:
+                            sub_category.append(get_doc1[0].name)
+                            category.append(get_doc1[0].exemption_category)
+                            max_amount.append(get_doc1[0].max_amount)
+                            declared_amount.append(value)
+                
+                # Reset and populate the `declarations` child table
+                self.declarations = []
+                for i in range(len(sub_category)):
+                    self.append('declarations', {
+                        "exemption_sub_category": sub_category[i],
+                        "exemption_category": category[i],
+                        "max_amount": max_amount[i],
+                        "amount": declared_amount[i]
+                    })
 
                     
 
