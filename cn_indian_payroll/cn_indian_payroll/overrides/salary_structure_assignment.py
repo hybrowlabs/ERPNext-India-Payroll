@@ -2,6 +2,7 @@ import frappe
 from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import SalaryStructureAssignment
 
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+from frappe.utils import getdate
 
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
@@ -221,6 +222,22 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
                                     amount.append(nps_amount_year)
 
+            
+            if self.custom_payroll_period:
+                get_payroll_period=frappe.get_doc("Payroll Period",self.custom_payroll_period)
+
+                from_date = getdate(self.from_date)
+                payroll_start_date = getdate(get_payroll_period.start_date)
+                
+                # Determine the declaration date based on the payroll period start date
+                if from_date <= payroll_start_date:
+                    declaration_date = payroll_start_date
+                else:
+                    declaration_date = from_date
+                
+
+
+
             get_all_declaration=frappe.get_list('Employee Tax Exemption Declaration',
                             filters={'employee':self.employee,'payroll_period':self.custom_payroll_period,'docstatus': ['in', [0, 1]]},
                             fields=['*'],
@@ -236,7 +253,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 insert_declaration.currency= self.currency,
                 insert_declaration.custom_income_tax=self.income_tax_slab,
                 insert_declaration.custom_salary_structure_assignment=self.name,
-                insert_declaration.custom_posting_date = frappe.utils.nowdate(),
+                # insert_declaration.custom_posting_date = frappe.utils.nowdate(),
+                insert_declaration.custom_posting_date=declaration_date
                 
                 for x in range(len(array)):
                     

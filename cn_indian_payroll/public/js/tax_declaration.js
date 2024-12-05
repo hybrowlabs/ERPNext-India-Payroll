@@ -3636,6 +3636,20 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
           frm.set_df_property("custom_declaration_form","hidden",1)
         }
 
+
+        if(frm.doc.docstatus==1)
+            {
+                frm.add_custom_button("Choose Regime",function()
+                {
+
+                  change_regime(frm)
+                    
+                    
+                    
+                })
+                frm.change_custom_button_type('Choose Regime', null, 'primary');
+            }
+
          
 
 
@@ -5884,4 +5898,274 @@ function edit(frm) {
 //         });
 //     }
 // }
+
+
+function change_regime(frm) {
+  console.log("hii");
+
+  let d = new frappe.ui.Dialog({
+      title: 'Enter details',
+      fields: [
+          {
+              label: 'Select Regime',
+              fieldname: 'select_regime',
+              fieldtype: 'Select',
+              options: ['Old Regime', 'New Regime'],
+              reqd: 1,
+              default: frm.doc.custom_tax_regime,
+              description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
+
+          }
+      ],
+      size: 'small', // small, large, extra-large 
+      primary_action_label: 'Submit',
+      primary_action(values) {
+          console.log(values);
+
+          if (values.select_regime == "New Regime") {
+              frappe.call({
+                  method: "frappe.client.get_list",
+                  args: {
+                      doctype: "Salary Slip",
+                      filters: { employee: frm.doc.employee, docstatus: 1, custom_payroll_period: frm.doc.payroll_period },
+                      fields: ["*"]
+                  },
+                  callback: function (kes) {
+                      if (kes.message.length == 0) {
+                          frappe.call({
+                              method: "frappe.client.get_list",
+                              args: {
+                                  doctype: "Salary Structure Assignment",
+                                  filters: { employee: frm.doc.employee, docstatus: 1 },
+                                  fields: ["*"],
+                                  limit: 1,
+                                  order_by: "from_date desc"
+                              },
+                              callback: function (res) {
+                                  if (res.message) {
+                                      console.log(res.message);
+
+                                      frappe.call({
+                                          method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
+                                          args: {
+                                              source_name: res.message[0].salary_structure,
+                                              employee: frm.doc.employee,
+                                              print_format: 'Salary Slip Standard for CTC',
+                                              docstatus: 1,
+                                              for_preview: 1
+                                          },
+                                          callback: function (response) {
+                                              if (response.message.earnings) {
+                                                  $.each(response.message.earnings, function (i, v) {
+                                                      frappe.call({
+                                                          method: "frappe.client.get",
+                                                          args: {
+                                                              doctype: "Salary Component",
+                                                              filters: { name: v.salary_component },
+                                                              fields: ["*"]
+                                                          },
+                                                          callback: function (mes) {
+                                                              if (mes.message && mes.message.component_type == "NPS") {
+
+                                                                console.log(res.message[0].from_date)
+
+                                                                
+
+
+                                                                frappe.call({
+                                                                  method: "frappe.client.get",
+                                                                  args: {
+                                                                      doctype: "Payroll Period",
+                                                                      filters: { name:frm.doc.payroll_period },
+                                                                      fields: ["*"]
+                                                                  },
+                                                                  callback: function (zes) {
+                                                                      if (zes.message) {
+
+                                                                        end_date=zes.message.end_date
+
+                                                                        from_date=res.message[0].from_date
+
+                                                                        const startDate = new Date(from_date);
+                                                                        const endDate = new Date(end_date);
+
+                                                                        // Calculate the difference in months
+                                                                        function getMonthsBetween(startDate, endDate) {
+                                                                            const startYear = startDate.getFullYear();
+                                                                            const startMonth = startDate.getMonth(); // 0-based
+                                                                            const endYear = endDate.getFullYear();
+                                                                            const endMonth = endDate.getMonth(); // 0-based
+
+                                                                            // Total months calculation
+                                                                            return (endYear - startYear) * 12 + (endMonth - startMonth) + 1; // +1 to include the start month
+                                                                        }
+
+                                                                        const monthsBetween = getMonthsBetween(startDate, endDate);
+
+
+
+
+                                                                  try {
+                                                                      // Parse the custom_declaration_form_data JSON
+                                                                      let jsonData = JSON.parse(frm.doc.custom_declaration_form_data);
+
+                                                                      // Update the nineNumber field
+                                                                      jsonData.nineNumber = Math.round(monthsBetween*v.amount);
+
+                                                                      console.log(v.amount)
+
+                                                                      console.log(monthsBetween*v.amount)
+
+                                                                      // Update the field on the form
+                                                                      frm.set_value("custom_declaration_form_data", JSON.stringify(jsonData));
+
+                                                                      // Save the form to persist changes
+                                                                      frm.save('Update');
+                                                                  } catch (error) {
+                                                                      console.error("Failed to parse custom_declaration_form_data JSON", error);
+                                                                  }
+
+                                                                }
+                                                              }
+                                                            })
+                                                              }
+                                                          }
+                                                      });
+                                                  });
+                                              }
+                                          }
+                                      });
+                                  }
+                              }
+                          });
+                      }
+
+                      else{
+
+
+                      //   frappe.call({
+                      //     method: "frappe.client.get_list",
+                      //     args: {
+                      //         doctype: "Salary Structure Assignment",
+                      //         filters: { employee: frm.doc.employee, docstatus: 1 },
+                      //         fields: ["*"],
+                      //         limit: 1,
+                      //         order_by: "from_date desc"
+                      //     },
+                      //     callback: function (res) {
+                      //         if (res.message) {
+                      //             console.log(res.message);
+
+                      //             frappe.call({
+                      //                 method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
+                      //                 args: {
+                      //                     source_name: res.message[0].salary_structure,
+                      //                     employee: frm.doc.employee,
+                      //                     print_format: 'Salary Slip Standard for CTC',
+                      //                     docstatus: 1,
+                      //                     for_preview: 1
+                      //                 },
+                      //                 callback: function (response) {
+                      //                     if (response.message.earnings) {
+                      //                         $.each(response.message.earnings, function (i, v) {
+                      //                             frappe.call({
+                      //                                 method: "frappe.client.get",
+                      //                                 args: {
+                      //                                     doctype: "Salary Component",
+                      //                                     filters: { name: v.salary_component },
+                      //                                     fields: ["*"]
+                      //                                 },
+                      //                                 callback: function (mes) {
+                      //                                     if (mes.message && mes.message.component_type == "NPS") {
+
+                      //                                       console.log(res.message[0].from_date)
+
+                                                            
+
+
+                      //                                       frappe.call({
+                      //                                         method: "frappe.client.get",
+                      //                                         args: {
+                      //                                             doctype: "Payroll Period",
+                      //                                             filters: { name:frm.doc.payroll_period },
+                      //                                             fields: ["*"]
+                      //                                         },
+                      //                                         callback: function (zes) {
+                      //                                             if (zes.message) {
+
+                      //                                               end_date=zes.message.end_date
+
+                      //                                               from_date=res.message[0].from_date
+
+                      //                                               const startDate = new Date(from_date);
+                      //                                               const endDate = new Date(end_date);
+
+                      //                                               // Calculate the difference in months
+                      //                                               function getMonthsBetween(startDate, endDate) {
+                      //                                                   const startYear = startDate.getFullYear();
+                      //                                                   const startMonth = startDate.getMonth(); // 0-based
+                      //                                                   const endYear = endDate.getFullYear();
+                      //                                                   const endMonth = endDate.getMonth(); // 0-based
+
+                      //                                                   // Total months calculation
+                      //                                                   return (endYear - startYear) * 12 + (endMonth - startMonth) + 1; // +1 to include the start month
+                      //                                               }
+
+                      //                                               const monthsBetween = getMonthsBetween(startDate, endDate);
+
+
+
+
+                      //                                         try {
+                      //                                             // Parse the custom_declaration_form_data JSON
+                      //                                             let jsonData = JSON.parse(frm.doc.custom_declaration_form_data);
+
+                      //                                             // Update the nineNumber field
+                      //                                             jsonData.nineNumber = Math.round(monthsBetween*v.amount);
+
+                      //                                             console.log(v.amount)
+
+                      //                                             console.log(monthsBetween*v.amount)
+
+                      //                                             // Update the field on the form
+                      //                                             frm.set_value("custom_declaration_form_data", JSON.stringify(jsonData));
+
+                      //                                             // Save the form to persist changes
+                      //                                             frm.save('Update');
+                      //                                         } catch (error) {
+                      //                                             console.error("Failed to parse custom_declaration_form_data JSON", error);
+                      //                                         }
+
+                      //                                       }
+                      //                                     }
+                      //                                   })
+                      //                                     }
+                      //                                 }
+                      //                             });
+                      //                         });
+                      //                     }
+                      //                 }
+                      //             });
+                      //         }
+                      //     }
+                      // });
+
+
+
+                      }
+                  }
+              });
+          }
+
+          else{
+
+          }
+
+          d.hide();
+      }
+  });
+
+  d.show();
+}
+
 

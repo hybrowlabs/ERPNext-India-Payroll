@@ -113,7 +113,8 @@ class CustomSalarySlip(SalarySlip):
 
     
     def update_total_lop(self):
-        self.custom_total_leave_without_pay=self.absent_days+self.leave_without_pay
+        self.custom_total_leave_without_pay = (self.absent_days or 0) + self.leave_without_pay
+
 
 
     
@@ -679,7 +680,7 @@ class CustomSalarySlip(SalarySlip):
                             get_each_doc.monthly_hra_exemption=round(annual_hra_exemption/12)
 
                         
-
+                        get_each_doc.workflow_state="Approved"
                         get_each_doc.save()
                         frappe.db.commit()
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount                    
@@ -746,6 +747,7 @@ class CustomSalarySlip(SalarySlip):
                                     each_component.max_amount = ki['max_amount']
                         
                         get_each_doc.custom_posting_date=self.posting_date
+                        get_each_doc.workflow_state="Approved"
                         get_each_doc.save()
                         frappe.db.commit()
                         self.tax_exemption_declaration=get_each_doc.total_exemption_amount
