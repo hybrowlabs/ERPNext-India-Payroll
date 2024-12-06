@@ -3652,7 +3652,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                             fieldtype: 'Select',
                             options:['Old Regime','New Regime'],
                             reqd:1,
-                            default:frm.doc.custom_income_tax,
+                            default:frm.doc.custom_tax_regime,
                             description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
 
 
