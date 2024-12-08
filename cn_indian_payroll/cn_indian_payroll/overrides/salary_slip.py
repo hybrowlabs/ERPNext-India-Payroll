@@ -29,7 +29,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-
+    
         
 
     
@@ -42,6 +42,12 @@ class CustomSalarySlip(SalarySlip):
     def on_submit(self):
         super().on_submit()
         self.employee_accrual_submit()
+
+    def validate(self):
+        super().validate()
+        self.insert_other_perquisites()
+
+
         
 
 
@@ -111,6 +117,74 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+
+    def insert_other_perquisites(self):
+        latest_salary_structure = frappe.get_list(
+            'Salary Structure Assignment',
+            filters={'employee': self.employee, 'docstatus': 1},
+            fields=["name"],
+            order_by='from_date desc',
+            limit=1
+        )
+
+        if latest_salary_structure:
+            # Get the Salary Structure Assignment document
+            salary_structure_doc = frappe.get_doc("Salary Structure Assignment", latest_salary_structure[0].name)
+
+            # Get the list of existing salary components in earnings
+            existing_components = [earning.salary_component for earning in self.earnings]
+
+            for perquisite in salary_structure_doc.custom_other_perquisites:
+                get_tax=frappe.get_doc("Salary Component",perquisite.title)
+
+                if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
+                    if get_tax.custom_regime=="All":
+                        is_tax_applicable=get_tax.is_tax_applicable
+                        custom_regime=get_tax.custom_regime
+                        custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+                    elif get_tax.custom_regime==tax_component:
+                        is_tax_applicable=get_tax.is_tax_applicable
+                        custom_regime=get_tax.custom_regime
+                        custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+                    elif get_tax.custom_regime!=tax_component:
+                        is_tax_applicable=0
+                        custom_regime=get_tax.custom_regime
+                        custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+                
+                elif get_tax.is_tax_applicable==0 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
+                    is_tax_applicable=0
+                    custom_regime=get_tax.custom_regime
+                    custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+                elif get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
+                    is_tax_applicable=1
+                    custom_regime=get_tax.custom_regime
+                    custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+
+
+
+
+
+
+
+
+                if perquisite.title not in existing_components:
+                    # Append only if the salary component is not already in earnings
+                    self.append("earnings", {
+                        "salary_component": perquisite.title,
+                        "amount": perquisite.amount/12,
+                        "is_tax_applicable":is_tax_applicable,
+                        "custom_regime":custom_regime,
+                        "custom_tax_exemption_applicable_based_on_regime":custom_tax_exemption_applicable_based_on_regime
+
+                    })
+
+
+
+
+
+
     
     def update_total_lop(self):
         self.custom_total_leave_without_pay = (self.absent_days or 0) + self.leave_without_pay
@@ -144,6 +218,7 @@ class CustomSalarySlip(SalarySlip):
 
                 if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
                     if get_tax.custom_regime=="All":
+                        # frappe.msgprint(str(get_tax.name))
                         earning.is_tax_applicable=get_tax.is_tax_applicable
                         earning.custom_regime=get_tax.custom_regime
                         earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
@@ -229,6 +304,9 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+
+
+
     def get_taxable_earnings_for_prev_period(self, start_date, end_date, allow_tax_exemption=False):
         exempted_amount = 0
         taxable_earnings = 0
@@ -254,6 +332,7 @@ class CustomSalarySlip(SalarySlip):
                         custom_tax_exemption_applicable_based_on_regime=1, 
                        
                     )
+                # frappe.msgprint(str(taxable_earnings))
 
             else:
 
