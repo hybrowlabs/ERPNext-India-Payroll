@@ -5,16 +5,33 @@ from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_s
 
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
-    # def before_save(self):
 
-        # self.set_cpl()
-        # self.reimbursement_amount()
+    def before_update_after_submit(self):
+        
+        if self.custom_employee_reimbursements:
+            for k in self.custom_employee_reimbursements:
+                if k.monthly_total_amount==0:
+                    frappe.throw("You Cant Enter Amount 0")
+
+        self.reimbursement_amount()
+
+
+    def before_save(self):
+        if self.custom_employee_reimbursements:
+            for k in self.custom_employee_reimbursements:
+                if k.monthly_total_amount==0:
+                    frappe.throw("You Cant Enter Amount 0")
+
+        self.reimbursement_amount()
+
+
+
  
 
 
     def on_submit(self):
         self.insert_tax_declaration()
-    #     self.update_employee_promotion()
+        self.update_employee_promotion()
 
        
 
