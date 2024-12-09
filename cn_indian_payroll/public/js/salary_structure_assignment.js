@@ -343,42 +343,42 @@ async function processSalaryComponents(frm) {
         }
 
         // Handle reimbursements if applicable
-        // if (frm.doc.custom_statistical_amount > 0) {
-        //     let reimbursementBreakup = `
-        //         <table class="table table-bordered small"> 
-        //             <thead> 
-        //                 <tr> 
-        //                     <th style="width: 16%">Reimbursements</th> 
-        //                     <th style="width: 16%" class="text-right">Monthly Amount</th> 
-        //                     <th style="width: 16%" class="text-right">Annual Amount</th> 
-        //                 </tr> 
-        //             </thead> 
-        //             <tbody id="reimbursement_breakup_body"></tbody>
-        //         </table>`;
+        if (frm.doc.custom_statistical_amount > 0) {
+            let reimbursementBreakup = `
+                <table class="table table-bordered small"> 
+                    <thead> 
+                        <tr> 
+                            <th style="width: 16%">Reimbursements</th> 
+                            <th style="width: 16%" class="text-right">Monthly Amount</th> 
+                            <th style="width: 16%" class="text-right">Annual Amount</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody id="reimbursement_breakup_body"></tbody>
+                </table>`;
             
-        //     document.getElementById("reimbursement_preview").innerHTML = reimbursementBreakup;
-        //     let reimbursementTableBody = document.getElementById("reimbursement_breakup_body");
+            document.getElementById("reimbursement_preview").innerHTML = reimbursementBreakup;
+            let reimbursementTableBody = document.getElementById("reimbursement_breakup_body");
 
-        //     $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
-        //         let newRow = reimbursementTableBody.insertRow();
+            $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
+                let newRow = reimbursementTableBody.insertRow();
                 
-        //         let componentCell = newRow.insertCell();
-        //         componentCell.textContent = component.reimbursements;
+                let componentCell = newRow.insertCell();
+                componentCell.textContent = component.reimbursements;
 
-        //         let amountCell = newRow.insertCell();
-        //         amountCell.className = "text-right";
-        //         amountCell.textContent = component.monthly_total_amount.toLocaleString();
+                let amountCell = newRow.insertCell();
+                amountCell.className = "text-right";
+                amountCell.textContent = component.monthly_total_amount.toLocaleString();
 
-        //         total_ctc.push(component.monthly_total_amount)
+                total_ctc.push(component.monthly_total_amount)
 
-        //         let annualAmountCell = newRow.insertCell();
-        //         annualAmountCell.className = "text-right";
-        //         annualAmountCell.textContent = (component.monthly_total_amount * 12).toLocaleString();
+                let annualAmountCell = newRow.insertCell();
+                annualAmountCell.className = "text-right";
+                annualAmountCell.textContent = (component.monthly_total_amount * 12).toLocaleString();
 
-        //         totalMonthlyEarnings += component.monthly_total_amount;
-        //         totalAnnualEarnings += component.monthly_total_amount * 12;
-        //     });
-        // }
+                totalMonthlyEarnings += component.monthly_total_amount;
+                totalAnnualEarnings += component.monthly_total_amount * 12;
+            });
+        }
 
         // Define and handle deductions
         let deductionBreakup = `
