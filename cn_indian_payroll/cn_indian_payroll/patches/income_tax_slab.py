@@ -16,7 +16,7 @@ def execute():
         "doctype": "Income Tax Slab",
         "effective_from": "2023-01-11",
         
-        "name": "Old Regime",
+        "name": "Old Regime 24-25",
         "other_taxes_and_charges": [
         {
             "custom_is_education_cess": 0,
@@ -83,9 +83,9 @@ def execute():
         "disabled": 0,
         "docstatus": 1,
         "doctype": "Income Tax Slab",
-        "effective_from": "2023-11-01",
+        "effective_from": "2024-04-01",
         
-        "name": "New Regime",
+        "name": "New Regime 24-25",
         "other_taxes_and_charges": [
         {
             "custom_is_education_cess": 0,
