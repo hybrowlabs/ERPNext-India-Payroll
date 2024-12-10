@@ -167,9 +167,29 @@ def execute():
 def insert_record(i):
 
     if not frappe.db.exists("Income Tax Slab", i["name"]):
-        doc=frappe.new_doc("Income Tax Slab")
-        doc.update(i)
-        doc.save()
+   
+
+
+        
+    #         doc=frappe.new_doc("Income Tax Slab")
+    #         doc.company=i.name
+    #         doc.update(i)
+    #         doc.save()
+
+        
+        
+        for company in frappe.db.get_list('Company', fields=['name']):
+            combined_name = f"{i['name']} - ({company['name']})"
+            if not frappe.db.exists("Income Tax Slab", combined_name):
+                doc = frappe.new_doc("Income Tax Slab")
+                doc.company = company["name"]  
+                doc.name = combined_name  
+                
+                for key, value in i.items():
+                    if key != "company" and key != "name":  
+                        doc.set(key, value)
+                
+                doc.save()  
 
 
 
