@@ -92,8 +92,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
 
-        # self.set_tax_projection()
-        self.show_tax_projection()
+
+        # self.show_tax_projection()
 
 
 

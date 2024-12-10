@@ -43,9 +43,9 @@ class CustomSalarySlip(SalarySlip):
         super().on_submit()
         self.employee_accrual_submit()
 
-    def validate(self):
-        super().validate()
-        self.insert_other_perquisites()
+    # def validate(self):
+    #     super().validate()
+    #     
 
 
         
@@ -77,8 +77,8 @@ class CustomSalarySlip(SalarySlip):
 
                    
         self.set_payroll_period()
-        self.insert_loan_perquisite()
-        self.update_declaration_component()
+        # self.insert_loan_perquisite()
+        # self.update_declaration_component()
         self.update_total_lop()
         
 
@@ -170,7 +170,6 @@ class CustomSalarySlip(SalarySlip):
 
 
                 if perquisite.title not in existing_components:
-                    # Append only if the salary component is not already in earnings
                     self.append("earnings", {
                         "salary_component": perquisite.title,
                         "amount": perquisite.amount/12,
@@ -723,19 +722,19 @@ class CustomSalarySlip(SalarySlip):
                     )
                     if declaration:
 
-                        form_data = json.loads(declaration[0].custom_declaration_form_data or '{}')
+                        # form_data = json.loads(declaration[0].custom_declaration_form_data or '{}')
 
                         
-                        get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
+                        # get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
                         
                         
-                        for ki in update_component_array:
-                            if ki['component']=="NPS Contribution by Employer":
-                                form_data['nineNumber'] = round(ki['amount'])
+                        # for ki in update_component_array:
+                        #     if ki['component']=="NPS Contribution by Employer":
+                        #         form_data['nineNumber'] = round(ki['amount'])
                             
 
-                            if ki['component']=="Employee Provident Fund (Auto)":
-                                form_data['pfValue'] = round(ki['amount'])
+                        #     if ki['component']=="Employee Provident Fund (Auto)":
+                        #         form_data['pfValue'] = round(ki['amount'])
                        
                         
                         get_each_doc.custom_posting_date=self.posting_date
