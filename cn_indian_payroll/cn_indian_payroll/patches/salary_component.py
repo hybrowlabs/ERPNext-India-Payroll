@@ -29,7 +29,7 @@ def execute():
   "custom_perquisite": 0,
   
   "custom_sequence": "1",
-  
+
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 1,
   "description": "Basic",
@@ -53,7 +53,10 @@ def execute():
   "salary_component_abbr": "B",
   "statistical_component": 0,
   "type": "Earning",
-  "variable_based_on_taxable_salary": 0
+  "variable_based_on_taxable_salary": 0,
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
+  
  },
  {
   "accounts": [],
@@ -78,6 +81,9 @@ def execute():
   "custom_perquisite": 0,
   
   "custom_sequence": "3",
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
+
   
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 1,
@@ -130,6 +136,9 @@ def execute():
   
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 1,
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
+
   
   "disabled": 0,
   "do_not_include_in_total": 0,
@@ -179,6 +188,9 @@ def execute():
   
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 1,
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
+
   
   "disabled": 0,
   "do_not_include_in_total": 0,
@@ -277,6 +289,7 @@ def execute():
   
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 1,
+
   
   "disabled": 0,
   "do_not_include_in_total": 0,
@@ -475,6 +488,9 @@ def execute():
   
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 0,
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
+
   
   "disabled": 0,
   "do_not_include_in_total": 1,
@@ -524,6 +540,7 @@ def execute():
   
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 0,
+
   
   "disabled": 0,
   "do_not_include_in_total": 1,
@@ -1063,6 +1080,9 @@ def execute():
   "custom_tax_exemption_applicable_based_on_regime": 1,
   "deduct_full_tax_on_selected_payroll_date": 0,
   "depends_on_payment_days": 0,
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
+
   
   "disabled": 0,
   "do_not_include_in_total": 0,
@@ -1091,6 +1111,8 @@ def execute():
   "amount": 0.0,
   "amount_based_on_formula": 1,
   "component_type": "",
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
   
   "create_separate_payment_entry_against_benefit_claim": 0,
   "custom_accrual_paid_on": "Payroll",
@@ -1313,6 +1335,8 @@ def execute():
   "docstatus": 0,
   "doctype": "Salary Component",
   "exempted_from_income_tax": 0,
+  "custom_tax_exemption_applicable_based_on_regime":1,
+  "custom_regime":"All",
   
   "is_flexible_benefit": 1,
   "is_income_tax_component": 0,
@@ -1446,6 +1470,9 @@ def insert_record(i):
                 get_doc.custom_is_part_of_ctc=1
             if get_doc.custom_is_part_of_appraisal==0:
                 get_doc.custom_is_part_of_appraisal=1
+            if get_doc.is_tax_applicable==1:
+                get_doc.custom_tax_exemption_applicable_based_on_regime=1
+                get_doc.custom_regime="All"
 
         get_doc.save()
 
