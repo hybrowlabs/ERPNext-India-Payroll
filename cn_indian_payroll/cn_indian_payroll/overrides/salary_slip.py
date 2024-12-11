@@ -110,7 +110,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.arrear_ytd()
         self.food_coupon()
-        self.tax_calculation()
+        # self.tax_calculation()
         self.calculate_grosspay()
 
 
