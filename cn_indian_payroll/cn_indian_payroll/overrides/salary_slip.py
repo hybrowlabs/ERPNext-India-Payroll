@@ -1829,14 +1829,14 @@ class CustomSalarySlip(SalarySlip):
                 #     gross_earning += i.amount
 
 
-        total_loan_amount=0
-        if len(self.loans)>0:
-            for ji in self.loans:
-                total_loan_amount+=ji.total_payment
+        # total_loan_amount=0
+        # if len(self.loans)>0:
+        #     for ji in self.loans:
+        #         total_loan_amount+=ji.total_payment
 
+        self.custom_loan_amount=self.total_loan_repayment
 
-
-        self.custom_total_deduction_amount=total_loan_amount+self.total_deduction   
+        self.custom_total_deduction_amount=self.custom_loan_amount+self.total_deduction   
                 
         self.custom_statutory_grosspay=round(gross_pay_sum)
         
@@ -1848,8 +1848,8 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_in_words=money_in_words(self.custom_net_pay_amount)
 
-        if self.total_loan_repayment:
-            self.custom_loan_amount=self.total_loan_repayment
+        # if self.total_loan_repayment:
+        
 
 
 
