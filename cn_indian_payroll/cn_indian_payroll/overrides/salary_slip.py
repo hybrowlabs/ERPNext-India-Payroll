@@ -1834,7 +1834,9 @@ class CustomSalarySlip(SalarySlip):
         #     for ji in self.loans:
         #         total_loan_amount+=ji.total_payment
 
-        # self.custom_loan_amount=self.total_loan_repayment
+        
+        if self.total_loan_repayment:
+            self.custom_loan_amount=self.total_loan_repayment
 
         self.custom_total_deduction_amount=self.custom_loan_amount+self.total_deduction   
                 
@@ -1848,7 +1850,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_in_words=money_in_words(self.custom_net_pay_amount)
 
-        # if self.total_loan_repayment:
+        
         
 
 
