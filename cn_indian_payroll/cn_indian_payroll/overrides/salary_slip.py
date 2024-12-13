@@ -1217,20 +1217,23 @@ class CustomSalarySlip(SalarySlip):
 
 
     def insert_lop_days(self):
-        
         benefit_application_days = frappe.get_list(
-                'Additional Salary',
-                filters={
-                    'employee': self.employee,
-                    'payroll_date': ['between', [self.start_date, self.end_date]],
-                    'docstatus': 1
-                },
-                fields=['*']
-            )
+            'LOP Reversal',
+            filters={
+                'employee': self.employee,
+                'additional_salary_date': ['between', [self.start_date, self.end_date]],
+                'docstatus': 1
+            },
+            fields=['number_of_days']  
+        )
 
+        if benefit_application_days:
+            total_lop_days = sum(days['number_of_days'] for days in benefit_application_days)
+            self.custom_lop_reversal_days = total_lop_days
+        else:
+            self.custom_lop_reversal_days = 0
+            
 
-        if len(benefit_application_days)>0:
-            self.custom_lop_reversal_days=benefit_application_days[0].custom_lop_reversal_days
 
 
 
@@ -1834,7 +1837,7 @@ class CustomSalarySlip(SalarySlip):
         #     for ji in self.loans:
         #         total_loan_amount+=ji.total_payment
 
-        
+
         if self.total_loan_repayment:
             self.custom_loan_amount=self.total_loan_repayment
 
