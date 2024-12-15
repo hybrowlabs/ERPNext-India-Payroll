@@ -84,6 +84,18 @@ frappe.ui.form.on('Salary Structure Assignment', {
             ]
         }
     }
+
+
+
+    frm.fields_dict['custom_other_perquisites'].grid.get_field('title').get_query = function(doc, cdt, cdn) {
+        var child = locals[cdt][cdn];
+        
+        return {    
+            filters:[
+                ['custom_perquisite', '=', 1]
+            ]
+        }
+    }
         
     },
 
