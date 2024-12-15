@@ -244,7 +244,7 @@ fixtures = [
 
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
-    # {"dt":"Salary Component"},
+    # {"dt":"Salary Component","filter":{"custom_is_arrear":1}},
     # {"dt":"Income Tax Slab","filters": {"name": ["in", ["Old Regime", "New Regime"]]}},
     # {"dt":"Salary Structure"},
 
