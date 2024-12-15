@@ -1840,6 +1840,8 @@ class CustomSalarySlip(SalarySlip):
 
         if self.total_loan_repayment:
             self.custom_loan_amount=self.total_loan_repayment
+        else:
+            self.custom_loan_amount=0
 
         self.custom_total_deduction_amount=self.custom_loan_amount+self.total_deduction   
                 
