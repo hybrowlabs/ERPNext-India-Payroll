@@ -154,6 +154,64 @@ def insert_breakup_table(self):
                     "amount": item['amount']
                 })
 
+
+    if self.number_of_days:
+        breakup_component_earning = []
+        breakup_component_deduction = []
+
+        # Fetch the salary slip
+        get_salary_slip = frappe.get_list('Salary Slip',
+                                          filters={'employee': self.employee, 'docstatus': 1, "custom_month": self.lop_month_reversal},
+                                          fields=['*'])
+
+        if get_salary_slip:
+            each_ss_doc = frappe.get_doc('Salary Slip', get_salary_slip[0].name)
+
+            # Process earnings components
+            for earning_component in each_ss_doc.earnings:
+                get_salary_component = frappe.get_list('Salary Component',
+                                                       filters={'custom_is_arrear': 1,
+                                                                "custom_component": earning_component.salary_component},
+                                                       fields=['*'])
+
+                for t in get_salary_component:
+                    earning_amount = (earning_component.amount / each_ss_doc.payment_days) * self.number_of_days
+                    breakup_component_earning.append({
+                        "salary_component": t.name,
+                        "amount": earning_amount
+                    })
+
+            # Process deduction components
+            for deduction_component in each_ss_doc.deductions:
+                get_deduction_salary_component = frappe.get_list('Salary Component',
+                                                                 filters={'custom_is_arrear': 1,
+                                                                          "custom_component": deduction_component.salary_component},
+                                                                 fields=['*'])
+
+                for k in get_deduction_salary_component:
+                    deduction_amount = (deduction_component.amount / each_ss_doc.payment_days) * self.number_of_days
+                    breakup_component_deduction.append({
+                        "salary_component": k.name,
+                        "amount": deduction_amount
+                    })
+
+            # Append earnings components to arrear_breakup
+            self.arrear_breakup=[]
+            for item in breakup_component_earning:
+                self.append('arrear_breakup', {
+                    "salary_component": item['salary_component'],
+                    "amount": item['amount']
+                })
+
+            # Append deduction components to arrear_deduction_breakup
+            self.arrear_deduction_breakup=[]
+            for item in breakup_component_deduction:
+                self.append('arrear_deduction_breakup', {
+                    "salary_component": item['salary_component'],
+                    "amount": item['amount']
+                })
+
+
         
 
 

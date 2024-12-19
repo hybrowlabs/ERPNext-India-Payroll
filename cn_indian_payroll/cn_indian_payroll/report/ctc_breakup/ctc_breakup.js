@@ -11,6 +11,21 @@ frappe.query_reports["CTC BreakUp"] = {
             "options": "Employee",
             "width": 200
         },
+
+        {
+            "label": "Payroll Period",
+            "fieldname": "payroll_period",
+            "fieldtype": "Link",
+            "options": "Payroll Period",
+            "width": 200
+        },
+        {
+            "label": "Effective From",
+            "fieldname": "from_date",
+            "fieldtype": "Date",
+            
+            "width": 200
+        },
        
        
 		

@@ -175,14 +175,7 @@ frappe.ui.form.on('LOP Reversal', {
 
     lop_month_reversal:function(frm)
     {
-
-
-
-
         var month = frm.doc.lop_month_reversal;
-
-
-
 
                 frappe.call({
         
@@ -253,13 +246,6 @@ frappe.ui.form.on('LOP Reversal', {
                                         }
                                     }
                                 })
-
-
-
-
-
-                                
-                               
                                 
 
                             }

@@ -314,6 +314,7 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                             get_declaration.custom_declaration_form_data = json.dumps(form_data)
 
                             get_declaration.custom_income_tax = selected_regime
+                            get_declaration.monthly_house_rent=0
 
                             get_declaration.save()
 
@@ -355,6 +356,8 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                 get_declaration.custom_declaration_form_data = json.dumps(form_data)
 
                 get_declaration.custom_income_tax = selected_regime
+
+                get_declaration.monthly_house_rent=0
 
                 get_declaration.save()
 
@@ -523,25 +526,4 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # get_doc=frappe.get_doc("Employee Tax Exemption Declaration",doc_id)
-
-    # # frappe.msgprint(str(get_doc.custom_income_tax))
-
-    # get_doc.custom_income_tax="New Regime"
-
-    # get_doc.save()
 
