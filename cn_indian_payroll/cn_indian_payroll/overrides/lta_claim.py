@@ -38,6 +38,8 @@ def validate(self, method):
         if lta_data and lta_data[0].name not in component:
            
             frappe.throw("you are not eligible for claim LTA")
+
+            
     # if self.non_taxable_amount:
     #     amount += self.non_taxable_amount
 

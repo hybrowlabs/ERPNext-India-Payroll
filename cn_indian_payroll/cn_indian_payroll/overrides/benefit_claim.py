@@ -4,13 +4,45 @@ from hrms.payroll.doctype.employee_benefit_claim.employee_benefit_claim import E
 
 class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
     
-    # def validate(self):
+    def validate(self):
 
-    #     super().validate()
+        super().validate()
+
+        self.validate_employee()
 
     def on_submit(self):
 
         self.insert_future_benefit()
+
+
+    def validate_employee(self):
+        get_component = frappe.get_doc("Salary Component", self.earning_component)
+        
+        if get_component.component_type == "Vehicle Maintenance Reimbursement":
+            get_salary_assignment = frappe.db.get_list(
+                'Salary Structure Assignment',
+                filters={
+                    'docstatus': 1,
+                    'employee': self.employee,
+                },
+                fields=['custom_car_maintenance'],
+                order_by='from_date desc',
+                limit=1
+            )
+            
+            # Check if a salary assignment exists
+            if get_salary_assignment:
+                # Validate custom_car_maintenance value
+                if get_salary_assignment[0].get('custom_car_maintenance', 0) == 0:
+                    frappe.throw("You are not eligible to claim Vehicle Maintenance Reimbursement")
+            else:
+                # If no salary assignment is found, raise an error
+                frappe.throw("No valid Salary Structure Assignment found for the employee.")
+
+
+
+
+
 
 
 
