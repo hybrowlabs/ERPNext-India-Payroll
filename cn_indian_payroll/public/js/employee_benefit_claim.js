@@ -383,6 +383,151 @@ frappe.ui.form.on('Employee Benefit Claim', {
     //         frappe.msgprint(__('Claim date cannot be in the past.'));
     //     }
     // }
+
+
+    earning_component: function(frm) {
+
+        if(frm.doc.earning_component && frm.doc.employee)
+        {
+
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Salary Component",
+                    filters: { "name": frm.doc.earning_component},
+                    
+                },
+                callback: function(kes) {
+                    if(kes.message)
+                    {
+                        if(kes.message.component_type=="Vehicle Maintenance Reimbursement")
+                        {
+
+                            console.log(kes.message.component_type)
+
+                            frappe.call({
+                                method: "frappe.client.get_list",
+                                args: {
+                                    doctype: "Salary Structure Assignment",
+                                    filters: { "employee": frm.doc.employee,"docstatus":1},
+                                    fields: ["*"],
+                                    order_by: "from_date desc",
+                                    limit: 1
+        
+                                },
+                                callback: function(res) {
+                                    if (res.message.length>0) {
+
+        
+                                        frm.set_value("custom_payroll_period",res.message[0].custom_payroll_period)
+
+                                        
+        
+                                        if(res.message[0].custom_car_maintenance==1 )
+        
+                                            {       
+                                                frappe.call({
+                                                    method: "frappe.client.get_list",
+                                                    args: {
+                                                        doctype: "Employee Benefit Claim",
+                                                        filters: { "employee": frm.doc.employee,"docstatus":1,"custom_payroll_period":res.message[0].custom_payroll_period},
+                                                        fields: ["*"],
+                                                       
+                                                        limit: 1
+                            
+                                                    },
+                                                    callback: function(response) {
+                                                        if(response.message.length>0)
+                                                        {
+
+                                                            var amount=0
+                                                            $.each(response.message,function(l,v)
+                                                                {
+                                                                    amount=amount+v.claimed_amount
+                                                                    
+                                                                })
+
+                                                        frm.set_value("custom_max_amount",(res.message[0].custom_maintenance_amountyearly-amount))
+        
+                                                        }
+                                                        else{
+
+                                                            
+                                                            
+                                                            frm.set_value("custom_max_amount",res.message[0].custom_maintenance_amountyearly)
+                                                        }
+                                                    }
+        
+                                                })
+        
+        
+      
+                                            }
+        
+       
+                                    }
+                                }
+                            })
+
+                        }
+                    }
+
+                }
+            })
+
+
+
+        }
+
+
+
+
+        // if (frm.doc.earning_component && frm.doc.employee) {
+
+        //     frappe.call({
+        //         method: "frappe.client.get_list",
+        //         args: {
+        //             doctype: "Salary Structure Assignment",
+        //             filters: { "employee": frm.doc.employee,"docstatus":1},
+        //             fields: ["*"],
+        //             order_by: "from_date desc",
+        //             limit: 99999999
+
+        //         },
+        //         callback: function(res) {
+        //             if (res.message) {
+
+        //                 frappe.call({
+        //                     method: "frappe.client.get",
+        //                     args: {
+        //                         doctype: "Salary Structure Assignment",
+        //                         filters: { "employee": frm.doc.employee,"docstatus":1,"name":res.message[0].name},
+        //                         fields: ["*"],
+                                
+        //                     },
+        //                     callback: function(tes) {
+        //                         if (tes.message) {
+
+                                    
+                                   
+        //                         }
+        //                     }
+        //                 })
+
+
+
+
+        //             }
+        //         }
+        //     })
+
+
+
+            
+        // }
+
+        
+    },
     
     
     
