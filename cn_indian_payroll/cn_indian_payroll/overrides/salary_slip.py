@@ -1941,6 +1941,9 @@ class CustomSalarySlip(SalarySlip):
         
         if self.annual_taxable_amount:
             self.custom_taxable_amount=round(self.annual_taxable_amount)
+        else:
+            self.custom_taxable_amount=0
+
 
         if self.ctc and self.non_taxable_earnings:
             self.custom_total_income_with_taxable_component=round(self.ctc-self.non_taxable_earnings)
