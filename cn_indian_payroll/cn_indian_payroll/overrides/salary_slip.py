@@ -33,8 +33,8 @@ class CustomSalarySlip(SalarySlip):
         
 
     
-    def before_update_after_submit(self):
-        self.tax_calculation()
+    # def before_update_after_submit(self):
+    #     self.tax_calculation()
 
     def after_insert(self):
         self.employee_accrual_insert()
@@ -106,7 +106,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.arrear_ytd()
         self.food_coupon()
-        self.tax_calculation()
+        # self.tax_calculation()
         self.calculate_grosspay()
 
 
