@@ -274,7 +274,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             if taxable_component.component_type == "Professional Tax":
                                     pt_amount+=deduction.amount
 
-
+                    # frappe.msgprint(str(basic_component_value_old))
+                    # frappe.msgprint(str(basic_component_value_new))
 
                     old_standard_value=sum(basic_component_value_old)
                     new_standard_value=sum(basic_component_value_new)
@@ -734,7 +735,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
                 
                 self.custom_tds_projection=[]
-                
+                # frappe.msgprint(str(len(old_regime_values)))
+                # frappe.msgprint(str(len(new_regime_values)))
+
                 for i in range(len(title_array)):
                     self.append("custom_tds_projection", {
                         "title": title_array[i],

@@ -57,11 +57,7 @@ class CustomSalarySlip(SalarySlip):
         self.update_bonus_accrual()
         self.new_joinee()
         self.insert_lop_days()
-
         self.set_taxale()
-
-       
-
         self.actual_amount_ctc()
         self.set_month()
         self.remaining_day()
@@ -84,7 +80,7 @@ class CustomSalarySlip(SalarySlip):
 
        
 
-        # if self.annual_taxable_amount and self.custom_perquisite_amount:
+        # if self.custom_perquisite_amount:
         #     self.annual_taxable_amount=self.total_earnings - (
         #         self.non_taxable_earnings
         #         + self.deductions_before_tax_calculation
@@ -163,17 +159,10 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-
-
-
-
-
-
                 if perquisite.title not in existing_components:
-                    # Append only if the salary component is not already in earnings
                     self.append("earnings", {
                         "salary_component": perquisite.title,
-                        "amount": perquisite.amount/12,
+                        "amount": perquisite.amount,
                         "is_tax_applicable":is_tax_applicable,
                         "custom_regime":custom_regime,
                         "custom_tax_exemption_applicable_based_on_regime":custom_tax_exemption_applicable_based_on_regime

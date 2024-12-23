@@ -192,7 +192,6 @@ frappe.ui.form.on('Employee Benefit Claim', {
                                                                     // console.log(v.amount)
                                                                 });
 
-                                                                console.log(sum,"77777")
                                             
                                                                
                                                                frappe.call({
