@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-12-24 11:50:59.632430",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "payment_days",
+  "salary_slip_id",
+  "salary_component",
+  "accrued_amount",
+  "claimed_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "payment_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Payment Days"
+  },
+  {
+   "fieldname": "salary_slip_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Salary Slip ID"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "accrued_amount",
+   "fieldtype": "Float",
+   "label": "Accrued Amount"
+  },
+  {
+   "fieldname": "claimed_amount",
+   "fieldtype": "Float",
+   "label": "Claimed Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-12-24 12:49:17.982236",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Accrued Benefit",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
