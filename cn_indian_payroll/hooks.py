@@ -260,6 +260,7 @@ doctype_js = {
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
+    "Full and Final Statement":"public/js/f_and_f.js",
 
 }
 
