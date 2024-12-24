@@ -463,6 +463,13 @@ frappe.ui.form.on('Employee Benefit Claim', {
         
       
                                             }
+                                        else
+                                        {
+
+                                            frm.set_value("custom_max_amount",0)
+
+
+                                        }
         
        
                                     }
