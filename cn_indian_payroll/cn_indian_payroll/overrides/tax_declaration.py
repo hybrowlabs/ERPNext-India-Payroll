@@ -64,7 +64,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             
             self.custom_declaration_form_data = json.dumps(form_data)
 
-        self.set_tax_projection()
+       
 
     
             
