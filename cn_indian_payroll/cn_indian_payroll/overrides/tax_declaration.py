@@ -1776,6 +1776,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
                     {"field": "twentyFour", "name": "Uniform Allowance"},
 
+                    {"field": "thirteen", "name": "Education Allowance"},
+                    {"field": "twentysix", "name": "Hostel Allowance"},
+                    {"field": "twentyseven", "name": "Gratuity"},
+
 
 
                 ]

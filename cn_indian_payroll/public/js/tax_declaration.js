@@ -2720,7 +2720,7 @@ const DECLARATION_FORM = {
                   "bordered": true,
                   "key": "table7",
                   "type": "table",
-                  "numRows": 9,
+                  "numRows": 12,
                   "numCols": 6,
                   "input": false,
                   "tableView": false,
@@ -3466,7 +3466,17 @@ const DECLARATION_FORM = {
                         ]
                       },
                       {
-                        "components": []
+                        "components": [
+                          {
+                          "html": "<p>Less : Allowances Exempted U/s 10</p>",
+                            "label": "Less : Allowances Exempted U/s 10",
+                            "refreshOnChange": false,
+                            "key": "u4",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
                       },
                       {
                         "components": [
@@ -3487,8 +3497,265 @@ const DECLARATION_FORM = {
                             "input": true
                           }
                         ]
-                      }
-                    ]
+                      },
+
+                    ],
+
+                    [
+                      {
+                        "components": [
+                          {
+                            "html": "<p>23</p>",
+                            "label": "twentythree",
+                            "refreshOnChange": false,
+                            "key": "twentythree",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>Education Allowance</p>",
+                            "label": "Education Allowance",
+                            "refreshOnChange": false,
+                            "key": "education",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>10(14)</p>",
+                            "label": "10(14)",
+                            "refreshOnChange": false,
+                            "key": "ten_fourteen_1",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                          "html": "<p>Less : Allowances Exempted U/s 10</p>",
+                            "label": "Less : Allowances Exempted U/s 10",
+                            "refreshOnChange": false,
+                            "key": "u3",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "label": "twenty_five",
+                            "applyMaskOn": "change",
+                            "hideLabel": true,
+                            "mask": false,
+                            "tableView": false,
+                            "defaultValue": 0,
+                            "delimiter": false,
+                            "requireDecimal": false,
+                            "inputFormat": "plain",
+                            "truncateMultipleSpaces": false,
+                            "validateWhenHidden": false,
+                            "key": "thirteen",
+                            "type": "number",
+                            "input": true
+                          }
+                        ]
+                      },
+
+                    ],
+
+
+                    [
+                      {
+                        "components": [
+                          {
+                            "html": "<p>24</p>",
+                            "label": "twentyfour",
+                            "refreshOnChange": false,
+                            "key": "twentyfour",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>Hostel Allowance</p>",
+                            "label": "Hostel Allowance",
+                            "refreshOnChange": false,
+                            "key": "hostel",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>10(14)</p>",
+                            "label": "10(14)",
+                            "refreshOnChange": false,
+                            "key": "ten_fourteen_2",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                          "html": "<p>Less : Allowances Exempted U/s 10</p>",
+                            "label": "Less : Allowances Exempted U/s 10",
+                            "refreshOnChange": false,
+                            "key": "u2",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "label": "twenty_six",
+                            "applyMaskOn": "change",
+                            "hideLabel": true,
+                            "mask": false,
+                            "tableView": false,
+                            "defaultValue": 0,
+                            "delimiter": false,
+                            "requireDecimal": false,
+                            "inputFormat": "plain",
+                            "truncateMultipleSpaces": false,
+                            "validateWhenHidden": false,
+                            "key": "twentysix",
+                            "type": "number",
+                            "input": true
+                          }
+                        ]
+                      },
+
+                    ],
+
+
+
+                    
+                    [
+                      {
+                        "components": [
+                          {
+                            "html": "<p>25</p>",
+                            "label": "twentyfive",
+                            "refreshOnChange": false,
+                            "key": "twentyfive",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>Gratuity</p>",
+                            "label": "Gratuity",
+                            "refreshOnChange": false,
+                            "key": "gratuity",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "html": "<p>10(14)</p>",
+                            "label": "10(14)",
+                            "refreshOnChange": false,
+                            "key": "ten_fourteen_3",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                          "html": "<p>Less : Allowances Exempted U/s 10</p>",
+                            "label": "Less : Allowances Exempted U/s 10",
+                            "refreshOnChange": false,
+                            "key": "u1",
+                            "type": "content",
+                            "input": false,
+                            "tableView": false
+                          }
+
+                          
+
+                        ]
+                      },
+                      {
+                        "components": [
+                          {
+                            "label": "twenty_seven",
+                            "applyMaskOn": "change",
+                            "hideLabel": true,
+                            "mask": false,
+                            "tableView": false,
+                            "defaultValue": 0,
+                            "delimiter": false,
+                            "requireDecimal": false,
+                            "inputFormat": "plain",
+                            "truncateMultipleSpaces": false,
+                            "validateWhenHidden": false,
+                            "key": "twentyseven",
+                            "type": "number",
+                            "input": true
+                          }
+                        ]
+                      },
+
+                    ],
+
+
+
+                    
+
+                   
                   ]
                 }
               ]
