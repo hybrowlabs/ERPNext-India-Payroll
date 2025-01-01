@@ -207,7 +207,6 @@ class CustomSalarySlip(SalarySlip):
 
                 if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
                     if get_tax.custom_regime=="All":
-                        # frappe.msgprint(str(get_tax.name))
                         earning.is_tax_applicable=get_tax.is_tax_applicable
                         earning.custom_regime=get_tax.custom_regime
                         earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
@@ -255,6 +254,7 @@ class CustomSalarySlip(SalarySlip):
 
                         if earning.deduct_full_tax_on_selected_payroll_date:
                             additional_income_with_full_tax += additional_amount
+
             # print(taxable_earnings,"taxable_earnings------")
 
             if allow_tax_exemption:
@@ -432,6 +432,7 @@ class CustomSalarySlip(SalarySlip):
                     filters={
                         'salary_slip': self.name,
                         'employee':self.employee,
+                        'docstatus':1
                     },
                     fields=['*'],
                     )
