@@ -148,7 +148,7 @@ function get_outstanding_benefits(frm) {
 
                         //BONUS COMPONENT
                         
-                        var bonus_sum=[]
+                        var bonus_sum = [];
                         frappe.call({
                             method: "frappe.client.get_list",
                             args: {
@@ -156,79 +156,64 @@ function get_outstanding_benefits(frm) {
                                 filters: {
                                     employee: frm.doc.employee,
                                     docstatus: ["in", [0, 1]],
-                                    is_paid:0
+                                    is_paid: 0
                                 },
                                 fields: ["*"],
-                                limit_page_length: 0 
-                                },
+                                limit_page_length: 0
+                            },
                             callback: function (bonus_response) {
-
-                                if(bonus_response.message)
-                                {
-                                    
-
+                                if (bonus_response.message) {
                                     $.each(bonus_response.message, function (i, k) {
-
-                                        bonus_sum.push(k.amount)
-
-
+                                        bonus_sum.push(k.amount);
+                        
                                         let child = frm.add_child('custom_accrued_benefit');
-
-                                        if(k.salary_slip)
-                                        {
-
+                                        child.date = k.accrual_date; // Replace 'benefit_accrual_date' if required
+                                        child.salary_slip_id = k.salary_slip; 
+                                        child.salary_component = k.salary_component;
+                                        child.accrued_amount = k.amount; // Replace 'amount' if required
+                        
+                                        if (k.salary_slip) {
                                             frappe.call({
                                                 method: "frappe.client.get",
                                                 args: {
                                                     doctype: "Salary Slip",
-                                                    filters: {
-                                                        employee: k.employee,
-                                                        name: k.salary_slip
-                                                       
-                                                    },
-                                                    
-                                                    },
+                                                    name: k.salary_slip
+                                                },
                                                 callback: function (slip_response_data) {
-                                                    if(slip_response_data.message)
-                                                    {
-                                                        
-                                                        child.date = k.accrual_date; // Replace 'benefit_accrual_date' with the correct field
-                                                        child.salary_slip_id = k.salary_slip; // Replace 'salary_slip' with the correct field
-                                                        child.salary_component = k.salary_component;
-                                                        child.accrued_amount = k.amount; // Replace 'amount' with the correct field
-                                                        child.payment_days=slip_response_data.message.payment_days
-
-
+                                                    if (slip_response_data.message) {
+                                                        child.payment_days = slip_response_data.message.payment_days;
                                                     }
                                                     frm.refresh_field('custom_accrued_benefit');
-
                                                 }
-                                            })
-
+                                            });
+                                        } else {
+                                            frm.refresh_field('custom_accrued_benefit');
                                         }
-                                        
-                                        
-                                       
                                     });
-
-                                    console.log(bonus_sum,"BONUS")
-
-                                    let sum = bonus_sum.reduce(function(accumulator, currentValue) {
-                                        return accumulator + currentValue;
-                                    }, 0); // 0 is the initial value of the accumulator
-                                    
-                                    
-            
-                                    let child = frm.add_child('payables');
-                                    child.component = "Bonus PaidOut";
-                                    child.amount=sum
-                                    frm.refresh_field('payables');
-
-                                    
-                                     
+                        
+                                    // Calculate total bonus sum
+                                    let sum = bonus_sum.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+                        
+                                    // Check if component exists
+                                    let exists = frm.doc.payables.some((row) => row.component === "Bonus PaidOut");
+                        
+                                    if (!exists) {
+                                        let payables_child = frm.add_child('payables');
+                                        payables_child.component = "Bonus PaidOut";
+                                        payables_child.amount = sum;
+                                        frm.refresh_field('payables');
+                                    } else {
+                                        frm.doc.payables.forEach((row) => {
+                                            if (row.component === "Bonus PaidOut") {
+                                                row.amount = sum;
+                                            }
+                                        });
+                                        frm.refresh_field('payables');
+                                    }
                                 }
                             }
-                        })
+                        });
+                        
 
 
 
