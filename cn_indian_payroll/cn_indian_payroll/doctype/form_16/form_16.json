@@ -24,7 +24,16 @@
   "section_break_10",
   "total_actual_amount",
   "column_break_12",
-  "exemption_amount"
+  "exemption_amount",
+  "hra_exemption_section",
+  "house_rent_payment_amount",
+  "rented_in_metro_city",
+  "rented_from_date",
+  "rented_to_date",
+  "column_break_xrxp",
+  "monthly_house_rent",
+  "monthly_eligible_amount",
+  "total_eligible_hra_exemption"
  ],
  "fields": [
   {
@@ -144,11 +153,56 @@
    "options": "Employee Tax Exemption Proof Submission",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "hra_exemption_section",
+   "fieldtype": "Section Break",
+   "label": "HRA Exemption"
+  },
+  {
+   "fieldname": "house_rent_payment_amount",
+   "fieldtype": "Float",
+   "label": "House Rent Payment Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "rented_in_metro_city",
+   "fieldtype": "Check",
+   "label": "Rented in Metro City"
+  },
+  {
+   "fieldname": "rented_from_date",
+   "fieldtype": "Date",
+   "label": "Rented From Date"
+  },
+  {
+   "fieldname": "rented_to_date",
+   "fieldtype": "Date",
+   "label": "Rented To Date"
+  },
+  {
+   "fieldname": "column_break_xrxp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_house_rent",
+   "fieldtype": "Float",
+   "label": "Monthly House Rent"
+  },
+  {
+   "fieldname": "monthly_eligible_amount",
+   "fieldtype": "Float",
+   "label": "Monthly Eligible Amount"
+  },
+  {
+   "fieldname": "total_eligible_hra_exemption",
+   "fieldtype": "Float",
+   "label": "Total Eligible HRA Exemption"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-30 17:16:43.627134",
+ "modified": "2025-01-03 10:34:19.379795",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Form 16",
