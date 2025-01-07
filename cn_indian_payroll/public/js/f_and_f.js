@@ -25,6 +25,40 @@ frappe.ui.form.on('Full and Final Statement', {
     }
 });
 
+
+
+frappe.ui.form.on('Leave Encashment Child', {
+    basic_amount: function (frm, cdt, cdn) {
+        var d = locals[cdt][cdn]; 
+
+        if (d.basic_amount) {
+            if (d.encashment_days && d.leave_type) {
+                frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
+            }
+        }
+    },
+
+    encashment_days:function(frm,cdt, cdn)
+    {
+        var d = locals[cdt][cdn]; 
+
+        if (d.encashment_days) {
+            if (d.basic_amount && d.leave_type) {
+                frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
+            }
+        }
+
+    }
+});
+
+
+
+
+
+
+
+
+
 function get_outstanding_benefits(frm) {
     if (frm.doc.employee) {
 
