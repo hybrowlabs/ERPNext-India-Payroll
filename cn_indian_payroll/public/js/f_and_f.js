@@ -11,6 +11,7 @@ frappe.ui.form.on('Full and Final Statement', {
             deduction_component(frm)
             get_outstanding_benefits(frm)
             get_tax(frm)
+            get_leave_encashment(frm)
            
             
            
@@ -120,6 +121,8 @@ function get_outstanding_benefits(frm) {
                                         
 
                                         $.each(group, function (i, v) {
+
+                                            // console.log(v.salary_slip,"11111")
                                             let child = frm.add_child('custom_accrued_benefit');
 
                                             if(v.salary_slip)
@@ -541,6 +544,39 @@ function earning_component(frm)
         }
     });
     
+}
+
+function get_leave_encashment(frm) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Leave Encashment",
+            filters: {
+                employee: frm.doc.employee,
+                docstatus: 1
+            },
+            fields: ["leave_type", "encashment_days", "custom_basic_amount", "encashment_amount"],
+        },
+        callback: function (r) {
+            if (r.message && r.message.length > 0) {
+                // Clear the child table before adding new rows
+                frm.clear_table('custom_calculated_amount');
+                
+                r.message.forEach(row => {
+                    let child = frm.add_child('custom_calculated_amount');
+                    child.leave_type = row.leave_type;
+                    child.encashment_days = row.encashment_days;
+                    child.basic_amount = row.custom_basic_amount;
+                    child.amount = row.encashment_amount;
+                });
+
+                // Refresh the child table field to show the new rows
+                frm.refresh_field('custom_calculated_amount');
+            } else {
+                frappe.msgprint(__('No Leave Encashment records found for this employee.'));
+            }
+        }
+    });
 }
 
 
