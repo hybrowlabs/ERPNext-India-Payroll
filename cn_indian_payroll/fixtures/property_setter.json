@@ -654,5 +654,21 @@
   "property_type": "Check",
   "row_name": null,
   "value": "0"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Employee Tax Exemption Proof Submission Detail",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "type_of_proof",
+  "is_system_generated": 0,
+  "modified": "2025-01-08 17:23:03.650214",
+  "module": "cn-indian-payroll",
+  "name": "Employee Tax Exemption Proof Submission Detail-type_of_proof-reqd",
+  "property": "reqd",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
  }
 ]
