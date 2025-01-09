@@ -5,5 +5,5 @@
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
 
-cn_indian_payroll.cn_indian_payroll.patches.income_tax_slab #21-14-2024
-#cn_indian_payroll.cn_indian_payroll.patches.salary_component #21-16-2024
+cn_indian_payroll.cn_indian_payroll.patches.income_tax_slab #21-14-2024defr
+cn_indian_payroll.cn_indian_payroll.patches.salary_component #21-16-2024deft
