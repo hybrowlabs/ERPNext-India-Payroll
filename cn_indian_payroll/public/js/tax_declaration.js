@@ -173,7 +173,9 @@ const DECLARATION_FORM = {
                   "requireDecimal": false,
                   "inputFormat": "plain",
                   "truncateMultipleSpaces": false,
-                  
+                  "calculateValue": "if (data.amount>50000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
+
                   "validateWhenHidden": false,
                   "key": "amount",
                   "type": "number",
@@ -253,6 +255,8 @@ const DECLARATION_FORM = {
                   "requireDecimal": false,
                   "inputFormat": "plain",
                   "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.amount3>25000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
                   "validateWhenHidden": false,
                   "key": "amount3",
                   "type": "number",
@@ -330,6 +334,8 @@ const DECLARATION_FORM = {
                   "requireDecimal": false,
                   "inputFormat": "plain",
                   "truncateMultipleSpaces": false,
+                  "calculateValue": "if (data.mpAmount3>50000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
                   
                   "validateWhenHidden": false,
                   "key": "mpAmount3",
@@ -411,7 +417,9 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "mpAmount4",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "calculateValue": "if (data.mpAmount4>25000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
                 }
               ]
             }
@@ -478,7 +486,9 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "mp5",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "calculateValue": "if (data.mp5>5000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
                 }
               ]
             }
@@ -545,7 +555,9 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "mpAmount6",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "calculateValue": "if (data.mpAmount6>5000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
                 }
               ]
             }
@@ -632,7 +644,9 @@ const DECLARATION_FORM = {
                   "validateWhenHidden": false,
                   "key": "hlAmount",
                   "type": "number",
-                  "input": true
+                  "input": true,
+                  "calculateValue": "if (data.hlAmount>200000){\n  value = 0;\n} ",
+                  "validateWhenHidden": false,
                 }
               ]
             }
@@ -2019,7 +2033,9 @@ const DECLARATION_FORM = {
                             "key": "fourValue",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "calculateValue": "if (data.fourValue>75000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -2106,7 +2122,9 @@ const DECLARATION_FORM = {
                             "key": "fiveNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "calculateValue": "if (data.fiveNumber>40000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -2270,7 +2288,9 @@ const DECLARATION_FORM = {
                             "key": "sevenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "calculateValue": "if (data.sevenNumber>75000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -2512,7 +2532,9 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "tenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "calculateValue": "if (data.tenNumber>50000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -2599,7 +2621,9 @@ const DECLARATION_FORM = {
                             "key": "elevenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "calculateValue": "if (data.elevenNumber>50000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -2807,7 +2831,9 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twelveNumber1",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "calculateValue": "if (data.twelveNumber1>150000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -2894,7 +2920,9 @@ const DECLARATION_FORM = {
                             "key": "fifteenNumber",
                             "type": "number",
                             "input": true,
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "calculateValue": "if (data.fifteenNumber>150000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -3058,7 +3086,9 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "seventeenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "calculateValue": "if (data.seventeenNumber>10000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -3145,7 +3175,9 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "eighteenNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "calculateValue": "if (data.eighteenNumber>50000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -3233,7 +3265,9 @@ const DECLARATION_FORM = {
                             "key": "nineteenNumber",
                             "type": "number",
                             "input": true,
-                            "disabled":true
+                            "disabled":true,
+                            "calculateValue": "if (data.nineteenNumber>2500){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -3320,7 +3354,9 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twentyNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "calculateValue": "if (data.twentyNumber>60000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }
@@ -3407,7 +3443,9 @@ const DECLARATION_FORM = {
                             "validateWhenHidden": false,
                             "key": "twentyoneNumber",
                             "type": "number",
-                            "input": true
+                            "input": true,
+                            "calculateValue": "if (data.twentyoneNumber>25000){\n  value = 0;\n} ",
+                            "validateWhenHidden": false,
                           }
                         ]
                       }

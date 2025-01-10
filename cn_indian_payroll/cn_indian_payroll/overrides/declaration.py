@@ -358,6 +358,12 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                 get_declaration.custom_income_tax = selected_regime
 
                 get_declaration.monthly_house_rent=0
+                get_declaration.rented_in_metro_city=0
+                get_declaration.salary_structure_hra=0
+                get_declaration.custom_basic=0
+                get_declaration.custom_basic_as_per_salary_structure=0
+                get_declaration.annual_hra_exemption=0
+                get_declaration.monthly_hra_exemption=0
 
                 get_declaration.save()
 
