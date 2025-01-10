@@ -227,10 +227,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 old_regime_other_perquisite = 0
                 new_regime_other_perquisite = 0
 
-                # Fetch the Salary Structure Assignment
                 get_other_perquisite = frappe.get_doc("Salary Structure Assignment", latest_salary_structure[0].name)
 
-                # Check if there are custom other perquisites
                 if get_other_perquisite.custom_other_perquisites:
                     for other_perquisite in get_other_perquisite.custom_other_perquisites:
                         old_regime_other_perquisite += other_perquisite.amount * num_months
@@ -238,6 +236,47 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 else:
                     old_regime_other_perquisite = 0
                     new_regime_other_perquisite = 0
+
+
+                #Loan Perquisite
+                annual_perquisite=0
+
+                if self.payroll_period:
+            
+                    get_payroll_period = frappe.get_list(
+                    'Payroll Period',
+                    filters={
+                        'company': self.company,
+                        'name': self.payroll_period
+                    },
+                    fields=['*']
+                    )
+
+                    
+                    if get_payroll_period:
+                        start_date = frappe.utils.getdate(get_payroll_period[0].start_date)
+                        end_date = frappe.utils.getdate(get_payroll_period[0].end_date)
+                        loan_repayments = frappe.get_list(
+                            'Loan Repayment Schedule',
+                            filters={
+                                'custom_employee': self.employee,
+                                'status': 'Active',
+                                'docstatus':1
+                            },
+                            fields=['*']
+                        )
+                        if loan_repayments:
+                            for repayment in loan_repayments:
+                                get_each_perquisite=frappe.get_doc("Loan Repayment Schedule",repayment.name)
+                                if len(get_each_perquisite.custom_loan_perquisite)>0:
+                                    for date in get_each_perquisite.custom_loan_perquisite:
+                                    
+                                        payment_date = frappe.utils.getdate(date.payment_date)
+                                        if start_date <= payment_date <= end_date:
+                                            annual_perquisite=annual_perquisite+date.perquisite_amount
+                            
+                            
+
 
                
 
@@ -440,17 +479,17 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     
 
 
-                old_regime_values.append(round(old_regime_car_perquisite+old_regime_driver_perquisite+old_regime_other_perquisite))
-                new_regime_values.append(round(new_regime_car_perquisite+new_regime_driver_perquisite+new_regime_other_perquisite))
+                old_regime_values.append(round(old_regime_car_perquisite+old_regime_driver_perquisite+old_regime_other_perquisite+annual_perquisite))
+                new_regime_values.append(round(new_regime_car_perquisite+new_regime_driver_perquisite+new_regime_other_perquisite+annual_perquisite))
                 
                 
 
-                old_regime_values.append(round(old_regime_car_perquisite+old_regime_driver_perquisite+old_regime_other_perquisite+future_old_amount+old_taxable_component))
-                new_regime_values.append(round(new_regime_car_perquisite+new_regime_driver_perquisite+new_regime_other_perquisite+future_new_amount+new_taxable_component))
+                old_regime_values.append(round(old_regime_car_perquisite+old_regime_driver_perquisite+old_regime_other_perquisite+future_old_amount+old_taxable_component+annual_perquisite))
+                new_regime_values.append(round(new_regime_car_perquisite+new_regime_driver_perquisite+new_regime_other_perquisite+future_new_amount+new_taxable_component+annual_perquisite))
 
 
-                old_amount_sum=(round(old_regime_car_perquisite+old_regime_driver_perquisite+old_regime_other_perquisite+future_old_amount+old_taxable_component))
-                new_amount_sum=(round(new_regime_car_perquisite+new_regime_driver_perquisite+new_regime_other_perquisite+future_new_amount+new_taxable_component))
+                old_amount_sum=(round(old_regime_car_perquisite+old_regime_driver_perquisite+old_regime_other_perquisite+future_old_amount+old_taxable_component+annual_perquisite))
+                new_amount_sum=(round(new_regime_car_perquisite+new_regime_driver_perquisite+new_regime_other_perquisite+future_new_amount+new_taxable_component+annual_perquisite))
                 
 
 

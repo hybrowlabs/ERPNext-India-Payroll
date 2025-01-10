@@ -250,7 +250,7 @@ doctype_js = {
     "Payroll Entry": "public/js/payroll.js",
     "Employee Benefit Claim": "public/js/employee_benefit_claim.js",
     "Employee": "public/js/employee.js",
-    # "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
+    "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
     "LOP Reversal": "public/js/lop_reversal.js",
     "Loan": "public/js/loan.js",
@@ -267,7 +267,7 @@ doctype_js = {
 
 override_doctype_class = {
     "Employee Benefit Claim": "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
-    # "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
+    "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
     "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
