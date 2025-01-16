@@ -37,6 +37,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     #     super().validate()
 
 
+
+
     def before_save(self):
 
         if self.custom_tax_regime=="Old Regime":
@@ -80,7 +82,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def before_update_after_submit(self):
 
-        self.process_form_data()
+        # self.process_form_data()
         
         if self.custom_check==0:
             self.calculate_hra_exemption()
@@ -93,7 +95,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.set_total_exemption_amount()
 
 
-        # self.show_tax_projection()
 
 
 

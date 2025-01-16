@@ -3548,23 +3548,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
-            // if(frm.doc.docstatus==1)
-            // {
-            //     frm.add_custom_button("Edit Declaration",function()
-            //     {
-                    
-            //         // edit_declaration(frm)
-
-            //         edit(frm)
-                    
-            //     })
-            //     frm.change_custom_button_type('Edit Declaration', null, 'primary');
-            // }
-
-
-
-            //sum of all 80C
-
 
 
         if(frm.doc.custom_tax_regime=="Old Regime")
