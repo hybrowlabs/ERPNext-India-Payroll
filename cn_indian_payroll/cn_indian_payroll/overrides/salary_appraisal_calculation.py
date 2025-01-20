@@ -101,6 +101,8 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 "new_amount": new_amount
             })
 
+        # frappe.msgprint(str(result))
+
         
 
 
@@ -175,6 +177,8 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                             "new_amount": prorated_new_amount,
                             "difference": prorated_new_amount - prorated_old_amount
                         })
+
+                    # frappe.msgprint(str(final_array))
 
 
         final_bonus_array = []

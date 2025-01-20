@@ -306,6 +306,11 @@ doc_events = {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
     },
 
+    "Payroll Configuration": {
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.validate",
+        
+    },
+
 }
 
 website_route_rules = [{'from_route': '/tax-exemptions/<path:app_path>', 'to_route': 'tax-exemptions'}, ]

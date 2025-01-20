@@ -670,5 +670,21 @@
   "property_type": "Check",
   "row_name": null,
   "value": "0"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Salary Component",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "amount_based_on_formula",
+  "is_system_generated": 0,
+  "modified": "2025-01-20 11:27:29.337554",
+  "module": "cn-indian-payroll",
+  "name": "Salary Component-amount_based_on_formula-default",
+  "property": "default",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "1"
  }
 ]
