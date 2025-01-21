@@ -1,0 +1,225 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-17 17:02:29.409013",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "salary_component",
+  "abbr",
+  "component_type",
+  "condition",
+  "formula",
+  "section_break_mjvu",
+  "depends_on_payment_days",
+  "remove_if_zero_valued",
+  "perquisite",
+  "is_part_of_appraisal",
+  "column_break_rtwh",
+  "is_tax_applicable",
+  "is_part_of_gross_pay",
+  "is_accrual",
+  "accrual_paid_on",
+  "paidout_component",
+  "column_break_hqma",
+  "round_to_the_nearest_integer",
+  "disabled",
+  "is_reimbursement",
+  "tax_applicable_based_on_regime",
+  "regime",
+  "column_break_mkuu",
+  "do_not_include_in_total",
+  "is_part_of_ctc",
+  "is_arrear",
+  "component"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "salary_component",
+   "fieldtype": "Data",
+   "label": "Salary Component"
+  },
+  {
+   "columns": 1,
+   "fieldname": "condition",
+   "fieldtype": "Small Text",
+   "label": "Condition"
+  },
+  {
+   "columns": 1,
+   "fieldname": "formula",
+   "fieldtype": "Small Text",
+   "label": "Formula"
+  },
+  {
+   "columns": 1,
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "label": "Abbr",
+   "mandatory_depends_on": "salary_component"
+  },
+  {
+   "columns": 1,
+   "fieldname": "component_type",
+   "fieldtype": "Select",
+   "label": "Component Type",
+   "mandatory_depends_on": "salary_component",
+   "options": "Earning\nDeduction"
+  },
+  {
+   "fieldname": "section_break_mjvu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "depends_on_payment_days",
+   "fieldtype": "Check",
+   "label": " Depends on Payment Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "remove_if_zero_valued",
+   "fieldtype": "Check",
+   "label": "Remove if Zero Valued"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Earning\"",
+   "fieldname": "perquisite",
+   "fieldtype": "Check",
+   "label": "Perquisite"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_part_of_appraisal",
+   "fieldtype": "Check",
+   "label": " Is Part of Appraisal"
+  },
+  {
+   "fieldname": "column_break_rtwh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Earning\"",
+   "fieldname": "is_tax_applicable",
+   "fieldtype": "Check",
+   "label": "Is Tax Applicable"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Earning\"",
+   "fieldname": "is_part_of_gross_pay",
+   "fieldtype": "Check",
+   "label": " Is Part of Gross Pay"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Earning\"",
+   "fieldname": "is_accrual",
+   "fieldtype": "Check",
+   "label": " Is Accrual"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Earning\"",
+   "fieldname": "tax_applicable_based_on_regime",
+   "fieldtype": "Check",
+   "label": " Tax Applicable Based on Regime"
+  },
+  {
+   "fieldname": "column_break_hqma",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_to_the_nearest_integer",
+   "fieldtype": "Check",
+   "label": "Round to the Nearest Integer"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Earning\"",
+   "fieldname": "is_reimbursement",
+   "fieldtype": "Check",
+   "label": "Is Reimbursement"
+  },
+  {
+   "fieldname": "column_break_mkuu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "do_not_include_in_total",
+   "fieldtype": "Check",
+   "label": " Do Not Include in Total"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "is_part_of_ctc",
+   "fieldtype": "Check",
+   "label": "Is Part of CTC"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_arrear",
+   "fieldtype": "Check",
+   "label": "Is Arrear"
+  },
+  {
+   "depends_on": "is_accrual",
+   "fieldname": "accrual_paid_on",
+   "fieldtype": "Select",
+   "label": "Accrual Paid on",
+   "options": "Payroll\nF and F"
+  },
+  {
+   "depends_on": "is_accrual",
+   "fieldname": "paidout_component",
+   "fieldtype": "Data",
+   "label": "Paidout Component",
+   "mandatory_depends_on": "is_accrual"
+  },
+  {
+   "depends_on": "is_arrear",
+   "fieldname": "component",
+   "fieldtype": "Data",
+   "label": "Component",
+   "mandatory_depends_on": "is_arrear"
+  },
+  {
+   "depends_on": "tax_applicable_based_on_regime",
+   "fieldname": "regime",
+   "fieldtype": "Link",
+   "label": "Regime",
+   "options": "Income Tax Regime"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-01-17 17:24:23.102067",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Salary Component Configuration",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
