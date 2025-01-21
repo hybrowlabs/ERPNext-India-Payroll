@@ -142,7 +142,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     "Total Exemption", 
                     "Standard Deduction", 
                     "Annual Taxable Income",
-                    "Total Income",
+                    "Tax on Total Income",
                     "Rebate", 
                     "Total Tax on Income",
                     "Surcharge", 
