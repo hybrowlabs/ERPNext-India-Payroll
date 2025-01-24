@@ -139,7 +139,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     "Future Taxable Earning",
                     "Total Perquisite",
                     "Total Taxable Income", 
-                    "Total Exemption", 
+                    "Total Exemption/Deduction", 
                     "Standard Deduction", 
                     "Annual Taxable Income",
                     "Tax on Total Income",

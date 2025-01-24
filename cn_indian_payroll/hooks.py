@@ -237,6 +237,9 @@ fixtures = [
 
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
     {"dt":"Workflow","filters":{"name":"declaration Approve"}},
+    
+    {"dt":"Workspace","filters":{"module":"cn-indian-payroll"}},
+
 
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
@@ -271,7 +274,7 @@ override_doctype_class = {
     "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
-    "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment"
+    "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
 
 }
 
@@ -309,7 +312,13 @@ doc_events = {
     "Full and Final Statement":{
 
         "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
+    },
+
+    "Payroll Configuration": 
+    {
+       "validate":"cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.validate"
     }
+
 
 }
 
