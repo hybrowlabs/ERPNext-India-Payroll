@@ -9,13 +9,21 @@
   "salary_component",
   "abbr",
   "component_type",
+  "special_type",
+  "lta_taxable_component",
+  "lta_non_taxable_component",
+  "component_identification_type",
   "condition",
   "formula",
+  "multi_select",
+  "type",
   "section_break_mjvu",
   "depends_on_payment_days",
   "remove_if_zero_valued",
   "perquisite",
   "is_part_of_appraisal",
+  "tax_applicable_based_on_regime",
+  "regime",
   "column_break_rtwh",
   "is_tax_applicable",
   "is_part_of_gross_pay",
@@ -26,13 +34,13 @@
   "round_to_the_nearest_integer",
   "disabled",
   "is_reimbursement",
-  "tax_applicable_based_on_regime",
-  "regime",
   "column_break_mkuu",
   "do_not_include_in_total",
   "is_part_of_ctc",
   "is_arrear",
-  "component"
+  "component",
+  "variable_based_on_taxable_salary",
+  "is_income_tax_component"
  ],
  "fields": [
   {
@@ -208,12 +216,60 @@
    "fieldtype": "Link",
    "label": "Regime",
    "options": "Income Tax Regime"
+  },
+  {
+   "default": "0",
+   "fieldname": "multi_select",
+   "fieldtype": "Check",
+   "label": "Multi Select"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Fixed\nNot Fixed"
+  },
+  {
+   "fieldname": "special_type",
+   "fieldtype": "Select",
+   "label": "Special Type",
+   "options": "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax\nLoan Perquisite\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance Reimbursement\nLTA Reimbursement\nNPS\nEPF\nEPF Employer\nESIC\nUniform"
+  },
+  {
+   "fieldname": "component_identification_type",
+   "fieldtype": "Select",
+   "label": "Component Identification Type",
+   "options": "Standard\nAccrual\nReimbursement\nPerquisite"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Deduction\"",
+   "fieldname": "variable_based_on_taxable_salary",
+   "fieldtype": "Check",
+   "label": "Variable Based On Taxable Salary"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.component_type==\"Deduction\"",
+   "fieldname": "is_income_tax_component",
+   "fieldtype": "Check",
+   "label": "Is Income Tax Component"
+  },
+  {
+   "fieldname": "lta_taxable_component",
+   "fieldtype": "Data",
+   "label": "LTA Taxable Component"
+  },
+  {
+   "fieldname": "lta_non_taxable_component",
+   "fieldtype": "Data",
+   "label": "LTA Non Taxable Component"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-17 17:24:23.102067",
+ "modified": "2025-01-29 15:39:13.714560",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Component Configuration",
