@@ -17,6 +17,7 @@
   "salary_component",
   "payroll_entry",
   "salary_slip",
+  "payroll_period",
   "amended_from",
   "section_break_lapc",
   "currency",
@@ -125,12 +126,18 @@
    "fieldtype": "Select",
    "label": "Accrual Paid on",
    "options": "Payroll\nF and F"
+  },
+  {
+   "fetch_from": "salary_structure_assignment.custom_payroll_period",
+   "fieldname": "payroll_period",
+   "fieldtype": "Data",
+   "label": "Payroll Period"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-09 17:01:10.841873",
+ "modified": "2025-01-30 16:14:20.268862",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

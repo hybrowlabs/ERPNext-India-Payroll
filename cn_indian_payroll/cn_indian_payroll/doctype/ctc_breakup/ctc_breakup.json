@@ -1,50 +1,48 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-01-06 10:22:17.537454",
+ "creation": "2024-12-24 12:07:29.320236",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "leave_type",
-  "encashment_days",
-  "basic_amount",
-  "amount"
+  "section_break_fnq7",
+  "salary_component",
+  "monthly_amount",
+  "annual_amount"
  ],
  "fields": [
   {
-   "fieldname": "leave_type",
+   "fieldname": "section_break_fnq7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "salary_component",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Leave Type",
-   "options": "Leave Type"
+   "label": "Salary Component",
+   "options": "Salary Component"
   },
   {
-   "fieldname": "encashment_days",
+   "fieldname": "monthly_amount",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Encashment Days"
+   "label": "Monthly Amount"
   },
   {
-   "fieldname": "amount",
+   "fieldname": "annual_amount",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Amount"
-  },
-  {
-   "fieldname": "basic_amount",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Basic Amount"
+   "label": "Annual Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-30 16:17:13.151207",
+ "modified": "2025-01-30 16:11:40.602841",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
- "name": "Leave Encashment Child",
+ "name": "CTC Breakup",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

@@ -1,15 +1,37 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2024-07-08 15:48:51.833706",
+ "creation": "2024-12-24 13:00:00.920885",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "date",
+  "salary_slip_id",
+  "payment_days",
   "salary_component",
   "amount"
  ],
  "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "salary_slip_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salary Slip ID",
+   "options": "Salary Slip"
+  },
+  {
+   "fieldname": "payment_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Payment days"
+  },
   {
    "fieldname": "salary_component",
    "fieldtype": "Link",
@@ -27,10 +49,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-30 16:15:50.409332",
+ "modified": "2025-01-30 16:11:31.921798",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
- "name": "LOP Reversal Child",
+ "name": "Tax Deduction",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
