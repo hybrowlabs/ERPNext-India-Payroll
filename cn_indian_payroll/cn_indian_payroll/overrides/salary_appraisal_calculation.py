@@ -30,7 +30,8 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             source_name=salary_structure_assignment[0].salary_structure,
             employee=employee_id,
             print_format='Salary Slip Standard for CTC',  
-            posting_date=salary_structure_assignment[0].from_date  
+            posting_date=salary_structure_assignment[0].from_date,
+            for_preview=1, 
         )
         
         # Collect new amounts from earnings and deductions
@@ -60,7 +61,8 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             source_name=salary_structure_assignment[1].salary_structure,
             employee=employee_id,
             print_format='Salary Slip Standard for CTC',  
-            posting_date=salary_structure_assignment[1].from_date  
+            posting_date=salary_structure_assignment[1].from_date,
+            for_preview=1, 
         )
 
         # Collect old amounts from earnings and deductions
