@@ -1,36 +1,32 @@
 frappe.ui.form.on('Employee Promotion', {
 	refresh(frm) {
 
+        if(!frm.is_new() && frm.doc.custom_status=="In Planning")
+            {
+    
+            frm.add_custom_button("Assign CTC",function()
+                {
+                    if(frm.doc.employee)
+                    {
+    
+                    frappe.route_options = {"employee": frm.doc.employee,"custom_promotion_id":frm.doc.name};
+    
+                    frappe.set_route("Form", "Salary Structure Assignment", 'new-salary-structure-assignment');
+    
+                    }
+                    else{
+                        msgprint("Please select employee first")
+                    }
+    
+                    
+                })
+    
+                frm.change_custom_button_type('Assign CTC', null, 'primary');
+    
+            }
 
-        // if (!frm.is_new() && frm.doc.custom_status === "Payroll Configured") {
-            // frm.add_custom_button("Calculate Arrears", function() {
-            //     if (frm.doc.custom_additional_salary_date) {
 
-            //         // Show initial progress
-            //         frappe.show_progress('Loading...', 0, 100, 'Please wait');
-
-            //         // Simulate progress over time
-            //         let progress = 0;
-            //         let interval = setInterval(function() {
-            //             progress += 10; // Increment progress
-
-            //             if (progress < 100) {
-            //                 frappe.show_progress('Loading...', progress, 100, 'Please wait');
-            //             } else {
-                            
-            //                 setTimeout(function() {
-            //                     frappe.hide_progress();
-            //                 }, 500); // Adjust delay as necessary
-            //             }
-            //         }, 500); // 500ms interval, adjust as needed
-
-            //         get_old_new_structure(frm);
-
-            //     } 
-            //     else {
-            //         frappe.msgprint("Please Select Additional Salary Date");
-            //     }
-            // });
+        
 
 
 
@@ -74,7 +70,7 @@ frappe.ui.form.on('Employee Promotion', {
                 })
 
             }
-        // }
+       
         
         
         
