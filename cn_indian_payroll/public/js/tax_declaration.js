@@ -3541,10 +3541,10 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
-        if(frm.doc.custom_tax_regime=="New Regime")
-            {
-                frm.set_df_property('declarations',  'read_only',  1);
-            }
+        // if(frm.doc.custom_tax_regime=="New Regime")
+        //     {
+        //         frm.set_df_property('declarations',  'read_only',  1);
+        //     }
 
 
 
