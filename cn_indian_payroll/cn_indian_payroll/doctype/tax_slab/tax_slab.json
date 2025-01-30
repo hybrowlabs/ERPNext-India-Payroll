@@ -21,21 +21,25 @@
   {
    "fieldname": "from_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "From Amount"
   },
   {
    "fieldname": "to_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "To Amount"
   },
   {
    "fieldname": "percentage",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "Percentage"
   },
   {
    "fieldname": "tax_amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Tax Amount"
   },
   {
@@ -47,7 +51,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-22 19:14:59.423915",
+ "modified": "2025-01-30 12:05:04.432642",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Slab",
