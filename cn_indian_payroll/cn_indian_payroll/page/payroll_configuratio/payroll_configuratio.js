@@ -849,13 +849,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 												condition:rowData.condition,
 												
 
-												accounts: [
-													{
-														company: "Minix Holdings Private Limited",
-														account: "Salary - MHPL",
-														parentfield: "accounts"  // Ensure correct linkage
-													}
-												]
+												// accounts: [
+												// 	{
+												// 		company: "Minix Holdings Private Limited",
+												// 		account: "Salary - MHPL",
+												// 		parentfield: "accounts"  // Ensure correct linkage
+												// 	}
+												// ]
 												
 
 											}).then((doc) => {
@@ -880,13 +880,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														custom_regime:"All",
 														custom_is_arrear:1,
 														custom_component:rowData.salary_component,
-														accounts: [
-															{
-																company: "Minix Holdings Private Limited",
-																account: "Salary - MHPL",
-																parentfield: "accounts"  // Ensure correct linkage
-															}
-														]
+														// accounts: [
+														// 	{
+														// 		company: "Minix Holdings Private Limited",
+														// 		account: "Salary - MHPL",
+														// 		parentfield: "accounts"  // Ensure correct linkage
+														// 	}
+														// ]
 														
 		
 													})
@@ -946,13 +946,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 												variable_based_on_taxable_salary:item.variable_based_on_taxable_salary,
 												is_income_tax_component:item.is_income_tax_component,
 
-												accounts: [
-													{
-														company: "Minix Holdings Private Limited",
-														account: "Salary - MHPL",
-														parentfield: "accounts"  // Ensure correct linkage
-													}
-												]
+												// accounts: [
+												// 	{
+												// 		company: "Minix Holdings Private Limited",
+												// 		account: "Salary - MHPL",
+												// 		parentfield: "accounts"  // Ensure correct linkage
+												// 	}
+												// ]
 												
 
 											}).then((doc) => {
@@ -978,13 +978,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														custom_regime:item.regime,
 														custom_is_arrear:1,
 														custom_component:item.salary_component,
-														accounts: [
-															{
-																company: "Minix Holdings Private Limited",
-																account: "Salary - MHPL",
-																parentfield: "accounts"  // Ensure correct linkage
-															}
-														]
+														// accounts: [
+														// 	{
+														// 		company: "Minix Holdings Private Limited",
+														// 		account: "Salary - MHPL",
+														// 		parentfield: "accounts"  // Ensure correct linkage
+														// 	}
+														// ]
 														
 		
 													})
@@ -1042,13 +1042,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														custom_is_part_of_ctc: 0,
 														custom_is_part_of_appraisal: 0,
 														is_tax_applicable: 1,
-														accounts: [
-															{
-																company: "Minix Holdings Private Limited",
-																account: "Salary - MHPL",
-																parentfield: "accounts"
-															}
-														]
+														// accounts: [
+														// 	{
+														// 		company: "Minix Holdings Private Limited",
+														// 		account: "Salary - MHPL",
+														// 		parentfield: "accounts"
+														// 	}
+														// ]
 													});
 												}
 									
@@ -1066,13 +1066,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														do_not_include_in_total: item.do_not_include_in_total,
 														custom_is_part_of_gross_pay: item.is_part_of_gross_pay,
 														custom_is_part_of_ctc: 0,
-														accounts: [
-															{
-																company: "Minix Holdings Private Limited",
-																account: "Salary - MHPL",
-																parentfield: "accounts"
-															}
-														]
+														// accounts: [
+														// 	{
+														// 		company: "Minix Holdings Private Limited",
+														// 		account: "Salary - MHPL",
+														// 		parentfield: "accounts"
+														// 	}
+														// ]
 													});
 												}
 									
@@ -1093,13 +1093,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 															custom_is_part_of_ctc: 0,
 															custom_lta_taxable_component: item.lta_taxable_component,
 															custom_lta_non_taxable_component: item.lta_non_taxable_component,
-															accounts: [
-																{
-																	company: "Minix Holdings Private Limited",
-																	account: "Salary - MHPL",
-																	parentfield: "accounts"
-																}
-															]
+															// accounts: [
+															// 	{
+															// 		company: "Minix Holdings Private Limited",
+															// 		account: "Salary - MHPL",
+															// 		parentfield: "accounts"
+															// 	}
+															// ]
 														});
 													}
 												});
@@ -1130,13 +1130,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														pay_against_benefit_claim: 1,
 														max_benefit_amount: 9999,
 														create_separate_payment_entry_against_benefit_claim: 1,
-														accounts: [
-															{
-																company: "Minix Holdings Private Limited",
-																account: "Salary - MHPL",
-																parentfield: "accounts"
-															}
-														]
+														// accounts: [
+														// 	{
+														// 		company: "Minix Holdings Private Limited",
+														// 		account: "Salary - MHPL",
+														// 		parentfield: "accounts"
+														// 	}
+														// ]
 													}).then((doc) => {
 														msgprint("Salary Component inserted successfully: " + doc.name);
 													});
@@ -1188,13 +1188,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														custom_perquisite:item.perquisite,
 														
 		
-														accounts: [
-															{
-																company: "Minix Holdings Private Limited",
-																account: "Salary - MHPL",
-																parentfield: "accounts"  // Ensure correct linkage
-															}
-														]
+														// accounts: [
+														// 	{
+														// 		company: "Minix Holdings Private Limited",
+														// 		account: "Salary - MHPL",
+														// 		parentfield: "accounts"  // Ensure correct linkage
+														// 	}
+														// ]
 														
 		
 													}).then((doc) => {
@@ -1255,13 +1255,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																is_tax_applicable: 1,
 																condition:item.condition,
 																formula:item.formula,
-																accounts: [
-																	{
-																		company: "Minix Holdings Private Limited",
-																		account: "Salary - MHPL",
-																		parentfield: "accounts"
-																	}
-																]
+																// accounts: [
+																// 	{
+																// 		company: "Minix Holdings Private Limited",
+																// 		account: "Salary - MHPL",
+																// 		parentfield: "accounts"
+																// 	}
+																// ]
 															});
 														}
 											
@@ -1284,13 +1284,13 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																	custom_is_accrual:1,
 																	custom_paidout_component:rowData.salary_component+"(Payout)",
 																	
-																	accounts: [
-																		{
-																			company: "Minix Holdings Private Limited",
-																			account: "Salary - MHPL",
-																			parentfield: "accounts"
-																		}
-																	]
+																	// accounts: [
+																	// 	{
+																	// 		company: "Minix Holdings Private Limited",
+																	// 		account: "Salary - MHPL",
+																	// 		parentfield: "accounts"
+																	// 	}
+																	// ]
 																});
 															}
 														});
