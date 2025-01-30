@@ -565,7 +565,7 @@ class CustomSalarySlip(SalarySlip):
 
             get_salary_component = frappe.get_list(
                 'Salary Component',
-                filters={"component_type": "NPS"},
+                filters={"component_type": "NPS","disabled":0},
                 fields=['name'],
             )
             if get_salary_component:
@@ -575,7 +575,7 @@ class CustomSalarySlip(SalarySlip):
 
             get_salary_component_epf = frappe.get_list(
                 'Salary Component',
-                filters={"component_type": "EPF"},
+                filters={"component_type": "EPF","disabled":0},
                 fields=['name'],
             )
             if get_salary_component_epf:
@@ -603,7 +603,7 @@ class CustomSalarySlip(SalarySlip):
 
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
-                    filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period,"company":self.company},
+                    filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period,"company":self.company,'docstatus': ['in', [0, 1]]},
                     fields=['name'],
                 )
                 if get_all_salary_slip:
@@ -757,7 +757,7 @@ class CustomSalarySlip(SalarySlip):
             if self.custom_tax_regime == "New Regime":
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
-                    filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period},
+                    filters={'employee': self.employee, "custom_payroll_period": self.custom_payroll_period,'docstatus': ['in', [0, 1]]},
                     fields=['name'],
                 )
                 if get_all_salary_slip:
@@ -782,8 +782,9 @@ class CustomSalarySlip(SalarySlip):
                             
 
                 
-                # frappe.msgprint(str(total_nps))
+                
                 total_nps_sum = sum(total_nps)
+                # frappe.msgprint(str(total_nps_sum))
                
 
                 for i in self.earnings:
@@ -801,21 +802,39 @@ class CustomSalarySlip(SalarySlip):
                                 "max_amount": total_nps_sum
                         })
                 if update_component_array:
+
+                    # frappe.msgprint(str(update_component_array))
+
+
                     declaration = frappe.get_list(
                         'Employee Tax Exemption Declaration',
                         filters={'employee': self.employee, 'payroll_period': self.custom_payroll_period,"docstatus":1},
                         fields=['*'], 
                     )
                     if declaration:
+
+                        form_data = json.loads(declaration[0].custom_declaration_form_data or '{}')
+
                         
                         get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
+                        
+                        
+                        for ki in update_component_array:
+                            if ki['component']=="NPS Contribution by Employer":
+                                form_data['nineNumber'] = round(ki['amount'])
+                            
+                       
+                        
+                        get_each_doc.custom_posting_date=self.posting_date
+                        get_each_doc.custom_declaration_form_data = json.dumps(form_data)
+                        
                         for each_component in get_each_doc.declarations:
                             for ki in update_component_array:
                                 if each_component.exemption_sub_category == ki['component']:
                                     each_component.amount = ki['amount']
                                     each_component.max_amount = ki['max_amount']
                         
-                        get_each_doc.custom_posting_date=self.posting_date
+                       
                         get_each_doc.workflow_state="Approved"
                         get_each_doc.save()
                         frappe.db.commit()

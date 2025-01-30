@@ -27,6 +27,17 @@ app_license = "mit"
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
 
+# pages = [
+#     {
+#         "module": "cn-indian-payroll",
+#         "label": ("Payroll Configuration"),
+#         # "icon": "octicon octicon-file-directory",
+#         "type": "page",
+#         "name": "payroll-configuratio",  # Make sure the name matches the JS file
+#         "route": "/payroll-configuratio"
+#     }
+# ]
+
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -314,10 +325,10 @@ doc_events = {
         "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
     },
 
-    "Payroll Configuration": 
-    {
-       "validate":"cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.validate"
-    }
+    # "Payroll Configuration": 
+    # {
+    #    "validate":"cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.validate"
+    # }
 
 
 }
