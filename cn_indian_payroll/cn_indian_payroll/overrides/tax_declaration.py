@@ -279,7 +279,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
                
-
+#Salary slip
                 get_all_salary_slip = frappe.get_list(
                     'Salary Slip',
                     filters={
