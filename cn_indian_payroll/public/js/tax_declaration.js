@@ -4887,6 +4887,9 @@ function tds_projection_test(frm) {
                   const old_future_amount = Math.round(res.message.future_old_value);
                   const new_future_amount = Math.round(res.message.future_new_value);
 
+                  const num_months=res.message.num_months
+                  const salary_slip_count=res.message.salary_slip_count
+
 
 
                   const old_std=res.message.old_standard
@@ -5075,6 +5078,10 @@ function tds_projection_test(frm) {
                                     let new_rebate_value=response.message.new_rebate_value
                                     let  new_surcharge_m=response.message.new_surcharge_m                              
                                     let new_education_cess=response.message.new_education_cess
+
+
+                                    let salary_slip_sum=Math.round(response.message.salary_slip_sum)
+                                    
                                     
 
                                     
@@ -5098,7 +5105,10 @@ function tds_projection_test(frm) {
                                        old_surcharge_m,
                                         old_education_cess,
                                         new_surcharge_m,
-                                        new_education_cess
+                                        new_education_cess,
+                                        salary_slip_sum,
+                                        num_months,
+                                        salary_slip_count
 
 
                                       });
@@ -5126,7 +5136,10 @@ function tds_projection_test(frm) {
                         old_surcharge_m,
                         old_education_cess,
                         new_surcharge_m,
-                        new_education_cess
+                        new_education_cess,
+                        salary_slip_sum,
+                        num_months,
+                        salary_slip_count
                       } = await getPerComp1();
                      
                       let OtherRows1 = "";
@@ -5445,6 +5458,13 @@ function tds_projection_test(frm) {
                               <td>₹ ${new_rebate_value}</td>
                           </tr>
 
+
+                          <tr>
+                              <td>Total Tax on Income</td>
+                              <td>₹ ${total_sum-old_rebate_value}</td>
+                              <td>₹ ${total_sum_new-new_rebate_value}</td>
+                          </tr>
+
                           <tr>
                               <td>Surcharge</td>
                               <td>₹ ${old_surcharge_m}</td>
@@ -5460,41 +5480,45 @@ function tds_projection_test(frm) {
                               <td>₹ ${new_education_cess}</td>
                           </tr>
 
+
+                          
+
                           <tr>
                               <td>Tax Payable</td>
-                              <td>0</td>
-                              <td>0</td>
+                              <td>₹ ${old_education_cess+old_surcharge_m+(total_sum-old_rebate_value)}</td>
+                              <td>₹ ${new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value)}</td>
                           </tr>
 
                           <tr>
                               <td>Tax Paid</td>
-                              <td>0</td>
-                              <td>0</td>
+                              <td>₹ ${salary_slip_sum}</td>
+                              <td>₹ ${salary_slip_sum}</td>
                           </tr>
 
                           <tr>
                               <td>Current Tax</td>
-                              <td>0</td>
-                              <td>0</td>
+                              <td>₹ ${Math.round((total_sum-old_rebate_value)/num_months)}</td>
+                              <td>₹ ${Math.round((total_sum_new-new_rebate_value)/num_months)}</td>
                           </tr>
 
 
                           <tr>
                               <td>Total Tax Deducted at source</td>
-                              <td>0</td>
-                              <td>0</td>
+                              <td>₹ ${Math.round(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum))}</td>
+                              <td>₹ ${Math.round(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum))}</td>
                           </tr>
 
                           <tr>
                               <td>Tax Payable / Refundable (14 - 15(A))</td>
-                              <td>0</td>
-                              <td>0</td>
+                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum)))}</td>
+                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum)))}</td>
+                              
                           </tr>
 
                           <tr>
                               <td>TDS For Future Month</td>
-                              <td>0</td>
-                              <td>0</td>
+                              <td>₹ ${Math.round(((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum)))/(num_months-salary_slip_count))}</td>
+                              <td>₹ ${Math.round(((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum)))/(num_months-salary_slip_count))}</td>
                           </tr>
 
 
