@@ -1,7 +1,7 @@
 [
  {
   "charts": [],
-  "content": "[{\"id\":\"kVA5uTofPX\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"QS3DIuSY4x\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Component\",\"col\":3}},{\"id\":\"W0_gLjHkUz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Benefit Claim\",\"col\":3}},{\"id\":\"eDaMo6kORQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payroll Entry\",\"col\":3}},{\"id\":\"S-cI6mL_5K\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Tax Exemption Declaration\",\"col\":3}},{\"id\":\"XWAcDP5sf7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Structure Assignment\",\"col\":3}},{\"id\":\"QuikjL1WxX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lop Reversal\",\"col\":3}},{\"id\":\"1ef-0xPodw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lta Claim\",\"col\":3}},{\"id\":\"oSyaTcZq6l\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"_aJqZupZJE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Masters &amp; Reports</b></span>\",\"col\":12}},{\"id\":\"8seKAPKsVT\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll Configuration Masters\",\"col\":4}},{\"id\":\"JcCJaKvOzw\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}},{\"id\":\"fBHMjHK1U-\",\"type\":\"card\",\"data\":{\"card_name\":\"Employee Accruals\",\"col\":4}},{\"id\":\"MEZott0G0Q\",\"type\":\"card\",\"data\":{\"card_name\":\"Reimbursement Claim\",\"col\":4}},{\"id\":\"Gfs50wNfG0\",\"type\":\"card\",\"data\":{\"card_name\":\"Arrears\",\"col\":4}},{\"id\":\"fjLPR4J76D\",\"type\":\"card\",\"data\":{\"card_name\":\"Tax Setup\",\"col\":4}}]",
+  "content": "[{\"id\":\"kVA5uTofPX\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"MH4ZHRLRoH\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payroll Configuration\",\"col\":3}},{\"id\":\"QS3DIuSY4x\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Component\",\"col\":3}},{\"id\":\"W0_gLjHkUz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Benefit Claim\",\"col\":3}},{\"id\":\"eDaMo6kORQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payroll Entry\",\"col\":3}},{\"id\":\"S-cI6mL_5K\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Tax Exemption Declaration\",\"col\":3}},{\"id\":\"XWAcDP5sf7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Structure Assignment\",\"col\":3}},{\"id\":\"QuikjL1WxX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lop Reversal\",\"col\":3}},{\"id\":\"1ef-0xPodw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lta Claim\",\"col\":3}},{\"id\":\"oSyaTcZq6l\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"_aJqZupZJE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Masters &amp; Reports</b></span>\",\"col\":12}},{\"id\":\"8seKAPKsVT\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll Configuration Masters\",\"col\":4}},{\"id\":\"JcCJaKvOzw\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}},{\"id\":\"fBHMjHK1U-\",\"type\":\"card\",\"data\":{\"card_name\":\"Employee Accruals\",\"col\":4}},{\"id\":\"MEZott0G0Q\",\"type\":\"card\",\"data\":{\"card_name\":\"Reimbursement Claim\",\"col\":4}},{\"id\":\"Gfs50wNfG0\",\"type\":\"card\",\"data\":{\"card_name\":\"Arrears\",\"col\":4}},{\"id\":\"fjLPR4J76D\",\"type\":\"card\",\"data\":{\"card_name\":\"Tax Setup\",\"col\":4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -455,7 +455,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2025-01-23 12:31:14.686607",
+  "modified": "2025-01-30 12:41:05.171553",
   "module": "cn-indian-payroll",
   "name": "India Payroll",
   "number_cards": [],
@@ -480,6 +480,22 @@
     "restrict_to_domain": null,
     "stats_filter": "[]",
     "type": "DocType",
+    "url": null
+   },
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Payroll Configuration",
+    "link_to": "payroll-configuratio",
+    "parent": "India Payroll",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "Page",
     "url": null
    },
    {
