@@ -3903,7 +3903,14 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
   {
 
 
-    tds_projection(frm)
+    tds_projection_test(frm)
+
+
+    
+
+
+
+    
 
 
 
@@ -4834,174 +4841,809 @@ function edit(frm) {
 }
 
 
-// function tds_projection(frm)
-// {
+
+function tds_projection_test(frm) {
+  if (frm.doc.docstatus == 1) {
+
+      let section10_component = []; // Ensure it's an array
+      let section10_amount = []; // Ensure it's an array
+
+      let section80c_component=[]
+      let section80c_amount=[]
+
+      let section80d_component=[]
+      let section80d_amount=[]
+
+      let other_component=[]
+      let other_amount=[]
 
 
-//         // Define your hardcoded table HTML with a dropdown and expandable rows
-//         const table_html = `
-//             <table class="table table-bordered">
-//                 <thead>
-//                     <tr>
-//                         <th>Title</th>
-//                         <th>Old Regime</th>
-//                         <th>New Regime</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-                  
-//                     <tr>
-//                         <td>Current Taxable Earnings</td>
-//                         <td>₹A</td>
-//                         <td>₹B</td>
-//                     </tr>
-//                     <tr>
-//                         <td>Future Taxable Earnings</td>
-//                         <td>₹AA</td>
-//                         <td>₹BB</td>
-//                     </tr>
-//                     <tr>
-//                         <td>
-//                             Total Perquisite
-//                             <button class="btn btn-secondary btn-sm" id="incomeTaxDropdown" style="margin-left: 10px;">
-//                                 <i class="fa fa-caret-down"></i>
-//                             </button>
-//                             <div id="incomeTaxDetails" style="display: none; margin-top: 10px;">
-//                                 <table class="table table-sm table-bordered">
-//                                     <thead>
-//                                         <tr>
-//                                             <th>Option</th>
-//                                             <th>Value</th>
-//                                         </tr>
-//                                     </thead>
-//                                     <tbody>
-//                                         <tr>
-//                                             <td>Car Perquisite</td>
-//                                             <td>₹50,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Driver Perquisite</td>
-//                                             <td>₹60,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Loan Perquisite</td>
-//                                             <td>₹70,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Other Perquisite</td>
-//                                             <td>₹70,000</td>
-//                                         </tr>
-//                                     </tbody>
-//                                 </table>
-//                             </div>
-//                         </td>
-//                         <td id="income_tax_amount">₹50,000</td>
-//                           <td id="income_tax_amount">₹50,000</td>
-//                     </tr>
-//                     <tr>
-//                         <td>Total Taxable Income</td>
-//                         <td>₹2,500</td>
-//                         <td>₹2,500</td>
-//                     </tr>
-//                     <tr>
-//                         <td>Other Deductions</td>
-//                         <td>₹10,000</td>
-//                         <td>₹10,000</td>
-//                     </tr>
-//                     <tr>
-//                         <td>
-//                             Total Perquisite
-//                             <button class="btn btn-secondary btn-sm" id="incomeTaxDropdown" style="margin-left: 10px;">
-//                                 <i class="fa fa-caret-down"></i>
-//                             </button>
-//                             <div id="incomeTaxDetails" style="display: none; margin-top: 10px;">
-//                                 <table class="table table-sm table-bordered">
-//                                     <thead>
-//                                         <tr>
-//                                             <th>Option</th>
-//                                             <th>Value</th>
-//                                         </tr>
-//                                     </thead>
-//                                     <tbody>
-//                                         <tr>
-//                                             <td>Car Perquisite</td>
-//                                             <td>₹50,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Driver Perquisite</td>
-//                                             <td>₹60,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Loan Perquisite</td>
-//                                             <td>₹70,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Other Perquisite</td>
-//                                             <td>₹70,000</td>
-//                                         </tr>
-//                                     </tbody>
-//                                 </table>
-//                             </div>
+      let total_array = [];
+      let total_value = [];
+      let from_amount = [];
+      let to_amount = [];
+      let percentage = [];
+      let difference = [];
 
-//                             <div id="incomeTaxDetails" style="display: none; margin-top: 10px;">
-//                                 <table class="table table-sm table-bordered">
-//                                     <thead>
-//                                         <tr>
-//                                             <th>Option</th>
-//                                             <th>Value</th>
-//                                         </tr>
-//                                     </thead>
-//                                     <tbody>
-//                                         <tr>
-//                                             <td>Car Perquisite</td>
-//                                             <td>₹50,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Driver Perquisite</td>
-//                                             <td>₹60,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Loan Perquisite</td>
-//                                             <td>₹70,000</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Other Perquisite</td>
-//                                             <td>₹70,000</td>
-//                                         </tr>
-//                                     </tbody>
-//                                 </table>
-//                             </div>
-//                         </td>
-//                         <td id="income_tax_amount">₹50,000</td>
-//                           <td id="income_tax_amount">₹50,000</td>
-//                     </tr>
-//                 </tbody>
-//             </table>
-//         `;
 
-//         // Set the value of the HTML field
-//         frm.set_df_property('custom_employee_tax_projection', 'options', table_html);
 
-//         // Add click listener to show/hide sub-table
-//         setTimeout(() => {
-//             const dropdownButton = document.getElementById('incomeTaxDropdown');
-//             const detailsDiv = document.getElementById('incomeTaxDetails');
 
-//             if (dropdownButton) {
-//                 dropdownButton.addEventListener('click', function () {
-//                     // Toggle the visibility of the sub-table
-//                     if (detailsDiv.style.display === 'none') {
-//                         detailsDiv.style.display = 'block';
-//                     } else {
-//                         detailsDiv.style.display = 'none';
-//                     }
-//                 });
-//             }
-//         }, 100); 
+      let total_sum_old=0
+
+      frappe.call({
+          method: "cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.get_doc_data",
+          args: {
+              doc_name: frm.doc.name,
+              employee: frm.doc.employee,
+              company: frm.doc.company,
+              payroll_period: frm.doc.payroll_period
+          },
+          callback: function (res) {
+              if (res.message) {
+                  const month1 = res.message.from_month;
+                  const month2 = res.message.to_month;
+                  const oldValue = Math.round(res.message.current_old_value);
+                  const newValue = Math.round(res.message.current_new_value);
+                  const old_future_amount = Math.round(res.message.future_old_value);
+                  const new_future_amount = Math.round(res.message.future_new_value);
+
+
+
+                  const old_std=res.message.old_standard
+                  const new_std=res.message.new_standard
+
+                  const pt_value=Math.round(res.message.pt)
+                  const nps_value=Math.round(res.message.nps)
+
+
+                  // console.log(old_std)
+                  // console.log(new_std)
+
+                  const per_comp = res.message.perquisite_component || []; // Ensure it's an array
+                  const per_values = res.message.perquisite_amount || [];
+
+                  // Summing up the per_values array
+                  const total_per_sum = per_values.reduce((total, value) => total + value, 0);
+
+                  // Calculate the longest array length for iteration
+                  const maxLength = Math.max(per_comp.length, per_values.length);
+
+                  // Create rows for perquisite details
+                  let perquisiteRows = "";
+                  for (let i = 0; i < maxLength; i++) {
+                      let component = per_comp[i] || "-";  // If index out of bounds, insert "-"
+                      let oldPer = per_values[i] || "-";
+                      let newPer = per_values[i] || "-";
+                      perquisiteRows += `<tr><td>${component}</td><td>${"₹" + oldPer}</td><td>${"₹" + newPer}</td></tr>`;
+                  }
+
+                  // Check if declarations exist
+                  if (frm.doc.declarations) {
+                      $.each(frm.doc.declarations, function (i, v) {
+                          if (v.exemption_category == "Section 10(14)") {
+                              section10_component.push(v.exemption_sub_category);
+                              section10_amount.push(v.amount);
+                          }
+
+                          if(v.exemption_category == "Section 80C")
+                          {
+                            section80c_component.push(v.exemption_sub_category)
+                            section80c_amount.push(v.amount)
+
+                          }
+
+                          if(v.exemption_category == "Section 80D" || v.exemption_category == "Section 80DD" || v.exemption_category == "Section 80E" || v.exemption_category == "Section 80EE"||v.exemption_category == "Section 80U")
+                            {
+                              section80d_component.push(v.exemption_sub_category)
+                              section80d_amount.push(v.amount)
   
+                            }
+
+                          
 
 
+                              const validCategories = [
+                                
+                                "Section 80DDB",
+                                "Section 80-G",
+                                "Section 80CCD(1B)",
+                                "Section 80EEA",
+                                "Section 80EEB",
+                                "Section 80GGC",
+                                "Section 80TTA",
+                                "Section 80TTB",
+                                "Section 80GG",
+                                "Section 80CCG"
+                            ];
+                            
+                            if (validCategories.includes(v.exemption_category)) {
+                              other_component.push(v.exemption_sub_category)
+                              other_amount.push(v.amount)
+                            }
+                      });
+                  }
+
+                  // console.log(section80d_component)
+
+                  // Summing up section10_amount array
+                  const total_section10_sum = section10_amount.reduce((total, value) => total + value, 0);
+                  const total_section80C_sum = Math.min(section80c_amount.reduce((total, value) => total + value, 0), 150000);
+                  const total_section80d_sum = section80d_amount.reduce((total, value) => total + value, 0);
+                  const total_other_sum = other_amount.reduce((total, value) => total + value, 0);
+
+
+
+                  // console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
+
+
+                  // Calculate the longest array length for section10 details
+                  const section10_maxLength = Math.max(section10_component.length, section10_amount.length);
+                  const section80_maxLength = Math.max(section80c_component.length, section80c_amount.length);
+                  const section80D_maxLength = Math.max(section80d_component.length, section80d_amount.length);
+                  const other_maxLength = Math.max(other_component.length, other_amount.length);
+
+                  // console.log(section10_maxLength,"section10_maxLengthsection10_maxLength")
+
+
+
+                  
+
+
+                  // Create rows for section 10 details
+                  let Section10Rows = "";
+                  for (let i = 0; i < section10_maxLength; i++) {
+                      let Section10component = section10_component[i] || "-";  // If index out of bounds, insert "-"
+                      let oldSection10 = section10_amount[i] || "0";
+                      let newSection10 = 0;  // Assuming new value is 0 for now
+                      Section10Rows += `<tr><td>${Section10component}</td><td>${"₹" + oldSection10}</td><td>${"₹" + newSection10}</td></tr>`;
+                  }
+
+
+                  let Section80Rows = "";
+                  for (let i = 0; i < section80_maxLength; i++) {
+                      let Section80component = section80c_component[i] || "-";  // If index out of bounds, insert "-"
+                      let oldSection80c = section80c_amount[i] || "0";
+                      let newSection80c = 0;  // Assuming new value is 0 for now
+                      Section80Rows += `<tr><td>${Section80component}</td><td>${"₹" + oldSection80c}</td><td>${"₹" + newSection80c}</td></tr>`;
+                  }
+
+                  let Section80DRows = "";
+                  for (let i = 0; i < section80D_maxLength; i++) {
+                      let Section80Dcomponent = section80d_component[i] || "-";  // If index out of bounds, insert "-"
+                      let oldSection80D = section80d_amount[i] || "0";
+                      let newSection80D = 0;  // Assuming new value is 0 for now
+                      Section80DRows += `<tr><td>${Section80Dcomponent}</td><td>${"₹" + oldSection80D}</td><td>${"₹" + newSection80D}</td></tr>`;
+                  }
+
+                  let OtherRows = "";
+                  for (let i = 0; i < other_maxLength; i++) {
+                      let Othercomponent = other_component[i] || "-";  // If index out of bounds, insert "-"
+                      let oldSectionOther = other_amount[i] || "0";
+                      let newSectionOther = 0;  // Assuming new value is 0 for now
+                      OtherRows += `<tr><td>${Othercomponent}</td><td>${"₹" + oldSectionOther}</td><td>${"₹" + newSectionOther}</td></tr>`;
+                  }
+
+
+
+                  
+                  
+
+                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value)
+                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
+
+
+                  console.log(annual_old_taxable_income,"11111")
+                  console.log(annual_new_taxable_income,"222222")
+
+
+                  function getPerComp1() {
+                    return new Promise((resolve, reject) => {
+                        frappe.call({
+                            method: "cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.slab_calculation",
+                            args: {
+                                employee: frm.doc.employee,
+                                company: frm.doc.company,
+                                payroll_period: frm.doc.payroll_period,
+                                old_annual_slab: annual_old_taxable_income,
+                                new_annual_slab: annual_new_taxable_income
+                            },
+                            callback: function (response) {
+                                if (response.message) {
+                                    let old_from_amount = response.message.from_amount || [];
+                                    let old_to_amount = response.message.to_amount || [];
+                                    let old_percentage_amount = response.message.percentage || [];
+                                    let old_value_amount = response.message.total_value || [];
+                                    let total_sum=response.message.total_sum
+                                    let rebate=response.message.rebate
+                                    let max_amount=response.message.max_amount
+                                    let old_rebate_value=response.message.old_rebate_value
+
+                                    let  old_surcharge_m=response.message.old_surcharge_m                              
+                                    let old_education_cess=response.message.old_education_cess
+                                    
+                                    
+                                    
+
+
+                                    let new_from_amount = response.message.from_amount_new || [];
+                                    let new_to_amount = response.message.to_amount_new || [];
+                                    let new_percentage_amount = response.message.percentage_new || [];
+                                    let new_value_amount = response.message.total_value_new || [];
+                                    let total_sum_new=response.message.total_sum_new
+                                    let newrebate=response.message.rebate_new
+                                    let newmax_amount=response.message.max_amount_new
+                                    let new_rebate_value=response.message.new_rebate_value
+                                    let  new_surcharge_m=response.message.new_surcharge_m                              
+                                    let new_education_cess=response.message.new_education_cess
+                                    
+
+                                    
+                                    resolve({ 
+                                      old_from_amount,
+                                       old_to_amount, 
+                                       old_percentage_amount, 
+                                       old_value_amount,
+                                       new_from_amount ,
+                                       new_to_amount,
+                                       new_percentage_amount,
+                                       new_value_amount,
+                                       total_sum,
+                                       total_sum_new,
+                                       rebate,
+                                       max_amount,
+                                       newrebate,
+                                       newmax_amount,
+                                       old_rebate_value,
+                                       new_rebate_value,
+                                       old_surcharge_m,
+                                        old_education_cess,
+                                        new_surcharge_m,
+                                        new_education_cess
+
+
+                                      });
+                                } else {
+                                    console.error("Error: No response received from Python method.");
+                                    reject("No response received");
+                                }
+                            }
+                        });
+                    });
+                }
+                
+                async function processPerComp1() {
+                  try {
+                      let { old_from_amount, old_to_amount, old_percentage_amount, old_value_amount,new_from_amount ,
+                        new_to_amount,
+                        new_percentage_amount,
+                        new_value_amount,total_sum,total_sum_new,
+                        rebate,
+                        max_amount,
+                        newrebate,
+                        newmax_amount,
+                        old_rebate_value,
+                        new_rebate_value,
+                        old_surcharge_m,
+                        old_education_cess,
+                        new_surcharge_m,
+                        new_education_cess
+                      } = await getPerComp1();
+                     
+                      let OtherRows1 = "";
+                      for (let i = 0; i < old_from_amount.length; i++) {
+                          let fromcomponent = old_from_amount[i]|| 0;  
+                          let tocomponent = old_to_amount[i] || 0; 
+                          let percentage =old_percentage_amount[i] || 0; 
+                          let final_amount = old_value_amount[i] || 0;
+
+
+                          
+                          OtherRows1 += `<tr><td>${fromcomponent}</td><td>${"₹" + tocomponent}</td><td>${"₹" + percentage}</td><td>${"₹" + final_amount}</td></tr>`;
+                      }
+
+                      let OtherRows2 = "";
+                      for (let i = 0; i < new_from_amount.length; i++) {
+                          let newfromcomponent = new_from_amount[i]|| 0;  
+                          let newtocomponent = new_to_amount[i] || 0; 
+                          let newpercentage =new_percentage_amount[i] || 0; 
+                          let newfinal_amount = new_value_amount[i] || 0;
+
+
+                          
+                          OtherRows2 += `<tr><td>${newfromcomponent}</td><td>${"₹" + newtocomponent}</td><td>${"₹" + newpercentage}</td><td>${"₹" + newfinal_amount}</td></tr>`;
+                      }
+              
+                      // Define the table HTML with dropdowns and expandable rows
+                  const table_html = `
+                  <table class="table table-bordered">
+                      <thead>
+                          <tr>
+                              <th>Title</th>
+                              <th>Old Regime</th>
+                              <th>New Regime</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>Current Taxable Earnings-(${month1}-${month2})</td>
+                              <td>₹ ${oldValue}</td>
+                              <td>₹ ${newValue}</td>
+                          </tr>
+                          <tr>
+                              <td>Future Taxable Earnings</td>
+                              <td>₹ ${old_future_amount}</td>
+                              <td>₹ ${new_future_amount}</td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  Total Perquisite
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Perquisite Component</th>
+                                                  <th>Old Regime</th>
+                                                  <th>New Regime</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>${perquisiteRows}</tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ ${total_per_sum}</td>
+                              <td>₹ ${total_per_sum}</td>
+                          </tr>
+
+
+
+                           <tr>
+                              <td>Total Taxable Income</td>
+                              <td>₹ ${oldValue+old_future_amount+total_per_sum}</td>
+                              <td>₹ ${newValue+new_future_amount+total_per_sum}</td>
+                          </tr>
+
+
+
+
+
+                          <tr>
+                              <td>
+                                  Less : Allowances Exempted U/s 10
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Title</th>
+                                                  <th>Old Regime</th>
+                                                  <th>New Regime</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>${Section10Rows}</tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ ${total_section10_sum}</td>
+                              <td>₹ 0</td>
+                          </tr>
+
+                          <tr>
+                                <td>Less: Allowances Exempted U/s 16
+                                    <button class="btn btn-secondary btn-sm incomeTaxDropdown">
+                                        <i class="fa fa-caret-down"></i>
+                                    </button>
+                                    <div class="incomeTaxDetails" style="display: none;">
+                                        <table class="table table-sm table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Option</th>
+                                                    <th>Old Regime</th>
+                                                    <th>New Regime</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Standard Deduction</td>
+                                                    <td>₹ ${old_std}</td>
+                                                    <td>₹ ${new_std}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Tax on Employment</td>
+                                                    <td>₹ ${pt_value}</td>
+                                                    <td>₹ 0</td>
+                                                </tr>
+
+                                                 
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                                <td>₹ ${old_std+pt_value}</td>
+                                <td>₹ ${new_std}</td>
+                            </tr>
+
+
+                            <tr>
+                              <td>
+                                  Less: Deduction under Sec 80C (Max Rs.1,50,000/-)
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Title</th>
+                                                  <th>Old Regime</th>
+                                                  <th>New Regime</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>${Section80Rows}</tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ ${total_section80C_sum}</td>
+                              <td>₹ 0</td>
+                          </tr>
+
+                          <tr>
+                              <td>
+                                  Less: Deductions Under Chapter VI- A(80D,80DD,80E,80EE,80U)
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Title</th>
+                                                  <th>Old Regime</th>
+                                                  <th>New Regime</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>${Section80DRows}</tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ ${total_section80d_sum}</td>
+                              <td>₹ 0</td>
+                          </tr>
+
+                          <tr>
+                              <td>NPS</td>
+                              <td>₹ ${nps_value}</td>
+                              <td>₹ ${nps_value}</td>
+                          </tr>
+
+
+                          <tr>
+                              <td>
+                                 Other
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Title</th>
+                                                  <th>Old Regime</th>
+                                                  <th>New Regime</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>${OtherRows}</tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ ${total_other_sum}</td>
+                              <td>₹ 0</td>
+                          </tr>
+
+
+
+
+
+
+                          <tr>
+                              <td>Total Exemption/Deductions</td>
+                              <td>₹ ${total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value}</td>
+                              <td>₹ ${nps_value+new_std}</td>
+                          </tr>
+                          <tr>
+                              <td>Annual Taxable Income</td>
+                              <td>₹ ${(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value)}</td>
+                              <td>₹ ${(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)}</td>
+                          </tr>
+
+
+
+                          <tr>
+                              <td>
+                                  Tax Slab
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>From Amount</th>
+                                                  <th>To Amount</th>
+                                                  <th>Percentage</th>
+                                                  <th>Amount</th>
+                                              </tr>
+                                          </thead>
+                                          Old Regime Slab
+                                          <tbody>${OtherRows1}</tbody>
+                                      </table>
+
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>From Amount</th>
+                                                  <th>To Amount</th>
+                                                  <th>Percentage</th>
+                                                  <th>Amount</th>
+                                              </tr>
+                                          </thead>
+                                          New Regime Slab
+                                          <tbody>${OtherRows2}</tbody>
+                                      </table>
+
+
+                                  </div>
+                              </td>
+                              <td>₹ ${total_sum}</td>
+                              <td>₹ ${total_sum_new}</td>
+                          </tr>
+
+
+                          
+
+                          <tr>
+                              <td>
+                                 Rebate
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Regime</th>
+                                                  <th>Annual Taxable Lessthan</th>
+                                                  <th>Max Amount</th>
+                                                  
+                                                  
+                                              </tr>
+                                          </thead>
+                                          <tbody>
+                  
+                                          <tr>
+                                                  <th>Old Regime</th>
+                                                  <th>₹ ${rebate}</th>
+                                                  <th>₹ ${max_amount}</th>
+                                                  
+                                          </tr>
+                                          <tr>
+                                                  <th>New Regime</th>
+                                                  <th>₹ ${newrebate}</th>
+                                                  <th>₹ ${newmax_amount}</th>
+                                                  
+                                          </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ ${old_rebate_value}
+                                       </td>
+                              <td>₹ ${new_rebate_value}</td>
+                          </tr>
+
+                          <tr>
+                              <td>Surcharge</td>
+                              <td>₹ ${old_surcharge_m}</td>
+                              <td>₹ ${new_surcharge_m}</td>
+
+                              
+                                    
+                          </tr>
+
+                          <tr>
+                              <td>Education Cess</td>
+                              <td>₹ ${old_education_cess}</td>
+                              <td>₹ ${new_education_cess}</td>
+                          </tr>
+
+                          <tr>
+                              <td>Tax Payable</td>
+                              <td>0</td>
+                              <td>0</td>
+                          </tr>
+
+                          <tr>
+                              <td>Tax Paid</td>
+                              <td>0</td>
+                              <td>0</td>
+                          </tr>
+
+                          <tr>
+                              <td>Current Tax</td>
+                              <td>0</td>
+                              <td>0</td>
+                          </tr>
+
+
+                          <tr>
+                              <td>Total Tax Deducted at source</td>
+                              <td>0</td>
+                              <td>0</td>
+                          </tr>
+
+                          <tr>
+                              <td>Tax Payable / Refundable (14 - 15(A))</td>
+                              <td>0</td>
+                              <td>0</td>
+                          </tr>
+
+                          <tr>
+                              <td>TDS For Future Month</td>
+                              <td>0</td>
+                              <td>0</td>
+                          </tr>
+
+
+
+                      </tbody>
+                  </table>
+              `;
+              
+                      // Set the value of the HTML field
+                      frm.set_df_property('custom_employee_tax_projection', 'options', table_html);
+              
+                      // Add event listeners for dropdown buttons
+                      setTimeout(() => {
+                          document.querySelectorAll('.incomeTaxDropdown').forEach((button, index) => {
+                              button.addEventListener('click', function () {
+                                  const detailsDiv = document.querySelectorAll('.incomeTaxDetails')[index];
+                                  detailsDiv.style.display = (detailsDiv.style.display === 'none') ? 'block' : 'none';
+                              });
+                          });
+                      }, 100);
+              
+                  } catch (error) {
+                      console.error("Error fetching per_comp1:", error);
+                  }
+              }
+              
+              // Call the function to fetch and process the data
+              processPerComp1();
+              }
+          }
+      });
+
+  }
+}
+
+
+
+// if (annual_old_taxable_income > 0) {
+
+                
+//   // Fetch income tax slabs
+//   frappe.call({
+//       method: 'frappe.client.get_list',
+//       args: {
+//           doctype: 'Income Tax Slab',
+//           filters: { company: frm.doc.company, docstatus: 1, disabled: 0, custom_select_regime: "Old Regime" },
+//           fields: ["*"],
+//           order_by: "effective_from DESC",
+//           limit: 1
+//       },
+//       callback: function (response) {
+//           const get_income_tax = response.message || [];
+
+//           if (get_income_tax.length > 0) {
+//               get_income_tax.forEach((tax_slab) => {
+//                   if (tax_slab.custom_select_regime === "Old Regime") {
+//                       frappe.call({
+//                           method: 'frappe.client.get',
+//                           args: { doctype: 'Income Tax Slab', name: tax_slab.name },
+//                           callback: function (incomeDocResponse) {
+//                               const incomeDoc = incomeDocResponse.message;
+
+//                               // Populate total_array with slab data
+//                               incomeDoc.slabs.forEach((slab) => {
+//                                   total_array.push({
+//                                       from: slab.from_amount,
+//                                       to: slab.to_amount,
+//                                       percent: slab.percent_deduction
+//                                   });
+//                               });
+
+//                               total_array.forEach((slab) => {
+//                                   if (slab.to === 0.0) {
+//                                       if (Math.round(annual_old_taxable_income) >= slab.from) {
+//                                           processSlab(slab);
+//                                       }
+//                                   } else {
+//                                       if (slab.from <= Math.round(annual_old_taxable_income) && Math.round(annual_old_taxable_income) <= slab.to) {
+//                                           processSlab(slab);
+//                                       }
+//                                   }
+//                               });
+
+//                               // Now accessing the first element safely
+//                               if (from_amount.length > 0) {
+
+//                                 const slab_maxLength = Math.max(from_amount.length);
+
+//                                 // let SlabRows = "";
+//                                 //       for (let i = 0; i < slab_maxLength; i++) {
+//                                 //           let from_amount1 = from_amount[i] || "0";  // If index out of bounds, insert "-"
+//                                 //           let to_amount1 = to_amount[i] || "0";
+//                                 //           let percentage1 = percentage[i] || "0";
+//                                 //           let total_value1 = total_value[i] || "0";
+//                                 //             // Assuming new value is 0 for now
+//                                 //           SlabRows += `<tr><td>${from_amount1}</td><td>${"₹" + to_amount1}</td><td>${"₹" + percentage1}</td><td>${"₹" + total_value1}</td></tr>`;
+//                                 //       }
+
+                                
+                                  
+//                               } 
+//                               else 
+//                               {
+//                                   console.log("from_amount is empty");
+//                               }
+//                           }
+//                       });
+//                   }
+//               });
+//           }
+//       }
+//   });
+
+//   function processSlab(slab) {
+//       const tt1 = Math.round(annual_old_taxable_income) - slab.from;
+//       const tt2 = slab.percent;
+//       const tt3 = Math.round((tt1 * tt2) / 100);
+//       const tt4 = slab.from;
+//       const tt5 = slab.to;
+
+//       const remaining_slabs = total_array.filter((s) => s.from !== slab.from && s.from < slab.from);
+//       remaining_slabs.forEach((s) => {
+//           from_amount.push(s.from);
+//           to_amount.push(s.to);
+//           percentage.push(s.percent);
+//           difference.push(s.to - s.from);
+//           total_value.push(((s.to - s.from) * s.percent) / 100);
+//       });
+
+//       from_amount.push(tt4);
+//       to_amount.push(tt5);
+//       percentage.push(tt2);
+//       difference.push(tt1);
+//       total_value.push(tt3);
+//   }
 // }
+
+
+// console.log(total_value,"total_valuetotal_value")
+
+// const slab_Sum = total_value.reduce((total, value) => total + value, 0);
+
+// console.log(slab_Sum,"slab_Sumslab_Sum")
+
+
+
+
+
+
 
 
 
@@ -5247,15 +5889,17 @@ async function fetchTaxableIncome() {
       // Log taxable incomes and update tax projection table
      
 
-      old_current_sslip_amount=old_totalSum
-      new_current_sslip_amount=new_totalSum
+      // old_current_sslip_amount=old_totalSum
+      // new_current_sslip_amount=new_totalSum
 
 
-      console.log(old_current_sslip_amount,"111111111111111")
+      console.log(old_totalSum,"111111111111111")
 
-      console.log(new_current_sslip_amount,"22222222222")
+      console.log(new_totalSum,"22222222222")
 
       return { old_totalSum, new_totalSum };
+
+
     } else {
       console.error("No salary slips found for this employee in the given payroll period.");
     }
@@ -5706,121 +6350,121 @@ async function fetchFutureTaxableIncome() {
 
 
 
-  if(old_annual_taxable_income>0)
-  {
+  // if(old_annual_taxable_income>0)
+  // {
 
 
 
 
-    if (frm.doc.custom_income_tax) {
-      // Fetch income tax slabs
-      frappe.call({
-        method: 'frappe.client.get_list',
-        args: {
-          doctype: 'Income Tax Slab',
-          filters: { company: frm.doc.company, docstatus: 1, disabled: 0 },
-          fields: ["*"]
-        },
-        callback: function (response) {
-          const get_income_tax = response.message || [];
-          const old_regime_values = [];
+  //   // if (frm.doc.custom_income_tax) {
+  //   //   // Fetch income tax slabs
+  //   //   frappe.call({
+  //   //     method: 'frappe.client.get_list',
+  //   //     args: {
+  //   //       doctype: 'Income Tax Slab',
+  //   //       filters: { company: frm.doc.company, docstatus: 1, disabled: 0 },
+  //   //       fields: ["*"]
+  //   //     },
+  //   //     callback: function (response) {
+  //   //       const get_income_tax = response.message || [];
+  //   //       const old_regime_values = [];
     
-          if (get_income_tax.length > 0) {
-            get_income_tax.forEach((tax_slab) => {
-              if (tax_slab.custom_select_regime === "Old Regime") {
+  //   //       if (get_income_tax.length > 0) {
+  //   //         get_income_tax.forEach((tax_slab) => {
+  //   //           if (tax_slab.custom_select_regime === "Old Regime") {
                 
     
     
-                frappe.call({
-                  method: 'frappe.client.get',
-                  args: { doctype: 'Income Tax Slab', name: tax_slab.name },
-                  callback: function (incomeDocResponse) {
-                    const incomeDoc = incomeDocResponse.message;
+  //   //             frappe.call({
+  //   //               method: 'frappe.client.get',
+  //   //               args: { doctype: 'Income Tax Slab', name: tax_slab.name },
+  //   //               callback: function (incomeDocResponse) {
+  //   //                 const incomeDoc = incomeDocResponse.message;
                    
     
-                    // const rebate = incomeDoc.custom_taxable_income_is_less_than;
-                    // const max_amount = incomeDoc.custom_maximum_amount;
+  //   //                 // const rebate = incomeDoc.custom_taxable_income_is_less_than;
+  //   //                 // const max_amount = incomeDoc.custom_maximum_amount;
     
-                    // Populate total_array with slab data
-                    incomeDoc.slabs.forEach((slab) => {
-                      total_array.push({
-                        from: slab.from_amount,
-                        to: slab.to_amount,
-                        percent: slab.percent_deduction
-                      });
-                    });
+  //   //                 // Populate total_array with slab data
+  //   //                 incomeDoc.slabs.forEach((slab) => {
+  //   //                   total_array.push({
+  //   //                     from: slab.from_amount,
+  //   //                     to: slab.to_amount,
+  //   //                     percent: slab.percent_deduction
+  //   //                   });
+  //   //                 });
     
-                    total_array.forEach((slab) => {
-                      if (slab.to === 0.0) {
-                        if (Math.round(old_annual_taxable_income) >= slab.from) {
-                          const tt1 = Math.round(old_annual_taxable_income) - slab.from;
-                          const tt2 = slab.percent;
-                          const tt3 = Math.round((tt1 * tt2) / 100);
-                          const tt4 = slab.from;
-                          const tt5 = slab.to;
+  //   //                 total_array.forEach((slab) => {
+  //   //                   if (slab.to === 0.0) {
+  //   //                     if (Math.round(old_annual_taxable_income) >= slab.from) {
+  //   //                       const tt1 = Math.round(old_annual_taxable_income) - slab.from;
+  //   //                       const tt2 = slab.percent;
+  //   //                       const tt3 = Math.round((tt1 * tt2) / 100);
+  //   //                       const tt4 = slab.from;
+  //   //                       const tt5 = slab.to;
     
-                          const remaining_slabs = total_array.filter((s) => s.from !== slab.from && s.from < slab.from);
-                          remaining_slabs.forEach((s) => {
-                            from_amount.push(s.from);
-                            to_amount.push(s.to);
-                            percentage.push(s.percent);
-                            difference.push(s.to - s.from);
-                            total_value.push(((s.to - s.from) * s.percent) / 100);
-                          });
+  //   //                       const remaining_slabs = total_array.filter((s) => s.from !== slab.from && s.from < slab.from);
+  //   //                       remaining_slabs.forEach((s) => {
+  //   //                         from_amount.push(s.from);
+  //   //                         to_amount.push(s.to);
+  //   //                         percentage.push(s.percent);
+  //   //                         difference.push(s.to - s.from);
+  //   //                         total_value.push(((s.to - s.from) * s.percent) / 100);
+  //   //                       });
     
-                          from_amount.push(tt4);
-                          to_amount.push(tt5);
-                          percentage.push(tt2);
-                          difference.push(tt1);
-                          total_value.push(tt3);
-                        }
-                      } else {
-                        if (slab.from <= Math.round(old_annual_taxable_income) && Math.round(old_annual_taxable_income) <= slab.to) {
-                          const tt1 = Math.round(old_annual_taxable_income) - slab.from;
-                          const tt2 = slab.percent;
-                          const tt3 = (tt1 * tt2) / 100;
-                          const tt4 = slab.from;
-                          const tt5 = slab.to;
+  //   //                       from_amount.push(tt4);
+  //   //                       to_amount.push(tt5);
+  //   //                       percentage.push(tt2);
+  //   //                       difference.push(tt1);
+  //   //                       total_value.push(tt3);
+  //   //                     }
+  //   //                   } else {
+  //   //                     if (slab.from <= Math.round(old_annual_taxable_income) && Math.round(old_annual_taxable_income) <= slab.to) {
+  //   //                       const tt1 = Math.round(old_annual_taxable_income) - slab.from;
+  //   //                       const tt2 = slab.percent;
+  //   //                       const tt3 = (tt1 * tt2) / 100;
+  //   //                       const tt4 = slab.from;
+  //   //                       const tt5 = slab.to;
     
-                          const remaining_slabs = total_array.filter((s) => s.from !== slab.from && s.from < slab.from);
-                          remaining_slabs.forEach((s) => {
-                            from_amount.push(s.from);
-                            to_amount.push(s.to);
-                            percentage.push(s.percent);
-                            difference.push(s.to - s.from);
-                            total_value.push(((s.to - s.from) * s.percent) / 100);
-                          });
+  //   //                       const remaining_slabs = total_array.filter((s) => s.from !== slab.from && s.from < slab.from);
+  //   //                       remaining_slabs.forEach((s) => {
+  //   //                         from_amount.push(s.from);
+  //   //                         to_amount.push(s.to);
+  //   //                         percentage.push(s.percent);
+  //   //                         difference.push(s.to - s.from);
+  //   //                         total_value.push(((s.to - s.from) * s.percent) / 100);
+  //   //                       });
     
-                          from_amount.push(tt4);
-                          to_amount.push(tt5);
-                          percentage.push(tt2);
-                          difference.push(tt1);
-                          total_value.push(tt3);
-                        }
-                      }
-                    });
+  //   //                       from_amount.push(tt4);
+  //   //                       to_amount.push(tt5);
+  //   //                       percentage.push(tt2);
+  //   //                       difference.push(tt1);
+  //   //                       total_value.push(tt3);
+  //   //                     }
+  //   //                   }
+  //   //                 });
 
                     
     
-                    total_sum_old = total_value.reduce((sum, val) => sum + val, 0);
+  //   //                 total_sum_old = total_value.reduce((sum, val) => sum + val, 0);
 
-                    return total_sum_old;
+  //   //                 return total_sum_old;
     
-                  }
-                });
-              }
-            });
-          }
-        }
-      });
-    }
+  //   //               }
+  //   //             });
+  //   //           }
+  //   //         });
+  //   //       }
+  //   //     }
+  //   //   });
+  //   // }
 
 
 
 
 
 
-  }
+  // }
 
 
 
@@ -5908,8 +6552,7 @@ function updateTaxProjectionTable(old_totalSum,
   
   Sumother,
   Sumnpt,
-  Sumq,
-  total_sum_old
+ 
   
 
 
@@ -6243,7 +6886,7 @@ Promise.all([fetchTaxableIncome(), fetchFutureTaxableIncome()])
      
       Sumother,
       Sumnpt,
-      total_sum_old
+      
       
       
 
@@ -6280,7 +6923,7 @@ Promise.all([fetchTaxableIncome(), fetchFutureTaxableIncome()])
       
       Sumother,
       Sumnpt,
-      total_sum_old
+      
       
       
       
