@@ -463,7 +463,6 @@ def remove_employee_repetition(data):
     return data
 
 def add_loan_perquisite(data):
-    # Add loan perquisite value (255) only to consolidated rows after total calculation
     for row in data:
         if row["month"] == "Total(sum+projection)":
             row["loan_perquisite"] = 255 
