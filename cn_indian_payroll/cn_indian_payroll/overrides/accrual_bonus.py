@@ -120,13 +120,15 @@ def get_doc_data(doc_name,employee,company,payroll_period):
 
 
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
-                        filters={'employee':employee,'docstatus':1},
+                        filters={'employee':employee,'docstatus':1,'custom_payroll_period':payroll_period},
                         fields=["*"],
-                        order_by='from_date desc',
+                        order_by='from_date asc',
                         limit=1
                     )
 
         if len(latest_salary_structure)>0:
+
+            # frappe.msgprint(str(latest_salary_structure[0].name))
 
             get_payroll=frappe.get_doc("Payroll Period",latest_salary_structure[0].custom_payroll_period)
             effective_start_date=latest_salary_structure[0].from_date
@@ -150,6 +152,8 @@ def get_doc_data(doc_name,employee,company,payroll_period):
 
             start_month_name = start.strftime("%B")
             end_month_name = end.strftime("%B")
+
+            # frappe.msgprint(str(start_month_name))
 
             
 
@@ -278,9 +282,9 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                         new_taxable_component += component.amount
 
                     # Bonus
-                    if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
-                        old_taxable_component += component.amount
-                        new_taxable_component += component.amount
+                    # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
+                    #     old_taxable_component += component.amount
+                    #     new_taxable_component += component.amount
 
                     # Food Coupon - Old Regime
                     if (
@@ -340,9 +344,9 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 new_future_amount += new_earning.amount * (num_months - salary_slip_count)
 
                 # Accrued BONUS tax=0
-            if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
-                old_future_amount += new_earning.amount * (num_months - salary_slip_count)
-                new_future_amount += new_earning.amount * (num_months - salary_slip_count)
+            # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
+            #     old_future_amount += new_earning.amount * (num_months - salary_slip_count)
+            #     new_future_amount += new_earning.amount * (num_months - salary_slip_count)
 
                
 
