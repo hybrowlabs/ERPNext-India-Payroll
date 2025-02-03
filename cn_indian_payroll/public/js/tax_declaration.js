@@ -5392,7 +5392,7 @@ function tds_projection_test(frm) {
                                               </tr>
                                           </thead>
                                           Old Regime Slab
-                                          <tbody>${OtherRows1}</tbody>
+                                          <tbody>${Math.round(OtherRows1)}</tbody>
                                       </table>
 
                                       <table class="table table-sm table-bordered">
@@ -5405,7 +5405,7 @@ function tds_projection_test(frm) {
                                               </tr>
                                           </thead>
                                           New Regime Slab
-                                          <tbody>${OtherRows2}</tbody>
+                                          <tbody>${Math.round(OtherRows2)}</tbody>
                                       </table>
 
 
@@ -5453,22 +5453,22 @@ function tds_projection_test(frm) {
                                       </table>
                                   </div>
                               </td>
-                              <td>₹ ${old_rebate_value}
+                              <td>₹ ${Math.round(old_rebate_value)}
                                        </td>
-                              <td>₹ ${new_rebate_value}</td>
+                              <td>₹ ${Math.round(new_rebate_value)}</td>
                           </tr>
 
 
                           <tr>
                               <td>Total Tax on Income</td>
-                              <td>₹ ${total_sum-old_rebate_value}</td>
-                              <td>₹ ${total_sum_new-new_rebate_value}</td>
+                              <td>₹ ${Math.round(total_sum-old_rebate_value)}</td>
+                              <td>₹ ${Math.round(total_sum_new-new_rebate_value)}</td>
                           </tr>
 
                           <tr>
                               <td>Surcharge</td>
-                              <td>₹ ${old_surcharge_m}</td>
-                              <td>₹ ${new_surcharge_m}</td>
+                              <td>₹ ${Math.round(old_surcharge_m)}</td>
+                              <td>₹ ${Math.round(new_surcharge_m)}</td>
 
                               
                                     
@@ -5476,8 +5476,8 @@ function tds_projection_test(frm) {
 
                           <tr>
                               <td>Education Cess</td>
-                              <td>₹ ${old_education_cess}</td>
-                              <td>₹ ${new_education_cess}</td>
+                              <td>₹ ${Math.round(old_education_cess)}</td>
+                              <td>₹ ${Math.round(new_education_cess)}</td>
                           </tr>
 
 
@@ -5485,14 +5485,14 @@ function tds_projection_test(frm) {
 
                           <tr>
                               <td>Tax Payable</td>
-                              <td>₹ ${old_education_cess+old_surcharge_m+(total_sum-old_rebate_value)}</td>
-                              <td>₹ ${new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value)}</td>
+                              <td>₹ ${Math.round(old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))}</td>
+                              <td>₹ ${Math.round(new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))}</td>
                           </tr>
 
                           <tr>
                               <td>Tax Paid</td>
-                              <td>₹ ${salary_slip_sum}</td>
-                              <td>₹ ${salary_slip_sum}</td>
+                              <td>₹ ${Math.round(salary_slip_sum)}</td>
+                              <td>₹ ${Math.round(salary_slip_sum)}</td>
                           </tr>
 
                           <tr>
@@ -5553,123 +5553,6 @@ function tds_projection_test(frm) {
 
   }
 }
-
-
-
-// if (annual_old_taxable_income > 0) {
-
-                
-//   // Fetch income tax slabs
-//   frappe.call({
-//       method: 'frappe.client.get_list',
-//       args: {
-//           doctype: 'Income Tax Slab',
-//           filters: { company: frm.doc.company, docstatus: 1, disabled: 0, custom_select_regime: "Old Regime" },
-//           fields: ["*"],
-//           order_by: "effective_from DESC",
-//           limit: 1
-//       },
-//       callback: function (response) {
-//           const get_income_tax = response.message || [];
-
-//           if (get_income_tax.length > 0) {
-//               get_income_tax.forEach((tax_slab) => {
-//                   if (tax_slab.custom_select_regime === "Old Regime") {
-//                       frappe.call({
-//                           method: 'frappe.client.get',
-//                           args: { doctype: 'Income Tax Slab', name: tax_slab.name },
-//                           callback: function (incomeDocResponse) {
-//                               const incomeDoc = incomeDocResponse.message;
-
-//                               // Populate total_array with slab data
-//                               incomeDoc.slabs.forEach((slab) => {
-//                                   total_array.push({
-//                                       from: slab.from_amount,
-//                                       to: slab.to_amount,
-//                                       percent: slab.percent_deduction
-//                                   });
-//                               });
-
-//                               total_array.forEach((slab) => {
-//                                   if (slab.to === 0.0) {
-//                                       if (Math.round(annual_old_taxable_income) >= slab.from) {
-//                                           processSlab(slab);
-//                                       }
-//                                   } else {
-//                                       if (slab.from <= Math.round(annual_old_taxable_income) && Math.round(annual_old_taxable_income) <= slab.to) {
-//                                           processSlab(slab);
-//                                       }
-//                                   }
-//                               });
-
-//                               // Now accessing the first element safely
-//                               if (from_amount.length > 0) {
-
-//                                 const slab_maxLength = Math.max(from_amount.length);
-
-//                                 // let SlabRows = "";
-//                                 //       for (let i = 0; i < slab_maxLength; i++) {
-//                                 //           let from_amount1 = from_amount[i] || "0";  // If index out of bounds, insert "-"
-//                                 //           let to_amount1 = to_amount[i] || "0";
-//                                 //           let percentage1 = percentage[i] || "0";
-//                                 //           let total_value1 = total_value[i] || "0";
-//                                 //             // Assuming new value is 0 for now
-//                                 //           SlabRows += `<tr><td>${from_amount1}</td><td>${"₹" + to_amount1}</td><td>${"₹" + percentage1}</td><td>${"₹" + total_value1}</td></tr>`;
-//                                 //       }
-
-                                
-                                  
-//                               } 
-//                               else 
-//                               {
-//                                   console.log("from_amount is empty");
-//                               }
-//                           }
-//                       });
-//                   }
-//               });
-//           }
-//       }
-//   });
-
-//   function processSlab(slab) {
-//       const tt1 = Math.round(annual_old_taxable_income) - slab.from;
-//       const tt2 = slab.percent;
-//       const tt3 = Math.round((tt1 * tt2) / 100);
-//       const tt4 = slab.from;
-//       const tt5 = slab.to;
-
-//       const remaining_slabs = total_array.filter((s) => s.from !== slab.from && s.from < slab.from);
-//       remaining_slabs.forEach((s) => {
-//           from_amount.push(s.from);
-//           to_amount.push(s.to);
-//           percentage.push(s.percent);
-//           difference.push(s.to - s.from);
-//           total_value.push(((s.to - s.from) * s.percent) / 100);
-//       });
-
-//       from_amount.push(tt4);
-//       to_amount.push(tt5);
-//       percentage.push(tt2);
-//       difference.push(tt1);
-//       total_value.push(tt3);
-//   }
-// }
-
-
-// console.log(total_value,"total_valuetotal_value")
-
-// const slab_Sum = total_value.reduce((total, value) => total + value, 0);
-
-// console.log(slab_Sum,"slab_Sumslab_Sum")
-
-
-
-
-
-
-
-
 
 
 

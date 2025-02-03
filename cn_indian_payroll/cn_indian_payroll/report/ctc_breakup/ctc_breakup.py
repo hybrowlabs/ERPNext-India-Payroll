@@ -66,7 +66,9 @@ def get_all_employee(filters=None):
             employee=each_employee.get("employee"),
             print_format='Salary Slip Standard for CTC',
             # docstatus= each_employee.get("docstatus"),
-            for_preview= 1,  
+            posting_date=each_employee.get("from_date"),
+            for_preview= 1, 
+             
         )
 
         
