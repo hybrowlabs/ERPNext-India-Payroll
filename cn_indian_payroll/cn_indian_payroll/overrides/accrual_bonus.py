@@ -122,19 +122,21 @@ def get_doc_data(doc_name,employee,company,payroll_period):
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
                         filters={'employee':employee,'docstatus':1,'custom_payroll_period':payroll_period},
                         fields=["*"],
-                        order_by='from_date asc',
-                        limit=1
+                        order_by='from_date desc',
+                        # limit=1
                     )
 
         if len(latest_salary_structure)>0:
 
-            # frappe.msgprint(str(latest_salary_structure[0].name))
 
             get_payroll=frappe.get_doc("Payroll Period",latest_salary_structure[0].custom_payroll_period)
-            effective_start_date=latest_salary_structure[0].from_date
+            effective_start_date = latest_salary_structure[-1].from_date
             payroll_end_date=get_payroll.end_date
             payroll_start_date=get_payroll.start_date
             doj=latest_salary_structure[0].custom_date_of_joining
+
+
+            # frappe.msgprint(str(effective_start_date))
 
             start_date = max(effective_start_date, payroll_start_date,doj)
 
