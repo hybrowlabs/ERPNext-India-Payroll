@@ -5110,7 +5110,9 @@ function tds_projection_test(frm) {
                                         new_education_cess,
                                         salary_slip_sum,
                                         num_months,
-                                        salary_slip_count
+                                        salary_slip_count,
+                                        month1,
+                                        month2
 
 
                                       });
@@ -5141,7 +5143,9 @@ function tds_projection_test(frm) {
                         new_education_cess,
                         salary_slip_sum,
                         num_months,
-                        salary_slip_count
+                        salary_slip_count,
+                        month1,
+                        month2
                       } = await getPerComp1();
                      
                       let OtherRows1 = "";
@@ -5182,7 +5186,7 @@ function tds_projection_test(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings-(${month1}-${month2})</td>
+                              <td>Current Taxable Earnings(${month1}-${month2})</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
