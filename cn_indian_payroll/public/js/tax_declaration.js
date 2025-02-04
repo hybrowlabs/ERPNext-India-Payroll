@@ -5061,6 +5061,8 @@ function tds_projection_test(frm) {
                                     let max_amount=response.message.max_amount
                                     let old_rebate_value=response.message.old_rebate_value
 
+                                    console.log(old_from_amount,"222222")
+
                                     let  old_surcharge_m=response.message.old_surcharge_m                              
                                     let old_education_cess=response.message.old_education_cess
                                     
@@ -5152,7 +5154,9 @@ function tds_projection_test(frm) {
 
                           
                           OtherRows1 += `<tr><td>${fromcomponent}</td><td>${"₹" + tocomponent}</td><td>${"₹" + percentage}</td><td>${"₹" + final_amount}</td></tr>`;
-                      }
+                          console.log(OtherRows1,"OtherRows1OtherRows1")
+                      
+                        }
 
                       let OtherRows2 = "";
                       for (let i = 0; i < new_from_amount.length; i++) {
@@ -5392,7 +5396,7 @@ function tds_projection_test(frm) {
                                               </tr>
                                           </thead>
                                           Old Regime Slab
-                                          <tbody>${Math.round(OtherRows1)}</tbody>
+                                          <tbody>${OtherRows1}</tbody>
                                       </table>
 
                                       <table class="table table-sm table-bordered">
@@ -5405,7 +5409,7 @@ function tds_projection_test(frm) {
                                               </tr>
                                           </thead>
                                           New Regime Slab
-                                          <tbody>${Math.round(OtherRows2)}</tbody>
+                                          <tbody>${OtherRows2}</tbody>
                                       </table>
 
 
