@@ -5094,7 +5094,9 @@ function tds_projection_html(frm) {
                                         new_education_cess,
                                         salary_slip_sum,
                                         num_months,
-                                        salary_slip_count
+                                        salary_slip_count,
+                                        month1,
+                                        month2
 
 
                                       });
@@ -5125,7 +5127,9 @@ function tds_projection_html(frm) {
                         new_education_cess,
                         salary_slip_sum,
                         num_months,
-                        salary_slip_count
+                        salary_slip_count,
+                        month1,
+                        month2
                       } = await getPerComp1();
                      
                       let OtherRows1 = "";
@@ -5164,7 +5168,7 @@ function tds_projection_html(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings-(${month1}-${month2})</td>
+                              <td>Current Taxable Earnings(${month1}-${month2})</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
@@ -5378,7 +5382,7 @@ function tds_projection_html(frm) {
                                               </tr>
                                           </thead>
                                           Old Regime Slab
-                                          <tbody>${Math.round(OtherRows1)}</tbody>
+                                          <tbody>${OtherRows1}</tbody>
                                       </table>
 
                                       <table class="table table-sm table-bordered">
@@ -5391,7 +5395,7 @@ function tds_projection_html(frm) {
                                               </tr>
                                           </thead>
                                           New Regime Slab
-                                          <tbody>${Math.round(OtherRows2)}</tbody>
+                                          <tbody>${OtherRows2}</tbody>
                                       </table>
 
 
