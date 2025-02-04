@@ -1,0 +1,345 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:salary_component",
+ "creation": "2025-02-04 12:54:12.694450",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "salary_component",
+  "abbr",
+  "type",
+  "component_type",
+  "lta_taxable_component",
+  "lta_non_taxable_component",
+  "sequence",
+  "component_added",
+  "multi_select",
+  "visibility_type",
+  "column_break_e8oy",
+  "depends_on_payment_days",
+  "is_tax_applicable",
+  "variable_based_on_taxable_salary",
+  "is_income_tax_component",
+  "exempted_from_income_tax",
+  "round_to_the_nearest_integer",
+  "do_not_include_in_total",
+  "remove_if_zero_valued",
+  "is_part_of_gross_pay",
+  "disabled",
+  "is_part_of_ctc",
+  "perquisite",
+  "is_accrual",
+  "accrual_paid_on",
+  "paidout_component",
+  "is_reimbursement",
+  "is_arrear",
+  "component",
+  "is_part_of_appraisal",
+  "tax_applicable_based_on_regime",
+  "regime",
+  "condition__formula_tab",
+  "condition",
+  "amount",
+  "amount_based_on_formula",
+  "formula",
+  "flexible_benefits_tab",
+  "is_flexible_benefit",
+  "max_benefit_amount_yearly",
+  "column_break_damb",
+  "pay_against_benefit_claim",
+  "only_tax_impact_cannot_claim_but_part_of_taxable_income",
+  "create_separate_payment_entry_against_benefit_claim"
+ ],
+ "fields": [
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Data",
+   "label": "Salary Component",
+   "unique": 1
+  },
+  {
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "label": "Abbr"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Earning\nDeduction"
+  },
+  {
+   "fieldname": "component_type",
+   "fieldtype": "Select",
+   "label": "Component Type",
+   "options": "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax\nLoan Perquisite\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance Reimbursement\nLTA Reimbursement\nNPS\nEPF\nEPF Employer\nESIC\nUniform"
+  },
+  {
+   "depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
+   "fieldname": "lta_taxable_component",
+   "fieldtype": "Link",
+   "label": "LTA Taxable Component",
+   "options": "Salary Component"
+  },
+  {
+   "depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
+   "fieldname": "lta_non_taxable_component",
+   "fieldtype": "Link",
+   "label": "LTA Non Taxable Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_e8oy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "depends_on_payment_days",
+   "fieldtype": "Check",
+   "label": "Depends on Payment Days"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "is_tax_applicable",
+   "fieldtype": "Check",
+   "label": "Is Tax Applicable"
+  },
+  {
+   "default": "0",
+   "fieldname": "variable_based_on_taxable_salary",
+   "fieldtype": "Check",
+   "label": "Variable Based On Taxable Salary"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_income_tax_component",
+   "fieldtype": "Check",
+   "label": "Is Income Tax Component"
+  },
+  {
+   "default": "0",
+   "fieldname": "exempted_from_income_tax",
+   "fieldtype": "Check",
+   "label": "Exempted from Income Tax"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_to_the_nearest_integer",
+   "fieldtype": "Check",
+   "label": "Round to the Nearest Integer"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_include_in_total",
+   "fieldtype": "Check",
+   "label": "Do Not Include in Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "remove_if_zero_valued",
+   "fieldtype": "Check",
+   "label": "Remove if Zero Valued"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "is_part_of_gross_pay",
+   "fieldtype": "Check",
+   "label": "Is Part of Gross Pay"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "is_part_of_ctc",
+   "fieldtype": "Check",
+   "label": "Is Part of CTC"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "perquisite",
+   "fieldtype": "Check",
+   "label": "Perquisite"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "is_accrual",
+   "fieldtype": "Check",
+   "label": "Is Accrual"
+  },
+  {
+   "depends_on": "is_accrual",
+   "fieldname": "accrual_paid_on",
+   "fieldtype": "Select",
+   "label": "Accrual Paid on",
+   "options": "Payroll\nF and F"
+  },
+  {
+   "depends_on": "is_accrual",
+   "fieldname": "paidout_component",
+   "fieldtype": "Data",
+   "label": "Paidout Component"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "is_reimbursement",
+   "fieldtype": "Check",
+   "label": "Is Reimbursement"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_arrear",
+   "fieldtype": "Check",
+   "label": "Is Arrear"
+  },
+  {
+   "depends_on": "is_arrear",
+   "fieldname": "component",
+   "fieldtype": "Data",
+   "label": "Component"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_part_of_appraisal",
+   "fieldtype": "Check",
+   "label": "Is Part of Appraisal"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type==\"Earning\"",
+   "fieldname": "tax_applicable_based_on_regime",
+   "fieldtype": "Check",
+   "label": "Tax Applicable Based on Regime"
+  },
+  {
+   "depends_on": "tax_applicable_based_on_regime",
+   "fieldname": "regime",
+   "fieldtype": "Link",
+   "label": "Regime",
+   "options": "Income Tax Regime"
+  },
+  {
+   "fieldname": "condition__formula_tab",
+   "fieldtype": "Tab Break",
+   "label": "Condition  Formula"
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "amount_based_on_formula",
+   "fieldtype": "Check",
+   "label": "Amount based on formula"
+  },
+  {
+   "fieldname": "formula",
+   "fieldtype": "Code",
+   "label": "Formula"
+  },
+  {
+   "fieldname": "flexible_benefits_tab",
+   "fieldtype": "Tab Break",
+   "label": "Flexible Benefits"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_flexible_benefit",
+   "fieldtype": "Check",
+   "label": "Is Flexible Benefit"
+  },
+  {
+   "fieldname": "max_benefit_amount_yearly",
+   "fieldtype": "Float",
+   "label": "Max Benefit Amount (Yearly)"
+  },
+  {
+   "fieldname": "column_break_damb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pay_against_benefit_claim",
+   "fieldtype": "Check",
+   "label": "Pay Against Benefit Claim"
+  },
+  {
+   "default": "0",
+   "fieldname": "only_tax_impact_cannot_claim_but_part_of_taxable_income",
+   "fieldtype": "Check",
+   "label": "Only Tax Impact (Cannot Claim But Part of Taxable Income)"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_separate_payment_entry_against_benefit_claim",
+   "fieldtype": "Check",
+   "label": "Create Separate Payment Entry Against Benefit Claim"
+  },
+  {
+   "default": "0",
+   "fieldname": "component_added",
+   "fieldtype": "Check",
+   "label": "Component Added"
+  },
+  {
+   "default": "0",
+   "fieldname": "multi_select",
+   "fieldtype": "Check",
+   "label": "Multi Select"
+  },
+  {
+   "fieldname": "visibility_type",
+   "fieldtype": "Select",
+   "label": "Visibility Type",
+   "options": "Fixed\nNot Fixed"
+  },
+  {
+   "fieldname": "sequence",
+   "fieldtype": "Select",
+   "label": "Sequence",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-04 14:27:38.025239",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Salary Component Library Item",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
