@@ -1452,7 +1452,8 @@
 
 
 
-var Child_custom_field=[]
+
+
 frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
@@ -1579,236 +1580,262 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                                 
                             };
 
-                            console.log(rowData,"11111");
+							console.log(rowData, "11111");
 
+							var Child_custom_field = [];
+							var custom_field = [];
 
-							if(rowData.child_table==1)
+							var salary_component_array = []; 
 
-								{
+							salary_component_array.push({
+								"component": rowData.salary_component,
+								"abbr":rowData.abbr,
+								"type":rowData.component_type,
+								"formula":rowData.formula,
+								"condition":rowData.condition
+							});
 
-								var custom_field = [
-                                {
-                                    doctype: "Salary Structure Assignment",
-                                    label: rowData.salary_component,
-                                    field_type: "Check"
-                                },
-                                {
-                                    doctype: "Salary Structure Assignment",
-                                    label: rowData.salary_component + " Value",
-                                    field_type: "Float"
-                                }
-                            ];
-
-
-
-								}
-
-							else
-							
+							if(rowData.is_arrear)
 							{
+								salary_component_array.push({
+									"component": rowData.salary_component+"(Arrear)",
+									"abbr":rowData.abbr+"Arrear",
+									"type":rowData.component_type,
+									"formula":"",
+									"condition":""
+								});
 
+							}
+
+							
+							
+							if (rowData.multi_insert == 1) {
+								custom_field = [
+									{
+										doctype: "Salary Structure Assignment",
+										label: rowData.salary_component,
+										field_type: "Check",
+										field_name:rowData.salary_component,
+										depends:"",
+										insert_after:"custom_allowances"
+
+									},
+									{
+										doctype: "Salary Structure Assignment",
+										label: rowData.salary_component + " Value",
+										field_type: "Float",
+										field_name:rowData.salary_component + " Value",
+										depends:rowData.salary_component,
+										insert_after:rowData.salary_component
+									}
+								];
+							}
+							
+							// Check if multi_insert is NOT 1, then fetch child fields first
+							if (rowData.multi_insert != 1) {
 								frappe.call({
 									method: "frappe.client.get",
 									args: {
 										doctype: "Salary Component Library Item",
-										filters: { "name":rowData.salary_component },
-										fields: ["*"],
-										
+										filters: { "name": rowData.salary_component },
+										fields: ["*"]
 									},
-									callback: function(current_res) {
-										if (current_res.message ) {
-
-											// console.log(current_res.message,"8888")
-
-											if(current_res.message.custom_field_child.length>0)
-											{
-
-												$.each(current_res.message.custom_field_child,function(i,v)
-												{
-
+									callback: function (current_res) {
+										if (current_res.message) {
+											if (current_res.message.custom_field_child.length > 0) {
+												$.each(current_res.message.custom_field_child, function (i, v) {
 													Child_custom_field.push({
-														"doctype":v.dt,
-														"label":v.label,
-														"field_name":v.field_name,
-														"type":v.type,
-														"depends":v.depends_on
-													})
-													
-												})
-
+														doctype: v.dt,
+														label: v.label,
+														field_name: v.field_name,
+														field_type: v.type,
+														depends: v.depends_on,
+														insert_after:v.insert_after,
+													});
+												});
 											}
-
 										}
+							
+										// Now create the dialog after fetching child fields
+										createAndShowDialog();
 									}
-									})
-
-
-								
-
+								});
+							} 
+							
+							
+							else 
+							
+							{
+								// If multi_insert is 1, no need to fetch, create the dialog immediately
+								createAndShowDialog();
 							}
 
-console.log(Child_custom_field,"77777")
 
-
-
-
-
-
-
-
-							// var custom_field = [
-                            //     {
-                            //         doctype: "Salary Structure Assignment",
-                            //         label: rowData.salary_component,
-                            //         field_type: "Check"
-                            //     },
-                            //     {
-                            //         doctype: "Salary Structure Assignment",
-                            //         label: rowData.salary_component + " Value",
-                            //         field_type: "Float"
-                            //     }
-                            // ];
-
-                            // console.log(custom_field, "Custom Fields Data");
-
-                            // let dialogFields = [
-                            //     {
-                            //         label: 'Following Components Are Added in Salary Component',
-                            //         fieldname: 'salary_component',
-                            //         fieldtype: 'Check',
-                            //         default: 1,
-							// 		hidden:1
-                            //     },
-                            //     {
-                            //         label: 'Following Components Are Added in Salary Component',
-                            //         fieldname: 'heading',
-                            //         fieldtype: 'Heading'
-                            //     },
-                            //     {
-                            //         label: 'Salary Component Details',
-                            //         fieldname: 'salary_components_table',
-                            //         fieldtype: 'Table',
-                            //         cannot_add_rows: 1,  
-                            //         in_place_edit: 0,  
-                            //         fields: [
-                            //             { label: 'Salary Component', fieldname: 'salary_component', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
-                            //             { label: 'Abbreviation', fieldname: 'abbr', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
-                            //             { label: 'Type', fieldname: 'type', fieldtype: 'Select', options: 'Earning\nDeduction', in_list_view: 1, read_only: 1 },
-                            //             { label: 'Formula', fieldname: 'formula', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
-                            //             { label: 'Condition', fieldname: 'condition', fieldtype: 'Data', in_list_view: 1, read_only: 1 }
-                            //         ]
-                            //     },
-
-							// 	{
-                            //         label: 'Following Custom Fields Are Added in Salary Structure Assignment',
-                            //         fieldname: 'custom_field',
-                            //         fieldtype: 'Check',
-                            //         default: rowData.type !== "Professional Tax"  && rowData.reimbursement==0 ? 1 : 0,
-							// 		hidden:1
-                            //     },
-
-								
-								
-
-								
-
-								
-                            // ];
-
-                            // if (rowData.type !== "Professional Tax" && rowData.reimbursement==0) {
-
-
-							// 	dialogFields.push({
-							// 		label: 'Following Custom Fields Are Added in Salary Structure Assignment',
-							// 		fieldname: 'custom_field_heading',
-							// 		fieldtype: 'Heading',
+							// console.log(Child_custom_field,"Child_custom_fieldChild_custom_fieldChild_custom_fieldChild_custom_field")
+							
+							function createAndShowDialog() {
+								console.log(Child_custom_field, "Child Custom Fields");
+								console.log(custom_field, "Custom Fields");
+							
+								let dialogFields = [
 									
-							// 	});
+									{
+										label: 'The following components have been added to the salary component.',
+										fieldname: 'heading',
+										fieldtype: 'Heading'
+									},
+									{
+										label: 'Salary Component Details',
+										fieldname: 'salary_components_table',
+										fieldtype: 'Table',
+										cannot_add_rows: 1,
+										in_place_edit: 0,
+										fields: [
+											{ label: 'Salary Component', fieldname: 'salary_component', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+											{ label: 'Abbreviation', fieldname: 'abbr', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+											{ label: 'Type', fieldname: 'type', fieldtype: 'Select', options: 'Earning\nDeduction', in_list_view: 1, read_only: 1 },
+											{ label: 'Formula', fieldname: 'formula', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+											{ label: 'Condition', fieldname: 'condition', fieldtype: 'Data', in_list_view: 1, read_only: 1 }
+										]
+									}
+								];
+							
+								if (custom_field.length > 0 || Child_custom_field.length > 0) {
+									dialogFields.push(
+										
+										{
+											label: 'The following custom fields have been added to the Salary Structure Assignment',
+											fieldname: 'custom_field_heading',
+											fieldtype: 'Heading'
+										},
+										{
+											label: 'Custom Field Details',
+											fieldname: 'custom_field_table',
+											fieldtype: 'Table',
+											cannot_add_rows: 1,
+											in_place_edit: 0,
+											fields: [
+												{ label: 'Doctype', fieldname: 'doctype', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+												{ label: 'Label', fieldname: 'label', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+												{ label: 'Field Name', fieldname: 'field_name', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+												{ label: 'Field Type', fieldname: 'field_type', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+												{ label: 'Depends', fieldname: 'depends', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
+												{ label: 'insert after', fieldname: 'insert_after', fieldtype: 'Data', hidden: 1, read_only: 1 }
+											]
+										}
+									);
+								}
+							
+								let d = new frappe.ui.Dialog({
+									title: 'Follow The Details',
+									fields: dialogFields,
+									size: 'large',
+									primary_action_label: 'Submit',
+									primary_action(values) {
+										console.log(values);
+
+
+
+										frappe.call({
+                                        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.get_salary_component",
+                                        args: {
+                                            data: rowData,
+                                            component: values.salary_components_table,
+                                            custom_field: values.custom_field_table,
+                                        },
+										callback:function(response)
+										{
+
+										}
+                                    });
+
+
+
+
+
+
+
+
+
+
+										d.hide();
+									}
+								});
+							
+								d.show();
+							
+								let tableField = d.fields_dict.salary_components_table;
+								if (!tableField.df.data) {
+									tableField.df.data = [];
+								}
+
 								
 
-
-
-                            //     dialogFields.push({
-                            //         label: 'Custom Field Details',
-                            //         fieldname: 'custom_field_table',
-                            //         fieldtype: 'Table',
-                            //         cannot_add_rows: 1,  
-                            //         in_place_edit: 0,  
-                            //         fields: [
-                            //             { label: 'Doctype', fieldname: 'doctype', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
-                            //             { label: 'Label', fieldname: 'label', fieldtype: 'Data', in_list_view: 1, read_only: 1 },
-                            //             { label: 'Field Type', fieldname: 'field_type', fieldtype: 'Data', in_list_view: 1, read_only: 1 }
-                            //         ],
-
-									
-                            //     });
-                            // }
+								if (salary_component_array.length > 0) {
+									salary_component_array.forEach(field => {
+										tableField.df.data.push({
+											salary_component: field.component,
+											abbr: field.abbr,
+											type: field.type,
+											formula: field.formula,
+											condition: field.condition
+										});
+									});
+									tableField.grid.refresh();
+								}
 
 
 
+								// tableField.df.data.push({
+								// 	salary_component: rowData.salary_component,
+								// 	abbr: rowData.abbr,
+								// 	type: rowData.component_type,
+								// 	formula: rowData.formula,
+								// 	condition: rowData.condition
+								// });
+								// tableField.grid.refresh();
 
-
-							// let d = new frappe.ui.Dialog({
-                            //     title: 'Follow The Details',
-                            //     fields: dialogFields,
-                            //     size: 'large',
-                            //     primary_action_label: 'Submit',
-                            //     primary_action(values) {
-
-							// 		console.log(values)
-                            //         // frappe.call({
-                            //         //     method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.get_salary_component",
-                            //         //     args: {
-                            //         //         data: rowData,
-                            //         //         component: values.salary_component,
-                            //         //         custom_field: values.salary_structure_assignment
-                            //         //     }
-                            //         // });
-
-                            //         d.hide();
-                            //     }
-                            // });
-
-                            // d.show();
-                       
-							
-
-							// let tableField = d.fields_dict.salary_components_table;
-							
-							// if (!tableField.df.data) {
-							// 	tableField.df.data = []; 
-							// }
-
-							// tableField.df.data.push({
-							// 	salary_component: rowData.salary_component,
-							// 	abbr: rowData.abbr,
-							// 	type: rowData.component_type,
-							// 	formula: rowData.formula ,
-							// 	condition: rowData.condition
-							// });
-
-							// tableField.grid.refresh();
 
 
 							
+								let CustomtableField = d.fields_dict.custom_field_table;
+								if (!CustomtableField.df.data) {
+									CustomtableField.df.data = [];
+								}
 							
-							// let CustomtableField = d.fields_dict.custom_field_table;
+								if (custom_field.length > 0) {
+									custom_field.forEach(field => {
+										CustomtableField.df.data.push({
+											doctype: field.doctype,
+											label: field.label,
+											field_name: field.field_name,
+											field_type: field.field_type,
+											depends: field.depends,
+											insert_after:field.insert_after
+										});
+									});
+									CustomtableField.grid.refresh();
+								}
 							
-							// if (!CustomtableField.df.data) {
-							// 	CustomtableField.df.data = []; // Initialize table data if empty
-							// }
+								if (Child_custom_field.length > 0) {
+									Child_custom_field.forEach(field => {
+										CustomtableField.df.data.push({
+											doctype: field.doctype,
+											label: field.label,
+											field_name: field.field_name,
+											field_type: field.field_type,
+											depends: field.depends,
+											insert_after:field.insert_after
+											
+										});
+									});
+									CustomtableField.grid.refresh();
+								}
+							}
 							
-							// // Iterate over custom_field array and add each field separately
-							// custom_field.forEach(field => {
-							// 	CustomtableField.df.data.push({
-							// 		doctype: field.doctype,
-							// 		label: field.label,
-							// 		field_type: field.field_type
-							// 	});
-							// });
 							
-							// // Refresh the table UI to reflect the added rows
-							// CustomtableField.grid.refresh();
+							
+							
 							
 
 
