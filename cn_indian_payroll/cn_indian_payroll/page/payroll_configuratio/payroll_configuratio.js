@@ -1615,20 +1615,20 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 										doctype: "Salary Structure Assignment",
 										label: rowData.salary_component,
 										field_type: "Check",
-										field_name:rowData.salary_component,
-										depends:"",
-										insert_after:"custom_allowances"
-
+										field_name: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, ''),
+										depends: "",
+										insert_after: "custom_allowances"
 									},
 									{
 										doctype: "Salary Structure Assignment",
 										label: rowData.salary_component + " Value",
-										field_type: "Float",
-										field_name:rowData.salary_component + " Value",
-										depends:rowData.salary_component,
-										insert_after:rowData.salary_component
+										field_type: "Data",
+										field_name: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, '') + "_value",
+										depends: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, ''),
+										insert_after: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, '')
 									}
 								];
+								
 							}
 							
 							// Check if multi_insert is NOT 1, then fetch child fields first
