@@ -1511,7 +1511,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                     var row = $('<tr>').appendTo(tbody).css("background-color", "white");
 
 					var isComponentEditable = item.multi_select == 1;
-                    var isFieldsEditable = item.library_visibility === "Not Fixed";
+                    var isFieldsEditable = item.visibility_type === "Not Fixed";
 
                     var componentInput = $('<input>', {
                         type: 'text',
