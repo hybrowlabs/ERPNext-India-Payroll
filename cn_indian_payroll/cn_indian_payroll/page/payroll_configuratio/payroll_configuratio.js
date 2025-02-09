@@ -1492,11 +1492,15 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
             doctype: "Salary Component Library Item",
             filters: { "disabled": 0 },
             fields: ["*"],
-            order_by: "sequence asc" 
+            // order_by: "sequence asc" 
         },
         callback: function(res) {
             if (res.message && res.message.length > 0) {
                 var data = res.message;
+
+				data.sort((a, b) => Number(a.sequence) - Number(b.sequence));
+
+				console.log(data); // Verify sorted data
 
                 data.forEach(function(item) {
 
@@ -1575,6 +1579,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 								tax_applicable_based_on_regime:item.tax_applicable_based_on_regime,
 								regime:item.regime,
 								multi_insert:item.multi_select,
+								sequence:item.sequence,
 								// child_table:each_res.message.custom_field_child   
                                 
                                 

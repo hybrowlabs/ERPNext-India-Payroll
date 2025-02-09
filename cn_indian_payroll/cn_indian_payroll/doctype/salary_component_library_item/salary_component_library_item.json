@@ -49,7 +49,9 @@
   "column_break_damb",
   "pay_against_benefit_claim",
   "only_tax_impact_cannot_claim_but_part_of_taxable_income",
-  "create_separate_payment_entry_against_benefit_claim"
+  "create_separate_payment_entry_against_benefit_claim",
+  "custom_field_configuration_tab",
+  "custom_field_child"
  ],
  "fields": [
   {
@@ -78,16 +80,14 @@
   {
    "depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
    "fieldname": "lta_taxable_component",
-   "fieldtype": "Link",
-   "label": "LTA Taxable Component",
-   "options": "Salary Component"
+   "fieldtype": "Data",
+   "label": "LTA Taxable Component"
   },
   {
    "depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
    "fieldname": "lta_non_taxable_component",
-   "fieldtype": "Link",
-   "label": "LTA Non Taxable Component",
-   "options": "Salary Component"
+   "fieldtype": "Data",
+   "label": "LTA Non Taxable Component"
   },
   {
    "fieldname": "column_break_e8oy",
@@ -315,11 +315,22 @@
    "fieldtype": "Select",
    "label": "Sequence",
    "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20"
+  },
+  {
+   "fieldname": "custom_field_configuration_tab",
+   "fieldtype": "Tab Break",
+   "label": "Custom Field Configuration"
+  },
+  {
+   "fieldname": "custom_field_child",
+   "fieldtype": "Table",
+   "label": "Custom Field Child",
+   "options": "Component Child"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-04 14:27:38.025239",
+ "modified": "2025-02-09 23:38:10.153413",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Component Library Item",
