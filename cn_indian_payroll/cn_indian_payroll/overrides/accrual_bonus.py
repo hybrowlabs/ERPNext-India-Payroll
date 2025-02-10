@@ -116,6 +116,8 @@ def get_doc_data(doc_name,employee,company,payroll_period):
     old_annual_taxable_income=[]
     new_annual_taxable_income=[]
 
+    
+
     if employee:
 
 
@@ -136,12 +138,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             doj=latest_salary_structure[0].custom_date_of_joining
 
 
-            # for k in latest_salary_structure:
-            #     frappe.msgprint(str(k.name))
-
-
-            # frappe.msgprint(str(effective_start_date))
-
             start_date = max(effective_start_date, payroll_start_date,doj)
 
             if isinstance(start_date, str):
@@ -159,7 +155,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             start_month_name = start.strftime("%B")
             end_month_name = end.strftime("%B")
 
-            # frappe.msgprint(str(start_month_name))
+            
 
             
 
@@ -327,6 +323,10 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                     if taxable_component.component_type == "Professional Tax":
                         pt_amount+=deduction.amount
 
+                # frappe.msgprint(str(pt_amount))
+
+                        
+
         else:
             salary_slip_count=0
             first_custom_month = start_month_name
@@ -339,6 +339,8 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 for_preview=1,
                 posting_date=latest_salary_structure[0].from_date
             )
+
+        
 
         for new_earning in new_salary_slip.earnings:
             taxable_component = frappe.get_doc("Salary Component", new_earning.salary_component)
@@ -373,7 +375,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             if taxable_component.is_tax_applicable == 1 and taxable_component.component_type == "NPS":
                 nps_amount += new_earning.amount * (num_months - salary_slip_count)
 
-        for deduction in new_salary_slip.earnings:
+        for deduction in new_salary_slip.deductions:
             taxable_component = frappe.get_doc("Salary Component", deduction.salary_component)
                 
                 # EPF
@@ -383,6 +385,10 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 # Professional Tax
             if taxable_component.component_type == "Professional Tax":
                 pt_amount += deduction.amount * (num_months - salary_slip_count)
+
+        
+
+
 
             
 
