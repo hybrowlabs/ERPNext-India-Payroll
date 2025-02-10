@@ -708,8 +708,14 @@ def get_columns(filters):
                 "width": 120
             })
 
-    return columns
+    columns.append({
+        "fieldname": "loan_perquisite",
+        "label": "Loan Perquisite",
+        "fieldtype": "Currency",
+        "width": 120
+    })
 
+    return columns
 def get_salary_slip_data(filters=None):
     """Fetch salary slip data with earnings child table components as columns ordered by idx"""
 
@@ -732,10 +738,10 @@ def get_salary_slip_data(filters=None):
     previous_employee = None  
     previous_employee_name = None  
     previous_doj = None  
-    previous_company_email=None
-    previous_department=None
-    previous_designation=None
-    previous_pan=None
+    previous_company_email = None
+    previous_department = None
+    previous_designation = None
+    previous_pan = None
     employee_totals = {}  
     employee_counts = {}  
 
@@ -758,7 +764,8 @@ def get_salary_slip_data(filters=None):
             "pan": get_employee.pan_number if get_employee.pan_number != previous_pan else "",
 
             "salary_slip_id": slip.name,
-            "month": slip.custom_month
+            "month": slip.custom_month,
+            "loan_perquisite": 1  # Set Loan Perquisite default value to 0
         }
 
         earnings = sorted(slip_doc.earnings, key=lambda x: x.idx)
@@ -775,22 +782,23 @@ def get_salary_slip_data(filters=None):
         previous_employee = slip.employee
         previous_doj = get_employee.date_of_joining
         previous_employee_name = get_employee.employee_name
-        previous_company_email=get_employee.company_email
+        previous_company_email = get_employee.company_email
 
-        previous_department=get_employee.department
-        previous_designation=get_employee.designation
-        previous_pan=get_employee.pan_number
+        previous_department = get_employee.department
+        previous_designation = get_employee.designation
+        previous_pan = get_employee.pan_number
 
         next_slip_index = salary_slips.index(slip) + 1
         if next_slip_index >= len(salary_slips) or salary_slips[next_slip_index].employee != slip.employee:
-            actual_row = {"employee": "Actual", "doj": "", "salary_slip_id": "", "month": ""}
+            actual_row = {"employee": "Actual", "doj": "", "salary_slip_id": "", "month": "", "loan_perquisite": 0}
             actual_row.update(employee_totals[slip.employee])
             data.append(actual_row)
             
             projection_row = get_projection(slip.employee, employee_totals[slip.employee], employee_counts[slip.employee])
+            projection_row["loan_perquisite"] = 0# Add Loan Perquisite for projection
             data.append(projection_row)
             
-            combined_row = {"employee": "Total", "doj": "", "salary_slip_id": "", "month": ""}
+            combined_row = {"employee": "Total", "doj": "", "salary_slip_id": "", "month": "", "loan_perquisite": 4}
             for key in employee_totals[slip.employee]:
                 combined_row[key] = employee_totals[slip.employee].get(key, 0) + projection_row.get(key, 0)
             data.append(combined_row)
@@ -798,6 +806,11 @@ def get_salary_slip_data(filters=None):
             employee_totals.pop(slip.employee)
 
     return data
+
+
+
+
+
 
 def get_projection(employee, employee_totals, slip_count):
     projection = {"employee": "Projection", "doj": "", "salary_slip_id": "", "month": ""}

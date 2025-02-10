@@ -5186,7 +5186,7 @@ function tds_projection_test(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings(${month1}-${month2})</td>
+                              <td>Current Taxable Earnings</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
