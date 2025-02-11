@@ -312,9 +312,8 @@
   },
   {
    "fieldname": "sequence",
-   "fieldtype": "Select",
-   "label": "Sequence",
-   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20"
+   "fieldtype": "Int",
+   "label": "Sequence"
   },
   {
    "fieldname": "custom_field_configuration_tab",
@@ -330,7 +329,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-09 23:38:10.153413",
+ "modified": "2025-02-11 17:17:27.830244",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Component Library Item",
