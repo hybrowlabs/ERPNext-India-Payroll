@@ -274,7 +274,7 @@ def get_salary_component(data, component, custom_field=None):
                 filters={
                     "name": salary_component,
                     "disabled": 0,
-                    "type": data.get("component_type")  # Corrected variable reference
+                    "type": data.get("component_type"),# Corrected variable reference
                 },
                 fields=['*']
             )
