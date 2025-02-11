@@ -136,10 +136,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             doj=latest_salary_structure[0].custom_date_of_joining
 
 
-            # for k in latest_salary_structure:
-            #     frappe.msgprint(str(k.name))
-
-
             # frappe.msgprint(str(effective_start_date))
 
             start_date = max(effective_start_date, payroll_start_date,doj)
