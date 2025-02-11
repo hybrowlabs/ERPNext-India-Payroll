@@ -124,7 +124,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 							
 
 							const Child_custom_field = [];
-							const custom_field = [];
+							let custom_field = [];
 
 							const salary_component_array = []; 
 
@@ -275,7 +275,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 									);
 								}
 							
-								let d = new frappe.ui.Dialog({
+								const d = new frappe.ui.Dialog({
 									title: 'Follow The Details',
 									fields: dialogFields,
 									size: 'large',
