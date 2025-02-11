@@ -750,5 +750,21 @@
   "property_type": "Check",
   "row_name": null,
   "value": "0"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Salary Structure",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "earnings",
+  "is_system_generated": 0,
+  "modified": "2025-02-11 12:48:33.901961",
+  "module": "cn-indian-payroll",
+  "name": "Salary Detail-earnings-allow_on_submit",
+  "property": "allow_on_submit",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
  }
 ]

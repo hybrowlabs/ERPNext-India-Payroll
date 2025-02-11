@@ -6,12 +6,15 @@ import json
 def get_salary_component(data=None, component=None, custom_field=None):
     try:
         data = json.loads(data)  
-        custom_field = json.loads(custom_field) if custom_field else 0  # Ensure custom_field is parsed as a list
+        custom_field = json.loads(custom_field) if custom_field else []  # Ensure custom_field is parsed as a list
+
+
 
         salary_component = data.get("salary_component")
+        component_type = data.get("type")
 
-        if len(component) > 0 and len(custom_field) > 0 and salary_component:
-            get_salary_component = frappe.get_list(
+        if component and custom_field and salary_component:
+            existing_components = frappe.get_list(
                 'Salary Component',
                 filters={
                     "name": salary_component,
@@ -21,8 +24,8 @@ def get_salary_component(data=None, component=None, custom_field=None):
                 fields=['*']
             )
 
-            if len(get_salary_component) > 0:
-                get_each_doc = frappe.get_doc("Salary Component", get_salary_component[0].name)
+            if len(existing_components) > 0:
+                get_each_doc = frappe.get_doc("Salary Component", existing_components[0].name)
 
                 get_each_doc.depends_on_payment_days = data.get("depends_on_payment_days")
                 get_each_doc.is_tax_applicable = data.get("is_tax_applicable")
@@ -198,8 +201,10 @@ def get_salary_component(data=None, component=None, custom_field=None):
                     get_library_item.save()
                     frappe.msgprint("Salary Component Added")
 
-        if custom_field == 0 and data.get("type") != "LTA Reimbursement":
+           
+            
 
+        elif component_type != "LTA Reimbursement" and not custom_field:
             get_each_doc = frappe.new_doc('Salary Component')
             get_each_doc.name=data.get("salary_component")
             get_each_doc.salary_component=data.get("salary_component")
@@ -233,9 +238,10 @@ def get_salary_component(data=None, component=None, custom_field=None):
             get_library_item.save()
             frappe.msgprint("Salary Component Added")
 
+            
+            
 
-
-        if data.get("type") == "LTA Reimbursement" and custom_field == 0:
+        elif component_type == "LTA Reimbursement" and not custom_field:
             salary_component = data.get("salary_component")
             
             # Insert LTA Reimbursement Component
@@ -331,7 +337,8 @@ def get_salary_component(data=None, component=None, custom_field=None):
             frappe.msgprint("Salary Components Added Successfully!")
 
 
-
+           
+        
 
 
 

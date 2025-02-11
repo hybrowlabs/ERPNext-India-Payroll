@@ -123,7 +123,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
 							
 
-							let Child_custom_field = [];
+							const Child_custom_field = [];
 							const custom_field = [];
 
 							const salary_component_array = []; 
@@ -319,7 +319,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 							
 								d.show();
 							
-								let tableField = d.fields_dict.salary_components_table;
+								const tableField = d.fields_dict.salary_components_table;
 								if (!tableField.df.data) {
 									tableField.df.data = [];
 								}
@@ -341,7 +341,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
 
 							
-								let CustomtableField = d.fields_dict.custom_field_table;
+								const CustomtableField = d.fields_dict.custom_field_table;
 								if (!CustomtableField.df.data) {
 									CustomtableField.df.data = [];
 								}
