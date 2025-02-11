@@ -1,6 +1,54 @@
 [
  {
   "default_value": null,
+  "doc_type": "Salary Component",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "component_type",
+  "is_system_generated": 0,
+  "modified": "2025-02-11 10:41:27.330257",
+  "module": "cn-indian-payroll",
+  "name": "Salary Component-component_type-options",
+  "property": "options",
+  "property_type": "",
+  "row_name": null,
+  "value": "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax\nLoan Perquisite\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance Reimbursement\nLTA Reimbursement\nNPS\nEPF\nEPF Employer\nESIC\nUniform"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Salary Structure Assignment",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "income_tax_slab",
+  "is_system_generated": 0,
+  "modified": "2025-02-11 10:41:27.027849",
+  "module": "cn-indian-payroll",
+  "name": "Salary Structure Assignment-income_tax_slab-allow_on_submit",
+  "property": "allow_on_submit",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Salary Component",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "amount_based_on_formula",
+  "is_system_generated": 0,
+  "modified": "2025-02-11 10:41:27.307593",
+  "module": "cn-indian-payroll",
+  "name": "Salary Component-amount_based_on_formula-default",
+  "property": "default",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "1"
+ },
+ {
+  "default_value": null,
   "doc_type": "Salary Slip",
   "docstatus": 0,
   "doctype": "Property Setter",
@@ -158,22 +206,6 @@
   "property_type": "Check",
   "row_name": null,
   "value": "0"
- },
- {
-  "default_value": null,
-  "doc_type": "Salary Component",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
-  "field_name": "component_type",
-  "is_system_generated": 0,
-  "modified": "2024-11-26 16:45:07.779478",
-  "module": "cn-indian-payroll",
-  "name": "Salary Component-component_type-select",
-  "property": "options",
-  "property_type": "",
-  "row_name": null,
-  "value": "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax\nLoan Perquisite\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance Reimbursement\nLTA Reimbursement\nNPS\nEPF\nEPF Employer\nESIC\nUniform"
  },
  {
   "default_value": null,
@@ -513,22 +545,6 @@
  },
  {
   "default_value": null,
-  "doc_type": "Salary Structure Assignment",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
-  "field_name": "income_tax_slab",
-  "is_system_generated": 0,
-  "modified": "2024-08-21 12:40:57.229895",
-  "module": "cn-indian-payroll",
-  "name": "Salary Structure Assignment-income_tax_slab-allow_on_submit",
-  "property": "allow_on_submit",
-  "property_type": "Check",
-  "row_name": null,
-  "value": "1"
- },
- {
-  "default_value": null,
   "doc_type": "Employee Tax Exemption Declaration Category",
   "docstatus": 0,
   "doctype": "Property Setter",
@@ -766,21 +782,5 @@
   "property_type": "Check",
   "row_name": null,
   "value": "0"
- },
- {
-  "default_value": null,
-  "doc_type": "Salary Component",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
-  "field_name": "amount_based_on_formula",
-  "is_system_generated": 0,
-  "modified": "2025-01-20 11:27:29.337554",
-  "module": "cn-indian-payroll",
-  "name": "Salary Component-amount_based_on_formula-default",
-  "property": "default",
-  "property_type": "Text",
-  "row_name": null,
-  "value": "1"
  }
 ]

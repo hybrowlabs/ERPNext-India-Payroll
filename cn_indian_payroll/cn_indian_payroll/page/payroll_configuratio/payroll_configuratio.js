@@ -3,7 +3,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Component Library',
-        single_column: true
+        single_column: true,
     });
 
     // Add CSS to make all rows white
@@ -45,22 +45,15 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
 				data.sort((a, b) => Number(a.sequence) - Number(b.sequence));
 
-				console.log(data); // Verify sorted data
+				
 
                 data.forEach(function(item) {
 
 
-
-					
-					
-
-
-
-
-                    var row = $('<tr>').appendTo(tbody).css("background-color", "white");
+                    const row = $('<tr>').appendTo(tbody).css("background-color", "white");
 
 					const isComponentEditable = item.multi_select === 1;
-                    var isFieldsEditable = item.visibility_type === "Not Fixed";
+                    const isFieldsEditable = item.visibility_type === "Not Fixed";
 
                     const componentInput = $('<input>', {
                         type: 'text',
@@ -76,7 +69,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                         readonly: !isComponentEditable
                     }).appendTo($('<td>').appendTo(row));
 
-                    let conditionInput = $('<input>', {
+                    const conditionInput = $('<input>', {
                         type: 'text',
                         class: 'form-control',
                         value: isFieldsEditable ? item.condition || "" : item.condition,
@@ -84,7 +77,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                         style: isFieldsEditable ? "" : "background-color: #f0f0f0; color: #888;"
                     }).appendTo($('<td>').appendTo(row));
 
-                    let formulaInput = $('<input>', {
+                    const formulaInput = $('<input>', {
                         type: 'text',
                         class: 'form-control',
                         value: isFieldsEditable ? item.formula || "" : item.formula,
@@ -116,7 +109,6 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 								is_accrual: item.is_accrual,
 								type: item.component_type,
 								reimbursement: item.is_reimbursement,
-                                
                                 component_type: item.type,
 								is_arrear:item.is_arrear,
 								component:item.component,
@@ -125,7 +117,6 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 								regime:item.regime,
 								multi_insert:item.multi_select,
 								sequence:item.sequence,
-								// child_table:each_res.message.custom_field_child   
                                 
                                 
                             };
@@ -133,7 +124,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 							
 
 							const Child_custom_field = [];
-							let custom_field = [];
+							const custom_field = [];
 
 							const salary_component_array = []; 
 
@@ -167,49 +158,60 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 										field_type: "Check",
 										field_name: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, ''),
 										depends: "",
-										insert_after: "custom_allowances"
+										insert_after: "custom_allowances",
 									},
 									{
 										doctype: "Salary Structure Assignment",
 										label: `${rowData.salary_component} Value`,
 										field_type: "Data",
 										field_name: `${rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')}${rowData.abbr.toLowerCase().replace(/[^a-z]/g, '')}_value`,										depends: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, ''),
-										insert_after: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, '')
+										insert_after: rowData.salary_component.toLowerCase().replace(/[^a-z]/g, '')+ rowData.abbr.toLowerCase().replace(/[^a-z]/g, ''),
 									}
 								];
 								
 							}
 							
-							// Check if multi_insert is NOT 1, then fetch child fields first
-							if (rowData.multi_insert != 1) {
+							if (rowData.multi_insert !== 1) {
 								frappe.call({
 									method: "frappe.client.get",
 									args: {
 										doctype: "Salary Component Library Item",
 										filters: { "name": rowData.salary_component },
-										fields: ["*"]
+										fields: ["*"],
 									},
 									callback: function (current_res) {
 										if (current_res.message) {
-											if (current_res.message.custom_field_child.length > 0) {
-												$.each(current_res.message.custom_field_child, function (i, v) {
-													Child_custom_field.push({
-														doctype: v.dt,
-														label: v.label,
-														field_name: v.field_name,
-														field_type: v.type,
-														depends: v.depends_on,
-														insert_after:v.insert_after,
+											try {
+												if (Array.isArray(current_res.message.custom_field_child) && current_res.message.custom_field_child.length > 0) {
+													$.each(current_res.message.custom_field_child, function (i, v) {
+														Child_custom_field.push({
+															doctype: v.dt,
+															label: v.label,
+															field_name: v.field_name,
+															field_type: v.type,
+															depends: v.depends_on,
+															insert_after: v.insert_after,
+														});
 													});
-												});
+												}
+											} catch (error) {
+												console.error("Error processing child fields:", error);
+												frappe.msgprint(__('Failed to process child fields. Please check console for details.'));
 											}
+										} else {
+											frappe.msgprint(__('No data received from the server.'));
 										}
 							
 										// Now create the dialog after fetching child fields
 										createAndShowDialog();
-									}
+									},
+									error: function (err) {
+										console.error("Server error:", err);
+										frappe.msgprint(__('Failed to fetch data. Please try again later.'));
+									},
 								});
-							} 
+							}
+							
 							
 							
 							else 
@@ -220,18 +222,16 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 							}
 
 
-							// console.log(Child_custom_field,"Child_custom_fieldChild_custom_fieldChild_custom_fieldChild_custom_field")
 							
 							function createAndShowDialog() {
-								console.log(Child_custom_field, "Child Custom Fields");
-								console.log(custom_field, "Custom Fields");
+							
 							
 								const dialogFields = [
 									
 									{
 										label: 'The following components have been added to the salary component.',
 										fieldname: 'heading',
-										fieldtype: 'Heading'
+										fieldtype: 'Heading',
 									},
 									{
 										label: 'Salary Component Details',
@@ -255,7 +255,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 										{
 											label: 'The following custom fields have been added to the Salary Structure Assignment',
 											fieldname: 'custom_field_heading',
-											fieldtype: 'Heading'
+											fieldtype: 'Heading',
 										},
 										{
 											label: 'Custom Field Details',
@@ -281,7 +281,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 									size: 'large',
 									primary_action_label: 'Submit',
 									primary_action(values) {
-										console.log(values);
+										
 
 
 
@@ -327,23 +327,11 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 											abbr: field.abbr,
 											type: field.type,
 											formula: field.formula,
-											condition: field.condition
+											condition: field.condition,
 										});
 									});
 									tableField.grid.refresh();
 								}
-
-
-
-								// tableField.df.data.push({
-								// 	salary_component: rowData.salary_component,
-								// 	abbr: rowData.abbr,
-								// 	type: rowData.component_type,
-								// 	formula: rowData.formula,
-								// 	condition: rowData.condition
-								// });
-								// tableField.grid.refresh();
-
 
 
 							
@@ -360,7 +348,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 											field_name: field.field_name,
 											field_type: field.field_type,
 											depends: field.depends,
-											insert_after:field.insert_after
+											insert_after:field.insert_after,
 										});
 									});
 									CustomtableField.grid.refresh();
@@ -374,7 +362,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 											field_name: field.field_name,
 											field_type: field.field_type,
 											depends: field.depends,
-											insert_after:field.insert_after
+											insert_after:field.insert_after,
 											
 										});
 									});

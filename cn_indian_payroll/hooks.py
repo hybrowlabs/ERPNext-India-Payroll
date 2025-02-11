@@ -234,7 +234,7 @@ fixtures = [
     {"dt":"Income Tax Regime"},
     {"dt":"Workflow","filters":{"name":"declaration Approve"}},
     {"dt":"Workflow State","filters":{"name":"Cancelled"}},
-    {"dt":"Salary Component Library Item"},
+    {"dt":"Salary Component Library Item","filters": {"disabled": 0}},
 
     
 
