@@ -1038,7 +1038,7 @@
    "creation": "2025-02-09 23:31:47.642393",
    "default": null,
    "depends_on": "custom_tax_exemption_applicable_based_on_regime",
-   "description": null,
+   "description": "Select the income tax regime to determine applicable tax exemptions. This affects how the salary component is taxed based on the chosen regime.",
    "docstatus": 0,
    "dt": "Salary Component",
    "fetch_from": null,
