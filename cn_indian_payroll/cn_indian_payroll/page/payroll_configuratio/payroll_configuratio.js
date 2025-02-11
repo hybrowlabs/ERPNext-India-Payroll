@@ -123,7 +123,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
 							
 
-							const Child_custom_field = [];
+							let Child_custom_field = [];
 							const custom_field = [];
 
 							const salary_component_array = []; 
@@ -177,7 +177,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 									args: {
 										doctype: "Salary Component Library Item",
 										filters: { "name": rowData.salary_component },
-										fields: ["*"],
+										fields: ["name"],
 									},
 									callback: function (current_res) {
 										if (current_res.message) {
@@ -294,6 +294,12 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                                         },
 										callback:function(response)
 										{
+
+											 if(response && response.exc) {
+												     frappe.msgprint(__('Server returned an error: ') + response.exc);
+												   } else {
+												     frappe.msgprint(__('Operation completed successfully.'));
+												   }
 
 										}
                                     });

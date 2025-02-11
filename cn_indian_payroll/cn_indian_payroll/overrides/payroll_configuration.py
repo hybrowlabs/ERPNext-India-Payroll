@@ -46,13 +46,11 @@ def get_salary_component(data=None, component=None, custom_field=None):
 
                     arrear_check = frappe.get_list('Salary Component',
                     filters={
-                            
-                        
-                            
-                        "name":data.get("salary_component") + "(Arrear)",
 
-                        
-                        },
+                            
+                                "name":data.get("salary_component") + "(Arrear)",
+
+                            },
                         fields=['*']
                         )
 
@@ -100,6 +98,9 @@ def get_salary_component(data=None, component=None, custom_field=None):
                         custom_field.allow_on_submit = 1
                         custom_field.depends_on = field.get('depends')
                         custom_field.insert()
+                    
+                    else:
+                        frappe.msgprint("Custom Field Already Exists")
 
 
 

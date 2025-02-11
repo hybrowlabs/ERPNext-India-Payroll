@@ -76,9 +76,10 @@
    "collapsible_depends_on": null,
    "columns": 0,
    "creation": "2025-02-09 23:31:41.376872",
-   "default": null,
+
    "depends_on": "custom_is_accrual",
-   "description": null,
+   "description": "Select when the accrual component will be paid out",
+   "default": "Payroll",
    "docstatus": 0,
    "dt": "Salary Component",
    "fetch_from": null,
@@ -1242,7 +1243,8 @@
    "property": "default",
    "property_type": "Text",
    "row_name": null,
-   "value": "1"
+   "value": "1",
+   "description": "Enable formula-based calculation by default to encourage structured salary computations"
   },
   {
    "_assign": null,
@@ -1265,7 +1267,8 @@
    "property": "depends_on",
    "property_type": "Data",
    "row_name": null,
-   "value": ""
+   "value": "",
+   "description": "Remove type dependency to allow component selection for all salary types"
   },
   {
    "_assign": null,
