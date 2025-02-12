@@ -155,11 +155,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             start_month_name = start.strftime("%B")
             end_month_name = end.strftime("%B")
 
-            # frappe.msgprint(str(start_month_name))
-
-            
-
-
             # CAR PERQUISITE
 
            
@@ -369,7 +364,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             if taxable_component.is_tax_applicable == 1 and taxable_component.component_type == "NPS":
                 nps_amount += new_earning.amount * (num_months - salary_slip_count)
 
-        for deduction in new_salary_slip.earnings:
+        for deduction in new_salary_slip.deductions:
             taxable_component = frappe.get_doc("Salary Component", deduction.salary_component)
                 
                 # EPF
