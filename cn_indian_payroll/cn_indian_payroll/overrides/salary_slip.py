@@ -1032,17 +1032,19 @@ class CustomSalarySlip(SalarySlip):
 
 
     def actual_amount_ctc(self):
-        if len(self.earnings)>0:
+        if len(self.earnings) > 0:
             for k in self.earnings:
+                salary_component_doc = frappe.get_doc("Salary Component", k.salary_component)
 
-                salary_component_doc=frappe.get_doc("Salary Component",k.salary_component)
-
-                if salary_component_doc.custom_is_arrear==0:
-                    nps_ctc=(k.amount*self.total_working_days)/self.payment_days
-                    k.custom_actual_amount=nps_ctc
+                if salary_component_doc.custom_is_arrear == 0:
+                    # Check if self.payment_days is zero to avoid division by zero
+                    if self.payment_days == 0:
+                        frappe.throw("Payment days cannot be zero. Please check the payroll setup.")
+                    
+                    nps_ctc = (k.amount * self.total_working_days) / self.payment_days
+                    k.custom_actual_amount = nps_ctc
                 else:
-                    k.custom_actual_amount=0
-                
+                    k.custom_actual_amount = 0
 
 
 
