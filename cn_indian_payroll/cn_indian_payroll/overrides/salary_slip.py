@@ -58,7 +58,7 @@ class CustomSalarySlip(SalarySlip):
         self.new_joinee()
         self.insert_lop_days()
         self.set_taxale()
-        self.actual_amount_ctc()
+        # self.actual_amount_ctc()
         self.set_month()
         self.remaining_day()
 
