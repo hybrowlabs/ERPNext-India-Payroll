@@ -228,17 +228,13 @@ app_license = "mit"
 # }
 
 fixtures = [
-    {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}},
+    # {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}},
     {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
-    {"dt": "Property Setter", "filters": {"module": "cn-indian-payroll"}},
+    # {"dt": "Property Setter", "filters": {"module": "cn-indian-payroll"}},
     {"dt":"Income Tax Regime"},
-
-    {"dt": "Report", "filters": {"name": "Salary Slip Registers"}},
-
-    # {"dt": "Role", "filters": {"name": ["in", ["HR Head", "Finance Head","Payroll manager"]]}},
-    {"dt":"Payroll Configuration","filters":{"name":"Payroll Configuration"}},
     {"dt":"Workflow","filters":{"name":"declaration Approve"}},
     {"dt":"Workflow State","filters":{"name":"Cancelled"}},
+    {"dt":"Salary Component Library Item","filters": {"disabled": 0}},
 
     
 

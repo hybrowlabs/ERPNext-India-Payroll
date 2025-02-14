@@ -155,15 +155,9 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             start_month_name = start.strftime("%B")
             end_month_name = end.strftime("%B")
 
-            # frappe.msgprint(str(start_month_name))
-
-            
 
 
             # CAR PERQUISITE
-
-           
-            
 
             if latest_salary_structure[0].custom__car_perquisite == 1 and latest_salary_structure[0].custom_car_perquisite_as_per_rules:
                 perquisite_amount.append(latest_salary_structure[0].custom_car_perquisite_as_per_rules * num_months)
@@ -238,13 +232,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 for other_perquisite in get_other_perquisite.custom_other_perquisites:
                     perquisite_component.append(other_perquisite.title)
                     perquisite_amount.append(other_perquisite.amount * num_months)
-            
-
-                    
-
-
-             
-
 
 
         get_all_salary_slip = frappe.get_list(
@@ -259,17 +246,11 @@ def get_doc_data(doc_name,employee,company,payroll_period):
         )
 
         if len(get_all_salary_slip) > 0:
-
-            # frappe.msgprint("yes")
             salary_slip_count = len(get_all_salary_slip)
-
             first_custom_month = get_all_salary_slip[0].get("custom_month")
             last_custom_month = get_all_salary_slip[-1].get("custom_month")
-            
-
             for salary_list in get_all_salary_slip:
                 get_salary_doc = frappe.get_doc("Salary Slip", salary_list.name)
-
                 for component in get_salary_doc.earnings:
                     taxable_component = frappe.get_doc("Salary Component", component.salary_component)
 
@@ -282,12 +263,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                     ):
                         old_taxable_component += component.amount
                         new_taxable_component += component.amount
-
-                    # Bonus
-                    # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
-                    #     old_taxable_component += component.amount
-                    #     new_taxable_component += component.amount
-
                     # Food Coupon - Old Regime
                     if (
                         taxable_component.is_tax_applicable == 1 and 
@@ -309,9 +284,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                     #NPS
                     if taxable_component.is_tax_applicable == 1 and taxable_component.component_type == "NPS":
                         nps_amount+=component.amount
-
-
-                
 
                 for deduction in get_salary_doc.deductions:
                     taxable_component = frappe.get_doc("Salary Component", deduction.salary_component)
@@ -344,18 +316,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 taxable_component.custom_tax_exemption_applicable_based_on_regime == 1 and taxable_component.custom_regime == "All":
                 old_future_amount += new_earning.amount * (num_months - salary_slip_count)
                 new_future_amount += new_earning.amount * (num_months - salary_slip_count)
-
-                # Accrued BONUS tax=0
-            # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
-            #     old_future_amount += new_earning.amount * (num_months - salary_slip_count)
-            #     new_future_amount += new_earning.amount * (num_months - salary_slip_count)
-
-               
-
-                
-
-
-
                 # FOOD COUPON
             if taxable_component.is_tax_applicable == 1 and taxable_component.custom_perquisite == 0 and \
                 taxable_component.custom_tax_exemption_applicable_based_on_regime == 1 and taxable_component.custom_regime == "Old Regime":
@@ -380,10 +340,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             if taxable_component.component_type == "Professional Tax":
                 pt_amount += deduction.amount * (num_months - salary_slip_count)
 
-            
-
-
-
         latest_tax_slab = frappe.get_list(
             'Income Tax Slab',
             filters={
@@ -403,9 +359,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
         if latest_tax_slab:
             for slab in latest_tax_slab:
                 old_standard_value = slab.standard_tax_exemption_amount
-
-
-
         latest_tax_slab = frappe.get_list(
             'Income Tax Slab',
             filters={
@@ -421,7 +374,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
         )
 
         new_standard_value = 0
-
         if latest_tax_slab:
             for slab in latest_tax_slab:
                 new_standard_value = slab.standard_tax_exemption_amount
