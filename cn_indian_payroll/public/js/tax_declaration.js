@@ -4432,17 +4432,17 @@ function tds_projection_html(frm) {
       let other_amount=[]
 
 
-      let total_array = [];
-      let total_value = [];
-      let from_amount = [];
-      let to_amount = [];
-      let percentage = [];
-      let difference = [];
+      // let total_array = [];
+      // let total_value = [];
+      // let from_amount = [];
+      // let to_amount = [];
+      // let percentage = [];
+      // let difference = [];
 
 
 
 
-      let total_sum_old=0
+      // let total_sum_old=0
 
       frappe.call({
           method: "cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.get_doc_data",
@@ -4460,32 +4460,16 @@ function tds_projection_html(frm) {
                   const newValue = Math.round(res.message.current_new_value);
                   const old_future_amount = Math.round(res.message.future_old_value);
                   const new_future_amount = Math.round(res.message.future_new_value);
-
                   const num_months=res.message.num_months
                   const salary_slip_count=res.message.salary_slip_count
-
-
-
                   const old_std=res.message.old_standard
                   const new_std=res.message.new_standard
-
                   const pt_value=Math.round(res.message.pt)
                   const nps_value=Math.round(res.message.nps)
-
-
-                  // console.log(old_std)
-                  // console.log(new_std)
-
                   const per_comp = res.message.perquisite_component || []; // Ensure it's an array
                   const per_values = res.message.perquisite_amount || [];
-
-                  // Summing up the per_values array
                   const total_per_sum = per_values.reduce((total, value) => total + value, 0);
-
-                  // Calculate the longest array length for iteration
                   const maxLength = Math.max(per_comp.length, per_values.length);
-
-                  // Create rows for perquisite details
                   let perquisiteRows = "";
                   for (let i = 0; i < maxLength; i++) {
                       let component = per_comp[i] || "-";  // If index out of bounds, insert "-"
@@ -4515,11 +4499,7 @@ function tds_projection_html(frm) {
                               section80d_amount.push(v.amount)
   
                             }
-
-                          
-
-
-                              const validCategories = [
+                            const validCategories = [
                                 
                                 "Section 80DDB",
                                 "Section 80-G",
@@ -4539,34 +4519,16 @@ function tds_projection_html(frm) {
                             }
                       });
                   }
-
-                  // console.log(section80d_component)
-
-                  // Summing up section10_amount array
                   const total_section10_sum = section10_amount.reduce((total, value) => total + value, 0);
                   const total_section80C_sum = Math.min(section80c_amount.reduce((total, value) => total + value, 0), 150000);
                   const total_section80d_sum = section80d_amount.reduce((total, value) => total + value, 0);
                   const total_other_sum = other_amount.reduce((total, value) => total + value, 0);
-
-
-
-                  // console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
-
-
-                  // Calculate the longest array length for section10 details
                   const section10_maxLength = Math.max(section10_component.length, section10_amount.length);
                   const section80_maxLength = Math.max(section80c_component.length, section80c_amount.length);
                   const section80D_maxLength = Math.max(section80d_component.length, section80d_amount.length);
                   const other_maxLength = Math.max(other_component.length, other_amount.length);
+                  const annual_hra_exemption=Math.max(frm.doc.annual_hra_exemption)
 
-                  // console.log(section10_maxLength,"section10_maxLengthsection10_maxLength")
-
-
-
-                  
-
-
-                  // Create rows for section 10 details
                   let Section10Rows = "";
                   for (let i = 0; i < section10_maxLength; i++) {
                       let Section10component = section10_component[i] || "-";  // If index out of bounds, insert "-"
@@ -4600,17 +4562,8 @@ function tds_projection_html(frm) {
                       OtherRows += `<tr><td>${Othercomponent}</td><td>${"₹" + oldSectionOther}</td><td>${"₹" + newSectionOther}</td></tr>`;
                   }
 
-
-
-                  
-                  
-
                   let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value)
                   let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
-
-
-                  console.log(annual_old_taxable_income,"11111")
-                  console.log(annual_new_taxable_income,"222222")
 
 
                   function getPerComp1() {
@@ -4634,14 +4587,8 @@ function tds_projection_html(frm) {
                                     let rebate=response.message.rebate
                                     let max_amount=response.message.max_amount
                                     let old_rebate_value=response.message.old_rebate_value
-
-                                    let  old_surcharge_m=response.message.old_surcharge_m                              
+                                    let old_surcharge_m=response.message.old_surcharge_m                              
                                     let old_education_cess=response.message.old_education_cess
-                                    
-                                    
-                                    
-
-
                                     let new_from_amount = response.message.from_amount_new || [];
                                     let new_to_amount = response.message.to_amount_new || [];
                                     let new_percentage_amount = response.message.percentage_new || [];
@@ -4652,13 +4599,8 @@ function tds_projection_html(frm) {
                                     let new_rebate_value=response.message.new_rebate_value
                                     let  new_surcharge_m=response.message.new_surcharge_m                              
                                     let new_education_cess=response.message.new_education_cess
-
-
                                     let salary_slip_sum=Math.round(response.message.salary_slip_sum)
-                                    
-                                    
 
-                                    
                                     resolve({ 
                                       old_from_amount,
                                        old_to_amount, 
@@ -4936,9 +4878,11 @@ function tds_projection_html(frm) {
                           </tr>
 
 
-
-
-
+                          <tr>
+                              <td>HRA Exemption</td>
+                              <td>₹ ${annual_hra_exemption}</td>
+                              <td>₹ 0</td>
+                          </tr>
 
                           <tr>
                               <td>Total Exemption/Deductions</td>
@@ -5021,7 +4965,7 @@ function tds_projection_html(frm) {
                                                   <th>₹ ${max_amount}</th>
                                                   
                                           </tr>
-                                          <tr>
+                                                                                    <tr>
                                                   <th>New Regime</th>
                                                   <th>₹ ${newrebate}</th>
                                                   <th>₹ ${newmax_amount}</th>

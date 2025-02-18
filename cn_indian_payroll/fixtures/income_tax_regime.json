@@ -2,6 +2,13 @@
  {
   "docstatus": 0,
   "doctype": "Income Tax Regime",
+  "modified": "2024-12-30 16:22:53.323061",
+  "name": "None",
+  "title": "None"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Income Tax Regime",
   "modified": "2024-11-04 17:17:38.635745",
   "name": "Old Regime",
   "title": "Old Regime"
