@@ -52,7 +52,9 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def before_save(self): 
+    def before_save(self):
+
+
         
         self.update_bonus_accrual()
         self.new_joinee()
@@ -109,10 +111,83 @@ class CustomSalarySlip(SalarySlip):
         # self.tax_calculation()
         self.calculate_grosspay()
 
+        # self.update_hra_exemption_amount()
 
 
 
 
+    
+
+    # def update_hra_exemption_amount(self):
+    #     get_company = frappe.get_doc("Company", self.company)
+    #     basic_component = get_company.basic_component
+    #     hra_component = get_company.hra_component
+
+    #         # Fetch the latest Salary Structure Assignment
+    #     ss_assignment = frappe.get_list(
+    #             'Salary Structure Assignment',
+    #             filters={
+    #                 'employee': self.employee,
+    #                 'docstatus': 1,
+    #                 'company': self.company,
+    #             },
+    #             fields=['name', 'from_date', 'custom_payroll_period', 'salary_structure'],
+    #             order_by='from_date desc',
+    #     )
+
+    #     if ss_assignment:
+
+    #         frappe.msgprint(str(ss_assignment))
+        #     start_date = ss_assignment[-1].from_date
+        #     payroll_period = frappe.get_doc("Payroll Period", ss_assignment[-1].custom_payroll_period)
+        #     end_date = payroll_period.end_date
+
+        #     month_count = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
+        #     frappe.msgprint(str(month_count))
+            # cur_basic_amount = 0
+            # cur_hra_amount = 0
+
+            #     # Fetch all salary slips for the employee in the given payroll period
+            # salary_slips = frappe.get_list(
+            #         'Salary Slip',
+            #         filters={
+            #             'employee': self.employee,
+            #             'docstatus': 1,
+            #             'company': self.company,
+            #             "custom_payroll_period": self.payroll_period
+            #         },
+            #         fields=['name', 'start_date', 'end_date']
+            # )
+
+            # if salary_slips:
+            #     for salary_slip in salary_slips:
+            #         get_salary_doc = frappe.get_doc("Salary Slip", salary_slip.name)
+
+            #             # Calculate total salary based on actual payment days
+            #         start_day = salary_slip.start_date.day
+            #         end_day = salary_slip.end_date.day
+            #         total_days = monthrange(salary_slip.start_date.year, salary_slip.start_date.month)[1]  # Get total days in month
+            #         payment_days = end_day - start_day + 1  # Adjusted for partial months
+
+            #         for component in get_salary_doc.earnings:
+            #             if component.salary_component == basic_component:
+            #                 cur_basic_amount += (component.amount / total_days) * payment_days
+            #             elif component.salary_component == hra_component:
+            #                 cur_hra_amount += (component.amount / total_days) * payment_days
+
+                # # HRA Calculation as per the 3 rules
+                # rent_paid = self.monthly_house_rent
+                # ten_percent_basic = 0.1 * cur_basic_amount
+                # forty_percent_basic = 0.4 * cur_basic_amount  # Non-metro city
+
+                # hra_exemption = min(cur_hra_amount, rent_paid - ten_percent_basic, forty_percent_basic)
+
+                # # Store the calculated values
+                # self.annual_hra_exemption = round(hra_exemption, 2)
+                # self.monthly_hra_exemption = round(hra_exemption / month_count, 2)
+
+                # frappe.msgprint(f"Annual HRA Exemption: {self.annual_hra_exemption}")
+                # frappe.msgprint(f"Monthly HRA Exemption: {self.monthly_hra_exemption}")
 
     def insert_other_perquisites(self):
         latest_salary_structure = frappe.get_list(
@@ -587,6 +662,7 @@ class CustomSalarySlip(SalarySlip):
                 hra_array=[]
                 
                 get_company=frappe.get_doc("Company",self.company)
+
                 basic_component=get_company.basic_component
                 hra_component=get_company.hra_component
 
@@ -646,7 +722,6 @@ class CustomSalarySlip(SalarySlip):
                         get_doc = frappe.get_doc("Salary Component", j.salary_component)
                         if get_doc.custom_is_arrear == 0:
                             epf_ctc = round((j.amount * self.total_working_days) / self.payment_days)
-                            
                             total_epf.append(epf_ctc * self.custom_month_count)
                             
 
@@ -747,6 +822,7 @@ class CustomSalarySlip(SalarySlip):
                             get_each_doc.annual_hra_exemption=round(annual_hra_exemption)
                             get_each_doc.monthly_hra_exemption=round(annual_hra_exemption/12)
 
+                            
                         
                         get_each_doc.workflow_state="Approved"
                         get_each_doc.save()

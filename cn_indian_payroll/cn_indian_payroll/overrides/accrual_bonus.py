@@ -106,28 +106,19 @@ def get_doc_data(doc_name,employee,company,payroll_period):
     perquisite_component=[]
     perquisite_amount=[]
 
-    
-
     epf_amount=0
     pt_amount=0
     nps_amount=0
 
-
-    old_annual_taxable_income=[]
-    new_annual_taxable_income=[]
-
     if employee:
-
-
         latest_salary_structure = frappe.get_list('Salary Structure Assignment',
                         filters={'employee':employee,'docstatus':1,'custom_payroll_period':payroll_period},
                         fields=["*"],
                         order_by='from_date desc',
-                        # limit=1
+                        
                     )
 
         if len(latest_salary_structure)>0:
-
 
             get_payroll=frappe.get_doc("Payroll Period",latest_salary_structure[0].custom_payroll_period)
             effective_start_date = latest_salary_structure[-1].from_date
@@ -136,7 +127,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             doj=latest_salary_structure[0].custom_date_of_joining
 
 
-            # frappe.msgprint(str(effective_start_date))
 
             start_date = max(effective_start_date, payroll_start_date,doj)
 
@@ -152,14 +142,11 @@ def get_doc_data(doc_name,employee,company,payroll_period):
 
             num_months = (end.year - start.year) * 12 + (end.month - start.month)+1
 
-            start_month_name = start.strftime("%B")
-            end_month_name = end.strftime("%B")
-
-            # CAR PERQUISITE
-
-           
             
 
+            
+
+            # CAR PERQUISITE
             if latest_salary_structure[0].custom__car_perquisite == 1 and latest_salary_structure[0].custom_car_perquisite_as_per_rules:
                 perquisite_amount.append(latest_salary_structure[0].custom_car_perquisite_as_per_rules * num_months)
                 
@@ -169,9 +156,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 perquisite_amount.append(0)
                 
 
-            # DRIVER PERQUISITE
-            old_regime_driver_perquisite = 0
-            
+            # DRIVER PERQUISITE            
 
             if latest_salary_structure[0].custom_driver_provided_by_company == 1 and latest_salary_structure[0].custom_driver_perquisite_as_per_rules:
                 perquisite_amount.append(latest_salary_structure[0].custom_driver_perquisite_as_per_rules * num_months)
@@ -235,11 +220,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                     perquisite_amount.append(other_perquisite.amount * num_months)
             
 
-                    
-
-
-             
-
 
 
         get_all_salary_slip = frappe.get_list(
@@ -255,12 +235,11 @@ def get_doc_data(doc_name,employee,company,payroll_period):
 
         if len(get_all_salary_slip) > 0:
 
-            # frappe.msgprint("yes")
             salary_slip_count = len(get_all_salary_slip)
 
-            first_custom_month = get_all_salary_slip[0].get("custom_month")
-            last_custom_month = get_all_salary_slip[-1].get("custom_month")
-            
+            end_month_name = get_all_salary_slip[0].get("custom_month")
+            start_month_name = get_all_salary_slip[-1].get("custom_month")
+
 
             for salary_list in get_all_salary_slip:
                 get_salary_doc = frappe.get_doc("Salary Slip", salary_list.name)
@@ -320,8 +299,8 @@ def get_doc_data(doc_name,employee,company,payroll_period):
 
         else:
             salary_slip_count=0
-            first_custom_month = start_month_name
-            last_custom_month = end_month_name
+            start_month_name = start.strftime("%B")
+            end_month_name = end.strftime("%B")
 
         new_salary_slip = make_salary_slip(
                 source_name=latest_salary_structure[0].salary_structure,
@@ -329,7 +308,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 print_format='Salary Slip Standard',
                 for_preview=1,
                 posting_date=latest_salary_structure[0].from_date
-            )
+        )
 
         for new_earning in new_salary_slip.earnings:
             taxable_component = frappe.get_doc("Salary Component", new_earning.salary_component)
@@ -339,16 +318,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 taxable_component.custom_tax_exemption_applicable_based_on_regime == 1 and taxable_component.custom_regime == "All":
                 old_future_amount += new_earning.amount * (num_months - salary_slip_count)
                 new_future_amount += new_earning.amount * (num_months - salary_slip_count)
-
-                # Accrued BONUS tax=0
-            # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
-            #     old_future_amount += new_earning.amount * (num_months - salary_slip_count)
-            #     new_future_amount += new_earning.amount * (num_months - salary_slip_count)
-
-               
-
-                
-
 
 
                 # FOOD COUPON
@@ -426,8 +395,9 @@ def get_doc_data(doc_name,employee,company,payroll_period):
 
 
     return {
-        "from_month":first_custom_month,
-        "to_month":last_custom_month,
+
+        "from_month":start_month_name,
+        "to_month":end_month_name,
         "current_old_value": old_taxable_component,
         "current_new_value": new_taxable_component,
         "future_old_value":old_future_amount,
@@ -441,9 +411,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
         "num_months":num_months,
         "salary_slip_count":salary_slip_count
         
-        
-
-           
         
     }
 
