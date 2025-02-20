@@ -391,7 +391,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         ss_slip_month_count=0
                     futute_month_count=month_count-ss_slip_month_count
 
-                    #Calculate future basic and HRA
 
                     new_salary_slip = make_salary_slip(
                         source_name=first_assignment_structure,
