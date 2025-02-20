@@ -3952,6 +3952,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   const k=parseFloat(data.jValue1 || 0);
                   const l=parseFloat(data.kValue1 || 0);
                   const m=parseFloat(data.kValue2 || 0);
+                  
 
                   total=a+b+c+d+e+f+g+h+i+j+k+l+m
 
@@ -3959,6 +3960,8 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   data.total80C = total;
 
                   form.submission.data = data;
+
+                  console.log(data,"999999999999999999")
 
                   frm.set_value("custom_declaration_form_data", JSON.stringify(data));
 

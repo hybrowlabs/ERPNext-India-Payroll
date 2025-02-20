@@ -778,6 +778,11 @@ def get_columns(filters):
 
 
     #80C Columns-----------
+
+
+
+
+
     columns.append({
         "label": "Investments In PF(Auto)",
         "fieldname": "pf_auto",
@@ -991,6 +996,20 @@ def get_columns(filters):
         "width": 120
     })
 
+    columns.append({
+        "fieldname": "total_deduction",
+        "label": "Total Deduction/Exemptions",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
+    columns.append({
+        "fieldname": "annual_taxable_income",
+        "label": "Annual Taxable Income",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
 
 
 
@@ -1038,6 +1057,46 @@ def get_salary_slip_data(filters=None):
     uniform_allowance_map={}
 
     pt_map = {}
+    
+    
+    pf_auto_map= {}
+    pension_scheme_map= {}
+    housing_loan= {}
+    ppf= {}
+    home_loan = {}
+    lic = {}
+    nsc = {}
+    mutual_fund = {}
+    elss = {}
+    tuition = {}
+    fixed_deposit = {}
+    deposit = {}
+    others = {}
+    mediclaim_self = {}
+    mediclaim_self_senior = {}
+    mediclaim_parents_below = {}
+    mediclaim_parents_senior = {}
+    preventive_health_checkup = {}
+    preventive_health_checkup_self = {}
+
+    medical_treatment_insurance = {}
+    medical_treatment_disease = {}
+    interest_repayment = {}
+    physical_disabled = {}
+    donation_80g = {}
+    nps_deduction = {}
+    hsg = {}
+    nps_contribution = {}
+    tax_incentive = {}
+    tax_incentive_eeb = {}
+    dona_political_party = {}
+    interest_saving_account = {}
+    interest_fd = {}
+    deduction_80gg = {}
+    regime_80ccg = {}
+
+
+    total_declaration={}
 
     standard_deduction_new=0
     standard_deduction_old=0
@@ -1048,24 +1107,86 @@ def get_salary_slip_data(filters=None):
     )
     
     for each_doc in declarations:
+
+        total_declaration[each_doc.employee] = each_doc.total_exemption_amount
+
+        
+
+
         if each_doc.custom_tax_regime=="Old Regime":
             get_tax_slab=frappe.get_doc("Income Tax Slab",each_doc.custom_income_tax)
             standard_deduction_old=get_tax_slab.standard_tax_exemption_amount
             amount_map[each_doc.employee] = each_doc.annual_hra_exemption
+
+    
             get_doc=frappe.get_doc("Employee Tax Exemption Declaration",each_doc.name)
 
             form_data = json.loads(get_doc.custom_declaration_form_data or '{}')
+
             lta_map[each_doc.employee] = form_data.get("twentyeight", 0)
             education_allowance_map[each_doc.employee] = form_data.get("thirteen", 0)
             hostel_allowance_map[each_doc.employee] = form_data.get("twentysix", 0)
             uniform_allowance_map[each_doc.employee] = form_data.get("twentyFour", 0)
             pt_map[each_doc.employee] = form_data.get("nineteenNumber", 0)
 
+
+
+
+            pf_auto_map[each_doc.employee] = form_data.get("pfValue", 0)
+            pension_scheme_map[each_doc.employee] = form_data.get("aValue2", 0)
+            
+            housing_loan[each_doc.employee] = form_data.get("bValue1", 0)
+            ppf[each_doc.employee] = form_data.get("amount4", 0)
+            home_loan[each_doc.employee] = form_data.get("dValue1", 0)
+
+
+            lic[each_doc.employee] = form_data.get("eValue1", 0)
+            nsc[each_doc.employee] = form_data.get("fValue1", 0)
+            mutual_fund[each_doc.employee] = form_data.get("gValue1", 0)
+
+            elss[each_doc.employee] = form_data.get("hValue1", 0)
+            tuition[each_doc.employee] = form_data.get("iValue1", 0)
+            
+            fixed_deposit[each_doc.employee] = form_data.get("jValue1", 0)
+            deposit[each_doc.employee] = form_data.get("kValue1", 0)
+            others[each_doc.employee] = form_data.get("kValue2", 0)
+            mediclaim_self[each_doc.employee] = form_data.get("amount", 0)
+            mediclaim_self_senior[each_doc.employee] = form_data.get("amount3", 0)
+            mediclaim_parents_below[each_doc.employee] = form_data.get("mpAmount3", 0)
+            mediclaim_parents_senior[each_doc.employee] = form_data.get("mpAmount4", 0)
+            preventive_health_checkup[each_doc.employee] = form_data.get("mp5", 0)
+            preventive_health_checkup_self[each_doc.employee] = form_data.get("mpAmount6", 0)
+
+            medical_treatment_insurance[each_doc.employee] = form_data.get("fourValue", 0)
+            medical_treatment_disease[each_doc.employee] = form_data.get("fiveNumber", 0)
+            interest_repayment[each_doc.employee] = form_data.get("sixNumber", 0)
+            physical_disabled[each_doc.employee] = form_data.get("sevenNumber", 0)
+            donation_80g[each_doc.employee] = form_data.get("eightNumber", 0)
+            nps_deduction[each_doc.employee] = form_data.get("nineNumber", 0)
+            hsg[each_doc.employee] = form_data.get("tenNumber", 0)
+            nps_contribution[each_doc.employee] = form_data.get("elevenNumber", 0)
+            tax_incentive[each_doc.employee] = form_data.get("twelveNumber1", 0)
+            tax_incentive_eeb[each_doc.employee] = form_data.get("fifteenNumber", 0)
+            dona_political_party[each_doc.employee] = form_data.get("sixteenNumber", 0)
+            interest_saving_account[each_doc.employee] = form_data.get("seventeenNumber", 0)
+            interest_fd[each_doc.employee] = form_data.get("eighteenNumber", 0)
+
+            deduction_80gg[each_doc.employee] = form_data.get("twentyNumber", 0)
+            regime_80ccg[each_doc.employee] = form_data.get("twentyoneNumber", 0)
+
+
+
+    
+
+
+
+
+
         elif each_doc.custom_tax_regime=="New Regime":
             get_tax_slab=frappe.get_doc("Income Tax Slab",each_doc.custom_income_tax)
             standard_deduction_new=get_tax_slab.standard_tax_exemption_amount
         
-
+    
 
     for slip in salary_slips:
         slip_doc = frappe.get_doc("Salary Slip", slip.name)
@@ -1119,6 +1240,8 @@ def get_salary_slip_data(filters=None):
             projection_row = get_projection(slip.employee, employee_totals.get(slip.employee, {}), employee_counts[slip.employee], filters.get("payroll_period"))
             projection_row["loan_perquisite"] = 0  
             data.append(projection_row)
+
+            # frappe.msgprint(str(regime_80ccg.get(slip.employee, 0)))
             
             combined_row = {
                 "employee": "Total", 
@@ -1133,7 +1256,46 @@ def get_salary_slip_data(filters=None):
                 "uniform_allowance":uniform_allowance_map.get(slip.employee, 0),
                 "standard_deduction_old":standard_deduction_old,
                 "standard_deduction_new":standard_deduction_new,
-                "tax_on_employment":pt_map.get(slip.employee, 0)
+                "tax_on_employment":pt_map.get(slip.employee, 0),
+                "pf_auto": pf_auto_map.get(slip.employee, 0),
+                "pension_scheme": pension_scheme_map.get(slip.employee, 0),
+                "housing_loan": housing_loan.get(slip.employee, 0),
+                "ppf": ppf.get(slip.employee, 0),
+                "home_loan": home_loan.get(slip.employee, 0),
+                "lic": lic.get(slip.employee, 0),
+                "nsc": nsc.get(slip.employee, 0),
+                "mutual_fund": mutual_fund.get(slip.employee, 0),
+                "elss": elss.get(slip.employee, 0),
+                "tuition": tuition.get(slip.employee, 0),
+                "fixed_deposit": fixed_deposit.get(slip.employee, 0),
+                "deposit": deposit.get(slip.employee, 0),
+                "others":others.get(slip.employee, 0),
+                "mediclaim_self":mediclaim_self.get(slip.employee, 0),
+                "mediclaim_self_senior":mediclaim_self_senior.get(slip.employee, 0),
+                "mediclaim_parents_below":mediclaim_parents_below.get(slip.employee, 0),
+                "mediclaim_parents_senior":mediclaim_parents_senior.get(slip.employee, 0),
+                "preventive_health_checkup":preventive_health_checkup.get(slip.employee, 0),
+                "preventive_health_checkup_self": preventive_health_checkup_self.get(slip.employee, 0),
+                "medical_treatment_insurance": medical_treatment_insurance.get(slip.employee, 0),
+                "medical_treatment_disease": medical_treatment_disease.get(slip.employee, 0),
+                "interest_repayment": interest_repayment.get(slip.employee, 0),
+                "physical_disabled": physical_disabled.get(slip.employee, 0),
+                "donation_80g": donation_80g.get(slip.employee, 0),
+                "nps_deduction": nps_deduction.get(slip.employee, 0),
+                "hsg": hsg.get(slip.employee, 0),
+                "nps_contribution": nps_contribution.get(slip.employee, 0),
+                "tax_incentive": tax_incentive.get(slip.employee, 0),
+                "tax_incentive_eeb": tax_incentive_eeb.get(slip.employee, 0),
+                "dona_political_party": dona_political_party.get(slip.employee, 0),
+                "interest_saving_account": interest_saving_account.get(slip.employee, 0),
+                "interest_fd": interest_fd.get(slip.employee, 0),
+                "deduction_80gg": deduction_80gg.get(slip.employee, 0),
+                "regime_80ccg": regime_80ccg.get(slip.employee, 0),
+
+                "total_deduction":total_declaration.get(slip.employee,0),
+                "annual_taxable_income":0
+
+
 
             }
             
@@ -1142,7 +1304,12 @@ def get_salary_slip_data(filters=None):
                 combined_row["total_income"] += combined_row[key]  
             
             combined_row["total_income"] += combined_row["loan_perquisite"]
+            combined_row["annual_taxable_income"] =(combined_row["total_income"]-total_declaration.get(slip.employee,0))
+
+            # frappe.msgprint(str(combined_row["total_income"]-total_declaration.get(slip.employee,0)))
             data.append(combined_row)
+
+            
             
             employee_totals.pop(slip.employee, None)
 
