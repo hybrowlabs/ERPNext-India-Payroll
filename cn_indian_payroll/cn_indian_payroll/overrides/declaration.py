@@ -244,24 +244,29 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
     # Fetch Salary Structure Assignment
     ss_assignment = frappe.get_list(
-        "Salary Structure Assignment",
-        filters={"employee": employee, "docstatus": 1, "custom_payroll_period": payroll_period},
-        fields=["name", "from_date", "salary_structure", "custom_payroll_period"],
-        order_by="from_date desc"
+    "Salary Structure Assignment",
+    filters={"employee": employee, "docstatus": 1, "custom_payroll_period": payroll_period},
+    fields=["name", "from_date", "salary_structure", "custom_payroll_period"],
+    order_by="from_date asc"  
     )
 
     if ss_assignment:
-        first_assignment = ss_assignment[0]
+        first_assignment = ss_assignment[0]  # Get the first (earliest) assignment
         start_date = first_assignment["from_date"]
-        first_assignment_id = first_assignment["name"]
         first_assignment_structure = first_assignment["salary_structure"]
 
-        # Calculate month count based on payroll period
-        if first_assignment["custom_payroll_period"]:
-            payroll_period_doc = frappe.get_doc("Payroll Period", first_assignment["custom_payroll_period"])
-            end_date = payroll_period_doc.end_date
-            month_count = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
+        last_assignment=ss_assignment[-1]
+        last_start_date=last_assignment["from_date"]
+        last_salary_structure=last_assignment["salary_structure"]
+        last_assignment_id=last_assignment["name"]
+        
 
+        payroll_period_doc = frappe.get_doc("Payroll Period", first_assignment["custom_payroll_period"])
+        end_date = payroll_period_doc.end_date
+
+        # Calculate month difference between start_date and end_date
+        month_count = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
+        # frappe.msgprint(str(month_count))
         # Fetch Salary Slips
         salary_slips = frappe.get_list(
             "Salary Slip",
@@ -273,10 +278,10 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
         if not salary_slips:
             # Generate Salary Slip for preview
             new_salary_slip = make_salary_slip(
-                source_name=first_assignment_structure,
+                source_name=last_salary_structure,
                 employee=employee,
                 print_format="Salary Slip Standard for CTC",
-                posting_date=start_date,
+                posting_date=last_start_date,
                 for_preview=1
             )
 
@@ -313,10 +318,10 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
             # Compute remaining months and add additional amount
             new_salary_slip = make_salary_slip(
-                source_name=first_assignment_structure,
+                source_name=last_salary_structure,
                 employee=employee,
                 print_format="Salary Slip Standard for CTC",
-                posting_date=start_date,
+                posting_date=last_start_date,
                 for_preview=1
             )
 
@@ -363,5 +368,5 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
         get_declaration.save()
 
     # Update Salary Structure Assignment with selected tax regime
-    frappe.db.set_value("Salary Structure Assignment", first_assignment_id, "income_tax_slab", selected_regime)
+    frappe.db.set_value("Salary Structure Assignment", last_assignment_id, "income_tax_slab", selected_regime)
 
