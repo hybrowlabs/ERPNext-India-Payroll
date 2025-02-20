@@ -605,8 +605,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Section 80EE</p>",
-                "label": "Section 80EE",
+                "html": "<p>Section 24(b)</p>",
+                "label": "Section 24(b)",
                 "refreshOnChange": false,
                 "key": "hl_section",
                 "type": "content",
@@ -3903,31 +3903,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
   {
 
 
-    tds_projection_test(frm)
-
-
-    
-
-
-
-    
-
-
-
-
-
-     
-
-
-
-      if(frm.doc.custom_tax_regime=="New Regime")
-          {
-              frm.set_df_property('declarations',  'read_only',  1);
-          }
-
-
-
-          
+    tds_projection_html(frm)
 
 
 
@@ -4060,22 +4036,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
               
               d.show();
 
-
-
-
-
-
-
-
-
-
-
-
-
-                
-
-                
-                  
+    
                   
                   
               })
@@ -4084,14 +4045,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
               
           }
-
-
-
-
-
-
-
-          
+      
   },
 
 
@@ -4107,742 +4061,26 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
   },
 
 
-  
-
- 
-
-  
- 
-});
-
-
-
-
-
-function change_regime(frm) {
-let d = new frappe.ui.Dialog({
-    title: 'Enter details',
-    fields: [
-        {
-            label: 'Select Regime',
-            fieldname: 'select_regime',
-            fieldtype: 'Select',
-            options: ['Old Regime', 'New Regime'],
-            reqd: 1,
-            default: frm.doc.custom_tax_regime,
-            description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
-        }
-    ],
-    size: 'small',
-    primary_action_label: 'Submit',
-    primary_action(values) {
-        if (values.select_regime === "New Regime") {
-
-
-          frappe.call({
-            method: "frappe.client.get_list",
-            args: {
-                doctype: "Income Tax Slab",
-                filters: { docstatus: 1, custom_select_regime:values.select_regime,company:frm.doc.company},
-                fields: ["*"]
-            },
-            callback: function (tes) {
-                if (tes.message) {
-
-                  var new_tax_regime=tes.message[0].name
-
-
-
-
-
-
-            frappe.call({
-                method: "frappe.client.get_list",
-                args: {
-                    doctype: "Salary Slip",
-                    filters: { employee: frm.doc.employee, docstatus: ["in", [0, 1]], custom_payroll_period: frm.doc.payroll_period },
-                    fields: ["*"]
-                },
-                callback: function (kes) {
-                    if (kes.message.length === 0) {
-                        frappe.call({
-                            method: "frappe.client.get_list",
-                            args: {
-                                doctype: "Salary Structure Assignment",
-                                filters: { employee: frm.doc.employee, docstatus: 1 },
-                                fields: ["*"],
-                                limit: 1,
-                                order_by: "from_date desc"
-                            },
-                            callback: function (res) {
-                                if (res.message) {
-                                    frappe.call({
-                                        method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
-                                        args: {
-                                            source_name: res.message[0].salary_structure,
-                                            employee: frm.doc.employee,
-                                            print_format: 'Salary Slip Standard for CTC',
-                                            docstatus: 1,
-                                            for_preview: 1
-                                        },
-                                        callback: function (response) {
-                                            if (response.message.earnings) {
-                                                $.each(response.message.earnings, function (i, v) {
-                                                    frappe.call({
-                                                        method: "frappe.client.get",
-                                                        args: {
-                                                            doctype: "Salary Component",
-                                                            filters: { name: v.salary_component },
-                                                            fields: ["*"]
-                                                        },
-                                                        callback: function (mes) {
-                                                            if (mes.message && mes.message.component_type === "NPS") {
-                                                                frappe.call({
-                                                                    method: "frappe.client.get",
-                                                                    args: {
-                                                                        doctype: "Payroll Period",
-                                                                        filters: { name: frm.doc.payroll_period },
-                                                                        fields: ["*"]
-                                                                    },
-                                                                    callback: function (zes) {
-                                                                        if (zes.message) {
-                                                                            let from_date = Math.max(new Date(zes.message.start_date), new Date(res.message[0].from_date));
-                                                                            const end_date = new Date(zes.message.end_date);
-
-                                                                            // Calculate months between two dates
-                                                                            function getMonthsBetween(startDate, endDate) {
-                                                                                const startYear = startDate.getFullYear();
-                                                                                const startMonth = startDate.getMonth();
-                                                                                const endYear = endDate.getFullYear();
-                                                                                const endMonth = endDate.getMonth();
-                                                                                return (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
-                                                                            }
-
-                                                                            const monthsBetween = getMonthsBetween(new Date(from_date), end_date);
-                                                                            const nineNumber = Math.round(monthsBetween * v.amount);
-
-                                                                            // Set JSON with only nineNumber
-                                                                            try {
-                                                                                let newJsonData = { nineNumber };
-                                                                                frm.set_value("custom_declaration_form_data", JSON.stringify(newJsonData));
-
-                                                                                frm.set_value("custom_income_tax",new_tax_regime)
-                                                                                frm.save('Update');
-                                                                            } catch (error) {
-                                                                                console.error("Failed to update custom_declaration_form_data JSON", error);
-                                                                            }
-
-
-                                                                            
-
-
-
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    });
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-
-                    else
-                    {
-
-                      var count=kes.message.length
-
-
-                      $.each(kes.message,function(i,k)
-                        {
-
-                          frappe.call({
-                            method: "frappe.client.get",
-                            args: {
-                                doctype: "Salary Slip",
-                                filters: {name:k.name},
-                                fields: ["*"]
-                            },
-                            callback: function (salary_response) {
-
-                              if(salary_response.message)
-                              {
-                                console.log(salary_response.message)
-
-                              }
-  
-  
-                            }
-                          })
-
-                        })
-
-                      
-
-
-
-
-
-                    }
-                }
-            });
-
-          }
-        }
-      })
-        }
-        d.hide();
+  monthly_house_rent:function(frm)
+  {
+    if(frm.doc.monthly_house_rent)
+    {
+      frm.set_value("custom_check",0)
     }
+  }
+
+  
+
+ 
+
+  
+ 
 });
 
-d.show();
-}
 
 
 
-
-
-
-
-
-function edit_declaration(frm) {
-  if (frm.doc.employee) {
-      var sub_category = [];
-
-      frappe.call({
-          method: "frappe.client.get_list",
-          args: {
-              doctype: "Employee Tax Exemption Sub Category",
-              filters: {
-                  "is_active": 1,
-                  "name": ["not in", ["Employee Provident Fund (Auto)", "NPS Contribution by Employer", "Tax on employment (Professional Tax)"]]
-              },
-              fields: ["*"],
-              limit_page_length: 999999999999
-          },
-          callback: function(subcategory_response) {
-              if (subcategory_response.message && subcategory_response.message.length > 0) {
-                  subcategory_response.message.forEach(function(v) {
-                      sub_category.push(v.name);
-                  });
-              }
-
-              if (frm.doc.custom_tax_regime === "Old Regime") {
-                  let component_array = [];
-
-                  let d = new frappe.ui.Dialog({
-                      title: 'Enter details',
-                      fields: [
-                          {
-                              label: 'Details Table',
-                              fieldname: 'details_table',
-                              fieldtype: 'Table',
-                              fields: [
-                                  {
-                                      label: 'Exemption Sub Category',
-                                      fieldname: 'exemption_sub_category',
-                                      fieldtype: 'Select',
-                                      options: sub_category,
-                                      in_list_view: 1,
-                                      editable: true
-                                  },
-                                  {
-                                      label: 'Employee Tax Exemption Category',
-                                      fieldname: 'employee_exemption_category',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Maximum Exempted Amount',
-                                      fieldname: 'maximum_amount',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Declared Amount',
-                                      fieldname: 'declared_amount',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      editable: true,
-                                  },
-                              ]
-                          },
-                          {
-                              fieldtype: 'Section Break'
-                          },
-                          {
-                              label: 'Monthly HRA Amount',
-                              fieldname: 'hra_amount',
-                              fieldtype: 'Currency',
-                          },
-                          {
-                              fieldtype: 'Column Break'
-                          },
-                          {
-                              label: 'Rented in Metro City',
-                              fieldname: 'rented_in_metro_city',
-                              fieldtype: 'Check',
-                          }
-                      ],
-                      size: 'large',
-                      primary_action_label: 'Submit',
-                      primary_action(values) {
-                          // let total_exe_amount = 0;
-                          // $.each(frm.doc.declarations, function(i, k) {
-                          //     if (k.exemption_category == "Section 80C") {
-                          //         total_exe_amount = k.max_amount - k.amount;
-                          //     }
-                          // });
-
-                          // let total_80C = 0;
-                          // $.each(values.details_table, function(i, m) {
-                          //     if (m.employee_exemption_category == "Section 80C") {
-                          //         total_80C += parseFloat(m.declared_amount);
-                          //     }
-                          // });
-
-                          // if (total_80C > total_exe_amount) {
-                          //     frappe.msgprint(`You can't enter an amount greater than ${total_exe_amount} for Section 80C.`);
-                          // } else {
-                              // Add declarations with specific sub-categories to component_array
-                              $.each(frm.doc.declarations, function(i, m) {
-                                  if (["NPS Contribution by Employer", "Tax on employment (Professional Tax)", "Employee Provident Fund (Auto)","Uniform Allowance"].includes(m.exemption_sub_category)) {
-                                      component_array.push({
-                                          "sub_category": m.exemption_sub_category,
-                                          "category": m.exemption_category,
-                                          "max_amount": m.max_amount,
-                                          "amount": m.amount
-                                      });
-                                  }
-                              });
-
-                              // Add dialog box values to component_array
-                              $.each(values.details_table, function(i, w) {
-                                  component_array.push({
-                                      "sub_category": w.exemption_sub_category,
-                                      "category": w.employee_exemption_category,
-                                      "max_amount": w.maximum_amount,
-                                      "amount": w.declared_amount
-                                  });
-                              });
-
-                              console.log(component_array);
-
-                              // Update child table
-                              frm.clear_table('declarations');
-                              component_array.forEach(row => {
-                                  let new_row = frm.add_child('declarations');
-                                  new_row.exemption_sub_category = row.sub_category;
-                                  new_row.exemption_category = row.category;
-                                  new_row.max_amount = row.max_amount;
-                                  new_row.amount = row.amount;
-                              });
-
-
-                              frm.set_value("monthly_house_rent", values.hra_amount);
-                              frm.set_value("rented_in_metro_city", values.rented_in_metro_city);
-                              frm.set_value("custom_posting_date",frappe.datetime.nowdate())
-                              frm.refresh_field('declarations');
-                              frm.save('Update');
-                              d.hide();
-
-
-
-                          // }
-                      }
-                  });
-
-                  d.show();
-
-                  // Update employee_exemption_category when exemption_sub_category changes
-                  d.$wrapper.on('change', '[data-fieldname="exemption_sub_category"] select', function() {
-                      let selectedValue = $(this).val();
-                      let rowIndex = $(this).closest('.grid-row').index();
-
-                      if (selectedValue) {
-                          frappe.call({
-                              method: 'frappe.client.get',
-                              args: {
-                                  doctype: "Employee Tax Exemption Sub Category",
-                                  name: selectedValue
-                              },
-                              callback: function(r) {
-                                  if (r.message) {
-                                      let category = r.message.exemption_category;
-                                      let category_max_amount = r.message.max_amount;
-                                      d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.employee_exemption_category = category;
-                                      d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.maximum_amount = category_max_amount;
-                                      d.fields_dict.details_table.grid.refresh();
-                                  }
-                              }
-                          });
-                      }
-                  });
-
-                  // Validate declared_amount input
-                  // d.$wrapper.on('change', '[data-fieldname="declared_amount"] input', function() {
-                  //     let rowIndex = $(this).closest('.grid-row').index();
-                  //     let selectedAmount = $(this).val();
-                  //     let maxAmount = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.maximum_amount;
-                  //     let component = d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.employee_exemption_category;
-
-                  //     if (component == "Section 80C") {
-                  //         $.each(frm.doc.declarations, function(i, v) {
-                  //             if (v.exemption_category == component) {
-                  //                 if (v.amount == 150000) {
-                  //                     frappe.msgprint("You can't enter the amount here because your Section 80C is at the maximum.");
-                  //                     d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
-                  //                     d.fields_dict.details_table.grid.refresh();
-                  //                 } else {
-                  //                     let remainingAmount = maxAmount - parseFloat(v.amount);
-
-                  //                     if (selectedAmount > remainingAmount) {
-                  //                         frappe.msgprint(`You can't enter an amount greater than ${remainingAmount}.`);
-                  //                         d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
-                  //                         d.fields_dict.details_table.grid.refresh();
-                  //                     }
-                  //                 }
-                  //             }
-                  //         });
-                  //     } 
-                  //     else 
-                  //     {
-
-                  //         console.log(selectedAmount,"selectedAmount")
-                  //         console.log(maxAmount,"maxAmount")
-                  //         if (selectedAmount > maxAmount) {
-                  //             frappe.msgprint(`You can't enter an amount greater than ${maxAmount}.`);
-                  //             d.fields_dict.details_table.grid.grid_rows[rowIndex].doc.declared_amount = undefined;
-                  //             d.fields_dict.details_table.grid.refresh();
-                  //         }
-                  //     }
-                  // });
-              } else {
-                  frappe.msgprint("You can't Edit the declaration because you are in the New regime.");
-              }
-          }
-      });
-  }
-}
-
-
-
-function edit(frm) {
-  var component_array = [];
-  var component_array_not_include = [];
-  var sub_category = [];
-
-  var component_from_dialogue=[]
-
-  // Collect data from frm.doc.declarations
-  $.each(frm.doc.declarations, function(i, m) {
-      if (["NPS Contribution by Employer", "Tax on employment (Professional Tax)", "Employee Provident Fund (Auto)"].includes(m.exemption_sub_category)) {
-          component_array.push({
-              "exemption_sub_category": m.exemption_sub_category,
-              "employee_exemption_category": m.exemption_category,
-              "maximum_amount": m.max_amount,
-              "declared_amount": m.amount
-          });
-      } else {
-          component_array_not_include.push({
-              "exemption_sub_category": m.exemption_sub_category,
-              "employee_exemption_category": m.exemption_category,
-              "maximum_amount": m.max_amount,
-              "declared_amount": m.amount
-          });
-      }
-  });
-
-  // Fetch active subcategories
-  frappe.call({
-      method: "frappe.client.get_list",
-      args: {
-          doctype: "Employee Tax Exemption Sub Category",
-          filters: {
-              "is_active": 1,
-              "name": ["not in", ["Employee Provident Fund (Auto)", "NPS Contribution by Employer", "Tax on employment (Professional Tax)"]]
-          },
-          fields: ["name"],
-          limit_page_length: 999999999999
-      },
-      callback: function(subcategory_response) {
-          if (subcategory_response.message && subcategory_response.message.length > 0) {
-              sub_category = subcategory_response.message.map(v => v.name);
-
-              if (frm.doc.custom_tax_regime === "Old Regime") {
-                  let d = new frappe.ui.Dialog({
-                      title: 'Declare Your Exemptions',
-                      fields: [
-                          {
-                              label: 'Exemptions Auto Calculated',
-                              fieldname: 'details_table',
-                              fieldtype: 'Table',
-                              cannot_add_rows: 1,
-                              cannot_delete_rows: 1,
-                              fields: [
-                                  {
-                                      label: 'Exemption Sub Category',
-                                      fieldname: 'exemption_sub_category',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Employee Tax Exemption Category',
-                                      fieldname: 'employee_exemption_category',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Maximum Exempted Amount',
-                                      fieldname: 'maximum_amount',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Declared Amount',
-                                      fieldname: 'declared_amount',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                              ]
-                          },
-                          {
-                              fieldtype: 'Section Break'
-                          },
-                          {
-                              label: 'Declare Tax Exemptions',
-                              fieldname: 'custom_details_table',
-                              fieldtype: 'Table',
-                              fields: [
-                                  {
-                                      label: 'Exemption Sub Category',
-                                      fieldname: 'custom_exemption_sub_category',
-                                      fieldtype: 'Select',
-                                      in_list_view: 1,
-                                      options: sub_category.join('\n'),
-                                      editable: true
-                                  },
-                                  {
-                                      label: 'Employee Tax Exemption Category',
-                                      fieldname: 'custom_employee_exemption_category',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Maximum Exempted Amount',
-                                      fieldname: 'custom_maximum_amount',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      read_only: 1
-                                  },
-                                  {
-                                      label: 'Declared Amount',
-                                      fieldname: 'custom_declared_amount',
-                                      fieldtype: 'Data',
-                                      in_list_view: 1,
-                                      editable: true,
-                                      reqd:1
-                                  },
-                              ]
-                          },
-
-                          {
-                              fieldtype: 'Section Break'
-                          },
-                          {
-                              label: 'Monthly HRA Amount',
-                              fieldname: 'hra_amount',
-                              fieldtype: 'Int',
-                              default:frm.doc.monthly_house_rent,
-                          },
-                          {
-                              fieldtype: 'Column Break'
-                          },
-                          {
-                              label: 'Rented in Metro City',
-                              fieldname: 'rented_in_metro_city',
-                              fieldtype: 'Check',
-                              default:frm.doc.rented_in_metro_city
-                          },
-                  
-                      ],
-                      size: 'large',
-                      primary_action_label: 'Submit',
-                      primary_action(values) {
-                          d.hide();
-
-                          // console.log(values)
-
-
-                          $.each(values.details_table, function(i, w) {
-                              component_from_dialogue.push({
-                                  "sub_category": w.exemption_sub_category,
-                                  "category": w.employee_exemption_category,
-                                  "max_amount": w.maximum_amount,
-                                  "amount": w.declared_amount
-                              });
-                          });
-
-                          $.each(values.custom_details_table, function(i, m) {
-                              component_from_dialogue.push({
-                                  "sub_category": m.custom_exemption_sub_category,
-                                  "category": m.custom_employee_exemption_category,
-                                  "max_amount": m.custom_maximum_amount,
-                                  "amount": m.custom_declared_amount
-                              });
-                          });
-
-                          frm.clear_table('declarations');
-                          component_from_dialogue.forEach(row => {
-                                  let new_row = frm.add_child('declarations');
-                                  new_row.exemption_sub_category = row.sub_category;
-                                  new_row.exemption_category = row.category;
-                                  new_row.max_amount = row.max_amount;
-                                  new_row.amount = row.amount;
-                              });
-
-                              
-
-                              frm.set_value("custom_check",0)
-                              frm.set_value("monthly_house_rent", values.hra_amount);
-                              frm.set_value("rented_in_metro_city", values.rented_in_metro_city);
-                              frm.set_value("custom_posting_date",frappe.datetime.nowdate())
-                              frm.refresh_field('declarations');
-                              frm.save('Update');
-                              d.hide();
-
-
-
-
-                      }
-                  });
-
-                  // Populate the dialog's first table
-                  let table_field = d.get_field('details_table');
-                  if (!table_field.df.data) {
-                      table_field.df.data = [];
-                  }
-                  component_array.forEach(item => {
-                      table_field.df.data.push({
-                          "exemption_sub_category": item.exemption_sub_category,
-                          "employee_exemption_category": item.employee_exemption_category,
-                          "maximum_amount": item.maximum_amount,
-                          "declared_amount": item.declared_amount
-                      });
-                  });
-                  table_field.grid.refresh();
-
-                  let custom_table_field = d.get_field('custom_details_table');
-                  if (!custom_table_field.df.data) {
-                      custom_table_field.df.data = [];
-                  }
-                  component_array_not_include.forEach(item => {
-                      custom_table_field.df.data.push({
-                          "custom_exemption_sub_category": item.exemption_sub_category,
-                          "custom_employee_exemption_category": item.employee_exemption_category,
-                          "custom_maximum_amount": item.maximum_amount,
-                          "custom_declared_amount": item.declared_amount
-                      });
-                  });
-                  custom_table_field.grid.refresh();
-
-                  d.show();  
-
-
-
-                  d.$wrapper.on('change', '[data-fieldname="custom_exemption_sub_category"] select', function() {
-                      let selectedValue = $(this).val();
-                      let rowIndex = $(this).closest('.grid-row').index();
-
-                      console.log(selectedValue,"7777")
-
-                      if (selectedValue) {
-                          frappe.call({
-                              method: 'frappe.client.get',
-                              args: {
-                                  doctype: "Employee Tax Exemption Sub Category",
-                                  name: selectedValue
-                              },
-                              callback: function(r) {
-                                  if (r.message) {
-                                      let category = r.message.exemption_category;
-                                      let category_max_amount = r.message.max_amount;
-                                      d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_employee_exemption_category = category;
-                                      d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_maximum_amount = category_max_amount;
-                                      d.fields_dict.custom_details_table.grid.refresh();
-                                  }
-                              }
-                          });
-
-                          
-
-
-                      }
-                  });
-
-                  d.$wrapper.on('change', '[data-fieldname="custom_declared_amount"] input', function() {
-                      let rowIndex = $(this).closest('.grid-row').index();
-                      let selectedAmount = $(this).val();
-                      
-                      let component = d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_exemption_sub_category;
-
-                      if(component=="Uniform Allowance") {
-                             
-
-                              frappe.call({
-                                  method: "frappe.client.get_list",
-                                  args: {
-                                      doctype: "Salary Structure Assignment",
-                                      filters: { employee: frm.doc.employee, 'docstatus': 1 },
-                                      fields: ["*"],
-                                      limit: 1,
-                                      order_by: "from_date desc"
-                                  },
-                                  callback: function(res) {
-                                      if (res.message && res.message.length > 0) {
-
-                                          if(res.message[0].custom_is_uniform_allowance==0)
-                                          {
-                                              msgprint("You Are Not Eligible for Uniform Allowance")
-                                              d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_declared_amount = 0;
-                                              d.fields_dict.custom_details_table.grid.refresh();
-
-                                          }
-
-                                      }
-                                  }
-                              })
-
-
-
-                          }
-                      
-                  })
-              }
-
-              else{
-                  msgprint("You Cant Edit Declaration,Because You are in The New Regime")
-              }
-          }
-      }
-  });
-}
-
-
-
-function tds_projection_test(frm) {
+function tds_projection_html(frm) {
   if (frm.doc.docstatus == 1) {
 
       let section10_component = []; // Ensure it's an array
@@ -4880,8 +4118,8 @@ function tds_projection_test(frm) {
           },
           callback: function (res) {
               if (res.message) {
-                  const month1 = res.message.from_month;
-                  const month2 = res.message.to_month;
+                  const from_month = res.message.from_month;
+                  const to_month = res.message.to_month;
                   const oldValue = Math.round(res.message.current_old_value);
                   const newValue = Math.round(res.message.current_new_value);
                   const old_future_amount = Math.round(res.message.future_old_value);
@@ -4899,22 +4137,16 @@ function tds_projection_test(frm) {
                   const nps_value=Math.round(res.message.nps)
 
 
-                  // console.log(old_std)
-                  // console.log(new_std)
-
-                  const per_comp = res.message.perquisite_component || []; // Ensure it's an array
+                  const per_comp = res.message.perquisite_component || []; 
                   const per_values = res.message.perquisite_amount || [];
 
-                  // Summing up the per_values array
                   const total_per_sum = per_values.reduce((total, value) => total + value, 0);
 
-                  // Calculate the longest array length for iteration
                   const maxLength = Math.max(per_comp.length, per_values.length);
 
-                  // Create rows for perquisite details
                   let perquisiteRows = "";
                   for (let i = 0; i < maxLength; i++) {
-                      let component = per_comp[i] || "-";  // If index out of bounds, insert "-"
+                      let component = per_comp[i] || "-";  
                       let oldPer = per_values[i] || "-";
                       let newPer = per_values[i] || "-";
                       perquisiteRows += `<tr><td>${component}</td><td>${"₹" + oldPer}</td><td>${"₹" + newPer}</td></tr>`;
@@ -4938,7 +4170,18 @@ function tds_projection_test(frm) {
                           if(v.exemption_category == "Section 80D" || v.exemption_category == "Section 80DD" || v.exemption_category == "Section 80E" || v.exemption_category == "Section 80EE"||v.exemption_category == "Section 80U")
                             {
                               section80d_component.push(v.exemption_sub_category)
-                              section80d_amount.push(v.amount)
+                              
+
+                              if(v.amount<=v.max_amount)
+                                {
+                                  
+                                  section80d_amount.push(v.amount)
+                                }
+                                else
+                                {
+                                  section80d_amount.push(v.max_amount)
+  
+                                }
   
                             }
 
@@ -4956,38 +4199,42 @@ function tds_projection_test(frm) {
                                 "Section 80TTA",
                                 "Section 80TTB",
                                 "Section 80GG",
-                                "Section 80CCG"
+                                "Section 80CCG",
+                                "Section 24(b)",
                             ];
                             
                             if (validCategories.includes(v.exemption_category)) {
                               other_component.push(v.exemption_sub_category)
-                              other_amount.push(v.amount)
+                              
+
+                              if(v.amount<=v.max_amount)
+                                {
+                                  
+                                  other_amount.push(v.amount)
+                                }
+                                else
+                                {
+                                  other_amount.push(v.amount)
+  
+                                }
                             }
                       });
                   }
 
-                  // console.log(section80d_component)
 
-                  // Summing up section10_amount array
                   const total_section10_sum = section10_amount.reduce((total, value) => total + value, 0);
                   const total_section80C_sum = Math.min(section80c_amount.reduce((total, value) => total + value, 0), 150000);
                   const total_section80d_sum = section80d_amount.reduce((total, value) => total + value, 0);
                   const total_other_sum = other_amount.reduce((total, value) => total + value, 0);
 
 
-
-                  // console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
-
-
-                  // Calculate the longest array length for section10 details
                   const section10_maxLength = Math.max(section10_component.length, section10_amount.length);
                   const section80_maxLength = Math.max(section80c_component.length, section80c_amount.length);
                   const section80D_maxLength = Math.max(section80d_component.length, section80d_amount.length);
                   const other_maxLength = Math.max(other_component.length, other_amount.length);
 
-                  // console.log(section10_maxLength,"section10_maxLengthsection10_maxLength")
 
-
+                  const annual_hra_exemption=Math.max(frm.doc.annual_hra_exemption)
 
                   
 
@@ -5031,7 +4278,7 @@ function tds_projection_test(frm) {
                   
                   
 
-                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value)
+                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
                   let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
 
 
@@ -5061,15 +4308,9 @@ function tds_projection_test(frm) {
                                     let max_amount=response.message.max_amount
                                     let old_rebate_value=response.message.old_rebate_value
 
-                                    console.log(old_from_amount,"222222")
 
                                     let  old_surcharge_m=response.message.old_surcharge_m                              
                                     let old_education_cess=response.message.old_education_cess
-                                    
-                                    
-                                    
-
-
                                     let new_from_amount = response.message.from_amount_new || [];
                                     let new_to_amount = response.message.to_amount_new || [];
                                     let new_percentage_amount = response.message.percentage_new || [];
@@ -5111,8 +4352,9 @@ function tds_projection_test(frm) {
                                         salary_slip_sum,
                                         num_months,
                                         salary_slip_count,
-                                        month1,
-                                        month2
+                                        from_month,
+                                        to_month,
+                                        
 
 
                                       });
@@ -5144,8 +4386,9 @@ function tds_projection_test(frm) {
                         salary_slip_sum,
                         num_months,
                         salary_slip_count,
-                        month1,
-                        month2
+                        from_month,
+                        to_month,
+                        
                       } = await getPerComp1();
                      
                       let OtherRows1 = "";
@@ -5186,7 +4429,7 @@ function tds_projection_test(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings</td>
+                              <td>Current Taxable Earnings(${from_month}-${to_month})</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
@@ -5365,6 +4608,12 @@ function tds_projection_test(frm) {
                               <td>₹ 0</td>
                           </tr>
 
+                          <tr>
+                              <td>HRA Exemption</td>
+                              <td>₹ ${annual_hra_exemption}</td>
+                              <td>₹ 0</td>
+                          </tr>
+
 
 
 
@@ -5372,12 +4621,12 @@ function tds_projection_test(frm) {
 
                           <tr>
                               <td>Total Exemption/Deductions</td>
-                              <td>₹ ${total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value}</td>
+                              <td>₹ ${total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption}</td>
                               <td>₹ ${nps_value+new_std}</td>
                           </tr>
                           <tr>
                               <td>Annual Taxable Income</td>
-                              <td>₹ ${(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value)}</td>
+                              <td>₹ ${(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
                               <td>₹ ${(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)}</td>
                           </tr>
 
@@ -5560,1178 +4809,6 @@ function tds_projection_test(frm) {
       });
 
   }
-}
-
-
-
-
-
-
-
-function tds_projection(frm) {
-
-
-let old_current_taxable_income = [];
-let new_current_taxable_income = [];
-let slip_length = 0;
-let firstCustomMonth = "N/A";
-let lastCustomMonth = "N/A";
-
-let epf_component=[]
-let nps_component=[]
-
-let pt=[]
-
-let old_current_sslip_amount=0
-
-let new_current_sslip_amount=0
-
-
-
-let old_future_taxable_income = [];
-let new_future_taxable_income = [];
-
-let car_perquisite=0
-let bus_perquisite=0
-let other_perquisite_component=[]
-let other_perquisite_componentSum=0
-
-
-let loanPerquisite=[]
-let loanPerquisiteSum=0
-
-let uniform=0
-let education=0
-let hostel=0
-let gratuity=0
-let hra=0
-let lta=0
-
-let eightyc_array=[]
-let eightc_amount=[]
-
-
-let eightyd_array=[]
-let eightd_amount=[]
-
-
-
-let other=[]
-
-let old_income_value=[]
-
-let total_array = [];
-let total_value = [];
-let from_amount = [];
-let to_amount = [];
-let percentage = [];
-let difference = [];
-
-
-let Sumq=0
-
-let old_annual_taxable_income=0
-
-let new_annual_taxable_income=0
-
-let total_sum_old=0
-
-
-
-
-
-async function fetchTaxableIncome() {
-  try {
-    // Fetch salary slips for the given employee and payroll period
-    const res = await frappe.call({
-      method: "frappe.client.get_list",
-      args: {
-        doctype: "Salary Slip",
-        filters: {
-          employee: frm.doc.employee,
-          docstatus: ["in", [0, 1]],
-          custom_payroll_period: frm.doc.payroll_period
-        },
-        fields: ["name", "custom_month"],
-        order_by: "end_date desc"
-      }
-    });
-
-    if (res.message && res.message.length > 0) {
-      slip_length = res.message.length;
-      const salary_slips = res.message;
-      firstCustomMonth = salary_slips[0]?.custom_month || "N/A";
-      lastCustomMonth = salary_slips[salary_slips.length - 1]?.custom_month || "N/A";
-
-      // Process each salary slip asynchronously
-      await Promise.all(
-        salary_slips.map(async (v) => {
-          try {
-            const each_doc_res = await frappe.call({
-              method: "frappe.client.get",
-              args: {
-                doctype: "Salary Slip",
-                name: v.name
-              }
-            });
-
-            if (each_doc_res.message) {
-              const salary_slip_doc = each_doc_res.message;
-              const earnings = salary_slip_doc.earnings || [];
-
-              const deductions = salary_slip_doc.deductions || [];
-
-              // Process each earning component
-              await Promise.all(
-                earnings.map(async (earning) => {
-                  const each_component_res = await frappe.call({
-                    method: "frappe.client.get",
-                    args: {
-                      doctype: "Salary Component",
-                      name: earning.salary_component
-                    }
-                  });
-
-                  if (each_component_res.message) {
-                    const component = each_component_res.message;
-
-                    // Add amounts to taxable income based on regime and conditions
-                    if (
-                      component.is_tax_applicable === 1 &&
-                      component.custom_perquisite === 0 &&
-                      component.custom_tax_exemption_applicable_based_on_regime === 1 &&
-                      component.custom_regime === "All"
-                    ) {
-                      old_current_taxable_income.push(earning.amount);
-                      new_current_taxable_income.push(earning.amount);
-                    }
-
-                    if (
-                      component.is_tax_applicable === 0 &&
-                      component.custom_is_accrual === 1
-                    ) {
-                      old_current_taxable_income.push(earning.amount);
-                      new_current_taxable_income.push(earning.amount);
-                    }
-
-                    if (
-                      component.is_tax_applicable === 1 &&
-                      component.custom_perquisite === 0 &&
-                      component.custom_tax_exemption_applicable_based_on_regime === 1 &&
-                      component.custom_regime === "Old Regime"
-                    ) {
-                      old_current_taxable_income.push(earning.amount);
-                    }
-
-                    if (
-                      component.is_tax_applicable === 1 &&
-                      component.custom_perquisite === 0 &&
-                      component.custom_tax_exemption_applicable_based_on_regime === 1 &&
-                      component.custom_regime === "New Regime"
-                    ) {
-                      new_current_taxable_income.push(earning.amount);
-                    }
-
-                    if (
-                      
-                      component.component_type === "NPS"
-                    ) {
-                      nps_component.push(earning.amount);
-                    }
-
-
-                    
-                  }
-                })
-
-
-              );
-
-
-
-              await Promise.all(
-              deductions.map(async (deduction) => {
-                const each_component_res = await frappe.call({
-                  method: "frappe.client.get",
-                  args: {
-                    doctype: "Salary Component",
-                    name: deduction.salary_component
-                  }
-                });
-
-                if (each_component_res.message) {
-                  const component = each_component_res.message;
-
-                 
-                  
-
-                  if (
-                    
-                    component.component_type === "EPF"
-                  ) {
-                    epf_component.push(deduction.amount);
-                  }
-                  if (
-                    
-                    component.component_type === "Professional Tax"
-                  ) {
-                    pt.push(deduction.amount);
-                  }
-                }
-              })
-            )
-
-
-            }
-          } catch (error) {
-            console.error(`Error fetching salary slip details for ${v.name}: `, error);
-          }
-        })
-      );
-
-
-      // console.log("Old Total Current Sum:", old_current_taxable_income);
-      // console.log("New Total Current Sum:", new_current_taxable_income);
-
-      // Calculate total sums for both regimes
-      const old_totalSum = Math.round(
-        old_current_taxable_income.reduce((sum, val) => sum + val, 0)
-      );
-      const new_totalSum = Math.round(
-        new_current_taxable_income.reduce((sum, val) => sum + val, 0)
-      );
-
-      // Log taxable incomes and update tax projection table
-     
-
-      // old_current_sslip_amount=old_totalSum
-      // new_current_sslip_amount=new_totalSum
-
-
-      console.log(old_totalSum,"111111111111111")
-
-      console.log(new_totalSum,"22222222222")
-
-      return { old_totalSum, new_totalSum };
-
-
-    } else {
-      console.error("No salary slips found for this employee in the given payroll period.");
-    }
-  } catch (error) {
-    console.error("Error fetching salary slips: ", error);
-  }
-}
-
-
-
-
-async function fetchFutureTaxableIncome() {
-  try {
-
-
-//ALLOWANCES 10C
-    if (frm.doc.custom_declaration_form_data) {
-     
-          const data = JSON.parse(frm.doc.custom_declaration_form_data);
-          
-         
-
-          uniform = data?.twentyFour || 0; // Defaults to 0 if data.twentyFour is undefined or null
-          education = data?.thirteen || 0; 
-          
-          
-          hostel = data?.twentysix|| 0;
-          gratuity = data?.twentyseven|| 0;
-          lta=data?.twentyeight|| 0;
-
-   
-      } 
-
- //HRA ALLOWANCE
-
- if(frm.doc.annual_hra_exemption)
- {
-  hra=frm.doc.annual_hra_exemption
- }
-
- //80C ALLOWANCES
-
- if(frm.doc.declarations.length>0 && frm.doc.custom_tax_regime=="Old Regime")
- {
-  $.each(frm.doc.declarations,function(i,eightyc)
-    {
-
-      if(eightyc.exemption_category=="Section 80C" && eightyc.exemption_sub_category!="Employee Provident Fund (Auto)" )
-      {
-        eightyc_array.push(eightyc.exemption_sub_category)
-        eightc_amount.push(eightyc.amount)
-      }
-
-      if(eightyc.exemption_category=="Section 80D")
-        {
-          eightyd_array.push(eightyc.exemption_sub_category)
-          eightd_amount.push(eightyc.amount)
-        }
-
-        if(eightyc.exemption_category=="Section 80DD")
-          {
-            eightyd_array.push(eightyc.exemption_sub_category)
-            eightd_amount.push(eightyc.amount)
-          }
-
-          if(eightyc.exemption_category=="Section 80E")
-            {
-              eightyd_array.push(eightyc.exemption_sub_category)
-              eightd_amount.push(eightyc.amount)
-            }
-
-            if(eightyc.exemption_category=="Section 80U")
-              {
-                eightyd_array.push(eightyc.exemption_sub_category)
-                eightd_amount.push(eightyc.amount)
-              }
-
-
-              // if(eightyc.exemption_category=="Section 80EE"||eightyc.exemption_category=="Section 80DDB"||eightyc.exemption_category=="Section 80-G"||eightyc.exemption_category=="Section 80CCD(1B)"||eightyc.exemption_category=="Section 80EEA"||eightyc.exemption_category=="Section EEB"||eightyc.exemption_category=="Section 80GGC"||eightyc.exemption_category=="Section 80TTA"||eightyc.exemption_category=="Section 80TTB"||eightyc.exemption_category=="Section 80GG"||eightyc.exemption_category=="Section 80CCG")
-              //   {
-              //     other.push(eightyc.amount)
-              //   }
-
-              const validCategories = [
-                "Section 80EE",
-                "Section 80DDB",
-                "Section 80-G",
-                "Section 80CCD(1B)",
-                "Section 80EEA",
-                "Section 80EEB",
-                "Section 80GGC",
-                "Section 80TTA",
-                "Section 80TTB",
-                "Section 80GG",
-                "Section 80CCG"
-            ];
-            
-            if (validCategories.includes(eightyc.exemption_category)) {
-                other.push(eightyc.amount);
-            }
-
-            
-
-        
-
-          
-
-
-      
-    })
-
-
-    // console.log(other,"otherother")
-
-    
- }
-
-
-
- //TOTAL EXEMPTION
-
-
-
-    const res = await frappe.call({
-      method: "frappe.client.get_list",
-      args: {
-        doctype: "Salary Structure Assignment",
-        filters: { employee: frm.doc.employee, docstatus: 1 },
-        fields: ["*"],
-        limit: 1,
-        order_by: "from_date desc"
-      }
-    });
-
-    if (res.message && res.message.length > 0) {
-      const ss_assignment = res.message[0];
-
-
-      const payrollPeriodRes = await frappe.call({
-        method: "frappe.client.get",
-        args: {
-          doctype: "Payroll Period",
-          name: ss_assignment.custom_payroll_period
-        }
-      });
-
-      if (payrollPeriodRes.message) {
-        const payrollPeriod = payrollPeriodRes.message;
-        
-        const start_date = new Date(payrollPeriod.start_date);
-        const end_date = new Date(payrollPeriod.end_date);
-        const effective_from = new Date(ss_assignment.custom_date_of_joining);
-
-        const future_date = effective_from <= start_date ? start_date : effective_from;
-
-        const monthCount = (end_date.getFullYear() - future_date.getFullYear()) * 12 +
-          (end_date.getMonth() - future_date.getMonth()) + 1;
-
-
-          // console.log(monthCount,"monthCountmonthCount")
-
-
-//CAR & DRIVER PERQUISITE
-
-        car_perquisite=monthCount*res.message[0].custom_car_perquisite_as_per_rules
-        bus_perquisite=monthCount*res.message[0].custom_driver_perquisite_as_per_rules
-
-
-//LOAN PERQUISITE
-        frappe.call({
-          method: "frappe.client.get_list",
-          args: {
-              doctype: "Loan Repayment Schedule",
-              filters: {
-                  custom_employee: frm.doc.employee,
-                  status: "Active",
-                  docstatus: 1
-              },
-              fields: ["*"]
-          },
-          callback: function(response) {
-              
-
-              
-              
-              if (response.message && response.message.length > 0) {
-                  response.message.forEach(async (repayment) => {
-                      const repaymentDoc = await frappe.call({
-                          method: "frappe.client.get",
-                          args: {
-                              doctype: "Loan Repayment Schedule",
-                              name: repayment.name
-                          }
-                      });
-      
-                      if (repaymentDoc.message && repaymentDoc.message.custom_loan_perquisite.length > 0) {
-
-                          repaymentDoc.message.custom_loan_perquisite.forEach((date) => {
-
-      
-                              if (payrollPeriod.start_date <= date.payroll_date &&  date.payroll_date <= payrollPeriod.end_date) {
-                                loanPerquisite.push(date.perquisite_amount);
-                              }
-                          });
-                      }
-                  });
-              }
-      
-            
-          },
-          error: function(error) {
-              console.error("Error fetching loan repayment details: ", error);
-          }
-      });
-      
-
-
-
-
-//OTHER PERQUISITE
-
-
-
-
-        frappe.call({
-          method: "frappe.client.get",
-          args: {
-            doctype: "Salary Structure Assignment",
-            name: ss_assignment.name
-          },
-          callback:function(each_ssa)
-
-          {
-            if(each_ssa.message)
-            {
-              
-              $.each(each_ssa.message.custom_other_perquisites,function(i,other_perquisite)
-                {
-
-                  // console.log(monthCount)
-                  // 
-
-                  other_perquisite_component.push(other_perquisite.amount*monthCount)
-
-                })
-
-              
-
-              
-            }
-          }
-        });
-
-
-
-
-
-        
-
-
-        const makeSalarySlipRes = await frappe.call({
-          method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
-          args: {
-            source_name: ss_assignment.salary_structure,
-            employee: frm.doc.employee,
-            print_format: "Salary Slip Standard for CTC",
-            posting_date: ss_assignment.from_date,
-            docstatus: 1,
-            for_preview: 1
-          }
-        });
-
-        if (makeSalarySlipRes.message && makeSalarySlipRes.message.earnings) {
-          for (const earning of makeSalarySlipRes.message.earnings) {
-            const componentRes = await frappe.call({
-              method: "frappe.client.get",
-              args: {
-                doctype: "Salary Component",
-                name: earning.salary_component
-              }
-            });
-
-            if (componentRes.message) {
-              const component = componentRes.message;
-              const applicableMonths = monthCount - slip_length;
-
-
-
-
-              if (
-                component.is_tax_applicable === 1 &&
-                component.custom_perquisite === 0 &&
-                component.custom_tax_exemption_applicable_based_on_regime === 1 &&
-                component.custom_regime === "All"
-              ) {
-                old_future_taxable_income.push(earning.amount * applicableMonths);
-                new_future_taxable_income.push(earning.amount * applicableMonths);
-              }
-
-              if (
-                component.is_tax_applicable === 0 &&
-                component.custom_is_accrual === 1
-              ) {
-                old_future_taxable_income.push(earning.amount * applicableMonths);
-                new_future_taxable_income.push(earning.amount * applicableMonths);
-              }
-
-              if (
-                component.is_tax_applicable === 1 &&
-                component.custom_perquisite === 0 &&
-                component.custom_tax_exemption_applicable_based_on_regime === 1 &&
-                component.custom_regime === "Old Regime"
-              ) {
-                old_future_taxable_income.push(earning.amount * applicableMonths);
-              }
-
-              if (
-                component.is_tax_applicable === 1 &&
-                component.custom_perquisite === 0 &&
-                component.custom_tax_exemption_applicable_based_on_regime === 1 &&
-                component.custom_regime === "New Regime"
-              ) {
-                new_future_taxable_income.push(earning.amount * applicableMonths);
-              }
-
-              if (
-               
-                component.component_type == "NPS"
-              ) {
-                nps_component.push(earning.amount * applicableMonths);
-              }
-
-
-              
-
-              
-            }
-          }
-
-          for(const deduction of makeSalarySlipRes.message.deductions)
-          {
-            const componentRes = await frappe.call({
-              method: "frappe.client.get",
-              args: {
-                doctype: "Salary Component",
-                name: deduction.salary_component
-              }
-            });
-
-            if (componentRes.message) {
-              const component = componentRes.message;
-              const applicableMonths = monthCount - slip_length;
-
-
-
-
-              if (component.component_type =="EPF") 
-              {
-                
-                epf_component.push(deduction.amount*applicableMonths);
-              }
-
-              if (component.component_type =="Professional Tax") 
-                {
-                  
-                  pt.push(deduction.amount*applicableMonths);
-                }
-
-            }
-
-              
-
-          }
-        }
-      }
-    }
-
-    // console.log(epf_component,"epf_componentepf_componentepf_component")
-
-
-    const Sumepf_component= Math.round(
-      epf_component.reduce((sum, val) => sum + val, 0)
-    );
-    
-
-    eightc_amount.push(Sumepf_component)
-
-    if(frm.doc.custom_tax_regime=="New Regime"||frm.doc.custom_tax_regime=="Old Regime")
-      {
-       eightyc_array.push("Employee Provident Fund")
-       
-   
-      }
-
-    // console.log(eightc_amount,"5555")
-
-    const old_totalfutureSum = Math.round(
-      old_future_taxable_income.reduce((sum, val) => sum + val, 0)
-    );
-    const new_totalfutureSum = Math.round(
-      new_future_taxable_income.reduce((sum, val) => sum + val, 0)
-    );
-
-    const other_perquisite_componentSum = Math.round(
-      other_perquisite_component.reduce((sum, val) => sum + val, 0)
-    );
-
-    const loanPerquisiteSum = Math.round(
-      loanPerquisite.reduce((sum, val) => sum + val, 0)
-    );
-
-
-  const sum80c = Math.min(
-    Math.round(eightc_amount.reduce((sum, val) => sum + val, 0)),
-    150000
-);
-
-  
-
-  const Sum80d = Math.round(
-    eightd_amount.reduce((sum, val) => sum + val, 0)
-  );
-
-  const Sumother = Math.round(
-    other.reduce((sum, val) => sum + val, 0)
-  );
-
-  const Sumnps = Math.round(
-    nps_component.reduce((sum, val) => sum + val, 0)
-  );
-
-  const Sumnpt = Math.round(
-    pt.reduce((sum, val) => sum + val, 0)
-  );
-
-
-
-  old_annual_taxable_income=(car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum+old_current_sslip_amount+old_totalfutureSum)-(gratuity+uniform+lta+hra+hostel+education)-(50000)-(Sumnpt)-(sum80c)-(Sum80d)-(Sumnps)-(Sumother)
-
-
-  console.log(old_annual_taxable_income,"old_annual_taxable_incomeold_annual_taxable_income")
-
-
-  new_annual_taxable_income=(car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum+new_totalfutureSum+new_current_sslip_amount)-(75000)-(Sumnps)
-
-  console.log(new_annual_taxable_income,"new_annual_taxable_incomenew_annual_taxable_income")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    return { old_totalfutureSum, 
-      new_totalfutureSum ,
-      car_perquisite,
-      bus_perquisite,
-      other_perquisite_componentSum,
-      loanPerquisiteSum,
-      uniform,
-      education,
-      hostel,
-      gratuity,
-      hra,
-      lta,
-      eightyc_array,
-      eightc_amount,
-      sum80c,
-      eightyd_array,
-      eightd_amount,
-      Sum80d,
-      Sumnps,
-      
-      Sumother,
-      Sumnpt,
-      
-      
-      
-      
-
- 
-
-    };
-
-
-
-
-  } catch (error) {
-    console.error("Error fetching future taxable income:", error);
-  }
-
-
-
-
-}
-
-
-        
-
-
-function updateTaxProjectionTable(old_totalSum,
-  new_totalSum,
-  firstCustomMonth,
-  lastCustomMonth,
-  old_totalfutureSum,
-  new_totalfutureSum,
-  car_perquisite,
-  bus_perquisite,
-  loanPerquisiteSum,
-  other_perquisite_componentSum,
-  uniform,
-  education,
-  hostel,
-  gratuity,
-  hra,
-  lta,
-  eightyc_array,
-  eightc_amount,
-  sum80c,
-  eightyd_array,
-  eightd_amount,
-  Sum80d,
-  Sumnps,
-  
-  Sumother,
-  Sumnpt,
- 
-  
-
-
-
-  
-) {
-
-
-
-
-
-    
-      // Dynamically generate rows for Section 80C deductions
-      let section80cRows = "";
-      for (let i = 0; i < eightyc_array.length; i++) {
-          section80cRows += `
-              <tr>
-                  <td>${eightyc_array[i]}</td>
-                  <td>${eightc_amount[i] || 0}</td>
-                  <td>0</td>
-              </tr>`;
-      }
-
-      let section80dRows = "";
-      for (let i = 0; i < eightyd_array.length; i++) {
-          section80dRows += `
-              <tr>
-                  <td>${eightyd_array[i]}</td>
-                  <td>${eightd_amount[i] || 0}</td>
-                  <td>0</td>
-              </tr>`;
-      }
-
-
-      
-
-
-  const table_html = `
-      <table class="table table-bordered">
-          <thead>
-              <tr>
-                  <th>Title</th>
-                  <th>Old Regime</th>
-                  <th>New Regime</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr>
-              <td>Current Taxable Earnings (${firstCustomMonth} - ${lastCustomMonth})</td>
-                  <td>₹ ${old_totalSum}</td>
-                  <td>₹ ${new_totalSum}</td>
-              </tr>
-              <tr>
-                  <td>Future Taxable Earnings</td>
-                  <td>₹ ${old_totalfutureSum}</td>
-                  <td>₹ ${new_totalfutureSum}</td>
-              </tr>
-              <tr>
-                  <td>Total Perquisite
-                      <button class="btn btn-secondary btn-sm" id="perquisiteDropdown1" style="margin-left: 10px;">
-                          <i class="fa fa-caret-down"></i>
-                      </button>
-                      <div id="perquisiteDetails1" style="display: none; margin-top: 10px;">
-                          <table class="table table-sm table-bordered">
-                              <thead>
-                                  <tr>
-                                      <th>Option</th>
-                                      <th>Value</th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  <tr>
-                                      <td>Car Perquisite</td>
-                                      <td>₹ ${car_perquisite}</td>
-                                  </tr>
-                                  <tr>
-                                      <td>Driver Perquisite</td>
-                                      <td>₹ ${bus_perquisite}</td>
-                                  </tr>
-                                  <tr>
-                                      <td>Loan Perquisite</td>
-                                      <td>₹ ${loanPerquisiteSum}</td>
-                                  </tr>
-                                  <tr>
-                                      <td>Other Perquisite</td>
-                                      <td>₹ ${other_perquisite_componentSum}</td>
-                                  </tr>
-                              </tbody>
-                          </table>
-                      </div>
-                  </td>
-                  <td>₹ ${car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum}</td>
-                   <td>₹ ${car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum}</td>
-              </tr>
-
-              <tr>
-                  <td>Total Taxable Income</td>
-                  <td>₹ ${car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum+old_totalSum+old_totalfutureSum}</td>
-                   <td>₹ ${car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum+new_totalfutureSum+new_totalSum}</td>
-              </tr>
-              <tr>
-                  <td>Less : Allowances Exempted U/s 10
-                      <button class="btn btn-secondary btn-sm" id="perquisiteDropdown2" style="margin-left: 10px;">
-                          <i class="fa fa-caret-down"></i>
-                      </button>
-                      <div id="perquisiteDetails2" style="display: none; margin-top: 10px;">
-                          <table class="table table-sm table-bordered">
-                              <thead>
-                                  <tr>
-                                      <th>Option</th>
-                                      <th>Old Regime</th>
-                                      <th>New Regime</th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  <tr>
-                                      <td>Education Allowance</td>
-                                      <td>₹ ${education}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-                                  <tr>
-                                      <td>Hostel Allowances</td>
-                                      <td>₹ ${hostel}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-                                  <tr>
-                                      <td>House Rent Allowance</td>
-                                      <td>₹ ${hra}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-                                  <tr>
-                                      <td>LTA  U/s 10 (5)</td>
-                                      <td>₹ ${lta}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-
-                                  <tr>
-                                      <td>Uniform Allowance</td>
-                                      <td>₹ ${uniform}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-
-                                  <tr>
-                                      <td>Gratuity</td>
-                                      <td>₹ ${gratuity}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-
-
-                              </tbody>
-                          </table>
-                      </div>
-                  </td>
-                  <td>₹ ${gratuity+uniform+lta+hra+hostel+education}</td>
-                  <td>₹ 0</td>
-                  
-              </tr>
-
-
-              <tr>
-                  <td>Less: Allowance Exempted U/s  16
-                      <button class="btn btn-secondary btn-sm" id="perquisiteDropdown3" style="margin-left: 10px;">
-                          <i class="fa fa-caret-down"></i>
-                      </button>
-                      <div id="perquisiteDetails3" style="display: none; margin-top: 10px;">
-                          <table class="table table-sm table-bordered">
-                              <thead>
-                                  <tr>
-                                      <th>Option</th>
-                                      <th>Old Regime</th>
-                                      <th>New Regime</th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  <tr>
-                                      <td>Standard Deduction</td>
-                                      <td>₹50000</td>
-                                      <td>₹75000</td>
-                                  </tr>
-                                  <tr>
-                                      <td>Tax on Employment</td>
-                                      <td>₹ ${Sumnpt}</td>
-                                      <td>₹ 0</td>
-                                  </tr>
-                                  
-                              </tbody>
-                          </table>
-                      </div>
-                  </td>
-                  <td>₹ ${Sumnpt+50000}</td>
-                   <td>₹ 75000</td>
-              </tr>
-
-
-
-
-
-              <tr>
-                  <td>Less: Deduction under Sec 80C (Max Rs.1,50,000/-)
-
-                      <button class="btn btn-secondary btn-sm" id="perquisiteDropdown4" style="margin-left: 10px;">
-                          <i class="fa fa-caret-down"></i>
-                      </button>
-                      <div id="perquisiteDetails4" style="display: none; margin-top: 10px;">
-                          <table class="table table-sm table-bordered">
-                              <thead>
-                                  <tr>
-                                      <th>Option</th>
-                                      <th>Old Regime</th>
-                                      <th>New Regime</th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  ${section80cRows}
-                              </tbody>
-                          </table>
-                      </div>
-                  </td>
-                  <td>₹ ${sum80c}</td>
-                  <td>₹ 0</td>
-                  
-              </tr>
-
-              <tr>
-                  <td>Less: Deductions Under Chapter VI- A(80D,80DD,80E,80U)
-
-                      <button class="btn btn-secondary btn-sm" id="perquisiteDropdown5" style="margin-left: 10px;">
-                          <i class="fa fa-caret-down"></i>
-                      </button>
-                      <div id="perquisiteDetails5" style="display: none; margin-top: 10px;">
-                          <table class="table table-sm table-bordered">
-                              <thead>
-                                  <tr>
-                                      <th>Option</th>
-                                      <th>Old Regime</th>
-                                      <th>New Regime</th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  ${section80dRows}
-                              </tbody>
-                          </table>
-                      </div>
-                  </td>
-                  <td>₹ ${Sum80d}</td>
-                  <td>₹ 0</td>
-                  
-              </tr>
-
-
-
-              <tr>
-                  <td>NPS</td>
-                  <td>₹ ${Sumnps}</td>
-                  <td>₹ ${Sumnps}</td>
-              </tr>
-              <tr>
-                  <td>Other</td>
-                  <td>₹ ${Sumother}</td>
-                  <td>₹ 0</td>
-              </tr>
-
-              <tr>
-                  <td>Total Exemption/Deduction</td>
-                  <td>₹ ${gratuity+uniform+lta+hra+hostel+education+sum80c+Sum80d+Sumnps+Sumother+Sumnpt}</td>
-                  <td>₹ ${Sumnps}</td>
-              </tr>
-
-              <tr>
-                  <td>Annual Taxable Income</td>
-                  <td>₹ ${(car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum+old_totalSum+old_totalfutureSum)-(gratuity+uniform+lta+hra+hostel+education)-(50000)-(Sumnpt)-(sum80c)-(Sum80d)-(Sumnps)-(Sumother)}</td>
-
-                  <td>₹ ${(car_perquisite+bus_perquisite+loanPerquisiteSum+other_perquisite_componentSum+new_totalfutureSum+new_totalSum)-75000-Sumnps}</td>
-              </tr>
-
-
-
-              <tr>
-                  <td>Tax On Total Income</td>                         
-                  <td>₹ ${total_sum_old} </td>
-                   <td>₹ ??</td>
-              </tr>
-
-
-              
-
-
-
-              
-          </tbody>
-      </table>
-  `;
-
-  // Set the value of the HTML field
-  frm.set_df_property('custom_employee_tax_projection', 'options', table_html);
-
-  // Add click listeners for dropdowns to show/hide sub-tables
-  setTimeout(() => {
-      const dropdowns = [
-          { buttonId: 'perquisiteDropdown1', detailsId: 'perquisiteDetails1' },
-          { buttonId: 'perquisiteDropdown2', detailsId: 'perquisiteDetails2' },
-          { buttonId: 'perquisiteDropdown3', detailsId: 'perquisiteDetails3' },
-          { buttonId: 'perquisiteDropdown4', detailsId: 'perquisiteDetails4' },
-          { buttonId: 'perquisiteDropdown5', detailsId: 'perquisiteDetails5' },
-          { buttonId: 'perquisiteDropdown6', detailsId: 'perquisiteDetails6' },
-      ];
-
-      dropdowns.forEach(({ buttonId, detailsId }) => {
-          const dropdownButton = document.getElementById(buttonId);
-          const detailsDiv = document.getElementById(detailsId);
-
-          if (dropdownButton && detailsDiv) {
-              dropdownButton.addEventListener('click', function () {
-                  // Toggle the visibility of the sub-table
-                  detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
-              });
-          }
-      });
-  }, 100); // Delay to ensure the table is rendered
-}
-
-// Call the function to fetch taxable income and future taxable income
-Promise.all([fetchTaxableIncome(), fetchFutureTaxableIncome()])
-  .then(([taxableData, futureTaxableData]) => {
-    const { old_totalSum, new_totalSum } = taxableData;
-    const { old_totalfutureSum, new_totalfutureSum ,car_perquisite,bus_perquisite,loanPerquisiteSum,other_perquisite_componentSum,uniform,education,hostel,gratuity,hra,lta,eightyc_array,
-      eightc_amount,sum80c,eightyd_array,
-      eightd_amount,
-      Sum80d,
-      Sumnps,
-     
-      Sumother,
-      Sumnpt,
-      
-      
-      
-
-      
-      } = futureTaxableData;
-
-      
-
-
-    updateTaxProjectionTable(
-      old_totalSum, 
-      new_totalSum,
-      firstCustomMonth, 
-      lastCustomMonth, 
-      old_totalfutureSum, 
-      new_totalfutureSum,
-      car_perquisite,
-      bus_perquisite, 
-      loanPerquisiteSum,
-      other_perquisite_componentSum,
-      uniform,
-      education,
-      hostel,
-      gratuity,
-      hra,
-      lta,
-      eightyc_array,
-      eightc_amount,
-      sum80c,
-      eightyd_array,
-      eightd_amount,
-      Sum80d,
-      Sumnps,
-      
-      Sumother,
-      Sumnpt,
-      
-      
-      
-      
-
-      
-      
-      
-    );
-  })
-  .catch((error) => console.error('Error fetching data for tax projection:', error));
 }
 
 

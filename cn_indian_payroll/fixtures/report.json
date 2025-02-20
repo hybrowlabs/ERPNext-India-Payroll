@@ -45,6 +45,7 @@
     "parenttype": "Report",
     "role": "Employee Self Service"
    }
-  ]
+  ],
+  "timeout": 0
  }
 ]
