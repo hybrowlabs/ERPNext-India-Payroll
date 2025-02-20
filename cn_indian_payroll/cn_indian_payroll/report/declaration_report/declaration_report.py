@@ -677,10 +677,8 @@ def get_columns(filters):
         {"fieldname": "department", "label": "Department", "fieldtype": "Data", "width": 150},
         {"fieldname": "designation", "label": "Designation", "fieldtype": "Data", "width": 150},
         {"fieldname": "pan", "label": "PAN", "fieldtype": "Data", "width": 150},
-        {"fieldname": "salary_slip_id", "label": "Salary Slip ID", "fieldtype": "Link", "width": 150,"options":"Salary Slip"},
+        {"fieldname": "salary_slip_id", "label": "Salary Slip ID", "fieldtype": "Link", "width": 150, "options": "Salary Slip"},
         {"fieldname": "month", "label": "Month", "fieldtype": "Data", "width": 100},
-
-        
     ]
 
     salary_components = frappe.db.sql("""
@@ -714,8 +712,15 @@ def get_columns(filters):
         "fieldtype": "Currency",
         "width": 120
     })
+    columns.append({
+        "fieldname": "total_income",
+        "label": "Total Income",
+        "fieldtype": "Currency",
+        "width": 120
+    })
 
     return columns
+
 def get_salary_slip_data(filters=None):
     """Fetch salary slip data with earnings child table components as columns ordered by idx"""
 
@@ -727,6 +732,10 @@ def get_salary_slip_data(filters=None):
         conditions["company"] = filters["company"]
     if filters.get("employee"):
         conditions["employee"] = filters["employee"]
+    if filters.get("payroll_period"):
+        conditions["custom_payroll_period"] = filters["payroll_period"]
+
+
 
     salary_slips = frappe.get_list(
         "Salary Slip",
@@ -749,23 +758,19 @@ def get_salary_slip_data(filters=None):
         slip_doc = frappe.get_doc("Salary Slip", slip.name)
         get_employee = frappe.get_doc("Employee", slip_doc.employee)
 
-        if slip.employee not in employee_counts:
-            employee_counts[slip.employee] = 0
-        employee_counts[slip.employee] += 1
+        employee_counts[slip.employee] = employee_counts.get(slip.employee, 0) + 1
 
         row = {
             "employee": slip.employee if slip.employee != previous_employee else "",
             "employee_name": slip.employee_name if slip.employee_name != previous_employee_name else "",
             "doj": get_employee.date_of_joining if get_employee.date_of_joining != previous_doj else "",
             "email": get_employee.company_email if get_employee.company_email != previous_company_email else "",
-
             "department": get_employee.department if get_employee.department != previous_department else "",
             "designation": get_employee.designation if get_employee.designation != previous_designation else "",
             "pan": get_employee.pan_number if get_employee.pan_number != previous_pan else "",
-
             "salary_slip_id": slip.name,
             "month": slip.custom_month,
-            "loan_perquisite": 1  # Set Loan Perquisite default value to 0
+            "loan_perquisite": slip.custom_perquisite_amount  
         }
 
         earnings = sorted(slip_doc.earnings, key=lambda x: x.idx)
@@ -773,82 +778,69 @@ def get_salary_slip_data(filters=None):
         for earning in earnings:
             component_key = frappe.scrub(earning.salary_component)
             row[component_key] = earning.amount
-            
-            if slip.employee not in employee_totals:
-                employee_totals[slip.employee] = {}
-            employee_totals[slip.employee][component_key] = employee_totals[slip.employee].get(component_key, 0) + earning.amount
+            employee_totals.setdefault(slip.employee, {}).setdefault(component_key, 0)
+            employee_totals[slip.employee][component_key] += earning.amount
 
         data.append(row)
-        previous_employee = slip.employee
-        previous_doj = get_employee.date_of_joining
-        previous_employee_name = get_employee.employee_name
-        previous_company_email = get_employee.company_email
-
-        previous_department = get_employee.department
-        previous_designation = get_employee.designation
-        previous_pan = get_employee.pan_number
+        previous_employee, previous_doj, previous_employee_name, previous_company_email = slip.employee, get_employee.date_of_joining, get_employee.employee_name, get_employee.company_email
+        previous_department, previous_designation, previous_pan = get_employee.department, get_employee.designation, get_employee.pan_number
 
         next_slip_index = salary_slips.index(slip) + 1
         if next_slip_index >= len(salary_slips) or salary_slips[next_slip_index].employee != slip.employee:
-            actual_row = {"employee": "Actual", "doj": "", "salary_slip_id": "", "month": "", "loan_perquisite": 0}
+            actual_row = {"employee": "Actual", "salary_slip_id": "", "month": "", "loan_perquisite": 0}
             actual_row.update(employee_totals[slip.employee])
             data.append(actual_row)
             
-            projection_row = get_projection(slip.employee, employee_totals[slip.employee], employee_counts[slip.employee])
-            projection_row["loan_perquisite"] = 0# Add Loan Perquisite for projection
+            projection_row = get_projection(slip.employee, employee_totals[slip.employee], employee_counts[slip.employee], filters.get("payroll_period"))
+            projection_row["loan_perquisite"] = 0  
             data.append(projection_row)
             
-            combined_row = {"employee": "Total", "doj": "", "salary_slip_id": "", "month": "", "loan_perquisite": 4}
+            combined_row = {"employee": "Total", "salary_slip_id": "", "month": "", "loan_perquisite":slip.custom_perquisite_amount,"total_income": 0}
             for key in employee_totals[slip.employee]:
                 combined_row[key] = employee_totals[slip.employee].get(key, 0) + projection_row.get(key, 0)
+                combined_row["total_income"] += combined_row[key]  
+
+            combined_row["total_income"] += combined_row["loan_perquisite"]  
+            frappe.msgprint(str(combined_row))
             data.append(combined_row)
             
             employee_totals.pop(slip.employee)
 
     return data
 
-
-
-
-
-
-def get_projection(employee, employee_totals, slip_count):
-    projection = {"employee": "Projection", "doj": "", "salary_slip_id": "", "month": ""}
+def get_projection(employee, employee_totals, slip_count, custom_payroll_period):
+    projection = {"employee": "Projection", "salary_slip_id": "", "month": ""}
 
     ss_assignment = frappe.get_list(
-        'Salary Structure Assignment',
-        filters={'employee': employee, 'docstatus': 1},
-        fields=['*'],
-        order_by='from_date desc',
-        limit=1
+    "Salary Structure Assignment",
+    filters={"employee": employee, "docstatus": 1, "custom_payroll_period": custom_payroll_period},
+    fields=["name", "from_date", "salary_structure", "custom_payroll_period"],
+    order_by="from_date asc"  
     )
 
     if ss_assignment:
-        get_payroll = frappe.get_doc("Payroll Period", ss_assignment[0].custom_payroll_period)
-        effective_start_date = ss_assignment[0].from_date
-        payroll_end_date = get_payroll.end_date
-        payroll_start_date = get_payroll.start_date
-        doj = ss_assignment[0].custom_date_of_joining
+        first_assignment = ss_assignment[0]  # Get the first (earliest) assignment
+        start_date = first_assignment["from_date"]
+        first_assignment_structure = first_assignment["salary_structure"]
 
-        start_date = max(effective_start_date, payroll_start_date, doj)
+        last_assignment=ss_assignment[-1]
+        last_start_date=last_assignment["from_date"]
+        last_salary_structure=last_assignment["salary_structure"]
         
-        if isinstance(start_date, str):
-            start = datetime.strptime(start_date, "%Y-%m-%d").date()
-        else:
-            start = start_date  
 
-        if isinstance(payroll_end_date, str):
-            end = datetime.strptime(payroll_end_date, "%Y-%m-%d").date()
-        else:
-            end = payroll_end_date  
+        payroll_period_doc = frappe.get_doc("Payroll Period", first_assignment["custom_payroll_period"])
+        end_date = payroll_period_doc.end_date
 
-        num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-        
+        # Calculate month difference between start_date and end_date
+        month_count = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
+
+        # frappe.msgprint(f"Months from {start_date} to {end_date}: {month_count}")
+
         salary_slip = make_salary_slip(
-            source_name=ss_assignment[0].salary_structure,
-            employee=ss_assignment[0].employee,
+            source_name=last_salary_structure,
+            employee=employee,
             print_format='Salary Slip Standard',
-            posting_date=ss_assignment[0].from_date,
+            posting_date=last_start_date,
             for_preview=1,  
         )
 
@@ -857,6 +849,8 @@ def get_projection(employee, employee_totals, slip_count):
             if get_tax_component.is_tax_applicable == 1:
                 component_key = frappe.scrub(earning.salary_component)
                 if component_key in employee_totals:
-                    projection[component_key] = (num_months - slip_count) * earning.amount
+                    projection[component_key] = (month_count - slip_count) * earning.amount
     
     return projection
+
+    

@@ -19,7 +19,7 @@ frappe.query_reports["Declaration Report"] = {
             "fieldtype": "Link",
             "options": "Payroll Period",
             "width": 200,
-			// "reqd":1
+			"reqd":1
         },
 
 		{
@@ -28,7 +28,7 @@ frappe.query_reports["Declaration Report"] = {
             "fieldtype": "Link",
             "options": "Company",
             "width": 200,
-			// "reqd":1
+			"reqd":1
         },
 
 
