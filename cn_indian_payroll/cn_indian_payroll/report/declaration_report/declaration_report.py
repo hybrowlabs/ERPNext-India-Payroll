@@ -660,6 +660,7 @@
 import frappe
 from datetime import datetime
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+import json
 
 def execute(filters=None):
     columns = get_columns(filters)
@@ -719,6 +720,283 @@ def get_columns(filters):
         "width": 120
     })
 
+
+    #section 10 columns-----------
+
+    columns.append({
+        "fieldname": "hra_exemption",
+        "label": "HRA Exemption",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "lta",
+        "label": "LTA  U/s 10 (5)",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "education_allowance",
+        "label": "Education Allowance",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "hostel_allowance",
+        "label": "Hostel Allowances",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "uniform_allowance",
+        "label": "Uniform Allowance",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
+    
+
+    #Standard Deduction Columns-----------
+    columns.append({
+        "fieldname": "standard_deduction_old",
+        "label": "Standard Deduction Old Regime",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "standard_deduction_new",
+        "label": "Standard Deduction Old Regime",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "tax_on_employment",
+        "label": "Tax on Employment",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
+
+    #80C Columns-----------
+    columns.append({
+        "label": "Investments In PF(Auto)",
+        "fieldname": "pf_auto",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": "Pension Scheme Investments & ULIP",
+        "fieldname": "pension_scheme",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": "Housing Loan Principal Repayment",
+        "fieldname": "housing_loan",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": " PPF - Public Provident Fund",
+        "fieldname": "ppf",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": " Home Loan Account Of National Housing Bank ",
+        "fieldname": "home_loan",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": "LIC- Life Insurance Premium Directly Paid By Employee",
+        "fieldname": "lic",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": "NSC - National Saving Certificate ",
+        "fieldname": "nsc",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": "Mutual Funds - Notified Under Clause 23D Of Section 10",
+        "fieldname": "mutual_fund",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "label": "ELSS - Equity Link Saving Scheme Of Mutual Funds ",
+        "fieldname": "elss",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "tuition",
+        "label": " Tuition Fees For Full Time Education ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "fixed_deposit",
+        "label": "Fixed Deposits In Banks (Period As Per Income Tax Guidelines) ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "deposit",
+        "label": "5 Years Term Deposit An Account Under Post Office Term Deposit Rules ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "others",
+        "label": "Others ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    
+
+    #80D Columns-----------
+
+    columns.append({
+        "fieldname": "mediclaim_self",
+        "label": "Mediclaim Self, Spouse & Children (Below 60 years) ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "mediclaim_self_senior",
+        "label": "Mediclaim Self (Senior Citizen - 60 years & above) ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "mediclaim_parents_below",
+        "label": "Mediclaim Parents (Below 60 years) ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "mediclaim_parents_senior",
+        "label": "Mediclaim Parents (Senior Citizen - 60 years & above) ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "preventive_health_checkup",
+        "label": "Preventive Health Check-up for Parents ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "preventive_health_checkup_self",
+        "label": "Preventive Health Check-up ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
+    #80DD and other columns-----------
+
+    columns.append({
+        "fieldname": "medical_treatment_insurance",
+        "label": "Medical treatment / insurance of handicapped dependant ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
+    columns.append({
+        "fieldname": "medical_treatment_disease",
+        "label": "Medical treatment (specified diseases only)",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "interest_repayment",
+        "label": "Interest repayment of Loan for higher education",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "physical_disabled",
+        "label": "Deduction for Physically Disabled",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "donation_80g",
+        "label": "Donation U/S 80G",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "nps_deduction",
+        "label": "NPS Deduction U/S 80CCD(2)",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "hsg",
+        "label": "First HSG Loan Interest Ded.(80EE)",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "nps_contribution",
+        "label": "Contribution in National Pension Scheme",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "tax_incentive",
+        "label": "Tax Incentive for Affordable Housing for Ded U/S 80EEA ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "tax_incentive_eeb",
+        "label": "Tax Incentives for Electric Vehicles for Ded U/S 80EEB ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "dona_political_party",
+        "label": "Donations/contribution made to a political party or an electoral trust",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "interest_saving_account",
+        "label": "Interest on deposits in saving account for Ded U/S 80TTA ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "interest_fd",
+        "label": "Interest on deposits in saving account for Ded U/S 80TTB ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "deduction_80gg",
+        "label": "Deduction U/S 80GG ",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+    columns.append({
+        "fieldname": "regime_80ccg",
+        "label": "Rajiv Gandhi Equity Saving Scheme 80CCG",
+        "fieldtype": "Currency",
+        "width": 120
+    })
+
+
+
+
+
+
+
     return columns
 
 def get_salary_slip_data(filters=None):
@@ -728,21 +1006,20 @@ def get_salary_slip_data(filters=None):
         filters = {}
 
     conditions = {"docstatus": ["in", [0, 1]]}
+    declaration_condition = {"docstatus": ["in", [0, 1]]}
+
     if filters.get("company"):
         conditions["company"] = filters["company"]
+        declaration_condition["company"] = filters["company"]
     if filters.get("employee"):
         conditions["employee"] = filters["employee"]
+        declaration_condition["employee"] = filters["employee"]
     if filters.get("payroll_period"):
         conditions["custom_payroll_period"] = filters["payroll_period"]
+        declaration_condition["payroll_period"] = filters["payroll_period"]
 
-
-
-    salary_slips = frappe.get_list(
-        "Salary Slip",
-        filters=conditions,
-        fields=["*"]
-    )
-
+    salary_slips = frappe.get_list("Salary Slip", filters=conditions, fields=["*"])
+    
     data = []
     previous_employee = None  
     previous_employee_name = None  
@@ -754,12 +1031,48 @@ def get_salary_slip_data(filters=None):
     employee_totals = {}  
     employee_counts = {}  
 
+    amount_map = {}
+    lta_map={}
+    education_allowance_map={}
+    hostel_allowance_map={}
+    uniform_allowance_map={}
+
+    pt_map = {}
+
+    standard_deduction_new=0
+    standard_deduction_old=0
+    declarations = frappe.get_list(
+        'Employee Tax Exemption Declaration',
+        filters=declaration_condition,
+        fields=['*']
+    )
+    
+    for each_doc in declarations:
+        if each_doc.custom_tax_regime=="Old Regime":
+            get_tax_slab=frappe.get_doc("Income Tax Slab",each_doc.custom_income_tax)
+            standard_deduction_old=get_tax_slab.standard_tax_exemption_amount
+            amount_map[each_doc.employee] = each_doc.annual_hra_exemption
+            get_doc=frappe.get_doc("Employee Tax Exemption Declaration",each_doc.name)
+
+            form_data = json.loads(get_doc.custom_declaration_form_data or '{}')
+            lta_map[each_doc.employee] = form_data.get("twentyeight", 0)
+            education_allowance_map[each_doc.employee] = form_data.get("thirteen", 0)
+            hostel_allowance_map[each_doc.employee] = form_data.get("twentysix", 0)
+            uniform_allowance_map[each_doc.employee] = form_data.get("twentyFour", 0)
+            pt_map[each_doc.employee] = form_data.get("nineteenNumber", 0)
+
+        elif each_doc.custom_tax_regime=="New Regime":
+            get_tax_slab=frappe.get_doc("Income Tax Slab",each_doc.custom_income_tax)
+            standard_deduction_new=get_tax_slab.standard_tax_exemption_amount
+        
+
+
     for slip in salary_slips:
         slip_doc = frappe.get_doc("Salary Slip", slip.name)
         get_employee = frappe.get_doc("Employee", slip_doc.employee)
-
+        
         employee_counts[slip.employee] = employee_counts.get(slip.employee, 0) + 1
-
+        
         row = {
             "employee": slip.employee if slip.employee != previous_employee else "",
             "employee_name": slip.employee_name if slip.employee_name != previous_employee_name else "",
@@ -770,41 +1083,68 @@ def get_salary_slip_data(filters=None):
             "pan": get_employee.pan_number if get_employee.pan_number != previous_pan else "",
             "salary_slip_id": slip.name,
             "month": slip.custom_month,
-            "loan_perquisite": slip.custom_perquisite_amount  
+            "loan_perquisite": slip.custom_perquisite_amount 
         }
 
         earnings = sorted(slip_doc.earnings, key=lambda x: x.idx)
         
         for earning in earnings:
-            component_key = frappe.scrub(earning.salary_component)
-            row[component_key] = earning.amount
-            employee_totals.setdefault(slip.employee, {}).setdefault(component_key, 0)
-            employee_totals[slip.employee][component_key] += earning.amount
-
+            get_tax_component = frappe.get_doc("Salary Component", earning.salary_component)
+            
+            if (
+                get_tax_component.is_tax_applicable == 1 
+                and get_tax_component.type == "Earning" 
+                and get_tax_component.custom_tax_exemption_applicable_based_on_regime == 1 
+                and (get_tax_component.custom_regime == "All" or get_tax_component.custom_regime == "New Regime")
+            ):
+                component_key = frappe.scrub(earning.salary_component)
+                row[component_key] = earning.amount
+                employee_totals.setdefault(slip.employee, {}).setdefault(component_key, 0)
+                employee_totals[slip.employee][component_key] += earning.amount
+        
         data.append(row)
-        previous_employee, previous_doj, previous_employee_name, previous_company_email = slip.employee, get_employee.date_of_joining, get_employee.employee_name, get_employee.company_email
-        previous_department, previous_designation, previous_pan = get_employee.department, get_employee.designation, get_employee.pan_number
-
+        previous_employee, previous_doj, previous_employee_name, previous_company_email = (
+            slip.employee, get_employee.date_of_joining, get_employee.employee_name, get_employee.company_email
+        )
+        previous_department, previous_designation, previous_pan = (
+            get_employee.department, get_employee.designation, get_employee.pan_number
+        )
+        
         next_slip_index = salary_slips.index(slip) + 1
         if next_slip_index >= len(salary_slips) or salary_slips[next_slip_index].employee != slip.employee:
             actual_row = {"employee": "Actual", "salary_slip_id": "", "month": "", "loan_perquisite": 0}
-            actual_row.update(employee_totals[slip.employee])
+            actual_row.update(employee_totals.get(slip.employee, {}))
             data.append(actual_row)
             
-            projection_row = get_projection(slip.employee, employee_totals[slip.employee], employee_counts[slip.employee], filters.get("payroll_period"))
+            projection_row = get_projection(slip.employee, employee_totals.get(slip.employee, {}), employee_counts[slip.employee], filters.get("payroll_period"))
             projection_row["loan_perquisite"] = 0  
             data.append(projection_row)
             
-            combined_row = {"employee": "Total", "salary_slip_id": "", "month": "", "loan_perquisite":slip.custom_perquisite_amount,"total_income": 0}
-            for key in employee_totals[slip.employee]:
+            combined_row = {
+                "employee": "Total", 
+                "salary_slip_id": "", 
+                "month": "", 
+                "loan_perquisite": slip.custom_perquisite_amount, 
+                "total_income": 0, 
+                "hra_exemption": amount_map.get(slip.employee, 0),
+                "lta":lta_map.get(slip.employee, 0),
+                "education_allowance":education_allowance_map.get(slip.employee, 0),
+                "hostel_allowance":hostel_allowance_map.get(slip.employee, 0),
+                "uniform_allowance":uniform_allowance_map.get(slip.employee, 0),
+                "standard_deduction_old":standard_deduction_old,
+                "standard_deduction_new":standard_deduction_new,
+                "tax_on_employment":pt_map.get(slip.employee, 0)
+
+            }
+            
+            for key in employee_totals.get(slip.employee, {}):
                 combined_row[key] = employee_totals[slip.employee].get(key, 0) + projection_row.get(key, 0)
                 combined_row["total_income"] += combined_row[key]  
-
-            combined_row["total_income"] += combined_row["loan_perquisite"]  
-            frappe.msgprint(str(combined_row))
+            
+            combined_row["total_income"] += combined_row["loan_perquisite"]
             data.append(combined_row)
             
-            employee_totals.pop(slip.employee)
+            employee_totals.pop(slip.employee, None)
 
     return data
 

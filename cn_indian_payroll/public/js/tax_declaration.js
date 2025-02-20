@@ -112,8 +112,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Mediclaim Policy for Parents</p>",
-                "label": "Mediclaim Premium",
+                "html": "<p>Mediclaim Self, Spouse & Children (Below 60 years)</p>",
+                "label": "Mediclaim Self, Spouse & Children (Below 60 years)",
                 "refreshOnChange": false,
                 "key": "mediclaimPremium1",
                 "type": "content",
@@ -125,8 +125,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>50000</p>",
-                "label": "50000",
+                "html": "<p>25000</p>",
+                "label": "25000",
                 "refreshOnChange": false,
                 "key": "m_value",
                 "type": "content",
@@ -173,7 +173,7 @@ const DECLARATION_FORM = {
                 "requireDecimal": false,
                 "inputFormat": "plain",
                 "truncateMultipleSpaces": false,
-                "calculateValue": "if (data.amount>50000){\n  value = 0;\n} ",
+                "calculateValue": "if (data.amount>25000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
 
                 "validateWhenHidden": false,
@@ -193,8 +193,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>&nbsp;Mediclaim Policy for Self, Spouse, Children for Senior Citizen</p>",
-                "label": " Mediclaim Policy for Self, Spouse, Children for Senior Citizen",
+                "html": "<p>&nbsp;Mediclaim Self (Senior Citizen - 60 years & above)</p>",
+                "label": " Mediclaim Self (Senior Citizen - 60 years & above)",
                 "refreshOnChange": false,
                 "key": "aDeductionUS80DPaidForParents",
                 "type": "content",
@@ -206,8 +206,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">25000</span></p>",
-                "label": "25000",
+                "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">50000</span></p>",
+                "label": "50000",
                 "refreshOnChange": false,
                 "key": "m1_value",
                 "type": "content",
@@ -255,7 +255,7 @@ const DECLARATION_FORM = {
                 "requireDecimal": false,
                 "inputFormat": "plain",
                 "truncateMultipleSpaces": false,
-                "calculateValue": "if (data.amount3>25000){\n  value = 0;\n} ",
+                "calculateValue": "if (data.amount3>50000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
                 "validateWhenHidden": false,
                 "key": "amount3",
@@ -272,8 +272,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Mediclaim Policy for Self, Spouse, Children</p>",
-                "label": "Mediclaim Policy for Self, Spouse, Children",
+                "html": "<p>Parents (Below 60 years)</p>",
+                "label": "Parents (Below 60 years)",
                 "refreshOnChange": false,
                 "key": "mediclaimPolicyForSelfSpouseChildren",
                 "type": "content",
@@ -285,7 +285,7 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>50000</p>",
+                "html": "<p>25000</p>",
                 "label": "p_amount",
                 "refreshOnChange": false,
                 "key": "pAmount",
@@ -334,7 +334,7 @@ const DECLARATION_FORM = {
                 "requireDecimal": false,
                 "inputFormat": "plain",
                 "truncateMultipleSpaces": false,
-                "calculateValue": "if (data.mpAmount3>50000){\n  value = 0;\n} ",
+                "calculateValue": "if (data.mpAmount3>25000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
                 
                 "validateWhenHidden": false,
@@ -352,8 +352,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Mediclaim Policy for Parents for Senior Citizen</p>",
-                "label": "Mediclaim Policy for Parents for Senior Citizen",
+                "html": "<p>Parents (Senior Citizen - 60 years & above)</p>",
+                "label": "Parents (Senior Citizen - 60 years & above)",
                 "refreshOnChange": false,
                 "key": "mediclaimPolicyForParentsForSeniorCitizen",
                 "type": "content",
@@ -365,7 +365,7 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>25000</p>",
+                "html": "<p>50000</p>",
                 "label": "max_amount_4",
                 "refreshOnChange": false,
                 "key": "maxAmount4",
@@ -418,7 +418,7 @@ const DECLARATION_FORM = {
                 "key": "mpAmount4",
                 "type": "number",
                 "input": true,
-                "calculateValue": "if (data.mpAmount4>25000){\n  value = 0;\n} ",
+                "calculateValue": "if (data.mpAmount4>50000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
               }
             ]
