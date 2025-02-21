@@ -97,22 +97,14 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             array=[]
             amount=[]
             max_amount_category=[]
-            # Fetch Payroll Period details
             get_payroll_period = frappe.get_doc("Payroll Period", self.custom_payroll_period)
 
-            # Convert dates to `datetime.date` for comparison
             from_date = getdate(self.from_date)
             payroll_start_date = getdate(get_payroll_period.start_date)
-
             payroll_end_date=getdate(get_payroll_period.end_date)
-
-            # Determine the declaration date
             declaration_date = max(from_date, payroll_start_date)
-
-
             start_date=declaration_date
             end_date=payroll_end_date
-
 
             if isinstance(start_date, str):
                 start = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -126,21 +118,14 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
             num_months = (end.year - start.year) * 12 + (end.month - start.month)+1
 
-
-
-
             if self.custom_tax_regime=="Old Regime":
-                
-
                 #find Uniform
-
                 if self.custom_is_uniform_allowance and self.custom_uniform_allowance_value:
                     uniform_component = frappe.get_list('Employee Tax Exemption Sub Category',
                             filters={'custom_component_type':"Uniform"},
                             fields=['*'],
                         
                         )
-
                     if len(uniform_component)>0:
                         for i in uniform_component:
                             array.append(i.name)
@@ -151,13 +136,12 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 #find epf
 
                 if self.custom_is_epf:
-                    
-
                     new_salary_slip = make_salary_slip(
                         source_name=self.salary_structure,
                         employee=self.employee,
                         print_format='Salary Slip Standard for CTC',  
-                        # posting_date=self.from_date  
+                        posting_date=self.from_date,
+                        for_preview=1,
                     )
                     for new_earning in new_salary_slip.deductions:
                         epf_component = frappe.get_doc("Salary Component", new_earning.salary_component)
@@ -193,7 +177,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         source_name=self.salary_structure,
                         employee=self.employee,
                         print_format='Salary Slip Standard for CTC',  
-                        # posting_date=self.from_date  
+                        posting_date=self.from_date ,
+                        for_preview=1,
+
                     )
                     for new_earning in new_salary_slip.earnings:
                         nps_component = frappe.get_doc("Salary Component", new_earning.salary_component)
@@ -201,7 +187,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                             
 
                             nps_amount_year=new_earning.amount*num_months
-                            # frappe.msgprint(str(nps_amount_year))
                             nps_component = frappe.get_list('Employee Tax Exemption Sub Category',
                                     filters={'custom_component_type':"NPS"},
                                     fields=['*'],
@@ -230,11 +215,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                            
                             amount.append(i.max_amount)
 
-                # frappe.msgprint(str(amount))
-
-               
-
-
 
             if self.custom_tax_regime=="New Regime":
 
@@ -243,7 +223,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         source_name=self.salary_structure,
                         employee=self.employee,
                         print_format='Salary Slip Standard for CTC',  
-                        # posting_date=self.from_date  
+                        posting_date=self.from_date,
+                        for_preview=1,  
                     )
                     for new_earning in new_salary_slip.earnings:
                         nps_component = frappe.get_doc("Salary Component", new_earning.salary_component)

@@ -107,17 +107,10 @@ frappe.ui.form.on('Salary Structure Assignment', {
         if (frm.doc.custom_is_nps==1)
         
         {
-        
                 if(frm.doc.custom_nps_percentage <= 10) 
                 {
-    
-    
                         var amount = (frm.doc.base / 12 * 35) / 100;
-                        
-                        
-                        
                         var nps_value=(amount*frm.doc.custom_nps_percentage)/100
-                        //  console.log(nps_value,"ppp")
                         frm.set_value("custom_nps_amount",nps_value)
                     
                 }
@@ -125,7 +118,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 else
                 {
                     msgprint("you cant put percentage greater than 10")
-                   
                     frm.set_value("custom_nps_amount",undefined)
                 }
         
