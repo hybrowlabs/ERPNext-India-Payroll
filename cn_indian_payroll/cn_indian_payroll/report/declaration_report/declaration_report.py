@@ -79,20 +79,20 @@ def get_columns(filters):
         "width": 120
     })
     columns.append({
-        "fieldname": "education_allowance",
-        "label": "Education Allowance",
+        "fieldname": "education_allowance_exemption",
+        "label": "Education Allowance Exemption",
         "fieldtype": "Currency",
         "width": 120
     })
     columns.append({
-        "fieldname": "hostel_allowance",
-        "label": "Hostel Allowances",
+        "fieldname": "hostel_allowance_exemption",
+        "label": "Hostel Allowances Exemption",
         "fieldtype": "Currency",
         "width": 120
     })
     columns.append({
-        "fieldname": "uniform_allowance",
-        "label": "Uniform Allowance",
+        "fieldname": "uniform_allowance_exemption",
+        "label": "Uniform Allowance Exemption",
         "fieldtype": "Currency",
         "width": 120
     })
@@ -598,9 +598,9 @@ def get_salary_slip_data(filters=None):
                 "total_income": 0, 
                 "hra_exemption": amount_map.get(slip.employee, 0),
                 "lta":lta_map.get(slip.employee, 0),
-                "education_allowance":education_allowance_map.get(slip.employee, 0),
-                "hostel_allowance":hostel_allowance_map.get(slip.employee, 0),
-                "uniform_allowance":uniform_allowance_map.get(slip.employee, 0),
+                "education_allowance_exemption":education_allowance_map.get(slip.employee, 0),
+                "hostel_allowance_exemption":hostel_allowance_map.get(slip.employee, 0),
+                "uniform_allowance_exemption":uniform_allowance_map.get(slip.employee, 0),
                 "standard_deduction_old":standard_deduction_old,
                 "standard_deduction_new":standard_deduction_new,
                 "tax_on_employment":pt_map.get(slip.employee, 0),
