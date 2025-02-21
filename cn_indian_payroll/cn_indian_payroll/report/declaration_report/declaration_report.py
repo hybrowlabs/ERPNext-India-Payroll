@@ -99,6 +99,8 @@ def get_columns(filters):
 
     
 
+    
+
     #Standard Deduction Columns-----------
     columns.append({
         "fieldname": "standard_deduction_old",
@@ -353,6 +355,13 @@ def get_columns(filters):
         "width": 120
     })
 
+    columns.append({
+        "fieldname": "opted_regime",
+        "label": "Opted Regime",
+        "fieldtype": "Data",
+        "width": 120
+    })
+
 
 
 
@@ -445,6 +454,8 @@ def get_salary_slip_data(filters=None):
 
     total_declaration={}
 
+    opted_regime = {}
+
     standard_deduction_new=0
     standard_deduction_old=0
     declarations = frappe.get_list(
@@ -456,6 +467,8 @@ def get_salary_slip_data(filters=None):
     for each_doc in declarations:
 
         total_declaration[each_doc.employee] = each_doc.total_exemption_amount
+
+        opted_regime[each_doc.employee] = each_doc.custom_tax_regime
 
         
 
@@ -640,7 +653,8 @@ def get_salary_slip_data(filters=None):
                 "regime_80ccg": regime_80ccg.get(slip.employee, 0),
 
                 "total_deduction":total_declaration.get(slip.employee,0),
-                "annual_taxable_income":0
+                "annual_taxable_income":0,
+                "opted_regime":opted_regime.get(slip.employee,0)
 
 
 
