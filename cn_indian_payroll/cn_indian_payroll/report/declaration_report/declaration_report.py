@@ -392,7 +392,8 @@ def get_salary_slip_data(filters=None):
     salary_slips = frappe.get_all(
                 "Salary Slip", 
                 filters=conditions, 
-                fields=["*"]
+                fields=["*"],
+                order_by="posting_date asc" 
             )
     
     data = []
