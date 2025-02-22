@@ -63,6 +63,12 @@ def get_columns(filters):
         "width": 120
     })
 
+    # additional_columns = [
+    #     {"fieldname": "loan_perquisite", "label": "Loan Perquisite", "fieldtype": "Currency", "width": 120},
+    #     {"fieldname": "total_income", "label": "Total Income", "fieldtype": "Currency", "width": 120},
+        
+    # ]
+
 
     #section 10 columns-----------
 
@@ -367,7 +373,7 @@ def get_columns(filters):
 
 
 
-
+    # columns.extend(additional_columns)
     return columns
 
 def get_salary_slip_data(filters=None):
@@ -546,6 +552,12 @@ def get_salary_slip_data(filters=None):
         elif each_doc.custom_tax_regime=="New Regime":
             get_tax_slab=frappe.get_doc("Income Tax Slab",each_doc.custom_income_tax)
             standard_deduction_new=get_tax_slab.standard_tax_exemption_amount
+            
+            get_doc=frappe.get_doc("Employee Tax Exemption Declaration",each_doc.name)
+
+            form_data = json.loads(get_doc.custom_declaration_form_data or '{}')
+
+            nps_deduction[each_doc.employee] = form_data.get("nineNumber", 0)
         
     
 
@@ -554,6 +566,8 @@ def get_salary_slip_data(filters=None):
         get_employee = frappe.get_doc("Employee", slip_doc.employee)
         
         employee_counts[slip.employee] = employee_counts.get(slip.employee, 0) + 1
+
+        # frappe.msgprint(str(employee_counts[slip.employee]))
         
         row = {
             "employee": slip.employee if slip.employee != previous_employee else "",
@@ -568,9 +582,14 @@ def get_salary_slip_data(filters=None):
             "loan_perquisite": slip.custom_perquisite_amount 
         }
 
+        # frappe.msgprint(str(row))
+
         earnings = sorted(slip_doc.earnings, key=lambda x: x.idx)
+
+        
         
         for earning in earnings:
+            
             get_tax_component = frappe.get_doc("Salary Component", earning.salary_component)
             
             if (
@@ -583,6 +602,7 @@ def get_salary_slip_data(filters=None):
                 row[component_key] = earning.amount
                 employee_totals.setdefault(slip.employee, {}).setdefault(component_key, 0)
                 employee_totals[slip.employee][component_key] += earning.amount
+                # frappe.msgprint(str(component_key))
         
         data.append(row)
         previous_employee, previous_doj, previous_employee_name, previous_company_email = (

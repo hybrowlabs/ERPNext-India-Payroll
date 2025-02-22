@@ -465,10 +465,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 
                 # Extract numbers from the form data
                 numbers = [
-                    {"field": "amount", "name": "Mediclaim Policy for Parents"},
-                    {"field": "amount3", "name": "Mediclaim Policy for Self, Spouse, Children for Senior Citizen"},
-                    {"field": "mpAmount3", "name": "Mediclaim Policy for Self, Spouse, Children"},
-                    {"field": "mpAmount4", "name": "Mediclaim Policy for Parents for Senior Citizen"},
+                    {"field": "amount", "name": "Mediclaim Self, Spouse & Children (Below 60 years)"},
+                    {"field": "amount3", "name": "Mediclaim Self (Senior Citizen - 60 years & above)"},
+                    {"field": "mpAmount3", "name": "Parents (Below 60 years)"},
+                    {"field": "mpAmount4", "name": "Parents (Senior Citizen - 60 years & above)"},
                     {"field": "mp5", "name": "Preventive Health Check-up for Parents"},
                     {"field": "mpAmount6", "name": "Preventive Health Check-up"},
                     {"field": "hlAmount", "name": "Interest Paid On Home Loan"},

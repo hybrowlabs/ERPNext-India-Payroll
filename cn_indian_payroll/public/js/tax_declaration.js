@@ -4112,7 +4112,7 @@ function tds_projection_html(frm) {
       let total_sum_old=0
 
       frappe.call({
-          method: "cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.get_doc_data",
+          method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.get_doc_data",
           args: {
               doc_name: frm.doc.name,
               employee: frm.doc.employee,
@@ -4285,14 +4285,13 @@ function tds_projection_html(frm) {
                   let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
 
 
-                  console.log(annual_old_taxable_income,"11111")
-                  console.log(annual_new_taxable_income,"222222")
+
 
 
                   function getPerComp1() {
                     return new Promise((resolve, reject) => {
                         frappe.call({
-                            method: "cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.slab_calculation",
+                            method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.slab_calculation",
                             args: {
                                 employee: frm.doc.employee,
                                 company: frm.doc.company,

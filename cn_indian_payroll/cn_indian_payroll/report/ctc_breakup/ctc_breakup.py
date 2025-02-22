@@ -9,6 +9,11 @@ def get_all_employee(filters=None):
 
     if filters.get("employee"):
         conditions1["employee"] = filters["employee"]
+    if filters.get("payroll_period"):
+        conditions1["custom_payroll_period"] = filters["payroll_period"]
+    if filters.get("from_date"):
+        conditions1["from_date"] = (">=", filters["from_date"])
+
 
     get_all_ssa = frappe.get_list('Salary Structure Assignment',
                 filters=conditions1,
@@ -28,6 +33,9 @@ def get_all_employee(filters=None):
             'employee': each_employee.get("employee"),
             'employee_name': each_employee.get("employee_name"),
             'from_date': each_employee.get("from_date"),
+            'doj': each_employee.get("custom_date_of_joining"),
+            'base': each_employee.get("base"),
+            'monthly_ctc': each_employee.get("base") / 12,
         }
 
         # Calculate allowances
@@ -65,7 +73,7 @@ def get_all_employee(filters=None):
             source_name=each_employee.get("salary_structure"),
             employee=each_employee.get("employee"),
             print_format='Salary Slip Standard for CTC',
-            # docstatus= each_employee.get("docstatus"),
+            
             posting_date=each_employee.get("from_date"),
             for_preview= 1, 
              
@@ -100,7 +108,13 @@ def get_all_employee(filters=None):
     columns = [
         {"label": "Employee", "fieldname": "employee", "fieldtype": "Data", "width": 150},
         {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 200},
-        {"label": "Effective From", "fieldname": "from_date", "fieldtype": "Date", "width": 200}
+        {"label": "Effective From", "fieldname": "from_date", "fieldtype": "Date", "width": 200},
+        {"label": "Date of Joining", "fieldname": "doj", "fieldtype": "Date", "width": 200},
+        {"label": "Annual CTC", "fieldname": "base", "fieldtype": "Data", "width": 200},
+        {"label": "Monthly CTC", "fieldname": "monthly_ctc", "fieldtype": "Data", "width": 200}
+
+        
+        
     ]
     
     # Adding salary components to the columns
