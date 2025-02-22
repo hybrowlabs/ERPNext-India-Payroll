@@ -1,9 +1,8 @@
 // Copyright (c) 2025, Hybrowlabs technologies and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Declaration Report"] = {
+frappe.query_reports["TDS Projection"] = {
 	"filters": [
-
 
 		{
             "label": "Employee ID",
@@ -11,7 +10,7 @@ frappe.query_reports["Declaration Report"] = {
             "fieldtype": "Link",
             "options": "Employee",
             "width": 200,
-            "reqd":1
+            
         },
 
         {
@@ -31,8 +30,6 @@ frappe.query_reports["Declaration Report"] = {
             "width": 200,
 			"reqd":1
         },
-
-
 
 
 	]

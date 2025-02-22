@@ -628,9 +628,6 @@ class CustomSalarySlip(SalarySlip):
                                     total_epf.append(deduction_component.amount)
 
                             
-                
-                            
-
                 for k in self.earnings:
                     if k.salary_component in nps_component:
                         total_nps.append(k.amount)
@@ -682,8 +679,6 @@ class CustomSalarySlip(SalarySlip):
                         fields=['*'],
                     )
                     if ded_components:
-
-                       
                         for k in ded_components:
                             if k.custom_component_type=="EPF":
                                 if total_epf_sum>k.max_amount:

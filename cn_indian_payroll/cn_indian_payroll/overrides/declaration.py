@@ -266,8 +266,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
         # Calculate month difference between start_date and end_date
         month_count = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
-        # frappe.msgprint(str(month_count))
-        # Fetch Salary Slips
+
         salary_slips = frappe.get_list(
             "Salary Slip",
             filters={"employee": employee, "custom_payroll_period": first_assignment["custom_payroll_period"], "docstatus": ["in", [0, 1]]},

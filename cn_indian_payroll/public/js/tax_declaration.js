@@ -667,10 +667,10 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Lender</p>",
-                "label": "Lender",
+                "html": "<p>Landlord</p>",
+                "label": "Landlord",
                 "refreshOnChange": false,
-                "key": "lender",
+                "key": "Landlord",
                 "type": "content",
                 "input": false,
                 "tableView": false
@@ -2389,7 +2389,7 @@ const DECLARATION_FORM = {
                     {
                       "components": [
                         {
-                          "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">NPS Deduction U/S 80CCD(2)</span></p>",
+                          "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">NPS Deduction U/S 80CCD(2)(Employer NPS deduction)</span></p>",
                           "label": "Deduction U/S 80CCD(2)",
                           "refreshOnChange": false,
                           "key": "deductionUS80Ccd2",
