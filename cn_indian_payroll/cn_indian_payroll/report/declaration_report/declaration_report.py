@@ -685,8 +685,10 @@ def get_salary_slip_data(filters=None):
                 combined_row[key] = employee_totals[slip.employee].get(key, 0) + projection_row.get(key, 0)
                 combined_row["total_income"] += combined_row[key]  
             
-            combined_row["total_income"] += combined_row["loan_perquisite"]
-            combined_row["annual_taxable_income"] =(combined_row["total_income"]-total_declaration.get(slip.employee,0))
+            combined_row["total_income"] += combined_row["loan_perquisite"]+standard_deduction_old+standard_deduction_new
+            
+            combined_row["annual_taxable_income"] = max(combined_row["total_income"] - total_declaration.get(slip.employee, 0), 0)
+
 
             # frappe.msgprint(str(combined_row["total_income"]-total_declaration.get(slip.employee,0)))
             data.append(combined_row)

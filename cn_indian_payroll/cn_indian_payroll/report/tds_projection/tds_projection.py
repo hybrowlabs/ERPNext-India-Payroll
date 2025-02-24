@@ -174,7 +174,7 @@ def get_salary_slips(filters=None):
 
 
                 
-                salary_data["annual_taxable_income"] =(total_income-total)
+                salary_data["annual_taxable_income"] =max(total_income - total, 0)
 
 
                
@@ -331,6 +331,7 @@ def execute(filters=None):
     data, salary_components = get_salary_slips(filters)
     
     sorted_components = sorted(salary_components.items(), key=lambda x: x[1])
+    
     for component, _ in sorted_components:
         columns.append({"label": component, "fieldname": component, "fieldtype": "Currency", "width": 120})
 
