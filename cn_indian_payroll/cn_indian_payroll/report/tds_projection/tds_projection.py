@@ -163,13 +163,19 @@ def get_salary_slips(filters=None):
 
                 standard_deduction_new = get_tax_slab.standard_tax_exemption_amount or 0
                 
-                # Parse custom declaration form data
                 form_data = json.loads(get_doc.custom_declaration_form_data or '{}')
                 nps_deduction = form_data.get("nineNumber", 0)
 
-                # Add deductions to salary data
                 salary_data["standard_deduction_new"] = standard_deduction_new
                 salary_data["nps_deduction"] = nps_deduction
+
+            if get_doc.custom_tax_regime == "Old Regime":
+
+                get_tax_slab=frappe.get_doc("Income Tax Slab",get_doc.custom_income_tax)
+                
+
+                standard_deduction_old = get_tax_slab.standard_tax_exemption_amount or 0
+                salary_data["standard_deduction_old"] = standard_deduction_old
 
         final_data.append(salary_data)
     
