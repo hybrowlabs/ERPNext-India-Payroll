@@ -296,9 +296,9 @@ def get_salary_slips(filters=None):
                 salary_data["deduction_80gg"] = deduction_80gg
                 salary_data["regime_80ccg"] = regime_80ccg
 
-                salary_data["total_deduction"] = total
+                salary_data["total_deduction"] = round(total)
 
-                salary_data["annual_taxable_income"] =(total_income-total)
+                salary_data["annual_taxable_income"] =round((total_income-total))
 
                 
                 

@@ -36,6 +36,7 @@ def get_all_employee(filters=None):
             'doj': each_employee.get("custom_date_of_joining"),
             'base': each_employee.get("base"),
             'monthly_ctc': round(each_employee.get("base") / 12),
+            'regime': each_employee.get("income_tax_slab"),
         }
 
         # Calculate allowances
@@ -111,7 +112,8 @@ def get_all_employee(filters=None):
         {"label": "Effective From", "fieldname": "from_date", "fieldtype": "Date", "width": 200},
         {"label": "Date of Joining", "fieldname": "doj", "fieldtype": "Date", "width": 200},
         {"label": "Annual CTC", "fieldname": "base", "fieldtype": "Data", "width": 200},
-        {"label": "Monthly CTC", "fieldname": "monthly_ctc", "fieldtype": "Data", "width": 200}
+        {"label": "Monthly CTC", "fieldname": "monthly_ctc", "fieldtype": "Data", "width": 200},
+        {"label": "Income Tax Regime", "fieldname": "regime", "fieldtype": "Data", "width": 200}
 
         
         
