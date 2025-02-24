@@ -35,7 +35,7 @@ def get_all_employee(filters=None):
             'from_date': each_employee.get("from_date"),
             'doj': each_employee.get("custom_date_of_joining"),
             'base': each_employee.get("base"),
-            'monthly_ctc': each_employee.get("base") / 12,
+            'monthly_ctc': round(each_employee.get("base") / 12),
         }
 
         # Calculate allowances

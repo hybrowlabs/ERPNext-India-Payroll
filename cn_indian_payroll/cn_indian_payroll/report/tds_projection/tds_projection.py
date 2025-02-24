@@ -26,6 +26,7 @@ def get_salary_slips(filters=None):
 
     latest_salary_structure = {}
     first_salary_structure = {}
+    
 
     for structure in salary_structure_assignments:
         employee_id = structure["employee"]
@@ -165,17 +166,146 @@ def get_salary_slips(filters=None):
                 
                 form_data = json.loads(get_doc.custom_declaration_form_data or '{}')
                 nps_deduction = form_data.get("nineNumber", 0)
+                total=nps_deduction+standard_deduction_new
 
                 salary_data["standard_deduction_new"] = standard_deduction_new
                 salary_data["nps_deduction"] = nps_deduction
+                salary_data["total_deduction"] = total
+
+
+                
+                salary_data["annual_taxable_income"] =(total_income-total)
+
+
+               
 
             if get_doc.custom_tax_regime == "Old Regime":
 
                 get_tax_slab=frappe.get_doc("Income Tax Slab",get_doc.custom_income_tax)
+                standard_deduction_old = get_tax_slab.standard_tax_exemption_amount or 0
+
+                hra_exemption = get_doc.annual_hra_exemption
+                
+                form_data = json.loads(get_doc.custom_declaration_form_data or '{}')
                 
 
-                standard_deduction_old = get_tax_slab.standard_tax_exemption_amount or 0
+                lta_map= form_data.get("twentyeight", 0)
+                education_allowance_map= form_data.get("thirteen", 0)
+                hostel_allowance_map= form_data.get("twentysix", 0)
+                uniform_allowance_map = form_data.get("twentyFour", 0)
+                pt_map= form_data.get("nineteenNumber", 0)
+
+                pf_auto_map = form_data.get("pfValue", 0)
+                pension_scheme_map = form_data.get("aValue2", 0)
+                housing_loan = form_data.get("bValue1", 0)
+                ppf = form_data.get("amount4", 0)
+                home_loan = form_data.get("dValue1", 0)
+
+                lic = form_data.get("eValue1", 0)
+                nsc = form_data.get("fValue1", 0)
+                mutual_fund = form_data.get("gValue1", 0)
+                elss = form_data.get("hValue1", 0)
+                tuition = form_data.get("iValue1", 0)
+
+                fixed_deposit = form_data.get("jValue1", 0)
+                deposit = form_data.get("kValue1", 0)
+                others = form_data.get("kValue2", 0)
+
+                mediclaim_self = form_data.get("amount", 0)
+                mediclaim_self_senior = form_data.get("amount3", 0)
+                mediclaim_parents_below = form_data.get("mpAmount3", 0)
+                mediclaim_parents_senior = form_data.get("mpAmount4", 0)
+                preventive_health_checkup = form_data.get("mp5", 0)
+                preventive_health_checkup_self = form_data.get("mpAmount6", 0)
+
+                medical_treatment_insurance = form_data.get("fourValue", 0)
+                medical_treatment_disease = form_data.get("fiveNumber", 0)
+                interest_repayment = form_data.get("sixNumber", 0)
+                physical_disabled = form_data.get("sevenNumber", 0)
+                donation_80g = form_data.get("eightNumber", 0)
+                nps_deduction = form_data.get("nineNumber", 0)
+                hsg = form_data.get("tenNumber", 0)
+                nps_contribution = form_data.get("elevenNumber", 0)
+                tax_incentive = form_data.get("twelveNumber1", 0)
+                tax_incentive_eeb = form_data.get("fifteenNumber", 0)
+                dona_political_party = form_data.get("sixteenNumber", 0)
+                interest_saving_account = form_data.get("seventeenNumber", 0)
+                interest_fd = form_data.get("eighteenNumber", 0)
+
+                deduction_80gg = form_data.get("twentyNumber", 0)
+                regime_80ccg = form_data.get("twentyoneNumber", 0)
+
+
+
+                total = (regime_80ccg + deduction_80gg + interest_fd + interest_saving_account + nps_deduction+standard_deduction_old+
+                             tax_incentive_eeb + tax_incentive + nps_contribution + hsg + donation_80g +
+                             physical_disabled + interest_repayment + medical_treatment_disease + 
+                             medical_treatment_insurance + preventive_health_checkup_self + 
+                             preventive_health_checkup + mediclaim_parents_senior + mediclaim_parents_below + 
+                             mediclaim_self_senior + mediclaim_self + deposit + fixed_deposit + tuition + 
+                             elss + mutual_fund + nsc + lic + home_loan + ppf + housing_loan + 
+                             pension_scheme_map + pf_auto_map + pt_map + uniform_allowance_map + 
+                             hostel_allowance_map + education_allowance_map + lta_map+hra_exemption)
+
+
                 salary_data["standard_deduction_old"] = standard_deduction_old
+                salary_data["hra_exemption"] = hra_exemption
+                salary_data["lta"] = lta_map
+                salary_data["education_allowance_exemption"] = education_allowance_map
+                salary_data["hostel_allowance_exemption"] = hostel_allowance_map
+                salary_data["uniform_allowance_exemption"] = uniform_allowance_map
+                salary_data["tax_on_employment"] = pt_map
+
+                salary_data["pf_auto"] = pf_auto_map
+                salary_data["pension_scheme"] = pension_scheme_map
+                salary_data["housing_loan"] = housing_loan
+                salary_data["ppf"] = ppf
+                salary_data["home_loan"] = home_loan
+
+                salary_data["lic"] = lic
+                salary_data["nsc"] = nsc
+                salary_data["mutual_fund"] = mutual_fund
+                salary_data["elss"] = elss
+                salary_data["tuition"] = tuition
+                salary_data["fixed_deposit"] = fixed_deposit
+                salary_data["deposit"] = deposit
+                salary_data["others"] = others
+
+                salary_data["mediclaim_self"] = mediclaim_self
+                salary_data["mediclaim_self_senior"] = mediclaim_self_senior
+                salary_data["mediclaim_parents_below"] = mediclaim_parents_below
+                salary_data["mediclaim_parents_senior"] = mediclaim_parents_senior
+                salary_data["preventive_health_checkup"] = preventive_health_checkup
+                salary_data["preventive_health_checkup_self"] = preventive_health_checkup_self
+
+                salary_data["medical_treatment_insurance"] = medical_treatment_insurance
+                salary_data["medical_treatment_disease"] = medical_treatment_disease
+                salary_data["interest_repayment"] = interest_repayment
+                salary_data["physical_disabled"] = physical_disabled
+                salary_data["donation_80g"] = donation_80g
+
+
+                salary_data["nps_deduction"] = nps_deduction
+                salary_data["hsg"] = hsg
+                salary_data["nps_contribution"] = nps_contribution
+                salary_data["tax_incentive"] = tax_incentive
+                salary_data["tax_incentive_eeb"] = tax_incentive_eeb
+                salary_data["dona_political_party"] = dona_political_party
+                salary_data["interest_saving_account"] = interest_saving_account
+                salary_data["interest_fd"] = interest_fd
+                salary_data["deduction_80gg"] = deduction_80gg
+                salary_data["regime_80ccg"] = regime_80ccg
+
+                salary_data["total_deduction"] = total
+
+                salary_data["annual_taxable_income"] =(total_income-total)
+
+                
+                
+
+      
+
+
 
         final_data.append(salary_data)
     
