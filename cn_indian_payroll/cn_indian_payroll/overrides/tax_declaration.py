@@ -30,14 +30,6 @@ from calendar import monthrange
 class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
-    # def validate(self):
-
-    #     # self.validate_tax_declaration()
-        
-
-    #     super().validate()
-
-
     def before_save(self):
         if self.custom_tax_regime=="Old Regime":
             form_data = json.loads(self.custom_declaration_form_data or '{}')
@@ -61,7 +53,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     form_data['nineNumber'] = round(k.amount)      
             
             self.custom_declaration_form_data = json.dumps(form_data)
-  
+
 
 
     def before_update_after_submit(self):
@@ -70,18 +62,74 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.calculate_hra_breakup()
         self.update_tax_declaration()
         self.set_total_exemption_amount()
-        self.throw_message()
-        self.set_total_declared_amount()
+
+        self.mediclaim_condition()
+
+
+    def mediclaim_condition(self):
+        if self.custom_tax_regime == "Old Regime":
+            form_data = json.loads(self.custom_declaration_form_data or '{}')
+
+            mediclaim_self_spouse_children_below_60_years = form_data.get("amount", 0)
+            mediclaim_self_senior_citizen_60_years_above = form_data.get("amount3", 0)
+            parents_below_60_years = form_data.get("mpAmount3", 0)
+            parents_above_60_years = form_data.get("mpAmount4", 0)
+            preventive_health_check_up_for_parents = form_data.get("mp5", 0)
+            preventive_health = form_data.get("mpAmount6", 0)
+
+            self_below = mediclaim_self_spouse_children_below_60_years + preventive_health
+            self_above = mediclaim_self_senior_citizen_60_years_above + preventive_health
+            parents_below = parents_below_60_years + preventive_health_check_up_for_parents
+            parents_above = parents_above_60_years + preventive_health_check_up_for_parents
+
+
+            if self_below > 25000:
+                frappe.throw("Mediclaim Self, Spouse & Children (Below 60 years) and Preventive Health Check-up should not exceed ₹25,000")
+
+            if self_above > 50000:
+                frappe.throw("Mediclaim Self (Senior Citizen - 60 years & above) and Preventive Health Check-up should not exceed ₹50,000")
+
+            if parents_below > 25000:
+                frappe.throw("Parents (Below 60 years) and Preventive Health Check-up for Parents should not exceed ₹25,000")
+
+            if parents_above > 50000:
+                frappe.throw("Parents (Senior Citizen - 60 years & above) and Preventive Health Check-up for Parents should not exceed ₹50,000")
+
+            name_value = form_data.get("nameValue")
+            address_one_value = form_data.get("addressoneValue")
+            pan_value = form_data.get("panValue")
+            address_two_value = form_data.get("addresstwoValue")
+            type_value = form_data.get("typeValue")
+            address_three_value = form_data.get("addressThreeValue")
+            
+            missing_fields = []
+            if not name_value:
+                missing_fields.append("Name")
+            if not address_one_value:
+                missing_fields.append("Address One")
+            if not pan_value:
+                missing_fields.append("PAN")
+            if not address_two_value:
+                missing_fields.append("Address Two")
+            if not type_value:
+                missing_fields.append("Type")
+            if not address_three_value:
+                missing_fields.append("Address Three")
+
+            if self.monthly_house_rent and missing_fields:
+                frappe.throw(f"Please update the following fields: {', '.join(missing_fields)}")
 
 
 
+
+        
 
     def set_total_exemption_amount(self):
         self.total_exemption_amount = flt(get_total_exemption_amount(self.declarations), self.precision("total_exemption_amount"))
+        
+        # if self.custom_check == 1:
         if self.annual_hra_exemption:
             self.total_exemption_amount = self.total_exemption_amount + self.annual_hra_exemption
-        else:
-            self.total_exemption_amount = self.total_exemption_amount
 
         
 
@@ -89,38 +137,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.cancel_declaration_history()
         
 
-#----------------Throw error message for HRA>0 is  there-------------------
-    def throw_message(self):
-        form_data = json.loads(self.custom_declaration_form_data or '{}')  
-        name_value = form_data.get("nameValue")
-        address_one_value = form_data.get("addressoneValue")
-        pan_value = form_data.get("panValue")
-        address_two_value = form_data.get("addresstwoValue")
-        type_value = form_data.get("typeValue")
-        address_three_value = form_data.get("addressThreeValue")
-        
-        missing_fields = []
-        if not name_value:
-            missing_fields.append("Name")
-        if not address_one_value:
-            missing_fields.append("Address One")
-        if not pan_value:
-            missing_fields.append("PAN")
-        if not address_two_value:
-            missing_fields.append("Address Two")
-        if not type_value:
-            missing_fields.append("Type")
-        if not address_three_value:
-            missing_fields.append("Address Three")
-
-        if self.monthly_house_rent and missing_fields:
-            frappe.throw(f"Please update the following fields: {', '.join(missing_fields)}")
-
-        
-        
-
-
-#---------------cancel declaration histry---------------------
 
     def cancel_declaration_history(self):
         history_data=frappe.db.get_list('Tax Declaration History',
@@ -478,13 +494,15 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         if self.custom_tax_regime == "Old Regime":
             if self.workflow_state in ["Approved", "Pending"]:
                 form_data = json.loads(self.custom_declaration_form_data or '{}')
+
+                # frappe.msgprint(form_data.get("twelveNumber"))
                 
                 # Extract numbers from the form data
                 numbers = [
-                    {"field": "amount", "name": "Mediclaim Policy for Parents"},
-                    {"field": "amount3", "name": "Mediclaim Policy for Self, Spouse, Children for Senior Citizen"},
-                    {"field": "mpAmount3", "name": "Mediclaim Policy for Self, Spouse, Children"},
-                    {"field": "mpAmount4", "name": "Mediclaim Policy for Parents for Senior Citizen"},
+                     {"field": "amount", "name": "Mediclaim Self, Spouse & Children (Below 60 years)"},
+                    {"field": "amount3", "name": "Mediclaim Self (Senior Citizen - 60 years & above)"},
+                    {"field": "mpAmount3", "name": "Parents (Below 60 years)"},
+                    {"field": "mpAmount4", "name": "Parents (Senior Citizen - 60 years & above)"},
                     {"field": "mp5", "name": "Preventive Health Check-up for Parents"},
                     {"field": "mpAmount6", "name": "Preventive Health Check-up"},
                     {"field": "hlAmount", "name": "Interest Paid On Home Loan"},
