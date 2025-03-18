@@ -24,9 +24,7 @@ import frappe
 
 def before_save(self, method):
     calculated_leave = sum(v.amount for v in self.custom_calculated_amount)
-
     locked_leave = sum(t.amount for t in self.custom_locked_leave)
-
     for payable in self.payables:
         if payable.reference_document_type == "Leave Encashment":
             payable.amount = round(locked_leave + calculated_leave)
