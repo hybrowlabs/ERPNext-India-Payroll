@@ -105,9 +105,6 @@ def additional_salary_submit(additional):
                 
                 additional_doc.docstatus = 1
                 additional_doc.save()
-
-
-                
                 employee_bonus = frappe.db.get_list('Employee Bonus Accrual',
                                                  filters={
                                                      'employee': i.employee,

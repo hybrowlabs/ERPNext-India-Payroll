@@ -131,7 +131,6 @@ frappe.ui.form.on('Payroll Entry', {
 
                                     if(response.message)
                                     {
-                                        // msgprint("Additional Salary Created Successfully")
                                         frm.set_value("custom_additional_salary_created",1)
                                         frm.save();
                                     }
