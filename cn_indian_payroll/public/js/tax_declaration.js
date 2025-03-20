@@ -431,8 +431,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Preventive Health Check-up for Parents</p>",
-                "label": "Preventive Health Check-up for Parents",
+                "html": "<p>Preventive Checkup (Self + Family)</p>",
+                "label": "Preventive Checkup (Self + Family)",
                 "refreshOnChange": false,
                 "key": "preventiveHealthCheckUpForParents",
                 "type": "content",
@@ -500,8 +500,8 @@ const DECLARATION_FORM = {
           {
             "components": [
               {
-                "html": "<p>Preventive Health Check-up</p>",
-                "label": "Preventive Health Check-up",
+                "html": "<p>Preventive Checkup (Parents)</p>",
+                "label": "Preventive Checkup (Parents)",
                 "refreshOnChange": false,
                 "key": "preventiveHealthCheckUp",
                 "type": "content",

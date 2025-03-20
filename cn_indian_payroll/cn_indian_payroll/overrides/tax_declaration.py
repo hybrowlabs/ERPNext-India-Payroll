@@ -74,8 +74,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         
         self.calculate_hra_breakup()
         self.update_tax_declaration()
+        self.validation_on_section10()
         
         self.set_total_declared_amount()
+
         self.set_total_exemption_amount()
         
 
@@ -97,17 +99,17 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             preventive_health_check_up_for_parents = form_data.get("mp5", 0)
             preventive_health = form_data.get("mpAmount6", 0)
 
-            self_below = mediclaim_self_spouse_children_below_60_years + preventive_health
-            self_above = mediclaim_self_senior_citizen_60_years_above + preventive_health
-            parents_below = parents_below_60_years + preventive_health_check_up_for_parents
-            parents_above = parents_above_60_years + preventive_health_check_up_for_parents
+            self_below = mediclaim_self_spouse_children_below_60_years + preventive_health_check_up_for_parents
+            self_above = mediclaim_self_senior_citizen_60_years_above + preventive_health_check_up_for_parents
+            parents_below = parents_below_60_years + preventive_health
+            parents_above = parents_above_60_years + preventive_health
 
 
             if self_below > 25000:
-                frappe.throw("Mediclaim Self, Spouse & Children (Below 60 years) and Preventive Health Check-up should not exceed ₹25,000")
+                frappe.throw("Mediclaim Self, Spouse & Children (Below 60 years) and Preventive Checkup (Self + Family) should not exceed ₹25,000")
 
             if self_above > 50000:
-                frappe.throw("Mediclaim Self (Senior Citizen - 60 years & above) and Preventive Health Check-up should not exceed ₹50,000")
+                frappe.throw("Mediclaim Self (Senior Citizen - 60 years & above) and Preventive Checkup (Self + Family) should not exceed ₹50,000")
 
             if parents_below > 25000:
                 frappe.throw("Parents (Below 60 years) and Preventive Health Check-up for Parents should not exceed ₹25,000")
@@ -140,7 +142,84 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 frappe.throw(f"Please update the following fields: {', '.join(missing_fields)}")
 
 
-   
+
+
+
+
+    #-----------validate section10 components on employee is eligible or not----------------
+
+    def validation_on_section10(self):
+        if self.custom_tax_regime != "Old Regime":
+            return
+
+        form_data = json.loads(self.custom_declaration_form_data or '{}')
+
+        # Mapping form keys to Salary Component sub-categories
+        allowances = {
+            "twentyeight": "LTA Allowance",
+            "twentysix": "Hostel Allowance",
+            "twentyseven": "Gratuity",
+            "twentyFour": "Uniform Allowance",
+            "thirteen": "Education Allowance",
+        }
+
+        selected_allowances = {key: value for key, value in allowances.items() if form_data.get(key, 0)}
+        valid_components = frappe.get_all(
+            "Salary Component",
+            filters={"component_type": "Tax Exemption", "disabled": 0},
+            fields=["name", "custom_sub_category"],
+        )
+        component_map = {comp["custom_sub_category"]: comp["name"] for comp in valid_components}
+
+        required_components = {
+            category: component_map.get(sub_category)
+            for category, sub_category in selected_allowances.items()
+        }
+
+        if "Hostel Allowance" in selected_allowances.values() and required_components.get("twentysix") is None:
+            frappe.throw("You are not allow to define the Hostel Allowance")
+        
+        if "LTA Allowance" in selected_allowances.values() and required_components.get("twentyeight") is None:
+            frappe.throw("You are not allow to define the LTA Allowance")
+
+        if "Uniform Allowance" in selected_allowances.values() and required_components.get("twentyFour") is None:
+            frappe.throw("You are not allow to define the Uniform Allowance")
+
+        if "Education Allowance" in selected_allowances.values() and required_components.get("thirteen") is None:
+            frappe.throw("You are not allow to define the Education Allowance")
+
+        if "Gratuity" in selected_allowances.values() and required_components.get("twentyseven") is None:
+            frappe.throw("You are not allow to define the Gratuity")
+
+        # Fetch latest Salary Structure Assignment
+        ss_assignment = frappe.get_list(
+            'Salary Structure Assignment',
+            filters={'employee': self.employee, 'docstatus': 1, 'company': self.company, "custom_payroll_period": self.payroll_period},
+            fields=['name', 'from_date', 'salary_structure'],
+            order_by='from_date desc',
+            limit=1,
+        )
+
+        if not ss_assignment:
+            return
+
+        # Generate Salary Slip Preview
+        salary_slip_preview = make_salary_slip(
+            source_name=ss_assignment[0].salary_structure,
+            employee=self.employee,
+            print_format='Salary Slip Standard for CTC',
+            posting_date=ss_assignment[0].from_date,
+            for_preview=1,
+        )
+
+        available_components = {earning.salary_component for earning in salary_slip_preview.earnings}
+
+        for key, component in required_components.items():
+            if component and component not in available_components:
+                frappe.throw(f"You are not eligible to declare {allowances[key]}")
+
+
+
 
     def set_total_exemption_amount(self):
         self.total_exemption_amount = flt(get_total_exemption_amount(self.declarations), self.precision("total_exemption_amount"))
@@ -518,8 +597,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     {"field": "amount3", "name": "Mediclaim Self (Senior Citizen - 60 years & above)"},
                     {"field": "mpAmount3", "name": "Parents (Below 60 years)"},
                     {"field": "mpAmount4", "name": "Parents (Senior Citizen - 60 years & above)"},
-                    {"field": "mp5", "name": "Preventive Health Check-up for Parents"},
-                    {"field": "mpAmount6", "name": "Preventive Health Check-up"},
+                    {"field": "mp5", "name": "Preventive Checkup (Self + Family)"},
+                    {"field": "mpAmount6", "name": "Preventive Checkup (Parents)"},
+
                     {"field": "hlAmount", "name": "Interest Paid On Home Loan"},
 
 
