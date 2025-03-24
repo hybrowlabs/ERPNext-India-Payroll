@@ -75,15 +75,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.calculate_hra_breakup()
         self.update_tax_declaration()
         self.validation_on_section10()
-        
         self.set_total_declared_amount()
-
         self.set_total_exemption_amount()
         
-
-
-
-
 
 
 
@@ -599,37 +593,20 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     {"field": "mpAmount4", "name": "Parents (Senior Citizen - 60 years & above)"},
                     {"field": "mp5", "name": "Preventive Checkup (Self + Family)"},
                     {"field": "mpAmount6", "name": "Preventive Checkup (Parents)"},
-
                     {"field": "hlAmount", "name": "Interest Paid On Home Loan"},
-
-
-
                     {"field": "pfValue", "name": "Employee Provident Fund (Auto)"},
                     {"field": "aValue2", "name": "Pension Scheme Investments & ULIP"},
                     {"field": "bValue1", "name": "Principal paid on Home Loan"},
                     {"field": "amount4", "name": "Public Provident Fund"},
-
-
                     {"field": "dValue1", "name": "Home Loan Account Of National Housing Bank"},
-
                     {"field": "eValue1", "name": "Life Insurance Premium"},
-
                     {"field": "fValue1", "name": "National Savings Certificates"},
-
-
                     {"field": "gValue1", "name": "Mutual Funds - Notified Under Clause 23D Of Section 10 "},
                     {"field": "hValue1", "name": "ELSS - Equity Link Saving Scheme Of Mutual Funds "},
-
                     {"field": "iValue1", "name": "Children Tuition Fees"},
-
-
                     {"field": "jValue1", "name": "Fixed Deposits In Banksn"},
                     {"field": "kValue1", "name": "5 Years Term Deposit An Account Under Post Office Term Deposit Rules "},
                     {"field": "kValue2", "name": "Others"},
-
-
-
-
                     {"field": "fourValue", "name": "Treatment of Dependent with Disability"},
                     {"field": "fiveNumber", "name": "Medical treatment (specified diseases only)"},
                     {"field": "sixNumber", "name": "Interest paid on Education Loan"},
@@ -638,20 +615,15 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     {"field": "nineNumber", "name": "NPS Contribution by Employer"},
                     {"field": "tenNumber", "name": "First HSG Loan Interest Ded.(80EE)"},
                     {"field": "elevenNumber", "name": "Additional Exemption on Voluntary NPS"},
-
-
                     {"field": "twelveNumber1", "name": "Tax Incentive for Affordable Housing for Ded U/S 80EEA"},
                     {"field": "fifteenNumber", "name": "Tax Incentives for Electric Vehicles for Ded U/S 80EEB"},
                     {"field": "sixteenNumber", "name": "Donations/contribution made to a political party or an electoral trust"},
                     {"field": "seventeenNumber", "name": "Interest on deposits in saving account for Ded U/S 80TTA"},
                     {"field": "eighteenNumber", "name": "Interest on deposits in saving account for Ded U/S 80TTB"},
                     {"field": "nineteenNumber", "name": "Profession Tax"},
-
                     {"field": "twentyNumber", "name": "Deduction U/S 80GG"},
                     {"field": "twentyoneNumber", "name": "Rajiv Gandhi Equity Saving Scheme 80CCG"},
-
                     {"field": "twentyFour", "name": "Uniform Allowance"},
-
                     {"field": "thirteen", "name": "Education Allowance"},
                     {"field": "twentysix", "name": "Hostel Allowance"},
                     {"field": "twentyseven", "name": "Gratuity"},
