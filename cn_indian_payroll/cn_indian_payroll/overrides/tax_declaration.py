@@ -87,9 +87,21 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         form_data = json.loads(self.custom_declaration_form_data or '{}')
 
+        if form_data.get("twentyeight", 0):
+            get_lta = frappe.get_list(
+            'Salary Component',
+            filters={"component_type": "LTA Reimbursement", "disabled": 0},
+            fields=["name"],
+            )
+            if not get_lta:
+                frappe.throw("You are not eligible to claim LTA Allowance")
+            else:
+                lta_component=get_lta[0].name
+            
+
         # Mapping form keys to Salary Component sub-categories
         allowances = {
-            "twentyeight": "LTA Allowance",
+            
             "twentysix": "Hostel Allowance",
             "twentyseven": "Gratuity",
             "twentyFour": "Uniform Allowance",
@@ -111,9 +123,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         if "Hostel Allowance" in selected_allowances.values() and required_components.get("twentysix") is None:
             frappe.throw("You are not allowed to define the Hostel Allowance")
-        
-        if "LTA Allowance" in selected_allowances.values() and required_components.get("twentyeight") is None:
-            frappe.throw("You are not allowed to define the LTA Allowance")
 
         if "Uniform Allowance" in selected_allowances.values() and required_components.get("twentyFour") is None:
             frappe.throw("You are not allowed to define the Uniform Allowance")
@@ -150,6 +159,15 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         for key, component in required_components.items():
             if component and component not in available_components:
                 frappe.throw(f"You are not allowed to define {allowances[key]}")
+
+        get_each_assignment=frappe.get_doc("Salary Structure Assignment",ss_assignment[0].name)
+        if get_each_assignment.custom_employee_reimbursements:
+            if lta_component not in custom_employee_reimbursements:
+                frappe.throw("You are not allowed to define LTA")
+
+
+
+
                         
 
 
