@@ -7,12 +7,7 @@ from frappe.utils import getdate
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def before_save(self):
-
-        self.set_cpl()
         self.reimbursement_amount()
-
-        # self.insert_tax_declaration()
- 
 
 
     def on_submit(self):
@@ -302,36 +297,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
 
-    
-
-
-
-
-    
-
-           
-                    
-
-        
-
-
-
-    def set_cpl(self):
-        components = ["Vehicle Maintenance Reimbursement", "Petrol Reimbursement", "Leave Travel Allowance"]
-        array=[]
-        
-        if self.custom_employee_reimbursements:
-            for i in self.custom_employee_reimbursements:
-                if i.reimbursements in components:
-                    
-                    array.append(i.reimbursements)
-
-            
-            if len(array)==3:
-                self.custom_is_car_petrol_lta=1
-               
-            else:
-                self.custom_is_car_petrol_lta=0
 
 
 
