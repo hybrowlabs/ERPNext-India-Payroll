@@ -457,7 +457,7 @@ def slab_calculation(employee, company, payroll_period, old_annual_slab, new_ann
     if old_annual_slab>5000000:
 
         old_surcharge_m=round((total_sum*10)/100)                                 
-        old_education_cess=round((surcharge_m+total_sum)*4/100)
+        old_education_cess=round((old_surcharge_m+total_sum)*4/100)
 
 
     else:
