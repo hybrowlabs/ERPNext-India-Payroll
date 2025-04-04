@@ -592,7 +592,7 @@ def slab_calculation(employee, company, payroll_period, old_annual_slab, new_ann
         'Salary Slip',
         filters={
             'employee': employee,
-            'docstatus': ['in', [0,1]],
+            'docstatus': ['in', [1]],
             'custom_payroll_period':payroll_period
         },
         fields=["current_month_income_tax"]  # Fetch only the required field
