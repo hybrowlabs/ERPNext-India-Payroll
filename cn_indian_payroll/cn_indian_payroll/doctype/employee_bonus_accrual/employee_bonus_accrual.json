@@ -9,6 +9,7 @@
   "section_break_fznz",
   "company",
   "employee",
+  "employee_name",
   "accrual_date",
   "accrual_paid_on",
   "column_break_yukg",
@@ -17,6 +18,9 @@
   "salary_component",
   "payroll_entry",
   "salary_slip",
+  "working_days",
+  "payment_day",
+  "total_lwp",
   "payroll_period",
   "amended_from",
   "section_break_lapc",
@@ -116,11 +120,6 @@
    "options": "Payroll Entry"
   },
   {
-   "fieldname": "salary_slip",
-   "fieldtype": "Data",
-   "label": "Salary Slip"
-  },
-  {
    "default": "Payroll",
    "fieldname": "accrual_paid_on",
    "fieldtype": "Select",
@@ -132,12 +131,46 @@
    "fieldname": "payroll_period",
    "fieldtype": "Data",
    "label": "Payroll Period"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "salary_slip",
+   "fieldtype": "Link",
+   "label": "Salary Slip",
+   "options": "Salary Slip"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salary_slip.total_working_days",
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salary_slip.payment_days",
+   "fieldname": "payment_day",
+   "fieldtype": "Float",
+   "label": "Payment Day"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salary_slip.custom_total_leave_without_pay",
+   "fieldname": "total_lwp",
+   "fieldtype": "Float",
+   "label": "Total LWP"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-30 12:07:08.853166",
+ "modified": "2025-04-09 11:49:10.657675",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",
@@ -159,6 +192,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
