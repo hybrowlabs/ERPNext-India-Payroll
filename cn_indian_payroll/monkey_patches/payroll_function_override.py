@@ -216,7 +216,7 @@ def custom_make_bank_entry(self, for_withheld_salaries=False):
     salary_slip_total -= total_loan_repayment
 
     # Show salary slip total for debugging
-    frappe.msgprint(str(salary_slip_total))
+    # frappe.msgprint(str(salary_slip_total))
 
     # Create bank entry if salary slip total is positive
     bank_entry = None
@@ -278,7 +278,7 @@ def custom_submit_salary_slips(self):
 
                 # Get company's reimbursement account mappings
                 get_company = frappe.get_doc("Company", self.company)
-                for reimb in get_company.custom_reimbursement_accounts:
+                for reimb in get_company.custom_accrued_component_payable_account:
                     if reimb.salary_component != comp.name:
                         continue
 
