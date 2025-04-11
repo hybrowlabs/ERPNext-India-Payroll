@@ -143,6 +143,40 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             
 
         accrued_data = {}
+
+        accrued_component_array=[]
+
+        get_company_doc=frappe.get_doc("Company",company)
+        if get_company_doc.custom_accrued_component:
+
+            for accrued_component in get_company_doc.custom_accrued_component:
+                accrued_component_array.append(accrued_component.accrued_componets)
+        else:
+            accrued_component_array = []
+
+
+        get_accrued_bonus = frappe.get_list(
+                                "Employee Bonus Accrual",
+                                filters={
+                                    "docstatus": 1,
+                                    "is_paid": 0,
+                                    "employee": employee,
+                                    "salary_component": ["in", accrued_component_array]
+                                },
+                                fields=["salary_component", "amount"]
+                            )
+
+        if get_accrued_bonus:
+
+            for bonus in get_accrued_bonus:
+                if bonus.salary_component in accrued_data:
+                    accrued_data[bonus.salary_component] += bonus.amount
+                else:
+                    accrued_data[bonus.salary_component] = bonus.amount
+
+                            # Convert to list of dicts if needed
+        accrued_data_list = [{"component": k, "amount": v,"future_amount":0} for k, v in accrued_data.items()]
+
         get_all_salary_slip = frappe.get_list(
             'Salary Slip',
             filters={
@@ -162,19 +196,6 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             end_month_name = get_all_salary_slip[0].get("custom_month")
             start_month_name = get_all_salary_slip[-1].get("custom_month")
 
-            
-
-            accrued_component_array=[]
-
-            get_company_doc=frappe.get_doc("Company",company)
-            if get_company_doc.custom_accrued_component:
-
-                for accrued_component in get_company_doc.custom_accrued_component:
-                    accrued_component_array.append(accrued_component.accrued_componets)
-            else:
-                accrued_component_array = []
-
-
 
             
             for salary_list in get_all_salary_slip:
@@ -193,40 +214,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                         old_taxable_component += component.amount
                         new_taxable_component += component.amount
 
-                    # Bonus (accrued)
-                    # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
-                    #     if accrued_component_array:
-                    #         get_accrued_bonus = frappe.get_list(
-                    #             "Employee Bonus Accrual",
-                    #             filters={
-                    #                 "docstatus": 1,
-                    #                 "is_paid": 0,
-                    #                 "employee": employee,
-                    #                 "salary_component": ["in", accrued_component_array]
-                    #             },
-                    #             fields=["salary_component", "amount"]
-                    #         )
-
-                    #         for bonus in get_accrued_bonus:
-                    #             if bonus.salary_component in accrued_data:
-                    #                 accrued_data[bonus.salary_component] += bonus.amount
-                    #             else:
-                    #                 accrued_data[bonus.salary_component] = bonus.amount
-
-                            # # Convert to list of dicts if needed
-                            # accrued_data_list = [{"component": k, "amount": v,"future_amount":0} for k, v in accrued_data.items()]
-                            # frappe.msgprint(str(accrued_data_list))
-
-                                
-                                # frappe.msgprint(str(get_accrued_bonus))
-                            #         accrued_amount += bonus.amount
-
-                            #     balance_amount = annual_bonus_amount - accrued_amount
-                            # else:
-                            #     balance_amount = annual_bonus_amount
-                        # else:
-                        #     frappe.msgprint("NO")
-
+                    
                         
 
                                 
@@ -283,8 +271,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 posting_date=latest_salary_structure[0].from_date
             )
 
-        # accrued_data_list = []
-        # processed_components = []
+        
 
 
 
@@ -298,31 +285,28 @@ def get_doc_data(doc_name,employee,company,payroll_period):
                 new_future_amount += new_earning.amount * (num_months - salary_slip_count)
 
                 # Accrued BONUS tax=0
-            # if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
+            if taxable_component.is_tax_applicable == 0 and taxable_component.custom_is_accrual == 1:
+                component_name = taxable_component.name
+                monthly_bonus = new_earning.amount
+                annual_bonus_amount = monthly_bonus * 12
 
-            #     monthly_bonus = new_earning.amount
-            #     annual_bonus_amount = monthly_bonus * 12
+                # Find and update the existing item in accrued_data_list
+                found = False
+                for item in accrued_data_list:
+                    if item["component"] == component_name:
+                        item["future_amount"] = annual_bonus_amount - item["amount"]
+                        found = True
+                        break
 
-            #     accrued_amount = accrued_data.get(new_earning.salary_component, 0)
-            #     future_amount = annual_bonus_amount - accrued_amount
-            #     accrued_data_list.append({
-            #         "component": component_name,
-            #         "amount": accrued_amount,
-            #         "future_amount": future_amount
-            #     })
+                # If not found, assume accrued = 0 and add a new entry
+                if not found:
+                    accrued_data_list.append({
+                        "component": component_name,
+                        "amount": 0,
+                        "future_amount": annual_bonus_amount
+                    })
 
-            #     processed_components.append(component_name)
-
-            #     for component_name, accrued_amount in accrued_data.items():
-            #         if component_name not in processed_components:
-            #             accrued_data_list.append({
-            #                 "component": component_name,
-            #                 "amount": accrued_amount,
-            #                 "future_amount": 0
-            #             })
-
-            #     # 3. Show the final result
-            #     frappe.msgprint(str(accrued_data_list))
+        
                 
 
 
@@ -339,7 +323,7 @@ def get_doc_data(doc_name,employee,company,payroll_period):
             if taxable_component.is_tax_applicable == 1 and taxable_component.component_type == "NPS":
                 nps_amount += new_earning.amount * (num_months - salary_slip_count)
         
-
+        
         for deduction in new_salary_slip.deductions:
             taxable_component = frappe.get_doc("Salary Component", deduction.salary_component)
                 
@@ -413,7 +397,8 @@ def get_doc_data(doc_name,employee,company,payroll_period):
         "pt":pt_amount,
         "nps":nps_amount,
         "num_months":num_months,
-        "salary_slip_count":salary_slip_count
+        "salary_slip_count":salary_slip_count,
+        "accrued_data_list":accrued_data_list
      
     }
 

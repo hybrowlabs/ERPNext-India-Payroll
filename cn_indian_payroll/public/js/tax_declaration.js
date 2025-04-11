@@ -4277,9 +4277,16 @@ function tds_projection_html(frm) {
                   const per_comp = res.message.perquisite_component || []; 
                   const per_values = res.message.perquisite_amount || [];
 
+                  const accrued_data=res.message.accrued_data_list||[]
+
+                  
+
                   const total_per_sum = per_values.reduce((total, value) => total + value, 0);
 
                   const maxLength = Math.max(per_comp.length, per_values.length);
+
+                  // console.log(accrued_data,"8888888888888888888")
+                  const accruedData = accrued_data; // just assign it, no Math.max
 
                   let perquisiteRows = "";
                   for (let i = 0; i < maxLength; i++) {
@@ -4289,8 +4296,26 @@ function tds_projection_html(frm) {
                       perquisiteRows += `<tr><td>${component}</td><td>${"₹" + oldPer}</td><td>${"₹" + newPer}</td></tr>`;
                   }
 
+                  console.log(perquisiteRows,"-----")
 
-                  console.log(frm.doc.custom_declaration_form_data,"------------------")
+                  let accrued_components = "";
+
+                    for (let i = 0; i < accruedData.length; i++) {
+                        let component = accruedData[i].component || "-";
+                        let accrued = accruedData[i].amount || 0;
+                        let future = accruedData[i].future_amount || 0;
+
+                        accrued_components += `<tr>
+                            <td>${component}</td>
+                            <td>₹${parseFloat(accrued).toFixed(2)}</td>
+                            <td>₹${parseFloat(future).toFixed(2)}</td>
+                        </tr>`;
+                    }
+
+                    console.log(accrued_components, "-----");
+
+
+                  // console.log(frm.doc.custom_declaration_form_data,"------------------")
                   if (frm.doc.custom_declaration_form_data) {
                     // Parse the JSON field if it's a string
                     let jsonData = typeof frm.doc.custom_declaration_form_data === 'string'
@@ -4433,7 +4458,7 @@ function tds_projection_html(frm) {
                   
                   const total_other_sum = other_amount.reduce((total, value) => total + value, 0);
 
-                  console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
+                  // console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
 
 
                   const section10_maxLength = Math.max(section10_component.length, section10_amount.length);
@@ -4682,6 +4707,36 @@ function tds_projection_html(frm) {
                               <td>₹ ${total_per_sum}</td>
                               <td>₹ ${total_per_sum}</td>
                           </tr>
+
+
+
+                          <tr>
+                              <td>
+                                  Accrued Components
+                                  <button class="btn btn-secondary btn-sm incomeTaxDropdown" style="margin-left: 10px;">
+                                      <i class="fa fa-caret-down"></i>
+                                  </button>
+                                  <div class="incomeTaxDetails" style="display: none; margin-top: 10px;">
+                                      <table class="table table-sm table-bordered">
+                                          <thead>
+                                              <tr>
+                                                  <th>Accrued Component </th>
+                                                  <th>Accrued Amount</th>
+                                                  <th>Future Amount</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>${accrued_components}</tbody>
+                                      </table>
+                                  </div>
+                              </td>
+                              <td>₹ 0</td>
+                              <td>₹ 0</td>
+                          </tr>
+
+
+
+
+                          
 
 
 
