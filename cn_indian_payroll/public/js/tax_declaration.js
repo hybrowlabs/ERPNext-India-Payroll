@@ -10,7 +10,7 @@ const DECLARATION_FORM = {
         "eq": "0"
       },
       "type": "table",
-      "numRows": 8,
+      "numRows": 9,
       "numCols": 6,
       "input": false,
       "tableView": false,
@@ -558,6 +558,68 @@ const DECLARATION_FORM = {
                 "input": true,
                 "calculateValue": "if (data.mpAmount6>5000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
+              }
+            ]
+          }
+        ],
+
+        [
+          {
+            "components": []
+          },
+          {
+            "components": [
+              {
+                "html": "<p>Total 80D Eligible Amount</p>",
+                "label": "Total 80D Eligible Amount",
+                "refreshOnChange": false,
+                "key": "80d_eligible",
+                "type": "content",
+                "input": false,
+                "tableView": false
+              }
+            ]
+          },
+          {
+            "components": [
+              
+            ]
+          },
+          {
+            "components": [
+              {
+                "html": "<p>80-D</p>",
+                "label": "80db_eligible",
+                "refreshOnChange": false,
+                "key": "Db",
+                "type": "content",
+                "input": false,
+                "tableView": false
+              }
+            ]
+          },
+          {
+            "components": []
+          },
+          {
+            "components": [
+              {
+                "label": "80d_eligible_amount",
+                "applyMaskOn": "change",
+                "hideLabel": true,
+                "mask": false,
+                "tableView": false,
+                "defaultValue": 0,
+                "delimiter": false,
+                "requireDecimal": false,
+                "inputFormat": "plain",
+                "truncateMultipleSpaces": false,
+                "validateWhenHidden": false,
+                "key": "amount_80d_eligible_amount",
+                "type": "number",
+                "input": true,
+                // "disabled": true,
+                
               }
             ]
           }
@@ -1933,7 +1995,8 @@ const DECLARATION_FORM = {
                           "validateWhenHidden": false,
                           "key": "total80C",
                           "type": "number",
-                          "input": true
+                          "input": true,
+                          // "disabled":true
                         }
                       ]
                     }
@@ -3959,13 +4022,79 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                   data.total80C = total;
 
+                  
+                  
+
+                  // console.log(data,"999999999999999999")
+
+                  const mediclaim_self_below = parseFloat(data.amount || 0);      // A
+                  const mediclaim_self_above = parseFloat(data.amount3 || 0);     // B
+                  const mediclaim_parent_below = parseFloat(data.mpAmount3 || 0); // C
+                  const mediclaim_parent_above = parseFloat(data.mpAmount4 || 0); // D
+                  const heal_self = parseFloat(data.mp5 || 0);                     // E
+                  const heal_parent = parseFloat(data.mpAmount6 || 0);            // F
+
+                  // Limits
+                  const limit_self_below = 25000;
+                  const limit_self_above = 50000;
+                  const limit_parent_below = 25000;
+                  const limit_parent_above = 50000;
+                  const limit_health_checkup_total = 5000;
+
+                  // Step 1: Cap mediclaims
+                  const eligible_self_below = Math.min(mediclaim_self_below, limit_self_below);       // A
+                  const eligible_self_above = Math.min(mediclaim_self_above, limit_self_above);       // B
+                  const eligible_parent_below = Math.min(mediclaim_parent_below, limit_parent_below); // C
+                  const eligible_parent_above = Math.min(mediclaim_parent_above, limit_parent_above); // D
+
+                  // Step 2: Apply category caps for health checkup
+                  let eligible_heal_self = Math.min(
+                    heal_self,
+                    limit_self_below - eligible_self_below,
+                    limit_self_above - eligible_self_above
+                  );
+
+                  let eligible_heal_parent = Math.min(
+                    heal_parent,
+                    limit_parent_below - eligible_parent_below,
+                    limit_parent_above - eligible_parent_above
+                  );
+
+                  // Step 3: Cap total health checkup (E + F ≤ ₹5000), prioritize E over F
+                  let total_health_checkup = eligible_heal_self + eligible_heal_parent;
+
+                  if (total_health_checkup > limit_health_checkup_total) {
+                    if (eligible_heal_self >= limit_health_checkup_total) {
+                      eligible_heal_self = limit_health_checkup_total;
+                      eligible_heal_parent = 0;
+                    } else {
+                      eligible_heal_parent = limit_health_checkup_total - eligible_heal_self;
+                    }
+                  }
+
+                  // Step 4: Total eligible amount
+                  const total_eligible_amount =
+                  (eligible_self_below || 0) +
+                  (eligible_self_above || 0) +
+                  (eligible_parent_below || 0) +
+                  (eligible_parent_above || 0) +
+                  (eligible_heal_self || 0) +
+                  (eligible_heal_parent || 0);
+
+                  console.log(total_eligible_amount,"*********************")
+
+                  // // Optional: Assign back to data
+
+                  data.amount_80d_eligible_amount = total_eligible_amount;
+
+
                   form.submission.data = data;
 
-                  console.log(data,"999999999999999999")
+                    
 
                   frm.set_value("custom_declaration_form_data", JSON.stringify(data));
 
-                  isUpdating = false; // Allow further updates
+                  isUpdating = false; 
               });
           })
           .catch((err) => {
@@ -4008,7 +4137,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   size: 'small', // small, large, extra-large 
                   primary_action_label: 'Submit',
                   primary_action(values) {
-                      console.log(values);
+                      // console.log(values);
   
                       frappe.call({
                         "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
@@ -4094,6 +4223,11 @@ function tds_projection_html(frm) {
 
       let section80d_component=[]
       let section80d_amount=[]
+      let section80d_amount_total=[]
+      
+      
+      let section80d_other=[]
+      let section80d_other_amount=[]
 
       let other_component=[]
       let other_amount=[]
@@ -4155,6 +4289,65 @@ function tds_projection_html(frm) {
                       perquisiteRows += `<tr><td>${component}</td><td>${"₹" + oldPer}</td><td>${"₹" + newPer}</td></tr>`;
                   }
 
+
+                  console.log(frm.doc.custom_declaration_form_data,"------------------")
+                  if (frm.doc.custom_declaration_form_data) {
+                    // Parse the JSON field if it's a string
+                    let jsonData = typeof frm.doc.custom_declaration_form_data === 'string'
+                        ? JSON.parse(frm.doc.custom_declaration_form_data)
+                        : frm.doc.custom_declaration_form_data;
+                
+                    
+                
+                    if (jsonData.amount && jsonData.amount > 0) {
+                        section80d_component.push("Mediclaim Self, Spouse & Children (Below 60 years)");
+                        section80d_amount.push(jsonData.amount);
+                    }
+                
+                    if (jsonData.amount3 && jsonData.amount3 > 0) {
+                        section80d_component.push("Mediclaim Self (Senior Citizen - 60 years & above)");
+                        section80d_amount.push(jsonData.amount3);
+                    }
+                
+                    if (jsonData.mpAmount3 && jsonData.mpAmount3 > 0) {
+                        section80d_component.push("Parents (Below 60 years)");
+                        section80d_amount.push(jsonData.mpAmount3);
+                    }
+                
+                    if (jsonData.mpAmount4 && jsonData.mpAmount4 > 0) {
+                        section80d_component.push("Parents (Senior Citizen - 60 years & above)");
+                        section80d_amount.push(jsonData.mpAmount4);
+                    }
+                
+                    if (jsonData.mp5 && jsonData.mp5 > 0) {
+                        section80d_component.push("Preventive Checkup (Self + Family)");
+                        section80d_amount.push(jsonData.mp5);
+                    }
+                
+                    if (jsonData.mpAmount6 && jsonData.mpAmount6 > 0) {
+                        section80d_component.push("Preventive Checkup (Parents)");
+                        section80d_amount.push(jsonData.mpAmount6);
+                    }
+
+                    if (jsonData.amount_80d_eligible_amount && jsonData.amount_80d_eligible_amount > 0) {
+                      section80d_component.push("Total Eligible Amount");
+                      section80d_amount_total.push(jsonData.amount_80d_eligible_amount);
+                      section80d_amount.push(jsonData.amount_80d_eligible_amount);
+                  }
+                
+                    
+                } else {
+                    console.log("custom_declaration_form_data is empty or undefined");
+                }
+
+                
+                
+
+
+
+
+
+
                   // Check if declarations exist
                   if (frm.doc.declarations) {
                       $.each(frm.doc.declarations, function (i, v) {
@@ -4170,24 +4363,29 @@ function tds_projection_html(frm) {
 
                           }
 
-                          if(v.exemption_category == "Section 80D" || v.exemption_category == "Section 80DD" || v.exemption_category == "Section 80E" || v.exemption_category == "Section 80EE"||v.exemption_category == "Section 80U")
-                            {
-                              section80d_component.push(v.exemption_sub_category)
+                          
+
+                            if(v.exemption_category == "Section 80DD" || v.exemption_category == "Section 80E" || v.exemption_category == "Section 80EE"||v.exemption_category == "Section 80U")
+                              {
+
                               
-
-                              if(v.amount<=v.max_amount)
-                                {
-                                  
-                                  section80d_amount.push(v.amount)
-                                }
-                                else
-                                {
-                                  section80d_amount.push(v.max_amount)
+                                section80d_other.push(v.exemption_sub_category)
+                                
   
-                                }
-  
-                            }
+                                if(v.amount<=v.max_amount)
+                                  {
+                                    
+                                    section80d_other_amount.push(v.amount)
+                                  }
+                                  else
+                                  {
+                                    section80d_other_amount.push(v.max_amount)
+    
+                                  }
+    
+                              }
 
+                              
                           
 
 
@@ -4227,13 +4425,21 @@ function tds_projection_html(frm) {
 
                   const total_section10_sum = section10_amount.reduce((total, value) => total + value, 0);
                   const total_section80C_sum = Math.min(section80c_amount.reduce((total, value) => total + value, 0), 150000);
-                  const total_section80d_sum = section80d_amount.reduce((total, value) => total + value, 0);
+                  // const total_section80d_sum = section80d_amount_total.reduce ((total, value) => total + value, 0);
+                  const total_section80d_sum = [...section80d_amount_total, ...section80d_other_amount].reduce(
+                    (total, value) => total + value,
+                    0
+                  );
+                  
                   const total_other_sum = other_amount.reduce((total, value) => total + value, 0);
+
+                  console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
 
 
                   const section10_maxLength = Math.max(section10_component.length, section10_amount.length);
                   const section80_maxLength = Math.max(section80c_component.length, section80c_amount.length);
-                  const section80D_maxLength = Math.max(section80d_component.length, section80d_amount.length);
+                  const section80D_maxLength = Math.max(section80d_component.length, section80d_amount_total.length);
+                  const section80DOther_maxLength = Math.max(section80d_other.length, section80d_other_amount.length);
                   const other_maxLength = Math.max(other_component.length, other_amount.length);
 
 
@@ -4268,6 +4474,15 @@ function tds_projection_html(frm) {
                       Section80DRows += `<tr><td>${Section80Dcomponent}</td><td>${"₹" + oldSection80D}</td><td>${"₹" + newSection80D}</td></tr>`;
                   }
 
+
+                  let Section80DOtherRows = "";
+                  for (let i = 0; i < section80DOther_maxLength; i++) {
+                      let Section80DOthercomponent = section80d_other[i] || "-";  // If index out of bounds, insert "-"
+                      let oldSection80DOther = section80d_other_amount[i] || "0";
+                      let newSection80D_other = 0;  // Assuming new value is 0 for now
+                      Section80DOtherRows += `<tr><td>${Section80DOthercomponent}</td><td>${"₹" + oldSection80DOther}</td><td>${"₹" + newSection80D_other}</td></tr>`;
+                  }
+
                   let OtherRows = "";
                   for (let i = 0; i < other_maxLength; i++) {
                       let Othercomponent = other_component[i] || "-";  // If index out of bounds, insert "-"
@@ -4284,7 +4499,10 @@ function tds_projection_html(frm) {
                   let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
                   let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
 
+                  
 
+                  // console.log(annual_old_taxable_income,"1111111")
+                  // console.log(annual_new_taxable_income,"22222222")
 
 
 
@@ -4403,7 +4621,7 @@ function tds_projection_html(frm) {
 
                           
                           OtherRows1 += `<tr><td>${fromcomponent}</td><td>${"₹" + tocomponent}</td><td>${"₹" + percentage}</td><td>${"₹" + final_amount}</td></tr>`;
-                          console.log(OtherRows1,"OtherRows1OtherRows1")
+                          // console.log(OtherRows1,"OtherRows1OtherRows1")
                       
                         }
 
@@ -4419,7 +4637,9 @@ function tds_projection_html(frm) {
                           OtherRows2 += `<tr><td>${newfromcomponent}</td><td>${"₹" + newtocomponent}</td><td>${"₹" + newpercentage}</td><td>${"₹" + newfinal_amount}</td></tr>`;
                       }
               
-                      // Define the table HTML with dropdowns and expandable rows
+                  const periodText = (from_month !== to_month)
+                      ? `${from_month} - ${to_month}`
+                      : from_month;
                   const table_html = `
                   <table class="table table-bordered">
                       <thead>
@@ -4431,7 +4651,7 @@ function tds_projection_html(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings(${from_month}-${to_month})</td>
+                              <td>Current Taxable Earnings(${periodText})</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
@@ -4573,8 +4793,17 @@ function tds_projection_html(frm) {
                                               </tr>
                                           </thead>
                                           <tbody>${Section80DRows}</tbody>
+                                          <tr>
+                                          <td colspan="3" style="height: 10px; background-color: #f9f9f9;"></td>
+                                        </tr>
+
+                                        <tbody>
+                                          ${Section80DOtherRows}
+                                        </tbody>
                                       </table>
                                   </div>
+
+                                  
                               </td>
                               <td>₹ ${total_section80d_sum}</td>
                               <td>₹ 0</td>
@@ -4756,29 +4985,25 @@ function tds_projection_html(frm) {
 
                           <tr>
                               <td>Current Tax</td>
-                              <td>₹ ${Math.round((total_sum-old_rebate_value)/num_months)}</td>
-                              <td>₹ ${Math.round((total_sum_new-new_rebate_value)/num_months)}</td>
+                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)}</td>
+                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)}</td>
                           </tr>
 
 
                           <tr>
                               <td>Total Tax Deducted at source</td>
-                              <td>₹ ${Math.round(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum))}</td>
-                              <td>₹ ${Math.round(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum))}</td>
+                              <td>₹ ${Math.round(((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)+(salary_slip_sum))}</td>
+                              <td>₹ ${Math.round(((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)+(salary_slip_sum))}</td>
                           </tr>
 
                           <tr>
                               <td>Tax Payable / Refundable (14 - 15(A))</td>
-                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum)))}</td>
-                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum)))}</td>
+                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)+(salary_slip_sum))}</td>
+                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)+(salary_slip_sum))}</td>
                               
                           </tr>
 
-                          <tr>
-                              <td>TDS For Future Month</td>
-                              <td>₹ ${Math.round(((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum)))/(num_months-salary_slip_count))}</td>
-                              <td>₹ ${Math.round(((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum)))/(num_months-salary_slip_count))}</td>
-                          </tr>
+                         
 
 
 

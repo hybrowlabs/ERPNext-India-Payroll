@@ -367,5 +367,13 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
         get_declaration.save()
 
     # Update Salary Structure Assignment with selected tax regime
-    frappe.db.set_value("Salary Structure Assignment", last_assignment_id, "income_tax_slab", selected_regime)
+    frappe.db.set_value(
+        "Salary Structure Assignment", 
+        last_assignment_id, 
+        {
+            "income_tax_slab": selected_regime,
+            "custom_tax_regime": regime
+        }
+    )
+
 
