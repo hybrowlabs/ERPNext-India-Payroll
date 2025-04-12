@@ -35,6 +35,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -48,6 +49,7 @@
    "options": "Employee"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "accrual_date",
    "fieldtype": "Date",
    "label": "Accrual Date"
@@ -57,6 +59,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "salary_structure",
    "fieldtype": "Link",
    "label": "Salary Structure",
@@ -73,12 +76,14 @@
    "search_index": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "salary_structure_assignment",
    "fieldtype": "Link",
    "label": "Salary Structure Assignment",
    "options": "Salary Structure Assignment"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "salary_component",
    "fieldtype": "Link",
    "label": "Salary Component",
@@ -89,6 +94,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -114,12 +120,14 @@
    "label": "Is Paid"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "payroll_entry",
    "fieldtype": "Link",
    "label": "Payroll Entry",
    "options": "Payroll Entry"
   },
   {
+   "allow_on_submit": 1,
    "default": "Payroll",
    "fieldname": "accrual_paid_on",
    "fieldtype": "Select",
@@ -127,6 +135,7 @@
    "options": "Payroll\nF and F"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "salary_structure_assignment.custom_payroll_period",
    "fieldname": "payroll_period",
    "fieldtype": "Data",
@@ -171,7 +180,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-12 18:56:45.894506",
+ "modified": "2025-04-12 19:43:25.450649",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

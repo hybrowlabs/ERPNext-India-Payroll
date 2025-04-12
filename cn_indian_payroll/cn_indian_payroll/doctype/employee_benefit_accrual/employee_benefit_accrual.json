@@ -37,6 +37,7 @@
    "search_index": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -122,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-12 19:29:23.148811",
+ "modified": "2025-04-12 19:43:47.611995",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",
