@@ -64,7 +64,7 @@ def get_salary_slips(filters=None):
         
         salary_slips = frappe.get_all(
             "Salary Slip", 
-            filters={"employee": structure["employee"], "docstatus": 1}, 
+            filters={"employee": structure["employee"], "docstatus": ["in", [0,1]]}, 
             fields=["name"]
         )
 
@@ -170,7 +170,7 @@ def get_salary_slips(filters=None):
 
                 salary_data["standard_deduction_new"] = standard_deduction_new
                 salary_data["nps_deduction"] = nps_deduction
-                salary_data["total_deduction"] = total
+                salary_data["total_deduction"] = get_doc.total_exemption_amount
 
 
                 
@@ -296,9 +296,9 @@ def get_salary_slips(filters=None):
                 salary_data["deduction_80gg"] = deduction_80gg
                 salary_data["regime_80ccg"] = regime_80ccg
 
-                salary_data["total_deduction"] = round(total)
+                salary_data["total_deduction"] = get_doc.total_exemption_amount
 
-                salary_data["annual_taxable_income"] =round((total_income-total))
+                salary_data["annual_taxable_income"] =round((total_income-standard_deduction_old-get_doc.total_exemption_amount))
 
                 
                 
@@ -330,7 +330,11 @@ def execute(filters=None):
     
     data, salary_components = get_salary_slips(filters)
     
-    sorted_components = sorted(salary_components.items(), key=lambda x: x[1])
+    # sorted_components = sorted(salary_components.items(), key=lambda x: x[1])
+    sorted_components = sorted(
+    salary_components.items(),
+    key=lambda x: x[1] if isinstance(x[1], (int, float)) else 9999
+    )
     
     for component, _ in sorted_components:
         columns.append({"label": component, "fieldname": component, "fieldtype": "Currency", "width": 120})

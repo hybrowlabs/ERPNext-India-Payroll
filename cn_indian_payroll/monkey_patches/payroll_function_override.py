@@ -330,7 +330,6 @@ def custom_submit_salary_slips(self):
 
         je.insert()
         je.submit()
-        # frappe.msgprint(f"Journal Entry {je.name} created.")
 
 
 
