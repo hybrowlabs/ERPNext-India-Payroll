@@ -37,22 +37,23 @@ def get_all_income_tax(filters=None):
     )
 
     for slip in salary_slips:
-        data.append({
-            "salary_slip": slip.name,
-            "employee": slip.employee,
-            "employee_name": slip.employee_name,
-            "company": slip.company,
-            "payroll_period": slip.custom_payroll_period,
-            "month": slip.custom_month,
-            "branch": slip.branch,
-            "department": slip.department,
-            "designation": slip.designation,
-            "working_days": slip.total_working_days,
-            "total_lwp": slip.custom_total_leave_without_pay,
-            "payment_day": slip.payment_days,
-            "salary_component": "Income Tax",
-            "amount": slip.current_month_income_tax,
-        })
+        if slip.current_month_income_tax>0:
+            data.append({
+                "salary_slip": slip.name,
+                "employee": slip.employee,
+                "employee_name": slip.employee_name,
+                "company": slip.company,
+                "payroll_period": slip.custom_payroll_period,
+                "month": slip.custom_month,
+                "branch": slip.branch,
+                "department": slip.department,
+                "designation": slip.designation,
+                "working_days": slip.total_working_days,
+                "total_lwp": slip.custom_total_leave_without_pay,
+                "payment_day": slip.payment_days,
+                "salary_component": "Income Tax",
+                "amount": slip.current_month_income_tax,
+            })
 
     return data
 

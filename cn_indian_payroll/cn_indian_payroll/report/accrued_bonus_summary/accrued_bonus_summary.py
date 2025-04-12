@@ -13,7 +13,7 @@ def get_all_accrued_bonus(filters=None):
     if filters is None:
         filters = {}
 
-    conditions = {"docstatus": 1}
+    conditions = {"docstatus": 1,"is_paid":0}
 
     if filters.get("employee"):
         conditions["employee"] = filters["employee"]
