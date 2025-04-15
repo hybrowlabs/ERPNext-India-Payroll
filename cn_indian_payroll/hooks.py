@@ -322,6 +322,10 @@ doc_events = {
 
         "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
     },
+    "Structure Setting":{
+
+        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
+    },
 
     # "Payroll Configuration": 
     # {
