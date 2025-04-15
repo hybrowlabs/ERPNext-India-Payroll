@@ -4564,7 +4564,7 @@ function tds_projection_html(frm) {
                                     let newrebate=response.message.rebate_new
                                     let newmax_amount=response.message.max_amount_new
                                     let new_rebate_value=response.message.new_rebate_value
-                                    let  new_surcharge_m=response.message.new_surcharge_m
+                                    let new_surcharge_m=response.message.new_surcharge_m
                                     let new_education_cess=response.message.new_education_cess
 
 

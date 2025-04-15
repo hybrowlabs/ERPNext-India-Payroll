@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-04-09 23:33:58.699126",
+ "creation": "2025-04-15 21:46:24.891899",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -21,7 +21,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-04-11 16:43:27.719109",
+ "modified": "2025-04-15 21:49:14.133974",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Accrued Components",

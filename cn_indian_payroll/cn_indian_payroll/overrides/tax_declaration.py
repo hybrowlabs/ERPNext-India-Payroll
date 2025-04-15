@@ -628,7 +628,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             },
                         )
 
-        else:
+        elif self.monthly_house_rent == 0 and self.custom_check == 0:
             self.custom_basic_as_per_salary_structure = None
             self.salary_structure_hra = None
             self.custom_basic = None
