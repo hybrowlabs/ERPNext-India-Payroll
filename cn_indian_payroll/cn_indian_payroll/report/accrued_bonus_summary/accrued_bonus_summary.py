@@ -37,7 +37,7 @@ def get_all_accrued_bonus(filters=None):
             "amount",
             "name",
             "working_days",
-            "payment_day",
+            "payment_days",
             "total_lwp",
             
             
@@ -56,7 +56,7 @@ def get_all_accrued_bonus(filters=None):
             "accrued_date": row.accrual_date,
             "salary_component": row.salary_component,
             "working_days":row.working_days,
-            "payment_day":row.payment_day,
+            "payment_day":row.payment_days,
             "total_lwp":row.total_lwp,
             "amount": row.amount,
         })
