@@ -38,7 +38,7 @@ frappe.query_reports["Accrued Bonus Summary"] = {
             "width": 200,
 			"reqd": 1,
         },
-        
+
 
 	]
 };

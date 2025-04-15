@@ -36,7 +36,7 @@ frappe.query_reports["Accrued Reimbursements Summary"] = {
             "width": 200,
 			"reqd": 1,
         },
-        
+
 
 	]
 };

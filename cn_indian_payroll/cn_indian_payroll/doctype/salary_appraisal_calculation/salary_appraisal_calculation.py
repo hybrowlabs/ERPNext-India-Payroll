@@ -6,4 +6,4 @@ from frappe.model.document import Document
 
 
 class SalaryAppraisalCalculation(Document):
-	pass
+    pass

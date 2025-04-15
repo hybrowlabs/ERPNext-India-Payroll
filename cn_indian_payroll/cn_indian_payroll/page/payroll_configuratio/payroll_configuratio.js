@@ -23,10 +23,10 @@
 //     // Create the table header
 //     $('<tr>')
 //         .append('<th>Salary Component</th>')
-//         .append('<th>Abbr</th>')  
+//         .append('<th>Abbr</th>')
 //         .append('<th>Condition</th>')
 //         .append('<th>Formula</th>')
-//         .append('<th>Action</th>')  
+//         .append('<th>Action</th>')
 //         .appendTo(thead);
 
 //     // Fetch data from "Payroll Configuration"
@@ -119,11 +119,11 @@
 //     // Create the table header
 //     $('<tr>')
 //         .append('<th>Salary Component</th>')
-//         .append('<th>Abbr</th>')  
+//         .append('<th>Abbr</th>')
 //         .append('<th>Condition</th>')
 //         .append('<th>Formula</th>')
-//         .append('<th>Action</th>')  
-		
+//         .append('<th>Action</th>')
+
 //         .appendTo(thead);
 
 //     // Fetch data from "Payroll Configuration"
@@ -202,7 +202,7 @@
 //                                 abbr: abbrInput.val(),
 //                                 condition: conditionInput.val(),
 //                                 formula: formulaInput.val(),
-								
+
 //                             };
 //                             console.log(rowData);
 //                         }
@@ -240,10 +240,10 @@
 //     // Create the table header
 //     $('<tr>')
 //         .append('<th>Salary Component</th>')
-//         .append('<th>Abbr</th>')  
+//         .append('<th>Abbr</th>')
 //         .append('<th>Condition</th>')
 //         .append('<th>Formula</th>')
-//         .append('<th>Action</th>')  
+//         .append('<th>Action</th>')
 //         .appendTo(thead);
 
 //     // Fetch data from "Payroll Configuration"
@@ -410,10 +410,10 @@
 //     // Create the table header
 //     $('<tr>')
 //         .append('<th>Salary Component</th>')
-//         .append('<th>Abbr</th>')  
+//         .append('<th>Abbr</th>')
 //         .append('<th>Condition</th>')
 //         .append('<th>Formula</th>')
-//         .append('<th>Action</th>')  
+//         .append('<th>Action</th>')
 //         .appendTo(thead);
 
 //     // Fetch data from "Payroll Configuration"
@@ -494,16 +494,16 @@
 //                                 formula: formulaInput.val(),
 //                                 component_identification_type: item.component_identification_type,
 // 								type: item.component_type,
-//                                 is_accrual: item.is_accrual 
+//                                 is_accrual: item.is_accrual
 //                             };
 
 //                             console.log("Row Data:", rowData);
 
 //                             if (rowData.component_identification_type) {
-                                
+
 
 //                                 // Corrected condition syntax
-//                                 if (item.component_identification_type == rowData.component_identification_type && 
+//                                 if (item.component_identification_type == rowData.component_identification_type &&
 //                                     item.salary_component == rowData.salary_component) {
 
 //                                     frappe.call({
@@ -561,10 +561,10 @@
 //     // Create the table header
 //     $('<tr>')
 //         .append('<th>Salary Component</th>')
-//         .append('<th>Abbr</th>')  
+//         .append('<th>Abbr</th>')
 //         .append('<th>Condition</th>')
 //         .append('<th>Formula</th>')
-//         .append('<th>Action</th>')  
+//         .append('<th>Action</th>')
 //         .appendTo(thead);
 
 //     // Fetch data from "Payroll Configuration"
@@ -645,13 +645,13 @@
 //                                 formula: formulaInput.val(),
 //                                 component_identification_type: item.component_identification_type,
 //                                 type: item.component_type,
-//                                 is_accrual: item.is_accrual 
+//                                 is_accrual: item.is_accrual
 //                             };
 
 //                             console.log("Row Data:", rowData);
 
 //                             if (rowData.component_identification_type ) {
-//                                 if (item.component_identification_type === rowData.component_identification_type && 
+//                                 if (item.component_identification_type === rowData.component_identification_type &&
 //                                     item.salary_component === rowData.salary_component) {
 
 //                                     frappe.call({
@@ -681,9 +681,9 @@
 //                                             }
 //                                         }
 //                                     });
-//                                 } 
+//                                 }
 // 								else
-								 
+
 // 								{
 // 									console.log(rowData.salary_component,"vvv")
 //                                     console.log("Component Identification Type does not match.");
@@ -727,10 +727,10 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
     // Create the table header
     $('<tr>')
         .append('<th>Salary Component</th>')
-        .append('<th>Abbr</th>')  
+        .append('<th>Abbr</th>')
         .append('<th>Condition</th>')
         .append('<th>Formula</th>')
-        .append('<th>Action</th>')  
+        .append('<th>Action</th>')
         .appendTo(thead);
 
     // Fetch data from "Payroll Configuration"
@@ -824,10 +824,10 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                                                 console.error("Error updating Salary Component:", err);
                                             });
 
-                                        } 
-										
-										else 
-										
+                                        }
+
+										else
+
 										{
 
 											frappe.db.insert({
@@ -836,7 +836,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 												name: rowData.salary_component,
 												type: rowData.type,
 												salary_component_abbr: rowData.abbr,
-												
+
 												depends_on_payment_days:1,
 												is_tax_applicable:1,
 												do_not_include_in_total:0,
@@ -847,7 +847,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 												custom_regime:"All",
 												formula:rowData.formula,
 												condition:rowData.condition,
-												
+
 
 												accounts: [
 													{
@@ -856,12 +856,12 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														parentfield: "accounts"  // Ensure correct linkage
 													}
 												]
-												
+
 
 											}).then((doc) => {
 												msgprint("Salary Component inserted successfully:", doc.name);
 
-												
+
 
 													frappe.db.insert({
 														doctype: "Salary Component",
@@ -869,7 +869,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														name: rowData.salary_component+"ARREAR",
 														type: rowData.type,
 														salary_component_abbr: rowData.abbr+"ARREAR",
-														
+
 														depends_on_payment_days:0,
 														is_tax_applicable:1,
 														do_not_include_in_total:0,
@@ -887,11 +887,11 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																parentfield: "accounts"  // Ensure correct linkage
 															}
 														]
-														
-		
+
+
 													})
 
-												
+
 
 											})
 
@@ -902,12 +902,12 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
 
 
-                                            
+
                                         }
                                     }
                                 });
-                            } 
-							
+                            }
+
 
 
 							if(rowData.condition =="Already Configured" && rowData.formula=="Already Configured" && rowData.component_identification_type=="Standard")
@@ -953,7 +953,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														parentfield: "accounts"  // Ensure correct linkage
 													}
 												]
-												
+
 
 											}).then((doc) => {
 												msgprint("Salary Component inserted successfully:", doc.name);
@@ -985,8 +985,8 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																parentfield: "accounts"  // Ensure correct linkage
 															}
 														]
-														
-		
+
+
 													})
 
 												}
@@ -1013,7 +1013,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
 							if(rowData.condition =="Already Configured" && rowData.formula=="Already Configured" && rowData.component_identification_type=="Reimbursement")
 								{
-									
+
 									frappe.call({
 										method: "frappe.client.get_list",
 										args: {
@@ -1023,10 +1023,10 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 										},
 										callback: function (reimbursement_component_res) {
 											if (reimbursement_component_res.message.length == 0) {
-									
+
 												let taxablePromise = Promise.resolve();
 												let nonTaxablePromise = Promise.resolve();
-									
+
 												// Insert LTA Taxable Component if applicable
 												if (item.special_type == "LTA Reimbursement" && item.lta_taxable_component) {
 													taxablePromise = frappe.db.insert({
@@ -1051,7 +1051,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														]
 													});
 												}
-									
+
 												// Insert LTA Non-Taxable Component if applicable
 												if (item.special_type == "LTA Reimbursement" && item.lta_non_taxable_component) {
 													nonTaxablePromise = frappe.db.insert({
@@ -1075,7 +1075,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														]
 													});
 												}
-									
+
 												// Insert LTA Reimbursement Component only after taxable and non-taxable components are created
 												Promise.all([taxablePromise, nonTaxablePromise]).then(() => {
 													if (item.special_type == "LTA Reimbursement") {
@@ -1103,7 +1103,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														});
 													}
 												});
-									
+
 												// Insert other salary components if not LTA Reimbursement
 												if (item.special_type != "LTA Reimbursement") {
 													frappe.db.insert({
@@ -1141,22 +1141,22 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														msgprint("Salary Component inserted successfully: " + doc.name);
 													});
 												}
-									
+
 											} else {
 												msgprint("Component Already Added");
 											}
 										}
 									});
-									
-									
-	
-	
+
+
+
+
 								}
 
 								if(rowData.condition =="Already Configured" && rowData.formula=="Already Configured" && rowData.component_identification_type=="Perquisite")
 									{
-										
-		
+
+
 											frappe.call({
 											method: "frappe.client.get_list",
 											args: {
@@ -1166,8 +1166,8 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 											},
 											callback: function(per_component_res) {
 												if (per_component_res.message.length == 0) {
-		
-		
+
+
 													frappe.db.insert({
 														doctype: "Salary Component",
 														salary_component :item.salary_component,
@@ -1186,8 +1186,8 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 														formula:item.formula,
 														condition:item.condition,
 														custom_perquisite:item.perquisite,
-														
-		
+
+
 														accounts: [
 															{
 																company: "Minix Holdings Private Limited",
@@ -1195,36 +1195,36 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																parentfield: "accounts"  // Ensure correct linkage
 															}
 														]
-														
-		
+
+
 													}).then((doc) => {
 														msgprint("Salary Component inserted successfully:", doc.name);
-		
 
-		
+
+
 													})
-		
-		
-		
-		
-		
+
+
+
+
+
 												}
-		
+
 												else{
-		
+
 													msgprint("Component Already Added")
-		
+
 												}
 											}
 										})
-		
-		
+
+
 									}
 
 
 									if(rowData.component_identification_type=="Accrual")
 										{
-											
+
 											frappe.call({
 												method: "frappe.client.get_list",
 												args: {
@@ -1234,10 +1234,10 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 												},
 												callback: function (accrual_component_res) {
 													if (accrual_component_res.message.length == 0) {
-											
+
 														let taxablePromise = Promise.resolve();
-														
-											
+
+
 														// Insert LTA Taxable Component if applicable
 														if (item.is_accrual == 1 && item.paidout_component) {
 															taxablePromise = frappe.db.insert({
@@ -1246,7 +1246,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																name: rowData.salary_component+"(Payout)",
 																type: item.component_type,
 																salary_component_abbr: rowData.abbr,
-																
+
 																depends_on_payment_days: 0,
 																do_not_include_in_total: item.do_not_include_in_total,
 																custom_is_part_of_gross_pay: item.is_part_of_gross_pay,
@@ -1264,9 +1264,9 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																]
 															});
 														}
-											
-														
-											
+
+
+
 														Promise.all([taxablePromise]).then(() => {
 															if (item.is_accrual == 1 ) {
 																frappe.db.insert({
@@ -1275,7 +1275,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																	name: rowData.salary_component,
 																	type: item.component_type,
 																	salary_component_abbr: rowData.abbr,
-																	
+
 																	depends_on_payment_days: 0,
 																	is_tax_applicable: 0,
 																	do_not_include_in_total: item.do_not_include_in_total,
@@ -1283,7 +1283,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																	custom_is_part_of_ctc: item.is_part_of_ctc,
 																	custom_is_accrual:1,
 																	custom_paidout_component:rowData.salary_component+"(Payout)",
-																	
+
 																	accounts: [
 																		{
 																			company: "Minix Holdings Private Limited",
@@ -1294,24 +1294,24 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 																});
 															}
 														});
-											
-														
-											
+
+
+
 													} else {
 														msgprint("Component Already Added");
 													}
 												}
 											});
-											
-											
-			
-			
+
+
+
+
 										}
 
-								
 
 
-							
+
+
                         }
                     }).appendTo($('<td>').appendTo(row));
                 });
@@ -1319,6 +1319,3 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
         }
     });
 };
-
-
-

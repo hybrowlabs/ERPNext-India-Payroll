@@ -2,7 +2,7 @@
 
 frappe.ui.form.on('LTA Claim', {
     refresh(frm) {
-        
+
                     // frm.set_query('employee', function() {
                     //     return {
                     //         filters: {
@@ -12,8 +12,8 @@ frappe.ui.form.on('LTA Claim', {
                     // });
 
 
-                
-         
+
+
     },
 
     employee: function(frm) {
@@ -25,12 +25,12 @@ frappe.ui.form.on('LTA Claim', {
 
 
             // show_max_lta_amount(frm)
-    
+
             // function futureAndProcessData() {
             //     return new Promise((resolve, reject) => {
             //         var component = [];
             //         var reimbursement_amount = [];
-                    
+
             //         frappe.call({
             //             method: "frappe.client.get_list",
             //             args: {
@@ -41,10 +41,10 @@ frappe.ui.form.on('LTA Claim', {
             //             callback: function(companyData) {
             //                 if (companyData.message && companyData.message.length > 0) {
             //                     const customLTAComponent = companyData.message[0].custom_lta_component;
-                
+
             //                     if (customLTAComponent) {
             //                         component.push(customLTAComponent);
-                
+
             //                         frappe.call({
             //                             method: "frappe.client.get_list",
             //                             args: {
@@ -57,20 +57,20 @@ frappe.ui.form.on('LTA Claim', {
             //                                 if (kes.message && kes.message.length > 0) {
             //                                     const t1 = new Date(kes.message[0].year_end_date);
             //                                     const t2 = new Date(frm.doc.claim_date);
-                
+
             //                                     const years = t1.getFullYear() - t2.getFullYear();
             //                                     const months = t1.getMonth() - t2.getMonth();
             //                                     const days = t1.getDate() - t2.getDate();
-                
+
             //                                     let monthDifference = ((years * 12) + months)+1;
 
             //                                     // console.log(monthDifference,"-----------")
-                
+
             //                                     if (days < 0) {
             //                                         monthDifference -= 1;
             //                                         console.log(monthDifference,"++++++++++")
             //                                     }
-    
+
             //                                     frappe.call({
             //                                         method: "frappe.client.get_list",
             //                                         args: {
@@ -96,7 +96,7 @@ frappe.ui.form.on('LTA Claim', {
             //                                                                     reimbursement_amount.push(v.monthly_total_amount * monthDifference);
             //                                                                 }
             //                                                             });
-    
+
             //                                                             const futureTotal = reimbursement_amount.reduce((acc, curr) => acc + curr, 0);
             //                                                             resolve(futureTotal);
             //                                                         } else {
@@ -124,11 +124,11 @@ frappe.ui.form.on('LTA Claim', {
             //         });
             //     });
             // }
-    
+
             // function fetchAndProcessData() {
             //     return new Promise((resolve, reject) => {
             //         var accrual_data_array = [];
-                
+
             //         frappe.call({
             //             method: "frappe.client.get_list",
             //             args: {
@@ -139,7 +139,7 @@ frappe.ui.form.on('LTA Claim', {
             //             callback: function(companyData) {
             //                 if (companyData.message && companyData.message.length > 0) {
             //                     const customLTAComponent = companyData.message[0].custom_lta_component;
-                
+
             //                     if (customLTAComponent) {
             //                         frappe.call({
             //                             method: "frappe.client.get_list",
@@ -157,7 +157,7 @@ frappe.ui.form.on('LTA Claim', {
             //                                     $.each(accrual_data.message, function(i, g) {
             //                                         accrual_data_array.push(g.amount);
             //                                     });
-    
+
             //                                     const sum = accrual_data_array.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
             //                                     resolve(sum);
             //                                 } else {
@@ -175,11 +175,11 @@ frappe.ui.form.on('LTA Claim', {
             //         });
             //     });
             // }
-    
+
             // function claimedAndProcessData() {
             //     return new Promise((resolve, reject) => {
             //         var total_claimed = [];
-    
+
             //         frappe.call({
             //             method: "frappe.client.get_list",
             //             args: {
@@ -193,7 +193,7 @@ frappe.ui.form.on('LTA Claim', {
             //                     $.each(lta_data.message, function(i, m) {
             //                         total_claimed.push(m.amount);
             //                     });
-    
+
             //                     const claimed_total = total_claimed.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
             //                     resolve(claimed_total);
             //                 } else {
@@ -203,7 +203,7 @@ frappe.ui.form.on('LTA Claim', {
             //         });
             //     });
             // }
-    
+
             // // Call all functions and calculate the final result
             // Promise.all([futureAndProcessData(), fetchAndProcessData(), claimedAndProcessData()])
             //     .then(results => {
@@ -236,10 +236,10 @@ frappe.ui.form.on('LTA Claim', {
     //         frappe.msgprint(__("You can't select a past date."));
     //     }
     // }
-    
 
 
-    
+
+
 
 });
 
@@ -281,7 +281,7 @@ function show_max_lta_amount(frm) {
                                             if (v.reimbursements === res.message[0].name) {
                                                 reimbursement_amount.push(v.monthly_total_amount);
                                             }
-                                            
+
                                         });
 
 
@@ -307,9 +307,9 @@ function show_max_lta_amount(frm) {
                                                                 doctype: "LTA Claim",
                                                                 filters: {
                                                                     "company": frm.doc.company,
-                                                                    "claim_date": ["between", payroll_data.message[0].start_date, payroll_data.message[0].end_date],                                                                    
+                                                                    "claim_date": ["between", payroll_data.message[0].start_date, payroll_data.message[0].end_date],
                                                                     "employee": frm.doc.employee,
-                                                                    
+
                                                                 },
                                                                 fields: ["*"],
                                                             },
@@ -320,7 +320,7 @@ function show_max_lta_amount(frm) {
                                                                     $.each(lta_data.message,function(i,k)
                                                                         {
                                                                             total_amount.push(k.amount)
-                                                                            
+
                                                                         })
                                                                     const sum1 = total_amount.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
@@ -363,9 +363,9 @@ function show_max_lta_amount(frm) {
                                                                                 // console.log("Difference in months:", totalMonths-1);
 
                                                                                 var future_value = (totalMonths)
-                                                                                
+
                                                                                 var future_amount=future_value*reimbursement_amount[0]
-                                                                                
+
                                                                                 var max_eligible_amount=(future_amount+sum)-sum1
                                                                                 frm.set_value("max_eligible_amount",max_eligible_amount)
 
@@ -383,13 +383,13 @@ function show_max_lta_amount(frm) {
 
 
 
-                                                                } 
-                                                                else 
+                                                                }
+                                                                else
                                                                 {
 
                                                                     var accrual_data_array = [];
 
-                                                                    
+
 
                                                                     frappe.call({
                                                                         method: "frappe.client.get_list",
@@ -412,7 +412,7 @@ function show_max_lta_amount(frm) {
                                                                                 });
 
                                                                                 const sum = accrual_data_array.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-                                                                                
+
                                                                                 let startDate = new Date(response.message[0].from_date);
                                                                                 let endDate = new Date(payroll_data.message[0].end_date);
 
@@ -431,8 +431,8 @@ function show_max_lta_amount(frm) {
 
                                                                                 // console.log(future_amount, "Future Value of LTA");
 
-                                                                            } 
-                                                                            else 
+                                                                            }
+                                                                            else
                                                                             {
                                                                                 console.log("No accruals found for this salary component.");
                                                                             }

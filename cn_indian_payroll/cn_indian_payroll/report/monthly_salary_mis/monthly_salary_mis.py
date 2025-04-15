@@ -3,15 +3,46 @@ import frappe
 # Column definitions
 columns = [
     {"fieldname": "month", "label": "Month", "fieldtype": "Data", "width": 150},
-    {"fieldname": "payroll_period", "label": "Payroll Period", "fieldtype": "Data", "width": 150},
-    {"fieldname": "no_of_employee", "label": "No. of Employee", "fieldtype": "Data", "width": 150},
+    {
+        "fieldname": "payroll_period",
+        "label": "Payroll Period",
+        "fieldtype": "Data",
+        "width": 150,
+    },
+    {
+        "fieldname": "no_of_employee",
+        "label": "No. of Employee",
+        "fieldtype": "Data",
+        "width": 150,
+    },
     {"fieldname": "ctc_pa", "label": "CTC P.A", "fieldtype": "Currency", "width": 150},
     {"fieldname": "ctc_pm", "label": "CTC P.M", "fieldtype": "Currency", "width": 150},
-    {"fieldname": "gross_pay", "label": "Gross Pay", "fieldtype": "Currency", "width": 150},
-    {"fieldname": "total_income", "label": "Total Income", "fieldtype": "Currency", "width": 150},
-    {"fieldname": "total_deduction", "label": "Total Deduction", "fieldtype": "Currency", "width": 150},
-    {"fieldname": "total_net_pay", "label": "Total Net Pay", "fieldtype": "Currency", "width": 150},
+    {
+        "fieldname": "gross_pay",
+        "label": "Gross Pay",
+        "fieldtype": "Currency",
+        "width": 150,
+    },
+    {
+        "fieldname": "total_income",
+        "label": "Total Income",
+        "fieldtype": "Currency",
+        "width": 150,
+    },
+    {
+        "fieldname": "total_deduction",
+        "label": "Total Deduction",
+        "fieldtype": "Currency",
+        "width": 150,
+    },
+    {
+        "fieldname": "total_net_pay",
+        "label": "Total Net Pay",
+        "fieldtype": "Currency",
+        "width": 150,
+    },
 ]
+
 
 def get_salary_slips(filters=None):
     if filters is None:
@@ -34,7 +65,7 @@ def get_salary_slips(filters=None):
 
     # Fetch salary slips based on conditions
     all_salary_slips = frappe.get_list(
-        'Salary Slip',
+        "Salary Slip",
         fields=["*"],
         filters=conditions,
         order_by="name DESC",
@@ -60,7 +91,7 @@ def get_salary_slips(filters=None):
                 "gross_pay": 0,
                 "total_income": 0,
                 "total_deduction": 0,
-                "total_net_pay": 0
+                "total_net_pay": 0,
             }
 
         # Increment the employee count
@@ -71,25 +102,30 @@ def get_salary_slips(filters=None):
         aggregated_data[key]["ctc_pm"] += (slip.custom_annual_ctc or 0) / 12
         aggregated_data[key]["gross_pay"] += slip.custom_statutory_grosspay or 0
         aggregated_data[key]["total_income"] += slip.custom_total_income or 0
-        aggregated_data[key]["total_deduction"] += slip.custom_total_deduction_amount or 0
+        aggregated_data[key]["total_deduction"] += (
+            slip.custom_total_deduction_amount or 0
+        )
         aggregated_data[key]["total_net_pay"] += slip.custom_net_pay_amount or 0
 
     # Prepare final data for return
     data = []
     for (month, payroll_period), values in aggregated_data.items():
-        data.append({
-            "month": month,
-            "payroll_period": payroll_period,
-            "no_of_employee": values["no_of_employee"],
-            "ctc_pa": values["ctc_pa"],
-            "ctc_pm": values["ctc_pm"],
-            "gross_pay": values["gross_pay"],
-            "total_income": values["total_income"],
-            "total_deduction": values["total_deduction"],
-            "total_net_pay": values["total_net_pay"],
-        })
+        data.append(
+            {
+                "month": month,
+                "payroll_period": payroll_period,
+                "no_of_employee": values["no_of_employee"],
+                "ctc_pa": values["ctc_pa"],
+                "ctc_pm": values["ctc_pm"],
+                "gross_pay": values["gross_pay"],
+                "total_income": values["total_income"],
+                "total_deduction": values["total_deduction"],
+                "total_net_pay": values["total_net_pay"],
+            }
+        )
 
     return data
+
 
 def execute(filters=None):
     # Fetch the salary slips data

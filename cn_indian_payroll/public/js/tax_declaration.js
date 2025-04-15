@@ -181,7 +181,7 @@ const DECLARATION_FORM = {
                 "type": "number",
                 "input": true,
                 "defaultValue": 0,
-                
+
               }
             ]
           }
@@ -336,7 +336,7 @@ const DECLARATION_FORM = {
                 "truncateMultipleSpaces": false,
                 "calculateValue": "if (data.mpAmount3>25000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
-                
+
                 "validateWhenHidden": false,
                 "key": "mpAmount3",
                 "type": "number",
@@ -582,7 +582,7 @@ const DECLARATION_FORM = {
           },
           {
             "components": [
-              
+
             ]
           },
           {
@@ -619,7 +619,7 @@ const DECLARATION_FORM = {
                 "type": "number",
                 "input": true,
                 // "disabled": true,
-                
+
               }
             ]
           }
@@ -1258,7 +1258,7 @@ const DECLARATION_FORM = {
                           "requireDecimal": false,
                           "inputFormat": "plain",
                           "truncateMultipleSpaces": false,
-                          
+
                           "validateWhenHidden": false,
                           "key": "amount4",
                           "type": "number",
@@ -1336,7 +1336,7 @@ const DECLARATION_FORM = {
                           "requireDecimal": false,
                           "inputFormat": "plain",
                           "truncateMultipleSpaces": false,
-                          
+
                           "validateWhenHidden": false,
                           "key": "dValue1",
                           "type": "number",
@@ -1414,7 +1414,7 @@ const DECLARATION_FORM = {
                           "requireDecimal": false,
                           "inputFormat": "plain",
                           "truncateMultipleSpaces": false,
-                          
+
                           "validateWhenHidden": false,
                           "key": "eValue1",
                           "type": "number",
@@ -3631,7 +3631,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3713,7 +3713,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3767,7 +3767,7 @@ const DECLARATION_FORM = {
 
 
 
-                  
+
                   [
                     {
                       "components": [
@@ -3797,7 +3797,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3825,7 +3825,7 @@ const DECLARATION_FORM = {
                           "tableView": false
                         }
 
-                        
+
 
                       ]
                     },
@@ -3882,7 +3882,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3910,7 +3910,7 @@ const DECLARATION_FORM = {
                           "tableView": false
                         }
 
-                        
+
 
                       ]
                     },
@@ -3940,9 +3940,9 @@ const DECLARATION_FORM = {
 
 
 
-                  
 
-                 
+
+
                 ]
               }
             ]
@@ -3951,7 +3951,7 @@ const DECLARATION_FORM = {
       ],
       "numCols": 1
     },
-    
+
   ]
 }
 
@@ -3992,15 +3992,15 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
               form.submission = { data: defaultData };
 
-              let isUpdating = false; 
+              let isUpdating = false;
 
               form.on('change', ({ data }) => {
-                  if (isUpdating) return; 
+                  if (isUpdating) return;
                   isUpdating = true;
 
 
                   const a = parseFloat(data.pfValue || 0);
-                  
+
                   const b = parseFloat(data.aValue2 || 0);
                   const c = parseFloat(data.bValue1 || 0);
                   const d=parseFloat(data.amount4 || 0);
@@ -4015,15 +4015,15 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   const k=parseFloat(data.jValue1 || 0);
                   const l=parseFloat(data.kValue1 || 0);
                   const m=parseFloat(data.kValue2 || 0);
-                  
+
 
                   total=a+b+c+d+e+f+g+h+i+j+k+l+m
 
 
                   data.total80C = total;
 
-                  
-                  
+
+
 
                   // console.log(data,"999999999999999999")
 
@@ -4090,11 +4090,11 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                   form.submission.data = data;
 
-                    
+
 
                   frm.set_value("custom_declaration_form_data", JSON.stringify(data));
 
-                  isUpdating = false; 
+                  isUpdating = false;
               });
           })
           .catch((err) => {
@@ -4117,7 +4117,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                 let d = new frappe.ui.Dialog({
                   title: 'Enter details',
                   fields: [
-                     
+
                       {
                           label: 'Select Regime',
                           fieldname: 'select_regime',
@@ -4129,62 +4129,62 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
                       },
-  
-                     
-  
-  
+
+
+
+
                   ],
-                  size: 'small', // small, large, extra-large 
+                  size: 'small', // small, large, extra-large
                   primary_action_label: 'Submit',
                   primary_action(values) {
                       // console.log(values);
-  
+
                       frappe.call({
                         "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
                         args:{
-    
+
                             doc_id: frm.doc.name,
                             employee:frm.doc.employee,
                             company:frm.doc.company,
                             payroll_period:frm.doc.payroll_period,
                             regime:values.select_regime
-                            
-    
+
+
                         },
                         callback :function(res)
                         {
                             frm.reload_doc();
-                           
-    
+
+
                         }
-    
+
                     })
-  
-  
-  
+
+
+
                       d.hide();
                   }
               });
-              
+
               d.show();
 
-    
-                  
-                  
+
+
+
               })
               frm.change_custom_button_type('Choose Regime', null, 'primary');
 
 
-              
+
           }
-      
+
   },
 
 
 
   custom_declaration_form_data(frm)
   {
-    
+
     if(frm.doc.custom_declaration_form_data)
     {
       frm.set_value("custom_status","Pending")
@@ -4201,12 +4201,12 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
     }
   }
 
-  
 
- 
 
-  
- 
+
+
+
+
 });
 
 
@@ -4224,8 +4224,8 @@ function tds_projection_html(frm) {
       let section80d_component=[]
       let section80d_amount=[]
       let section80d_amount_total=[]
-      
-      
+
+
       let section80d_other=[]
       let section80d_other_amount=[]
 
@@ -4274,12 +4274,12 @@ function tds_projection_html(frm) {
                   const nps_value=Math.round(res.message.nps)
 
 
-                  const per_comp = res.message.perquisite_component || []; 
+                  const per_comp = res.message.perquisite_component || [];
                   const per_values = res.message.perquisite_amount || [];
 
                   const accrued_data=res.message.accrued_data_list||[]
 
-                  
+
 
                   const total_per_sum = per_values.reduce((total, value) => total + value, 0);
 
@@ -4290,7 +4290,7 @@ function tds_projection_html(frm) {
 
                   let perquisiteRows = "";
                   for (let i = 0; i < maxLength; i++) {
-                      let component = per_comp[i] || "-";  
+                      let component = per_comp[i] || "-";
                       let oldPer = per_values[i] || "-";
                       let newPer = per_values[i] || "-";
                       perquisiteRows += `<tr><td>${component}</td><td>${"₹" + oldPer}</td><td>${"₹" + newPer}</td></tr>`;
@@ -4321,34 +4321,34 @@ function tds_projection_html(frm) {
                     let jsonData = typeof frm.doc.custom_declaration_form_data === 'string'
                         ? JSON.parse(frm.doc.custom_declaration_form_data)
                         : frm.doc.custom_declaration_form_data;
-                
-                    
-                
+
+
+
                     if (jsonData.amount && jsonData.amount > 0) {
                         section80d_component.push("Mediclaim Self, Spouse & Children (Below 60 years)");
                         section80d_amount.push(jsonData.amount);
                     }
-                
+
                     if (jsonData.amount3 && jsonData.amount3 > 0) {
                         section80d_component.push("Mediclaim Self (Senior Citizen - 60 years & above)");
                         section80d_amount.push(jsonData.amount3);
                     }
-                
+
                     if (jsonData.mpAmount3 && jsonData.mpAmount3 > 0) {
                         section80d_component.push("Parents (Below 60 years)");
                         section80d_amount.push(jsonData.mpAmount3);
                     }
-                
+
                     if (jsonData.mpAmount4 && jsonData.mpAmount4 > 0) {
                         section80d_component.push("Parents (Senior Citizen - 60 years & above)");
                         section80d_amount.push(jsonData.mpAmount4);
                     }
-                
+
                     if (jsonData.mp5 && jsonData.mp5 > 0) {
                         section80d_component.push("Preventive Checkup (Self + Family)");
                         section80d_amount.push(jsonData.mp5);
                     }
-                
+
                     if (jsonData.mpAmount6 && jsonData.mpAmount6 > 0) {
                         section80d_component.push("Preventive Checkup (Parents)");
                         section80d_amount.push(jsonData.mpAmount6);
@@ -4359,14 +4359,14 @@ function tds_projection_html(frm) {
                       section80d_amount_total.push(jsonData.amount_80d_eligible_amount);
                       section80d_amount.push(jsonData.amount_80d_eligible_amount);
                   }
-                
-                    
+
+
                 } else {
                     console.log("custom_declaration_form_data is empty or undefined");
                 }
 
-                
-                
+
+
 
 
 
@@ -4388,34 +4388,34 @@ function tds_projection_html(frm) {
 
                           }
 
-                          
+
 
                             if(v.exemption_category == "Section 80DD" || v.exemption_category == "Section 80E" || v.exemption_category == "Section 80EE"||v.exemption_category == "Section 80U")
                               {
 
-                              
+
                                 section80d_other.push(v.exemption_sub_category)
-                                
-  
+
+
                                 if(v.amount<=v.max_amount)
                                   {
-                                    
+
                                     section80d_other_amount.push(v.amount)
                                   }
                                   else
                                   {
                                     section80d_other_amount.push(v.max_amount)
-    
+
                                   }
-    
+
                               }
 
-                              
-                          
+
+
 
 
                               const validCategories = [
-                                
+
                                 "Section 80DDB",
                                 "Section 80-G",
                                 "Section 80CCD(1B)",
@@ -4428,20 +4428,20 @@ function tds_projection_html(frm) {
                                 "Section 80CCG",
                                 "Section 24(b)",
                             ];
-                            
+
                             if (validCategories.includes(v.exemption_category)) {
                               other_component.push(v.exemption_sub_category)
-                              
+
 
                               if(v.amount<=v.max_amount)
                                 {
-                                  
+
                                   other_amount.push(v.amount)
                                 }
                                 else
                                 {
                                   other_amount.push(v.amount)
-  
+
                                 }
                             }
                       });
@@ -4455,7 +4455,7 @@ function tds_projection_html(frm) {
                     (total, value) => total + value,
                     0
                   );
-                  
+
                   const total_other_sum = other_amount.reduce((total, value) => total + value, 0);
 
                   // console.log(total_section80d_sum,"total_section80d_sumtotal_section80d_sum")
@@ -4470,7 +4470,7 @@ function tds_projection_html(frm) {
 
                   const annual_hra_exemption=Math.max(frm.doc.annual_hra_exemption)
 
-                  
+
 
 
                   // Create rows for section 10 details
@@ -4518,13 +4518,13 @@ function tds_projection_html(frm) {
 
 
 
-                  
-                  
+
+
 
                   let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
                   let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
 
-                  
+
 
                   // console.log(annual_old_taxable_income,"1111111")
                   // console.log(annual_new_taxable_income,"22222222")
@@ -4554,7 +4554,7 @@ function tds_projection_html(frm) {
                                     let old_rebate_value=response.message.old_rebate_value
 
 
-                                    let  old_surcharge_m=response.message.old_surcharge_m                              
+                                    let  old_surcharge_m=response.message.old_surcharge_m
                                     let old_education_cess=response.message.old_education_cess
                                     let new_from_amount = response.message.from_amount_new || [];
                                     let new_to_amount = response.message.to_amount_new || [];
@@ -4564,19 +4564,19 @@ function tds_projection_html(frm) {
                                     let newrebate=response.message.rebate_new
                                     let newmax_amount=response.message.max_amount_new
                                     let new_rebate_value=response.message.new_rebate_value
-                                    let  new_surcharge_m=response.message.new_surcharge_m                              
+                                    let  new_surcharge_m=response.message.new_surcharge_m
                                     let new_education_cess=response.message.new_education_cess
 
 
                                     let salary_slip_sum=Math.round(response.message.salary_slip_sum)
-                                    
-                                    
 
-                                    
-                                    resolve({ 
+
+
+
+                                    resolve({
                                       old_from_amount,
-                                       old_to_amount, 
-                                       old_percentage_amount, 
+                                       old_to_amount,
+                                       old_percentage_amount,
                                        old_value_amount,
                                        new_from_amount ,
                                        new_to_amount,
@@ -4599,7 +4599,7 @@ function tds_projection_html(frm) {
                                         salary_slip_count,
                                         from_month,
                                         to_month,
-                                        
+
 
 
                                       });
@@ -4611,7 +4611,7 @@ function tds_projection_html(frm) {
                         });
                     });
                 }
-                
+
                 async function processPerComp1() {
                   try {
                       let { old_from_amount, old_to_amount, old_percentage_amount, old_value_amount,new_from_amount ,
@@ -4633,35 +4633,35 @@ function tds_projection_html(frm) {
                         salary_slip_count,
                         from_month,
                         to_month,
-                        
+
                       } = await getPerComp1();
-                     
+
                       let OtherRows1 = "";
                       for (let i = 0; i < old_from_amount.length; i++) {
-                          let fromcomponent = old_from_amount[i]|| 0;  
-                          let tocomponent = old_to_amount[i] || 0; 
-                          let percentage =old_percentage_amount[i] || 0; 
+                          let fromcomponent = old_from_amount[i]|| 0;
+                          let tocomponent = old_to_amount[i] || 0;
+                          let percentage =old_percentage_amount[i] || 0;
                           let final_amount = old_value_amount[i] || 0;
 
 
-                          
+
                           OtherRows1 += `<tr><td>${fromcomponent}</td><td>${"₹" + tocomponent}</td><td>${"₹" + percentage}</td><td>${"₹" + final_amount}</td></tr>`;
                           // console.log(OtherRows1,"OtherRows1OtherRows1")
-                      
+
                         }
 
                       let OtherRows2 = "";
                       for (let i = 0; i < new_from_amount.length; i++) {
-                          let newfromcomponent = new_from_amount[i]|| 0;  
-                          let newtocomponent = new_to_amount[i] || 0; 
-                          let newpercentage =new_percentage_amount[i] || 0; 
+                          let newfromcomponent = new_from_amount[i]|| 0;
+                          let newtocomponent = new_to_amount[i] || 0;
+                          let newpercentage =new_percentage_amount[i] || 0;
                           let newfinal_amount = new_value_amount[i] || 0;
 
 
-                          
+
                           OtherRows2 += `<tr><td>${newfromcomponent}</td><td>${"₹" + newtocomponent}</td><td>${"₹" + newpercentage}</td><td>${"₹" + newfinal_amount}</td></tr>`;
                       }
-              
+
                   const periodText = (from_month !== to_month)
                       ? `${from_month} - ${to_month}`
                       : from_month;
@@ -4736,7 +4736,7 @@ function tds_projection_html(frm) {
 
 
 
-                          
+
 
 
 
@@ -4799,7 +4799,7 @@ function tds_projection_html(frm) {
                                                     <td>₹ 0</td>
                                                 </tr>
 
-                                                 
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -4858,7 +4858,7 @@ function tds_projection_html(frm) {
                                       </table>
                                   </div>
 
-                                  
+
                               </td>
                               <td>₹ ${total_section80d_sum}</td>
                               <td>₹ 0</td>
@@ -4959,7 +4959,7 @@ function tds_projection_html(frm) {
                           </tr>
 
 
-                          
+
 
                           <tr>
                               <td>
@@ -4974,23 +4974,23 @@ function tds_projection_html(frm) {
                                                   <th>Regime</th>
                                                   <th>Annual Taxable Lessthan</th>
                                                   <th>Max Amount</th>
-                                                  
-                                                  
+
+
                                               </tr>
                                           </thead>
                                           <tbody>
-                  
+
                                           <tr>
                                                   <th>Old Regime</th>
                                                   <th>₹ ${rebate}</th>
                                                   <th>₹ ${max_amount}</th>
-                                                  
+
                                           </tr>
                                           <tr>
                                                   <th>New Regime</th>
                                                   <th>₹ ${newrebate}</th>
                                                   <th>₹ ${newmax_amount}</th>
-                                                  
+
                                           </tr>
                                           </tbody>
                                       </table>
@@ -5013,8 +5013,8 @@ function tds_projection_html(frm) {
                               <td>₹ ${Math.round(old_surcharge_m)}</td>
                               <td>₹ ${Math.round(new_surcharge_m)}</td>
 
-                              
-                                    
+
+
                           </tr>
 
                           <tr>
@@ -5024,7 +5024,7 @@ function tds_projection_html(frm) {
                           </tr>
 
 
-                          
+
 
                           <tr>
                               <td>Tax Payable</td>
@@ -5055,20 +5055,20 @@ function tds_projection_html(frm) {
                               <td>Tax Payable / Refundable (14 - 15(A))</td>
                               <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)+(salary_slip_sum))}</td>
                               <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)+(salary_slip_sum))}</td>
-                              
+
                           </tr>
 
-                         
+
 
 
 
                       </tbody>
                   </table>
               `;
-              
+
                       // Set the value of the HTML field
                       frm.set_df_property('custom_employee_tax_projection', 'options', table_html);
-              
+
                       // Add event listeners for dropdown buttons
                       setTimeout(() => {
                           document.querySelectorAll('.incomeTaxDropdown').forEach((button, index) => {
@@ -5078,12 +5078,12 @@ function tds_projection_html(frm) {
                               });
                           });
                       }, 100);
-              
+
                   } catch (error) {
                       console.error("Error fetching per_comp1:", error);
                   }
               }
-              
+
               // Call the function to fetch and process the data
               processPerComp1();
               }
@@ -5092,34 +5092,3 @@ function tds_projection_html(frm) {
 
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

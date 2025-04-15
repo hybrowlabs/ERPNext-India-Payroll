@@ -242,19 +242,16 @@ fixtures = [
     # {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}},
     {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
     # {"dt": "Property Setter", "filters": {"module": "cn-indian-payroll"}},
-    {"dt":"Income Tax Regime"},
+    {"dt": "Income Tax Regime"},
     {"dt": "Report", "filters": {"name": "Salary Slip Registers"}},
-    {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
-    {"dt":"Workflow","filters":{"name":"declaration Approve"}},
-    {"dt":"Workspace","filters":{"module":"cn-indian-payroll"}},
-
-
+    {"dt": "Translation", "filters": {"name": "Reimbursement Claim"}},
+    {"dt": "Workflow", "filters": {"name": "declaration Approve"}},
+    {"dt": "Workspace", "filters": {"module": "cn-indian-payroll"}},
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
     # {"dt":"Salary Component"},
     # {"dt":"Income Tax Slab","filters": {"name": ["in", ["Old Regime", "New Regime"]]}},
     # {"dt":"Salary Structure"},
-
 ]
 
 doctype_js = {
@@ -270,11 +267,10 @@ doctype_js = {
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
-    "Full and Final Statement":"public/js/f_and_f.js",
-    "Form 16":"public/js/form16.js",
-    "Leave Encashment":"public/js/leave_encashment.js",
-    "Company":"public/js/company.js",
-
+    "Full and Final Statement": "public/js/f_and_f.js",
+    "Form 16": "public/js/form16.js",
+    "Leave Encashment": "public/js/leave_encashment.js",
+    "Company": "public/js/company.js",
 }
 
 override_doctype_class = {
@@ -284,55 +280,43 @@ override_doctype_class = {
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
-
 }
 
 doc_events = {
     "Job Offer": {
         "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.job_offer.on_update_after_submit",
-
     },
-
     "LOP Reversal": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.before_save",
-
     },
-
     "Loan Repayment Schedule": {
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_save",
-
     },
     "LTA Claim": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
     },
-
     "Salary Appraisal Calculation": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
-        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
+        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel",
     },
-
     "Employee Promotion": {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
     },
-
-    "Full and Final Statement":{
-
-        "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
+    "Full and Final Statement": {
+        "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
     },
-    "Structure Setting":{
-
-        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
+    "Structure Setting": {
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
     },
-
-    # "Payroll Configuration": 
+    # "Payroll Configuration":
     # {
     #    "validate":"cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.validate"
     # }
-
-
 }
 
-website_route_rules = [{'from_route': '/tax-exemptions/<path:app_path>', 'to_route': 'tax-exemptions'}, ]
+website_route_rules = [
+    {"from_route": "/tax-exemptions/<path:app_path>", "to_route": "tax-exemptions"},
+]

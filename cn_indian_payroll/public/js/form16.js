@@ -1,6 +1,6 @@
 frappe.ui.form.on('Form 16', {
 	refresh(frm) {
-		
+
 	},
 
     employee:function(frm)
@@ -24,7 +24,7 @@ frappe.ui.form.on('Form 16', {
                 callback: function (res) {
                     if (res.message && res.message.length > 0) {
                         const payrollPeriod = res.message[0].custom_payroll_period;
-    
+
                         if (payrollPeriod) {
 
 
@@ -38,16 +38,16 @@ frappe.ui.form.on('Form 16', {
                     doctype: "Employee Tax Exemption Proof Submission",
                     filters: {
                         employee: frm.doc.employee,
-                        
-                        docstatus: ["in", [0, 1]] 
+
+                        docstatus: ["in", [0, 1]]
                     },
                     fields: ["*"],
                     limit_page_length: 0
                 },
                 callback: function (proof_response) {
                     if (proof_response.message) {
-                        
-            
+
+
                             if (proof_response.message[0].name) {
                                 frappe.call({
                                     method: "frappe.client.get",
@@ -66,14 +66,14 @@ frappe.ui.form.on('Form 16', {
 
                                                 let child = frm.add_child('tax_exemption_proofs');
                                                 child.exemption_sub_category = v.exemption_sub_category; // Replace 'benefit_accrual_date' if required
-                                                child.exemption_category = v.exemption_category; 
+                                                child.exemption_category = v.exemption_category;
                                                 child.max_amount = v.max_amount;
-                                                child.amount = v.amount; 
+                                                child.amount = v.amount;
 
 
 
 
-                                                
+
                                             })
 
                                             frm.refresh_field('tax_exemption_proofs');
@@ -88,19 +88,19 @@ frappe.ui.form.on('Form 16', {
                                             frm.set_value("monthly_house_rent",each_response_data.message.monthly_house_rent)
                                             frm.set_value("monthly_eligible_amount",each_response_data.message.monthly_eligible_amount)
                                             frm.set_value("total_eligible_hra_exemption",each_response_data.message.total_eligible_hra_exemption)
-                                         
-
-                                           
 
 
-                                            
+
+
+
+
                                         }
-                                        
+
                                     }
                                 });
-                            } 
-                            
-                            
+                            }
+
+
                         }
                     }
 
@@ -108,7 +108,7 @@ frappe.ui.form.on('Form 16', {
 
                         }
                     }
-                
+
                 }
             })
 

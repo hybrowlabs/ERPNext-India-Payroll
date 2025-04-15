@@ -4,7 +4,7 @@
 frappe.query_reports["ESIC Register"] = {
 	"filters": [
 
-		
+
 
 
 		{
@@ -26,7 +26,7 @@ frappe.query_reports["ESIC Register"] = {
 			"width": 200
 		},
 
-        
+
 		{
             "label": "Company",
 			"fieldname": "company",

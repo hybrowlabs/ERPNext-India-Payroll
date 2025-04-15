@@ -64,15 +64,15 @@ frappe.ui.form.on('LOP Reversal', {
                                                 {
                                                     month_array.push(v.start_date);
                                                 }
-                                               
+
                                             });
 
                                                         var month_names = [];
-    
-                        
+
+
                                                         var month_map = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                                    
-                                                        
+
+
                                                         month_array.forEach(function(date_str) {
                                                             var date = new Date(date_str);
                                                             var month_name = month_map[date.getMonth()];
@@ -83,22 +83,22 @@ frappe.ui.form.on('LOP Reversal', {
 
                                                         frm.set_df_property('lop_month_reversal', 'options', month_names.join('\n'));
                                                         frm.refresh_field('lop_month_reversal');
-                                    
-                                                        
-                                                    } 
 
-                                                
-                                                    else 
+
+                                                    }
+
+
+                                                    else
                                                     {
-                                                    
+
                                                         frm.set_df_property('lop_month_reversal', 'options', "");
                                                         frm.refresh_field('lop_month_reversal');
-                                                        
+
                                                     }
 
 
 
-                                            
+
                             }
                         });
                     }
@@ -117,11 +117,11 @@ frappe.ui.form.on('LOP Reversal', {
             //         filters: [
             //             ["employee", "=", frm.doc.employee],
             //             ["docstatus", "=", 1],
-                        
-            //            [["leave_without_pay", ">", 0],|| 
-                            
+
+            //            [["leave_without_pay", ">", 0],||
+
             //             ["absent_days", ">", 0]]
-                        
+
             //         ],
             //         fields: ["*"],
             //     },
@@ -129,10 +129,10 @@ frappe.ui.form.on('LOP Reversal', {
             //         var month_array = [];
 
             //         console.log(res.message,"111111")
-    
+
             //         // if (res.message.length > 0) {
 
-                        
+
             //         //     $.each(res.message, function(i, v) {
 
             //         //         // if(v.leave_without_pay!=v.custom_lop_reversal_days)
@@ -140,33 +140,33 @@ frappe.ui.form.on('LOP Reversal', {
             //         //             month_array.push(v.start_date);
             //         //         // }
             //         //     });
-    
+
             //         //     var month_names = [];
-    
-                        
+
+
             //         //     var month_map = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    
-                        
+
+
             //         //     month_array.forEach(function(date_str) {
             //         //         var date = new Date(date_str);
             //         //         var month_name = month_map[date.getMonth()];
             //         //         month_names.push(month_name);
             //         //     });
-    
-                        
-    
-                        
+
+
+
+
             //         //     frm.set_df_property('lop_month_reversal', 'options', month_names.join('\n'));
             //         //     frm.refresh_field('lop_month_reversal');
-    
-                        
-            //         // } 
-            //         // else 
+
+
+            //         // }
+            //         // else
             //         // {
-                       
+
             //         //     frm.set_df_property('lop_month_reversal', 'options', "");
             //         //     frm.refresh_field('lop_month_reversal');
-                        
+
             //         // }
             //     }
             // });
@@ -178,14 +178,14 @@ frappe.ui.form.on('LOP Reversal', {
         var month = frm.doc.lop_month_reversal;
 
                 frappe.call({
-        
+
                     method: "frappe.client.get_list",
                     args: {
                         doctype: "Salary Slip",
                         filters: { "employee": frm.doc.employee,"docstatus":1,"custom_month":month},
                         fields: ["*"],
-                        
-                       
+
+
                     },
                     callback: function(res) {
 
@@ -199,27 +199,27 @@ frappe.ui.form.on('LOP Reversal', {
 
 
                                 frappe.call({
-        
+
                                     method: "frappe.client.get_list",
                                     args: {
                                         doctype: "LOP Reversal",
                                         filters: { "employee": frm.doc.employee,"docstatus":1,"salary_slip":salary_slip},
                                         fields: ["*"],
-                                        
-                                       
+
+
                                     },
                                     callback: function(kes) {
-                
+
                                         var days=0
-                                        
+
                                         if(kes.message.length>0)
                                         {
                                             $.each(kes.message,function(i,v)
                                             {
                                                 days=days+v.number_of_days
-                                                
 
-                                                
+
+
                                             })
 
 
@@ -232,7 +232,7 @@ frappe.ui.form.on('LOP Reversal', {
                                             frm.set_value("absent_days",res.message[0].absent_days)
                                             frm.set_value("lop_days",res.message[0].leave_without_pay)
 
-                                            
+
 
 
                                         }
@@ -246,7 +246,7 @@ frappe.ui.form.on('LOP Reversal', {
                                         }
                                     }
                                 })
-                                
+
 
                             }
                         }
@@ -269,7 +269,7 @@ frappe.ui.form.on('LOP Reversal', {
 
     refresh:function(frm)
     {
-        
+
             if (frm.doc.employee && frm.doc.salary_slip) {
                 frappe.call({
                     method: "frappe.client.get_list",
@@ -278,59 +278,59 @@ frappe.ui.form.on('LOP Reversal', {
                         filters: [
                             ["employee", "=", frm.doc.employee],
                             ["name", "=", frm.doc.salary_slip],
-                            
-                            
+
+
                             ["docstatus", "=", 1],
                         ],
                         fields: ["*"],
                     },
                     callback: function(res) {
                         var month_array = [];
-        
+
                         if (res.message.length > 0) {
-    
-                            
+
+
                             $.each(res.message, function(i, v) {
-                                
+
                                 month_array.push(v.start_date);
-                                
+
                             });
-        
+
                             var month_names = [];
-        
-                            
+
+
                             var month_map = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        
-                            
+
+
                             month_array.forEach(function(date_str) {
                                 var date = new Date(date_str);
                                 var month_name = month_map[date.getMonth()];
                                 month_names.push(month_name);
                             });
-        
-                            
-        
-                            
+
+
+
+
                             frm.set_df_property('lop_month_reversal', 'options', month_names.join('\n'));
                             frm.refresh_field('lop_month_reversal');
-        
-                            
-                        } 
-                        else 
+
+
+                        }
+                        else
                         {
-                           
+
                             frm.set_df_property('lop_month_reversal', 'options', "");
                             frm.refresh_field('lop_month_reversal');
-                            
+
                         }
                     }
                 });
             }
-        
-    }
-    
 
-    
-   
+    }
+
+
+
+
 
 })

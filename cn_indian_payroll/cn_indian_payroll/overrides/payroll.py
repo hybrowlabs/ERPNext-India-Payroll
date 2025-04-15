@@ -10,9 +10,5 @@ class CustomPayrollEntry(PayrollEntry):
     # def before_save(self):
     #     frappe.msgprint(str(self.company))
     @frappe.whitelist()
-    def payrollset(self,value1):
+    def payrollset(self, value1):
         frappe.msgprint(str(value1))
-
-
-
-

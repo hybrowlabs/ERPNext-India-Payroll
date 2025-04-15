@@ -7,7 +7,7 @@ frappe.query_reports["Salary Reco"] = {
             "options": "Employee",
             "width": 200
         },
-       
+
         {
             "label": "Current Month",
             "fieldname": "current_month",

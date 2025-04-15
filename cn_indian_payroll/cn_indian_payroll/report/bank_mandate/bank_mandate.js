@@ -22,7 +22,7 @@ frappe.query_reports["Bank mandate"] = {
 			"width": 200
 		},
 
-        
+
 		{
             "label": "Company",
 			"fieldname": "company",

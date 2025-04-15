@@ -15,23 +15,23 @@ frappe.query_reports["Salary Slip Register"] = {
             "options": "Income Tax Slab",
             "width": 200
         },
-        
+
          {
             "label": "From date",
             "fieldname": "from_date",
             "fieldtype": "Date",
-            
+
             "width": 200
         },
          {
             "label": "To Date",
             "fieldname": "to_date",
             "fieldtype": "Date",
-            
+
             "width": 200
         },
-        
-        
-        
+
+
+
     ]
 }

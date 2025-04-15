@@ -10,7 +10,7 @@ frappe.query_reports["TDS Projection"] = {
             "fieldtype": "Link",
             "options": "Employee",
             "width": 200,
-            
+
         },
 
         {

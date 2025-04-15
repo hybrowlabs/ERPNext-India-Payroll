@@ -11,7 +11,7 @@ frappe.pages['income-tax-calculato'].on_page_load = function(wrapper) {
 		keyup: function() {
 		  formatCurrency($(this));
 		},
-		blur: function() { 
+		blur: function() {
 		  formatCurrency($(this), "blur");
 		}
 	});
@@ -31,19 +31,19 @@ function formatNumber(n) {
 function formatCurrency(input, blur) {
   // appends $ to value, validates decimal side
   // and puts cursor back in right position.
-  
+
   // get input value
   var input_val = input.val();
-  
+
   // don't validate empty input
   if (input_val === "") { return; }
-  
+
   // original length
   var original_len = input_val.length;
 
-  // initial caret position 
+  // initial caret position
   var caret_pos = input.prop("selectionStart");
-    
+
   // check for decimal
   if (input_val.indexOf(".") >= 0) {
 
@@ -61,12 +61,12 @@ function formatCurrency(input, blur) {
 
     // validate right side
     right_side = formatNumber(right_side);
-    
+
     // On blur make sure 2 numbers after decimal
     if (blur === "blur") {
       right_side += "00";
     }
-    
+
     // Limit decimal to only 2 digits
     right_side = right_side.substring(0, 2);
 
@@ -79,13 +79,13 @@ function formatCurrency(input, blur) {
     // remove all non-digits
     input_val = formatNumber(input_val);
     input_val = '₹ '+input_val;
-    
+
     // final formatting
     if (blur === "blur") {
       input_val += ".00";
     }
   }
-  
+
   // send updated string to input
   input.val(input_val);
 
@@ -104,7 +104,7 @@ function calculatetax(){
   	var rupeesFormat = '₹ ' + enteredAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 	$("#totaldeduction").html(rupeesFormat)
 	var total_income =  (parseInt(document.getElementById('salaryincome').value.replace(/[^0-9.-]+/g,"")) || 0) +  (parseInt(document.getElementById('otherincome').value.replace(/[^0-9.-]+/g,"")) || 0)
-	
+
 	frappe.call({
 		method: 'cn_indian_payroll.cn_indian_payroll.tax_utils.income_tax_calculator_template',
 		args: {
@@ -136,7 +136,7 @@ function calculatetax(){
 			$("#newtaxableincome").empty().append('<h5 style="margin-top:10px;margin-left:10px">Taxable Income</h5><p style="text-align:center"><i class="fa fa-inr"></i>'+newtaxableincomeCell.textContent+'</p>')
 			$("#oldtotaltax").empty().append('<h5 style="margin-top:10px;margin-left:10px">Total Tax</h5><p style="text-align:center"><i class="fa fa-inr"></i>'+oldregimeCell.textContent+'</p>')
 			$("#newtotaltax").empty().append('<h5 style="margin-top:10px;margin-left:10px">Total Tax</h5><p style="text-align:center"><i class="fa fa-inr"></i>'+newregimeCell.textContent+'</p>')
-			
+
 			if(parseInt(oldregimeCell.textContent)>parseInt(newregimeCell.textContent)){
 				$("#newtotaltax").css({
 					"border-radius": '10px',
@@ -188,5 +188,3 @@ function calculatetax(){
 		}
 	});
 }
-
-

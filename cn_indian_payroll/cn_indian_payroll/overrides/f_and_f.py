@@ -12,14 +12,11 @@ import frappe
 #         for t in self.custom_locked_leave:
 #             locked_leave+=t.amount
 
-   
-
 
 #     if len(self.payables)>0:
 #         for i in self.payables:
 #             if i.reference_document_type=="Leave Encashment":
 #                 i.amount=round(locked_leave+calculated_leave)
-
 
 
 def before_save(self, method):

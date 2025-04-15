@@ -2,7 +2,7 @@ frappe.ui.form.on('Leave Encashment', {
 	refresh(frm) {
 		// your code here
 	},
-    
+
     encashment_days:function(frm)
     {
 
@@ -16,6 +16,3 @@ frappe.ui.form.on('Leave Encashment', {
 
     }
 })
-
-
-

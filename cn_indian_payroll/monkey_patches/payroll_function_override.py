@@ -1,7 +1,9 @@
 import frappe
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry
 from frappe import _
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+    get_accounting_dimensions,
+)
 
 import json
 from dateutil.relativedelta import relativedelta
@@ -9,25 +11,31 @@ from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Count
 from frappe.utils import (
-	DATE_FORMAT,
-	add_days,
-	add_to_date,
-	cint,
-	comma_and,
-	date_diff,
-	flt,
-	get_link_to_form,
-	getdate,
+    DATE_FORMAT,
+    add_days,
+    add_to_date,
+    cint,
+    comma_and,
+    date_diff,
+    flt,
+    get_link_to_form,
+    getdate,
 )
 
 import erpnext
 
 from erpnext.accounts.utils import get_fiscal_year
 
-from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import if_lending_app_installed
-from hrms.payroll.doctype.salary_withholding.salary_withholding import link_bank_entry_in_salary_withholdings
+from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (
+    if_lending_app_installed,
+)
+from hrms.payroll.doctype.salary_withholding.salary_withholding import (
+    link_bank_entry_in_salary_withholdings,
+)
 
-from hrms.payroll.doctype.payroll_entry.payroll_entry import submit_salary_slips_for_employees
+from hrms.payroll.doctype.payroll_entry.payroll_entry import (
+    submit_salary_slips_for_employees,
+)
 
 
 def custom_get_salary_component_account(self, salary_component):
@@ -35,20 +43,19 @@ def custom_get_salary_component_account(self, salary_component):
     Custom function to override `get_salary_component_account` in PayrollEntry.
     """
     if not salary_component:
-        return 
+        return
 
     get_doc = frappe.get_doc("Salary Component", salary_component)
 
     if get_doc.get("do_not_include_in_total") == 0:
-        for j in get_doc.get("accounts", []):  
+        for j in get_doc.get("accounts", []):
             if j.company == self.company:
-                return j.account  
+                return j.account
 
     return None
 
+
 PayrollEntry.get_salary_component_account = custom_get_salary_component_account
-
-
 
 
 def custom_make_accrual_jv_entry(self, submitted_salary_slips):
@@ -64,15 +71,21 @@ def custom_make_accrual_jv_entry(self, submitted_salary_slips):
     self.employee_based_payroll_payable_entries = {}
     self._advance_deduction_entries = []
 
-    earnings = self.get_salary_component_total(
-        component_type="earnings",
-        employee_wise_accounting_enabled=employee_wise_accounting_enabled,
-    ) or {}
+    earnings = (
+        self.get_salary_component_total(
+            component_type="earnings",
+            employee_wise_accounting_enabled=employee_wise_accounting_enabled,
+        )
+        or {}
+    )
 
-    deductions = self.get_salary_component_total(
-        component_type="deductions",
-        employee_wise_accounting_enabled=employee_wise_accounting_enabled,
-    ) or {}
+    deductions = (
+        self.get_salary_component_total(
+            component_type="deductions",
+            employee_wise_accounting_enabled=employee_wise_accounting_enabled,
+        )
+        or {}
+    )
 
     earnings = {
         (component, cost_center): amount
@@ -86,7 +99,9 @@ def custom_make_accrual_jv_entry(self, submitted_salary_slips):
         if component is not None
     }
 
-    precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
+    precision = frappe.get_precision(
+        "Journal Entry Account", "debit_in_account_currency"
+    )
 
     if earnings or deductions:
         accounts = []
@@ -141,7 +156,9 @@ def custom_make_accrual_jv_entry(self, submitted_salary_slips):
             submitted_salary_slips=submitted_salary_slips,
         )
 
+
 PayrollEntry.make_accrual_jv_entry = custom_make_accrual_jv_entry
+
 
 @frappe.whitelist()
 def custom_make_bank_entry(self, for_withheld_salaries=False):
@@ -159,9 +176,12 @@ def custom_make_bank_entry(self, for_withheld_salaries=False):
 
     for salary_detail in salary_details:
         do_not_include_in_total = frappe.db.get_value(
-            "Salary Component", salary_detail.salary_component, "do_not_include_in_total", cache=True
+            "Salary Component",
+            salary_detail.salary_component,
+            "do_not_include_in_total",
+            cache=True,
         )
-        
+
         if do_not_include_in_total == 0:
             if salary_detail.parentfield == "earnings":
                 (
@@ -198,7 +218,10 @@ def custom_make_bank_entry(self, for_withheld_salaries=False):
 
             elif salary_detail.parentfield == "deductions":
                 statistical_component = frappe.db.get_value(
-                    "Salary Component", salary_detail.salary_component, "statistical_component", cache=True
+                    "Salary Component",
+                    salary_detail.salary_component,
+                    "statistical_component",
+                    cache=True,
                 )
 
                 if not statistical_component:
@@ -212,7 +235,9 @@ def custom_make_bank_entry(self, for_withheld_salaries=False):
                     salary_slip_total -= salary_detail.amount
 
     # Process loan repayments
-    total_loan_repayment = self.process_loan_repayments_for_bank_entry(salary_details) or 0
+    total_loan_repayment = (
+        self.process_loan_repayments_for_bank_entry(salary_details) or 0
+    )
     salary_slip_total -= total_loan_repayment
 
     # Show salary slip total for debugging
@@ -222,7 +247,9 @@ def custom_make_bank_entry(self, for_withheld_salaries=False):
     bank_entry = None
     if salary_slip_total > 0:
         remark = "withheld salaries" if for_withheld_salaries else "salaries"
-        bank_entry = self.set_accounting_entries_for_bank_entry(salary_slip_total, remark)
+        bank_entry = self.set_accounting_entries_for_bank_entry(
+            salary_slip_total, remark
+        )
 
         if for_withheld_salaries:
             link_bank_entry_in_salary_withholdings(salary_details, bank_entry.name)
@@ -231,6 +258,7 @@ def custom_make_bank_entry(self, for_withheld_salaries=False):
 
 
 PayrollEntry.make_bank_entry = custom_make_bank_entry
+
 
 @frappe.whitelist()
 def custom_submit_salary_slips(self):
@@ -260,7 +288,7 @@ def custom_submit_salary_slips(self):
     get_reimbursement_component = frappe.get_list(
         "Salary Component",
         filters={"disabled": 0},
-        fields=["name", "custom_is_reimbursement", "custom_is_accrual"]
+        fields=["name", "custom_is_reimbursement", "custom_is_accrual"],
     )
 
     # Check if data exists
@@ -282,28 +310,33 @@ def custom_submit_salary_slips(self):
                     if reimb.salary_component != comp.name:
                         continue
 
-                    for accrual_doctype in ["Employee Benefit Accrual", "Employee Bonus Accrual"]:
+                    for accrual_doctype in [
+                        "Employee Benefit Accrual",
+                        "Employee Bonus Accrual",
+                    ]:
                         get_accrued_data = frappe.get_list(
                             accrual_doctype,
                             filters={
                                 "payroll_entry": self.name,
                                 "docstatus": ["in", [0, 1]],
-                                "salary_component": reimb.salary_component
+                                "salary_component": reimb.salary_component,
                             },
-                            fields=["amount"]
+                            fields=["amount"],
                         )
 
                         if get_accrued_data:
                             accrued_sum = sum(item.amount for item in get_accrued_data)
 
-                            account_array.append({
-                                "payable_account": acc.account,
-                                "payable_debit_amount": accrued_sum,
-                                "payable_credit_amount": 0,
-                                "expense_account": reimb.payable_account,
-                                "expense_credit_amount": accrued_sum,
-                                "expense_debit_amount": 0,
-                            })
+                            account_array.append(
+                                {
+                                    "payable_account": acc.account,
+                                    "payable_debit_amount": accrued_sum,
+                                    "payable_credit_amount": 0,
+                                    "expense_account": reimb.payable_account,
+                                    "expense_credit_amount": accrued_sum,
+                                    "expense_debit_amount": 0,
+                                }
+                            )
 
     # Create Journal Entry if needed
     if account_array:
@@ -315,27 +348,27 @@ def custom_submit_salary_slips(self):
 
         for entry in account_array:
             # Debit entry (Payable account)
-            je.append("accounts", {
-                "account": entry["payable_account"],
-                "debit_in_account_currency": entry["payable_debit_amount"],
-                "credit_in_account_currency": 0
-            })
+            je.append(
+                "accounts",
+                {
+                    "account": entry["payable_account"],
+                    "debit_in_account_currency": entry["payable_debit_amount"],
+                    "credit_in_account_currency": 0,
+                },
+            )
 
             # Credit entry (Expense account)
-            je.append("accounts", {
-                "account": entry["expense_account"],
-                "debit_in_account_currency": 0,
-                "credit_in_account_currency": entry["expense_credit_amount"]
-            })
+            je.append(
+                "accounts",
+                {
+                    "account": entry["expense_account"],
+                    "debit_in_account_currency": 0,
+                    "credit_in_account_currency": entry["expense_credit_amount"],
+                },
+            )
 
         je.insert()
         je.submit()
-
-
-
-
-
-            
 
 
 PayrollEntry.submit_salary_slips = custom_submit_salary_slips

@@ -10,8 +10,8 @@ frappe.ui.form.on('Salary Appraisal Calculation', {
             get_reimbursements(frm);
             get_bonus(frm);
             });
-        } 
-        else 
+        }
+        else
         {
             frm.clear_table("old_structure_child");
             frm.refresh_field("old_structure_child");
@@ -158,7 +158,7 @@ function fetchNewSalaryComponents(frm, salary_structure, from_date, new_componen
 function fetchSalaryComponentDetails(frm, ctc_array, component_dict, callback) {
     let fetchDetails = (index) => {
 
-        
+
         if (index < ctc_array.length) {
             let item = ctc_array[index];
             frappe.call({
@@ -176,11 +176,11 @@ function fetchSalaryComponentDetails(frm, ctc_array, component_dict, callback) {
                     }
                     fetchDetails(index + 1);
 
-                   
+
                 }
             });
-        } 
-        else 
+        }
+        else
         {
             callback();
         }
@@ -220,7 +220,7 @@ function get_salary_slip(frm) {
                                 fields: ["*"]
                             },
                             callback: function(res) {
-                                
+
 
                                 res.message.forEach(v => {
                                     frappe.call({
@@ -263,9 +263,9 @@ function get_salary_slip(frm) {
 
                                             frm.clear_table("salary_arrear_components");
                                             frm.refresh_field("salary_arrear_components");
-                                            
+
                                             final_mapped_array.forEach(b => {
-                                                
+
                                                 let child = frm.add_child("salary_arrear_components");
                                                 let expected_amount = (b.new_amount / b.working_days) * (b.working_days - b.lop);
                                                 frappe.model.set_value(child.doctype, child.name, "salary_slip_id", b.salary_slip);
@@ -341,9 +341,9 @@ function get_bonus(frm) {
                                                     if (mes.message.custom_is_accrual == 1) {
                                                         latest_bonus_amount = bonus.amount;
                                                         console.log(mes.message.name)
-                                                        
+
                                                     }
-                                                    
+
                                                     resolve();
                                                 }
                                             });
@@ -362,7 +362,7 @@ function get_bonus(frm) {
                                                 fields: ["*"]
                                             },
                                             callback: function (res_bonus) {
-                                                
+
                                                 frm.clear_table("bonus_components");
                                                 frm.refresh_field("bonus_components");
 
@@ -377,10 +377,10 @@ function get_bonus(frm) {
                                                             callback: function (slip_response) {
                                                                 if (slip_response.message) {
 
-                                                                    
+
                                                                     let child = frm.add_child("bonus_components");
                                                                     let expected_bonus_amount = (latest_bonus_amount / slip_response.message.total_working_days) * (slip_response.message.total_working_days - slip_response.message.leave_without_pay);
-                                                                    
+
 
                                                                     frappe.model.set_value(child.doctype, child.name, "salary_slip_id", d.salary_slip);
                                                                     frappe.model.set_value(child.doctype, child.name, "salary_component", d.salary_component);
@@ -442,7 +442,7 @@ function get_bonus(frm) {
 //                             },
 //                             callback: function(mes) {
 //                                 if (mes.message) {
-                                    
+
 
 //                                     $.each(mes.message.custom_employee_reimbursements, function(i, reimbursement) {
 //                                         latest_structure_reimbursement_component.push({
@@ -493,7 +493,7 @@ function get_bonus(frm) {
 //                                                     }
 //                                                 });
 //                                             });
-                                           
+
 //                                         }
 //                                     });
 //                                 }
@@ -557,7 +557,7 @@ function get_reimbursements(frm) {
 
                                             res.message.forEach(v => {
                                                 let component = latest_structure_reimbursement_component.find(comp => comp.component === v.salary_component);
-                                                
+
                                                 frappe.call({
                                                     method: "frappe.client.get",
                                                     args: {
@@ -598,8 +598,3 @@ function get_reimbursements(frm) {
         });
     }
 }
-
-
-
-
-

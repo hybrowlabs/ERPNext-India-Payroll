@@ -19,10 +19,10 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 callback: function(r) {
                     if (r.message) {
 
-                        
+
 
                         frm.set_value("from_date",r.message.promotion_date)
-                        
+
                     }
                 }
             });
@@ -31,10 +31,10 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
     },
 
-    
-    
 
-    
+
+
+
 
 
     refresh(frm)
@@ -48,19 +48,19 @@ frappe.ui.form.on('Salary Structure Assignment', {
         if(frm.doc.docstatus==1)
             {
 
-           
+
                     change_regime(frm)
-                    
+
             }
 
 
-           
+
                 setTimeout(() => {
-                    
+
                     frm.remove_custom_button('Payroll Entry', 'Create');
                     // frm.remove_custom_button('Preview Salary Slip', 'Actions');
                     // frm.remove_custom_button('Chose Regime');
-                    
+
                 }, 10);
 
 
@@ -71,14 +71,14 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 }
 
 
-        
-    
+
+
 
 
     frm.fields_dict['custom_employee_reimbursements'].grid.get_field('reimbursements').get_query = function(doc, cdt, cdn) {
         var child = locals[cdt][cdn];
-        
-        return {    
+
+        return {
             filters:[
                 ['custom_is_reimbursement', '=', 1]
             ]
@@ -89,66 +89,66 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
     frm.fields_dict['custom_other_perquisites'].grid.get_field('title').get_query = function(doc, cdt, cdn) {
         var child = locals[cdt][cdn];
-        
-        return {    
+
+        return {
             filters:[
                 ['custom_perquisite', '=', 1]
             ]
         }
     }
-        
+
     },
 
-    
+
     custom_nps_percentage(frm) {
 
 
-        
+
         if (frm.doc.custom_is_nps==1)
-        
+
         {
-                if(frm.doc.custom_nps_percentage <= 10) 
+                if(frm.doc.custom_nps_percentage <= 10)
                 {
                         var amount = (frm.doc.base / 12 * 35) / 100;
                         var nps_value=(amount*frm.doc.custom_nps_percentage)/100
                         frm.set_value("custom_nps_amount",nps_value)
-                    
+
                 }
-        
+
                 else
                 {
                     msgprint("you cant put percentage greater than 10")
                     frm.set_value("custom_nps_amount",undefined)
                 }
-        
-        }
-    },  
 
-    
+        }
+    },
+
+
 
 
 
 custom_cubic_capacity_of_company(frm)
 {
-    
-   
-    
+
+
+
         if(frm.doc.custom_cubic_capacity_of_company=="Car < 1600 CC" )
         {
             frm.set_value("custom_car_perquisite_as_per_rules",1800)
-           
-            
+
+
         }
-        
+
         else if (frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
         {
-            
+
              frm.set_value("custom_car_perquisite_as_per_rules",2400)
 
-            
-            
+
+
         }
-    
+
 
 },
 
@@ -161,7 +161,7 @@ custom_driver_provided_by_company(frm)
     }
     else
     {
-        frm.set_value("custom_driver_perquisite_as_per_rules",undefined) 
+        frm.set_value("custom_driver_perquisite_as_per_rules",undefined)
     }
 },
 
@@ -172,10 +172,10 @@ custom__car_perquisite(frm)
         {
             if(frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
                 {
-                   
+
                     frm.set_value("custom_car_perquisite_as_per_rules",2400)
                 }
-            
+
         }
 
         else
@@ -219,7 +219,7 @@ function change_regime(frm)
             let d = new frappe.ui.Dialog({
                 title: 'Enter details',
                 fields: [
-                   
+
                     {
                         label: 'Select Regime',
                         fieldname: 'select_regime',
@@ -229,11 +229,11 @@ function change_regime(frm)
                         default:frm.doc.custom_tax_regime
                     },
 
-                   
+
 
 
                 ],
-                size: 'small', // small, large, extra-large 
+                size: 'small', // small, large, extra-large
                 primary_action_label: 'Submit',
                 primary_action(values) {
                     console.log(values);
@@ -252,7 +252,7 @@ function change_regime(frm)
                         callback :function(res)
                         {
                             frm.reload_doc();
-                           
+
 
                         }
 
@@ -263,9 +263,9 @@ function change_regime(frm)
                     d.hide();
                 }
             });
-            
+
             d.show();
-            
+
 
         });
         frm.change_custom_button_type('Switch Regime', null, 'primary');
@@ -301,17 +301,17 @@ async function processSalaryComponents(frm) {
     if (response.message) {
         // Define the tables for earnings, reimbursements, deductions, and additional components
         let salaryBreakup = `
-            <table class="table table-bordered small"> 
-                <thead> 
-                    <tr> 
-                        <th style="width: 16%">Salary Component (Earnings)</th> 
-                        <th style="width: 16%" class="text-right">Monthly Amount</th> 
-                        <th style="width: 16%" class="text-right">Annual Amount</th> 
-                    </tr> 
-                </thead> 
+            <table class="table table-bordered small">
+                <thead>
+                    <tr>
+                        <th style="width: 16%">Salary Component (Earnings)</th>
+                        <th style="width: 16%" class="text-right">Monthly Amount</th>
+                        <th style="width: 16%" class="text-right">Annual Amount</th>
+                    </tr>
+                </thead>
                 <tbody id="salary_breakup_body"></tbody>
             </table>`;
-    
+
         document.getElementById("ctc_preview").innerHTML = salaryBreakup;
         let tableBody = document.getElementById("salary_breakup_body");
 
@@ -333,7 +333,7 @@ async function processSalaryComponents(frm) {
 
                 total_ctc.push(v.amount)
                 let newRow = tableBody.insertRow();
-                
+
                 let componentCell = newRow.insertCell();
                 componentCell.textContent = res.message.name;
 
@@ -358,23 +358,23 @@ async function processSalaryComponents(frm) {
         // Handle reimbursements if applicable
         if (frm.doc.custom_statistical_amount > 0) {
             let reimbursementBreakup = `
-                <table class="table table-bordered small"> 
-                    <thead> 
-                        <tr> 
-                            <th style="width: 16%">Reimbursements</th> 
-                            <th style="width: 16%" class="text-right">Monthly Amount</th> 
-                            <th style="width: 16%" class="text-right">Annual Amount</th> 
-                        </tr> 
-                    </thead> 
+                <table class="table table-bordered small">
+                    <thead>
+                        <tr>
+                            <th style="width: 16%">Reimbursements</th>
+                            <th style="width: 16%" class="text-right">Monthly Amount</th>
+                            <th style="width: 16%" class="text-right">Annual Amount</th>
+                        </tr>
+                    </thead>
                     <tbody id="reimbursement_breakup_body"></tbody>
                 </table>`;
-            
+
             document.getElementById("reimbursement_preview").innerHTML = reimbursementBreakup;
             let reimbursementTableBody = document.getElementById("reimbursement_breakup_body");
 
             $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
                 let newRow = reimbursementTableBody.insertRow();
-                
+
                 let componentCell = newRow.insertCell();
                 componentCell.textContent = component.reimbursements;
 
@@ -395,18 +395,18 @@ async function processSalaryComponents(frm) {
 
         // Define and handle deductions
         let deductionBreakup = `
-            <table class="table table-bordered small"> 
-                <thead> 
-                    <tr> 
-                        <th style="width: 16%">Salary Component (Deductions)</th> 
-                        <th style="width: 16%" class="text-right">Monthly Amount</th> 
-                        <th style="width: 16%" class="text-right">Annual Amount</th> 
-                    </tr> 
-                </thead> 
+            <table class="table table-bordered small">
+                <thead>
+                    <tr>
+                        <th style="width: 16%">Salary Component (Deductions)</th>
+                        <th style="width: 16%" class="text-right">Monthly Amount</th>
+                        <th style="width: 16%" class="text-right">Annual Amount</th>
+                    </tr>
+                </thead>
                 <tbody id="deduction_breakup_body"></tbody>
-                
+
             </table>`;
-        
+
         document.getElementById("deduction_preview").innerHTML = deductionBreakup;
         let deductionTableBody = document.getElementById("deduction_breakup_body");
 
@@ -427,7 +427,7 @@ async function processSalaryComponents(frm) {
 
                 total_ctc.push(v.amount)
                 let newRow = deductionTableBody.insertRow();
-                
+
                 let componentCell = newRow.insertCell();
                 componentCell.textContent = res.message.name;
 
@@ -452,45 +452,45 @@ async function processSalaryComponents(frm) {
         var sum = total_ctc.reduce(function(accumulator, currentValue) {
             return accumulator + currentValue;
         }, 0);
-        
+
         console.log(sum);
 
 
         if (frm.doc.base) {
             // Define the table structure with proper HTML syntax and include table headings
             let total_ctcTable = `
-                <table class="table table-bordered small"> 
-                    <thead> 
+                <table class="table table-bordered small">
+                    <thead>
                         <tr>
-                            <th style="width: 16%">Total</th> 
-                            <th style="width: 16%" class="text-right">Monthly</th> 
-                            <th style="width: 16%" class="text-right">Annual</th> 
+                            <th style="width: 16%">Total</th>
+                            <th style="width: 16%" class="text-right">Monthly</th>
+                            <th style="width: 16%" class="text-right">Annual</th>
                         </tr>
-                    </thead> 
+                    </thead>
                     <tbody id="ctc_breakup_body"></tbody>
                 </table>`;
-            
+
             // Insert the table structure into the element with id "total_ctc"
             document.getElementById("total_ctc").innerHTML = total_ctcTable;
             let ctc_body = document.getElementById("ctc_breakup_body");
-        
+
             // Create a new row in the table body
             let newRow = ctc_body.insertRow();
-            
+
             // Insert cells into the new row
             let componentCell = newRow.insertCell();
             componentCell.textContent = "Total CTC";
-            
-            let monthlyAmount = Math.round(sum); 
-            let annualAmount = Math.round(monthlyAmount*12); 
 
-            
-        
+            let monthlyAmount = Math.round(sum);
+            let annualAmount = Math.round(monthlyAmount*12);
+
+
+
             let formattedMonthlyAmount = monthlyAmount.toLocaleString();
             let amountCell = newRow.insertCell();
             amountCell.className = "text-right";
             amountCell.textContent = formattedMonthlyAmount;
-        
+
             let formattedAnnualAmount = annualAmount.toLocaleString();
             let annualAmountCell = newRow.insertCell();
             annualAmountCell.className = "text-right";
@@ -498,24 +498,24 @@ async function processSalaryComponents(frm) {
         }
 
 
-        
 
-        
+
+
 
         // Handle additional components if applicable
         if (frm.doc.custom_is_special_hra || frm.doc.custom_is_special_conveyance || frm.doc.custom_is_car_allowance || frm.doc.custom_is_incentive || frm.doc.custom_is_extra_driver_salary) {
             let additionalComponentTable = `
-                <table class="table table-bordered small"> 
-                    <thead> 
-                        <tr> 
-                            <th style="width: 16%">Additional Component</th> 
-                            <th style="width: 16%" class="text-right">Monthly Amount</th> 
-                            <th style="width: 16%" class="text-right">Annual Amount</th> 
-                        </tr> 
-                    </thead> 
+                <table class="table table-bordered small">
+                    <thead>
+                        <tr>
+                            <th style="width: 16%">Additional Component</th>
+                            <th style="width: 16%" class="text-right">Monthly Amount</th>
+                            <th style="width: 16%" class="text-right">Annual Amount</th>
+                        </tr>
+                    </thead>
                     <tbody id="additional_breakup_body"></tbody>
                 </table>`;
-            
+
             document.getElementById("additional_component").innerHTML = additionalComponentTable;
             let additionalTableBody = document.getElementById("additional_breakup_body");
 
@@ -547,19 +547,19 @@ async function processSalaryComponents(frm) {
                 componentAmounts.push(frm.doc.custom_extra_driver_salary_value);
             }
 
-            
+
 
             $.each(components, function (i, componentName) {
                 let newRow = additionalTableBody.insertRow();
-                
+
                 let componentCell = newRow.insertCell();
                 componentCell.textContent = componentName;
 
 
-                
+
 
                 let monthlyAmount = Math.round(componentAmounts[i] / 12)
-                
+
                 let formattedMonthlyAmount = monthlyAmount.toLocaleString();
                 // console.log(formattedMonthlyAmount)
                 let amountCell = newRow.insertCell();
@@ -574,9 +574,9 @@ async function processSalaryComponents(frm) {
         }
 
 
-       
-        
 
-        
+
+
+
     }
 }
