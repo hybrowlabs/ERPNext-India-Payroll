@@ -282,6 +282,8 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 new_future_amount += new_earning.amount * (
                     num_months - salary_slip_count
                 )
+                # frappe.msgprint(str(new_earning.amount * (
+                #     num_months - salary_slip_count)))
 
                 # Accrued BONUS tax=0
             if (
@@ -340,6 +342,8 @@ def get_doc_data(doc_name, employee, company, payroll_period):
             ):
                 nps_amount += new_earning.amount * (num_months - salary_slip_count)
 
+                # frappe.msgprint(str(new_earning.amount * (num_months - salary_slip_count)))
+
         for deduction in new_salary_slip.deductions:
             taxable_component = frappe.get_doc(
                 "Salary Component", deduction.salary_component
@@ -353,6 +357,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
             if taxable_component.component_type == "Professional Tax":
                 pt_amount += deduction.amount * (num_months - salary_slip_count)
 
+        # frappe.msgprint(str(old_future_amount))
         latest_tax_slab = frappe.get_list(
             "Income Tax Slab",
             filters={
@@ -404,6 +409,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
         "new_standard": new_standard_value,
         "pt": pt_amount,
         "nps": nps_amount,
+        "epf": epf_amount,
         "num_months": num_months,
         "salary_slip_count": salary_slip_count,
         "accrued_data_list": accrued_data_list,

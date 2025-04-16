@@ -4272,6 +4272,7 @@ function tds_projection_html(frm) {
 
                   const pt_value=Math.round(res.message.pt)
                   const nps_value=Math.round(res.message.nps)
+                  const epf_value=Math.round(res.message.epf)
 
 
                   const per_comp = res.message.perquisite_component || [];
@@ -4287,6 +4288,10 @@ function tds_projection_html(frm) {
 
                   // console.log(accrued_data,"8888888888888888888")
                   const accruedData = accrued_data; // just assign it, no Math.max
+
+
+                  section80c_component.push("Investments In PF(Auto)")
+                  section80c_amount.push(epf_value)
 
                   let perquisiteRows = "";
                   for (let i = 0; i < maxLength; i++) {
@@ -4312,7 +4317,7 @@ function tds_projection_html(frm) {
                         </tr>`;
                     }
 
-                    console.log(accrued_components, "-----");
+                    // console.log(accrued_components, "-----");
 
 
                   // console.log(frm.doc.custom_declaration_form_data,"------------------")
@@ -4381,10 +4386,14 @@ function tds_projection_html(frm) {
                               section10_amount.push(v.amount);
                           }
 
-                          if(v.exemption_category == "Section 80C")
+                          if(v.exemption_category == "Section 80C" && v.exemption_sub_category!="Investments In PF(Auto)")
                           {
                             section80c_component.push(v.exemption_sub_category)
                             section80c_amount.push(v.amount)
+
+
+
+
 
                           }
 

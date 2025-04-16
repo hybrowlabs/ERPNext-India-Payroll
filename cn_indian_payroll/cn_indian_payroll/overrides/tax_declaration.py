@@ -660,16 +660,19 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     {"field": "mpAmount6", "name": "Preventive Checkup (Parents)"},
                     # ... (other fields not related to 80D)
                     {"field": "hlAmount", "name": "Interest Paid On Home Loan"},
-                    {"field": "pfValue", "name": "Employee Provident Fund (Auto)"},
+                    {"field": "pfValue", "name": "Investments In PF(Auto)"},
                     {"field": "aValue2", "name": "Pension Scheme Investments & ULIP"},
-                    {"field": "bValue1", "name": "Principal paid on Home Loan"},
-                    {"field": "amount4", "name": "Public Provident Fund"},
+                    {"field": "bValue1", "name": "Housing Loan Principal Repayment"},
+                    {"field": "amount4", "name": "PPF - Public Provident Fund"},
                     {
                         "field": "dValue1",
                         "name": "Home Loan Account Of National Housing Bank",
                     },
-                    {"field": "eValue1", "name": "Life Insurance Premium"},
-                    {"field": "fValue1", "name": "National Savings Certificates"},
+                    {
+                        "field": "eValue1",
+                        "name": "LIC- Life Insurance Premium Directly Paid By Employee",
+                    },
+                    {"field": "fValue1", "name": "NSC - National Saving Certificate"},
                     {
                         "field": "gValue1",
                         "name": "Mutual Funds - Notified Under Clause 23D Of Section 10",
@@ -678,8 +681,14 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         "field": "hValue1",
                         "name": "ELSS - Equity Link Saving Scheme Of Mutual Funds",
                     },
-                    {"field": "iValue1", "name": "Children Tuition Fees"},
-                    {"field": "jValue1", "name": "Fixed Deposits In Banksn"},
+                    {
+                        "field": "iValue1",
+                        "name": "Tuition Fees For Full Time Education",
+                    },
+                    {
+                        "field": "jValue1",
+                        "name": "Fixed Deposits In Banks (Period As Per Income Tax Guidelines)",
+                    },
                     {
                         "field": "kValue1",
                         "name": "5 Years Term Deposit An Account Under Post Office Term Deposit Rules",
@@ -687,26 +696,32 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     {"field": "kValue2", "name": "Others"},
                     {
                         "field": "fourValue",
-                        "name": "Treatment of Dependent with Disability",
+                        "name": "(Medical treatment / insurance of handicapped dependant)",
                     },
                     {
                         "field": "fiveNumber",
                         "name": "Medical treatment (specified diseases only)",
                     },
-                    {"field": "sixNumber", "name": "Interest paid on Education Loan"},
+                    {
+                        "field": "sixNumber",
+                        "name": "Interest repayment of Loan for higher education",
+                    },
                     {
                         "field": "sevenNumber",
-                        "name": "Permanent Physical Disability (Self)",
+                        "name": "Deduction for Physically Disabled",
                     },
                     {"field": "eightNumber", "name": "Donation U/S 80G"},
-                    {"field": "nineNumber", "name": "NPS Contribution by Employer"},
+                    {
+                        "field": "nineNumber",
+                        "name": "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)",
+                    },
                     {
                         "field": "tenNumber",
                         "name": "First HSG Loan Interest Ded.(80EE)",
                     },
                     {
                         "field": "elevenNumber",
-                        "name": "Additional Exemption on Voluntary NPS",
+                        "name": "Contribution in National Pension Scheme",
                     },
                     {
                         "field": "twelveNumber1",
@@ -728,7 +743,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         "field": "eighteenNumber",
                         "name": "Interest on deposits in saving account for Ded U/S 80TTB",
                     },
-                    {"field": "nineteenNumber", "name": "Profession Tax"},
+                    {"field": "nineteenNumber", "name": "P.T. Paid by employee"},
                     {"field": "twentyNumber", "name": "Deduction U/S 80GG"},
                     {
                         "field": "twentyoneNumber",
@@ -911,7 +926,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
                 # Extract numbers from the form data
                 numbers = [
-                    {"field": "nineNumber", "name": "NPS Contribution by Employer"},
+                    {
+                        "field": "nineNumber",
+                        "name": "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)",
+                    },
                 ]
 
                 # Prepare lists for child table population
