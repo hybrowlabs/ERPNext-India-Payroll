@@ -1152,6 +1152,27 @@ def get_salary_slips(filters=None):
             salary_data["new_regime_tax"] = new_regime_payable / month_count
             salary_data["old_regime_tax"] = old_regime_payable / month_count
 
+            new_regime_tax_amount = new_regime_payable / month_count
+            old_regime_tax_amount = old_regime_payable / month_count
+
+            beneficial = min(new_regime_tax_amount, old_regime_tax_amount)
+
+            beneficial_max = max(new_regime_payable, old_regime_payable)
+            beneficial_min = min(new_regime_payable, old_regime_payable)
+
+            final_beneficial = None
+
+            if beneficial == new_regime_tax_amount:
+                final_beneficial = "New Regime"
+            else:
+                final_beneficial = "Old Regime"
+
+            salary_data["final_beneficial"] = final_beneficial
+
+            difference = beneficial_max - beneficial_min
+
+            salary_data["difference"] = difference
+
         final_data.append(salary_data)
 
     return final_data, salary_components
@@ -1625,8 +1646,18 @@ def execute(filters=None):
                 "fieldtype": "Currency",
                 "width": 250,
             },
-            # salary_data["new_regime_tax"] = new_regime_payable/month_count
-            #     salary_data["old_regime_tax"] = old_regime_payable/month_count
+            {
+                "fieldname": "final_beneficial",
+                "label": "Beneficial",
+                "fieldtype": "Data",
+                "width": 250,
+            },
+            {
+                "fieldname": "difference",
+                "label": "Difference between old and new tax payable",
+                "fieldtype": "Currency",
+                "width": 250,
+            },
         ]
     )
 
