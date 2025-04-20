@@ -4405,7 +4405,7 @@ function tds_projection_html(frm) {
 
                                 section80d_other.push(v.exemption_sub_category)
 
-                                section80d_other_amount.push(v.max_amount)
+                                section80d_other_amount.push(v.amount)
 
 
 
