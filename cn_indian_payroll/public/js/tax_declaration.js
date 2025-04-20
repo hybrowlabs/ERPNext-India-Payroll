@@ -2146,8 +2146,8 @@ const DECLARATION_FORM = {
                     {
                       "components": [
                         {
-                          "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">80-DDB</span></p>",
-                          "label": "80-DDB",
+                          "html": "<p><span style=\"background-color:rgb(255,255,255);color:rgb(93,93,93);\">80-DD</span></p>",
+                          "label": "80-DD",
                           "refreshOnChange": false,
                           "key": "Ddb",
                           "type": "content",
@@ -2159,8 +2159,8 @@ const DECLARATION_FORM = {
                     {
                       "components": [
                         {
-                          "html": "<p>Deduction U/S 80-DDB</p>",
-                          "label": "Deduction U/S 80-DDB",
+                          "html": "<p>Deduction U/S 80-DD</p>",
+                          "label": "Deduction U/S 80-DD",
                           "refreshOnChange": false,
                           "key": "deductionUS80Ddb",
                           "type": "content",
@@ -4405,17 +4405,9 @@ function tds_projection_html(frm) {
 
                                 section80d_other.push(v.exemption_sub_category)
 
+                                section80d_other_amount.push(v.max_amount)
 
-                                if(v.amount<=v.max_amount)
-                                  {
 
-                                    section80d_other_amount.push(v.amount)
-                                  }
-                                  else
-                                  {
-                                    section80d_other_amount.push(v.max_amount)
-
-                                  }
 
                               }
 
@@ -4426,7 +4418,7 @@ function tds_projection_html(frm) {
                               const validCategories = [
 
                                 "Section 80DDB",
-                                "Section 80-G",
+                                "Section 80G",
                                 "Section 80CCD(1B)",
                                 "Section 80EEA",
                                 "Section 80EEB",
@@ -4436,22 +4428,21 @@ function tds_projection_html(frm) {
                                 "Section 80GG",
                                 "Section 80CCG",
                                 "Section 24(b)",
+
+                                "Section 80CCD(2)",
+                                "Section 80CCG",
+
+
                             ];
 
                             if (validCategories.includes(v.exemption_category)) {
                               other_component.push(v.exemption_sub_category)
 
 
-                              if(v.amount<=v.max_amount)
-                                {
 
                                   other_amount.push(v.amount)
-                                }
-                                else
-                                {
-                                  other_amount.push(v.amount)
 
-                                }
+
                             }
                       });
                   }
