@@ -1588,7 +1588,7 @@ def execute(filters=None):
             },
             {
                 "fieldname": "old_education_cess",
-                "label": "Old Regimec Education Cess",
+                "label": "Old Regime Education Cess",
                 "fieldtype": "Currency",
                 "width": 250,
             },
@@ -1618,7 +1618,7 @@ def execute(filters=None):
             },
             {
                 "fieldname": "new_education_cess",
-                "label": "New Regimec Education Cess",
+                "label": "New Regime Education Cess",
                 "fieldtype": "Currency",
                 "width": 250,
             },
