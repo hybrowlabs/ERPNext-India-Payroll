@@ -120,7 +120,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 )
 
     # -----------validate section10 components on employee is eligible or not----------------
-
     def validation_on_section10(self):
         if self.custom_tax_regime != "Old Regime":
             return
@@ -136,9 +135,12 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             "thirteen": "Education Allowance",
         }
 
+        # Selected allowances from form data
         selected_allowances = {
             key: value for key, value in allowances.items() if form_data.get(key, 0)
         }
+
+        # Fetch valid salary components of type "Tax Exemption"
         valid_components = frappe.get_all(
             "Salary Component",
             filters={"component_type": "Tax Exemption", "disabled": 0},
@@ -148,40 +150,35 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             comp["custom_sub_category"]: comp["name"] for comp in valid_components
         }
 
+        # Map selected allowances to their required components
         required_components = {
             category: component_map.get(sub_category)
             for category, sub_category in selected_allowances.items()
         }
 
+        # Specific allowance validations
         if (
             "Hostel Allowance" in selected_allowances.values()
-            and required_components.get("twentysix") is None
+            and not required_components.get("twentysix")
         ):
-            frappe.throw("You are not allow to define the Hostel Allowance")
-
-        if (
-            "LTA Allowance" in selected_allowances.values()
-            and required_components.get("twentyeight") is None
-        ):
-            frappe.throw("You are not allow to define the LTA Allowance")
+            frappe.throw("You are not allowed to define the Hostel Allowance")
 
         if (
             "Uniform Allowance" in selected_allowances.values()
-            and required_components.get("twentyFour") is None
+            and not required_components.get("twentyFour")
         ):
-            frappe.throw("You are not allow to define the Uniform Allowance")
+            frappe.throw("You are not allowed to define the Uniform Allowance")
 
         if (
             "Education Allowance" in selected_allowances.values()
-            and required_components.get("thirteen") is None
+            and not required_components.get("thirteen")
         ):
-            frappe.throw("You are not allow to define the Education Allowance")
+            frappe.throw("You are not allowed to define the Education Allowance")
 
-        if (
-            "Gratuity" in selected_allowances.values()
-            and required_components.get("twentyseven") is None
+        if "Gratuity" in selected_allowances.values() and not required_components.get(
+            "twentyseven"
         ):
-            frappe.throw("You are not allow to define the Gratuity")
+            frappe.throw("You are not allowed to define the Gratuity")
 
         # Fetch latest Salary Structure Assignment
         ss_assignment = frappe.get_list(
@@ -209,6 +206,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             for_preview=1,
         )
 
+        # Validate if required components exist in earnings
         available_components = {
             earning.salary_component for earning in salary_slip_preview.earnings
         }
@@ -216,6 +214,28 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         for key, component in required_components.items():
             if component and component not in available_components:
                 frappe.throw(f"You are not eligible to declare {allowances[key]}")
+
+        # LTA validation block
+        if "twentyeight" in selected_allowances:
+            valid_lta_components = frappe.get_all(
+                "Salary Component",
+                filters={"component_type": "LTA Reimbursement", "disabled": 0},
+                fields=["name"],
+            )
+
+            if not valid_lta_components:
+                frappe.throw("You are not eligible to declare LTA")
+
+            lta_component_name = valid_lta_components[0].name
+
+            get_ssa = frappe.get_doc(
+                "Salary Structure Assignment", ss_assignment[0].name
+            )
+            if not any(
+                lta_component_name in r.reimbursements
+                for r in get_ssa.custom_employee_reimbursements
+            ):
+                frappe.throw("You are not eligible to declare LTA")
 
     def set_total_exemption_amount(self):
         self.total_exemption_amount = flt(
@@ -584,6 +604,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         non_metro_or_metro = (future_basic_amount * 50) / 100
 
                     # HRA Exemption rule
+                    # (annul_hra_receive,metro or nonmtro,annula hra paid-10%basic)
+
                     final_hra_exemption = round(
                         min(basic_rule2, future_hra_amount, non_metro_or_metro)
                     )
