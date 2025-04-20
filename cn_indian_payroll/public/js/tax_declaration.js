@@ -4429,18 +4429,13 @@ function tds_projection_html(frm) {
                                 "Section 80CCG",
                                 "Section 24(b)",
 
-                                "Section 80CCD(2)",
-                                "Section 80CCG",
 
 
                             ];
 
                             if (validCategories.includes(v.exemption_category)) {
                               other_component.push(v.exemption_sub_category)
-
-
-
-                                  other_amount.push(v.amount)
+                              other_amount.push(v.amount)
 
 
                             }
