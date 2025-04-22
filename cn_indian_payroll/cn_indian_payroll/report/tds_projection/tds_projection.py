@@ -788,6 +788,8 @@ def get_salary_slips(filters=None):
 
                 salary_data["old_total_deduction"] = total
 
+                salary_data["new_total_deduction"] = nps_deduction + 75000
+
                 salary_data["old_annual_taxable_income"] = round(
                     (old_total_income - total)
                 )

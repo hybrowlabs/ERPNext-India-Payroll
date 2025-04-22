@@ -4304,11 +4304,18 @@ function tds_projection_html(frm) {
                   console.log(perquisiteRows,"-----")
 
                   let accrued_components = "";
+                  let total_accrued = 0;
+                  let total_future = 0;
 
                     for (let i = 0; i < accruedData.length; i++) {
                         let component = accruedData[i].component || "-";
                         let accrued = accruedData[i].amount || 0;
                         let future = accruedData[i].future_amount || 0;
+
+                        let row_sum = accrued + future;
+
+                        total_accrued += accrued;
+                        total_future += future;
 
                         accrued_components += `<tr>
                             <td>${component}</td>
@@ -4318,6 +4325,7 @@ function tds_projection_html(frm) {
                     }
 
                     // console.log(accrued_components, "-----");
+                    // console.log(`Total Combined Amount: ₹${total_accrued + total_future}`);
 
 
                   // console.log(frm.doc.custom_declaration_form_data,"------------------")
@@ -4724,8 +4732,8 @@ function tds_projection_html(frm) {
                                       </table>
                                   </div>
                               </td>
-                              <td>₹ 0</td>
-                              <td>₹ 0</td>
+                              <td>₹0</td>
+                              <td>₹0</td>
                           </tr>
 
 

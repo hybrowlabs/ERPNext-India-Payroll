@@ -286,10 +286,12 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 #     num_months - salary_slip_count)))
 
                 # Accrued BONUS tax=0
-            if (
-                taxable_component.is_tax_applicable == 0
-                and taxable_component.custom_is_accrual == 1
-            ):
+            # if (
+            #     taxable_component.is_tax_applicable == 0
+            #     and taxable_component.custom_is_accrual == 1
+            # ):
+
+            if taxable_component.custom_is_accrual == 1:
                 component_name = taxable_component.name
                 monthly_bonus = new_earning.amount
                 annual_bonus_amount = monthly_bonus * 12
