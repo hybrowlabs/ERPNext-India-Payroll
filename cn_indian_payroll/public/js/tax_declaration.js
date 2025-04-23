@@ -4571,7 +4571,18 @@ function tds_projection_html(frm) {
                                     let new_education_cess=response.message.new_education_cess
 
 
+                                    let new_regime_marginal_relief_min_value=response.message.new_regime_marginal_relief_min_value
+                                    let new_regime_marginal_relief_max_value=response.message.new_regime_marginal_relief_max_value
+                                    let old_regime_marginal_relief_min_value=response.message.old_regime_marginal_relief_min_value
+                                    let old_regime_marginal_relief_max_value=response.message.old_regime_marginal_relief_max_value
+
+
+
+
+
                                     let salary_slip_sum=Math.round(response.message.salary_slip_sum)
+
+
 
 
 
@@ -4602,6 +4613,10 @@ function tds_projection_html(frm) {
                                         salary_slip_count,
                                         from_month,
                                         to_month,
+                                        new_regime_marginal_relief_min_value,
+                                        new_regime_marginal_relief_max_value,
+                                        old_regime_marginal_relief_min_value,
+                                        old_regime_marginal_relief_max_value,
 
 
 
@@ -4636,6 +4651,10 @@ function tds_projection_html(frm) {
                         salary_slip_count,
                         from_month,
                         to_month,
+                        new_regime_marginal_relief_min_value,
+                        new_regime_marginal_relief_max_value,
+                        old_regime_marginal_relief_min_value,
+                        old_regime_marginal_relief_max_value,
 
                       } = await getPerComp1();
 
@@ -4977,6 +4996,7 @@ function tds_projection_html(frm) {
                                                   <th>Regime</th>
                                                   <th>Annual Taxable Lessthan</th>
                                                   <th>Max Amount</th>
+                                                  <th>Marginal Relief</th>
 
 
                                               </tr>
@@ -4988,11 +5008,17 @@ function tds_projection_html(frm) {
                                                   <th>₹ ${rebate}</th>
                                                   <th>₹ ${max_amount}</th>
 
+                                                  <th>${old_regime_marginal_relief_min_value}-${old_regime_marginal_relief_max_value}</th>
+
+
+
                                           </tr>
                                           <tr>
                                                   <th>New Regime</th>
                                                   <th>₹ ${newrebate}</th>
                                                   <th>₹ ${newmax_amount}</th>
+                                                  <th>${new_regime_marginal_relief_min_value}-${new_regime_marginal_relief_max_value}</th>
+
 
                                           </tr>
                                           </tbody>

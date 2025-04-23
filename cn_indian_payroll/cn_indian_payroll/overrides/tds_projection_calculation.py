@@ -442,7 +442,6 @@ def slab_calculation(
         for slab in latest_tax_slab:
             income_doc = frappe.get_doc("Income Tax Slab", slab.name)
 
-            # Initialize Lists
             total_value = []
             from_amount = []
             to_amount = []
@@ -455,9 +454,20 @@ def slab_calculation(
             old_surcharge_m = 0
             old_education_cess = 0
 
+            old_regime_marginal_relief_min_value = 0
+            old_regime_marginal_relief_max_value = 0
+
             # Retrieve Exemption & Maximum Values
             old_rebate = income_doc.custom_taxable_income_is_less_than
             old_max_amount = income_doc.custom_maximum_amount
+
+            if (
+                income_doc.custom_marginal_relief_applicable
+                and income_doc.custom_minmum_value
+                and income_doc.custom_maximun_value
+            ):
+                old_regime_marginal_relief_min_value = income_doc.custom_minmum_value
+                old_regime_marginal_relief_max_value = income_doc.custom_maximun_value
 
             if old_annual_slab > old_rebate:
                 # Store all slab details in a structured list
@@ -529,24 +539,59 @@ def slab_calculation(
                             percentage.append(tax_percent)
                             difference.append(taxable_amount)
                             total_value.append(tax_amount)
-                            # frappe.msgprint(str(difference))
 
-                # Compute the total tax
                 total_sum = sum(total_value)
 
-                if old_annual_slab < old_rebate:
-                    old_rebate_value = total_sum
+                final_value = 0
+                if (
+                    income_doc.custom_marginal_relief_applicable
+                    and income_doc.custom_minmum_value
+                    and income_doc.custom_maximun_value
+                ):
+                    if (
+                        income_doc.custom_minmum_value
+                        < old_annual_slab
+                        < income_doc.custom_maximun_value
+                    ):
+                        old_rebate_value = total_sum - (
+                            old_annual_slab - income_doc.custom_minmum_value
+                        )
+                        final_value = total_sum - old_rebate_value
 
+                        old_education_cess = final_value * 4 / 100
+
+                    else:
+                        if old_annual_slab < old_rebate:
+                            old_rebate_value = total_sum
+
+                        else:
+                            old_rebate_value = 0
+
+                        if old_annual_slab > 5000000:
+                            old_surcharge_m = round((total_sum * 10) / 100)
+                            old_education_cess = round(
+                                (old_surcharge_m + total_sum) * 4 / 100
+                            )
+
+                        else:
+                            old_surcharge_m = 0
+                            old_education_cess = round((0 + total_sum) * 4 / 100)
                 else:
-                    old_rebate_value = 0
+                    if old_annual_slab < old_rebate:
+                        old_rebate_value = total_sum
 
-                if old_annual_slab > 5000000:
-                    old_surcharge_m = round((total_sum * 10) / 100)
-                    old_education_cess = round((old_surcharge_m + total_sum) * 4 / 100)
+                    else:
+                        old_rebate_value = 0
 
-                else:
-                    old_surcharge_m = 0
-                    old_education_cess = round((0 + total_sum) * 4 / 100)
+                    if old_annual_slab > 5000000:
+                        old_surcharge_m = round((total_sum * 10) / 100)
+                        old_education_cess = round(
+                            (old_surcharge_m + total_sum) * 4 / 100
+                        )
+
+                    else:
+                        old_surcharge_m = 0
+                        old_education_cess = round((0 + total_sum) * 4 / 100)
             else:
                 old_rebate_value = 0
                 old_surcharge_m = 0
@@ -582,9 +627,24 @@ def slab_calculation(
             new_surcharge_m = 0
             new_education_cess = 0
 
+            new_regime_marginal_relief_min_value = 0
+            new_regime_marginal_relief_max_value = 0
+
             # Retrieve Exemption & Maximum Values
             new_rebate = income_doc_new.custom_taxable_income_is_less_than
             new_max_amount = income_doc_new.custom_maximum_amount
+
+            if (
+                income_doc_new.custom_marginal_relief_applicable
+                and income_doc_new.custom_minmum_value
+                and income_doc_new.custom_maximun_value
+            ):
+                new_regime_marginal_relief_min_value = (
+                    income_doc_new.custom_minmum_value
+                )
+                new_regime_marginal_relief_max_value = (
+                    income_doc_new.custom_maximun_value
+                )
 
             if new_annual_slab > new_rebate:
                 # Store all slab details in a structured list
@@ -629,15 +689,11 @@ def slab_calculation(
                                     )
                                 )
 
-                                # frappe.msgprint(str(from_amount_new))
-
                             from_amount_new.append(slab_new["from"])
                             to_amount_new.append(slab_new["to"])
                             percentage_new.append(tax_percent_new)
                             difference_new.append(taxable_amount_new)
                             total_value_new.append(tax_amount_new)
-
-                            # frappe.msgprint(str(from_amount_new))
 
                     else:  # Standard slab range
                         if slab_new["from"] <= round(new_annual_slab) <= slab_new["to"]:
@@ -674,24 +730,58 @@ def slab_calculation(
                             difference_new.append(taxable_amount_new)
                             total_value_new.append(tax_amount_new)
 
-                # Compute the total tax
                 total_sum_new = sum(total_value_new)
 
-                if new_annual_slab < new_rebate:
-                    new_rebate_value = total_sum_new
+                if (
+                    income_doc_new.custom_marginal_relief_applicable
+                    and income_doc_new.custom_minmum_value
+                    and income_doc_new.custom_maximun_value
+                ):
+                    if (
+                        income_doc_new.custom_minmum_value
+                        < new_annual_slab
+                        < income_doc_new.custom_maximun_value
+                    ):
+                        new_rebate_value = total_sum_new - (
+                            new_annual_slab - income_doc_new.custom_minmum_value
+                        )
+                        final_value = total_sum_new - new_rebate_value
+
+                        new_education_cess = final_value * 4 / 100
+
+                    else:
+                        if new_annual_slab < new_rebate:
+                            new_rebate_value = total_sum_new
+
+                        else:
+                            new_rebate_value = 0
+
+                        if new_annual_slab > 5000000:
+                            new_surcharge_m = round((total_sum_new * 10) / 100)
+                            new_education_cess = round(
+                                (new_surcharge_m + total_sum_new) * 4 / 100
+                            )
+
+                        else:
+                            new_surcharge_m = 0
+                            new_education_cess = round((0 + total_sum_new) * 4 / 100)
 
                 else:
-                    new_rebate_value = 0
+                    if new_annual_slab < new_rebate:
+                        new_rebate_value = total_sum_new
 
-                if new_annual_slab > 5000000:
-                    new_surcharge_m = round((total_sum_new * 10) / 100)
-                    new_education_cess = round(
-                        (new_surcharge_m + total_sum_new) * 4 / 100
-                    )
+                    else:
+                        new_rebate_value = 0
 
-                else:
-                    new_surcharge_m = 0
-                    new_education_cess = round((0 + total_sum_new) * 4 / 100)
+                    if new_annual_slab > 5000000:
+                        new_surcharge_m = round((total_sum_new * 10) / 100)
+                        new_education_cess = round(
+                            (new_surcharge_m + total_sum_new) * 4 / 100
+                        )
+
+                    else:
+                        new_surcharge_m = 0
+                        new_education_cess = round((0 + total_sum_new) * 4 / 100)
 
     salary_slip_sum = 0
 
@@ -726,6 +816,10 @@ def slab_calculation(
         "total_sum_new": total_sum_new,
         "rebate_new": new_rebate,
         "max_amount_new": new_max_amount,
+        "new_regime_marginal_relief_min_value": new_regime_marginal_relief_min_value,
+        "new_regime_marginal_relief_max_value": new_regime_marginal_relief_max_value,
+        "old_regime_marginal_relief_min_value": old_regime_marginal_relief_min_value,
+        "old_regime_marginal_relief_max_value": old_regime_marginal_relief_max_value,
         "new_rebate_value": new_rebate_value,
         "new_surcharge_m": new_surcharge_m,
         "new_education_cess": new_education_cess,
