@@ -2148,11 +2148,11 @@ class CustomSalarySlip(SalarySlip):
                             / 100
                         )
 
-                self.custom_total_amount = round(
-                    self.custom_surcharge
-                    + self.custom_education_cess
-                    + self.custom_total_tax_on_income
-                )
+                    self.custom_total_amount = round(
+                        self.custom_surcharge
+                        + self.custom_education_cess
+                        + self.custom_total_tax_on_income
+                    )
 
             else:
                 self.custom_tax_slab = []
