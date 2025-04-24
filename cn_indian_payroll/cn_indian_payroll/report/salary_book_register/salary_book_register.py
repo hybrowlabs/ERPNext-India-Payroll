@@ -177,7 +177,7 @@ def get_columns(earning_types, ded_types):
 			"fieldtype": "Float",
 			"width": 150,
 		},
-		
+
 		{
 			"label": _("Leave Without Pay"),
 			"fieldname": "leave_without_pay",
@@ -190,7 +190,7 @@ def get_columns(earning_types, ded_types):
 			"fieldtype": "Float",
 			"width": 150,
 		},
-		
+
 		{
 			"label": _("Payment Days"),
 			"fieldname": "payment_days",
@@ -327,7 +327,7 @@ def get_salary_slip_details(salary_slips, currency, company_currency, component_
         .join(salary_detail)
         .on(salary_slip.name == salary_detail.parent)
         .where(
-            (salary_detail.parent.isin(salary_slips)) & 
+            (salary_detail.parent.isin(salary_slips)) &
             (salary_detail.parentfield == component_type) &
             (salary_detail.do_not_include_in_total == 0)  # Ensure we only get components where this is 0
         )

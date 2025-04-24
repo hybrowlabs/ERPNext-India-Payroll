@@ -8,11 +8,11 @@ def before_save(self,method):
 
 
 def on_submit(self, method):
-    
- 
+
+
     if len(self.arrear_breakup)>0:
         for i in self.arrear_breakup:
-            
+
 
             additional_doc = frappe.get_doc({
                 'doctype': 'Additional Salary',
@@ -31,7 +31,7 @@ def on_submit(self, method):
 
     if len(self.arrear_deduction_breakup)>0:
         for j in self.arrear_deduction_breakup:
-            
+
 
             additional_doc = frappe.get_doc({
                 'doctype': 'Additional Salary',
@@ -52,10 +52,10 @@ def on_submit(self, method):
             additional_doc.insert()
 
 
-    
 
 
-    
+
+
     reimbursement_accrual_update(self)
     bonus_accrual_update(self)
 
@@ -65,7 +65,7 @@ def reimbursement_accrual_update(self):
         lop_reversal = frappe.get_list('Employee Benefit Accrual',
                         filters={'employee': self.employee,'docstatus':1,"salary_slip":self.salary_slip},
                         fields=['*'],
-                       
+
                     )
 
 
@@ -212,21 +212,21 @@ def insert_breakup_table(self):
                 })
 
 
-        
 
 
-      
+
+
 
 
 def on_cancel(self,method):
 
     get_additional_arrears=frappe.db.get_list('Additional Salary',
                 filters={
-                    
+
                     'custom_lop_reversal':self.name
                 },
                 fields=['*'],
-                
+
             )
 
     if len(get_additional_arrears)>0:
@@ -244,10 +244,10 @@ def on_cancel(self,method):
     lop_reversal = frappe.get_list('Employee Benefit Accrual',
                         filters={'employee': self.employee,'docstatus':1,"salary_slip":self.salary_slip},
                         fields=['*'],
-                       
+
                     )
 
-    
+
 
 
     if len(lop_reversal)>0:
@@ -275,19 +275,3 @@ def on_cancel(self,method):
 
             each_doc_bonus.amount = round(eligible_amount)
             each_doc_bonus.save()
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-    

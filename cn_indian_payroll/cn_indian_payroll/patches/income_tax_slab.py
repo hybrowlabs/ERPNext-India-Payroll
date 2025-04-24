@@ -5,7 +5,7 @@ def execute():
     data=[
         {
         "allow_tax_exemption": 1,
-        
+
         "company": "",
         "currency": "INR",
         "custom_maximum_amount": 12500.0,
@@ -15,7 +15,7 @@ def execute():
         "docstatus": 1,
         "doctype": "Income Tax Slab",
         "effective_from": "2023-01-11",
-        
+
         "name": "Old Regime",
         "other_taxes_and_charges": [
         {
@@ -52,7 +52,7 @@ def execute():
             "to_amount": 500000.0
         },
         {
-            
+
             "from_amount": 500000.0,
             "parent": "Old Regime",
             "parentfield": "slabs",
@@ -61,7 +61,7 @@ def execute():
             "to_amount": 1000000.0
         },
         {
-            
+
             "from_amount": 1000000.0,
             "parent": "Old Regime",
             "parentfield": "slabs",
@@ -74,7 +74,7 @@ def execute():
         },
         {
         "allow_tax_exemption": 1,
-        
+
         "company": "",
         "currency": "INR",
         "custom_maximum_amount": 25000.0,
@@ -84,7 +84,7 @@ def execute():
         "docstatus": 1,
         "doctype": "Income Tax Slab",
         "effective_from": "2023-11-01",
-        
+
         "name": "New Regime",
         "other_taxes_and_charges": [
         {
@@ -130,7 +130,7 @@ def execute():
             "to_amount": 1000000.0
         },
         {
-           
+
             "from_amount": 1000000.0,
             "parent": "New Regime",
             "parentfield": "slabs",
@@ -139,7 +139,7 @@ def execute():
             "to_amount": 1200000.0
         },
         {
-           
+
             "from_amount": 1200000.0,
             "parent": "New Regime",
             "parentfield": "slabs",
@@ -148,7 +148,7 @@ def execute():
             "to_amount": 1500000.0
         },
         {
-           
+
             "from_amount": 1500000.0,
             "parent": "New Regime",
             "parentfield": "slabs",
@@ -170,10 +170,3 @@ def insert_record(i):
         doc=frappe.new_doc("Income Tax Slab")
         doc.update(i)
         doc.save()
-
-
-
-
-
-
-    

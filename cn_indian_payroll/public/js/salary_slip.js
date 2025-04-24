@@ -5,5 +5,5 @@ frappe.ui.form.on("Salary Slip", {
             frm.set_value('posting_date', null);
         }
     },
-    
+
 });

@@ -24,7 +24,7 @@ def validate(self, method):
                 },
                 fields=['*'],
                 order_by='from_date desc',
-                limit=1  
+                limit=1
             )
 
             if get_salary_assignment and get_salary_assignment[0].name:
@@ -36,10 +36,10 @@ def validate(self, method):
 
 
         if lta_data and lta_data[0].name not in component:
-           
+
             frappe.throw("you are not eligible for claim LTA")
 
-            
+
     # if self.non_taxable_amount:
     #     amount += self.non_taxable_amount
 

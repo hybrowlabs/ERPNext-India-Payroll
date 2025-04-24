@@ -15,10 +15,10 @@ def get_all_employee(filters=None):
                 fields=['*']
             )
 
-    salary_components = set()  
-    reimbursement_components = set()  
+    salary_components = set()
+    reimbursement_components = set()
     data = []
-    
+
     ctc_components = frappe.get_all("Salary Component", filters={"custom_is_part_of_ctc": 1}, fields=["*"],order_by="custom_sequence asc")
     ctc_components_set = set(component.name for component in ctc_components)
 
@@ -44,14 +44,14 @@ def get_all_employee(filters=None):
         if each_employee.get("custom_is_extra_driver_salary") == 1:
             driver_amount = each_employee.get("custom_extra_driver_salary_value") / 12
 
-        
+
         reimbursements = frappe.get_all(
             'Employee Reimbursements',
             filters={"parent": each_employee.get("name")},
             fields=["reimbursements", "monthly_total_amount"]
         )
 
-        
+
         for reimbursement in reimbursements:
             component_name = reimbursement.get("reimbursements")
             amount = reimbursement.get("monthly_total_amount")
@@ -66,10 +66,10 @@ def get_all_employee(filters=None):
             employee=each_employee.get("employee"),
             print_format='Salary Slip Standard for CTC',
             # docstatus= each_employee.get("docstatus"),
-            for_preview= 1,  
+            for_preview= 1,
         )
 
-        
+
         for earning in salary_slip.earnings:
             component_name = earning.salary_component
             if component_name in ctc_components_set:
@@ -100,7 +100,7 @@ def get_all_employee(filters=None):
         {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 200},
         {"label": "Effective From", "fieldname": "from_date", "fieldtype": "Date", "width": 200}
     ]
-    
+
     # Adding salary components to the columns
     for component in salary_components:
         columns.append({

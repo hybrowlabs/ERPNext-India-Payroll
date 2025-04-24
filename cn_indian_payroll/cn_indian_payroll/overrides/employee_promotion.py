@@ -18,7 +18,7 @@ def cancel_additional_salary(self):
             fields=['*']
             )
     if get_appraisal_additional:
-        
+
         for each_appraisal_doc in get_appraisal_additional:
             get_each_doc = frappe.get_doc('Additional Salary', each_appraisal_doc.name)
             get_each_doc.docstatus=2
@@ -32,11 +32,10 @@ def cancel_appraisal_calculation(self):
             fields=['*']
             )
     if get_appraisal_calculation:
-        
+
         for each_appraisal_doc in get_appraisal_calculation:
             get_each_doc = frappe.get_doc('Salary Appraisal Calculation', each_appraisal_doc.name)
             get_each_doc.docstatus=2
             get_each_doc.save()
 
             frappe.delete_doc('Salary Appraisal Calculation', each_appraisal_doc.name)
-

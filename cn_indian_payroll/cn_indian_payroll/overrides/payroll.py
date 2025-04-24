@@ -12,7 +12,3 @@ class CustomPayrollEntry(PayrollEntry):
     @frappe.whitelist()
     def payrollset(self,value1):
         frappe.msgprint(str(value1))
-
-
-
-

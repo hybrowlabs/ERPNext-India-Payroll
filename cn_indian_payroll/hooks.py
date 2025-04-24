@@ -300,6 +300,9 @@ doc_events = {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
     },
+    "Structure Setting": {
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
+    },
 
 }
 

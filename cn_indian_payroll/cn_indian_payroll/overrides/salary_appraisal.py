@@ -6,9 +6,9 @@ def on_submit(self,method):
     insert_additional_salary(self)
     update_bonus_accrual(self)
     update_reimbursement_accruals(self)
-    
 
-    
+
+
 
 
 def on_cancel(self,method):
@@ -32,10 +32,10 @@ def update_bonus_accrual(self):
 
                     get_doc.amount += j.difference
                     get_doc.save()
-                    
+
 
 def update_reimbursement_accruals(self):
-    
+
     if len(self.reimbursement_components) > 0:
         for accrual in self.reimbursement_components:
             benefit_accrual = frappe.get_list('Employee Benefit Accrual',
@@ -46,13 +46,13 @@ def update_reimbursement_accruals(self):
                 for each_accrual_doc in benefit_accrual:
                     get_doc = frappe.get_doc('Employee Benefit Accrual', each_accrual_doc.name)
 
-                    
-    
+
+
                     get_doc.amount += accrual.difference
                     get_doc.save()
 
             else:
-                
+
                 if accrual.salary_slip_id:
                     get_sl=frappe.get_doc("Salary Slip",accrual.salary_slip_id)
 
@@ -65,8 +65,8 @@ def update_reimbursement_accruals(self):
                             'salary_slip':accrual.salary_slip_id,
                             'payroll_period':get_sl.custom_payroll_period,
                             'docstatus':1,
-                        
-                            
+
+
                         })
                     insert_doc.insert()
 
@@ -74,7 +74,7 @@ def update_reimbursement_accruals(self):
 
 def insert_additional_salary(self):
     component_array = []
-    
+
     if len(self.salary_arrear_components) > 0:
         for i in self.salary_arrear_components:
             component_array.append({
@@ -87,8 +87,8 @@ def insert_additional_salary(self):
         for component in component_array:
             name = component['component']
             amount = component['amount']
-            
-            
+
+
             if name in aggregated_components:
                 aggregated_components[name] += amount
             else:
@@ -105,7 +105,7 @@ def insert_additional_salary(self):
             if salary_component:
 
                 for t in salary_component:
-                    
+
                     insert_doc = frappe.get_doc({
                         'doctype': 'Additional Salary',
                         'employee': self.employee,
@@ -117,7 +117,7 @@ def insert_additional_salary(self):
                         'docstatus':1,
                         'custom_salary_appraisal_calculation':self.name,
                         'custom_employee_promotion_id':self.employee_promotion_id,
-                        
+
                     })
                     insert_doc.insert()
 
@@ -149,14 +149,14 @@ def reverse_bonus_accrual(self):
                         difference = j.old_amount
                         get_doc.amount=difference
                     else:
-                        difference = j.difference   
+                        difference = j.difference
 
                         get_doc.amount -= difference
                     get_doc.save()
 
 
-                
-                    
+
+
 
 def reverse_benefit_accrual(self):
     if len(self.reimbursement_components) > 0:
@@ -176,12 +176,6 @@ def reverse_benefit_accrual(self):
                         difference = component.difference
                         get_accrued_doc.amount -= difference
 
-                    
+
                     # get_accrued_doc.amount -= difference
                     get_accrued_doc.save()
-                    
-
-                   
-
-
-

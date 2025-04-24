@@ -181,7 +181,7 @@ const DECLARATION_FORM = {
                 "type": "number",
                 "input": true,
                 "defaultValue": 0,
-                
+
               }
             ]
           }
@@ -336,7 +336,7 @@ const DECLARATION_FORM = {
                 "truncateMultipleSpaces": false,
                 "calculateValue": "if (data.mpAmount3>25000){\n  value = 0;\n} ",
                 "validateWhenHidden": false,
-                
+
                 "validateWhenHidden": false,
                 "key": "mpAmount3",
                 "type": "number",
@@ -1196,7 +1196,7 @@ const DECLARATION_FORM = {
                           "requireDecimal": false,
                           "inputFormat": "plain",
                           "truncateMultipleSpaces": false,
-                          
+
                           "validateWhenHidden": false,
                           "key": "amount4",
                           "type": "number",
@@ -1274,7 +1274,7 @@ const DECLARATION_FORM = {
                           "requireDecimal": false,
                           "inputFormat": "plain",
                           "truncateMultipleSpaces": false,
-                          
+
                           "validateWhenHidden": false,
                           "key": "dValue1",
                           "type": "number",
@@ -1352,7 +1352,7 @@ const DECLARATION_FORM = {
                           "requireDecimal": false,
                           "inputFormat": "plain",
                           "truncateMultipleSpaces": false,
-                          
+
                           "validateWhenHidden": false,
                           "key": "eValue1",
                           "type": "number",
@@ -2640,7 +2640,7 @@ const DECLARATION_FORM = {
                 "input": false,
                 "tableView": false,
                 "rows": [
-                
+
                   [
                     {
                       "components": [
@@ -3521,7 +3521,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3603,7 +3603,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3657,7 +3657,7 @@ const DECLARATION_FORM = {
 
 
 
-                  
+
                   [
                     {
                       "components": [
@@ -3687,7 +3687,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3715,7 +3715,7 @@ const DECLARATION_FORM = {
                           "tableView": false
                         }
 
-                        
+
 
                       ]
                     },
@@ -3772,7 +3772,7 @@ const DECLARATION_FORM = {
                     },
                     {
                       "components": [
-                        
+
                       ]
                     },
                     {
@@ -3800,7 +3800,7 @@ const DECLARATION_FORM = {
                           "tableView": false
                         }
 
-                        
+
 
                       ]
                     },
@@ -3830,9 +3830,9 @@ const DECLARATION_FORM = {
 
 
 
-                  
 
-                 
+
+
                 ]
               }
             ]
@@ -3841,7 +3841,7 @@ const DECLARATION_FORM = {
       ],
       "numCols": 1
     },
-    
+
   ]
 }
 
@@ -3883,15 +3883,15 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                 form.submission = { data: defaultData };
 
-                let isUpdating = false; 
+                let isUpdating = false;
 
                 form.on('change', ({ data }) => {
-                    if (isUpdating) return; 
+                    if (isUpdating) return;
                     isUpdating = true;
 
 
                     const a = parseFloat(data.pfValue || 0);
-                    
+
                     const b = parseFloat(data.aValue2 || 0);
                     const c = parseFloat(data.bValue1 || 0);
                     const d=parseFloat(data.amount4 || 0);
@@ -3939,7 +3939,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   let d = new frappe.ui.Dialog({
                     title: 'Enter details',
                     fields: [
-                       
+
                         {
                             label: 'Select Regime',
                             fieldname: 'select_regime',
@@ -3951,43 +3951,43 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
                         },
-    
-                       
-    
-    
+
+
+
+
                     ],
-                    size: 'small', // small, large, extra-large 
+                    size: 'small', // small, large, extra-large
                     primary_action_label: 'Submit',
                     primary_action(values) {
                         console.log(values);
-    
+
                         frappe.call({
                           "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
                           args:{
-      
+
                               doc_id: frm.doc.name,
                               employee:frm.doc.employee,
                               company:frm.doc.company,
                               payroll_period:frm.doc.payroll_period,
                               regime:values.select_regime
-                              
-      
+
+
                           },
                           callback :function(res)
                           {
                               frm.reload_doc();
-                             
-      
+
+
                           }
-      
+
                       })
-    
-    
-    
+
+
+
                         d.hide();
                     }
                 });
-                
+
                 d.show();
 
 
@@ -4002,32 +4002,32 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
-                  
 
-                  
-                    
-                    
-                    
+
+
+
+
+
                 })
                 frm.change_custom_button_type('Choose Regime', null, 'primary');
 
 
-                
+
             }
 
-         
 
 
 
 
-            
+
+
     },
 
 
 
     custom_declaration_form_data(frm)
     {
-      
+
       if(frm.doc.custom_declaration_form_data)
       {
         frm.set_value("custom_status","Pending")
@@ -4036,11 +4036,11 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
     },
 
 
-    
 
 
-    
-   
+
+
+
 });
 
 
@@ -4161,7 +4161,7 @@ function change_regime(frm) {
                                                                               }
 
 
-                                                                              
+
 
 
 
@@ -4203,14 +4203,14 @@ function change_regime(frm) {
                                   console.log(salary_response.message)
 
                                 }
-    
-    
+
+
                               }
                             })
 
                           })
 
-                        
+
 
 
 
@@ -4566,7 +4566,7 @@ function edit(frm) {
                                 fieldtype: 'Check',
                                 default:frm.doc.rented_in_metro_city
                             },
-                    
+
                         ],
                         size: 'large',
                         primary_action_label: 'Submit',
@@ -4603,7 +4603,7 @@ function edit(frm) {
                                     new_row.amount = row.amount;
                                 });
 
-                                
+
 
                                 frm.set_value("custom_check",0)
                                 frm.set_value("monthly_house_rent", values.hra_amount);
@@ -4648,7 +4648,7 @@ function edit(frm) {
                     });
                     custom_table_field.grid.refresh();
 
-                    d.show();  
+                    d.show();
 
 
 
@@ -4676,7 +4676,7 @@ function edit(frm) {
                                 }
                             });
 
-                            
+
 
 
                         }
@@ -4685,11 +4685,11 @@ function edit(frm) {
                     d.$wrapper.on('change', '[data-fieldname="custom_declared_amount"] input', function() {
                         let rowIndex = $(this).closest('.grid-row').index();
                         let selectedAmount = $(this).val();
-                        
+
                         let component = d.fields_dict.custom_details_table.grid.grid_rows[rowIndex].doc.custom_exemption_sub_category;
 
                         if(component=="Uniform Allowance") {
-                               
+
 
                                 frappe.call({
                                     method: "frappe.client.get_list",
@@ -4718,7 +4718,7 @@ function edit(frm) {
 
 
                             }
-                        
+
                     })
                 }
 
@@ -4797,12 +4797,12 @@ function tds_projection_html(frm) {
                                 else
                                 {
                                   section10_amount.push(v.amount);
-  
+
                                 }
 
 
 
-                              
+
                           }
 
                           if(v.exemption_category == "Section 80C")
@@ -4817,7 +4817,7 @@ function tds_projection_html(frm) {
                               section80d_component.push(v.exemption_sub_category)
                               if(v.amount<=v.max_amount)
                               {
-                                
+
                                 section80d_amount.push(v.amount)
                               }
                               else
@@ -4825,10 +4825,10 @@ function tds_projection_html(frm) {
                                 section80d_amount.push(v.max_amount)
 
                               }
-  
+
                             }
                             const validCategories = [
-                                
+
                                 "Section 80DDB",
                                 "Section 80-G",
                                 "Section 80CCD(1B)",
@@ -4841,7 +4841,7 @@ function tds_projection_html(frm) {
                                 "Section 80CCG",
                                 "Section 24(b)"
                             ];
-                            
+
                             if (validCategories.includes(v.exemption_category)) {
 
                               other_component.push(v.exemption_sub_category)
@@ -4849,17 +4849,17 @@ function tds_projection_html(frm) {
 
                               if(v.amount<=v.max_amount)
                                 {
-                                  
+
                                   other_amount.push(v.amount)
                                 }
                                 else
                                 {
                                   other_amount.push(v.amount)
-  
+
                                 }
 
 
-                              
+
                             }
                       });
                   }
@@ -4931,7 +4931,7 @@ function tds_projection_html(frm) {
                                     let rebate=response.message.rebate
                                     let max_amount=response.message.max_amount
                                     let old_rebate_value=response.message.old_rebate_value
-                                    let old_surcharge_m=response.message.old_surcharge_m                              
+                                    let old_surcharge_m=response.message.old_surcharge_m
                                     let old_education_cess=response.message.old_education_cess
                                     let new_from_amount = response.message.from_amount_new || [];
                                     let new_to_amount = response.message.to_amount_new || [];
@@ -4941,14 +4941,14 @@ function tds_projection_html(frm) {
                                     let newrebate=response.message.rebate_new
                                     let newmax_amount=response.message.max_amount_new
                                     let new_rebate_value=response.message.new_rebate_value
-                                    let  new_surcharge_m=response.message.new_surcharge_m                              
+                                    let  new_surcharge_m=response.message.new_surcharge_m
                                     let new_education_cess=response.message.new_education_cess
                                     let salary_slip_sum=Math.round(response.message.salary_slip_sum)
 
-                                    resolve({ 
+                                    resolve({
                                       old_from_amount,
-                                       old_to_amount, 
-                                       old_percentage_amount, 
+                                       old_to_amount,
+                                       old_percentage_amount,
                                        old_value_amount,
                                        new_from_amount ,
                                        new_to_amount,
@@ -4982,7 +4982,7 @@ function tds_projection_html(frm) {
                         });
                     });
                 }
-                
+
                 async function processPerComp1() {
                   try {
                       let { old_from_amount, old_to_amount, old_percentage_amount, old_value_amount,new_from_amount ,
@@ -5005,31 +5005,31 @@ function tds_projection_html(frm) {
                         from_month,
                         to_month
                       } = await getPerComp1();
-                     
+
                       let OtherRows1 = "";
                       for (let i = 0; i < old_from_amount.length; i++) {
-                          let fromcomponent = old_from_amount[i]|| 0;  
-                          let tocomponent = old_to_amount[i] || 0; 
-                          let percentage =old_percentage_amount[i] || 0; 
+                          let fromcomponent = old_from_amount[i]|| 0;
+                          let tocomponent = old_to_amount[i] || 0;
+                          let percentage =old_percentage_amount[i] || 0;
                           let final_amount = old_value_amount[i] || 0;
 
 
-                          
+
                           OtherRows1 += `<tr><td>${fromcomponent}</td><td>${"₹" + tocomponent}</td><td>${"₹" + percentage}</td><td>${"₹" + final_amount}</td></tr>`;
                       }
 
                       let OtherRows2 = "";
                       for (let i = 0; i < new_from_amount.length; i++) {
-                          let newfromcomponent = new_from_amount[i]|| 0;  
-                          let newtocomponent = new_to_amount[i] || 0; 
-                          let newpercentage =new_percentage_amount[i] || 0; 
+                          let newfromcomponent = new_from_amount[i]|| 0;
+                          let newtocomponent = new_to_amount[i] || 0;
+                          let newpercentage =new_percentage_amount[i] || 0;
                           let newfinal_amount = new_value_amount[i] || 0;
 
 
-                          
+
                           OtherRows2 += `<tr><td>${newfromcomponent}</td><td>${"₹" + newtocomponent}</td><td>${"₹" + newpercentage}</td><td>${"₹" + newfinal_amount}</td></tr>`;
                       }
-              
+
                       // Define the table HTML with dropdowns and expandable rows
                   const table_html = `
                   <table class="table table-bordered">
@@ -5135,7 +5135,7 @@ function tds_projection_html(frm) {
                                                     <td>₹ 0</td>
                                                 </tr>
 
-                                                 
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -5282,7 +5282,7 @@ function tds_projection_html(frm) {
                           </tr>
 
 
-                          
+
 
                           <tr>
                               <td>
@@ -5297,23 +5297,23 @@ function tds_projection_html(frm) {
                                                   <th>Regime</th>
                                                   <th>Annual Taxable Lessthan</th>
                                                   <th>Max Amount</th>
-                                                  
-                                                  
+
+
                                               </tr>
                                           </thead>
                                           <tbody>
-                  
+
                                           <tr>
                                                   <th>Old Regime</th>
                                                   <th>₹ ${rebate}</th>
                                                   <th>₹ ${max_amount}</th>
-                                                  
+
                                           </tr>
                                                                                     <tr>
                                                   <th>New Regime</th>
                                                   <th>₹ ${newrebate}</th>
                                                   <th>₹ ${newmax_amount}</th>
-                                                  
+
                                           </tr>
                                           </tbody>
                                       </table>
@@ -5336,8 +5336,8 @@ function tds_projection_html(frm) {
                               <td>₹ ${Math.round(old_surcharge_m)}</td>
                               <td>₹ ${Math.round(new_surcharge_m)}</td>
 
-                              
-                                    
+
+
                           </tr>
 
                           <tr>
@@ -5347,7 +5347,7 @@ function tds_projection_html(frm) {
                           </tr>
 
 
-                          
+
 
                           <tr>
                               <td>Tax Payable</td>
@@ -5378,7 +5378,7 @@ function tds_projection_html(frm) {
                               <td>Tax Payable / Refundable (14 - 15(A))</td>
                               <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-(((total_sum-old_rebate_value)/num_months)+(salary_slip_sum)))}</td>
                               <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-(((total_sum_new-new_rebate_value)/num_months)+(salary_slip_sum)))}</td>
-                              
+
                           </tr>
 
                           <tr>
@@ -5392,10 +5392,10 @@ function tds_projection_html(frm) {
                       </tbody>
                   </table>
               `;
-              
+
                       // Set the value of the HTML field
                       frm.set_df_property('custom_employee_tax_projection', 'options', table_html);
-              
+
                       // Add event listeners for dropdown buttons
                       setTimeout(() => {
                           document.querySelectorAll('.incomeTaxDropdown').forEach((button, index) => {
@@ -5405,12 +5405,12 @@ function tds_projection_html(frm) {
                               });
                           });
                       }, 100);
-              
+
                   } catch (error) {
                       console.error("Error fetching per_comp1:", error);
                   }
               }
-              
+
               // Call the function to fetch and process the data
               processPerComp1();
               }
@@ -5419,14 +5419,3 @@ function tds_projection_html(frm) {
 
   }
 }
-
-
-
-
-
-
-
-
-
-
-

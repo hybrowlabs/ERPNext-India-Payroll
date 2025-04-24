@@ -43,7 +43,7 @@ def calculate_tax(doc_name=None,totalincome = None):
         as_list=True
     )
         total_income = (total_income_list[0][0])*12
-    
+
     taxable_amount = total_income-deduction
     old_regime_tax = 0
     new_regime_tax = 0
@@ -52,7 +52,7 @@ def calculate_tax(doc_name=None,totalincome = None):
         new_regime_tax = calculate_regime_tax(1,total_income)
     old_cess = (4/100)*old_regime_tax
     new_cess = (4/100)*new_regime_tax
-    template_dict = {"total_income":total_income,"deduction":deduction,"taxable_amount":taxable_amount-50000,"old_regime_tax":old_regime_tax,"new_regime_tax":new_regime_tax,"old_cess":old_cess,"new_cess":new_cess,"old_total_tax":old_regime_tax+old_cess,"new_total_tax":new_regime_tax+new_cess}  
+    template_dict = {"total_income":total_income,"deduction":deduction,"taxable_amount":taxable_amount-50000,"old_regime_tax":old_regime_tax,"new_regime_tax":new_regime_tax,"old_cess":old_cess,"new_cess":new_cess,"old_total_tax":old_regime_tax+old_cess,"new_total_tax":new_regime_tax+new_cess}
     template =  frappe.render_template('cn_indian_payroll/cn_indian_payroll/tax_calculator.html', {"dict": template_dict})
     frappe.msgprint(template)
 
@@ -89,7 +89,7 @@ def income_tax_calculator_template(total_income,deduction):
         new_regime_tax = calculate_regime_tax(1,float(total_income)-50000)
         old_cess = (4/100)*old_regime_tax
         new_cess = (4/100)*new_regime_tax
-        template_dict = {"total_income":total_income,"deduction":deduction,"taxable_amount":taxable_income,"old_regime_tax":old_regime_tax,"new_regime_tax":new_regime_tax,"old_cess":old_cess,"new_cess":new_cess,"old_total_tax":old_regime_tax+old_cess,"new_total_tax":new_regime_tax+new_cess}  
+        template_dict = {"total_income":total_income,"deduction":deduction,"taxable_amount":taxable_income,"old_regime_tax":old_regime_tax,"new_regime_tax":new_regime_tax,"old_cess":old_cess,"new_cess":new_cess,"old_total_tax":old_regime_tax+old_cess,"new_total_tax":new_regime_tax+new_cess}
         template =  frappe.render_template('cn_indian_payroll/cn_indian_payroll/tax_calculator.html', {"dict": template_dict})
         return template
     else:

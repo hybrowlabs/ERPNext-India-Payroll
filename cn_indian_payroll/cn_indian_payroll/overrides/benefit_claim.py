@@ -3,7 +3,7 @@ from hrms.payroll.doctype.employee_benefit_claim.employee_benefit_claim import E
 
 
 class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
-    
+
     # def validate(self):
 
     #     super().validate()
@@ -17,7 +17,7 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
 
     # def validate_employee(self):
     #     get_component = frappe.get_doc("Salary Component", self.earning_component)
-        
+
     #     if get_component.component_type == "Vehicle Maintenance Reimbursement":
     #         get_salary_assignment = frappe.db.get_list(
     #             'Salary Structure Assignment',
@@ -29,7 +29,7 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
     #             order_by='from_date desc',
     #             limit=1
     #         )
-            
+
     #         # Check if a salary assignment exists
     #         if get_salary_assignment:
     #             # Validate custom_car_maintenance value
@@ -49,21 +49,21 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
     def insert_future_benefit(self):
 
         if self.custom_max_amount:
-        
-        
+
+
             if self.claimed_amount>self.custom_max_amount:
 
                 doc1 = frappe.get_doc('Salary Component', self.earning_component)
                 if doc1.component_type=="Vehicle Maintenance Reimbursement":
-                
-                    date_str = self.claim_date       
+
+                    date_str = self.claim_date
                     year, month, day = map(int, date_str.split('-'))
                     new_month = month + 1
                     new_year = year
                     if new_month > 12:
                         new_month = 1
                         new_year += 1
-                        
+
                     next_month_date = f"{new_year}-{new_month:02d}-{day:02d}"
 
 
@@ -80,4 +80,3 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
 
                     })
                     insert_doc.insert()
-

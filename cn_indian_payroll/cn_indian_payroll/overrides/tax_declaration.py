@@ -36,10 +36,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             for k in self.declarations:
                 if k.exemption_sub_category == "Employee Provident Fund (Auto)":
                     form_data['pfValue'] = round(k.amount)
-                
+
                 elif k.exemption_sub_category == "NPS Contribution by Employer":
                     form_data['nineNumber'] = round(k.amount)
-                
+
                 elif k.exemption_sub_category == "Tax on employment (Professional Tax)":
                     form_data['nineteenNumber'] = round(k.amount)
             self.custom_declaration_form_data = json.dumps(form_data)
@@ -47,11 +47,11 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         if self.custom_tax_regime=="New Regime":
             form_data = json.loads(self.custom_declaration_form_data or '{}')
-            
+
             for k in self.declarations:
                 if k.exemption_sub_category == "NPS Contribution by Employer":
-                    form_data['nineNumber'] = round(k.amount)      
-            
+                    form_data['nineNumber'] = round(k.amount)
+
             self.custom_declaration_form_data = json.dumps(form_data)
 
 
@@ -101,7 +101,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             address_two_value = form_data.get("addresstwoValue")
             type_value = form_data.get("typeValue")
             address_three_value = form_data.get("addressThreeValue")
-            
+
             missing_fields = []
             if not name_value:
                 missing_fields.append("Name")
@@ -122,20 +122,20 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
 
-        
+
 
     def set_total_exemption_amount(self):
         self.total_exemption_amount = flt(get_total_exemption_amount(self.declarations), self.precision("total_exemption_amount"))
-        
+
         # if self.custom_check == 1:
         if self.annual_hra_exemption:
             self.total_exemption_amount = self.total_exemption_amount + self.annual_hra_exemption
 
-        
+
 
     def on_cancel(self):
         self.cancel_declaration_history()
-        
+
 
 
     def cancel_declaration_history(self):
@@ -144,7 +144,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 'tax_exemption':self.name,
             },
             fields=['*'],
-            
+
         )
         if len(history_data)>0:
             data_doc=frappe.get_doc('Tax Declaration History',history_data[0].name)
@@ -175,7 +175,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     filters={'employee': self.employee},
                     fields=['*'],
                     order_by='posting_date desc',
-                    limit=1  
+                    limit=1
 
                 )
 
@@ -309,7 +309,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
 
-    
+
 #----------Insert Declaration History-------------
 
     def insert_declaration_history(self):
@@ -340,13 +340,13 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 'doctype': 'Tax Declaration History',
                 'employee': self.employee,
                 'employee_name':self.employee_name,
-                'income_tax': self.custom_income_tax, 
+                'income_tax': self.custom_income_tax,
                 'company': self.company,
                 'posting_date': frappe.utils.nowdate(),
                 'payroll_period': self.payroll_period,
                 'monthly_house_rent': self.monthly_house_rent,
                 'rented_in_metro_city': self.rented_in_metro_city,
-                'hra_as_per_salary_structure': self.salary_structure_hra,  
+                'hra_as_per_salary_structure': self.salary_structure_hra,
                 'total_declared_amount': self.total_declared_amount,
                 'annual_hra_exemption': self.annual_hra_exemption,
                 'monthly_hra_exemption': self.monthly_hra_exemption,
@@ -357,7 +357,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             })
 
             insert_doc.insert()
-            
+
 
 
 #--------Insert HRA Breakup Table & Annual HRA and Basic----------------
@@ -376,10 +376,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             )
 
             if ss_assignment:
-                first_assignment = next(iter(ss_assignment))  
+                first_assignment = next(iter(ss_assignment))
                 first_assignment_date = first_assignment.get("from_date")
                 first_assignment_structure = first_assignment.get("salary_structure")
-                
+
                 start_date=ss_assignment[-1].from_date
                 if ss_assignment[-1].custom_payroll_period:
                     payroll_period=frappe.get_doc("Payroll Period",ss_assignment[-1].custom_payroll_period)
@@ -395,7 +395,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     )
                     if len(get_salary_slip)>0:
                         ss_slip_month_count=len(get_salary_slip)
-                        
+
                         for salary_slip in get_salary_slip:
                             get_salary_doc = frappe.get_doc("Salary Slip", salary_slip.name)
                             for component in get_salary_doc.earnings:
@@ -411,14 +411,14 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     new_salary_slip = make_salary_slip(
                         source_name=first_assignment_structure,
                         employee=self.employee,
-                        print_format='Salary Slip Standard for CTC',  
+                        print_format='Salary Slip Standard for CTC',
                         posting_date=first_assignment_date,
                         for_preview=1,
                     )
                     future_basic_amount=0
                     future_hra_amount=0
-                    
-                    for new_earning in new_salary_slip.earnings:                        
+
+                    for new_earning in new_salary_slip.earnings:
                         if new_earning.salary_component==basic_component:
                             future_basic_amount=(new_earning.amount*futute_month_count)+cur_basic_amount
 
@@ -444,27 +444,27 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     #HRA Exemption rule
                     final_hra_exemption=round(min(basic_rule2,future_hra_amount,non_metro_or_metro))
 
-                    
+
                     self.annual_hra_exemption=round(final_hra_exemption)
                     self.monthly_hra_exemption=round(final_hra_exemption/month_count)
-     
+
 
                     months = []
                     current_date = start_date
-                    
+
                     while current_date <= end_date:
                         month_name = current_date.strftime("%B")
                         if month_name not in months:
                             months.append(month_name)
                         current_date = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
-    
+
                     earned_basic = 0
                     if self.rented_in_metro_city==1:
                         earned_basic=(self.custom_basic_as_per_salary_structure*10)*50/100
                     else:
                         earned_basic=(self.custom_basic_as_per_salary_structure*10)*40/100
 
-                    self.custom_hra_breakup = []  
+                    self.custom_hra_breakup = []
                     for i in range(len(months)):
                         self.append("custom_hra_breakup", {
                             "month": months[i],
@@ -475,8 +475,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             "exemption_amount": final_hra_exemption
                         })
 
-                
-      
+
+
 
         else:
             self.custom_basic_as_per_salary_structure=None
@@ -496,7 +496,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 form_data = json.loads(self.custom_declaration_form_data or '{}')
 
                 # frappe.msgprint(form_data.get("twelveNumber"))
-                
+
                 # Extract numbers from the form data
                 numbers = [
                      {"field": "amount", "name": "Mediclaim Self, Spouse & Children (Below 60 years)"},
@@ -540,9 +540,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
 
                 ]
-                
+
                 sub_category, category, max_amount, declared_amount = [], [], [], []
-                
+
                 for item in numbers:
                     value = form_data.get(item["field"], 0)
                     if value > 0:
@@ -552,13 +552,13 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             filters={"is_active": 1, "name": item["name"]},
                             fields=['name', 'exemption_category', 'max_amount']
                         )
-                        
+
                         if get_doc1:
                             sub_category.append(get_doc1[0].name)
                             category.append(get_doc1[0].exemption_category)
                             max_amount.append(get_doc1[0].max_amount)
                             declared_amount.append(value)
-                
+
                 # Reset and populate the `declarations` child table
                 self.declarations = []
                 for i in range(len(sub_category)):
@@ -572,17 +572,17 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         if self.custom_tax_regime=="New Regime":
             if self.workflow_state in ["Approved", "Pending"]:
                 form_data = json.loads(self.custom_declaration_form_data or '{}')
-                
+
                 # Extract numbers from the form data
                 numbers = [
-                    
+
                     {"field": "nineNumber", "name": "NPS Contribution by Employer"},
-                    
+
                 ]
-                
+
                 # Prepare lists for child table population
                 sub_category, category, max_amount, declared_amount = [], [], [], []
-                
+
                 for item in numbers:
                     value = form_data.get(item["field"], 0)
                     if value > 0:
@@ -592,13 +592,13 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             filters={"is_active": 1, "name": item["name"]},
                             fields=['name', 'exemption_category', 'max_amount']
                         )
-                        
+
                         if get_doc1:
                             sub_category.append(get_doc1[0].name)
                             category.append(get_doc1[0].exemption_category)
                             max_amount.append(get_doc1[0].max_amount)
                             declared_amount.append(value)
-                
+
                 # Reset and populate the `declarations` child table
                 self.declarations = []
                 for i in range(len(sub_category)):
@@ -608,17 +608,3 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         "max_amount": max_amount[i],
                         "amount": declared_amount[i]
                     })
-
-
-                    
-
-    
-
-
-
-            
-
-            
-            
-
-            

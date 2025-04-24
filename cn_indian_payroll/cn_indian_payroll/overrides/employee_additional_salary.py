@@ -3,7 +3,7 @@ from hrms.payroll.doctype.additional_salary.additional_salary import AdditionalS
 
 class CustomAdditionalSalary(AdditionalSalary):
     def validate(self):
-        
+
         self.validate_dates()
         self.validate_salary_structure()
         self.validate_recurring_additional_salary_overlap()

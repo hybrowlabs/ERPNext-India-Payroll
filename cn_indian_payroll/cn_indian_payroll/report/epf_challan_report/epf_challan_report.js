@@ -11,7 +11,7 @@ frappe.query_reports["EPF Challan Report"] = {
             "options": "Employee",
             "width": 200
         },
-       
+
         {
             "label": "Month",
             "fieldname": "month",
@@ -37,7 +37,7 @@ frappe.query_reports["EPF Challan Report"] = {
             "width": 200,
 			"reqd":1
         },
-		
+
 
 
 

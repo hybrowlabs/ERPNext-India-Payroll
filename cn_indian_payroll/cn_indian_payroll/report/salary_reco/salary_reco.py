@@ -15,23 +15,23 @@ columns = [
 def get_salary_slips(filters=None):
     date_str = frappe.utils.nowdate()
     current_date = frappe.utils.getdate(date_str)
-    
+
     month_number = current_date.month
     year_number = current_date.year
-    
+
     if month_number == 1:
         previous_month_number = 12
         previous_year_number = year_number - 1
     else:
         previous_month_number = month_number - 1
         previous_year_number = year_number
-    
+
     month_names = ["", "January", "February", "March", "April", "May", "June",
                    "July", "August", "September", "October", "November", "December"]
-    
+
     current_month_name = month_names[month_number]
     previous_month_name = month_names[previous_month_number]
-    
+
     if filters is None:
         filters = {}
 
@@ -41,19 +41,19 @@ def get_salary_slips(filters=None):
     if filters.get("employee"):
         conditions1["employee"] = filters["employee"]
         conditions2["employee"] = filters["employee"]
-        
+
     if filters.get("previous_month"):
         conditions1["custom_month"] = filters["previous_month"]
-        
+
     if filters.get("current_month"):
         conditions2["custom_month"] = filters["current_month"]
-        
+
     data_previous = frappe.get_list(
         'Salary Slip',
         fields=["*"],
         filters=conditions1,
         order_by="name DESC",
-        limit_page_length=0 
+        limit_page_length=0
     )
 
     previous_month_data = []
@@ -70,13 +70,13 @@ def get_salary_slips(filters=None):
         }
         previous_month_data.append(previous_array)
     # frappe.msgprint(str(previous_month_data))
-    
+
     data_current = frappe.get_list(
         'Salary Slip',
         fields=["*"],
         filters=conditions2,
         order_by="name DESC",
-        limit_page_length=0  
+        limit_page_length=0
     )
 
     current_month_data = []
@@ -90,17 +90,17 @@ def get_salary_slips(filters=None):
             "status": employee_data.status ,
             "remark":j1.custom_new_joinee,
             # "remark":"-"
-            
+
         }
         current_month_data.append(current_array)
     # frappe.msgprint(str(current_month_data))
     # Process data
     final_data_map = {}
-    
+
     for record in previous_month_data:
         employee_id = record['employee']
         final_data_map[employee_id] = {
-            'employee': record['employee'], 
+            'employee': record['employee'],
             'employee_name': record['employee_name'],
             'previous_month': record['month'],
             'previous_gross_pay': record['gross_pay'],
@@ -109,9 +109,9 @@ def get_salary_slips(filters=None):
             'difference': 0,
             'status': record['status'],
             # 'remark':record['remark']
-              
+
         }
-    
+
     for record in current_month_data:
         employee_id = record['employee']
         if employee_id not in final_data_map:
@@ -126,19 +126,19 @@ def get_salary_slips(filters=None):
                 'status': record['status']  ,
                 # 'remark':record['remark']
                 'remark':record['remark'],
-                
+
 
             }
         else:
             final_data_map[employee_id]['current_month'] = record['month']
             final_data_map[employee_id]['current_gross_pay'] = record['gross_pay']
             final_data_map[employee_id]['difference'] = (
-                final_data_map[employee_id]['current_gross_pay'] - 
+                final_data_map[employee_id]['current_gross_pay'] -
                 final_data_map[employee_id]['previous_gross_pay']
             )
             # Ensure status is consistent
             final_data_map[employee_id]['status'] = record['status']
-    
+
     final_array = list(final_data_map.values())
     return final_array
 

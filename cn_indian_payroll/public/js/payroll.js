@@ -1,12 +1,12 @@
 frappe.ui.form.on('Payroll Entry', {
 
 
-    
 
-    refresh(frm) 
+
+    refresh(frm)
     {
 
-        
+
 
         if(frm.doc.docstatus==1)
             {
@@ -18,7 +18,7 @@ frappe.ui.form.on('Payroll Entry', {
             }
 
 
-            
+
 
 
 
@@ -29,11 +29,11 @@ frappe.ui.form.on('Payroll Entry', {
                 {
                     if( frm.doc.custom_additional_salary_submitted==0)
                         {
-                            
+
                             frm.page.clear_primary_action();
 
                         }
-                    
+
                 }
 
 
@@ -51,15 +51,15 @@ frappe.ui.form.on('Payroll Entry', {
 
 
         if (frm.doc.custom_bonus_payment_mode == "Bonus Accrual" && frm.doc.custom_bonus_accrual_created == 0)
-            
-            
+
+
             {
 
                 create_bonus_accrual_entry(frm)
 
 
 
-             
+
 
 
             }
@@ -95,19 +95,19 @@ frappe.ui.form.on('Payroll Entry', {
                         }
 
             })
-                    
+
                 })
 
             }
 
-           
+
 
         }
 
 
 
-        if (frm.doc.custom_bonus_payment_mode == "Bonus Payout") 
-            
+        if (frm.doc.custom_bonus_payment_mode == "Bonus Payout")
+
             {
 
                 if(frm.doc.custom_additional_salary_created==0 && frm.doc.custom_additional_salary_submitted==0&&frm.doc.employees.length>0)
@@ -119,9 +119,9 @@ frappe.ui.form.on('Payroll Entry', {
 
 
                     frm.add_custom_button(__('Create Additional Salary'), function() {
-                    
+
                             frappe.call({
-                                
+
                                 method: 'cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.get_additional_salary',
                                 args: {
                                     payroll_id:frm.doc.name,
@@ -136,10 +136,10 @@ frappe.ui.form.on('Payroll Entry', {
                                         frm.save();
                                     }
 
-                                    
-                                   
 
-                                    
+
+
+
                                 }
                             });
                         // }
@@ -150,8 +150,8 @@ frappe.ui.form.on('Payroll Entry', {
 
 
 
-        if (frm.doc.custom_bonus_payment_mode == "Bonus Payout") 
-            
+        if (frm.doc.custom_bonus_payment_mode == "Bonus Payout")
+
             {
 
                 if(frm.doc.custom_additional_salary_created==1 &&frm.doc.custom_additional_salary_submitted==0 &&frm.doc.employees.length>0)
@@ -160,27 +160,27 @@ frappe.ui.form.on('Payroll Entry', {
 
                     frm.add_custom_button(__("Submit Additional Salary"),function()
                     {
-                        
-    
+
+
                         frappe.call({
-    
+
                             "method":"cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.additional_salary_submit",
                             args:{
-    
+
                                 additional: frm.doc.name
-    
+
                             },
                             callback :function(res)
                             {
 
-                                
+
                                         frm.set_value("custom_additional_salary_submitted",1)
                                         frm.save();
-                                        
+
                             }
-    
+
                         })
-                        
+
                     })
 
 
@@ -206,8 +206,8 @@ frappe.ui.form.on('Payroll Entry', {
             if(frm.doc.custom_bonus_accrual_submit==1)
                 {
                     msgprint("Employee Bonus Accrual Submitted")
-    
-    
+
+
                 }
     }
 });
@@ -216,7 +216,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 function create_bunus(frm)
 {
-   
+
     frm.add_custom_button(__("Create Bonus Accrual Entry"), function() {
                 if (frm.doc.employees.length > 0) {
                     $.each(frm.doc.employees, function(i, v) {
@@ -238,7 +238,7 @@ function create_bunus(frm)
 
                                     if (salaryStructure.company)
                                          {
-                                           
+
 
                                         frappe.call({
                                             "method": "frappe.client.get",
@@ -249,11 +249,11 @@ function create_bunus(frm)
                                             },
                                             callback: function(companyData) {
                                                 if (companyData.message && companyData.message.custom_bonus_salary_component) {
-                                                    
+
                                                     console.log(companyData.message.custom_bonus_salary_component)
 
-                                                    
-                                                    
+
+
                                                     frappe.call({
                                                         "method": "frappe.client.get_list",
                                                         args: {
@@ -271,15 +271,15 @@ function create_bunus(frm)
                                                                     args: {
                                                                         doctype: "Salary Slip",
                                                                         filters: { name: salaryslip.message[0].name },
-                                                                        
+
                                                                     },
                                                                     callback: function(slipdate) {
 
-                                                                       
+
 
                                                                         $.each(slipdate.message.earnings, function(i, component) {
 
-                                                                         
+
 
 
 
@@ -287,7 +287,7 @@ function create_bunus(frm)
                                                                             if(component.salary_component==companyData.message.custom_bonus_salary_component)
                                                                                 {
                                                                                     console.log(component.amount)
-                                                                                    
+
                                                                                        frappe.db.insert({
                                                                                           "doctype": "Employee Bonus Accrual",
                                                                                           "employee": v.employee,
@@ -298,7 +298,7 @@ function create_bunus(frm)
                                                                                           "salary_structure_assignment": res.message[0].name,
                                                                                           "bonus_paid_date":frm.doc.posting_date,
                                                                                           "payroll_entry":frm.doc.name,
-                                                                                        
+
                                                                                           "amount": component.amount
                                                                                     });
 
@@ -307,8 +307,8 @@ function create_bunus(frm)
                                                                                     frm.save('Update');
 
 
-                                                                                    
-                                                                                    
+
+
 
 
 
@@ -319,7 +319,7 @@ function create_bunus(frm)
 
 
 
-                                                                        
+
                                                                     }
 
                                                                 })
@@ -339,7 +339,7 @@ function create_bunus(frm)
                     });
 
                 }
-                    
+
 
 
             });
@@ -372,14 +372,13 @@ function create_bonus_accrual_entry(frm)
                 msgprint("Bonus Accrual is Created")
                 frm.set_value("custom_bonus_accrual_created",1)
                 frm.save('Update');
-                
+
             }
-            
+
 
             })
-        
+
     })
 
 
 }
-

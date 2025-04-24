@@ -20,15 +20,15 @@ frappe.ui.form.on('Salary Component', {
                     'custom_is_arrear': 0
                 }
             };
-        };    
-		
+        };
+
 	},
     is_tax_applicable:function(frm)
     {
         if(frm.doc.is_tax_applicable == 1)
         {
             frm.set_value("custom_tax_exemption_applicable_based_on_regime",1);
-            frm.set_value("custom_regime","All");           
+            frm.set_value("custom_regime","All");
         }
         else
         {
@@ -37,6 +37,3 @@ frappe.ui.form.on('Salary Component', {
         frm.refresh_field("tax_section");
     }
 })
-
-
-

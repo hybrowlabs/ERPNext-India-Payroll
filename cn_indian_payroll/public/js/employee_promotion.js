@@ -17,7 +17,7 @@ frappe.ui.form.on('Employee Promotion', {
             //             if (progress < 100) {
             //                 frappe.show_progress('Loading...', progress, 100, 'Please wait');
             //             } else {
-                            
+
             //                 setTimeout(function() {
             //                     frappe.hide_progress();
             //                 }, 500); // Adjust delay as necessary
@@ -26,7 +26,7 @@ frappe.ui.form.on('Employee Promotion', {
 
             //         get_old_new_structure(frm);
 
-            //     } 
+            //     }
             //     else {
             //         frappe.msgprint("Please Select Additional Salary Date");
             //     }
@@ -51,14 +51,14 @@ frappe.ui.form.on('Employee Promotion', {
                             company:frm.doc.company,
                             date:frm.doc.custom_additional_salary_date,
                             effective_from:frm.doc.promotion_date
-            
+
                         },
                         callback: function(res)
                         {
-            
-            
-                            
-                            
+
+
+
+
                         }
                     })
 
@@ -70,18 +70,18 @@ frappe.ui.form.on('Employee Promotion', {
                 else {
                     frappe.msgprint("Please Select Additional Salary Date");
                 }
-                    
+
                 })
 
             }
         // }
-        
-        
-        
-        
+
+
+
+
 
         frm.change_custom_button_type('Calculate Appraisal Arrears', null, 'primary');
-		
+
 	},
 
     // onload:function(frm)
@@ -239,7 +239,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                             });
                         });
 
-                       
+
                     }
 
                     let latest_structure = await frappe.call({
@@ -309,7 +309,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                                                     });
                                                 }
 
-                                                let totalamount = (expected_amount / slip_response.message.total_working_days) * 
+                                                let totalamount = (expected_amount / slip_response.message.total_working_days) *
                                                     (slip_response.message.total_working_days - (slip_response.message.leave_without_pay - lop_reversal_sum));
                                                 let difference = totalamount - v.amount;
 
@@ -414,7 +414,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                                                 });
                                             }
 
-                                            let expected_bonus_amount = (latest_bonus_amount / slip_response.message.total_working_days) * 
+                                            let expected_bonus_amount = (latest_bonus_amount / slip_response.message.total_working_days) *
                                                 (slip_response.message.total_working_days - (slip_response.message.leave_without_pay - lop_reversal_sum));
                                             bonus_array.push({
                                                 salary_slip_id: d.salary_slip,
@@ -455,9 +455,9 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                             })),
 
                             salary_arrear_components: final_mapped_array.map(row => {
-                                const prorated_old_amount = (row.old_amount / row.working_days) * 
+                                const prorated_old_amount = (row.old_amount / row.working_days) *
                                     (row.working_days - (row.lop - row.lop_reversal));
-                                const prorated_new_amount = (row.new_amount / row.working_days) * 
+                                const prorated_new_amount = (row.new_amount / row.working_days) *
                                     (row.working_days - (row.lop - row.lop_reversal));
                                 return {
                                     salary_component: row.salary_component,
@@ -502,10 +502,10 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
                 }
             }
         }
-    } 
+    }
 
-    
-    
+
+
     catch (error) {
         console.error(error);
         frappe.show_alert({ message: __("An error occurred."), indicator: 'red' });
@@ -513,7 +513,7 @@ async function fetchSalarySlipsAndInsertAppraisal(frm, final_array, old_salary_s
 
     // console.log(final_mapped_array,"1111111111")
 
-   
+
 }
 
 
