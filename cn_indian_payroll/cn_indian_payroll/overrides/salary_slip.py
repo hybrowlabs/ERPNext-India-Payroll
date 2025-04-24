@@ -1967,6 +1967,14 @@ class CustomSalarySlip(SalarySlip):
             rebate = income_doc.custom_taxable_income_is_less_than
             max_amount = income_doc.custom_maximum_amount
 
+            if (
+                income_doc.custom_marginal_relief_applicable
+                and income_doc.custom_minmum_value
+                and income_doc.custom_maximun_value
+            ):
+                marginal_relief_min_value = income_doc.custom_minmum_value
+                marginal_relief_max_value = income_doc.custom_maximun_value
+
             if self.annual_taxable_amount > rebate:
                 for i in income_doc.slabs:
                     array_list = {
@@ -2065,29 +2073,80 @@ class CustomSalarySlip(SalarySlip):
 
                 total_sum = sum(total_value)
 
-                if self.custom_taxable_amount < rebate:
-                    self.custom_tax_on_total_income = total_sum
-                    self.custom_rebate_under_section_87a = total_sum
-                    self.custom_total_tax_on_income = 0
-                else:
-                    self.custom_total_tax_on_income = total_sum
-                    self.custom_rebate_under_section_87a = 0
-                    self.custom_tax_on_total_income = total_sum - 0
+                final_value = 0
+                if (
+                    income_doc.custom_marginal_relief_applicable
+                    and income_doc.custom_minmum_value
+                    and income_doc.custom_maximun_value
+                ):
+                    if (
+                        income_doc.custom_minmum_value
+                        < self.custom_taxable_amount
+                        < income_doc.custom_maximun_value
+                    ):
+                        self.custom_rebate_under_section_87a = total_sum - (
+                            self.custom_taxable_amount - income_doc.custom_minmum_value
+                        )
+                        final_value = total_sum - self.custom_rebate_under_section_87a
 
-                if self.custom_taxable_amount > 5000000:
-                    surcharge_m = (self.custom_total_tax_on_income * 10) / 100
+                        self.custom_education_cess = final_value * 4 / 100
 
-                    self.custom_surcharge = round(surcharge_m)
-                    self.custom_education_cess = round(
-                        (surcharge_m + self.custom_total_tax_on_income) * 4 / 100
-                    )
+                        self.custom_total_tax_on_income = final_value
+
+                    else:
+                        if self.custom_taxable_amount < rebate:
+                            self.custom_tax_on_total_income = total_sum
+                            self.custom_rebate_under_section_87a = total_sum
+                            self.custom_total_tax_on_income = 0
+                        else:
+                            self.custom_total_tax_on_income = total_sum
+                            self.custom_rebate_under_section_87a = 0
+                            self.custom_tax_on_total_income = total_sum - 0
+
+                        if self.custom_taxable_amount > 5000000:
+                            surcharge_m = (self.custom_total_tax_on_income * 10) / 100
+
+                            self.custom_surcharge = round(surcharge_m)
+                            self.custom_education_cess = round(
+                                (surcharge_m + self.custom_total_tax_on_income)
+                                * 4
+                                / 100
+                            )
+                        else:
+                            self.custom_surcharge = 0
+                            self.custom_education_cess = (
+                                (
+                                    self.custom_surcharge
+                                    + self.custom_total_tax_on_income
+                                )
+                                * 4
+                                / 100
+                            )
+
                 else:
-                    self.custom_surcharge = 0
-                    self.custom_education_cess = (
-                        (self.custom_surcharge + self.custom_total_tax_on_income)
-                        * 4
-                        / 100
-                    )
+                    if self.custom_taxable_amount < rebate:
+                        self.custom_tax_on_total_income = total_sum
+                        self.custom_rebate_under_section_87a = total_sum
+                        self.custom_total_tax_on_income = 0
+                    else:
+                        self.custom_total_tax_on_income = total_sum
+                        self.custom_rebate_under_section_87a = 0
+                        self.custom_tax_on_total_income = total_sum - 0
+
+                    if self.custom_taxable_amount > 5000000:
+                        surcharge_m = (self.custom_total_tax_on_income * 10) / 100
+
+                        self.custom_surcharge = round(surcharge_m)
+                        self.custom_education_cess = round(
+                            (surcharge_m + self.custom_total_tax_on_income) * 4 / 100
+                        )
+                    else:
+                        self.custom_surcharge = 0
+                        self.custom_education_cess = (
+                            (self.custom_surcharge + self.custom_total_tax_on_income)
+                            * 4
+                            / 100
+                        )
 
                 self.custom_total_amount = round(
                     self.custom_surcharge
