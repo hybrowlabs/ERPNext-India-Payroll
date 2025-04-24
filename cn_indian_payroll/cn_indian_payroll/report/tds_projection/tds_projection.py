@@ -496,10 +496,23 @@ def get_salary_slips(filters=None):
                         new_rebate_value = 0
                         new_surcharge_m = 0
                         new_education_cess = 0
+                        new_regime_tax_payable = 0
 
                         # Retrieve Exemption & Maximum Values
                         new_rebate = income_doc_new.custom_taxable_income_is_less_than
                         new_max_amount = income_doc_new.custom_maximum_amount
+
+                        if (
+                            income_doc_new.custom_marginal_relief_applicable
+                            and income_doc_new.custom_minmum_value
+                            and income_doc_new.custom_maximun_value
+                        ):
+                            new_regime_marginal_relief_min_value = (
+                                income_doc_new.custom_minmum_value
+                            )
+                            new_regime_marginal_relief_max_value = (
+                                income_doc_new.custom_maximun_value
+                            )
 
                         if new_annual_taxable_income_value > new_rebate:
                             for i in income_doc_new.slabs:
@@ -596,21 +609,71 @@ def get_salary_slips(filters=None):
                             # Compute the total tax
                             total_sum_new = sum(total_value_new)
 
-                            if new_annual_taxable_income_value < new_rebate:
-                                new_rebate_value = total_sum_new
-                            else:
-                                new_rebate_value = 0
+                            if (
+                                income_doc_new.custom_marginal_relief_applicable
+                                and income_doc_new.custom_minmum_value
+                                and income_doc_new.custom_maximun_value
+                            ):
+                                if (
+                                    income_doc_new.custom_minmum_value
+                                    < new_annual_taxable_income_value
+                                    < income_doc_new.custom_maximun_value
+                                ):
+                                    new_rebate_value = total_sum_new - (
+                                        new_annual_taxable_income_value
+                                        - income_doc_new.custom_minmum_value
+                                    )
+                                    final_value = total_sum_new - new_rebate_value
 
-                            if new_annual_taxable_income_value > 5000000:
-                                new_surcharge_m = round((total_sum_new * 10) / 100)
-                                new_education_cess = round(
-                                    (new_surcharge_m + total_sum_new) * 4 / 100
-                                )
+                                    new_education_cess = final_value * 4 / 100
+
+                                    new_regime_tax_payable = (
+                                        final_value + new_education_cess
+                                    )
+
+                                else:
+                                    if new_annual_taxable_income_value < new_rebate:
+                                        new_rebate_value = total_sum_new
+
+                                    else:
+                                        new_rebate_value = 0
+
+                                    if new_annual_taxable_income_value > 5000000:
+                                        new_surcharge_m = round(
+                                            (total_sum_new * 10) / 100
+                                        )
+                                        new_education_cess = round(
+                                            (new_surcharge_m + total_sum_new) * 4 / 100
+                                        )
+
+                                    else:
+                                        new_surcharge_m = 0
+                                        new_education_cess = round(
+                                            (0 + total_sum_new) * 4 / 100
+                                        )
+
+                                    new_regime_tax_payable = (
+                                        total_sum_new
+                                        + new_surcharge_m
+                                        + new_education_cess
+                                    )
+
                             else:
-                                new_surcharge_m = 0
-                                new_education_cess = round(
-                                    (0 + total_sum_new) * 4 / 100
-                                )
+                                if new_annual_taxable_income_value < new_rebate:
+                                    new_rebate_value = total_sum_new
+                                else:
+                                    new_rebate_value = 0
+
+                                if new_annual_taxable_income_value > 5000000:
+                                    new_surcharge_m = round((total_sum_new * 10) / 100)
+                                    new_education_cess = round(
+                                        (new_surcharge_m + total_sum_new) * 4 / 100
+                                    )
+                                else:
+                                    new_surcharge_m = 0
+                                    new_education_cess = round(
+                                        (0 + total_sum_new) * 4 / 100
+                                    )
 
                         else:
                             new_rebate_value = 0
@@ -631,9 +694,10 @@ def get_salary_slips(filters=None):
                 salary_data["new_surcharge_m"] = new_surcharge_m
                 salary_data["new_education_cess"] = new_education_cess
 
-                salary_data["new_regime_tax_payable"] = (
-                    total_sum_new + new_surcharge_m + new_education_cess
-                )
+                salary_data["new_regime_tax_payable"] = new_regime_tax_payable
+                # frappe.msgprint(str(total_sum_new))
+                # frappe.msgprint(str(new_surcharge_m))
+                # frappe.msgprint(str(new_education_cess))
 
             if get_doc.custom_tax_regime == "Old Regime":
                 get_tax_slab = frappe.get_doc(
@@ -989,10 +1053,23 @@ def get_salary_slips(filters=None):
                         new_rebate_value = 0
                         new_surcharge_m = 0
                         new_education_cess = 0
+                        new_regime_tax_payable = 0
 
                         # Retrieve Exemption & Maximum Values
                         new_rebate = income_doc_new.custom_taxable_income_is_less_than
                         new_max_amount = income_doc_new.custom_maximum_amount
+
+                        if (
+                            income_doc_new.custom_marginal_relief_applicable
+                            and income_doc_new.custom_minmum_value
+                            and income_doc_new.custom_maximun_value
+                        ):
+                            new_regime_marginal_relief_min_value = (
+                                income_doc_new.custom_minmum_value
+                            )
+                            new_regime_marginal_relief_max_value = (
+                                income_doc_new.custom_maximun_value
+                            )
 
                         if new_annual_taxable_income_value > new_rebate:
                             for i in income_doc_new.slabs:
@@ -1089,21 +1166,71 @@ def get_salary_slips(filters=None):
                             # Compute the total tax
                             total_sum_new = sum(total_value_new)
 
-                            if new_annual_taxable_income_value < new_rebate:
-                                new_rebate_value = total_sum_new
-                            else:
-                                new_rebate_value = 0
+                            if (
+                                income_doc_new.custom_marginal_relief_applicable
+                                and income_doc_new.custom_minmum_value
+                                and income_doc_new.custom_maximun_value
+                            ):
+                                if (
+                                    income_doc_new.custom_minmum_value
+                                    < new_annual_taxable_income_value
+                                    < income_doc_new.custom_maximun_value
+                                ):
+                                    new_rebate_value = total_sum_new - (
+                                        new_annual_taxable_income_value
+                                        - income_doc_new.custom_minmum_value
+                                    )
+                                    final_value = total_sum_new - new_rebate_value
 
-                            if new_annual_taxable_income_value > 5000000:
-                                new_surcharge_m = round((total_sum_new * 10) / 100)
-                                new_education_cess = round(
-                                    (new_surcharge_m + total_sum_new) * 4 / 100
-                                )
+                                    new_education_cess = final_value * 4 / 100
+
+                                    new_regime_tax_payable = (
+                                        final_value + new_education_cess
+                                    )
+
+                                else:
+                                    if new_annual_taxable_income_value < new_rebate:
+                                        new_rebate_value = total_sum_new
+
+                                    else:
+                                        new_rebate_value = 0
+
+                                    if new_annual_taxable_income_value > 5000000:
+                                        new_surcharge_m = round(
+                                            (total_sum_new * 10) / 100
+                                        )
+                                        new_education_cess = round(
+                                            (new_surcharge_m + total_sum_new) * 4 / 100
+                                        )
+
+                                    else:
+                                        new_surcharge_m = 0
+                                        new_education_cess = round(
+                                            (0 + total_sum_new) * 4 / 100
+                                        )
+
+                                    new_regime_tax_payable = (
+                                        total_sum_new
+                                        + new_education_cess
+                                        + new_surcharge_m
+                                    )
+
                             else:
-                                new_surcharge_m = 0
-                                new_education_cess = round(
-                                    (0 + total_sum_new) * 4 / 100
-                                )
+                                if new_annual_taxable_income_value < new_rebate:
+                                    new_rebate_value = total_sum_new
+                                else:
+                                    new_rebate_value = 0
+
+                                if new_annual_taxable_income_value > 5000000:
+                                    new_surcharge_m = round((total_sum_new * 10) / 100)
+                                    new_education_cess = round(
+                                        (new_surcharge_m + total_sum_new) * 4 / 100
+                                    )
+                                else:
+                                    new_surcharge_m = 0
+                                    new_education_cess = round(
+                                        (0 + total_sum_new) * 4 / 100
+                                    )
 
                         else:
                             new_rebate_value = 0
@@ -1124,13 +1251,10 @@ def get_salary_slips(filters=None):
                 salary_data["new_surcharge_m"] = new_surcharge_m
                 salary_data["new_education_cess"] = new_education_cess
 
-                salary_data["new_regime_tax_payable"] = (
-                    total_sum_new + new_surcharge_m + new_education_cess
-                )
+                salary_data["new_regime_tax_payable"] = new_regime_tax_payable
 
-            new_regime_payable = max(
-                (total_sum_new + new_surcharge_m + new_education_cess), 0
-            )
+            new_regime_payable = max((new_regime_tax_payable), 0)
+
             old_regime_payable = max(
                 (total_sum + old_surcharge_m + old_education_cess), 0
             )
