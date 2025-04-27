@@ -106,10 +106,7 @@ def get_salary_slips(filters=None):
                         and get_each_component.type == "Earning"
                         and get_each_component.custom_tax_exemption_applicable_based_on_regime
                         == 1
-                        and (
-                            get_each_component.custom_regime == "All"
-                            or get_each_component.custom_regime == "New Regime"
-                        )
+                        and (get_each_component.custom_regime == "New Regime")
                     ):
                         salary_component = earning.salary_component
                         salary_components[salary_component] = component_sequence
@@ -131,6 +128,7 @@ def get_salary_slips(filters=None):
                             salary_data.get(salary_component, 0) + earning.amount
                         )
                         old_total_income += earning.amount
+                        new_total_income += earning.amount
 
                 for deduction in salary_slip_doc.deductions:
                     get_tax_component_ded = frappe.get_doc(
@@ -188,10 +186,7 @@ def get_salary_slips(filters=None):
                     and get_tax_component.type == "Earning"
                     and get_tax_component.custom_tax_exemption_applicable_based_on_regime
                     == 1
-                    and (
-                        get_tax_component.custom_regime == "All"
-                        or get_tax_component.custom_regime == "New Regime"
-                    )
+                    and (get_tax_component.custom_regime == "New Regime")
                 ):
                     salary_component = projection_earning.salary_component
                     projected_income = projection_earning.amount * (
@@ -218,6 +213,7 @@ def get_salary_slips(filters=None):
                         salary_data.get(salary_component, 0) + projected_income
                     )
                     old_total_income += projected_income
+                    new_total_income += projected_income
 
                 processed_components.add(get_tax_component.name)
 
@@ -245,7 +241,7 @@ def get_salary_slips(filters=None):
                     )
                 processed_components.add(get_tax_component_ded.name)
 
-        epf_amount = epf_amount_futu + epf_amount_prev
+        epf_amount = min(epf_amount_futu + epf_amount_prev, 150000)
         pt_amount = pt_amount_futu + pt_amount_prev
 
         start_date = frappe.utils.getdate(payroll_period_doc.start_date)
