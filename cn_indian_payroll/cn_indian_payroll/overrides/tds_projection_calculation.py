@@ -263,10 +263,15 @@ def get_doc_data(doc_name, employee, company, payroll_period):
             posting_date=latest_salary_structure[0].from_date,
         )
 
+        processed_components = set()
+
         for new_earning in new_salary_slip.earnings:
             taxable_component = frappe.get_doc(
                 "Salary Component", new_earning.salary_component
             )
+
+            if taxable_component.name in processed_components:
+                continue
 
             # STANDARD COMPONENT
             if (
@@ -275,6 +280,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 and taxable_component.custom_tax_exemption_applicable_based_on_regime
                 == 1
                 and taxable_component.custom_regime == "All"
+                and taxable_component.custom_component_category == "Fixed"
             ):
                 old_future_amount += new_earning.amount * (
                     num_months - salary_slip_count
@@ -282,14 +288,6 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 new_future_amount += new_earning.amount * (
                     num_months - salary_slip_count
                 )
-                # frappe.msgprint(str(new_earning.amount * (
-                #     num_months - salary_slip_count)))
-
-                # Accrued BONUS tax=0
-            # if (
-            #     taxable_component.is_tax_applicable == 0
-            #     and taxable_component.custom_is_accrual == 1
-            # ):
 
             if taxable_component.custom_is_accrual == 1:
                 component_name = taxable_component.name
@@ -321,6 +319,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 and taxable_component.custom_tax_exemption_applicable_based_on_regime
                 == 1
                 and taxable_component.custom_regime == "Old Regime"
+                and taxable_component.custom_component_category == "Fixed"
             ):
                 old_future_amount += new_earning.amount * (
                     num_months - salary_slip_count
@@ -332,6 +331,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 and taxable_component.custom_tax_exemption_applicable_based_on_regime
                 == 1
                 and taxable_component.custom_regime == "New Regime"
+                and taxable_component.custom_component_category == "Fixed"
             ):
                 new_future_amount += new_earning.amount * (
                     num_months - salary_slip_count
@@ -341,10 +341,11 @@ def get_doc_data(doc_name, employee, company, payroll_period):
             if (
                 taxable_component.is_tax_applicable == 1
                 and taxable_component.component_type == "NPS"
+                and taxable_component.custom_component_category == "Fixed"
             ):
                 nps_amount += new_earning.amount * (num_months - salary_slip_count)
 
-                # frappe.msgprint(str(new_earning.amount * (num_months - salary_slip_count)))
+            processed_components.add(taxable_component.name)
 
         for deduction in new_salary_slip.deductions:
             taxable_component = frappe.get_doc(

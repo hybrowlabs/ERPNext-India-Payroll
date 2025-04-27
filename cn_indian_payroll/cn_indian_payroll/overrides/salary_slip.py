@@ -104,12 +104,12 @@ class CustomSalarySlip(SalarySlip):
             self.future_structured_taxable_earnings_before_exemption
         )
         self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
-        if self.earnings:
-            total_ctc_taxable_amount = 0
-            for earning in self.earnings:
-                if earning.is_tax_applicable == 1:
-                    total_ctc_taxable_amount += earning.default_amount
-        self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        # if self.earnings:
+        #     total_ctc_taxable_amount = 0
+        #     for earning in self.earnings:
+        #         if earning.is_tax_applicable == 1:
+        #             total_ctc_taxable_amount += earning.default_amount
+        # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
     def insert_other_perquisites(self):
         latest_salary_structure = frappe.get_list(
