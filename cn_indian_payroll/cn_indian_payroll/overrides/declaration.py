@@ -305,20 +305,43 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 for_preview=1,
             )
 
+            processed_components = set()
+
             # Compute earnings and deductions
             for earning in new_salary_slip.earnings:
                 component = frappe.get_doc("Salary Component", earning.salary_component)
-                if component.component_type == "NPS":
+
+                if component.name in processed_components:
+                    continue
+
+                if (
+                    component.component_type == "NPS"
+                    and component.custom_component_category == "Fixed"
+                ):
                     nps_amount = month_count * earning.amount
+
+                processed_components.add(component.name)
 
             for deduction in new_salary_slip.deductions:
                 ded_component = frappe.get_doc(
                     "Salary Component", deduction.salary_component
                 )
-                if ded_component.component_type == "EPF":
+
+                if ded_component.name in processed_components:
+                    continue
+
+                if (
+                    ded_component.component_type == "EPF"
+                    and ded_component.custom_component_category == "Fixed"
+                ):
                     epf_amount = month_count * deduction.amount
-                elif ded_component.component_type == "Professional Tax":
+                elif (
+                    ded_component.component_type == "Professional Tax"
+                    and ded_component.custom_component_category == "Fixed"
+                ):
                     pt_amount = month_count * deduction.amount
+
+                processed_components.add(ded_component.name)
 
         else:
             slip_count = len(salary_slips)
@@ -351,19 +374,33 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 for_preview=1,
             )
 
+            processed_components = set()
+
             for earning in new_salary_slip.earnings:
                 component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                if component.name in processed_components:
+                    continue
+
                 if component.component_type == "NPS":
                     nps_amount += (month_count - slip_count) * earning.amount
+
+                processed_components.add(component.name)
 
             for deduction in new_salary_slip.deductions:
                 ded_component = frappe.get_doc(
                     "Salary Component", deduction.salary_component
                 )
+
+                if ded_component.name in processed_components:
+                    continue
+
                 if ded_component.component_type == "EPF":
                     epf_amount += (month_count - slip_count) * deduction.amount
                 elif ded_component.component_type == "Professional Tax":
                     pt_amount += (month_count - slip_count) * deduction.amount
+
+                processed_components.add(ded_component.name)
 
     # Update Employee Tax Exemption Declaration based on selected regime
     get_declaration = frappe.get_doc("Employee Tax Exemption Declaration", doc_id)

@@ -545,7 +545,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         ss_slip_month_count = 0
                     futute_month_count = month_count - ss_slip_month_count
 
-                    # frappe.msgprint(str(cur_hra_amount))
                     new_salary_slip = make_salary_slip(
                         source_name=first_assignment_structure,
                         employee=self.employee,

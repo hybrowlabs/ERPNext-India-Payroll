@@ -205,7 +205,7 @@
    "columns": 0,
    "creation": "2025-04-27 19:37:14.518453",
    "default": "Fixed",
-   "depends_on": "eval:doc.type==\"Earning\"",
+   "depends_on": "",
    "description": null,
    "docstatus": 0,
    "dt": "Salary Component",

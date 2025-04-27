@@ -35,11 +35,17 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             for_preview=1,
         )
 
+        processed_components = set()
+
         # Collect new amounts from earnings and deductions
         for new_earning in new_salary_slip.earnings:
             part_of_ctc = frappe.get_doc(
                 "Salary Component", new_earning.salary_component
             )
+
+            if part_of_ctc.name in processed_components:
+                continue
+
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = new_earning.salary_component
                 new_amounts[component] = new_earning.amount
@@ -48,15 +54,20 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 component = new_earning.salary_component
                 new_bonus[component] = new_earning.amount
 
-                # frappe.msgprint(str(new_bonus[component]))
+            processed_components.add(part_of_ctc.name)
 
         for new_deduction in new_salary_slip.deductions:
             part_of_ctc = frappe.get_doc(
                 "Salary Component", new_deduction.salary_component
             )
+            if part_of_ctc.name in processed_components:
+                continue
+
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = new_deduction.salary_component
                 new_amounts[component] = new_deduction.amount
+
+            processed_components.add(part_of_ctc.name)
 
         # Get old salary slip
         old_salary_slip = make_salary_slip(
@@ -67,11 +78,17 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             for_preview=1,
         )
 
+        processed_components = set()
+
         # Collect old amounts from earnings and deductions
         for old_earning in old_salary_slip.earnings:
             part_of_ctc = frappe.get_doc(
                 "Salary Component", old_earning.salary_component
             )
+
+            if part_of_ctc.name in processed_components:
+                continue
+
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = old_earning.salary_component
                 old_amounts[component] = old_earning.amount
@@ -80,15 +97,20 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 component = old_earning.salary_component
                 old_bonus[component] = old_earning.amount
 
-                # frappe.msgprint(str(old_bonus[component]))
+            processed_components.add(part_of_ctc.name)
 
         for old_deduction in old_salary_slip.deductions:
             part_of_ctc = frappe.get_doc(
                 "Salary Component", old_deduction.salary_component
             )
+
+            if part_of_ctc.name in processed_components:
+                continue
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = old_deduction.salary_component
                 old_amounts[component] = old_deduction.amount
+
+            processed_components.add(part_of_ctc.name)
 
         # Collect all components (union of old and new components)
         all_components = set(old_amounts.keys()).union(set(new_amounts.keys()))

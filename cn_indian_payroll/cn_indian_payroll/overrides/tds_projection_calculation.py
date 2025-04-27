@@ -352,13 +352,24 @@ def get_doc_data(doc_name, employee, company, payroll_period):
                 "Salary Component", deduction.salary_component
             )
 
+            if taxable_component.name in processed_components:
+                continue
+
             # EPF
-            if taxable_component.component_type == "EPF":
+            if (
+                taxable_component.component_type == "EPF"
+                and taxable_component.custom_component_category == "Fixed"
+            ):
                 epf_amount += deduction.amount * (num_months - salary_slip_count)
 
                 # Professional Tax
-            if taxable_component.component_type == "Professional Tax":
+            if (
+                taxable_component.component_type == "Professional Tax"
+                and taxable_component.custom_component_category == "Fixed"
+            ):
                 pt_amount += deduction.amount * (num_months - salary_slip_count)
+
+            processed_components.add(taxable_component.name)
 
         # frappe.msgprint(str(old_future_amount))
         latest_tax_slab = frappe.get_list(

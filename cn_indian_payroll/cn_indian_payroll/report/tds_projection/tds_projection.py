@@ -172,13 +172,19 @@ def get_salary_slips(filters=None):
                 for_preview=1,
             )
 
+            processed_components = set()
+
             for projection_earning in salary_slip.earnings:
                 get_tax_component = frappe.get_doc(
                     "Salary Component", projection_earning.salary_component
                 )
 
+                if get_tax_component.name in processed_components:
+                    continue
+
                 if (
                     get_tax_component.is_tax_applicable == 1
+                    and get_tax_component.custom_component_category == "Fixed"
                     and get_tax_component.type == "Earning"
                     and get_tax_component.custom_tax_exemption_applicable_based_on_regime
                     == 1
@@ -198,6 +204,7 @@ def get_salary_slips(filters=None):
 
                 if (
                     get_tax_component.is_tax_applicable == 1
+                    and get_tax_component.custom_component_category == "Fixed"
                     and get_tax_component.type == "Earning"
                     and get_tax_component.custom_tax_exemption_applicable_based_on_regime
                     == 1
@@ -212,20 +219,31 @@ def get_salary_slips(filters=None):
                     )
                     old_total_income += projected_income
 
+                processed_components.add(get_tax_component.name)
+
             for projection_deduction in salary_slip.deductions:
                 get_tax_component_ded = frappe.get_doc(
                     "Salary Component", projection_deduction.salary_component
                 )
+                if get_tax_component_ded.name in processed_components:
+                    continue
 
-                if get_tax_component_ded.component_type == "EPF":
+                if (
+                    get_tax_component_ded.component_type == "EPF"
+                    and get_tax_component_ded.custom_component_category == "Fixed"
+                ):
                     epf_amount_futu = projection_deduction.amount * (
                         month_count - slip_count
                     )
 
-                if get_tax_component_ded.component_type == "Professional Tax":
+                if (
+                    get_tax_component_ded.component_type == "Professional Tax"
+                    and get_tax_component_ded.custom_component_category == "Fixed"
+                ):
                     pt_amount_futu = projection_deduction.amount * (
                         month_count - slip_count
                     )
+                processed_components.add(get_tax_component_ded.name)
 
         epf_amount = epf_amount_futu + epf_amount_prev
         pt_amount = pt_amount_futu + pt_amount_prev
