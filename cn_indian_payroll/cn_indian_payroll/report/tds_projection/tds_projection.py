@@ -242,7 +242,7 @@ def get_salary_slips(filters=None):
                 processed_components.add(get_tax_component_ded.name)
 
         epf_amount = min(epf_amount_futu + epf_amount_prev, 150000)
-        pt_amount = pt_amount_futu + pt_amount_prev
+        pt_amount = min(pt_amount_futu + pt_amount_prev, 2400)
 
         start_date = frappe.utils.getdate(payroll_period_doc.start_date)
 
