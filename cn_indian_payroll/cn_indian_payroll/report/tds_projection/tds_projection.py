@@ -83,6 +83,7 @@ def get_salary_slips(filters=None):
                 "employee": structure["employee"],
                 "custom_payroll_period": structure["custom_payroll_period"],
                 "docstatus": ["in", [0, 1]],
+                "company": structure["company"],
             },
             fields=["name"],
         )
@@ -141,6 +142,7 @@ def get_salary_slips(filters=None):
 
                     if get_tax_component_ded.component_type == "Professional Tax":
                         pt_amount_prev += deduction.amount
+        frappe.msgprint(str(epf_amount_prev))
 
         last_employee_detail = next(
             (
@@ -241,7 +243,12 @@ def get_salary_slips(filters=None):
                     )
                 processed_components.add(get_tax_component_ded.name)
 
+        frappe.msgprint(str(epf_amount_futu))
+
         epf_amount = min(epf_amount_futu + epf_amount_prev, 150000)
+
+        frappe.msgprint(str(epf_amount))
+
         pt_amount = min(pt_amount_futu + pt_amount_prev, 2400)
 
         start_date = frappe.utils.getdate(payroll_period_doc.start_date)
@@ -709,9 +716,6 @@ def get_salary_slips(filters=None):
                 salary_data["new_education_cess"] = new_education_cess
 
                 salary_data["new_regime_tax_payable"] = new_regime_tax_payable
-                # frappe.msgprint(str(total_sum_new))
-                # frappe.msgprint(str(new_surcharge_m))
-                # frappe.msgprint(str(new_education_cess))
 
             if get_doc.custom_tax_regime == "Old Regime":
                 get_tax_slab = frappe.get_doc(
@@ -880,9 +884,6 @@ def get_salary_slips(filters=None):
                     new_total_income - nps_deduction - 75000, 0
                 )
                 old_annual_taxable_income_value = max((old_total_income - total), 0)
-
-                # frappe.msgprint(str(new_annual_taxable_income_value))
-                # frappe.msgprint(str(old_annual_taxable_income_value))
 
                 latest_tax_slab = frappe.get_list(
                     "Income Tax Slab",
