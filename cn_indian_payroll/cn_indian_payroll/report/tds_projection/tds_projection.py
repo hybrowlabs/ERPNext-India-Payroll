@@ -59,15 +59,14 @@ def get_salary_slips(filters=None):
     salary_components = {}
     final_data = []
 
-    epf_amount = 0
-    pt_amount = 0
-    pt_amount_prev = 0
-    pt_amount_futu = 0
-
-    epf_amount_prev = 0
-    epf_amount_futu = 0
-
     for structure in unique_salary_structures:
+        epf_amount = 0
+        pt_amount = 0
+        pt_amount_prev = 0
+        pt_amount_futu = 0
+
+        epf_amount_prev = 0
+        epf_amount_futu = 0
         employee = frappe.get_value(
             "Employee",
             structure["employee"],
