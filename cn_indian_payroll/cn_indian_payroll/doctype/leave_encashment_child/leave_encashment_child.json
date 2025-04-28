@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-04-28 17:24:30.361370",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "leave_type",
+  "encashment_days",
+  "basic_amount",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Leave Type",
+   "options": "Leave Type"
+  },
+  {
+   "fieldname": "encashment_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Encashment Days"
+  },
+  {
+   "fieldname": "basic_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Basic Amount"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-04-28 17:28:11.181860",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Leave Encashment Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
