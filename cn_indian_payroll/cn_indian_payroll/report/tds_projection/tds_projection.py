@@ -777,9 +777,11 @@ def get_salary_slips(filters=None):
 
                 deduction_80gg = form_data.get("twentyNumber", 0)
                 regime_80ccg = form_data.get("twentyoneNumber", 0)
+                hlAmount = form_data.get("hlAmount", 0)
 
                 total = (
-                    regime_80ccg
+                    hlAmount
+                    + regime_80ccg
                     + deduction_80gg
                     + interest_fd
                     + interest_saving_account
@@ -814,6 +816,8 @@ def get_salary_slips(filters=None):
                     + lta_map
                     + hra_exemption
                 )
+
+                salary_data["hlAmount"] = hlAmount
 
                 salary_data["standard_deduction_old"] = standard_deduction_old
                 salary_data["standard_deduction_new"] = 75000
@@ -1589,6 +1593,12 @@ def execute(filters=None):
             {
                 "fieldname": "preventive_health_checkup_self",
                 "label": "Preventive Health Check-up",
+                "fieldtype": "Currency",
+                "width": 120,
+            },
+            {
+                "fieldname": "hlAmount",
+                "label": "Interest Paid On Housing Loan",
                 "fieldtype": "Currency",
                 "width": 120,
             },
