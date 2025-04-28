@@ -22,7 +22,7 @@ def get_salary_slips(filters=None):
         "Salary Structure Assignment",
         filters=conditions,
         fields=["*"],
-        order_by="from_date ASC",
+        order_by="from_date desc",
     )
 
     latest_salary_structure = {}
@@ -142,7 +142,7 @@ def get_salary_slips(filters=None):
 
                     if get_tax_component_ded.component_type == "Professional Tax":
                         pt_amount_prev += deduction.amount
-        frappe.msgprint(str(epf_amount_prev))
+        # frappe.msgprint(str(epf_amount_prev))
 
         last_employee_detail = next(
             (
@@ -243,11 +243,11 @@ def get_salary_slips(filters=None):
                     )
                 processed_components.add(get_tax_component_ded.name)
 
-        frappe.msgprint(str(epf_amount_futu))
+        # frappe.msgprint(str(epf_amount_futu))
 
         epf_amount = min(epf_amount_futu + epf_amount_prev, 150000)
 
-        frappe.msgprint(str(epf_amount))
+        # frappe.msgprint(str(epf_amount))
 
         pt_amount = min(pt_amount_futu + pt_amount_prev, 2400)
 
