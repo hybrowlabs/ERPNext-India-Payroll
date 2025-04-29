@@ -271,6 +271,7 @@ doctype_js = {
     "Form 16": "public/js/form16.js",
     "Leave Encashment": "public/js/leave_encashment.js",
     "Company": "public/js/company.js",
+    "Structure Setting": "public/js/structure_setting.js",
 }
 
 override_doctype_class = {
@@ -283,9 +284,6 @@ override_doctype_class = {
 }
 
 doc_events = {
-    "Job Offer": {
-        "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.job_offer.on_update_after_submit",
-    },
     "LOP Reversal": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
@@ -308,9 +306,9 @@ doc_events = {
     "Full and Final Statement": {
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
     },
-    "Structure Setting": {
-        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
-    },
+    # "Structure Setting": {
+    #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
+    # },
     # "Payroll Configuration":
     # {
     #    "validate":"cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.validate"
