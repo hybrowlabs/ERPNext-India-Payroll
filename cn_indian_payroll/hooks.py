@@ -258,6 +258,7 @@ doctype_js = {
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
     "Salary Component": "public/js/salary_component.js",
+    "Structure Setting": "public/js/structure_setting.js",
 
 }
 
@@ -299,9 +300,6 @@ doc_events = {
     "Employee Promotion": {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
-    },
-    "Structure Setting": {
-        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
     },
 
 }
