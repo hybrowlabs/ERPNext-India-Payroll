@@ -495,7 +495,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             if self.workflow_state in ["Approved", "Pending"]:
                 form_data = json.loads(self.custom_declaration_form_data or '{}')
 
-                # frappe.msgprint(form_data.get("twelveNumber"))
+
 
                 # Extract numbers from the form data
                 numbers = [
