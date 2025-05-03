@@ -18,104 +18,104 @@ frappe.ui.form.on('Employee Benefit Claim', {
     },
 
 
-    // employee:function(frm)
-    // {
-    //     if(frm.doc.employee)
-    //         {
-    //             var reimbursements_component=[]
+    employee:function(frm)
+    {
+        if(frm.doc.employee)
+            {
+                var reimbursements_component=[]
 
-    //             frappe.call({
-    //                 "method": "frappe.client.get_list",
-    //                 args: {
-    //                     doctype: "Salary Component",
-    //                     filters: { "component_type":"LTA Reimbursement"},
-    //                     fields: ["*"],
+                frappe.call({
+                    "method": "frappe.client.get_list",
+                    args: {
+                        doctype: "Salary Component",
+                        filters: { "component_type":"LTA Reimbursement"},
+                        fields: ["*"],
 
-    //                 },
-    //                 callback: function(kes) {
+                    },
+                    callback: function(kes) {
 
-    //                     if(kes.message.length>0)
-    //                     {
-    //                         var company=kes.message[0].name
-    //                     }
-
-
+                        if(kes.message.length>0)
+                        {
+                            var company=kes.message[0].name
+                        }
 
 
 
 
-    //             frappe.call({
-    //                 "method": "frappe.client.get_list",
-    //                 args: {
-    //                     doctype: "Salary Structure Assignment",
-    //                     filters: { employee: frm.doc.employee ,docstatus:1},
-    //                     fields: ["*"],
-    //                     order_by: "from_date desc",
-    //                     limit: 1
-    //                 },
-    //                 callback: function(res) {
-    //                     if (res.message && res.message.length > 0) {
-
-    //                         frm.set_value("custom_payroll_period",res.message[0].custom_payroll_period)
-
-    //                         frappe.call({
-    //                             method: "frappe.client.get",
-    //                             args: {
-    //                                 doctype: "Salary Structure Assignment",
-    //                                 filters: { "employee": frm.doc.employee,"docstatus":1,"name":res.message[0].name},
-    //                                 fields: ["*"],
-
-    //                             },
-    //                             callback: function(tes) {
-    //                                 if (tes.message) {
-
-    //                                     $.each(tes.message.custom_employee_reimbursements,function(i,v)
-    //                                         {
-    //                                             if(v.reimbursements!=company)
-    //                                             {
-    //                                                 reimbursements_component.push(v.reimbursements)
-
-    //                                             }
 
 
+                frappe.call({
+                    "method": "frappe.client.get_list",
+                    args: {
+                        doctype: "Salary Structure Assignment",
+                        filters: { employee: frm.doc.employee ,docstatus:1},
+                        fields: ["*"],
+                        order_by: "from_date desc",
+                        limit: 1
+                    },
+                    callback: function(res) {
+                        if (res.message && res.message.length > 0) {
 
-    //                                         })
+                            frm.set_value("custom_payroll_period",res.message[0].custom_payroll_period)
 
-    //                                         // console.log(reimbursements_component)
+                            frappe.call({
+                                method: "frappe.client.get",
+                                args: {
+                                    doctype: "Salary Structure Assignment",
+                                    filters: { "employee": frm.doc.employee,"docstatus":1,"name":res.message[0].name},
+                                    fields: ["*"],
 
-    //                                         frm.set_query("earning_component", function() {
-    //                                             return {
-    //                                                 filters: { name: ["in", reimbursements_component] }
-    //                                             };
-    //                                         });
+                                },
+                                callback: function(tes) {
+                                    if (tes.message) {
+
+                                        $.each(tes.message.custom_employee_reimbursements,function(i,v)
+                                            {
+                                                if(v.reimbursements!=company)
+                                                {
+                                                    reimbursements_component.push(v.reimbursements)
+
+                                                }
 
 
 
-    //                                     }
-    //                                 }
-    //                             })
+                                            })
+
+                                            // console.log(reimbursements_component)
+
+                                            frm.set_query("earning_component", function() {
+                                                return {
+                                                    filters: { name: ["in", reimbursements_component] }
+                                                };
+                                            });
 
 
-    //                     }
-    //                 }
-    //             })
 
-    //         }
-    //     })
+                                        }
+                                    }
+                                })
 
-    //         }
 
-    //     else{
+                        }
+                    }
+                })
 
-    //         frm.set_query("earning_component", function() {
-    //             return {
-    //                 filters: { name: ["in", reimbursements_component] }
-    //             };
-    //         });
+            }
+        })
 
-    //     }
+            }
 
-    // },
+        else{
+
+            frm.set_query("earning_component", function() {
+                return {
+                    filters: { name: ["in", reimbursements_component] }
+                };
+            });
+
+        }
+
+    },
 
 
     // earning_component: function(frm)
@@ -382,7 +382,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
     //         frm.set_value("claim_date", undefined);
     //         frappe.msgprint(__('Claim date cannot be in the past.'));
     //     }
-    // }
+    // },
 
 
     earning_component: function(frm) {
