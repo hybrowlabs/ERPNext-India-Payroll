@@ -40,26 +40,14 @@ frappe.ui.form.on('Salary Structure Assignment', {
     refresh(frm)
     {
 
-        // $('[data-fieldname="custom_preview_tax_projection"]').css('color', 'black');
 
-        // $('input[data-fieldname="custom_preview_tax_projection"]').css("background-color","#FFE4C4")
-
-
-        if(frm.doc.docstatus==1)
-            {
-
-
-                    change_regime(frm)
-
-            }
 
 
 
                 setTimeout(() => {
 
                     frm.remove_custom_button('Payroll Entry', 'Create');
-                    // frm.remove_custom_button('Preview Salary Slip', 'Actions');
-                    // frm.remove_custom_button('Chose Regime');
+
 
                 }, 10);
 
@@ -97,39 +85,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
         }
     }
 
-    },
-
-
-    custom_nps_percentage(frm) {
-
-
-
-        if (frm.doc.custom_is_nps==1)
-
-        {
-
-                if(frm.doc.custom_nps_percentage <= 10)
-                {
-
-
-                        var amount = (frm.doc.base / 12 * 35) / 100;
-
-
-
-                        var nps_value=(amount*frm.doc.custom_nps_percentage)/100
-                        //  console.log(nps_value,"ppp")
-                        frm.set_value("custom_nps_amount",nps_value)
-
-                }
-
-                else
-                {
-                    msgprint("you cant put percentage greater than 10")
-
-                    frm.set_value("custom_nps_amount",undefined)
-                }
-
-        }
     },
 
 
@@ -196,22 +151,6 @@ custom__car_perquisite(frm)
 
 
 
-custom_nps_amount(frm) {
-    if (frm.doc.custom_is_nps == 1 && frm.doc.custom_nps_amount) {
-        var amount = (frm.doc.base / 12 * 35) / 100;
-        var nps_value = (amount * 10) / 100;
-
-        if (frm.doc.custom_nps_amount > nps_value) {
-            msgprint("Please enter an amount less than or equal to " + nps_value);
-            frm.set_value("custom_nps_amount", 0);
-            frm.set_value("custom_nps_percentage", 0);
-        } else {
-            // Calculate custom NPS percentage
-            var custom_percentage = (frm.doc.custom_nps_amount / amount) * 100;
-            frm.set_value("custom_nps_percentage", custom_percentage);
-        }
-    }
-},
 
 })
 
@@ -301,12 +240,14 @@ async function processSalaryComponents(frm) {
             employee: frm.doc.employee,
             print_format: 'Salary Slip Standard for CTC',
             docstatus: frm.doc.docstatus,
-            // posting_date: frm.doc.from_date
+            posting_date: frm.doc.from_date,
             for_preview: 1,
         }
     });
 
     if (response.message) {
+
+        console.log(response.message.earnings);
         // Define the tables for earnings, reimbursements, deductions, and additional components
         let salaryBreakup = `
             <table class="table table-bordered small">
@@ -339,19 +280,19 @@ async function processSalaryComponents(frm) {
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
-                total_ctc.push(v.amount)
+                total_ctc.push(v.default_amount)
                 let newRow = tableBody.insertRow();
 
                 let componentCell = newRow.insertCell();
                 componentCell.textContent = res.message.name;
 
-                let roundedAmount = Math.round(v.amount);
+                let roundedAmount = Math.round(v.default_amount);
                 let formattedAmount = roundedAmount.toLocaleString();
                 let amountCell = newRow.insertCell();
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount * 12);
+                let annualAmount = Math.round(v.default_amount * 12);
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -433,19 +374,19 @@ async function processSalaryComponents(frm) {
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
-                total_ctc.push(v.amount)
+                total_ctc.push(v.default_amount)
                 let newRow = deductionTableBody.insertRow();
 
                 let componentCell = newRow.insertCell();
                 componentCell.textContent = res.message.name;
 
-                let roundedAmount = Math.round(v.amount);
+                let roundedAmount = Math.round(v.default_amount);
                 let formattedAmount = roundedAmount.toLocaleString();
                 let amountCell = newRow.insertCell();
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount * 12);
+                let annualAmount = Math.round(v.default_amount * 12);
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
