@@ -2,6 +2,7 @@ import frappe
 import datetime
 from frappe.query_builder.functions import Count, Sum
 import json
+from frappe.utils import flt
 
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
@@ -22,8 +23,79 @@ from frappe.utils import (
 )
 from datetime import datetime
 
+from frappe.utils import flt
+from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
+
+# from hrms.payroll.doctype.salary_slip.salary_slip import get_total_exemption_amount
+
 
 class CustomSalarySlip(SalarySlip):
+    def calculate_variable_tax(self, tax_component):
+        self.previous_total_paid_taxes = self.get_tax_paid_in_period(
+            self.payroll_period.start_date, self.start_date, tax_component
+        )
+
+        # Structured tax amount
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_taxable_earnings_without_full_tax_addl_components,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
+
+        self.current_structured_tax_amount = (
+            self.total_structured_tax_amount - self.previous_total_paid_taxes
+        ) / self.remaining_sub_periods
+
+        # Total taxable earnings with additional earnings with full tax
+        self.full_tax_on_additional_earnings = 0.0
+        if self.current_additional_earnings_with_full_tax:
+            self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
+                self,
+                self.total_taxable_earnings,
+                self.tax_slab,
+                self.whitelisted_globals,
+                eval_locals,
+            )
+            self.full_tax_on_additional_earnings = (
+                self.total_tax_amount - self.total_structured_tax_amount
+            )
+
+        current_tax_amount = (
+            self.current_structured_tax_amount + self.full_tax_on_additional_earnings
+        )
+        if flt(current_tax_amount) < 0:
+            current_tax_amount = 0
+
+        self._component_based_variable_tax[tax_component].update(
+            {
+                "previous_total_paid_taxes": self.previous_total_paid_taxes,
+                "total_structured_tax_amount": self.total_structured_tax_amount,
+                "current_structured_tax_amount": self.current_structured_tax_amount,
+                "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
+                "current_tax_amount": current_tax_amount,
+            }
+        )
+
+        return current_tax_amount
+
+    def calculate_income_tax(self):
+        # Replace this with actual taxable income logic if different
+        annual_taxable_earning = self.base_annual_taxable_income
+
+        tax, charges = override_calculate_tax_by_tax_slab(
+            self,
+            annual_taxable_earning=annual_taxable_earning,
+            tax_slab=self.tax_slab,
+            salary_slip=self,
+        )
+
+        frappe.msgprint(f"[DEBUG] Income Tax: ₹{tax}, Other Charges: ₹{charges}")
+        self.income_tax = tax
+        self.other_charges = charges
+
     def before_update_after_submit(self):
         self.tax_calculation()
 
@@ -2168,3 +2240,122 @@ class CustomSalarySlip(SalarySlip):
                 self.custom_surcharge = 0
                 self.custom_education_cess = 0
                 self.custom_total_amount = 0
+
+
+def override_calculate_tax_by_tax_slab(
+    self, annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
+    eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
+    base_tax = 0
+    rebate = 0
+    other_taxes_and_charges = 0
+    custom_tds_already_deducted_amount = 0
+
+    # Step 1: Calculate base tax from slabs
+    for slab in tax_slab.slabs:
+        cond = cstr(slab.condition).strip()
+        if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+            continue
+
+        from_amt = slab.from_amount
+        to_amt = slab.to_amount or annual_taxable_earning
+        rate = slab.percent_deduction * 0.01
+
+        if annual_taxable_earning > from_amt:
+            taxable_range = min(annual_taxable_earning, to_amt) - from_amt
+            base_tax += taxable_range * rate
+
+    # Step 2: Marginal Relief (Rebate Logic)
+
+    if (
+        tax_slab.custom_marginal_relief_applicable
+        and tax_slab.custom_minmum_value
+        and tax_slab.custom_maximun_value
+    ):
+        if (
+            tax_slab.custom_minmum_value
+            < annual_taxable_earning
+            < tax_slab.custom_maximun_value
+        ):
+            excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+            if base_tax > excess_income:
+                rebate = base_tax - excess_income
+                base_tax -= rebate
+
+    # Step 3: Cess and Other Charges AFTER Rebate
+    for d in tax_slab.other_taxes_and_charges:
+        if (
+            flt(d.min_taxable_income)
+            and flt(d.min_taxable_income) > annual_taxable_earning
+        ):
+            continue
+        if (
+            flt(d.max_taxable_income)
+            and flt(d.max_taxable_income) < annual_taxable_earning
+        ):
+            continue
+
+        charge_percent = flt(d.percent)
+        charge = base_tax * charge_percent / 100.0
+        other_taxes_and_charges += charge
+
+    declaration = frappe.db.get_value(
+        "Employee Tax Exemption Declaration",
+        {
+            "employee": self.employee,
+            "payroll_period": self.payroll_period.name,
+            "docstatus": 1,
+        },
+        "custom_tds_already_deducted_amount",
+        as_dict=True,
+        cache=True,
+    )
+    if declaration:
+        custom_tds_already_deducted_amount = (
+            declaration.custom_tds_already_deducted_amount or 0.0
+        )
+
+    final_tax = (
+        base_tax + other_taxes_and_charges
+    ) - custom_tds_already_deducted_amount
+
+    return round(final_tax, 2), round(other_taxes_and_charges, 2)
+
+
+def get_total_exemption_amount(self):
+    total_exemption_amount = 0.0
+
+    if self.tax_slab.allow_tax_exemption:
+        if self.deduct_tax_for_unsubmitted_tax_exemption_proof:
+            exemption_proof = frappe.db.get_value(
+                "Employee Tax Exemption Proof Submission",
+                {
+                    "employee": self.employee,
+                    "payroll_period": self.payroll_period.name,
+                    "docstatus": 1,
+                },
+                "exemption_amount",
+                cache=True,
+            )
+            if exemption_proof:
+                total_exemption_amount = exemption_proof
+        else:
+            declaration = frappe.db.get_value(
+                "Employee Tax Exemption Declaration",
+                {
+                    "employee": self.employee,
+                    "payroll_period": self.payroll_period.name,
+                    "docstatus": 1,
+                },
+                "total_exemption_amount",
+                as_dict=True,
+                cache=True,
+            )
+            if declaration:
+                total_exemption_amount = declaration.total_exemption_amount or 0.0
+
+    if self.tax_slab.standard_tax_exemption_amount:
+        total_exemption_amount += flt(self.tax_slab.standard_tax_exemption_amount)
+
+    frappe.msgprint(f"[DEBUG] Total Exemption Amount: ₹{total_exemption_amount}")
+    return total_exemption_amount
