@@ -305,6 +305,7 @@ doc_events = {
     },
     "Full and Final Statement": {
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.on_submit",
     },
     # "Structure Setting": {
     #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",

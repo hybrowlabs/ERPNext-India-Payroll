@@ -7,11 +7,16 @@ frappe.ui.form.on('Full and Final Statement', {
 
         if(frm.doc.employee)
         {
-            earning_component(frm)
+
+            earning_component(frm).then(() => {
+                // Ensure payables table is updated BEFORE calling this
+                get_leave_encashment(frm);
+            });
+            // earning_component(frm)
             deduction_component(frm)
             get_outstanding_benefits(frm)
             get_tax(frm)
-            get_leave_encashment(frm)
+            // get_leave_encashment(frm)
 
 
 
@@ -445,7 +450,8 @@ function get_tax(frm)
 function deduction_component(frm) {
     var deduction_array = ["Notice Pay Recovery", "PF Recovery", "ESIC Recovery", "Waive off Recovery"]; // Array with deduction components
 
-    // Iterate through the deduction_array
+    frm.clear_table('receivables');
+
     deduction_array.forEach((component) => {
         // Check if the component already exists in the child table
         let exists = frm.doc.receivables.some((row) => row.component === component);
@@ -463,89 +469,197 @@ function deduction_component(frm) {
 }
 
 
-function earning_component(frm)
-{
-    frappe.call({
-        method: "frappe.client.get_list",
-        args: {
-            doctype: "Salary Structure Assignment",
-            filters: {
-                employee: frm.doc.employee,
-                docstatus: 1
-            },
-            fields: ["*"],
-            limit: 1,
-            order_by: "from_date desc"
-        },
-        callback: function (res) {
-            if (res.message && res.message.length > 0) {
-                const payrollPeriod = res.message[0].custom_payroll_period;
+// function earning_component(frm)
+// {
+//     frappe.call({
+//         method: "frappe.client.get_list",
+//         args: {
+//             doctype: "Salary Structure Assignment",
+//             filters: {
+//                 employee: frm.doc.employee,
+//                 docstatus: 1
+//             },
+//             fields: ["*"],
+//             limit: 1,
+//             order_by: "from_date desc"
+//         },
+//         callback: function (res) {
+//             if (res.message && res.message.length > 0) {
+//                 const payrollPeriod = res.message[0].custom_payroll_period;
 
-                if (payrollPeriod) {
-                    frappe.call({
-                        method: "frappe.client.get_list",
-                        args: {
-                            doctype: "Employee Benefit Accrual",
-                            filters: {
-                                employee: frm.doc.employee,
-                                docstatus: ["in", [0, 1]],
-                                payroll_period: payrollPeriod
-                            },
-                            fields: ["*"],
-                            limit_page_length: 0
-                        },
-                        callback: function (response) {
-                            if (response.message && response.message.length > 0) {
-                                // Create a map to group components
-                                let componentGroups = {};
+//                 if (payrollPeriod) {
+//                     frappe.call({
+//                         method: "frappe.client.get_list",
+//                         args: {
+//                             doctype: "Employee Benefit Accrual",
+//                             filters: {
+//                                 employee: frm.doc.employee,
+//                                 docstatus: ["in", [0, 1]],
+//                                 payroll_period: payrollPeriod
+//                             },
+//                             fields: ["*"],
+//                             limit_page_length: 0
+//                         },
+//                         callback: function (response) {
+//                             if (response.message && response.message.length > 0) {
+//                                 // Create a map to group components
+//                                 let componentGroups = {};
 
-                                // Group components by their salary_component
-                                $.each(response.message, function (i, v) {
-                                    if (!componentGroups[v.salary_component]) {
-                                        componentGroups[v.salary_component] = [];
-                                    }
-                                    componentGroups[v.salary_component].push(v);
-                                });
+//                                 // Group components by their salary_component
+//                                 $.each(response.message, function (i, v) {
+//                                     if (!componentGroups[v.salary_component]) {
+//                                         componentGroups[v.salary_component] = [];
+//                                     }
+//                                     componentGroups[v.salary_component].push(v);
+//                                 });
 
-                                // Iterate through the grouped components in the desired order
-                                Object.keys(componentGroups).forEach(function (component) {
-                                    let group = componentGroups[component];
-                                    let componentSum = 0; // To sum the components
-                                    let totalSettlement = 0; // To accumulate total settlement for subtraction
+//                                 // Iterate through the grouped components in the desired order
+//                                 Object.keys(componentGroups).forEach(function (component) {
+//                                     let group = componentGroups[component];
+//                                     let componentSum = 0; // To sum the components
+//                                     let totalSettlement = 0; // To accumulate total settlement for subtraction
 
-                                    // Calculate the sums for the component
-                                    group.forEach((v) => {
-                                        componentSum += v.amount; // Add the accrued amount
-                                        totalSettlement += v.total_settlement; // Add the total settlement
-                                    });
+//                                     // Calculate the sums for the component
+//                                     group.forEach((v) => {
+//                                         componentSum += v.amount; // Add the accrued amount
+//                                         totalSettlement += v.total_settlement; // Add the total settlement
+//                                     });
 
-                                    // Calculate the final value to be added to payables (sum - total settlement)
-                                    let finalAmount = componentSum - totalSettlement;
+//                                     // Calculate the final value to be added to payables (sum - total settlement)
+//                                     let finalAmount = componentSum - totalSettlement;
 
-                                    // Check if the component already exists in payables
-                                    let exists = frm.doc.payables.some((row) => row.component === component);
+//                                     // Check if the component already exists in payables
+//                                     let exists = frm.doc.payables.some((row) => row.component === component);
 
-                                    if (!exists) {
-                                        // Add the result to the child table (payables)
-                                        let child = frm.add_child('payables');
-                                        child.component = component; // Set the component name
-                                        child.amount = finalAmount; // Set the final calculated amount
-                                    }
-                                });
+//                                     if (!exists) {
+//                                         // Add the result to the child table (payables)
+//                                         let child = frm.add_child('payables');
+//                                         child.component = component; // Set the component name
+//                                         child.amount = finalAmount; // Set the final calculated amount
+//                                     }
+//                                 });
 
-                                // Refresh the payables field after adding all components
-                                frm.refresh_field('payables');
+//                                 // Refresh the payables field after adding all components
+//                                 frm.refresh_field('payables');
 
-                            }
-                        }
-                    });
-                }
-            }
-        }
-    });
+//                             }
+//                         }
+//                     });
+//                 }
+//             }
+//         }
+//     });
 
-}
+// }
 
+// function get_leave_encashment(frm) {
+//     frappe.call({
+//         method: "frappe.client.get_list",
+//         args: {
+//             doctype: "Leave Encashment",
+//             filters: {
+//                 employee: frm.doc.employee,
+//                 docstatus: 1
+//             },
+//             fields: ["leave_type", "encashment_days", "custom_basic_amount", "encashment_amount"],
+//         },
+//         callback: function (r) {
+//             if (r.message && r.message.length > 0) {
+//                 // Clear the child table before adding new rows
+//                 frm.clear_table('custom_calculated_amount');
+
+//                 r.message.forEach(row => {
+//                     let child = frm.add_child('custom_calculated_amount');
+//                     child.leave_type = row.leave_type;
+//                     child.encashment_days = row.encashment_days;
+//                     child.basic_amount = row.custom_basic_amount;
+//                     child.amount = row.encashment_amount;
+//                 });
+
+//                 // Refresh the child table field to show the new rows
+//                 frm.refresh_field('custom_calculated_amount');
+//             } else {
+//                 frappe.msgprint(__('No Leave Encashment records found for this employee.'));
+//             }
+//         }
+//     });
+// }
+
+
+// function earning_component(frm) {
+//     frappe.call({
+//         method: "frappe.client.get_list",
+//         args: {
+//             doctype: "Salary Structure Assignment",
+//             filters: {
+//                 employee: frm.doc.employee,
+//                 docstatus: 1
+//             },
+//             fields: ["*"],
+//             limit: 1,
+//             order_by: "from_date desc"
+//         },
+//         callback: function (res) {
+//             if (res.message && res.message.length > 0) {
+//                 const payrollPeriod = res.message[0].custom_payroll_period;
+
+//                 if (payrollPeriod) {
+//                     frappe.call({
+//                         method: "frappe.client.get_list",
+//                         args: {
+//                             doctype: "Employee Benefit Accrual",
+//                             filters: {
+//                                 employee: frm.doc.employee,
+//                                 docstatus: ["in", [0, 1]],
+//                                 payroll_period: payrollPeriod
+//                             },
+//                             fields: ["*"],
+//                             limit_page_length: 0
+//                         },
+//                         callback: function (response) {
+//                             if (response.message && response.message.length > 0) {
+//                                 // ✅ Clear the payables child table before inserting new rows
+//                                 frm.clear_table('payables');
+
+//                                 // Create a map to group components
+//                                 let componentGroups = {};
+
+//                                 // Group components by their salary_component
+//                                 $.each(response.message, function (i, v) {
+//                                     if (!componentGroups[v.salary_component]) {
+//                                         componentGroups[v.salary_component] = [];
+//                                     }
+//                                     componentGroups[v.salary_component].push(v);
+//                                 });
+
+//                                 // Iterate through the grouped components
+//                                 Object.keys(componentGroups).forEach(function (component) {
+//                                     let group = componentGroups[component];
+//                                     let componentSum = 0;
+//                                     let totalSettlement = 0;
+
+//                                     group.forEach((v) => {
+//                                         componentSum += v.amount;
+//                                         totalSettlement += v.total_settlement;
+//                                     });
+
+//                                     let finalAmount = componentSum - totalSettlement;
+
+//                                     let child = frm.add_child('payables');
+//                                     child.component = component;
+//                                     child.amount = finalAmount;
+//                                 });
+
+//                                 // Refresh the table
+//                                 frm.refresh_field('payables');
+//                             }
+//                         }
+//                     });
+//                 }
+//             }
+//         }
+//     });
+// }
 function get_leave_encashment(frm) {
     frappe.call({
         method: "frappe.client.get_list",
@@ -559,8 +673,10 @@ function get_leave_encashment(frm) {
         },
         callback: function (r) {
             if (r.message && r.message.length > 0) {
-                // Clear the child table before adding new rows
+                // Clear custom_calculated_amount table
                 frm.clear_table('custom_calculated_amount');
+
+                let total_encashment = 0;
 
                 r.message.forEach(row => {
                     let child = frm.add_child('custom_calculated_amount');
@@ -568,13 +684,107 @@ function get_leave_encashment(frm) {
                     child.encashment_days = row.encashment_days;
                     child.basic_amount = row.custom_basic_amount;
                     child.amount = row.encashment_amount;
+
+                    total_encashment += row.encashment_amount || 0;
                 });
 
-                // Refresh the child table field to show the new rows
                 frm.refresh_field('custom_calculated_amount');
+
+                // ❌ Remove existing Leave Encashment from payables the right way
+                const existing_rows = frm.doc.payables.filter(row => row.component === "Leave Encashment");
+                existing_rows.forEach(row => {
+                    frm.get_field('payables').grid.grid_rows_by_docname[row.name].remove();
+                });
+
+                // ➕ Add new Leave Encashment row
+                if (total_encashment > 0) {
+                    let payable = frm.add_child('payables');
+                    payable.component = "Leave Encashment";
+                    payable.amount = total_encashment;
+                }
+
+                frm.refresh_field('payables');
             } else {
                 frappe.msgprint(__('No Leave Encashment records found for this employee.'));
             }
         }
+    });
+}
+
+
+function earning_component(frm) {
+    return new Promise((resolve) => {
+        frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "Salary Structure Assignment",
+                filters: {
+                    employee: frm.doc.employee,
+                    docstatus: 1
+                },
+                fields: ["*"],
+                limit: 1,
+                order_by: "from_date desc"
+            },
+            callback: function (res) {
+                if (res.message && res.message.length > 0) {
+                    const payrollPeriod = res.message[0].custom_payroll_period;
+
+                    if (payrollPeriod) {
+                        frappe.call({
+                            method: "frappe.client.get_list",
+                            args: {
+                                doctype: "Employee Benefit Accrual",
+                                filters: {
+                                    employee: frm.doc.employee,
+                                    docstatus: ["in", [0, 1]],
+                                    payroll_period: payrollPeriod
+                                },
+                                fields: ["*"],
+                                limit_page_length: 0
+                            },
+                            callback: function (response) {
+                                if (response.message && response.message.length > 0) {
+                                    frm.clear_table('payables');
+
+                                    let componentGroups = {};
+
+                                    $.each(response.message, function (i, v) {
+                                        if (!componentGroups[v.salary_component]) {
+                                            componentGroups[v.salary_component] = [];
+                                        }
+                                        componentGroups[v.salary_component].push(v);
+                                    });
+
+                                    Object.keys(componentGroups).forEach(function (component) {
+                                        let group = componentGroups[component];
+                                        let componentSum = 0;
+                                        let totalSettlement = 0;
+
+                                        group.forEach((v) => {
+                                            componentSum += v.amount;
+                                            totalSettlement += v.total_settlement;
+                                        });
+
+                                        let finalAmount = componentSum - totalSettlement;
+
+                                        let child = frm.add_child('payables');
+                                        child.component = component;
+                                        child.amount = finalAmount;
+                                    });
+
+                                    frm.refresh_field('payables');
+                                }
+                                resolve(); // ✅ Resolve after everything is done
+                            }
+                        });
+                    } else {
+                        resolve();
+                    }
+                } else {
+                    resolve();
+                }
+            }
+        });
     });
 }
