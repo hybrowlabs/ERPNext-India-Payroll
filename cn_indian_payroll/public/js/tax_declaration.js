@@ -4527,7 +4527,9 @@ function tds_projection_html(frm) {
                   let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
                   let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
 
+                  let tds_already_deducted=frm.doc.custom_tds_already_deducted_amount
 
+                  // console.log(tds_already_deducted,"*****************************************")
 
                   // console.log(annual_old_taxable_income,"1111111")
                   // console.log(annual_new_taxable_income,"22222222")
@@ -5062,30 +5064,65 @@ function tds_projection_html(frm) {
                           </tr>
 
                           <tr>
+                              <td>TDS already deducted</td>
+                              <td>₹ ${Math.round(tds_already_deducted)}</td>
+                              <td>₹ ${Math.round(tds_already_deducted)}</td>
+
+                          </tr>
+
+                          <tr>
+                              <td>Balance TDS payable</td>
+                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-tds_already_deducted)}</td>
+                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-tds_already_deducted)}</td>
+                          </tr>
+
+
+
+
+
+
+                          <tr>
                               <td>Tax Paid</td>
                               <td>₹ ${Math.round(salary_slip_sum)}</td>
                               <td>₹ ${Math.round(salary_slip_sum)}</td>
                           </tr>
 
                           <tr>
-                              <td>Current Tax</td>
-                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)}</td>
-                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)}</td>
+                            <td>Current Tax</td>
+                            <td>₹ ${Math.round(((old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted) / num_months))}</td>
+                            <td>₹ ${Math.round(((new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted) / num_months))}</td>
                           </tr>
+
 
 
                           <tr>
                               <td>Total Tax Deducted at source</td>
-                              <td>₹ ${Math.round(((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)+(salary_slip_sum))}</td>
-                              <td>₹ ${Math.round(((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)+(salary_slip_sum))}</td>
+                              <td>₹ ${Math.round(((old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted) / num_months)+(salary_slip_sum))}</td>
+                              <td>₹ ${Math.round(((new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted) / num_months)+(salary_slip_sum))}</td>
                           </tr>
 
                           <tr>
-                              <td>Tax Payable / Refundable (14 - 15(A))</td>
-                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))/num_months)+(salary_slip_sum))}</td>
-                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))/num_months)+(salary_slip_sum))}</td>
-
+                            <td>Tax Payable / Refundable (14 - 15(A))</td>
+                            <td>
+                              ₹ ${Math.round(
+                                (
+                                  (old_education_cess + old_surcharge_m + (total_sum - old_rebate_value)) -
+                                  tds_already_deducted -
+                                  ((old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted) / num_months + salary_slip_sum)
+                                )
+                              )}
+                            </td>
+                            <td>
+                              ₹ ${Math.round(
+                                (
+                                  (new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value)) -
+                                  tds_already_deducted -
+                                  ((new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted) / num_months + salary_slip_sum)
+                                )
+                              )}
+                            </td>
                           </tr>
+
 
 
 
