@@ -231,9 +231,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
     if not employee:
         frappe.throw("Employee is required")
 
-    # Fetch selected tax regime from Income Tax Slab
-    selected_regime = None
-    income_tax_slab = frappe.get_list(
+    selected_regime = frappe.get_value(
         "Income Tax Slab",
         filters={
             "company": company,
@@ -241,10 +239,12 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
             "disabled": 0,
             "custom_select_regime": regime,
         },
-        fields=["name"],
+        fieldname="name",
+        order_by="effective_from desc",
     )
-    if income_tax_slab:
-        selected_regime = income_tax_slab[0]["name"]
+
+    if not selected_regime:
+        frappe.throw("Tax regime not found for the selected company")
 
     # Initialize variables
     month_count = 0
