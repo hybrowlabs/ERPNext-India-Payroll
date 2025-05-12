@@ -57,6 +57,48 @@ class CustomSalarySlip(SalarySlip):
         self.tax_calculation()
         self.calculate_grosspay()
 
+    def on_cancel(self):
+        super().on_cancel()
+        self.delete_bonus_accruals()
+        self.delete_benefit_accruals()
+
+
+
+    def delete_bonus_accruals(self):
+        bonus_accruals = frappe.get_list(
+            'Employee Bonus Accrual',
+            filters={
+                'salary_slip': self.name,
+                'payroll_entry': self.payroll_entry,
+                'payroll_period': self.custom_payroll_period,
+            },
+            fields=['name']
+        )
+
+        if bonus_accruals:
+            for accrual in bonus_accruals:
+                bonus_doc = frappe.get_doc('Employee Bonus Accrual', accrual.name)
+                bonus_doc.delete()
+
+    def delete_benefit_accruals(self):
+        benefit_accruals = frappe.get_list(
+            'Employee Benefit Accrual',
+            filters={
+                'salary_slip': self.name,
+                'payroll_entry': self.payroll_entry,
+                'payroll_period': self.custom_payroll_period,
+            },
+            fields=['name']
+        )
+        if benefit_accruals:
+            for accrual in benefit_accruals:
+                benefit_doc = frappe.get_doc('Employee Benefit Accrual', accrual.name)
+                benefit_doc.delete()
+
+
+
+
+
 
 
 
@@ -153,7 +195,6 @@ class CustomSalarySlip(SalarySlip):
             for entry in repayment_doc.custom_loan_perquisite:
                 if entry.payment_date and start_date <= frappe.utils.getdate(entry.payment_date) <= end_date:
                     total_perq += entry.perquisite_amount
-
         self.custom_perquisite_amount = total_perq
 
         # Tax slab logic
@@ -742,11 +783,10 @@ class CustomSalarySlip(SalarySlip):
                 component_type = salary_components.get(deduction.salary_component)
                 if component_type == "Provident Fund":
                     current_epf_value = deduction.amount
-                    future_epf_value = (deduction.default_amount)*(self.custom_month_count)
-                elif component_type == "Professional Tax":
+                    future_epf_value = (deduction.custom_actual_amount)*(self.custom_month_count)
+                if component_type == "Professional Tax":
                     current_pt_value = deduction.amount
-                    future_pt_value = (deduction.default_amount)*(self.custom_month_count)
-
+                    future_pt_value = (deduction.custom_actual_amount)*(self.custom_month_count)
         get_previous_salary_slip = frappe.get_list(
             'Salary Slip',
             filters={
@@ -755,7 +795,7 @@ class CustomSalarySlip(SalarySlip):
                 'docstatus': 1,
                 'name': ['!=', self.name]
             },
-            fields=['name']
+            fields=['name',"custom_payroll_period"]
         )
         if get_previous_salary_slip:
                 for slip in get_previous_salary_slip:
@@ -764,19 +804,19 @@ class CustomSalarySlip(SalarySlip):
                         for earning in previous_salary_slip.earnings:
                             component_type = salary_components.get(earning.salary_component)
                             if component_type == "NPS":
-                                previous_nps_value = earning.amount
+                                previous_nps_value += earning.amount
                             if earning.salary_component == current_basic:
-                                previous_basic_value = earning.amount
+                                previous_basic_value += earning.amount
                             if earning.salary_component == current_hra:
-                                previous_hra_value = earning.amount
+                                previous_hra_value += earning.amount
 
                     if previous_salary_slip.deductions:
                         for deduction in previous_salary_slip.deductions:
                             component_type = salary_components.get(deduction.salary_component)
                             if component_type == "Provident Fund":
-                                previous_epf_value = deduction.amount
-                            elif component_type == "Professional Tax":
-                                previous_pt_value = deduction.amount
+                                previous_epf_value += deduction.amount
+                            if component_type == "Professional Tax":
+                                previous_pt_value += deduction.amount
 
 
         if self.custom_tax_regime=="Old Regime":
@@ -1068,6 +1108,18 @@ class CustomSalarySlip(SalarySlip):
                         k.custom_actual_amount = 0
                 else:
                     k.custom_actual_amount = 0
+
+        if self.deductions:
+                for deduction in self.deductions:
+                    salary_component_doc = frappe.get_doc("Salary Component", deduction.salary_component)
+
+                    if salary_component_doc.custom_is_arrear == 0:
+                        if self.payment_days and self.payment_days > 0:
+                            deduction.custom_actual_amount = (deduction.amount * self.total_working_days) / self.payment_days
+                        else:
+                            deduction.custom_actual_amount = 0
+                    else:
+                        deduction.custom_actual_amount = 0
 
 
 
@@ -1766,17 +1818,7 @@ class CustomSalarySlip(SalarySlip):
 
     def calculate_grosspay(self):
         gross_pay_sum = 0
-
         gross_pay_year_sum=0
-
-        reimbursement_sum=0
-
-        total_income=0
-
-        gross_earning=0
-
-
-
         if self.earnings:
             for i in self.earnings:
                 component = frappe.get_doc('Salary Component', i.salary_component)
@@ -1785,47 +1827,16 @@ class CustomSalarySlip(SalarySlip):
                     gross_pay_year_sum +=i.year_to_date
 
 
-                if component.custom_is_reimbursement == 1 or component.component_type=="LTA Taxable" or component.component_type=="LTA Non Taxable":
-                    reimbursement_sum += i.amount
-
-                if component.do_not_include_in_total==0 and component.custom_is_reimbursement==0:
-                    total_income+=i.amount
-
-
-                # if component.custom_is_gross_earning == 1:
-                #     gross_earning += i.amount
-
-
-        total_loan_amount=0
-        if len(self.loans)>0:
-            for ji in self.loans:
-                total_loan_amount+=ji.total_payment
-
-
-
-        self.custom_total_deduction_amount=total_loan_amount+self.total_deduction
 
         self.custom_statutory_grosspay=round(gross_pay_sum)
-
         self.custom_statutory_year_to_date=round(gross_pay_year_sum)
-
-        self.custom_total_income=round(total_income)
-
-        self.custom_net_pay_amount=round((total_income-self.custom_total_deduction_amount)+reimbursement_sum)
-
-        self.custom_in_words=money_in_words(self.custom_net_pay_amount)
-
-        if self.total_loan_repayment:
-            self.custom_loan_amount=self.total_loan_repayment
 
 
 
 
     def set_taxale(self):
-
         for earning in self.earnings:
             get_tax=frappe.get_doc("Salary Component",earning.salary_component)
-
             earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
             earning.custom_regime=get_tax.custom_regime
 

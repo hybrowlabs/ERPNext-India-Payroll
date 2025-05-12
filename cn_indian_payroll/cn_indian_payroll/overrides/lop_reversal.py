@@ -46,8 +46,11 @@ def on_submit(self, method):
                 'currency':'INR',
                 'amount':j.amount,
                 'docstatus':1,
-                'custom_lop_reversal':self.name,
-                'custom_lop_reversal_days':self.number_of_days
+                'ref_doctype':"LOP Reversal",
+                'ref_docname':self.name,
+
+                # 'custom_lop_reversal':self.name,
+                # 'custom_lop_reversal_days':self.number_of_days
 
 
             })
@@ -214,3 +217,15 @@ def on_cancel(self,method):
 
             each_doc_bonus.amount = round(eligible_amount)
             each_doc_bonus.save()
+
+    get_linked_additional_salary = frappe.get_list('Additional Salary',
+        filters={
+            'employee': self.employee,
+            'ref_docname': self.name
+        },
+        fields=['name']
+    )
+    if get_linked_additional_salary:
+        for each_additional_salary in get_linked_additional_salary:
+            additional_salary_doc = frappe.get_doc('Additional Salary', each_additional_salary.name)
+            additional_salary_doc.delete()

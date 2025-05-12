@@ -76,7 +76,6 @@
   {
    "fieldname": "payroll_period",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Payroll Period",
    "options": "Payroll Period"
   },
@@ -109,7 +108,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-11 13:29:30.805524",
+ "modified": "2025-05-12 14:07:35.533933",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",

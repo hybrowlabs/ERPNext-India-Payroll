@@ -154,10 +154,10 @@
  "links": [
   {
    "link_doctype": "Additional Salary",
-   "link_fieldname": "custom_lop_reversal"
+   "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2024-11-20 17:38:57.945680",
+ "modified": "2025-05-12 16:33:01.065369",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
@@ -181,6 +181,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
