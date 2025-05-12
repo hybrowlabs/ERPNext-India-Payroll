@@ -291,8 +291,9 @@ doc_events = {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
     },
 
-    # "Structure Setting": {
-    #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
+    # "Salary Slip": {
+    #     "on_trash": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.on_trash",
+    #     # "before_delete": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.before_delete",
     # },
 
 }

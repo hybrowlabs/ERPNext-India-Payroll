@@ -94,9 +94,10 @@
   },
   {
    "fieldname": "salary_slip",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Salary Slip"
+   "label": "Salary Slip",
+   "options": "Salary Slip"
   },
   {
    "allow_on_submit": 1,
@@ -108,7 +109,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-30 16:13:03.747205",
+ "modified": "2025-05-11 13:29:30.805524",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",
@@ -130,6 +131,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
