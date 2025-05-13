@@ -1,23 +1,24 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{employee}-SAC-{YYYY}-{#####}",
  "creation": "2024-08-01 10:24:35.898361",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "old_salary_structure_assignment_id",
-  "employee_promotion_id",
-  "old_from_date",
+  "promotion_reference",
+  "previous_salary_structure_assignment",
+  "previous_effective_date",
   "column_break_ozck",
   "posting_date",
   "company",
-  "new_salary_structure_assignment_id",
-  "new_from_date",
+  "revised_salary_structure_assignment",
+  "revised_effective_date",
   "section_break_ugei",
-  "old_structure_child",
+  "previous_revised_salary_components",
   "section_break_cwor",
-  "salary_arrear_components",
+  "arrear_breakdown",
   "section_break_jakm",
   "reimbursement_components",
   "section_break_ajlu",
@@ -42,20 +43,8 @@
    "reqd": 1
   },
   {
-   "fieldname": "old_structure_child",
-   "fieldtype": "Table",
-   "label": "Old Structure Child",
-   "options": "Salary Revision Child"
-  },
-  {
    "fieldname": "section_break_cwor",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "salary_arrear_components",
-   "fieldtype": "Table",
-   "label": "Salary Arrear Components",
-   "options": "Salary Appraisal Child"
   },
   {
    "default": "Now",
@@ -104,40 +93,59 @@
    "reqd": 1
   },
   {
-   "fieldname": "employee_promotion_id",
-   "fieldtype": "Data",
-   "label": "Employee Promotion ID"
-  },
-  {
-   "fieldname": "old_salary_structure_assignment_id",
+   "fieldname": "previous_salary_structure_assignment",
    "fieldtype": "Link",
-   "label": "Old Salary Structure Assignment ID",
+   "label": "Previous Salary Structure Assignment",
    "options": "Salary Structure Assignment"
   },
   {
-   "fieldname": "new_salary_structure_assignment_id",
+   "fieldname": "promotion_reference",
    "fieldtype": "Link",
-   "label": "New Salary Structure Assignment ID",
+   "label": "Promotion Reference",
+   "options": "Employee Promotion"
+  },
+  {
+   "fieldname": "previous_effective_date",
+   "fieldtype": "Date",
+   "label": "Previous Effective Date"
+  },
+  {
+   "fieldname": "revised_salary_structure_assignment",
+   "fieldtype": "Link",
+   "label": "Revised Salary Structure Assignment",
    "options": "Salary Structure Assignment"
   },
   {
-   "fieldname": "old_from_date",
+   "fieldname": "revised_effective_date",
    "fieldtype": "Date",
-   "label": "Old From Date"
+   "label": "Revised Effective Date"
   },
   {
-   "fieldname": "new_from_date",
-   "fieldtype": "Date",
-   "label": "New From date"
+   "fieldname": "previous_revised_salary_components",
+   "fieldtype": "Table",
+   "label": "Previous vs Revised Salary Components (Used to Generate Arrears)",
+   "options": "Salary Revision Child"
+  },
+  {
+   "fieldname": "arrear_breakdown",
+   "fieldtype": "Table",
+   "label": "Arrear Breakdown",
+   "options": "Salary Appraisal Child"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2024-08-31 13:23:17.929016",
+ "links": [
+  {
+   "link_doctype": "Additional Salary",
+   "link_fieldname": "ref_docname"
+  }
+ ],
+ "modified": "2025-05-13 11:18:20.249861",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -153,6 +161,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

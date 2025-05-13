@@ -248,7 +248,6 @@ doctype_js = {
     "Loan Product": "public/js/loan_product.js",
     "Salary Slip": "public/js/salary_slip.js",
     "LTA Claim": "public/js/lta_claim.js",
-    "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
     "Company": "public/js/company.js",
     "Structure Setting": "public/js/structure_setting.js",
@@ -286,10 +285,10 @@ doc_events = {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel"
     },
 
-    "Employee Promotion": {
-        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
-        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
-    },
+    # "Employee Promotion": {
+    #     "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
+    #     # "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
+    # },
 
     # "Salary Slip": {
     #     "on_trash": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.on_trash",

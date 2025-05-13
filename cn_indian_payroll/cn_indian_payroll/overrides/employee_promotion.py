@@ -11,8 +11,7 @@ def on_cancel(self,method):
 def update_status_cancelled(self):
     self.custom_status="Cancelled"
 
-def on_submit(self,method):
-    self.custom_status="Completed"
+
 
 
 

@@ -7,13 +7,9 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
     if promotion_id:
         old_amounts = {}
         new_amounts = {}
-
-
         old_bonus={}
         new_bonus={}
 
-
-        # Fetch salary structure assignments (limit 2, most recent first)
         salary_structure_assignment = frappe.get_list('Salary Structure Assignment',
             filters={'employee': employee_id, 'company': company, 'docstatus': 1},
             fields=['*'],
@@ -21,15 +17,13 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             limit=2
         )
 
-        # If fewer than 2 salary structures are found, return error
         if len(salary_structure_assignment) < 2:
             frappe.throw("Unable to find enough salary structure assignments for comparison.")
 
-        # Get new salary slip
         new_salary_slip = make_salary_slip(
             source_name=salary_structure_assignment[0].salary_structure,
             employee=employee_id,
-            print_format='Salary Slip Standard for CTC',
+            print_format='Salary Slip Standard',
             posting_date=salary_structure_assignment[0].from_date,
             for_preview=1,
         )
@@ -38,14 +32,16 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
         for new_earning in new_salary_slip.earnings:
             part_of_ctc = frappe.get_doc("Salary Component", new_earning.salary_component)
             if part_of_ctc.custom_is_part_of_appraisal == 1:
+
                 component = new_earning.salary_component
-                new_amounts[component] = new_earning.amount
+                if component not in new_amounts:
+                    new_amounts[component] = new_earning.amount
 
             if part_of_ctc.custom_is_accrual==1:
                 component = new_earning.salary_component
-                new_bonus[component] = new_earning.amount
+                if component not in new_bonus:
+                    new_bonus[component] = new_earning.amount
 
-                # frappe.msgprint(str(new_bonus[component]))
 
 
 
@@ -54,7 +50,8 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             part_of_ctc = frappe.get_doc("Salary Component", new_deduction.salary_component)
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = new_deduction.salary_component
-                new_amounts[component] = new_deduction.amount
+                if component not in new_amounts:
+                    new_amounts[component] = new_deduction.amount
 
         # Get old salary slip
         old_salary_slip = make_salary_slip(
@@ -70,19 +67,21 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             part_of_ctc = frappe.get_doc("Salary Component", old_earning.salary_component)
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = old_earning.salary_component
-                old_amounts[component] = old_earning.amount
+                if component not in old_amounts:
+                    old_amounts[component] = old_earning.amount
 
             if part_of_ctc.custom_is_accrual==1:
                 component = old_earning.salary_component
-                old_bonus[component] = old_earning.amount
+                if component not in old_bonus:
+                    old_bonus[component] = old_earning.amount
 
-                # frappe.msgprint(str(old_bonus[component]))
 
         for old_deduction in old_salary_slip.deductions:
             part_of_ctc = frappe.get_doc("Salary Component", old_deduction.salary_component)
             if part_of_ctc.custom_is_part_of_appraisal == 1:
                 component = old_deduction.salary_component
-                old_amounts[component] = old_deduction.amount
+                if component not in old_amounts:
+                    old_amounts[component] = old_deduction.amount
 
         # Collect all components (union of old and new components)
         all_components = set(old_amounts.keys()).union(set(new_amounts.keys()))
@@ -90,7 +89,6 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
         all_bonus_components=set(old_bonus.keys()).union(set(new_bonus.keys()))
 
 
-        # frappe.msgprint(str(all_bonus_components))
 
         result = []
         for component in all_components:
@@ -103,7 +101,6 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 "new_amount": new_amount
             })
 
-        # frappe.msgprint(str(result))
 
 
 
@@ -123,11 +120,9 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
 
 
 
-        # frappe.msgprint(str(bonus_result))
 
         final_array = []
 
-        # Get salary slips after effective_from date
 
 
         if effective_from:
@@ -141,29 +136,28 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 fields=['*']
             )
 
-            # Iterate through salary slips and append salary components with old and new amounts
             if get_all_salary_slip:
                 for slip in get_all_salary_slip:
                     get_each_doc = frappe.get_doc("Salary Slip", slip.name)
 
-                    # Fetch LOP Reversal for the specific salary slip
                     get_lop_reversal = frappe.get_list('LOP Reversal',
                         filters={
                             'employee': employee_id,
                             'company': company,
                             'docstatus': 1,
-                            'salary_slip': get_each_doc.name  # Filter by current salary slip
+                            'salary_slip': get_each_doc.name
                         },
                         fields=['*']
                     )
 
                     lop_reversal = sum([lop.number_of_days for lop in get_lop_reversal])
 
-                    # Calculate actual LOP and payment days
-                    actual_lop = get_each_doc.leave_without_pay - lop_reversal
+                    actual_lop = (get_each_doc.leave_without_pay+get_each_doc.absent_days) - lop_reversal
+
+
                     payment_days = get_each_doc.total_working_days - actual_lop
 
-                    # Append salary components with prorated amounts based on payment days
+
                     for entry in result:
                         prorated_old_amount = (entry["old_amount"] / get_each_doc.total_working_days) * payment_days
                         prorated_new_amount = (entry["new_amount"] / get_each_doc.total_working_days) * payment_days
@@ -174,13 +168,12 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                             "lop_reversal": lop_reversal,
                             "month": get_each_doc.custom_month,
                             "working_days": get_each_doc.total_working_days,
+                            "payment_days": payment_days,
                             "lop_days": get_each_doc.leave_without_pay,
                             "old_amount": prorated_old_amount,
                             "new_amount": prorated_new_amount,
                             "difference": prorated_new_amount - prorated_old_amount
                         })
-
-                    # frappe.msgprint(str(final_array))
 
 
         final_bonus_array = []
@@ -216,7 +209,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                     lop_reversal = sum([lop.number_of_days for lop in get_lop_reversal])
 
                     # Calculate actual LOP and payment days
-                    actual_lop = get_each_doc.leave_without_pay - lop_reversal
+                    actual_lop = (get_each_doc.leave_without_pay+get_each_doc.absent_days) - lop_reversal
                     payment_days = get_each_doc.total_working_days - actual_lop
 
                     # Append salary components with prorated amounts based on payment days
@@ -231,6 +224,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                             "month": get_each_doc.custom_month,
                             "working_days": get_each_doc.total_working_days,
                             "lop_days": get_each_doc.leave_without_pay,
+                            "payment_days": payment_days,
                             "old_amount": prorated_old_amount,
                             "new_amount": prorated_new_amount,
                             "difference": prorated_new_amount - prorated_old_amount
@@ -268,7 +262,6 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                     "old_amount": 0
                 })
 
-            # frappe.msgprint(str(reimbursement_array))
 
             # Fetch the old Salary Structure Assignment
             get_ssa_old = frappe.get_doc("Salary Structure Assignment", salary_structure_assignment[1].name)
@@ -292,10 +285,6 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                         "new_amount": 0,
                         "old_amount": reimbursemenold.monthly_total_amount
                     })
-
-            # Display the final reimbursement array
-            # frappe.msgprint(str(reimbursement_array))
-
 
             if effective_from:
                 get_all_salary_slip = frappe.get_list('Salary Slip',
@@ -327,7 +316,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                         lop_reversal = sum([lop.number_of_days for lop in get_lop_reversal])
 
                         # Calculate actual LOP and payment days
-                        actual_lop = get_each_doc.leave_without_pay - lop_reversal
+                        actual_lop = (get_each_doc.leave_without_pay+get_each_doc.absent_days) - lop_reversal
                         payment_days = get_each_doc.total_working_days - actual_lop
 
                         # Append salary components with prorated amounts based on payment days
@@ -342,11 +331,11 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                                 "month": get_each_doc.custom_month,
                                 "working_days": get_each_doc.total_working_days,
                                 "lop_days": get_each_doc.leave_without_pay,
+                                "payment_days": payment_days,
                                 "old_amount": prorated_old_amount,
                                 "new_amount": prorated_new_amount,
                                 "difference": prorated_new_amount - prorated_old_amount
                             })
-            # frappe.msgprint(str(reimbursement_final_array))
 
 
         insert_appraisal = frappe.get_doc({
@@ -354,28 +343,28 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
             "employee": employee_id,
             "posting_date": date,
             "company": company,
-            "employee_promotion_id": promotion_id,
-            "old_salary_structure_assignment_id": salary_structure_assignment[1].name,
-            "old_from_date": salary_structure_assignment[1].from_date,
-            "new_salary_structure_assignment_id": salary_structure_assignment[0].name,
-            "new_from_date": salary_structure_assignment[0].from_date
+            "promotion_reference": promotion_id,
+            "previous_salary_structure_assignment": salary_structure_assignment[1].name,
+            "previous_effective_date": salary_structure_assignment[1].from_date,
+            "revised_salary_structure_assignment": salary_structure_assignment[0].name,
+            "revised_effective_date": salary_structure_assignment[0].from_date
         })
 
-        # Append components and amounts to child tables in the Salary Appraisal Calculation document
         for entry in result:
-            insert_appraisal.append("old_structure_child", {
+            insert_appraisal.append("previous_revised_salary_components", {
                 "salary_component": entry["component"],
                 "old_amount": entry["old_amount"],
                 "new_amount": entry["new_amount"]
             })
 
         for insert_arrear in final_array:
-            insert_appraisal.append("salary_arrear_components", {
+            insert_appraisal.append("arrear_breakdown", {
                 "salary_component": insert_arrear["salary_component"],
                 "salary_slip_id": insert_arrear["salary_slip"],
                 "month": insert_arrear["month"],
                 "working_days": insert_arrear["working_days"],
                 "lop_days": insert_arrear["lop_days"],
+                "payment_days": insert_arrear["payment_days"],
                 "old_amount": insert_arrear["old_amount"],
                 "expected_amount": insert_arrear["new_amount"],
                 "lop_reversal": insert_arrear["lop_reversal"],
@@ -389,6 +378,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 "month": insert_bonus["month"],
                 "working_days": insert_bonus["working_days"],
                 "lop_days": insert_bonus["lop_days"],
+                "payment_days": insert_bonus["payment_days"],
                 "old_amount": insert_bonus["old_amount"],
                 "expected_amount": insert_bonus["new_amount"],
                 "lop_reversal": insert_bonus["lop_reversal"],
@@ -403,6 +393,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 "month": insert_reimbursement["month"],
                 "working_days": insert_reimbursement["working_days"],
                 "lop_days": insert_reimbursement["lop_days"],
+                "payment_days": insert_reimbursement["payment_days"],
                 "old_amount": insert_reimbursement["old_amount"],
                 "expected_amount": insert_reimbursement["new_amount"],
                 "lop_reversal": insert_reimbursement["lop_reversal"],

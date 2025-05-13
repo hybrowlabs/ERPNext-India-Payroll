@@ -2,6 +2,17 @@ frappe.ui.form.on('Employee Promotion', {
 	refresh(frm) {
 
 
+        if (frm.doc.docstatus === 0) {
+            if (frm.doc.custom_status === "Completed") {
+                frm.page.set_primary_action(__('Submit'), () => {
+                    frm.save('Submit');
+                });
+            } else {
+                frm.page.clear_primary_action(); // removes the default button
+            }
+        }
+
+
 
 
         if(!frm.is_new() && frm.doc.custom_status=="In Planning")
