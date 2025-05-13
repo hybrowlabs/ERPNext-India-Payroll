@@ -251,6 +251,7 @@ doctype_js = {
     "Employee Promotion": "public/js/employee_promotion.js",
     "Company": "public/js/company.js",
     "Structure Setting": "public/js/structure_setting.js",
+    "Salary Component": "public/js/salary_component.js",
 
 }
 
