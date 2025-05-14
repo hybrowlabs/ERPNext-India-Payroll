@@ -1101,13 +1101,13 @@ class CustomSalarySlip(SalarySlip):
             for k in self.earnings:
                 salary_component_doc = frappe.get_doc("Salary Component", k.salary_component)
 
-                if salary_component_doc.custom_is_arrear == 0:
+                if salary_component_doc.custom_is_arrear == 0 and salary_component_doc.depends_on_payment_days:
                     if self.payment_days and self.payment_days > 0:
                         k.custom_actual_amount = (k.amount * self.total_working_days) / self.payment_days
                     else:
                         k.custom_actual_amount = 0
                 else:
-                    k.custom_actual_amount = 0
+                    k.custom_actual_amount = k.amount
 
         if self.deductions:
                 for deduction in self.deductions:
@@ -1120,6 +1120,11 @@ class CustomSalarySlip(SalarySlip):
                             deduction.custom_actual_amount = 0
                     else:
                         deduction.custom_actual_amount = 0
+
+        if self.total_deduction or self.total_loan_repayment:
+            self.custom_total_deduction_amount = (self.total_deduction or 0) + (self.total_loan_repayment or 0)
+        else:
+            self.custom_total_deduction_amount = 0
 
 
 

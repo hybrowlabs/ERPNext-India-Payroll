@@ -17,6 +17,7 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
         get_income_tax = frappe.get_list('Income Tax Slab',
                         filters={'company':company,'docstatus':1,"disabled":0,"custom_select_regime":regime},
                         fields=["*"],
+                        order_by="effective_from desc",
 
                     )
         if len(get_income_tax)>0:
@@ -45,9 +46,6 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
 
             else:
                 effective_from=latest_salary_structure[0].from_date
-
-
-
 
 
 
@@ -183,7 +181,7 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
 
                 nps_component = 0
                 epf_amount = 0
-                pt_amount = 2400
+                pt_amount = 0
 
                 # Loop through earnings
                 for new_earning in new_salary_slip.earnings:
@@ -196,6 +194,8 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                     component = frappe.get_doc("Salary Component", deduction.salary_component)
                     if component.component_type == "Provident Fund":
                         epf_amount += deduction.amount  # Add the deduction amount
+                    if component.component_type == "Professional Tax":
+                        pt_amount += deduction.amount  # Add the deduction amount
 
 
                 start_date=effective_from
@@ -217,24 +217,19 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
 
                 total_nps=round(num_months*nps_component)
                 total_epf = min(round(num_months * epf_amount), 150000)
-                # total_epf=round(num_months*epf_amount)
-                # if (num_months*epf_amount)>=150000:
-                #     total_epf=150000
-                # else:
-                #     total_epf=round(num_months*epf_amount)
+                total_pt = min(round(num_months * pt_amount))
+
 
 
 
                 get_declaration = frappe.get_doc("Employee Tax Exemption Declaration", doc_id)
 
-                # Correctly define the form_data dictionary
                 form_data = {
                     'nineNumber': round(total_nps),
                     'pfValue': round(total_epf),
-                    'nineteenNumber': pt_amount  # Use a colon, not a comma
+                    'nineteenNumber': total_pt
                 }
 
-                # Assign the corrected JSON data to the custom_declaration_form_data field
                 get_declaration.custom_declaration_form_data = json.dumps(form_data)
 
                 # Set the selected income tax regime
@@ -254,6 +249,7 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                 salary_slip_count = len(get_all_salary_slip)
                 nps_amount = []
                 epf_amount = []
+                pt_amount = []
 
                 # Process existing salary slips
                 for j in get_all_salary_slip:
@@ -270,6 +266,8 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                         get_epf_component = frappe.get_doc("Salary Component", m.salary_component)
                         if get_epf_component.component_type == "Provident Fund":
                             epf_amount.append(m.amount)
+                        if get_epf_component.component_type == "Professional Tax":
+                            pt_amount.append(m.amount)
 
                 # Create new salary slip
                 new_salary_slip = make_salary_slip(
@@ -291,20 +289,23 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                     if epf_component.component_type == "Provident Fund":
                         calculated_epf = (12 - salary_slip_count) * old_deduction.amount
                         epf_amount.append(calculated_epf)
+                    if epf_component.component_type == "Professional Tax":
+                        calculated_pt = (12 - salary_slip_count) * old_deduction.amount
+                        pt_amount.append(calculated_pt)
 
                 # Summing up NPS and calculating capped EPF
                 nps_amount_sum = sum(nps_amount)
                 epf_amount_sum = min(sum(epf_amount), 150000) if epf_amount else 0
+                pt_amount_sum = min(sum(pt_amount)) if pt_amount else 0
 
-                # frappe.msgprint(f"NPS Amount Sum: {nps_amount_sum}")
-                # frappe.msgprint(f"EPF Amount Sum: {epf_amount_sum}")
+
 
                 get_declaration = frappe.get_doc("Employee Tax Exemption Declaration", doc_id)
 
                 form_data = {
                     'nineNumber': round(nps_amount_sum),
                     'pfValue': round(epf_amount_sum),
-                    'nineteenNumber': 2400
+                    'nineteenNumber': round(pt_amount_sum)
                 }
 
                 get_declaration.custom_declaration_form_data = json.dumps(form_data)

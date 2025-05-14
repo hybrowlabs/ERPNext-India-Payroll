@@ -27,8 +27,7 @@ def on_submit(self, method):
                 'docstatus':1,
                 'ref_doctype':"LOP Reversal",
                 'ref_docname':self.name,
-                # 'custom_lop_reversal':self.name,
-                # 'custom_lop_reversal_days':self.number_of_days
+
             })
             additional_doc.insert()
 
@@ -49,8 +48,6 @@ def on_submit(self, method):
                 'ref_doctype':"LOP Reversal",
                 'ref_docname':self.name,
 
-                # 'custom_lop_reversal':self.name,
-                # 'custom_lop_reversal_days':self.number_of_days
 
 
             })
@@ -60,7 +57,6 @@ def on_submit(self, method):
 
     reimbursement_accrual_update(self)
     bonus_accrual_update(self)
-
     update_arrear_breakup(self)
 
 
