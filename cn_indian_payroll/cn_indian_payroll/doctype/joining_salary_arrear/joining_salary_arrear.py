@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Hybrowlabs technologies and contributors
+# Copyright (c) 2025, Hybrowlabs Technologies and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -8,55 +8,138 @@ from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_s
 
 class JoiningSalaryArrear(Document):
     def before_save(self):
-        frappe.msgprint("Before Save")
-        # if self.employee:
-        # 	salary_structure_assignment = frappe.get_list(
-        #     "Salary Structure Assignment",
-        #     filters={"employee": self.employee, "company": self.company, "docstatus": 1},
-        #     fields=["*"],
-        #     order_by="from_date desc",
-        #     limit=1,
-        # 	)
+        self.insert_breakup_table()
 
-        # 	if not salary_structure_assignment:
-        # 		new_salary_slip = make_salary_slip(
-        # 			source_name=salary_structure_assignment[0].salary_structure,
-        # 			employee=self.employee,
-        # 			print_format="Salary Slip Standard",
-        # 			posting_date=salary_structure_assignment[0].from_date,
-        # 			for_preview=1,
-        # 		)
+    def on_submit(self):
+        self.insert_additional_salary()
 
-        # 		processed_components = set()
+    def insert_additional_salary(self):
+        if not (self.earning_breakup or self.deduction_breakup):
+            return
 
-        # 		# Collect new amounts from earnings and deductions
-        # 		for new_earning in new_salary_slip.earnings:
-        # 	part_of_ctc = frappe.get_doc(
-        # 		"Salary Component", new_earning.salary_component
-        # 	)
+        # Create Additional Salary for earnings
+        for row in self.earning_breakup:
+            additional_salary = frappe.new_doc("Additional Salary")
+            additional_salary.employee = self.employee
+            additional_salary.salary_component = row.salary_component
+            additional_salary.amount = row.amount
+            additional_salary.company = self.company
+            additional_salary.payroll_date = self.additional_salary_date
+            additional_salary.currency = "INR"
+            additional_salary.ref_doctype = "Joining Salary Arrear"
+            additional_salary.ref_docname = self.name
+            additional_salary.insert()
+            additional_salary.submit()
 
-        # 	if part_of_ctc.name in processed_components:
-        # 		continue
+        # Create Additional Salary for deductions
+        for row in self.deduction_breakup:
+            additional_salary = frappe.new_doc("Additional Salary")
+            additional_salary.employee = self.employee
+            additional_salary.salary_component = row.salary_component
+            additional_salary.amount = row.amount
+            additional_salary.company = self.company
+            additional_salary.payroll_date = self.additional_salary_date
+            additional_salary.currency = "INR"
+            additional_salary.ref_doctype = "Joining Salary Arrear"
+            additional_salary.ref_docname = self.name
+            additional_salary.insert()
+            additional_salary.submit()
 
-        # 	if part_of_ctc.custom_is_arrear == 1 and part_of_ctc.custom_component==:
-        # 		component = new_earning.salary_component
-        # 		new_amounts[component] = new_earning.amount
+    def insert_breakup_table(self):
+        if not self.employee:
+            return
 
-        # 	if part_of_ctc.custom_is_accrual == 1:
-        # 		component = new_earning.salary_component
-        # 		new_bonus[component] = new_earning.amount
+        # Get the latest approved salary structure assignment
+        salary_structure_assignment = frappe.get_list(
+            "Salary Structure Assignment",
+            filters={
+                "employee": self.employee,
+                "company": self.company,
+                "docstatus": 1,
+            },
+            fields=["*"],
+            order_by="from_date desc",
+            limit=1,
+        )
 
-        # 	processed_components.add(part_of_ctc.name)
+        if not salary_structure_assignment:
+            return
 
-        # for new_deduction in new_salary_slip.deductions:
-        # 	part_of_ctc = frappe.get_doc(
-        # 		"Salary Component", new_deduction.salary_component
-        # 	)
-        # 	if part_of_ctc.name in processed_components:
-        # 		continue
+        salary_structure = salary_structure_assignment[0].salary_structure
+        from_date = salary_structure_assignment[0].from_date
 
-        # 	if part_of_ctc.custom_is_part_of_appraisal == 1:
-        # 		component = new_deduction.salary_component
-        # 		new_amounts[component] = new_deduction.amount
+        # Generate salary slip for preview
+        new_salary_slip = make_salary_slip(
+            source_name=salary_structure,
+            employee=self.employee,
+            print_format="Salary Slip Standard",
+            posting_date=from_date,
+            for_preview=1,
+        )
 
-        # 	processed_components.add(part_of_ctc.name)
+        processed_components = []
+        earning_breakup = []
+        deduction_breakup = []
+
+        for new_earning in new_salary_slip.earnings:
+            component_doc = frappe.get_value(
+                "Salary Component",
+                filters={
+                    "custom_component": new_earning.salary_component,
+                    "disabled": 0,
+                },
+                fieldname=["name", "custom_is_arrear"],
+                as_dict=True,
+            )
+
+            if not component_doc or component_doc.name in processed_components:
+                continue
+
+            if component_doc.custom_is_arrear == 1:
+                earning_breakup.append(
+                    {
+                        "salary_component": component_doc.name,
+                        "amount": round(
+                            (new_earning.amount / new_salary_slip.total_working_days)
+                            * self.number_of_present_days
+                        ),
+                    }
+                )
+                processed_components.append(component_doc.name)
+
+        # Process deductions
+        for new_deduction in new_salary_slip.deductions:
+            component_doc = frappe.get_value(
+                "Salary Component",
+                filters={
+                    "custom_component": new_deduction.salary_component,
+                    "disabled": 0,
+                },
+                fieldname=["name", "custom_is_arrear"],
+                as_dict=True,
+            )
+
+            if not component_doc or component_doc.name in processed_components:
+                continue
+
+            if component_doc.custom_is_arrear == 1:
+                deduction_breakup.append(
+                    {
+                        "salary_component": component_doc.name,
+                        "amount": round(
+                            (new_deduction.amount / new_salary_slip.total_working_days)
+                            * self.number_of_present_days
+                        ),
+                    }
+                )
+                processed_components.append(component_doc.name)
+
+        # Assign results to document child tables
+        self.set("earning_breakup", [])
+        self.set("deduction_breakup", [])
+
+        for row in earning_breakup:
+            self.append("earning_breakup", row)
+
+        for row in deduction_breakup:
+            self.append("deduction_breakup", row)

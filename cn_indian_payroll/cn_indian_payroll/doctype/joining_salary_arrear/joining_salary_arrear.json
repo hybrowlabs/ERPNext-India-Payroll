@@ -118,8 +118,13 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2025-05-14 17:36:25.363458",
+ "links": [
+  {
+   "link_doctype": "Additional Salary",
+   "link_fieldname": "ref_docname"
+  }
+ ],
+ "modified": "2025-05-15 00:45:15.224583",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Joining Salary Arrear",
