@@ -34,9 +34,8 @@ from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
 
 class CustomSalarySlip(SalarySlip):
 
-    def validate(self):
-        super().validate()
-        self.set_sub_period()
+
+
 
     def on_submit(self):
         super().on_submit()
@@ -56,6 +55,12 @@ class CustomSalarySlip(SalarySlip):
         self.food_coupon()
         self.tax_calculation()
         self.calculate_grosspay()
+
+
+
+    def validate(self):
+        super().validate()
+        self.set_sub_period()
 
     def on_cancel(self):
         super().on_cancel()
@@ -148,6 +153,7 @@ class CustomSalarySlip(SalarySlip):
 
 
         self.custom_month_count=sub_period-1
+        print(sub_period,"*************************\n\n\n\n\n\n")
 
 
     def compute_income_tax_breakup(self):
