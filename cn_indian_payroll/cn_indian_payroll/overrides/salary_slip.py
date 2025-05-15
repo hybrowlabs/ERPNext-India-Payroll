@@ -3,6 +3,8 @@ import datetime
 from frappe.query_builder.functions import Count, Sum
 import json
 from frappe.utils import flt
+from frappe.query_builder import Order
+from frappe import _
 
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
@@ -25,33 +27,29 @@ from datetime import datetime
 
 from frappe.utils import flt
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
-
-# from hrms.payroll.doctype.salary_slip.salary_slip import get_total_exemption_amount
+from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
 
 
 class CustomSalarySlip(SalarySlip):
     def before_update_after_submit(self):
         self.tax_calculation()
 
-    def after_insert(self):
-        self.employee_accrual_insert()
-
     def on_submit(self):
         super().on_submit()
-        self.employee_accrual_submit()
+        self.insert_bonus_accruals()
+        self.employee_accrual_insert()
 
-    def validate(self):
-        super().validate()
-        self.insert_other_perquisites()
+    # def validate(self):
+    #     super().validate()
+    #     self.insert_other_perquisites()
 
     def before_save(self):
-        self.update_bonus_accrual()
+        self.set_sub_period()
         self.new_joinee()
         self.insert_lop_days()
         self.set_taxale()
         self.actual_amount_ctc()
         self.set_month()
-        self.remaining_day()
 
         if self.leave_without_pay > 0:
             # self.insert_lta_reimbursement_lop()
@@ -62,38 +60,8 @@ class CustomSalarySlip(SalarySlip):
             self.insert_reimbursement()
             self.driver_reimbursement()
 
-        self.set_payroll_period()
-        self.insert_loan_perquisite()
         self.update_declaration_component()
         self.update_total_lop()
-
-        # print(self.previous_taxable_earnings_before_exemption,"self.previous_taxable_earnings_before_exemption\n\n\n")
-        # print(self.current_structured_taxable_earnings_before_exemption,"self.current_structured_taxable_earnings_before_exemption\n\n\n")
-        # print(self.future_structured_taxable_earnings_before_exemption,"self.future_structured_taxable_earnings_before_exemption\n\n\n")
-        # print(self.current_additional_earnings,"self.current_additional_earnings\n\n\n")
-        # print(self.unclaimed_taxable_benefits,"self.unclaimed_taxable_benefits\n\n\n")
-        # print(self.non_taxable_earnings,"self.non_taxable_earnings\n\n\n")
-
-        # if self.custom_perquisite_amount:
-        #     self.annual_taxable_amount=self.total_earnings - (
-        #         self.non_taxable_earnings
-        #         + self.deductions_before_tax_calculation
-        #         + self.tax_exemption_declaration
-        #         + self.standard_tax_exemption_amount
-
-        #         ) + self.custom_perquisite_amount
-        # else:
-        #     self.annual_taxable_amount=self.total_earnings - (
-        #         self.non_taxable_earnings
-        #         + self.deductions_before_tax_calculation
-        #         + self.tax_exemption_declaration
-        #         + self.standard_tax_exemption_amount
-
-        #         )
-
-        if self.is_new():
-            self.add_reimbursement_taxable_new_doc()
-
         self.arrear_ytd()
         self.food_coupon()
         self.tax_calculation()
@@ -116,6 +84,248 @@ class CustomSalarySlip(SalarySlip):
         #         if earning.is_tax_applicable == 1:
         #             total_ctc_taxable_amount += earning.default_amount
         # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+
+    def on_cancel(self):
+        super().on_cancel()
+        self.delete_bonus_accruals()
+        self.delete_benefit_accruals()
+
+    def set_sub_period(self):
+        sub_period = get_period_factor(
+            self.employee,
+            self.start_date,
+            self.end_date,
+            self.payroll_frequency,
+            self.payroll_period,
+            joining_date=self.joining_date,
+            relieving_date=self.relieving_date,
+        )[1]
+
+        self.custom_month_count = sub_period - 1
+
+    def compute_income_tax_breakup(self):
+        self.standard_tax_exemption_amount = 0
+        self.tax_exemption_declaration = 0
+        self.deductions_before_tax_calculation = 0
+        self.custom_perquisite_amount = 0
+
+        self.non_taxable_earnings = self.compute_non_taxable_earnings()
+        self.ctc = self.compute_ctc()
+        self.income_from_other_sources = self.get_income_form_other_sources()
+        self.total_earnings = self.ctc + self.income_from_other_sources
+
+        # Fetch payroll period once
+        payroll_period = frappe.get_value(
+            "Payroll Period",
+            {"company": self.company, "name": self.payroll_period.name},
+            ["name", "start_date", "end_date"],
+            as_dict=True,
+        )
+
+        # If payroll period is not found, return without further processing
+        if not payroll_period:
+            return
+
+        # If payroll period is found, process further
+        start_date = frappe.utils.getdate(payroll_period["start_date"])
+        end_date = frappe.utils.getdate(payroll_period["end_date"])
+        fiscal_year = payroll_period["name"]
+
+        # Calculate loan perquisites within the fiscal year
+        loan_repayments = frappe.get_list(
+            "Loan Repayment Schedule",
+            filters={
+                "custom_employee": self.employee,
+                "status": "Active",
+                "docstatus": 1,
+            },
+            fields=["name"],
+        )
+
+        total_perq = 0
+        for repayment in loan_repayments:
+            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
+            for entry in repayment_doc.custom_loan_perquisite:
+                if (
+                    entry.payment_date
+                    and start_date
+                    <= frappe.utils.getdate(entry.payment_date)
+                    <= end_date
+                ):
+                    total_perq += entry.perquisite_amount
+        self.custom_perquisite_amount = total_perq
+
+        # Tax slab logic
+        if hasattr(self, "tax_slab") and self.tax_slab:
+            if self.tax_slab.allow_tax_exemption:
+                self.standard_tax_exemption_amount = (
+                    self.tax_slab.standard_tax_exemption_amount
+                )
+                self.deductions_before_tax_calculation = (
+                    self.compute_annual_deductions_before_tax_calculation()
+                )
+
+            self.tax_exemption_declaration = (
+                self.get_total_exemption_amount() - self.standard_tax_exemption_amount
+            )
+
+        # Final Taxable Income Calculation
+        self.annual_taxable_amount = (
+            self.total_earnings
+            + self.custom_perquisite_amount
+            - (
+                self.non_taxable_earnings
+                + self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
+            )
+        )
+
+    def check_sal_struct(self):
+        ss = frappe.qb.DocType("Salary Structure")
+        ssa = frappe.qb.DocType("Salary Structure Assignment")
+
+        query = (
+            frappe.qb.from_(ssa)
+            .join(ss)
+            .on(ssa.salary_structure == ss.name)
+            .select(
+                ssa.salary_structure,
+                ssa.custom_payroll_period,
+                ssa.name,
+                ssa.income_tax_slab,
+                ssa.custom_tax_regime,
+                ssa.custom_state,
+                ssa.base,
+            )
+            .where(
+                (ssa.docstatus == 1)
+                & (ss.docstatus == 1)
+                & (ss.is_active == "Yes")
+                & (ssa.employee == self.employee)
+                & (
+                    (ssa.from_date <= self.start_date)
+                    | (ssa.from_date <= self.end_date)
+                    | (ssa.from_date <= self.joining_date)
+                )
+            )
+            .orderby(ssa.from_date, order=Order.desc)
+            .limit(1)
+        )
+
+        if not self.salary_slip_based_on_timesheet and self.payroll_frequency:
+            query = query.where(ss.payroll_frequency == self.payroll_frequency)
+
+        st_name = query.run()
+
+        if st_name:
+            self.salary_structure = st_name[0][0]
+            self.custom_payroll_period = st_name[0][1]
+            self.custom_salary_structure_assignment = st_name[0][2]
+            self.custom_income_tax_slab = st_name[0][3]
+            self.custom_tax_regime = st_name[0][4]
+            self.custom_employee_state = st_name[0][5]
+            self.custom_annual_ctc = st_name[0][6]
+
+            return self.salary_structure
+
+        else:
+            self.salary_structure = None
+            frappe.msgprint(
+                _(
+                    "No active or default Salary Structure found for employee {0} for the given dates"
+                ).format(self.employee),
+                title=_("Salary Structure Missing"),
+            )
+
+    def delete_bonus_accruals(self):
+        bonus_accruals = frappe.get_list(
+            "Employee Bonus Accrual",
+            filters={
+                "salary_slip": self.name,
+                "payroll_entry": self.payroll_entry,
+                "payroll_period": self.custom_payroll_period,
+            },
+            fields=["name"],
+        )
+
+        if bonus_accruals:
+            for accrual in bonus_accruals:
+                bonus_doc = frappe.get_doc("Employee Bonus Accrual", accrual.name)
+                bonus_doc.delete()
+
+    def delete_benefit_accruals(self):
+        benefit_accruals = frappe.get_list(
+            "Employee Benefit Accrual",
+            filters={
+                "salary_slip": self.name,
+                "payroll_entry": self.payroll_entry,
+                "payroll_period": self.custom_payroll_period,
+            },
+            fields=["name"],
+        )
+        if benefit_accruals:
+            for accrual in benefit_accruals:
+                benefit_doc = frappe.get_doc("Employee Benefit Accrual", accrual.name)
+                benefit_doc.delete()
+
+    def employee_accrual_insert(self):
+        if self.custom_salary_structure_assignment:
+            child_doc = frappe.get_doc(
+                "Salary Structure Assignment", self.custom_salary_structure_assignment
+            )
+            if child_doc.custom_employee_reimbursements:
+                for i in child_doc.custom_employee_reimbursements:
+                    accrual_insert = frappe.get_doc(
+                        {
+                            "doctype": "Employee Benefit Accrual",
+                            "employee": self.employee,
+                            "payroll_entry": self.payroll_entry,
+                            "amount": round(
+                                (i.monthly_total_amount / self.total_working_days)
+                                * self.payment_days
+                            ),
+                            "salary_component": i.reimbursements,
+                            "benefit_accrual_date": self.posting_date,
+                            "salary_slip": self.name,
+                            "payroll_period": child_doc.custom_payroll_period,
+                        }
+                    )
+                    accrual_insert.insert()
+                    accrual_insert.submit()
+
+    def insert_bonus_accruals(self):
+        for bonus in self.earnings:
+            bonus_component = frappe.get_doc("Salary Component", bonus.salary_component)
+
+            if bonus_component.custom_is_accrual == 1:
+                existing_accruals = frappe.get_list(
+                    "Employee Bonus Accrual",
+                    filters={
+                        "salary_slip": self.name,
+                        "salary_component": bonus_component.name,
+                        "payroll_entry": self.payroll_entry,
+                        "payroll_period": self.custom_payroll_period,
+                    },
+                    limit=1,
+                )
+
+                if not existing_accruals:
+                    accrual_doc = frappe.new_doc("Employee Bonus Accrual")
+                    accrual_doc.amount = bonus.amount
+                    accrual_doc.employee = self.employee
+                    accrual_doc.accrual_date = self.posting_date
+                    accrual_doc.salary_structure = self.salary_structure
+                    accrual_doc.salary_structure_assignment = (
+                        self.custom_salary_structure_assignment
+                    )
+                    accrual_doc.salary_component = bonus.salary_component
+                    accrual_doc.payroll_entry = self.payroll_entry
+                    accrual_doc.salary_slip = self.name
+                    accrual_doc.payroll_period = self.custom_payroll_period
+
+                    accrual_doc.insert()
+                    accrual_doc.submit()
 
     def calculate_variable_tax(self, tax_component):
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
@@ -509,24 +719,24 @@ class CustomSalarySlip(SalarySlip):
 
         return flt(result[0][0]) if result else 0.0
 
-    def on_cancel(self):
-        get_benefit_accrual = frappe.db.get_list(
-            "Employee Benefit Accrual",
-            filters={
-                "salary_slip": self.name,
-                "employee": self.employee,
-                "docstatus": 1,
-            },
-            fields=["*"],
-        )
+    # def on_cancel(self):
+    #     get_benefit_accrual = frappe.db.get_list(
+    #         "Employee Benefit Accrual",
+    #         filters={
+    #             "salary_slip": self.name,
+    #             "employee": self.employee,
+    #             "docstatus": 1,
+    #         },
+    #         fields=["*"],
+    #     )
 
-        if len(get_benefit_accrual) > 0:
-            for j in get_benefit_accrual:
-                arrear_doc = frappe.get_doc("Employee Benefit Accrual", j.name)
-                arrear_doc.docstatus = 2
-                arrear_doc.save()
+    #     if len(get_benefit_accrual) > 0:
+    #         for j in get_benefit_accrual:
+    #             arrear_doc = frappe.get_doc("Employee Benefit Accrual", j.name)
+    #             arrear_doc.docstatus = 2
+    #             arrear_doc.save()
 
-                frappe.delete_doc("Employee Benefit Accrual", j.name)
+    #             frappe.delete_doc("Employee Benefit Accrual", j.name)
 
     def food_coupon(self):
         food_coupon_array = []
@@ -1152,17 +1362,40 @@ class CustomSalarySlip(SalarySlip):
                     k.custom_actual_amount = k.amount
 
     def actual_amount_ctc(self):
-        if len(self.earnings) > 0:
+        if self.earnings and self.payment_days and self.total_working_days:
             for k in self.earnings:
                 salary_component_doc = frappe.get_doc(
                     "Salary Component", k.salary_component
                 )
 
-                if salary_component_doc.custom_is_arrear == 0:
-                    nps_ctc = (k.amount * self.total_working_days) / self.payment_days
-                    k.custom_actual_amount = nps_ctc
+                if (
+                    salary_component_doc.custom_is_arrear == 0
+                    and salary_component_doc.depends_on_payment_days
+                ):
+                    if self.payment_days and self.payment_days > 0:
+                        k.custom_actual_amount = (
+                            k.amount * self.total_working_days
+                        ) / self.payment_days
+                    else:
+                        k.custom_actual_amount = 0
                 else:
-                    k.custom_actual_amount = 0
+                    k.custom_actual_amount = k.amount
+
+        if self.deductions and self.payment_days and self.total_working_days:
+            for deduction in self.deductions:
+                salary_component_doc = frappe.get_doc(
+                    "Salary Component", deduction.salary_component
+                )
+
+                if salary_component_doc.custom_is_arrear == 0:
+                    if self.payment_days and self.payment_days > 0:
+                        deduction.custom_actual_amount = (
+                            deduction.amount * self.total_working_days
+                        ) / self.payment_days
+                    else:
+                        deduction.custom_actual_amount = 0
+                else:
+                    deduction.custom_actual_amount = 0
 
     def accrual_update(self):
         if self.leave_without_pay > 0:
@@ -1820,38 +2053,38 @@ class CustomSalarySlip(SalarySlip):
                     },
                 )
 
-    def employee_accrual_insert(self):
-        if self.employee:
-            ss_assignment = frappe.get_list(
-                "Salary Structure Assignment",
-                filters={"employee": self.employee, "docstatus": 1},
-                fields=["name"],
-                order_by="from_date desc",
-                limit=1,
-            )
+    # def employee_accrual_insert(self):
+    #     if self.employee:
+    #         ss_assignment = frappe.get_list(
+    #             "Salary Structure Assignment",
+    #             filters={"employee": self.employee, "docstatus": 1},
+    #             fields=["name"],
+    #             order_by="from_date desc",
+    #             limit=1,
+    #         )
 
-            if ss_assignment:
-                child_doc = frappe.get_doc(
-                    "Salary Structure Assignment", ss_assignment[0].name
-                )
+    #         if ss_assignment:
+    #             child_doc = frappe.get_doc(
+    #                 "Salary Structure Assignment", ss_assignment[0].name
+    #             )
 
-                for i in child_doc.custom_employee_reimbursements:
-                    accrual_insert = frappe.get_doc(
-                        {
-                            "doctype": "Employee Benefit Accrual",
-                            "employee": self.employee,
-                            "payroll_entry": self.payroll_entry,
-                            "amount": round(
-                                (i.monthly_total_amount / self.total_working_days)
-                                * self.payment_days
-                            ),
-                            "salary_component": i.reimbursements,
-                            "benefit_accrual_date": self.posting_date,
-                            "salary_slip": self.name,
-                            "payroll_period": child_doc.custom_payroll_period,
-                        }
-                    )
-                    accrual_insert.insert()
+    #             for i in child_doc.custom_employee_reimbursements:
+    #                 accrual_insert = frappe.get_doc(
+    #                     {
+    #                         "doctype": "Employee Benefit Accrual",
+    #                         "employee": self.employee,
+    #                         "payroll_entry": self.payroll_entry,
+    #                         "amount": round(
+    #                             (i.monthly_total_amount / self.total_working_days)
+    #                             * self.payment_days
+    #                         ),
+    #                         "salary_component": i.reimbursements,
+    #                         "benefit_accrual_date": self.posting_date,
+    #                         "salary_slip": self.name,
+    #                         "payroll_period": child_doc.custom_payroll_period,
+    #                     }
+    #                 )
+    #                 accrual_insert.insert()
 
     def employee_accrual_submit(self):
         if self.employee:
@@ -1979,17 +2212,6 @@ class CustomSalarySlip(SalarySlip):
         )
         if latest_payroll_period:
             self.custom_payroll_period = latest_payroll_period[0].name
-
-        # if self.custom_tax_regime:
-
-        #     for earning in self.earnings:
-
-        #         if earning.custom_regime==self.custom_tax_regime and earning.is_tax_applicable==1:
-        #             earning.custom_taxable=1
-        #         if earning.custom_regime=="None" and earning.is_tax_applicable==1:
-        #             earning.custom_taxable=1
-        #         if earning.custom_regime=="None" and earning.is_tax_applicable==0:
-        #             earning.custom_taxable=0
 
     def add_employee_benefits(self):
         pass
