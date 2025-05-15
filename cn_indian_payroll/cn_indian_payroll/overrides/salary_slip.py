@@ -39,12 +39,12 @@ class CustomSalarySlip(SalarySlip):
         self.insert_bonus_accruals()
         self.employee_accrual_insert()
 
-    # def validate(self):
-    #     super().validate()
-    #     self.insert_other_perquisites()
+    def validate(self):
+        super().validate()
+        self.set_sub_period()
+        # self.insert_other_perquisites()
 
     def before_save(self):
-        self.set_sub_period()
         self.new_joinee()
         self.insert_lop_days()
         self.set_taxale()
