@@ -4,6 +4,8 @@ from frappe.query_builder.functions import Count, Sum
 import json
 from frappe.utils import flt
 
+import math
+
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
@@ -1152,17 +1154,40 @@ class CustomSalarySlip(SalarySlip):
                     k.custom_actual_amount = k.amount
 
     def actual_amount_ctc(self):
-        if len(self.earnings) > 0:
+        if self.earnings:
             for k in self.earnings:
-                salary_component_doc = frappe.get_doc(
-                    "Salary Component", k.salary_component
-                )
-
-                if salary_component_doc.custom_is_arrear == 0:
-                    nps_ctc = (k.amount * self.total_working_days) / self.payment_days
-                    k.custom_actual_amount = nps_ctc
+                if self.payment_days and self.payment_days > 0:
+                    k.custom_actual_amount = round(
+                        (k.amount * self.total_working_days) / self.payment_days
+                    )
                 else:
                     k.custom_actual_amount = 0
+
+        if self.deductions:
+            for deduction in self.deductions:
+                component_doc = frappe.get_doc(
+                    "Salary Component", deduction.salary_component
+                )
+                original_amount = float(deduction.amount or 0)
+
+                if self.payment_days and self.payment_days > 0:
+                    deduction.custom_actual_amount = round(
+                        (original_amount * self.total_working_days) / self.payment_days
+                    )
+                else:
+                    deduction.custom_actual_amount = 0
+
+                if component_doc.component_type == "ESIC":
+                    deduction.amount = math.ceil(original_amount)
+                else:
+                    deduction.amount = round(original_amount)
+
+        if self.total_deduction or self.total_loan_repayment:
+            self.custom_total_deduction_amount = (self.total_deduction or 0) + (
+                self.total_loan_repayment or 0
+            )
+        else:
+            self.custom_total_deduction_amount = 0
 
     def accrual_update(self):
         if self.leave_without_pay > 0:
