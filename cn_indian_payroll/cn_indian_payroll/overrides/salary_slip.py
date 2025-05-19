@@ -5,6 +5,7 @@ import json
 from frappe.utils import flt
 from frappe.query_builder import Order
 from frappe import _
+import math
 
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
@@ -112,19 +113,82 @@ class CustomSalarySlip(SalarySlip):
             "Salary Structure Assignment", self.custom_salary_structure_assignment
         )
 
-        if self.earnings:
-            for earning in self.earnings:
-                if ssa_doc.custom_employee_reimbursements:
-                    for reimbursement in ssa_doc.custom_employee_reimbursements:
-                        if reimbursement.reimbursements == earning.salary_component:
-                            if self.total_working_days and self.payment_days:
-                                prorated_amount = round(
-                                    (reimbursement.monthly_total_amount or 0)
-                                    / self.total_working_days
-                                    * (self.total_working_days - self.payment_days),
-                                    2,
-                                )
-                                earning.amount = earning.amount - prorated_amount
+        if not self.earnings:
+            return
+
+        for earning in self.earnings:
+            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+            # Step 1: Standard reimbursement-based LOP adjustment
+            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                if reimbursement.reimbursements == earning.salary_component:
+                    if self.total_working_days and self.payment_days:
+                        prorated_amount = round(
+                            (reimbursement.monthly_total_amount or 0)
+                            / self.total_working_days
+                            * (self.total_working_days - self.payment_days),
+                            2,
+                        )
+
+                        earning.amount -= prorated_amount
+
+            # Step 2: Handle special case for LTA reimbursement → apply to taxable/non-taxable LTA
+            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                lta_component = frappe.get_doc(
+                    "Salary Component", reimbursement.reimbursements
+                )
+                if lta_component.component_type == "LTA Reimbursement":
+                    if component.component_type in ["LTA Taxable", "LTA Non Taxable"]:
+                        if self.total_working_days and self.payment_days:
+                            prorated_amount = round(
+                                (reimbursement.monthly_total_amount or 0)
+                                / self.total_working_days
+                                * (self.total_working_days - self.payment_days),
+                                2,
+                            )
+                            earning.amount -= prorated_amount
+                    break
+
+    # def apply_lop_amount_in_reimbursement_component(self):
+    #     if not self.custom_salary_structure_assignment:
+    #         frappe.throw("Salary Structure Assignment not linked.")
+
+    #     ssa_doc = frappe.get_doc(
+    #         "Salary Structure Assignment", self.custom_salary_structure_assignment
+    #     )
+
+    #     if self.earnings:
+    #         for earning in self.earnings:
+    #             if ssa_doc.custom_employee_reimbursements:
+    #                 for reimbursement in ssa_doc.custom_employee_reimbursements:
+    #                     if reimbursement.reimbursements == earning.salary_component:
+    #                         if self.total_working_days and self.payment_days:
+    #                             prorated_amount = round(
+    #                                 (reimbursement.monthly_total_amount or 0)
+    #                                 / self.total_working_days
+    #                                 * (self.total_working_days - self.payment_days),
+    #                                 2,
+    #                             )
+    #                             earning.amount = earning.amount - prorated_amount
+
+    #                     get_lta=frappe.get_doc("Salary Component", earning.salary_component)
+    #                     if get_lta.component_type=="LTA Reimbursement":
+    #                         if self.total_working_days and self.payment_days:
+    #                             prorated_amount = round(
+    #                                 (get_lta.monthly_total_amount or 0)
+    #                                 / self.total_working_days
+    #                                 * (self.total_working_days - self.payment_days),
+    #                                 2,
+    #                             )
+
+    #                         get_lta_component= frappe.get_doc(
+    #                             "Salary Component", earning.salary_component
+    #                         )
+    #                         if get_lta_component.component_type == "LTA Taxable":
+
+    #                                 earning.amount = earning.amount - prorated_amount
+    #                         elif get_lta_component.component_type == "LTA Non Taxable":
+    #                                 earning.amount = earning.amount - prorated_amount
 
     def compute_income_tax_breakup(self):
         self.standard_tax_exemption_amount = 0
@@ -1385,40 +1449,40 @@ class CustomSalarySlip(SalarySlip):
                     k.custom_actual_amount = k.amount
 
     def actual_amount_ctc(self):
-        if self.earnings and self.payment_days and self.total_working_days:
+        if self.earnings:
             for k in self.earnings:
-                salary_component_doc = frappe.get_doc(
-                    "Salary Component", k.salary_component
-                )
-
-                if (
-                    salary_component_doc.custom_is_arrear == 0
-                    and salary_component_doc.depends_on_payment_days
-                ):
-                    if self.payment_days and self.payment_days > 0:
-                        k.custom_actual_amount = (
-                            k.amount * self.total_working_days
-                        ) / self.payment_days
-                    else:
-                        k.custom_actual_amount = 0
+                if self.payment_days and self.payment_days > 0:
+                    k.custom_actual_amount = round(
+                        (k.amount * self.total_working_days) / self.payment_days
+                    )
                 else:
-                    k.custom_actual_amount = k.amount
+                    k.custom_actual_amount = 0
 
-        if self.deductions and self.payment_days and self.total_working_days:
+        if self.deductions:
             for deduction in self.deductions:
-                salary_component_doc = frappe.get_doc(
+                component_doc = frappe.get_doc(
                     "Salary Component", deduction.salary_component
                 )
+                original_amount = float(deduction.amount or 0)
 
-                if salary_component_doc.custom_is_arrear == 0:
-                    if self.payment_days and self.payment_days > 0:
-                        deduction.custom_actual_amount = (
-                            deduction.amount * self.total_working_days
-                        ) / self.payment_days
-                    else:
-                        deduction.custom_actual_amount = 0
+                if self.payment_days and self.payment_days > 0:
+                    deduction.custom_actual_amount = round(
+                        (original_amount * self.total_working_days) / self.payment_days
+                    )
                 else:
                     deduction.custom_actual_amount = 0
+
+                if component_doc.component_type == "ESIC":
+                    deduction.amount = math.ceil(original_amount)
+                else:
+                    deduction.amount = round(original_amount)
+
+        if self.total_deduction or self.total_loan_repayment:
+            self.custom_total_deduction_amount = (self.total_deduction or 0) + (
+                self.total_loan_repayment or 0
+            )
+        else:
+            self.custom_total_deduction_amount = 0
 
     def accrual_update(self):
         if self.leave_without_pay > 0:

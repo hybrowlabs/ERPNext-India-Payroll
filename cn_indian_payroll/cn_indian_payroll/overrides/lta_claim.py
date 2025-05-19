@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import getdate
 
 
 def on_submit(self, method):
@@ -108,3 +109,87 @@ def insert_additional_salary(self):
         additional_salary.ref_docname = self.name
         additional_salary.insert()
         additional_salary.submit()
+
+
+@frappe.whitelist()
+def get_max_amount(doc):
+    doc = frappe.get_doc(frappe.parse_json(doc))
+
+    # Get latest Salary Structure Assignment
+    get_ssa = frappe.get_list(
+        "Salary Structure Assignment",
+        filters={
+            "employee": doc.employee,
+            "docstatus": 1,
+            "from_date": ["<=", doc.claim_date],
+        },
+        fields=["name", "custom_payroll_period"],
+        order_by="from_date desc",
+        limit=1,
+    )
+
+    if not get_ssa:
+        return {"max_amount": 0, "payroll_period": None}
+
+    ssa_doc = frappe.get_doc("Salary Structure Assignment", get_ssa[0].name)
+    payroll_period = get_ssa[0].custom_payroll_period
+
+    if not payroll_period:
+        return {"max_amount": 0, "payroll_period": None}
+
+    if ssa_doc.custom_employee_reimbursements:
+        for component in ssa_doc.custom_employee_reimbursements:
+            get_lta_component = frappe.get_doc(
+                "Salary Component", component.reimbursements
+            )
+
+            if get_lta_component.component_type == "LTA Reimbursement":
+                eligible_amount = component.monthly_total_amount or 0
+
+                # Claimed total
+                claims = frappe.get_all(
+                    "LTA Claim",
+                    filters={
+                        "employee": doc.employee,
+                        "docstatus": 1,
+                        "payroll_period": payroll_period,
+                    },
+                    fields=["amount"],
+                )
+                claimed_total = sum([row.amount for row in claims])
+
+                # Accrued total
+                accruals = frappe.get_all(
+                    "Employee Benefit Accrual",
+                    filters={
+                        "employee": doc.employee,
+                        "salary_component": get_lta_component.name,
+                        "docstatus": 1,
+                        "payroll_period": payroll_period,
+                    },
+                    fields=["amount"],
+                )
+                accrued_total = sum([row.amount for row in accruals])
+                accrued_months = len(accruals)
+
+                # Get effective start date
+                payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
+                start_date = getdate(payroll_doc.start_date)
+                end_date = getdate(payroll_doc.end_date)
+                from_date = getdate(ssa_doc.from_date)
+                effective_start_date = max(start_date, from_date)
+
+                # Total months in payroll period
+                year_diff = end_date.year - effective_start_date.year
+                month_diff = end_date.month - effective_start_date.month
+                total_months = (year_diff * 12 + month_diff) + 1
+
+                # Calculate future eligible amount
+                future_eligible = (total_months - accrued_months) * eligible_amount
+
+                # Final Max Amount = Accrued + Future Eligible - Already Claimed
+                max_amount = (accrued_total + future_eligible) - claimed_total
+
+                return {"max_amount": max_amount, "payroll_period": payroll_period}
+
+    return {"max_amount": 0, "payroll_period": payroll_period}

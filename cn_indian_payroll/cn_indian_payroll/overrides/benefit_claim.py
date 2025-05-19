@@ -174,6 +174,7 @@ def get_max_amount(doc):
                     fields=["amount"],
                 )
                 accrued_total = sum([row.amount for row in accruals])
+                accrued_months = len(accruals)
 
                 payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
                 start_date = getdate(payroll_doc.start_date)
@@ -182,16 +183,16 @@ def get_max_amount(doc):
 
                 effective_start_date = max(start_date, from_date)
 
-                # Calculate number of months including the start month
+                # Calculate total number of months including start and end month
                 year_diff = end_date.year - effective_start_date.year
                 month_diff = end_date.month - effective_start_date.month
                 total_months = (year_diff * 12 + month_diff) + 1
 
-                future_amount = total_months * eligible_amount
+                # Calculate future eligible (remaining) months
+                future_eligible = (total_months - accrued_months) * eligible_amount
 
-                max_amount = (
-                    future_amount - (accrued_total + claimed_total) + eligible_amount
-                )
+                # Final max amount = accrued + future - claimed
+                max_amount = (accrued_total + future_eligible) - claimed_total
 
                 return max_amount
 
