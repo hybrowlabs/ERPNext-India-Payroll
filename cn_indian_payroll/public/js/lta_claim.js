@@ -3,15 +3,6 @@
 frappe.ui.form.on('LTA Claim', {
     refresh(frm) {
 
-                    // frm.set_query('employee', function() {
-                    //     return {
-                    //         filters: {
-                    //             "custom_lta_applicable":1
-                    //         }
-                    //     };
-                    // });
-
-
 
 
     },

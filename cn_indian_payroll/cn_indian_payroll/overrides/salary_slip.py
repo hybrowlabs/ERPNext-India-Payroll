@@ -43,6 +43,7 @@ class CustomSalarySlip(SalarySlip):
         super().validate()
         self.set_sub_period()
         # self.insert_other_perquisites()
+        self.apply_lop_amount_in_reimbursement_component()
 
     def before_save(self):
         self.new_joinee()
@@ -51,14 +52,14 @@ class CustomSalarySlip(SalarySlip):
         self.actual_amount_ctc()
         self.set_month()
 
-        if self.leave_without_pay > 0:
-            # self.insert_lta_reimbursement_lop()
-            self.accrual_update()
-            self.driver_reimbursement_lop()
-        if self.leave_without_pay == 0:
-            self.insert_lta_reimbursement()
-            self.insert_reimbursement()
-            self.driver_reimbursement()
+        # if self.leave_without_pay > 0:
+        #     # self.insert_lta_reimbursement_lop()
+        #     self.accrual_update()
+        #     self.driver_reimbursement_lop()
+        # if self.leave_without_pay == 0:
+        #     self.insert_lta_reimbursement()
+        #     self.insert_reimbursement()
+        #     self.driver_reimbursement()
 
         self.update_declaration_component()
         self.update_total_lop()
@@ -78,12 +79,12 @@ class CustomSalarySlip(SalarySlip):
             self.future_structured_taxable_earnings_before_exemption
         )
         self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
-        # if self.earnings:
-        #     total_ctc_taxable_amount = 0
-        #     for earning in self.earnings:
-        #         if earning.is_tax_applicable == 1:
-        #             total_ctc_taxable_amount += earning.default_amount
-        # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        if self.earnings:
+            total_ctc_taxable_amount = 0
+            for earning in self.earnings:
+                if earning.is_tax_applicable == 1:
+                    total_ctc_taxable_amount += earning.default_amount
+            self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
     def on_cancel(self):
         super().on_cancel()
@@ -102,6 +103,28 @@ class CustomSalarySlip(SalarySlip):
         )[1]
 
         self.custom_month_count = sub_period - 1
+
+    def apply_lop_amount_in_reimbursement_component(self):
+        if not self.custom_salary_structure_assignment:
+            frappe.throw("Salary Structure Assignment not linked.")
+
+        ssa_doc = frappe.get_doc(
+            "Salary Structure Assignment", self.custom_salary_structure_assignment
+        )
+
+        if self.earnings:
+            for earning in self.earnings:
+                if ssa_doc.custom_employee_reimbursements:
+                    for reimbursement in ssa_doc.custom_employee_reimbursements:
+                        if reimbursement.reimbursements == earning.salary_component:
+                            if self.total_working_days and self.payment_days:
+                                prorated_amount = round(
+                                    (reimbursement.monthly_total_amount or 0)
+                                    / self.total_working_days
+                                    * (self.total_working_days - self.payment_days),
+                                    2,
+                                )
+                                earning.amount = earning.amount - prorated_amount
 
     def compute_income_tax_breakup(self):
         self.standard_tax_exemption_amount = 0
@@ -1534,18 +1557,18 @@ class CustomSalarySlip(SalarySlip):
                     if earnings.salary_component == component_data["component"]:
                         earnings.amount = component_data["total_amount"]
 
-    def compute_ctc(self):
-        if hasattr(self, "previous_taxable_earnings"):
-            return (
-                self.previous_taxable_earnings_before_exemption
-                + self.current_structured_taxable_earnings_before_exemption
-                + self.future_structured_taxable_earnings_before_exemption
-                + self.current_additional_earnings
-                + self.other_incomes
-                + self.unclaimed_taxable_benefits
-                + self.non_taxable_earnings
-            )
-        return 0
+    # def compute_ctc(self):
+    #     if hasattr(self, "previous_taxable_earnings"):
+    #         return (
+    #             self.previous_taxable_earnings_before_exemption
+    #             + self.current_structured_taxable_earnings_before_exemption
+    #             + self.future_structured_taxable_earnings_before_exemption
+    #             + self.current_additional_earnings
+    #             + self.other_incomes
+    #             + self.unclaimed_taxable_benefits
+    #             + self.non_taxable_earnings
+    #         )
+    #     return 0
 
     def insert_lop_days(self):
         benefit_application_days = frappe.get_list(
@@ -2213,8 +2236,8 @@ class CustomSalarySlip(SalarySlip):
         if latest_payroll_period:
             self.custom_payroll_period = latest_payroll_period[0].name
 
-    def add_employee_benefits(self):
-        pass
+    # def add_employee_benefits(self):
+    #     pass
 
     def tax_calculation(self):
         latest_salary_structure = frappe.get_list(
