@@ -117,7 +117,7 @@ class CustomSalarySlip(SalarySlip):
     #                     get_benefit_doc=frappe.get_doc(
     #                         "Employee Benefit Claim", additional_salary.ref_docname
     #                     )
-    #                     if get_benefit_doc.claimed_amount:
+    #                     get_benefit_doc.is_paid=1
 
     def apply_lop_amount_in_reimbursement_component(self):
         if not self.custom_salary_structure_assignment:
