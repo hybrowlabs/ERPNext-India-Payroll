@@ -234,8 +234,8 @@ fixtures = [
     {"dt":"Income Tax Regime"},
     {"dt": "Report", "filters": {"name": "Salary Slip Registers"}},
     {"dt":"Translation","filters":{"name":"Reimbursement Claim"}},
-    {"dt":"Workflow","filters":{"name":"declaration Approve"}},
-    {"dt":"Workflow State"},
+    # {"dt":"Workflow","filters":{"name":"declaration Approve"}},
+    # {"dt":"Workflow State"},
 
 
     # {"dt":"Employee Tax Exemption Sub Category"},
@@ -261,6 +261,7 @@ doctype_js = {
     "Employee Promotion": "public/js/employee_promotion.js",
     "Salary Component": "public/js/salary_component.js",
     "Structure Setting": "public/js/structure_setting.js",
+    "Employee Tax Exemption Proof Submission": "public/js/proof_submission.js",
 
 }
 
