@@ -39,6 +39,7 @@ class CustomSalarySlip(SalarySlip):
         super().on_submit()
         self.insert_bonus_accruals()
         self.employee_accrual_insert()
+        # self.update_benefit_claim_amount()
 
     def validate(self):
         super().validate()
@@ -104,6 +105,19 @@ class CustomSalarySlip(SalarySlip):
         )[1]
 
         self.custom_month_count = sub_period - 1
+
+    # def update_benefit_claim_amount(self):
+    #     if self.earnings:
+    #         for earning in self.earnings:
+    #             if earning.additional_salary:
+    #                 additional_salary = frappe.get_doc(
+    #                     "Additional Salary", earning.additional_salary
+    #                 )
+    #                 if additional_salary.ref_doctype=="Employee Benefit Claim" and additional_salary.ref_docname:
+    #                     get_benefit_doc=frappe.get_doc(
+    #                         "Employee Benefit Claim", additional_salary.ref_docname
+    #                     )
+    #                     if get_benefit_doc.claimed_amount:
 
     def apply_lop_amount_in_reimbursement_component(self):
         if not self.custom_salary_structure_assignment:
