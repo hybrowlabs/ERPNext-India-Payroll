@@ -794,11 +794,11 @@ class CustomSalarySlip(SalarySlip):
 
 
                         for ki in update_component_array:
-                            if ki['component']=="NPS Contribution by Employer":
+                            if ki['component']=="NPS Deduction U/S 80CCD(2)(Employer NPS deduction)":
                                 form_data['nineNumber'] = round(ki['amount'])
 
 
-                            if ki['component']=="Employee Provident Fund (Auto)":
+                            if ki['component']=="Investments In PF(Auto)":
                                 form_data['pfValue'] = round(ki['amount'])
 
 
