@@ -142,7 +142,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             if self.custom_tax_regime == "Old Regime":
                 for deduction in salary_slip.deductions:
                     comp_doc = frappe.get_doc("Salary Component", deduction.salary_component)
-                    if comp_doc.component_type in ["Provident Fund", "Professional Tax"]:
+                    if comp_doc.component_type in ["EPF", "Professional Tax"]:
                         add_exemption(comp_doc.component_type, deduction.amount)
 
         existing_declaration = frappe.get_list(

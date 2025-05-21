@@ -2,7 +2,8 @@ import frappe
 import datetime
 from frappe.query_builder.functions import Count, Sum
 import json
-
+import math
+from datetime import datetime, timedelta
 
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
@@ -664,7 +665,7 @@ class CustomSalarySlip(SalarySlip):
         if self.deductions:
             for deduction in self.deductions:
                 component_type = salary_components.get(deduction.salary_component)
-                if component_type == "Provident Fund":
+                if component_type == "EPF":
                     current_epf_value = deduction.amount
                     future_epf_value = (deduction.custom_actual_amount)*(self.custom_month_count)
                 if component_type == "Professional Tax":
@@ -696,7 +697,7 @@ class CustomSalarySlip(SalarySlip):
                     if previous_salary_slip.deductions:
                         for deduction in previous_salary_slip.deductions:
                             component_type = salary_components.get(deduction.salary_component)
-                            if component_type == "Provident Fund":
+                            if component_type == "EPF":
                                 previous_epf_value += deduction.amount
                             if component_type == "Professional Tax":
                                 previous_pt_value += deduction.amount
@@ -1055,27 +1056,34 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def actual_amount(self):
-        if self.leave_without_pay==0:
-            if len(self.earnings)>0:
-                for k in self.earnings:
-                    k.custom_actual_amount=k.amount
-
-
     def actual_amount_ctc(self):
-        if len(self.earnings) > 0:
+        if self.earnings:
             for k in self.earnings:
-                salary_component_doc = frappe.get_doc("Salary Component", k.salary_component)
-
-                if salary_component_doc.custom_is_arrear == 0:
-                    # Check if self.payment_days is zero to avoid division by zero
-                    if self.payment_days == 0:
-                        frappe.throw("Payment days cannot be zero. Please check the payroll setup.")
-
-                    nps_ctc = (k.amount * self.total_working_days) / self.payment_days
-                    k.custom_actual_amount = nps_ctc
+                if self.payment_days and self.payment_days > 0:
+                    k.custom_actual_amount = round((k.amount * self.total_working_days) / self.payment_days)
                 else:
                     k.custom_actual_amount = 0
+
+        if self.deductions:
+            for deduction in self.deductions:
+                component_doc = frappe.get_doc("Salary Component", deduction.salary_component)
+                original_amount = float(deduction.amount or 0)
+
+                if self.payment_days and self.payment_days > 0:
+                    deduction.custom_actual_amount = round((original_amount * self.total_working_days) / self.payment_days)
+                else:
+                    deduction.custom_actual_amount = 0
+
+                if component_doc.component_type == "ESIC":
+                    deduction.amount = math.ceil(original_amount)
+                else:
+                    deduction.amount = round(original_amount)
+
+
+        # if self.total_deduction or self.total_loan_repayment:
+        #     self.custom_total_deduction_amount = (self.total_deduction or 0) + (self.total_loan_repayment or 0)
+        # else:
+        #     self.custom_total_deduction_amount = 0
 
 
 
