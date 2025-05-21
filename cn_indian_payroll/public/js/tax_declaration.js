@@ -4591,7 +4591,7 @@ function tds_projection_html(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings(${periodText})</td>
+                              <td>Current Taxable Earnings</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
