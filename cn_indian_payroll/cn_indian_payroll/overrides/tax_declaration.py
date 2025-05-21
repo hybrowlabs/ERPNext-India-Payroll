@@ -245,7 +245,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def update_hra_breakup(self):
         if self.monthly_house_rent:
-            if self.workflow_state in ["Approved"]:
+            if self.custom_status in ["Approved"]:
                 array = []
                 for t1 in self.custom_hra_breakup:
                     array.append(
@@ -298,7 +298,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     frappe.db.commit()
 
     def update_tax_declaration(self):
-        if self.workflow_state in ["Approved"]:
+        if self.custom_status in ["Approved"]:
             if len(self.declarations) > 0:
                 tax_component = []
                 for component in self.declarations:
@@ -643,7 +643,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def process_form_data(self):
         if self.custom_tax_regime == "Old Regime":
-            if self.workflow_state in ["Approved", "Pending"]:
+            if self.custom_status in ["Approved", "Pending"]:
                 form_data = json.loads(self.custom_declaration_form_data or "{}")
 
                 # Extract numbers from the form data
@@ -848,7 +848,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     self.append("declarations", row)
 
         if self.custom_tax_regime == "New Regime":
-            if self.workflow_state in ["Approved", "Pending"]:
+            if self.custom_status in ["Approved", "Pending"]:
                 form_data = json.loads(self.custom_declaration_form_data or "{}")
 
                 # Extract numbers from the form data
