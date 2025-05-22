@@ -140,9 +140,9 @@ def get_max_amount(doc):
                     "docstatus": 1,
                     "custom_payroll_period": payroll_period,
                 },
-                fields=["claimed_amount"],
+                fields=["*"],
             )
-            claimed_total = sum([row.claimed_amount for row in claims])
+            claimed_total = sum([row.custom_paid_amount for row in claims])
 
             # For non-Vehicle Maintenance components
             if salary_component.component_type != "Vehicle Maintenance Reimbursement":
@@ -158,7 +158,7 @@ def get_max_amount(doc):
                 )
                 accrued_total = sum([row.amount for row in accruals])
 
-                max_amount = (accrued_total + eligible_amount) - claimed_total
+                max_amount = round((accrued_total + eligible_amount) - claimed_total)
 
                 return max_amount
 
@@ -192,7 +192,7 @@ def get_max_amount(doc):
                 future_eligible = (total_months - accrued_months) * eligible_amount
 
                 # Final max amount = accrued + future - claimed
-                max_amount = (accrued_total + future_eligible) - claimed_total
+                max_amount = round((accrued_total + future_eligible) - claimed_total)
 
                 return max_amount
 
