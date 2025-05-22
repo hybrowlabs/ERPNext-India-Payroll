@@ -18,7 +18,7 @@ frappe.ui.form.on('Full and Final Statement', {
             // get_tax(frm)
             // // get_leave_encashment(frm)
 
-            get_bonus(frm)
+            get_accrued_components(frm)
 
 
 
@@ -62,11 +62,11 @@ frappe.ui.form.on('Leave Encashment Child', {
 
 
 
-function get_bonus(frm) {
+function get_accrued_components(frm) {
     if (!frm.doc.employee) return;
 
     frappe.call({
-        method: "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.get_bonus",
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.get_accrued_components",
         args: {
             employee: frm.doc.employee,
             company: frm.doc.company,
@@ -74,15 +74,12 @@ function get_bonus(frm) {
         },
         callback: function (response) {
             frm.clear_table('custom_accrued_benefit');
-
-
-            let settled_components = [];
-            let bonus_accrued_component=[];
-
+            frm.clear_table('custom_accrued_component_summary');
 
             if (response.message) {
                 const bonusList = response.message.bonus_list || [];
                 const reimbursementList = response.message.reimbursement_list || [];
+                const final_arrayList = response.message.final_array || [];
 
                 // Add bonus entries
                 bonusList.forEach(row => {
@@ -92,13 +89,6 @@ function get_bonus(frm) {
                     child.salary_slip_id = row.salary_slip_id;
                     child.salary_component = row.salary_component;
                     child.accrued_amount = row.accrued_amount;
-
-                    if (row.accrued_amount > 0) {
-                        bonus_accrued_component.push({
-                            component: row.salary_component,
-                            amount: row.accrued_amount
-                        });
-                    }
                 });
 
                 // Add reimbursement entries
@@ -110,27 +100,73 @@ function get_bonus(frm) {
                     child.salary_component = row.salary_component;
                     child.accrued_amount = row.accrued_amount;
                     child.claimed_amount = row.claimed_amount;
-
-
-                    if (row.claimed_amount > 0) {
-                        settled_components.push({
-                            component: row.salary_component,
-                            amount: row.claimed_amount
-                        });
-                    }
                 });
+
+                // Process final array and update payables
+                final_arrayList.forEach(row => {
+                    if (row.balance_amount > 0) {
+                        frappe.call({
+                            method: "frappe.client.get",
+                            args: {
+                                doctype: "Salary Component",
+                                name: row.component
+                            },
+                            callback: function (res) {
+                                if (res.message) {
+                                    const component = res.message;
+
+                                    if (
+                                        component.custom_is_accrual === 1 &&
+                                        component.custom_paidout_component
+                                    ) {
+
+                                        console.log(component.custom_paidout_component)
+                                        frm.doc.payables.forEach(v => {
+                                            if (v.custom_reference_component === component.custom_paidout_component) {
+                                                v.amount = row.balance_amount;
+                                            }
+                                        });
+                                        frm.refresh_field('payables');
+                                    }
+                                }
+                            }
+                        });
+
+                        frm.doc.payables.forEach(v => {
+                            if (v.custom_reference_component === row.component) {
+                                v.amount = row.balance_amount;
+                            }
+                        });
+                        frm.refresh_field('payables');
+                    }
+
+                    // if (row.balance_amount <= 0) {
+                    //     frm.doc.receivables.forEach(v => {
+                    //         if (v.custom_reference_component === row.component) {
+                    //             v.amount = row.balance_amount;
+                    //         }
+                    //     });
+                    //     frm.refresh_field('receivables');
+
+                    // }
+
+                    // Always add component summary
+                    const child = frm.add_child('custom_accrued_component_summary');
+                    child.salary_component = row.component;
+                    child.total_accrued_amount = row.accrued_amount;
+                    child.total_settled_amount = row.claimed_amount;
+                    child.balance_amount = row.balance_amount;
+                });
+
+                frm.refresh_field('custom_accrued_component_summary');
+
             }
 
             frm.refresh_field('custom_accrued_benefit');
-
-            // frappe.msgprint(`Total Accrued Amount: ₹${total_accrued_amount.toFixed(2)}`);
-
-            console.log("Settled Components:", settled_components);
-            console.log("Total Accrued Amount:", bonus_accrued_component);
+            frm.refresh_field('custom_accrued_component_summary');
         }
     });
 }
-
 
 
 

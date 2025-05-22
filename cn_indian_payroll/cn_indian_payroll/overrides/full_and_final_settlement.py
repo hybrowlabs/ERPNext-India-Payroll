@@ -72,10 +72,28 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
     def create_component_row(self, components, component_type):
         pass
 
+    def on_submit(self):
+        if self.payables:
+            for payable in self.payables:
+                if payable.amount > 0 and payable.custom_reference_component:
+                    additional_salary = frappe.get_doc(
+                        {
+                            "doctype": "Additional Salary",
+                            "employee": self.employee,
+                            "amount": payable.amount,
+                            "salary_component": payable.custom_reference_component,
+                            "company": self.company,
+                            "payroll_date": self.transaction_date,
+                        }
+                    )
+                    additional_salary.insert()
+                    additional_salary.submit()
+
 
 @frappe.whitelist()
-def get_bonus(employee, company, relieving_date):
+def get_accrued_components(employee, company, relieving_date):
     from frappe.utils import getdate, flt
+    from collections import defaultdict
 
     relieving_date = getdate(relieving_date)
     bonus_list = []
@@ -116,7 +134,7 @@ def get_bonus(employee, company, relieving_date):
         filters={
             "employee": employee,
             "status": "Withheld",
-            "docstatus": ("!=", 2),
+            "docstatus": 0,
         },
         fields=["name"],
     )
@@ -124,7 +142,7 @@ def get_bonus(employee, company, relieving_date):
     for slip in salary_slips:
         salary_slip_doc = frappe.get_doc("Salary Slip", slip.name)
 
-        # Add accrual earnings from the slip
+        # Get accrual-type earnings
         for earning in salary_slip_doc.earnings:
             salary_component_doc = frappe.get_doc(
                 "Salary Component", earning.salary_component
@@ -140,73 +158,97 @@ def get_bonus(employee, company, relieving_date):
                     }
                 )
 
-        # Reimbursements from employee benefits accrual and structure assignment
-        if salary_slip_doc.custom_salary_structure_assignment:
-            structure_assignment = frappe.get_doc(
-                "Salary Structure Assignment",
-                salary_slip_doc.custom_salary_structure_assignment,
+        structure_assignment = frappe.get_doc(
+            "Salary Structure Assignment",
+            salary_slip_doc.custom_salary_structure_assignment,
+        )
+
+        payroll_period = structure_assignment.custom_payroll_period
+
+        if payroll_period:
+            accruals = frappe.get_all(
+                "Employee Benefit Accrual",
+                filters={
+                    "employee": employee,
+                    "docstatus": ["in", [0, 1]],
+                    "payroll_period": payroll_period,
+                },
+                fields=["*"],
             )
 
-            payroll_period = structure_assignment.custom_payroll_period
-
-            if payroll_period:
-                reimbursement_components = frappe.get_all(
-                    "Salary Component",
-                    filters={
-                        "type": "Earning",
-                        "custom_is_reimbursement": 1,
-                        "disabled": 0,
-                    },
-                    fields=["name"],
+            for accrual in accruals:
+                reimbursement_list.append(
+                    {
+                        "date": accrual.benefit_accrual_date,
+                        "payment_days": accrual.payment_days,
+                        "salary_slip_id": accrual.salary_slip,
+                        "salary_component": accrual.salary_component,
+                        "accrued_amount": flt(accrual.amount),
+                    }
                 )
 
-                for comp in reimbursement_components:
-                    accruals = frappe.get_all(
-                        "Employee Benefit Accrual",
-                        filters={
-                            "employee": employee,
-                            "docstatus": ["in", [0, 1]],
-                            "payroll_period": payroll_period,
-                            "salary_component": comp.name,
-                        },
-                        fields=["*"],
+        # Reimbursements from custom_employee_reimbursements
+        if structure_assignment.custom_employee_reimbursements:
+            for component in structure_assignment.custom_employee_reimbursements:
+                if component.reimbursements:
+                    daily_amount = 0
+                    if salary_slip_doc.total_working_days:
+                        daily_amount = (
+                            flt(component.monthly_total_amount)
+                            / salary_slip_doc.total_working_days
+                        )
+
+                    reimbursement_list.append(
+                        {
+                            "date": salary_slip_doc.posting_date,
+                            "payment_days": salary_slip_doc.payment_days,
+                            "salary_slip_id": salary_slip_doc.name,
+                            "salary_component": component.reimbursements,
+                            "accrued_amount": round(flt(daily_amount))
+                            * salary_slip_doc.payment_days,
+                        }
                     )
 
-                    for accrual in accruals:
-                        reimbursement_list.append(
-                            {
-                                "date": accrual.benefit_accrual_date,
-                                "payment_days": accrual.payment_days,
-                                "salary_slip_id": accrual.salary_slip,
-                                "salary_component": accrual.salary_component,
-                                "accrued_amount": flt(accrual.amount),
-                            }
-                        )
+    # Aggregate accrued_amount by salary_component
+    component_totals = defaultdict(float)
+    for item in bonus_list + reimbursement_list:
+        component_totals[item["salary_component"]] += item["accrued_amount"]
 
-            # Reimbursements from custom_employee_reimbursements
-            if structure_assignment.custom_employee_reimbursements:
-                for component in structure_assignment.custom_employee_reimbursements:
-                    if component.reimbursements:
-                        # Avoid divide by zero
-                        daily_amount = 0
-                        if salary_slip_doc.total_working_days:
-                            daily_amount = (
-                                flt(component.monthly_total_amount)
-                                / salary_slip_doc.total_working_days
-                            )
+    # Prepare final array
+    final_array = []
 
-                        reimbursement_list.append(
-                            {
-                                "date": salary_slip_doc.posting_date,
-                                "payment_days": salary_slip_doc.payment_days,
-                                "salary_slip_id": salary_slip_doc.name,
-                                "salary_component": component.reimbursements,
-                                "accrued_amount": flt(daily_amount)
-                                * salary_slip_doc.payment_days,
-                            }
-                        )
+    for component, amount in component_totals.items():
+        # Get the total claimed amount for this component
+        benefit_claims = frappe.get_all(
+            "Employee Benefit Claim",
+            filters={
+                "employee": employee,
+                "custom_payroll_period": payroll_period,
+                "docstatus": 1,
+                "company": company,
+                "earning_component": component,
+            },
+            fields=["custom_paid_amount"],
+        )
 
-    return {"bonus_list": bonus_list, "reimbursement_list": reimbursement_list}
+        # Sum up the claimed amounts
+        claimed_amount = sum(flt(claim.custom_paid_amount) for claim in benefit_claims)
+
+        # Append the final result
+        final_array.append(
+            {
+                "component": component,
+                "accrued_amount": round(amount, 2),
+                "claimed_amount": round(claimed_amount, 2),
+                "balance_amount": round(amount - claimed_amount),
+            }
+        )
+
+    return {
+        "bonus_list": bonus_list,
+        "reimbursement_list": reimbursement_list,
+        "final_array": final_array,
+    }
 
 
 # def before_save(self,method):
@@ -233,19 +275,3 @@ def get_bonus(employee, company, relieving_date):
 #     for payable in self.payables:
 #         if payable.component == "Leave Encashment":
 #             payable.amount = round(locked_leave + calculated_leave)
-
-
-# def on_submit(self, method):
-#     if self.payables:
-#         for payable in self.payables:
-#             additional_salary = frappe.get_doc(
-#                 {
-#                     "doctype": "Additional Salary",
-#                     "employee": self.employee,
-#                     "amount": payable.amount,
-#                     "salary_component": payable.component,
-#                     "company": self.company,
-#                     "payroll_date": self.transaction_date,
-#                 }
-#             )
-#             additional_salary.insert()
