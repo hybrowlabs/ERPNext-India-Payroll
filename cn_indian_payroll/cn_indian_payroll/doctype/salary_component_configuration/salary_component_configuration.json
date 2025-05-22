@@ -47,6 +47,7 @@
    "columns": 2,
    "fieldname": "salary_component",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Salary Component"
   },
   {
@@ -65,6 +66,7 @@
    "columns": 1,
    "fieldname": "abbr",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Abbr",
    "mandatory_depends_on": "salary_component"
   },
@@ -72,7 +74,8 @@
    "columns": 1,
    "fieldname": "component_type",
    "fieldtype": "Select",
-   "label": "Component Type",
+   "in_list_view": 1,
+   "label": "Type",
    "mandatory_depends_on": "salary_component",
    "options": "Earning\nDeduction"
   },
@@ -219,23 +222,28 @@
   },
   {
    "default": "0",
+   "description": "It will decide whether the abbr and component name field is read-only or editable. If multi select is checked, we can edit the abbrevation and component name",
    "fieldname": "multi_select",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Multi Select"
   },
   {
+   "description": "It will decide whether the field's formula and condition are read-only or editable. If not fixed, we can edit the formula and condition",
    "fieldname": "type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Type",
    "options": "Fixed\nNot Fixed"
   },
   {
    "fieldname": "special_type",
    "fieldtype": "Select",
-   "label": "Special Type",
-   "options": "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax\nLoan Perquisite\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance Reimbursement\nLTA Reimbursement\nNPS\nEPF\nEPF Employer\nESIC\nUniform"
+   "label": "Sub Type",
+   "options": "\nProvident Fund\nProfessional Tax\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance\nLTA Reimbursement\nNPS\nEPF\nESIC"
   },
   {
+   "description": "It determines whether the component is standard or not. If it is standard, arrears are created. If it is an accrual, payout components are created. If it is a reimbursement or perquisite, no arrears are created.",
    "fieldname": "component_identification_type",
    "fieldtype": "Select",
    "label": "Component Identification Type",
@@ -269,12 +277,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-30 16:15:27.427430",
+ "modified": "2025-05-14 15:05:15.088561",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Component Configuration",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

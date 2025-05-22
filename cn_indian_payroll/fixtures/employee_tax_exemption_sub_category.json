@@ -5,8 +5,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80CCD(1B)",
   "is_active": 1,
-  "max_amount": 50000.0,
-  "modified": "2025-04-16 11:45:03.690776",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.577059",
   "name": "Section 80CCD(1B) NPS-Additional Exemption"
  },
  {
@@ -15,8 +15,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80CCD(1B)",
   "is_active": 1,
-  "max_amount": 279996.0,
-  "modified": "2025-04-16 11:45:03.684058",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.570509",
   "name": "Section 80CCD(2)-Employer Contribution"
  },
  {
@@ -25,8 +25,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.651568",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.564762",
   "name": "Unit-linked Insurance Plan"
  },
  {
@@ -35,8 +35,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.627979",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.560338",
   "name": "Sukanya Samriddhi Deposit Scheme"
  },
  {
@@ -45,8 +45,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.616056",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.553876",
   "name": "Stamp duty & Registration fee on buying house property"
  },
  {
@@ -55,8 +55,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80U",
   "is_active": 1,
-  "max_amount": 125000.0,
-  "modified": "2025-04-16 11:45:03.602455",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.545325",
   "name": "Permanent Severe Physical Disability (Self)"
  },
  {
@@ -65,8 +65,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 16",
   "is_active": 1,
-  "max_amount": 2400.0,
-  "modified": "2025-04-16 11:45:03.579517",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.539598",
   "name": "Tax on employment (Professional Tax)"
  },
  {
@@ -75,8 +75,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 10(13A)",
   "is_active": 1,
-  "max_amount": 50000.0,
-  "modified": "2025-04-16 11:45:03.575152",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.532574",
   "name": "House Rent Allowance"
  },
  {
@@ -85,8 +85,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80EEA",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 13:21:37.222919",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.525579",
   "name": "Tax Incentive for Affordable Housing for Ded U/S 80EEA"
  },
  {
@@ -95,8 +95,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80EEB",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 13:22:17.989676",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.520438",
   "name": "Tax Incentives for Electric Vehicles for Ded U/S 80EEB"
  },
  {
@@ -106,7 +106,7 @@
   "exemption_category": "Section GGC",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:22:56.116700",
+  "modified": "2025-04-27 17:22:35.515591",
   "name": "Donations/contribution made to a political party or an electoral trust"
  },
  {
@@ -116,7 +116,7 @@
   "exemption_category": "Section TTA",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:23:46.159071",
+  "modified": "2025-04-27 17:22:35.511352",
   "name": "Interest on deposits in saving account for Ded U/S 80TTA"
  },
  {
@@ -126,7 +126,7 @@
   "exemption_category": "Section TTB",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:24:14.817101",
+  "modified": "2025-04-27 17:22:35.507000",
   "name": "Interest on deposits in saving account for Ded U/S 80TTB"
  },
  {
@@ -136,7 +136,7 @@
   "exemption_category": "Section 80GG",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:26:03.838628",
+  "modified": "2025-04-27 17:22:35.501737",
   "name": "Deduction U/S 80GG"
  },
  {
@@ -146,7 +146,7 @@
   "exemption_category": "Section 80CCG",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:26:38.131125",
+  "modified": "2025-04-27 17:22:35.497381",
   "name": "Rajiv Gandhi Equity Saving Scheme 80CCG"
  },
  {
@@ -156,7 +156,7 @@
   "exemption_category": "Section 10(14)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 14:16:53.298803",
+  "modified": "2025-04-27 17:22:35.493335",
   "name": "Education Allowance"
  },
  {
@@ -166,7 +166,7 @@
   "exemption_category": "Section 10(14)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 14:17:00.608686",
+  "modified": "2025-04-27 17:22:35.488995",
   "name": "Hostel Allowance"
  },
  {
@@ -176,7 +176,7 @@
   "exemption_category": "Section 10(14)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 14:17:07.173671",
+  "modified": "2025-04-27 17:22:35.483849",
   "name": "Gratuity"
  },
  {
@@ -186,7 +186,7 @@
   "exemption_category": "Section 10(14)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 14:17:14.665625",
+  "modified": "2025-04-27 17:22:35.479748",
   "name": "LTA U/s 10 (5)"
  },
  {
@@ -196,7 +196,7 @@
   "exemption_category": "Section 10(14)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 11:45:03.712996",
+  "modified": "2025-04-27 17:22:35.475137",
   "name": "Uniform Allowance"
  },
  {
@@ -205,8 +205,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.639674",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.470091",
   "name": "ELSS - Equity Link Saving Scheme Of Mutual Funds"
  },
  {
@@ -215,8 +215,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.620739",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.465604",
   "name": "Fixed Deposits In Banks (Period As Per Income Tax Guidelines)"
  },
  {
@@ -225,8 +225,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80DD",
   "is_active": 1,
-  "max_amount": 125000.0,
-  "modified": "2025-04-16 11:45:03.593424",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.461411",
   "name": "Medical treatment (specified diseases only)"
  },
  {
@@ -235,8 +235,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 13:02:43.602142",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.457119",
   "name": "Home Loan Account Of National Housing Bank"
  },
  {
@@ -245,18 +245,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 13:04:07.119355",
-  "name": "Pension Scheme Investments & ULIP"
- },
- {
-  "custom_component_type": null,
-  "docstatus": 0,
-  "doctype": "Employee Tax Exemption Sub Category",
-  "exemption_category": "Section 80C",
-  "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:06:46.464814",
+  "modified": "2025-04-27 17:22:35.447871",
   "name": "Mutual Funds - Notified Under Clause 23D Of Section 10"
  },
  {
@@ -265,8 +255,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 13:08:43.616238",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.443718",
   "name": "5 Years Term Deposit An Account Under Post Office Term Deposit Rules"
  },
  {
@@ -275,8 +265,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 13:09:03.186899",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.439633",
   "name": "Others"
  },
  {
@@ -285,8 +275,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80U",
   "is_active": 1,
-  "max_amount": 75000.0,
-  "modified": "2025-04-16 13:16:22.139530",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.434653",
   "name": "Deduction for Physically Disabled"
  },
  {
@@ -296,7 +286,7 @@
   "exemption_category": "Section 80G",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:17:16.101982",
+  "modified": "2025-04-27 17:22:35.429406",
   "name": "Donation U/S 80G"
  },
  {
@@ -306,7 +296,7 @@
   "exemption_category": "Section 80CCD(2)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 13:18:27.214347",
+  "modified": "2025-04-27 17:22:35.424597",
   "name": "First HSG Loan Interest Ded.(80EE)"
  },
  {
@@ -315,8 +305,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 24(b)",
   "is_active": 1,
-  "max_amount": 200000.0,
-  "modified": "2025-04-16 11:45:03.697137",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.413918",
   "name": "Interest Paid On Home Loan"
  },
  {
@@ -325,19 +315,9 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80CCD(1B)",
   "is_active": 1,
-  "max_amount": 50000.0,
-  "modified": "2025-04-16 11:45:03.611835",
-  "name": "Additional Exemption on Voluntary NPS"
- },
- {
-  "custom_component_type": null,
-  "docstatus": 0,
-  "doctype": "Employee Tax Exemption Sub Category",
-  "exemption_category": "Section 80CCD(2)",
-  "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 11:45:03.583603",
-  "name": "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
+  "modified": "2025-04-27 17:22:35.406065",
+  "name": "Additional Exemption on Voluntary NPS"
  },
  {
   "custom_component_type": null,
@@ -345,8 +325,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.660837",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.390885",
   "name": "LIC- Life Insurance Premium Directly Paid By Employee"
  },
  {
@@ -355,8 +335,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.656238",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.382815",
   "name": "PPF - Public Provident Fund"
  },
  {
@@ -365,8 +345,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.647857",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.376626",
   "name": "NSC - National Saving Certificate"
  },
  {
@@ -375,8 +355,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.644041",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.369333",
   "name": "Housing Loan Principal Repayment"
  },
  {
@@ -385,8 +365,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-16 11:45:03.634640",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.362779",
   "name": "Tuition Fees For Full Time Education"
  },
  {
@@ -396,7 +376,7 @@
   "exemption_category": "Section 80E",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-16 11:45:03.588277",
+  "modified": "2025-04-27 17:22:35.355669",
   "name": "Interest repayment of Loan for higher education"
  },
  {
@@ -405,8 +385,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80U",
   "is_active": 1,
-  "max_amount": 75000.0,
-  "modified": "2025-04-16 11:45:03.607693",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.347150",
   "name": "Permanent Physical Disability (Self)"
  },
  {
@@ -415,8 +395,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80D",
   "is_active": 1,
-  "max_amount": 5000.0,
-  "modified": "2025-04-16 11:45:03.550336",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.340155",
   "name": "Preventive Checkup (Self + Family)"
  },
  {
@@ -425,8 +405,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80DD",
   "is_active": 1,
-  "max_amount": 75000.0,
-  "modified": "2025-04-16 11:45:03.598077",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.333092",
   "name": "(Medical treatment / insurance of handicapped dependant)"
  },
  {
@@ -435,8 +415,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80D",
   "is_active": 1,
-  "max_amount": 5000.0,
-  "modified": "2025-04-16 11:45:03.483503",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.326693",
   "name": "Preventive Checkup (Parents)"
  },
  {
@@ -445,8 +425,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80D",
   "is_active": 1,
-  "max_amount": 50000.0,
-  "modified": "2025-04-16 11:45:03.564370",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.318371",
   "name": "Mediclaim Self (Senior Citizen - 60 years & above)"
  },
  {
@@ -455,8 +435,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80D",
   "is_active": 1,
-  "max_amount": 25000.0,
-  "modified": "2025-04-16 11:45:03.560345",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.311661",
   "name": "Parents (Below 60 years)"
  },
  {
@@ -465,8 +445,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80D",
   "is_active": 1,
-  "max_amount": 50000.0,
-  "modified": "2025-04-16 11:45:03.555986",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.304682",
   "name": "Parents (Senior Citizen - 60 years & above)"
  },
  {
@@ -475,9 +455,29 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80D",
   "is_active": 1,
-  "max_amount": 25000.0,
-  "modified": "2025-04-16 11:45:03.569991",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.293190",
   "name": "Mediclaim Self, Spouse & Children (Below 60 years)"
+ },
+ {
+  "custom_component_type": null,
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Sub Category",
+  "exemption_category": "Section 80C",
+  "is_active": 1,
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.452281",
+  "name": "Pension Scheme Investments & ULIP"
+ },
+ {
+  "custom_component_type": "",
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Sub Category",
+  "exemption_category": "Section 80CCD(1B)",
+  "is_active": 1,
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.419483",
+  "name": "Contribution in National Pension Scheme"
  },
  {
   "custom_component_type": "Provident Fund",
@@ -485,8 +485,8 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 80C",
   "is_active": 1,
-  "max_amount": 150000.0,
-  "modified": "2025-04-24 23:10:11.744130",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.241266",
   "name": "Investments In PF(Auto)"
  },
  {
@@ -495,18 +495,18 @@
   "doctype": "Employee Tax Exemption Sub Category",
   "exemption_category": "Section 16",
   "is_active": 1,
-  "max_amount": 2400.0,
-  "modified": "2025-04-24 23:10:17.392666",
+  "max_amount": 0.0,
+  "modified": "2025-04-27 17:22:35.282949",
   "name": "P.T. Paid by employee"
  },
  {
   "custom_component_type": "NPS",
   "docstatus": 0,
   "doctype": "Employee Tax Exemption Sub Category",
-  "exemption_category": "Section 80CCD(1B)",
+  "exemption_category": "Section 80CCD(2)",
   "is_active": 1,
   "max_amount": 0.0,
-  "modified": "2025-04-24 23:10:44.423619",
-  "name": "Contribution in National Pension Scheme"
+  "modified": "2025-04-27 17:22:35.397878",
+  "name": "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
  }
 ]

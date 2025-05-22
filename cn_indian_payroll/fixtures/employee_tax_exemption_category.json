@@ -123,14 +123,6 @@
   "docstatus": 0,
   "doctype": "Employee Tax Exemption Category",
   "is_active": 1,
-  "max_amount": 99999999.0,
-  "modified": "2025-04-16 11:43:03.222910",
-  "name": "Section 80CCD(2)"
- },
- {
-  "docstatus": 0,
-  "doctype": "Employee Tax Exemption Category",
-  "is_active": 1,
   "max_amount": 200000.0,
   "modified": "2025-04-09 17:25:09.159936",
   "name": "Section 80U"
@@ -155,6 +147,14 @@
   "docstatus": 0,
   "doctype": "Employee Tax Exemption Category",
   "is_active": 1,
+  "max_amount": 9999999.0,
+  "modified": "2025-04-09 17:25:09.127477",
+  "name": "Section 80CCD(1B)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employee Tax Exemption Category",
+  "is_active": 1,
   "max_amount": 150000.0,
   "modified": "2025-04-09 17:25:09.120876",
   "name": "Section 80C"
@@ -171,8 +171,8 @@
   "docstatus": 0,
   "doctype": "Employee Tax Exemption Category",
   "is_active": 1,
-  "max_amount": 9999999.0,
-  "modified": "2025-04-09 17:25:09.127477",
-  "name": "Section 80CCD(1B)"
+  "max_amount": 99999999.0,
+  "modified": "2025-04-16 11:43:03.222910",
+  "name": "Section 80CCD(2)"
  }
 ]

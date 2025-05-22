@@ -7,6 +7,7 @@ def before_save(self,method):
 
 
 
+
 def on_submit(self, method):
 
 
@@ -24,8 +25,9 @@ def on_submit(self, method):
                 'currency':'INR',
                 'amount':i.amount,
                 'docstatus':1,
-                'custom_lop_reversal':self.name,
-                'custom_lop_reversal_days':self.number_of_days
+                'ref_doctype':"LOP Reversal",
+                'ref_docname':self.name,
+
             })
             additional_doc.insert()
 
@@ -43,8 +45,9 @@ def on_submit(self, method):
                 'currency':'INR',
                 'amount':j.amount,
                 'docstatus':1,
-                'custom_lop_reversal':self.name,
-                'custom_lop_reversal_days':self.number_of_days
+                'ref_doctype':"LOP Reversal",
+                'ref_docname':self.name,
+
 
 
             })
@@ -52,12 +55,9 @@ def on_submit(self, method):
             additional_doc.insert()
 
 
-
-
-
-
     reimbursement_accrual_update(self)
     bonus_accrual_update(self)
+    update_arrear_breakup(self)
 
 
 
@@ -156,42 +156,39 @@ def insert_breakup_table(self):
 
 
 
+def update_arrear_breakup(self):
+    if self.additional_salary_date:
+        get_salary_slip = frappe.get_list(
+            'Salary Slip',
+            filters={
+                'employee': self.employee,
+                'docstatus': 0,
+                'start_date': ['<=', self.additional_salary_date],
+                'end_date': ['>=', self.additional_salary_date]
+            },
+            fields=['*']
+        )
+
+        if get_salary_slip:
+            for each_ss_doc in get_salary_slip:
+                get_salary_slip_component = frappe.get_doc("Salary Slip", each_ss_doc.name)
+                get_salary_slip_component.custom_update_arrear = 1
+                get_salary_slip_component.save()
+
+
+
+
 
 
 
 
 def on_cancel(self,method):
 
-    get_additional_arrears=frappe.db.get_list('Additional Salary',
-                filters={
-
-                    'custom_lop_reversal':self.name
-                },
-                fields=['*'],
-
-            )
-
-    if len(get_additional_arrears)>0:
-        for j in get_additional_arrears:
-            arrear_doc = frappe.get_doc('Additional Salary', j.name)
-            arrear_doc.docstatus = 2
-
-            arrear_doc.save()
-
-            frappe.delete_doc('Additional Salary', j.name)
-
-
-
-
     lop_reversal = frappe.get_list('Employee Benefit Accrual',
                         filters={'employee': self.employee,'docstatus':1,"salary_slip":self.salary_slip},
                         fields=['*'],
 
                     )
-
-
-
-
     if len(lop_reversal)>0:
         for i in lop_reversal:
             each_doc = frappe.get_doc('Employee Benefit Accrual', i.name)
@@ -201,7 +198,6 @@ def on_cancel(self,method):
 
             each_doc.amount = round(eligible_amount)
             each_doc.save()
-
 
 
     lop_reversal_bonus = frappe.get_list('Employee Bonus Accrual',
@@ -217,3 +213,15 @@ def on_cancel(self,method):
 
             each_doc_bonus.amount = round(eligible_amount)
             each_doc_bonus.save()
+
+    get_linked_additional_salary = frappe.get_list('Additional Salary',
+        filters={
+            'employee': self.employee,
+            'ref_docname': self.name
+        },
+        fields=['name']
+    )
+    if get_linked_additional_salary:
+        for each_additional_salary in get_linked_additional_salary:
+            additional_salary_doc = frappe.get_doc('Additional Salary', each_additional_salary.name)
+            additional_salary_doc.delete()

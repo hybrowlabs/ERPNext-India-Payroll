@@ -6,9 +6,12 @@ def on_cancel(self,method):
 
     cancel_additional_salary(self)
     cancel_appraisal_calculation(self)
+    update_status_cancelled(self)
 
-def on_submit(self,method):
-    self.custom_status="Completed"
+def update_status_cancelled(self):
+    self.custom_status="Cancelled"
+
+
 
 
 

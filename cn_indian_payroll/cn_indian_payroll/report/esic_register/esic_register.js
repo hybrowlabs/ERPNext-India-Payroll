@@ -34,6 +34,7 @@ frappe.query_reports["ESIC Register"] = {
             "options": "Company",
             "width": 200,
 			"reqd": 1,
+			"default": frappe.defaults.get_user_default("company")
         },
 		{
             "label": "Payroll Period",
@@ -44,5 +45,23 @@ frappe.query_reports["ESIC Register"] = {
 			"reqd": 1,
         },
 
-	]
+	],
+	"onload": function (report) {
+				report.set_filter_value("company", frappe.defaults.get_user_default("company"));
+
+				frappe.db.get_list("Payroll Period", {
+					limit: 1,
+					order_by: "start_date desc",
+					fields: ["name"],
+					filters: {
+
+						"company": frappe.defaults.get_user_default("company")
+					}
+				}).then(res => {
+					if (res && res.length > 0) {
+						report.set_filter_value("payroll_period", res[0].name);
+					}
+				});
+			}
+
 };

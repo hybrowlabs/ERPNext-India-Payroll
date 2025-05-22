@@ -68,30 +68,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         if self.custom_tax_regime == "Old Regime":
             form_data = json.loads(self.custom_declaration_form_data or "{}")
 
-            # Ensure numeric values (default to 0 if None)
-            # mediclaim_self_spouse_children_below_60_years = form_data.get("amount", 0)
-            # mediclaim_self_senior_citizen_60_years_above = form_data.get("amount3", 0)
-            # parents_below_60_years = form_data.get("mpAmount3", 0)
-            # parents_above_60_years = form_data.get("mpAmount4", 0)
-            # preventive_health_check_up_for_parents = form_data.get("mp5", 0)
-            # preventive_health = form_data.get("mpAmount6", 0)
 
-            # self_below = mediclaim_self_spouse_children_below_60_years + preventive_health_check_up_for_parents
-            # self_above = mediclaim_self_senior_citizen_60_years_above + preventive_health_check_up_for_parents
-            # parents_below = parents_below_60_years + preventive_health
-            # parents_above = parents_above_60_years + preventive_health
-
-            # if self_below > 25000:
-            #     frappe.throw("Mediclaim Self, Spouse & Children (Below 60 years) and Preventive Checkup (Self + Family) should not exceed ₹25,000")
-
-            # if self_above > 50000:
-            #     frappe.throw("Mediclaim Self (Senior Citizen - 60 years & above) and Preventive Checkup (Self + Family) should not exceed ₹50,000")
-
-            # if parents_below > 25000:
-            #     frappe.throw("Parents (Below 60 years) and Preventive Health Check-up for Parents should not exceed ₹25,000")
-
-            # if parents_above > 50000:
-            #     frappe.throw("Parents (Senior Citizen - 60 years & above) and Preventive Health Check-up for Parents should not exceed ₹50,000")
 
             name_value = form_data.get("nameValue")
             address_one_value = form_data.get("addressoneValue")
@@ -628,7 +605,14 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             },
                         )
 
-        elif self.monthly_house_rent == 0 and self.custom_check == 0:
+        elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 0:
+            self.custom_basic_as_per_salary_structure = None
+            self.salary_structure_hra = None
+            self.custom_basic = None
+            self.custom_hra_breakup = []
+            self.annual_hra_exemption = None
+            self.monthly_hra_exemption = None
+        elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 1:
             self.custom_basic_as_per_salary_structure = None
             self.salary_structure_hra = None
             self.custom_basic = None
@@ -827,83 +811,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 for row in declarations:
                     self.append("declarations", row)
 
-                # form_data = json.loads(self.custom_declaration_form_data or '{}')
-
-                # # Extract numbers from the form data
-                # numbers = [
-                #     {"field": "amount", "name": "Mediclaim Self, Spouse & Children (Below 60 years)"},
-                #     {"field": "amount3", "name": "Mediclaim Self (Senior Citizen - 60 years & above)"},
-                #     {"field": "mpAmount3", "name": "Parents (Below 60 years)"},
-                #     {"field": "mpAmount4", "name": "Parents (Senior Citizen - 60 years & above)"},
-                #     {"field": "mp5", "name": "Preventive Checkup (Self + Family)"},
-                #     {"field": "mpAmount6", "name": "Preventive Checkup (Parents)"},
-                #     {"field": "hlAmount", "name": "Interest Paid On Home Loan"},
-                #     {"field": "pfValue", "name": "Employee Provident Fund (Auto)"},
-                #     {"field": "aValue2", "name": "Pension Scheme Investments & ULIP"},
-                #     {"field": "bValue1", "name": "Principal paid on Home Loan"},
-                #     {"field": "amount4", "name": "Public Provident Fund"},
-                #     {"field": "dValue1", "name": "Home Loan Account Of National Housing Bank"},
-                #     {"field": "eValue1", "name": "Life Insurance Premium"},
-                #     {"field": "fValue1", "name": "National Savings Certificates"},
-                #     {"field": "gValue1", "name": "Mutual Funds - Notified Under Clause 23D Of Section 10 "},
-                #     {"field": "hValue1", "name": "ELSS - Equity Link Saving Scheme Of Mutual Funds "},
-                #     {"field": "iValue1", "name": "Children Tuition Fees"},
-                #     {"field": "jValue1", "name": "Fixed Deposits In Banksn"},
-                #     {"field": "kValue1", "name": "5 Years Term Deposit An Account Under Post Office Term Deposit Rules "},
-                #     {"field": "kValue2", "name": "Others"},
-                #     {"field": "fourValue", "name": "Treatment of Dependent with Disability"},
-                #     {"field": "fiveNumber", "name": "Medical treatment (specified diseases only)"},
-                #     {"field": "sixNumber", "name": "Interest paid on Education Loan"},
-                #     {"field": "sevenNumber", "name": "Permanent Physical Disability (Self)"},
-                #     {"field": "eightNumber", "name": "Donation U/S 80G"},
-                #     {"field": "nineNumber", "name": "NPS Contribution by Employer"},
-                #     {"field": "tenNumber", "name": "First HSG Loan Interest Ded.(80EE)"},
-                #     {"field": "elevenNumber", "name": "Additional Exemption on Voluntary NPS"},
-                #     {"field": "twelveNumber1", "name": "Tax Incentive for Affordable Housing for Ded U/S 80EEA"},
-                #     {"field": "fifteenNumber", "name": "Tax Incentives for Electric Vehicles for Ded U/S 80EEB"},
-                #     {"field": "sixteenNumber", "name": "Donations/contribution made to a political party or an electoral trust"},
-                #     {"field": "seventeenNumber", "name": "Interest on deposits in saving account for Ded U/S 80TTA"},
-                #     {"field": "eighteenNumber", "name": "Interest on deposits in saving account for Ded U/S 80TTB"},
-                #     {"field": "nineteenNumber", "name": "Profession Tax"},
-                #     {"field": "twentyNumber", "name": "Deduction U/S 80GG"},
-                #     {"field": "twentyoneNumber", "name": "Rajiv Gandhi Equity Saving Scheme 80CCG"},
-                #     {"field": "twentyFour", "name": "Uniform Allowance"},
-                #     {"field": "thirteen", "name": "Education Allowance"},
-                #     {"field": "twentysix", "name": "Hostel Allowance"},
-                #     {"field": "twentyseven", "name": "Gratuity"},
-                #     {"field": "twentyeight", "name": "LTA U/s 10 (5)"},
-
-                # ]
-
-                # # Prepare lists for child table population
-                # sub_category, category, max_amount, declared_amount = [], [], [], []
-
-                # for item in numbers:
-                #     value = form_data.get(item["field"], 0)
-                #     if value > 0:
-
-                #         # Fetch data for the sub-category
-                #         get_doc1 = frappe.get_list(
-                #             'Employee Tax Exemption Sub Category',
-                #             filters={"is_active": 1, "name": item["name"]},
-                #             fields=['name', 'exemption_category', 'max_amount']
-                #         )
-
-                #         if get_doc1:
-                #             sub_category.append(get_doc1[0].name)
-                #             category.append(get_doc1[0].exemption_category)
-                #             max_amount.append(get_doc1[0].max_amount)
-                #             declared_amount.append(value)
-
-                # # Reset and populate the `declarations` child table
-                # self.declarations = []
-                # for i in range(len(sub_category)):
-                #     self.append('declarations', {
-                #         "exemption_sub_category": sub_category[i],
-                #         "exemption_category": category[i],
-                #         "max_amount": max_amount[i],
-                #         "amount": declared_amount[i]
-                #     })
 
         if self.custom_tax_regime == "New Regime":
             if self.workflow_state in ["Approved", "Pending"]:
@@ -911,7 +818,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
                 # Extract numbers from the form data
                 numbers = [
-                    {"field": "nineNumber", "name": "NPS Contribution by Employer"},
+                    {"field": "nineNumber", "name": "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"},
                 ]
 
                 # Prepare lists for child table population

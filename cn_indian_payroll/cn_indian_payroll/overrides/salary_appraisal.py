@@ -1,82 +1,127 @@
 import frappe
 
 def on_submit(self,method):
-
-
     insert_additional_salary(self)
     update_bonus_accrual(self)
     update_reimbursement_accruals(self)
-
-
-
+    update_status_completed(self)
 
 
 def on_cancel(self,method):
-
+    cancel_additional_salary(self)
     reverse_bonus_accrual(self)
     reverse_benefit_accrual(self)
 
 
 
+def update_status_completed(self):
+    if self.promotion_reference:
+        promotion_doc = frappe.get_doc('Employee Promotion', self.promotion_reference)
+        promotion_doc.custom_status = "Completed"
+        promotion_doc.save()
 
 def update_bonus_accrual(self):
-    if len(self.bonus_components)>0:
-        for j in self.bonus_components:
-            bonus_accrual = frappe.get_list('Employee Bonus Accrual',
-            filters={'employee':self.employee, "salary_slip":j.salary_slip_id},
-            fields=['*']
-            )
-            if bonus_accrual:
-                for k in bonus_accrual:
-                    get_doc = frappe.get_doc('Employee Bonus Accrual', k.name)
+    if not self.bonus_components:
+        return
 
-                    get_doc.amount += j.difference
-                    get_doc.save()
+    for bonus_row in self.bonus_components:
+        filters = {
+            'employee': self.employee,
+            'salary_slip': bonus_row.salary_slip_id,
+            'salary_component': bonus_row.salary_component,
+            'docstatus': 1,
+        }
+
+        accrual_list = frappe.get_list(
+            'Employee Bonus Accrual',
+            filters=filters,
+            fields=['name', 'amount']
+        )
+
+        if accrual_list:
+            for accrual in accrual_list:
+                accrual_doc = frappe.get_doc('Employee Bonus Accrual', accrual.name)
+                updated_amount = accrual_doc.amount + (bonus_row.difference or 0)
+                accrual_doc.amount = max(updated_amount, 0)
+                accrual_doc.save()
+        else:
+            if bonus_row.salary_slip_id:
+                salary_slip = frappe.get_doc('Salary Slip', bonus_row.salary_slip_id)
+
+                new_accrual = frappe.get_doc({
+                    'doctype': 'Employee Bonus Accrual',
+                    'company': self.company,
+                    'accrual_date': self.posting_date,
+                    'employee': self.employee,
+                    'amount': bonus_row.difference or 0,
+                    'salary_component': bonus_row.salary_component,
+                    'benefit_accrual_date': salary_slip.end_date,
+                    'salary_slip': bonus_row.salary_slip_id,
+                    'payroll_period': salary_slip.custom_payroll_period,
+                    'salary_structure_assignment': salary_slip.custom_salary_structure_assignment,
+                    'salary_structure': salary_slip.salary_structure,
+                    'docstatus': 1,
+                })
+
+                new_accrual.insert()
+                new_accrual.submit()
+
+
+
+
 
 
 def update_reimbursement_accruals(self):
+    if not self.reimbursement_components:
+        return
 
-    if len(self.reimbursement_components) > 0:
-        for accrual in self.reimbursement_components:
-            benefit_accrual = frappe.get_list('Employee Benefit Accrual',
-                filters={'employee': self.employee, "salary_slip": accrual.salary_slip_id, "salary_component": accrual.salary_component},
-                fields=['*']
-            )
-            if benefit_accrual:
-                for each_accrual_doc in benefit_accrual:
-                    get_doc = frappe.get_doc('Employee Benefit Accrual', each_accrual_doc.name)
+    for row in self.reimbursement_components:
+        accruals = frappe.get_list(
+            'Employee Benefit Accrual',
+            filters={
+                'employee': self.employee,
+                'salary_slip': row.salary_slip_id,
+                'salary_component': row.salary_component,
+                'docstatus': 1
+            },
+            fields=['name', 'amount']
+        )
+
+        if accruals:
+            for accrual in accruals:
+                accrual_doc = frappe.get_doc('Employee Benefit Accrual', accrual.name)
+                updated_amount = accrual_doc.amount + (row.difference or 0)
+                accrual_doc.amount = max(updated_amount, 0)
+                accrual_doc.save()
+        else:
+            if row.salary_slip_id:
+                salary_slip = frappe.get_doc("Salary Slip", row.salary_slip_id)
+
+                new_accrual = frappe.get_doc({
+                    'doctype': 'Employee Benefit Accrual',
+                    'employee': self.employee,
+                    'amount': row.difference or 0,
+                    'salary_component': row.salary_component,
+                    'benefit_accrual_date': salary_slip.end_date,
+                    'salary_slip': row.salary_slip_id,
+                    'payroll_period': salary_slip.custom_payroll_period,
+                    'docstatus': 1
+                })
+
+                new_accrual.insert()
+                new_accrual.submit()
 
 
 
-                    get_doc.amount += accrual.difference
-                    get_doc.save()
 
-            else:
-
-                if accrual.salary_slip_id:
-                    get_sl=frappe.get_doc("Salary Slip",accrual.salary_slip_id)
-
-                    insert_doc = frappe.get_doc({
-                            'doctype': 'Employee Benefit Accrual',
-                            'employee': self.employee,
-                            'amount': accrual.difference,
-                            'salary_component':accrual.salary_component,
-                            'benefit_accrual_date':get_sl.end_date,
-                            'salary_slip':accrual.salary_slip_id,
-                            'payroll_period':get_sl.custom_payroll_period,
-                            'docstatus':1,
-
-
-                        })
-                    insert_doc.insert()
 
 
 
 def insert_additional_salary(self):
     component_array = []
 
-    if len(self.salary_arrear_components) > 0:
-        for i in self.salary_arrear_components:
+    if len(self.arrear_breakdown) > 0:
+        for i in self.arrear_breakdown:
             component_array.append({
                 "component": i.salary_component,
                 "amount": i.difference
@@ -115,67 +160,83 @@ def insert_additional_salary(self):
                         'currency': "INR",
                         'amount': insert['amount'],
                         'docstatus':1,
-                        'custom_salary_appraisal_calculation':self.name,
-                        'custom_employee_promotion_id':self.employee_promotion_id,
+                        'ref_doctype':"Salary Appraisal Calculation",
+                        'ref_docname':self.name,
 
                     })
                     insert_doc.insert()
 
 
 def cancel_additional_salary(self):
-    get_appraisal_additional = frappe.get_list('Additional Salary',
-            filters={'custom_salary_appraisal_calculation':self.name},
-            fields=['*']
-            )
-    if get_appraisal_additional:
-        # frappe.msgprint(str(get_appraisal_additional))
-        for each_appraisal_doc in get_appraisal_additional:
-            get_each_doc = frappe.get_doc('Additional Salary', each_appraisal_doc.name)
-            get_each_doc.docstatus=2
-            get_each_doc.save()
+    additional_salaries = frappe.get_list(
+        'Additional Salary',
+        filters={'ref_docname': self.name},
+        fields=['name']
+    )
+
+    for record in additional_salaries:
+        frappe.delete_doc('Additional Salary', record.name, force=True)
+
+
+
 
 
 def reverse_bonus_accrual(self):
-    if len(self.bonus_components)>0:
-        for j in self.bonus_components:
-            bonus_accrual = frappe.get_list('Employee Bonus Accrual',
-            filters={'employee':self.employee, "salary_slip":j.salary_slip_id},
-            fields=['*']
-            )
-            if len(bonus_accrual)>0:
-                for k in bonus_accrual:
-                    get_doc = frappe.get_doc('Employee Bonus Accrual', k.name)
-                    if get_doc.amount ==0:
-                        difference = j.old_amount
-                        get_doc.amount=difference
-                    else:
-                        difference = j.difference
+    if not self.bonus_components:
+        return
 
-                        get_doc.amount -= difference
-                    get_doc.save()
+    for component in self.bonus_components:
+        bonus_accrual_list = frappe.get_list(
+            'Employee Bonus Accrual',
+            filters={
+                'employee': self.employee,
+                'salary_slip': component.salary_slip_id,
+                'salary_component': component.salary_component,
+                'docstatus': 1
+            },
+            fields=['name', 'amount']
+        )
+
+        for accrual in bonus_accrual_list:
+            accrual_doc = frappe.get_doc('Employee Bonus Accrual', accrual.name)
+
+            if accrual_doc.amount == 0:
+                accrual_doc.amount = component.old_amount or 0
+            else:
+                accrual_doc.amount = max(accrual_doc.amount - (component.difference or 0), 0)
+
+            accrual_doc.save()
+
+
+
+
 
 
 
 
 
 def reverse_benefit_accrual(self):
-    if len(self.reimbursement_components) > 0:
-        for component in self.reimbursement_components:
-            benefit_accrual = frappe.get_list('Employee Benefit Accrual',
-                filters={'employee': self.employee, "salary_slip": component.salary_slip_id, "salary_component": component.salary_component},
-                fields=['*']
-            )
-            if benefit_accrual:
-                for accrual in benefit_accrual:
-                    get_accrued_doc = frappe.get_doc('Employee Benefit Accrual', accrual.name)
-                    if get_accrued_doc.amount == 0:
-                        difference = component.old_amount
-                        get_accrued_doc.amount=difference
+    if not self.reimbursement_components:
+        return
 
-                    else:
-                        difference = component.difference
-                        get_accrued_doc.amount -= difference
+    for component in self.reimbursement_components:
+        benefit_accrual_list = frappe.get_list(
+            'Employee Benefit Accrual',
+            filters={
+                'employee': self.employee,
+                'salary_slip': component.salary_slip_id,
+                'salary_component': component.salary_component,
+                'docstatus': 1
+            },
+            fields=['name', 'amount']
+        )
 
+        for accrual in benefit_accrual_list:
+            accrual_doc = frappe.get_doc('Employee Benefit Accrual', accrual.name)
 
-                    # get_accrued_doc.amount -= difference
-                    get_accrued_doc.save()
+            if accrual_doc.amount == 0:
+                accrual_doc.amount = component.old_amount or 0
+            else:
+                accrual_doc.amount = max(accrual_doc.amount - (component.difference or 0), 0)
+
+            accrual_doc.save()

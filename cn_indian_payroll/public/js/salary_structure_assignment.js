@@ -2,122 +2,110 @@
 
 frappe.ui.form.on('Salary Structure Assignment', {
 
-    onload:function(frm)
-    {
 
-        if (frm.doc.custom_promotion_id && frm.is_new())
-        {
+    onload: function(frm) {
+            if (frm.doc.custom_promotion_id && frm.is_new()) {
+                frappe.call({
+                    method: 'frappe.client.get',
+                    args: {
+                        doctype: "Employee Promotion",
+                        filters: { "name": frm.doc.custom_promotion_id }
+                    },
+                    callback: function(r) {
+                        if (r.message) {
+                            frappe.after_ajax(() => {
+                                setTimeout(() => {
+                                    frm.set_value("salary_structure", r.message.custom_current_structure);
+                                    frm.set_value("from_date",r.message.promotion_date)
+                                    frm.set_value("currency",r.message.custom_currency)
 
-            frappe.call({
-                method: 'frappe.client.get',
-                args: {
-                    doctype: "Employee Promotion",
-                    filters:{"name":frm.doc.custom_promotion_id}
-                },
-                callback: function(r) {
-                    if (r.message) {
 
-
-
-                        frm.set_value("from_date",r.message.promotion_date)
-
+                                }, 100);
+                            });
+                        }
                     }
-                }
-            });
-
-        }
-
+                });
+            }
     },
-
-
-
-
-
 
 
     refresh(frm)
     {
 
-
-
-
-                if (frm.doc.employee && frm.doc.docstatus==1)
-                {
-                    processSalaryComponents(frm)
-                }
-
-
-
-
-
-
-    frm.fields_dict['custom_employee_reimbursements'].grid.get_field('reimbursements').get_query = function(doc, cdt, cdn) {
-        var child = locals[cdt][cdn];
-
-        return {
-            filters:[
-                ['custom_is_reimbursement', '=', 1]
-            ]
+        if (frm.doc.custom_promotion_id) {
+            frm.add_custom_button(__('View Employee Promotion'), function() {
+                frappe.set_route('Form', 'Employee Promotion', frm.doc.custom_promotion_id);
+            }, __('Actions'));
         }
-    }
+
+
+        if (frm.doc.employee && frm.doc.docstatus==1)
+            {
+                    processSalaryComponents(frm)
+            }
+
+
+        frm.fields_dict['custom_employee_reimbursements'].grid.get_field('reimbursements').get_query = function(doc, cdt, cdn) {
+            var child = locals[cdt][cdn];
+
+            return {
+                filters:[
+                    ['custom_is_reimbursement', '=', 1]
+                ]
+            }
+        }
 
     },
 
 
-custom_cubic_capacity_of_company(frm)
-{
-
-        if(frm.doc.custom_cubic_capacity_of_company=="Car < 1600 CC" )
-        {
-            frm.set_value("custom_car_perquisite_as_per_rules",1800)
-
-
-        }
-
-        else if (frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
-        {
-
-             frm.set_value("custom_car_perquisite_as_per_rules",2400)
-
-
-
-        }
-
-
-},
-
-
-custom_driver_provided_by_company(frm)
-{
-    if(frm.doc.custom_driver_provided_by_company==1)
+    custom_cubic_capacity_of_company(frm)
     {
-        frm.set_value("custom_driver_perquisite_as_per_rules",900)
-    }
-    else
+
+            if(frm.doc.custom_cubic_capacity_of_company=="Car < 1600 CC" )
+            {
+                frm.set_value("custom_car_perquisite_as_per_rules",1800)
+            }
+
+            else if (frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
+            {
+                frm.set_value("custom_car_perquisite_as_per_rules",2400)
+            }
+
+
+    },
+
+
+    custom_driver_provided_by_company(frm)
     {
-        frm.set_value("custom_driver_perquisite_as_per_rules",undefined)
-    }
-},
-
-
-custom__car_perquisite(frm)
-{
-    if (frm.doc.custom__car_perquisite==1)
+        if(frm.doc.custom_driver_provided_by_company==1)
         {
-            if(frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
-                {
-
-                    frm.set_value("custom_car_perquisite_as_per_rules",2400)
-                }
-
+            frm.set_value("custom_driver_perquisite_as_per_rules",900)
         }
-
         else
         {
-            frm.set_value("custom_car_perquisite_as_per_rules",undefined)
-
+            frm.set_value("custom_driver_perquisite_as_per_rules",undefined)
         }
-},
+    },
+
+
+    custom__car_perquisite(frm)
+    {
+        if (frm.doc.custom__car_perquisite==1)
+            {
+                if(frm.doc.custom_cubic_capacity_of_company=="Car > 1600 CC")
+                    {
+
+                        frm.set_value("custom_car_perquisite_as_per_rules",2400)
+                    }
+
+            }
+
+            else
+            {
+                frm.set_value("custom_car_perquisite_as_per_rules",undefined)
+
+            }
+    },
 
 
 })
