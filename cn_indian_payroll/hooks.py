@@ -256,7 +256,8 @@ fixtures = [
 
 doctype_js = {
     "Payroll Entry": "public/js/payroll.js",
-    "Employee Benefit Claim": "public/js/employee_benefit_claim.js",
+    # "Employee Benefit Claim": "public/js/employee_benefit_claim.js",
+    "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
@@ -267,7 +268,7 @@ doctype_js = {
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
-    "Full and Final Statement": "public/js/f_and_f.js",
+    # "Full and Final Statement": "public/js/f_and_f.js",
     "Form 16": "public/js/form16.js",
     "Leave Encashment": "public/js/leave_encashment.js",
     "Company": "public/js/company.js",
@@ -281,6 +282,7 @@ override_doctype_class = {
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
+    "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.CustomFullAndFinalStatement",
 }
 
 doc_events = {
@@ -294,6 +296,7 @@ doc_events = {
     },
     "LTA Claim": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.on_submit",
     },
     "Salary Appraisal Calculation": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
@@ -303,10 +306,10 @@ doc_events = {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
     },
-    "Full and Final Statement": {
-        "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
-        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.on_submit",
-    },
+    # "Full and Final Statement": {
+    #     "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
+    #     "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.on_submit",
+    # },
     # "Structure Setting": {
     #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.structure_setting.validate",
     # },

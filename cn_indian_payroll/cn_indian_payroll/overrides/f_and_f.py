@@ -1,6 +1,30 @@
 import frappe
 
 
+from hrms.hr.doctype.full_and_final_statement.full_and_final_statement import (
+    FullandFinalStatement,
+)
+
+
+class CustomFullAndFinalStatement(FullandFinalStatement):
+    def get_payable_component(self):
+        get_salary_component = frappe.get_all(
+            "Salary Component",
+            filters={"type": "Earning", "custom_included_in_f_and_f": 1},
+            fields=["name"],
+        )
+        if get_salary_component:
+            for i in get_salary_component:
+                if i.name not in [d.component for d in self.payables]:
+                    self.append(
+                        "payables",
+                        {"component": i.name, "amount": 0, "status": "Unsettled"},
+                    )
+
+    def create_component_row(self, components, component_type):
+        pass
+
+
 # def before_save(self,method):
 #     calculated_leave=0
 #     if len(self.custom_calculated_amount)>0:

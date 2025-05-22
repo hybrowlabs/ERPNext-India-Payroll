@@ -3,6 +3,9 @@ import datetime
 from frappe.query_builder.functions import Count, Sum
 import json
 from frappe.utils import flt
+from frappe.query_builder import Order
+from frappe import _
+import math
 
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
@@ -25,75 +28,44 @@ from datetime import datetime
 
 from frappe.utils import flt
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
-
-# from hrms.payroll.doctype.salary_slip.salary_slip import get_total_exemption_amount
+from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
+from datetime import datetime, timedelta
 
 
 class CustomSalarySlip(SalarySlip):
     def before_update_after_submit(self):
         self.tax_calculation()
 
-    def after_insert(self):
-        self.employee_accrual_insert()
-
     def on_submit(self):
         super().on_submit()
-        self.employee_accrual_submit()
+        self.insert_bonus_accruals()
+        self.employee_accrual_insert()
+        # self.update_benefit_claim_amount()
 
     def validate(self):
         super().validate()
-        self.insert_other_perquisites()
+        self.set_sub_period()
+        # self.insert_other_perquisites()
+        self.apply_lop_amount_in_reimbursement_component()
 
     def before_save(self):
-        self.update_bonus_accrual()
         self.new_joinee()
         self.insert_lop_days()
         self.set_taxale()
         self.actual_amount_ctc()
         self.set_month()
-        self.remaining_day()
 
-        if self.leave_without_pay > 0:
-            # self.insert_lta_reimbursement_lop()
-            self.accrual_update()
-            self.driver_reimbursement_lop()
-        if self.leave_without_pay == 0:
-            self.insert_lta_reimbursement()
-            self.insert_reimbursement()
-            self.driver_reimbursement()
+        # if self.leave_without_pay > 0:
+        #     # self.insert_lta_reimbursement_lop()
+        #     self.accrual_update()
+        #     self.driver_reimbursement_lop()
+        # if self.leave_without_pay == 0:
+        #     self.insert_lta_reimbursement()
+        #     self.insert_reimbursement()
+        #     self.driver_reimbursement()
 
-        self.set_payroll_period()
-        self.insert_loan_perquisite()
         self.update_declaration_component()
         self.update_total_lop()
-
-        # print(self.previous_taxable_earnings_before_exemption,"self.previous_taxable_earnings_before_exemption\n\n\n")
-        # print(self.current_structured_taxable_earnings_before_exemption,"self.current_structured_taxable_earnings_before_exemption\n\n\n")
-        # print(self.future_structured_taxable_earnings_before_exemption,"self.future_structured_taxable_earnings_before_exemption\n\n\n")
-        # print(self.current_additional_earnings,"self.current_additional_earnings\n\n\n")
-        # print(self.unclaimed_taxable_benefits,"self.unclaimed_taxable_benefits\n\n\n")
-        # print(self.non_taxable_earnings,"self.non_taxable_earnings\n\n\n")
-
-        # if self.custom_perquisite_amount:
-        #     self.annual_taxable_amount=self.total_earnings - (
-        #         self.non_taxable_earnings
-        #         + self.deductions_before_tax_calculation
-        #         + self.tax_exemption_declaration
-        #         + self.standard_tax_exemption_amount
-
-        #         ) + self.custom_perquisite_amount
-        # else:
-        #     self.annual_taxable_amount=self.total_earnings - (
-        #         self.non_taxable_earnings
-        #         + self.deductions_before_tax_calculation
-        #         + self.tax_exemption_declaration
-        #         + self.standard_tax_exemption_amount
-
-        #         )
-
-        if self.is_new():
-            self.add_reimbursement_taxable_new_doc()
-
         self.arrear_ytd()
         self.food_coupon()
         self.tax_calculation()
@@ -110,12 +82,352 @@ class CustomSalarySlip(SalarySlip):
             self.future_structured_taxable_earnings_before_exemption
         )
         self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
-        # if self.earnings:
-        #     total_ctc_taxable_amount = 0
-        #     for earning in self.earnings:
-        #         if earning.is_tax_applicable == 1:
-        #             total_ctc_taxable_amount += earning.default_amount
-        # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        if self.earnings:
+            total_ctc_taxable_amount = 0
+            for earning in self.earnings:
+                if earning.is_tax_applicable == 1:
+                    total_ctc_taxable_amount += earning.default_amount
+            self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+
+    def on_cancel(self):
+        super().on_cancel()
+        self.delete_bonus_accruals()
+        self.delete_benefit_accruals()
+
+    def set_sub_period(self):
+        sub_period = get_period_factor(
+            self.employee,
+            self.start_date,
+            self.end_date,
+            self.payroll_frequency,
+            self.payroll_period,
+            joining_date=self.joining_date,
+            relieving_date=self.relieving_date,
+        )[1]
+
+        self.custom_month_count = sub_period - 1
+
+    # def update_benefit_claim_amount(self):
+    #     if self.earnings:
+    #         for earning in self.earnings:
+    #             if earning.additional_salary:
+    #                 additional_salary = frappe.get_doc(
+    #                     "Additional Salary", earning.additional_salary
+    #                 )
+    #                 if additional_salary.ref_doctype=="Employee Benefit Claim" and additional_salary.ref_docname:
+    #                     get_benefit_doc=frappe.get_doc(
+    #                         "Employee Benefit Claim", additional_salary.ref_docname
+    #                     )
+    #                     get_benefit_doc.is_paid=1
+
+    def apply_lop_amount_in_reimbursement_component(self):
+        if not self.custom_salary_structure_assignment:
+            frappe.throw("Salary Structure Assignment not linked.")
+
+        ssa_doc = frappe.get_doc(
+            "Salary Structure Assignment", self.custom_salary_structure_assignment
+        )
+
+        if not self.earnings:
+            return
+
+        for earning in self.earnings:
+            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+            # Step 1: Standard reimbursement-based LOP adjustment
+            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                if reimbursement.reimbursements == earning.salary_component:
+                    if self.total_working_days and self.payment_days:
+                        prorated_amount = round(
+                            (reimbursement.monthly_total_amount or 0)
+                            / self.total_working_days
+                            * (self.total_working_days - self.payment_days),
+                            2,
+                        )
+
+                        earning.amount -= prorated_amount
+
+            # Step 2: Handle special case for LTA reimbursement → apply to taxable/non-taxable LTA
+            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                lta_component = frappe.get_doc(
+                    "Salary Component", reimbursement.reimbursements
+                )
+                if lta_component.component_type == "LTA Reimbursement":
+                    if component.component_type in ["LTA Taxable", "LTA Non Taxable"]:
+                        if self.total_working_days and self.payment_days:
+                            prorated_amount = round(
+                                (reimbursement.monthly_total_amount or 0)
+                                / self.total_working_days
+                                * (self.total_working_days - self.payment_days),
+                                2,
+                            )
+                            earning.amount -= prorated_amount
+                    break
+
+    # def apply_lop_amount_in_reimbursement_component(self):
+    #     if not self.custom_salary_structure_assignment:
+    #         frappe.throw("Salary Structure Assignment not linked.")
+
+    #     ssa_doc = frappe.get_doc(
+    #         "Salary Structure Assignment", self.custom_salary_structure_assignment
+    #     )
+
+    #     if self.earnings:
+    #         for earning in self.earnings:
+    #             if ssa_doc.custom_employee_reimbursements:
+    #                 for reimbursement in ssa_doc.custom_employee_reimbursements:
+    #                     if reimbursement.reimbursements == earning.salary_component:
+    #                         if self.total_working_days and self.payment_days:
+    #                             prorated_amount = round(
+    #                                 (reimbursement.monthly_total_amount or 0)
+    #                                 / self.total_working_days
+    #                                 * (self.total_working_days - self.payment_days),
+    #                                 2,
+    #                             )
+    #                             earning.amount = earning.amount - prorated_amount
+
+    #                     get_lta=frappe.get_doc("Salary Component", earning.salary_component)
+    #                     if get_lta.component_type=="LTA Reimbursement":
+    #                         if self.total_working_days and self.payment_days:
+    #                             prorated_amount = round(
+    #                                 (get_lta.monthly_total_amount or 0)
+    #                                 / self.total_working_days
+    #                                 * (self.total_working_days - self.payment_days),
+    #                                 2,
+    #                             )
+
+    #                         get_lta_component= frappe.get_doc(
+    #                             "Salary Component", earning.salary_component
+    #                         )
+    #                         if get_lta_component.component_type == "LTA Taxable":
+
+    #                                 earning.amount = earning.amount - prorated_amount
+    #                         elif get_lta_component.component_type == "LTA Non Taxable":
+    #                                 earning.amount = earning.amount - prorated_amount
+
+    def compute_income_tax_breakup(self):
+        self.standard_tax_exemption_amount = 0
+        self.tax_exemption_declaration = 0
+        self.deductions_before_tax_calculation = 0
+        self.custom_perquisite_amount = 0
+
+        self.non_taxable_earnings = self.compute_non_taxable_earnings()
+        self.ctc = self.compute_ctc()
+        self.income_from_other_sources = self.get_income_form_other_sources()
+        self.total_earnings = self.ctc + self.income_from_other_sources
+
+        # Fetch payroll period once
+        payroll_period = frappe.get_value(
+            "Payroll Period",
+            {"company": self.company, "name": self.payroll_period.name},
+            ["name", "start_date", "end_date"],
+            as_dict=True,
+        )
+
+        # If payroll period is not found, return without further processing
+        if not payroll_period:
+            return
+
+        # If payroll period is found, process further
+        start_date = frappe.utils.getdate(payroll_period["start_date"])
+        end_date = frappe.utils.getdate(payroll_period["end_date"])
+        fiscal_year = payroll_period["name"]
+
+        # Calculate loan perquisites within the fiscal year
+        loan_repayments = frappe.get_list(
+            "Loan Repayment Schedule",
+            filters={
+                "custom_employee": self.employee,
+                "status": "Active",
+                "docstatus": 1,
+            },
+            fields=["name"],
+        )
+
+        total_perq = 0
+        for repayment in loan_repayments:
+            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
+            for entry in repayment_doc.custom_loan_perquisite:
+                if (
+                    entry.payment_date
+                    and start_date
+                    <= frappe.utils.getdate(entry.payment_date)
+                    <= end_date
+                ):
+                    total_perq += entry.perquisite_amount
+        self.custom_perquisite_amount = total_perq
+
+        # Tax slab logic
+        if hasattr(self, "tax_slab") and self.tax_slab:
+            if self.tax_slab.allow_tax_exemption:
+                self.standard_tax_exemption_amount = (
+                    self.tax_slab.standard_tax_exemption_amount
+                )
+                self.deductions_before_tax_calculation = (
+                    self.compute_annual_deductions_before_tax_calculation()
+                )
+
+            self.tax_exemption_declaration = (
+                self.get_total_exemption_amount() - self.standard_tax_exemption_amount
+            )
+
+        # Final Taxable Income Calculation
+        self.annual_taxable_amount = (
+            self.total_earnings
+            + self.custom_perquisite_amount
+            - (
+                self.non_taxable_earnings
+                + self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
+            )
+        )
+
+    def check_sal_struct(self):
+        ss = frappe.qb.DocType("Salary Structure")
+        ssa = frappe.qb.DocType("Salary Structure Assignment")
+
+        query = (
+            frappe.qb.from_(ssa)
+            .join(ss)
+            .on(ssa.salary_structure == ss.name)
+            .select(
+                ssa.salary_structure,
+                ssa.custom_payroll_period,
+                ssa.name,
+                ssa.income_tax_slab,
+                ssa.custom_tax_regime,
+                ssa.custom_state,
+                ssa.base,
+            )
+            .where(
+                (ssa.docstatus == 1)
+                & (ss.docstatus == 1)
+                & (ss.is_active == "Yes")
+                & (ssa.employee == self.employee)
+                & (
+                    (ssa.from_date <= self.start_date)
+                    | (ssa.from_date <= self.end_date)
+                    | (ssa.from_date <= self.joining_date)
+                )
+            )
+            .orderby(ssa.from_date, order=Order.desc)
+            .limit(1)
+        )
+
+        if not self.salary_slip_based_on_timesheet and self.payroll_frequency:
+            query = query.where(ss.payroll_frequency == self.payroll_frequency)
+
+        st_name = query.run()
+
+        if st_name:
+            self.salary_structure = st_name[0][0]
+            self.custom_payroll_period = st_name[0][1]
+            self.custom_salary_structure_assignment = st_name[0][2]
+            self.custom_income_tax_slab = st_name[0][3]
+            self.custom_tax_regime = st_name[0][4]
+            self.custom_employee_state = st_name[0][5]
+            self.custom_annual_ctc = st_name[0][6]
+
+            return self.salary_structure
+
+        else:
+            self.salary_structure = None
+            frappe.msgprint(
+                _(
+                    "No active or default Salary Structure found for employee {0} for the given dates"
+                ).format(self.employee),
+                title=_("Salary Structure Missing"),
+            )
+
+    def delete_bonus_accruals(self):
+        bonus_accruals = frappe.get_list(
+            "Employee Bonus Accrual",
+            filters={
+                "salary_slip": self.name,
+                "payroll_entry": self.payroll_entry,
+                "payroll_period": self.custom_payroll_period,
+            },
+            fields=["name"],
+        )
+
+        if bonus_accruals:
+            for accrual in bonus_accruals:
+                bonus_doc = frappe.get_doc("Employee Bonus Accrual", accrual.name)
+                bonus_doc.delete()
+
+    def delete_benefit_accruals(self):
+        benefit_accruals = frappe.get_list(
+            "Employee Benefit Accrual",
+            filters={
+                "salary_slip": self.name,
+                "payroll_entry": self.payroll_entry,
+                "payroll_period": self.custom_payroll_period,
+            },
+            fields=["name"],
+        )
+        if benefit_accruals:
+            for accrual in benefit_accruals:
+                benefit_doc = frappe.get_doc("Employee Benefit Accrual", accrual.name)
+                benefit_doc.delete()
+
+    def employee_accrual_insert(self):
+        if self.custom_salary_structure_assignment:
+            child_doc = frappe.get_doc(
+                "Salary Structure Assignment", self.custom_salary_structure_assignment
+            )
+            if child_doc.custom_employee_reimbursements:
+                for i in child_doc.custom_employee_reimbursements:
+                    accrual_insert = frappe.get_doc(
+                        {
+                            "doctype": "Employee Benefit Accrual",
+                            "employee": self.employee,
+                            "payroll_entry": self.payroll_entry,
+                            "amount": round(
+                                (i.monthly_total_amount / self.total_working_days)
+                                * self.payment_days
+                            ),
+                            "salary_component": i.reimbursements,
+                            "benefit_accrual_date": self.posting_date,
+                            "salary_slip": self.name,
+                            "payroll_period": child_doc.custom_payroll_period,
+                        }
+                    )
+                    accrual_insert.insert()
+                    accrual_insert.submit()
+
+    def insert_bonus_accruals(self):
+        for bonus in self.earnings:
+            bonus_component = frappe.get_doc("Salary Component", bonus.salary_component)
+
+            if bonus_component.custom_is_accrual == 1:
+                existing_accruals = frappe.get_list(
+                    "Employee Bonus Accrual",
+                    filters={
+                        "salary_slip": self.name,
+                        "salary_component": bonus_component.name,
+                        "payroll_entry": self.payroll_entry,
+                        "payroll_period": self.custom_payroll_period,
+                    },
+                    limit=1,
+                )
+
+                if not existing_accruals:
+                    accrual_doc = frappe.new_doc("Employee Bonus Accrual")
+                    accrual_doc.amount = bonus.amount
+                    accrual_doc.employee = self.employee
+                    accrual_doc.accrual_date = self.posting_date
+                    accrual_doc.salary_structure = self.salary_structure
+                    accrual_doc.salary_structure_assignment = (
+                        self.custom_salary_structure_assignment
+                    )
+                    accrual_doc.salary_component = bonus.salary_component
+                    accrual_doc.payroll_entry = self.payroll_entry
+                    accrual_doc.salary_slip = self.name
+                    accrual_doc.payroll_period = self.custom_payroll_period
+
+                    accrual_doc.insert()
+                    accrual_doc.submit()
 
     def calculate_variable_tax(self, tax_component):
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
@@ -509,24 +821,24 @@ class CustomSalarySlip(SalarySlip):
 
         return flt(result[0][0]) if result else 0.0
 
-    def on_cancel(self):
-        get_benefit_accrual = frappe.db.get_list(
-            "Employee Benefit Accrual",
-            filters={
-                "salary_slip": self.name,
-                "employee": self.employee,
-                "docstatus": 1,
-            },
-            fields=["*"],
-        )
+    # def on_cancel(self):
+    #     get_benefit_accrual = frappe.db.get_list(
+    #         "Employee Benefit Accrual",
+    #         filters={
+    #             "salary_slip": self.name,
+    #             "employee": self.employee,
+    #             "docstatus": 1,
+    #         },
+    #         fields=["*"],
+    #     )
 
-        if len(get_benefit_accrual) > 0:
-            for j in get_benefit_accrual:
-                arrear_doc = frappe.get_doc("Employee Benefit Accrual", j.name)
-                arrear_doc.docstatus = 2
-                arrear_doc.save()
+    #     if len(get_benefit_accrual) > 0:
+    #         for j in get_benefit_accrual:
+    #             arrear_doc = frappe.get_doc("Employee Benefit Accrual", j.name)
+    #             arrear_doc.docstatus = 2
+    #             arrear_doc.save()
 
-                frappe.delete_doc("Employee Benefit Accrual", j.name)
+    #             frappe.delete_doc("Employee Benefit Accrual", j.name)
 
     def food_coupon(self):
         food_coupon_array = []
@@ -623,339 +935,307 @@ class CustomSalarySlip(SalarySlip):
                         )
 
     def update_declaration_component(self):
-        if self.employee:
-            total_nps = []
-            total_epf = []
-            update_component_array = []
-            nps_component = []
-            epf_component = []
+        if not self.employee:
+            return
 
-            get_salary_component = frappe.get_list(
-                "Salary Component",
-                filters={"component_type": "NPS", "disabled": 0},
-                fields=["name"],
+        current_basic = current_hra = None
+
+        current_basic_value = (
+            current_hra_value
+        ) = current_nps_value = current_epf_value = current_pt_value = 0
+        previous_basic_value = (
+            previous_hra_value
+        ) = previous_nps_value = previous_epf_value = previous_pt_value = 0
+        future_basic_value = (
+            future_hra_value
+        ) = future_nps_value = future_epf_value = future_pt_value = 0
+
+        get_company = frappe.get_doc("Company", self.company)
+        if get_company.basic_component:
+            current_basic = get_company.basic_component
+        if get_company.hra_component:
+            current_hra = get_company.hra_component
+
+        salary_components = {
+            d.name: d.component_type
+            for d in frappe.get_list(
+                "Salary Component", fields=["name", "component_type"]
             )
-            if get_salary_component:
-                for all_nps_component in get_salary_component:
-                    nps_component.append(all_nps_component.name)
+        }
 
-            get_salary_component_epf = frappe.get_list(
-                "Salary Component",
-                filters={"component_type": "EPF", "disabled": 0},
-                fields=["name"],
-            )
-            if get_salary_component_epf:
-                for all_epf_component in get_salary_component_epf:
-                    epf_component.append(all_epf_component.name)
-
-            if self.custom_tax_regime == "Old Regime":
-                basic_array = []
-                hra_array = []
-
-                get_company = frappe.get_doc("Company", self.company)
-                basic_component = get_company.basic_component
-                hra_component = get_company.hra_component
-
-                if basic_component and hra_component:
-                    for get_component in self.earnings:
-                        if get_component.salary_component == basic_component:
-                            future_basic_amount = (
-                                get_component.custom_actual_amount
-                                * (self.custom_month_count)
-                                + get_component.amount
-                            )
-
-                        if get_component.salary_component == hra_component:
-                            future_hra_amount = (
-                                get_component.custom_actual_amount
-                                * (self.custom_month_count)
-                                + get_component.amount
-                            )
-
-                get_all_salary_slip = frappe.get_list(
-                    "Salary Slip",
-                    filters={
-                        "employee": self.employee,
-                        "custom_payroll_period": self.custom_payroll_period,
-                        "company": self.company,
-                        "docstatus": ["in", [0, 1]],
-                    },
-                    fields=["name"],
-                )
-                if get_all_salary_slip:
-                    for salary_slip in get_all_salary_slip:
-                        if salary_slip.name != self.name:
-                            each_salary_slip = frappe.get_doc(
-                                "Salary Slip", salary_slip.name
-                            )
-
-                            for earning_component in each_salary_slip.earnings:
-                                if earning_component.salary_component in nps_component:
-                                    total_nps.append(earning_component.amount)
-
-                                if (
-                                    earning_component.salary_component
-                                    == basic_component
-                                ):
-                                    basic_array.append(earning_component.amount)
-
-                                if earning_component.salary_component == hra_component:
-                                    hra_array.append(earning_component.amount)
-
-                            for deduction_component in each_salary_slip.deductions:
-                                if (
-                                    deduction_component.salary_component
-                                    in epf_component
-                                ):
-                                    total_epf.append(deduction_component.amount)
-
-                for k in self.earnings:
-                    if k.salary_component in nps_component:
-                        total_nps.append(k.amount)
-
-                        get_doc = frappe.get_doc("Salary Component", k.salary_component)
-                        if get_doc.custom_is_arrear == 0:
-                            nps_ctc = (
-                                k.amount * self.total_working_days
-                            ) / self.payment_days
-                            total_nps.append(nps_ctc * self.custom_month_count)
-
-                for j in self.deductions:
-                    if j.salary_component in epf_component:
-                        total_epf.append(j.amount)
-
-                        get_doc = frappe.get_doc("Salary Component", j.salary_component)
-                        if get_doc.custom_is_arrear == 0:
-                            epf_ctc = round(
-                                (j.amount * self.total_working_days) / self.payment_days
-                            )
-
-                            total_epf.append(epf_ctc * self.custom_month_count)
-
-                total_nps_sum = sum(total_nps)
-                total_epf_sum = sum(total_epf)
-
-                basic_sum = sum(basic_array)
-                hra_sum = sum(hra_array)
-
-                # frappe.msgprint(str(total_nps_sum))
-
-                for i in self.earnings:
-                    components = frappe.get_list(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"custom_salary_component": i.salary_component},
-                        fields=["*"],
+        if self.earnings:
+            for earning in self.earnings:
+                component_type = salary_components.get(earning.salary_component)
+                if component_type == "NPS":
+                    current_nps_value = earning.amount
+                    future_nps_value = (earning.custom_actual_amount) * (
+                        self.custom_month_count
                     )
-                    if len(components) > 0:
-                        update_component_array.append(
-                            {
-                                "component": components[0].name,
-                                "amount": total_nps_sum,
-                                "max_amount": total_nps_sum,
-                            }
+                if earning.salary_component == current_basic:
+                    current_basic_value = earning.amount
+                    future_basic_value = (earning.custom_actual_amount) * (
+                        self.custom_month_count
+                    )
+                if earning.salary_component == current_hra:
+                    current_hra_value = earning.amount
+                    future_hra_value = (earning.custom_actual_amount) * (
+                        self.custom_month_count
+                    )
+
+        if self.deductions:
+            for deduction in self.deductions:
+                component_type = salary_components.get(deduction.salary_component)
+                if component_type == "EPF":
+                    current_epf_value = deduction.amount
+                    future_epf_value = (deduction.custom_actual_amount) * (
+                        self.custom_month_count
+                    )
+                if component_type == "Professional Tax":
+                    current_pt_value = deduction.amount
+                    future_pt_value = (deduction.custom_actual_amount) * (
+                        self.custom_month_count
+                    )
+        get_previous_salary_slip = frappe.get_list(
+            "Salary Slip",
+            filters={
+                "employee": self.employee,
+                "custom_payroll_period": self.custom_payroll_period,
+                "docstatus": 1,
+                "name": ["!=", self.name],
+            },
+            fields=["name", "custom_payroll_period"],
+        )
+        if get_previous_salary_slip:
+            for slip in get_previous_salary_slip:
+                previous_salary_slip = frappe.get_doc("Salary Slip", slip.name)
+                if previous_salary_slip.earnings:
+                    for earning in previous_salary_slip.earnings:
+                        component_type = salary_components.get(earning.salary_component)
+                        if component_type == "NPS":
+                            previous_nps_value += earning.amount
+                        if earning.salary_component == current_basic:
+                            previous_basic_value += earning.amount
+                        if earning.salary_component == current_hra:
+                            previous_hra_value += earning.amount
+
+                if previous_salary_slip.deductions:
+                    for deduction in previous_salary_slip.deductions:
+                        component_type = salary_components.get(
+                            deduction.salary_component
                         )
+                        if component_type == "EPF":
+                            previous_epf_value += deduction.amount
+                        if component_type == "Professional Tax":
+                            previous_pt_value += deduction.amount
 
-                for g in self.deductions:
-                    ded_components = frappe.get_list(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"custom_salary_component": g.salary_component},
-                        fields=["*"],
-                    )
-                    if ded_components:
-                        for k in ded_components:
-                            if k.custom_component_type == "EPF":
-                                if total_epf_sum > k.max_amount:
-                                    update_component_array.append(
-                                        {
-                                            "component": k.name,
-                                            "amount": k.max_amount,
-                                            "max_amount": k.max_amount,
-                                        }
-                                    )
+        if self.custom_tax_regime == "Old Regime":
+            declaration = frappe.get_list(
+                "Employee Tax Exemption Declaration",
+                filters={
+                    "employee": self.employee,
+                    "payroll_period": self.custom_payroll_period,
+                    "docstatus": 1,
+                    "company": self.company,
+                },
+                fields=["*"],
+            )
+            if declaration:
+                form_data = json.loads(
+                    declaration[0].custom_declaration_form_data or "{}"
+                )
+                get_each_doc = frappe.get_doc(
+                    "Employee Tax Exemption Declaration", declaration[0].name
+                )
 
-                                else:
-                                    update_component_array.append(
-                                        {
-                                            "component": k.name,
-                                            "amount": total_epf_sum,
-                                            "max_amount": k.max_amount,
-                                        }
-                                    )
+                form_data["nineNumber"] = round(
+                    previous_nps_value + future_nps_value + current_nps_value
+                )
+                form_data["pfValue"] = min(
+                    round(previous_epf_value + future_epf_value + current_epf_value),
+                    150000,
+                )
+                form_data["nineteenNumber"] = round(
+                    previous_pt_value + future_pt_value + current_pt_value
+                )
 
-                # frappe.msgprint(str(update_component_array))
+                get_each_doc.custom_posting_date = self.posting_date
+                get_each_doc.custom_declaration_form_data = json.dumps(form_data)
 
-                if update_component_array:
-                    declaration = frappe.get_list(
-                        "Employee Tax Exemption Declaration",
+                if get_each_doc.monthly_house_rent > 0:
+                    ss_assignment = frappe.get_list(
+                        "Salary Structure Assignment",
                         filters={
                             "employee": self.employee,
-                            "payroll_period": self.custom_payroll_period,
                             "docstatus": 1,
                             "company": self.company,
+                            "custom_payroll_period": self.custom_payroll_period,
                         },
-                        fields=["*"],
+                        fields=[
+                            "name",
+                            "from_date",
+                            "custom_payroll_period",
+                            "salary_structure",
+                        ],
+                        order_by="from_date desc",
                     )
-                    if declaration:
-                        form_data = json.loads(
-                            declaration[0].custom_declaration_form_data or "{}"
+
+                    if ss_assignment:
+                        first_assignment = next(iter(ss_assignment))
+                        first_assignment_date = first_assignment.get("from_date")
+                        first_assignment_structure = first_assignment.get(
+                            "salary_structure"
                         )
 
-                        get_each_doc = frappe.get_doc(
-                            "Employee Tax Exemption Declaration", declaration[0].name
-                        )
+                        start_date = ss_assignment[-1].from_date
+                        if ss_assignment[-1].custom_payroll_period:
+                            payroll_period = frappe.get_doc(
+                                "Payroll Period",
+                                ss_assignment[-1].custom_payroll_period,
+                            )
+                            end_date = payroll_period.end_date
+                            month_count = (
+                                (end_date.year - start_date.year) * 12
+                                + end_date.month
+                                - start_date.month
+                                + 1
+                            )
 
-                        for ki in update_component_array:
-                            if (
-                                ki["component"]
-                                == "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
-                            ):
-                                form_data["nineNumber"] = round(ki["amount"])
-
-                            if ki["component"] == "Investments In PF(Auto)":
-                                form_data["pfValue"] = round(ki["amount"])
-
-                        get_each_doc.custom_posting_date = self.posting_date
-                        get_each_doc.custom_declaration_form_data = json.dumps(
-                            form_data
-                        )
-
-                        # update hra exemption
-
-                        if get_each_doc.monthly_house_rent > 0:
-                            percentage = (future_basic_amount + basic_sum) * 10 / 100
-                            annual_hra_exemption = (
-                                get_each_doc.monthly_house_rent * 12
-                            ) - percentage
+                            percentage = (
+                                (
+                                    previous_basic_value
+                                    + future_basic_value
+                                    + current_basic_value
+                                )
+                                * 10
+                                / 100
+                            )
                             get_each_doc.custom_check = 1
                             get_each_doc.custom_basic_as_per_salary_structure = round(
                                 percentage
                             )
                             get_each_doc.salary_structure_hra = round(
-                                future_hra_amount + hra_sum
+                                previous_hra_value
+                                + future_hra_value
+                                + current_hra_value
                             )
                             get_each_doc.custom_basic = round(
-                                future_basic_amount + basic_sum
+                                previous_basic_value
+                                + future_basic_value
+                                + current_basic_value
                             )
 
-                            exemption = (
-                                get_each_doc.total_exemption_amount
-                                - get_each_doc.annual_hra_exemption
+                            total_basic_amount = round(
+                                previous_basic_value
+                                + future_basic_value
+                                + current_basic_value
+                            )
+                            total_hra_amount = round(
+                                previous_hra_value
+                                + future_hra_value
+                                + current_hra_value
                             )
 
-                            get_each_doc.total_exemption_amount = round(
-                                exemption + annual_hra_exemption
+                            annual_hra_amount = (
+                                get_each_doc.monthly_house_rent * month_count
                             )
+
+                            basic_rule2 = round(annual_hra_amount - percentage)
+
+                            if get_each_doc.rented_in_metro_city == 0:
+                                non_metro_or_metro = (total_basic_amount * 40) / 100
+                            elif get_each_doc.rented_in_metro_city == 1:
+                                non_metro_or_metro = (total_basic_amount * 50) / 100
+
+                            # HRA Exemption rule
+                            final_hra_exemption = round(
+                                min(basic_rule2, annual_hra_amount, non_metro_or_metro)
+                            )
+
                             get_each_doc.annual_hra_exemption = round(
-                                annual_hra_exemption
+                                final_hra_exemption
                             )
                             get_each_doc.monthly_hra_exemption = round(
-                                annual_hra_exemption / 12
+                                final_hra_exemption / month_count
                             )
 
-                        get_each_doc.workflow_state = "Approved"
-                        get_each_doc.save()
-                        frappe.db.commit()
-                        self.tax_exemption_declaration = (
-                            get_each_doc.total_exemption_amount
-                        )
+                            months = []
+                            current_date = start_date
 
-            if self.custom_tax_regime == "New Regime":
-                get_all_salary_slip = frappe.get_list(
-                    "Salary Slip",
-                    filters={
-                        "employee": self.employee,
-                        "custom_payroll_period": self.custom_payroll_period,
-                        "docstatus": ["in", [0, 1]],
-                    },
-                    fields=["name"],
+                            while current_date <= end_date:
+                                month_name = current_date.strftime("%B")
+                                if month_name not in months:
+                                    months.append(month_name)
+                                current_date = (
+                                    current_date.replace(day=28) + timedelta(days=4)
+                                ).replace(day=1)
+
+                            earned_basic = 0
+                            if get_each_doc.rented_in_metro_city == 1:
+                                earned_basic = (
+                                    (
+                                        get_each_doc.custom_basic_as_per_salary_structure
+                                        * 10
+                                    )
+                                    * 50
+                                    / 100
+                                )
+                            else:
+                                earned_basic = (
+                                    (
+                                        get_each_doc.custom_basic_as_per_salary_structure
+                                        * 10
+                                    )
+                                    * 40
+                                    / 100
+                                )
+
+                            get_each_doc.custom_hra_breakup = []
+                            for i in range(len(months)):
+                                get_each_doc.append(
+                                    "custom_hra_breakup",
+                                    {
+                                        "month": months[i],
+                                        "rent_paid": round(annual_hra_amount),
+                                        "hra_received": round(total_hra_amount),
+                                        "earned_basic": round(earned_basic),
+                                        "excess_of_rent_paid": round(basic_rule2),
+                                        "exemption_amount": final_hra_exemption,
+                                    },
+                                )
+
+                get_each_doc.save()
+                frappe.db.commit()
+                self.tax_exemption_declaration = get_each_doc.total_exemption_amount
+
+        if self.custom_tax_regime == "New Regime":
+            declaration = frappe.get_list(
+                "Employee Tax Exemption Declaration",
+                filters={
+                    "employee": self.employee,
+                    "payroll_period": self.custom_payroll_period,
+                    "docstatus": 1,
+                    "company": self.company,
+                },
+                fields=["*"],
+            )
+            if declaration:
+                form_data = json.loads(
+                    declaration[0].custom_declaration_form_data or "{}"
                 )
-                if get_all_salary_slip:
-                    for salary_slip in get_all_salary_slip:
-                        if salary_slip.name != self.name:
-                            each_salary_slip = frappe.get_doc(
-                                "Salary Slip", salary_slip.name
-                            )
+                get_each_doc = frappe.get_doc(
+                    "Employee Tax Exemption Declaration", declaration[0].name
+                )
 
-                            for earning_component in each_salary_slip.earnings:
-                                if earning_component.salary_component in nps_component:
-                                    total_nps.append(earning_component.amount)
+                form_data["nineNumber"] = round(
+                    previous_nps_value + future_nps_value + current_nps_value
+                )
 
-                for k in self.earnings:
-                    if k.salary_component in nps_component:
-                        total_nps.append(k.amount)
+                get_each_doc.custom_posting_date = self.posting_date
+                get_each_doc.custom_declaration_form_data = json.dumps(form_data)
 
-                        get_doc = frappe.get_doc("Salary Component", k.salary_component)
-                        if get_doc.custom_is_arrear == 0:
-                            nps_ctc = (
-                                k.amount * self.total_working_days
-                            ) / self.payment_days
-                            total_nps.append(nps_ctc * self.custom_month_count)
-
-                total_nps_sum = sum(total_nps)
-                # frappe.msgprint(str(total_nps_sum))
-
-                for i in self.earnings:
-                    components = frappe.get_list(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"custom_salary_component": i.salary_component},
-                        fields=["*"],
-                    )
-                    if len(components) > 0:
-                        update_component_array.append(
-                            {
-                                "component": components[0].name,
-                                "amount": total_nps_sum,
-                                "max_amount": total_nps_sum,
-                            }
-                        )
-                if update_component_array:
-                    # frappe.msgprint(str(update_component_array))
-
-                    declaration = frappe.get_list(
-                        "Employee Tax Exemption Declaration",
-                        filters={
-                            "employee": self.employee,
-                            "payroll_period": self.custom_payroll_period,
-                            "docstatus": 1,
-                        },
-                        fields=["*"],
-                    )
-                    if declaration:
-                        form_data = json.loads(
-                            declaration[0].custom_declaration_form_data or "{}"
-                        )
-
-                        get_each_doc = frappe.get_doc(
-                            "Employee Tax Exemption Declaration", declaration[0].name
-                        )
-
-                        for ki in update_component_array:
-                            if (
-                                ki["component"]
-                                == "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
-                            ):
-                                form_data["nineNumber"] = round(ki["amount"])
-
-                        get_each_doc.custom_posting_date = self.posting_date
-                        get_each_doc.custom_declaration_form_data = json.dumps(
-                            form_data
-                        )
-
-                        for each_component in get_each_doc.declarations:
-                            for ki in update_component_array:
-                                if (
-                                    each_component.exemption_sub_category
-                                    == ki["component"]
-                                ):
-                                    each_component.amount = ki["amount"]
-                                    each_component.max_amount = ki["max_amount"]
-
-                        get_each_doc.workflow_state = "Approved"
-                        get_each_doc.save()
-                        frappe.db.commit()
-                        self.tax_exemption_declaration = (
-                            get_each_doc.total_exemption_amount
-                        )
+                get_each_doc.save()
+                frappe.db.commit()
+                self.tax_exemption_declaration = get_each_doc.total_exemption_amount
 
     def update_nps(self):
         if self.earnings:
@@ -1152,17 +1432,40 @@ class CustomSalarySlip(SalarySlip):
                     k.custom_actual_amount = k.amount
 
     def actual_amount_ctc(self):
-        if len(self.earnings) > 0:
+        if self.earnings:
             for k in self.earnings:
-                salary_component_doc = frappe.get_doc(
-                    "Salary Component", k.salary_component
-                )
-
-                if salary_component_doc.custom_is_arrear == 0:
-                    nps_ctc = (k.amount * self.total_working_days) / self.payment_days
-                    k.custom_actual_amount = nps_ctc
+                if self.payment_days and self.payment_days > 0:
+                    k.custom_actual_amount = round(
+                        (k.amount * self.total_working_days) / self.payment_days
+                    )
                 else:
                     k.custom_actual_amount = 0
+
+        if self.deductions:
+            for deduction in self.deductions:
+                component_doc = frappe.get_doc(
+                    "Salary Component", deduction.salary_component
+                )
+                original_amount = float(deduction.amount or 0)
+
+                if self.payment_days and self.payment_days > 0:
+                    deduction.custom_actual_amount = round(
+                        (original_amount * self.total_working_days) / self.payment_days
+                    )
+                else:
+                    deduction.custom_actual_amount = 0
+
+                if component_doc.component_type == "ESIC":
+                    deduction.amount = math.ceil(original_amount)
+                else:
+                    deduction.amount = round(original_amount)
+
+        if self.total_deduction or self.total_loan_repayment:
+            self.custom_total_deduction_amount = (self.total_deduction or 0) + (
+                self.total_loan_repayment or 0
+            )
+        else:
+            self.custom_total_deduction_amount = 0
 
     def accrual_update(self):
         if self.leave_without_pay > 0:
@@ -1301,18 +1604,18 @@ class CustomSalarySlip(SalarySlip):
                     if earnings.salary_component == component_data["component"]:
                         earnings.amount = component_data["total_amount"]
 
-    def compute_ctc(self):
-        if hasattr(self, "previous_taxable_earnings"):
-            return (
-                self.previous_taxable_earnings_before_exemption
-                + self.current_structured_taxable_earnings_before_exemption
-                + self.future_structured_taxable_earnings_before_exemption
-                + self.current_additional_earnings
-                + self.other_incomes
-                + self.unclaimed_taxable_benefits
-                + self.non_taxable_earnings
-            )
-        return 0
+    # def compute_ctc(self):
+    #     if hasattr(self, "previous_taxable_earnings"):
+    #         return (
+    #             self.previous_taxable_earnings_before_exemption
+    #             + self.current_structured_taxable_earnings_before_exemption
+    #             + self.future_structured_taxable_earnings_before_exemption
+    #             + self.current_additional_earnings
+    #             + self.other_incomes
+    #             + self.unclaimed_taxable_benefits
+    #             + self.non_taxable_earnings
+    #         )
+    #     return 0
 
     def insert_lop_days(self):
         benefit_application_days = frappe.get_list(
@@ -1820,38 +2123,38 @@ class CustomSalarySlip(SalarySlip):
                     },
                 )
 
-    def employee_accrual_insert(self):
-        if self.employee:
-            ss_assignment = frappe.get_list(
-                "Salary Structure Assignment",
-                filters={"employee": self.employee, "docstatus": 1},
-                fields=["name"],
-                order_by="from_date desc",
-                limit=1,
-            )
+    # def employee_accrual_insert(self):
+    #     if self.employee:
+    #         ss_assignment = frappe.get_list(
+    #             "Salary Structure Assignment",
+    #             filters={"employee": self.employee, "docstatus": 1},
+    #             fields=["name"],
+    #             order_by="from_date desc",
+    #             limit=1,
+    #         )
 
-            if ss_assignment:
-                child_doc = frappe.get_doc(
-                    "Salary Structure Assignment", ss_assignment[0].name
-                )
+    #         if ss_assignment:
+    #             child_doc = frappe.get_doc(
+    #                 "Salary Structure Assignment", ss_assignment[0].name
+    #             )
 
-                for i in child_doc.custom_employee_reimbursements:
-                    accrual_insert = frappe.get_doc(
-                        {
-                            "doctype": "Employee Benefit Accrual",
-                            "employee": self.employee,
-                            "payroll_entry": self.payroll_entry,
-                            "amount": round(
-                                (i.monthly_total_amount / self.total_working_days)
-                                * self.payment_days
-                            ),
-                            "salary_component": i.reimbursements,
-                            "benefit_accrual_date": self.posting_date,
-                            "salary_slip": self.name,
-                            "payroll_period": child_doc.custom_payroll_period,
-                        }
-                    )
-                    accrual_insert.insert()
+    #             for i in child_doc.custom_employee_reimbursements:
+    #                 accrual_insert = frappe.get_doc(
+    #                     {
+    #                         "doctype": "Employee Benefit Accrual",
+    #                         "employee": self.employee,
+    #                         "payroll_entry": self.payroll_entry,
+    #                         "amount": round(
+    #                             (i.monthly_total_amount / self.total_working_days)
+    #                             * self.payment_days
+    #                         ),
+    #                         "salary_component": i.reimbursements,
+    #                         "benefit_accrual_date": self.posting_date,
+    #                         "salary_slip": self.name,
+    #                         "payroll_period": child_doc.custom_payroll_period,
+    #                     }
+    #                 )
+    #                 accrual_insert.insert()
 
     def employee_accrual_submit(self):
         if self.employee:
@@ -1980,19 +2283,8 @@ class CustomSalarySlip(SalarySlip):
         if latest_payroll_period:
             self.custom_payroll_period = latest_payroll_period[0].name
 
-        # if self.custom_tax_regime:
-
-        #     for earning in self.earnings:
-
-        #         if earning.custom_regime==self.custom_tax_regime and earning.is_tax_applicable==1:
-        #             earning.custom_taxable=1
-        #         if earning.custom_regime=="None" and earning.is_tax_applicable==1:
-        #             earning.custom_taxable=1
-        #         if earning.custom_regime=="None" and earning.is_tax_applicable==0:
-        #             earning.custom_taxable=0
-
-    def add_employee_benefits(self):
-        pass
+    # def add_employee_benefits(self):
+    #     pass
 
     def tax_calculation(self):
         latest_salary_structure = frappe.get_list(
