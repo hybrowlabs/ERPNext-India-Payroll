@@ -101,17 +101,18 @@ class CustomSalarySlip(SalarySlip):
         self.tax_calculation()
         self.calculate_grosspay()
 
-        self.custom_previous_taxable_earnings = (
-            self.previous_taxable_earnings_before_exemption
-        )
-        self.custom_current_taxable_earnings = (
-            self.current_structured_taxable_earnings_before_exemption
-        )
+        # self.custom_previous_taxable_earnings = (
+        #     self.previous_taxable_earnings_before_exemption
 
-        self.custom_future_taxable_earnings = (
-            self.future_structured_taxable_earnings_before_exemption
-        )
-        self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
+        # )
+        # self.custom_current_taxable_earnings = (
+        #     self.current_structured_taxable_earnings_before_exemption
+        # )
+
+        # self.custom_future_taxable_earnings = (
+        #     self.future_structured_taxable_earnings_before_exemption
+        # )
+        # self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
         # if self.earnings:
         #     total_ctc_taxable_amount = 0
         #     for earning in self.earnings:
