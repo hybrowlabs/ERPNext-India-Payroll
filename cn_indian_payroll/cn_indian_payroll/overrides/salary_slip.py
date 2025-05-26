@@ -40,7 +40,7 @@ class CustomSalarySlip(SalarySlip):
         super().on_submit()
         self.insert_bonus_accruals()
         self.employee_accrual_insert()
-        # self.update_benefit_claim_amount()
+        self.update_benefit_claim_amount()
 
     def validate(self):
         super().validate()
@@ -54,15 +54,6 @@ class CustomSalarySlip(SalarySlip):
         self.set_taxale()
         self.actual_amount_ctc()
         self.set_month()
-
-        # if self.leave_without_pay > 0:
-        #     # self.insert_lta_reimbursement_lop()
-        #     self.accrual_update()
-        #     self.driver_reimbursement_lop()
-        # if self.leave_without_pay == 0:
-        #     self.insert_lta_reimbursement()
-        #     self.insert_reimbursement()
-        #     self.driver_reimbursement()
 
         self.update_declaration_component()
         self.update_total_lop()
@@ -107,18 +98,45 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_month_count = sub_period - 1
 
-    # def update_benefit_claim_amount(self):
-    #     if self.earnings:
-    #         for earning in self.earnings:
-    #             if earning.additional_salary:
-    #                 additional_salary = frappe.get_doc(
-    #                     "Additional Salary", earning.additional_salary
-    #                 )
-    #                 if additional_salary.ref_doctype=="Employee Benefit Claim" and additional_salary.ref_docname:
-    #                     get_benefit_doc=frappe.get_doc(
-    #                         "Employee Benefit Claim", additional_salary.ref_docname
-    #                     )
-    #                     get_benefit_doc.is_paid=1
+    def update_benefit_claim_amount(self):
+        if not self.earnings:
+            return
+
+        for earning in self.earnings:
+            additional_salary_name = earning.get("additional_salary")
+            if not additional_salary_name:
+                continue
+
+            # Fetch the Additional Salary document safely
+            additional_salary = frappe.get_value(
+                "Additional Salary",
+                additional_salary_name,
+                ["ref_doctype", "ref_docname"],
+            )
+
+            if not additional_salary:
+                frappe.log_error(
+                    f"Additional Salary '{additional_salary_name}' not found.",
+                    "update_benefit_claim_amount",
+                )
+                continue
+
+            ref_doctype, ref_docname = additional_salary
+
+            # Check if it's linked to an Employee Benefit Claim
+            if ref_doctype == "Employee Benefit Claim" and ref_docname:
+                try:
+                    benefit_claim = frappe.get_doc(
+                        "Employee Benefit Claim", ref_docname
+                    )
+                    benefit_claim.custom_is_paid = 1
+                    benefit_claim.custom_paid_amount = earning.amount
+                    benefit_claim.save(ignore_permissions=True)
+                except frappe.DoesNotExistError:
+                    frappe.log_error(
+                        f"Employee Benefit Claim '{ref_docname}' not found.",
+                        "update_benefit_claim_amount",
+                    )
 
     def apply_lop_amount_in_reimbursement_component(self):
         if not self.custom_salary_structure_assignment:

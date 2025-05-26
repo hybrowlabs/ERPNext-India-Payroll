@@ -268,7 +268,7 @@ doctype_js = {
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
-    # "Full and Final Statement": "public/js/f_and_f.js",
+    "Full and Final Statement": "public/js/f_and_f.js",
     "Form 16": "public/js/form16.js",
     "Leave Encashment": "public/js/leave_encashment.js",
     "Company": "public/js/company.js",
@@ -282,7 +282,7 @@ override_doctype_class = {
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
-    "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.CustomFullAndFinalStatement",
+    "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
 }
 
 doc_events = {
