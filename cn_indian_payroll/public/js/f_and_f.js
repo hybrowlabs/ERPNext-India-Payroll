@@ -8,15 +8,18 @@ frappe.ui.form.on('Full and Final Statement', {
         if(frm.doc.employee)
         {
 
-            earning_component(frm).then(() => {
-                // Ensure payables table is updated BEFORE calling this
-                get_leave_encashment(frm);
-            });
-            // earning_component(frm)
-            deduction_component(frm)
-            get_outstanding_benefits(frm)
-            get_tax(frm)
-            // get_leave_encashment(frm)
+            // earning_component(frm).then(() => {
+            //     // Ensure payables table is updated BEFORE calling this
+            //     get_leave_encashment(frm);
+            // });
+            // // earning_component(frm)
+            // deduction_component(frm)
+            // get_outstanding_benefits(frm)
+            // get_tax(frm)
+            // // get_leave_encashment(frm)
+
+            get_accrued_components(frm)
+
 
 
 
@@ -56,6 +59,115 @@ frappe.ui.form.on('Leave Encashment Child', {
 
     }
 });
+
+
+
+function get_accrued_components(frm) {
+    if (!frm.doc.employee) return;
+
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.get_accrued_components",
+        args: {
+            employee: frm.doc.employee,
+            company: frm.doc.company,
+            relieving_date: frm.doc.relieving_date,
+        },
+        callback: function (response) {
+            frm.clear_table('custom_accrued_benefit');
+            frm.clear_table('custom_accrued_component_summary');
+
+            if (response.message) {
+                const bonusList = response.message.bonus_list || [];
+                const reimbursementList = response.message.reimbursement_list || [];
+                const final_arrayList = response.message.final_array || [];
+
+                // Add bonus entries
+                bonusList.forEach(row => {
+                    let child = frm.add_child('custom_accrued_benefit');
+                    child.date = row.date;
+                    child.payment_days = row.payment_days;
+                    child.salary_slip_id = row.salary_slip_id;
+                    child.salary_component = row.salary_component;
+                    child.accrued_amount = row.accrued_amount;
+                });
+
+                // Add reimbursement entries
+                reimbursementList.forEach(row => {
+                    let child = frm.add_child('custom_accrued_benefit');
+                    child.date = row.date;
+                    child.payment_days = row.payment_days;
+                    child.salary_slip_id = row.salary_slip_id;
+                    child.salary_component = row.salary_component;
+                    child.accrued_amount = row.accrued_amount;
+                    child.claimed_amount = row.claimed_amount;
+                });
+
+                // Process final array and update payables
+                final_arrayList.forEach(row => {
+                    if (row.balance_amount > 0) {
+                        frappe.call({
+                            method: "frappe.client.get",
+                            args: {
+                                doctype: "Salary Component",
+                                name: row.component
+                            },
+                            callback: function (res) {
+                                if (res.message) {
+                                    const component = res.message;
+
+                                    if (
+                                        component.custom_is_accrual === 1 &&
+                                        component.custom_paidout_component
+                                    ) {
+
+                                        console.log(component.custom_paidout_component)
+                                        frm.doc.payables.forEach(v => {
+                                            if (v.custom_reference_component === component.custom_paidout_component) {
+                                                v.amount = row.balance_amount;
+                                            }
+                                        });
+                                        frm.refresh_field('payables');
+                                    }
+                                }
+                            }
+                        });
+
+                        frm.doc.payables.forEach(v => {
+                            if (v.custom_reference_component === row.component) {
+                                v.amount = row.balance_amount;
+                            }
+                        });
+                        frm.refresh_field('payables');
+                    }
+
+                    // if (row.balance_amount <= 0) {
+                    //     frm.doc.receivables.forEach(v => {
+                    //         if (v.custom_reference_component === row.component) {
+                    //             v.amount = row.balance_amount;
+                    //         }
+                    //     });
+                    //     frm.refresh_field('receivables');
+
+                    // }
+
+                    // Always add component summary
+                    const child = frm.add_child('custom_accrued_component_summary');
+                    child.salary_component = row.component;
+                    child.total_accrued_amount = row.accrued_amount;
+                    child.total_settled_amount = row.claimed_amount;
+                    child.balance_amount = row.balance_amount;
+                });
+
+                frm.refresh_field('custom_accrued_component_summary');
+
+            }
+
+            frm.refresh_field('custom_accrued_benefit');
+            frm.refresh_field('custom_accrued_component_summary');
+        }
+    });
+}
+
 
 
 

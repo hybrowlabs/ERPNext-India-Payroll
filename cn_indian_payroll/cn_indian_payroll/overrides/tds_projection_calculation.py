@@ -18,8 +18,8 @@ def get_doc_data(doc_name, employee, company, payroll_period):
     pt_amount = 0
     nps_amount = 0
 
-    old_annual_taxable_income = []
-    new_annual_taxable_income = []
+    start = None
+    end = None
 
     if employee:
         latest_salary_structure = frappe.get_list(

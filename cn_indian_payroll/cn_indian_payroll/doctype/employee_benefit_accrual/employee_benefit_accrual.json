@@ -19,7 +19,9 @@
   "payroll_period",
   "benefit_accrual_date",
   "allow_claim_across_outside_payroll_period",
-  "salary_slip"
+  "salary_slip",
+  "payment_days",
+  "working_days"
  ],
  "fields": [
   {
@@ -119,12 +121,28 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salary_slip.payment_days",
+   "fieldname": "payment_days",
+   "fieldtype": "Float",
+   "label": "Payment Days",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salary_slip.total_working_days",
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-15 16:35:19.024469",
+ "modified": "2025-05-22 16:33:23.702786",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",
