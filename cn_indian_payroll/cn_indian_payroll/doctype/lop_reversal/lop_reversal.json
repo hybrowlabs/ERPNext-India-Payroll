@@ -9,6 +9,7 @@
   "lop_reversal_details_section",
   "employee",
   "payroll_entry",
+  "payroll_period",
   "auto_submit",
   "company",
   "salary_slip",
@@ -147,6 +148,13 @@
    "fieldtype": "Float",
    "label": "LOP Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -154,10 +162,10 @@
  "links": [
   {
    "link_doctype": "Additional Salary",
-   "link_fieldname": "custom_lop_reversal"
+   "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2024-11-20 17:38:57.945680",
+ "modified": "2025-05-27 16:13:09.064867",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
@@ -181,6 +189,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
