@@ -29,47 +29,48 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     #     super().validate()
 
-    def before_save(self):
-        if self.custom_tax_regime == "Old Regime":
-            form_data = json.loads(self.custom_declaration_form_data or "{}")
+    # def before_save(self):
+    #     if self.custom_tax_regime == "Old Regime":
+    #         form_data = json.loads(self.custom_declaration_form_data or "{}")
 
-            for k in self.declarations:
-                if k.exemption_sub_category == "Investments In PF(Auto)":
-                    form_data["pfValue"] = round(k.amount)
+    #         for k in self.declarations:
+    #             if k.exemption_sub_category == "Investments In PF(Auto)":
+    #                 form_data["pfValue"] = round(k.amount)
 
-                elif (
-                    k.exemption_sub_category
-                    == "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
-                ):
-                    form_data["nineNumber"] = round(k.amount)
+    #             elif (
+    #                 k.exemption_sub_category
+    #                 == "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
+    #             ):
+    #                 form_data["nineNumber"] = round(k.amount)
 
-                elif k.exemption_sub_category == "P.T. Paid by employee":
-                    form_data["nineteenNumber"] = round(k.amount)
+    #             elif k.exemption_sub_category == "P.T. Paid by employee":
+    #                 form_data["nineteenNumber"] = round(k.amount)
 
-            self.custom_declaration_form_data = json.dumps(form_data)
+    #         self.custom_declaration_form_data = json.dumps(form_data)
 
-        if self.custom_tax_regime == "New Regime":
-            form_data = json.loads(self.custom_declaration_form_data or "{}")
+    #     if self.custom_tax_regime == "New Regime":
+    #         form_data = json.loads(self.custom_declaration_form_data or "{}")
 
-            for k in self.declarations:
-                if (
-                    k.exemption_sub_category
-                    == "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
-                ):
-                    form_data["nineNumber"] = round(k.amount)
+    #         for k in self.declarations:
+    #             if (
+    #                 k.exemption_sub_category
+    #                 == "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)"
+    #             ):
+    #                 form_data["nineNumber"] = round(k.amount)
 
-            self.custom_declaration_form_data = json.dumps(form_data)
+    #         self.custom_declaration_form_data = json.dumps(form_data)
 
     def before_update_after_submit(self):
+        pass
         # self.process_form_data()
-        self.mediclaim_condition()
+        # self.mediclaim_condition()
 
-        self.calculate_hra_breakup()
-        self.update_tax_declaration()
-        self.validation_on_section10()
-        self.set_total_declared_amount()
-        self.set_total_exemption_amount()
-        self.update_json_data()
+        # self.calculate_hra_breakup()
+        # self.update_tax_declaration()
+        # self.validation_on_section10()
+        # self.set_total_declared_amount()
+        # self.set_total_exemption_amount()
+        # self.update_json_data()
 
 
     def update_json_data(self):

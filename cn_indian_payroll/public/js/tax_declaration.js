@@ -3856,237 +3856,152 @@ var array
 frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
-
-  refresh:function(frm)
-  {
-
-
-    tds_projection_html(frm)
-
-
-
-
-
-      if(frm.doc.custom_tax_regime=="Old Regime")
-      {
-
-
-
-      frm.set_df_property("custom_declaration_form","hidden",0)
-      const wrapper = frm.fields_dict.custom_declaration_form.$wrapper;
-      const formContainer = document.createElement("div");
-      wrapper.html('');
-      wrapper.append(formContainer);
-
-      // Create Form.io form
-      Formio.createForm(formContainer, DECLARATION_FORM, { baseUrl: window?.location?.origin || '' })
-          .then((form) => {
-              window.cur_formioInstance = form;
-
-              // Pre-fill the form with saved data (if available)
-              const savedData = frm.doc.custom_declaration_form_data
-                  ? JSON.parse(frm.doc.custom_declaration_form_data)
-                  : {};
-
-              const defaultData = { pfValue: 0, aValue2: 0, bValue1: 0,amount4:0,dValue1:0,eValue1:0,fValue1:0,gValue1:0,hValue1:0,iValue1:0,jValue1:0,kValue1:0,kValue2:0,...savedData };
-
-              form.submission = { data: defaultData };
-
-              let isUpdating = false;
-
-              form.on('change', ({ data }) => {
-                  if (isUpdating) return;
-                  isUpdating = true;
-
-
-                  // Update form data and suppress is_dirty
-
-                  // isUpdating = true;
-
-
-
-                  const a = parseFloat(data.pfValue || 0);
-
-                  const b = parseFloat(data.aValue2 || 0);
-                  const c = parseFloat(data.bValue1 || 0);
-                  const d=parseFloat(data.amount4 || 0);
-
-                  const e=parseFloat(data.dValue1 || 0);
-
-                  const f=parseFloat(data.eValue1 || 0);
-                  const g=parseFloat(data.fValue1 || 0);
-                  const h=parseFloat(data.gValue1 || 0);
-                  const i=parseFloat(data.hValue1 || 0);
-                  const j=parseFloat(data.iValue1 || 0);
-                  const k=parseFloat(data.jValue1 || 0);
-                  const l=parseFloat(data.kValue1 || 0);
-                  const m=parseFloat(data.kValue2 || 0);
-
-
-                  total=a+b+c+d+e+f+g+h+i+j+k+l+m
-
-
-                  data.total80C = total;
-
-
-                  const mediclaim_self_below = parseFloat(data.amount || 0);      // A
-                  const mediclaim_self_above = parseFloat(data.amount3 || 0);     // B
-                  const mediclaim_parent_below = parseFloat(data.mpAmount3 || 0); // C
-                  const mediclaim_parent_above = parseFloat(data.mpAmount4 || 0); // D
-                  const heal_self = parseFloat(data.mp5 || 0);                     // E
-                  const heal_parent = parseFloat(data.mpAmount6 || 0);            // F
-
-                  // Limits
-                  const limit_self_below = 25000;
-                  const limit_self_above = 50000;
-                  const limit_parent_below = 25000;
-                  const limit_parent_above = 50000;
-                  const limit_health_checkup_total = 5000;
-
-                  // Step 1: Cap mediclaims
-                  const eligible_self_below = Math.min(mediclaim_self_below, limit_self_below);       // A
-                  const eligible_self_above = Math.min(mediclaim_self_above, limit_self_above);       // B
-                  const eligible_parent_below = Math.min(mediclaim_parent_below, limit_parent_below); // C
-                  const eligible_parent_above = Math.min(mediclaim_parent_above, limit_parent_above); // D
-
-                  // Step 2: Apply category caps for health checkup
-                  let eligible_heal_self = Math.min(
-                    heal_self,
-                    limit_self_below - eligible_self_below,
-                    limit_self_above - eligible_self_above
-                  );
-
-                  let eligible_heal_parent = Math.min(
-                    heal_parent,
-                    limit_parent_below - eligible_parent_below,
-                    limit_parent_above - eligible_parent_above
-                  );
-
-                  // Step 3: Cap total health checkup (E + F ≤ ₹5000), prioritize E over F
-                  let total_health_checkup = eligible_heal_self + eligible_heal_parent;
-
-                  if (total_health_checkup > limit_health_checkup_total) {
-                    if (eligible_heal_self >= limit_health_checkup_total) {
-                      eligible_heal_self = limit_health_checkup_total;
-                      eligible_heal_parent = 0;
-                    } else {
-                      eligible_heal_parent = limit_health_checkup_total - eligible_heal_self;
-                    }
-                  }
-
-                  // Step 4: Total eligible amount
-                  const total_eligible_amount =
-                  (eligible_self_below || 0) +
-                  (eligible_self_above || 0) +
-                  (eligible_parent_below || 0) +
-                  (eligible_parent_above || 0) +
-                  (eligible_heal_self || 0) +
-                  (eligible_heal_parent || 0);
-
-
-                  data.amount_80d_eligible_amount = total_eligible_amount;
-
-
-                  form.submission.data = data;
-
-
-
-                  frm.set_value("custom_declaration_form_data", JSON.stringify(data));
-
-                  // isUpdating = false;
-
-
-                  // frappe.model.set_doc_dirty(frm.doc, false);
-
-                  // frm.dirty = false;
-
-              });
-
-          })
-          .catch((err) => {
-              console.error("Error creating Form.io form:", err);
-          });
-
-        }
-
-      if(frm.doc.custom_tax_regime=="New Regime")
-      {
-        frm.set_df_property("custom_declaration_form","hidden",1)
-      }
-
-
-
-
-      if(frm.doc.docstatus==1)
-          {
-              frm.add_custom_button("Choose Regime",function()
-              {
-
-                let d = new frappe.ui.Dialog({
-                  title: 'Enter details',
-                  fields: [
-
-                      {
-                          label: 'Select Regime',
-                          fieldname: 'select_regime',
-                          fieldtype: 'Select',
-                          options:['Old Regime','New Regime'],
-                          reqd:1,
-                          default:frm.doc.custom_tax_regime,
-                          description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
-
-
-                      },
-
-
-
-
-                  ],
-                  size: 'small', // small, large, extra-large
-                  primary_action_label: 'Submit',
-                  primary_action(values) {
-                      // console.log(values);
-
-                      frappe.call({
-                        "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
-                        args:{
-
-                            doc_id: frm.doc.name,
-                            employee:frm.doc.employee,
-                            company:frm.doc.company,
-                            payroll_period:frm.doc.payroll_period,
-                            regime:values.select_regime
-
-
-                        },
-                        callback :function(res)
-                        {
-                            frm.reload_doc();
-
-
+  refresh: function(frm) {
+    tds_projection_html(frm);
+
+    if (frm.doc.custom_tax_regime == "Old Regime") {
+        frm.set_df_property("custom_declaration_form", "hidden", 0);
+        const wrapper = frm.fields_dict.custom_declaration_form.$wrapper;
+        const formContainer = document.createElement("div");
+        wrapper.html('');
+        wrapper.append(formContainer);
+
+        Formio.createForm(formContainer, DECLARATION_FORM, {
+            baseUrl: window?.location?.origin || ''
+        }).then((form) => {
+            window.cur_formioInstance = form;
+
+            const savedData = frm.doc.custom_declaration_form_data
+                ? JSON.parse(frm.doc.custom_declaration_form_data)
+                : {};
+
+            const defaultData = {
+                pfValue: 0, aValue2: 0, bValue1: 0, amount4: 0,
+                dValue1: 0, eValue1: 0, fValue1: 0, gValue1: 0,
+                hValue1: 0, iValue1: 0, jValue1: 0, kValue1: 0, kValue2: 0,
+                ...savedData
+            };
+
+            // Only set form.submission ONCE to avoid multiple Update buttons
+            form.submission = { data: defaultData };
+
+            form.on('change', ({ data }) => {
+                try {
+                    const originalData = frm.doc.custom_declaration_form_data
+                        ? JSON.parse(frm.doc.custom_declaration_form_data)
+                        : {};
+
+                    // Deep clone and calculate new data
+                    const updatedData = { ...data };
+
+                    // Calculate total 80C
+                    const a = parseFloat(data.pfValue || 0);
+                    const b = parseFloat(data.aValue2 || 0);
+                    const c = parseFloat(data.bValue1 || 0);
+                    const d = parseFloat(data.amount4 || 0);
+                    const e = parseFloat(data.dValue1 || 0);
+                    const f = parseFloat(data.eValue1 || 0);
+                    const g = parseFloat(data.fValue1 || 0);
+                    const h = parseFloat(data.gValue1 || 0);
+                    const i = parseFloat(data.hValue1 || 0);
+                    const j = parseFloat(data.iValue1 || 0);
+                    const k = parseFloat(data.jValue1 || 0);
+                    const l = parseFloat(data.kValue1 || 0);
+                    const m = parseFloat(data.kValue2 || 0);
+
+                    updatedData.total80C = a + b + c + d + e + f + g + h + i + j + k + l + m;
+
+                    // MEDICLAIM logic
+                    const mediclaim_self_below = parseFloat(data.amount || 0);
+                    const mediclaim_self_above = parseFloat(data.amount3 || 0);
+                    const mediclaim_parent_below = parseFloat(data.mpAmount3 || 0);
+                    const mediclaim_parent_above = parseFloat(data.mpAmount4 || 0);
+                    const heal_self = parseFloat(data.mp5 || 0);
+                    const heal_parent = parseFloat(data.mpAmount6 || 0);
+
+                    const eligible_self_below = Math.min(mediclaim_self_below, 25000);
+                    const eligible_self_above = Math.min(mediclaim_self_above, 50000);
+                    const eligible_parent_below = Math.min(mediclaim_parent_below, 25000);
+                    const eligible_parent_above = Math.min(mediclaim_parent_above, 50000);
+
+                    let eligible_heal_self = Math.min(heal_self, 5000);
+                    let eligible_heal_parent = Math.min(heal_parent, 5000 - eligible_heal_self);
+                    if (eligible_heal_self + eligible_heal_parent > 5000) {
+                        if (eligible_heal_self >= 5000) {
+                            eligible_heal_self = 5000;
+                            eligible_heal_parent = 0;
+                        } else {
+                            eligible_heal_parent = 5000 - eligible_heal_self;
                         }
+                    }
 
-                    })
+                    updatedData.amount_80d_eligible_amount =
+                        eligible_self_below + eligible_self_above +
+                        eligible_parent_below + eligible_parent_above +
+                        eligible_heal_self + eligible_heal_parent;
+
+                    // Compare new data with saved data
+                    const is_dirty =
+                        JSON.stringify(updatedData) !== JSON.stringify(originalData);
+
+                    if (is_dirty) {
+                        frm.set_value("custom_declaration_form_data", JSON.stringify(updatedData));
+                    }
+
+                } catch (err) {
+                    console.error("Error calculating values:", err);
+                }
+            });
+        }).catch((err) => {
+            console.error("Error rendering form:", err);
+        });
+
+    } else {
+        frm.set_df_property("custom_declaration_form", "hidden", 1);
+    }
+
+    if (frm.doc.docstatus == 1) {
+        frm.add_custom_button("Choose Regime", function () {
+            let d = new frappe.ui.Dialog({
+                title: 'Enter details',
+                fields: [
+                    {
+                        label: 'Select Regime',
+                        fieldname: 'select_regime',
+                        fieldtype: 'Select',
+                        options: ['Old Regime', 'New Regime'],
+                        reqd: 1,
+                        default: frm.doc.custom_tax_regime,
+                        description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
+                    },
+                ],
+                size: 'small',
+                primary_action_label: 'Submit',
+                primary_action(values) {
+                    frappe.call({
+                        method: "cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
+                        args: {
+                            doc_id: frm.doc.name,
+                            employee: frm.doc.employee,
+                            company: frm.doc.company,
+                            payroll_period: frm.doc.payroll_period,
+                            regime: values.select_regime
+                        },
+                        callback: function () {
+                            frm.reload_doc();
+                        }
+                    });
+                    d.hide();
+                }
+            });
+            d.show();
+        });
+        frm.change_custom_button_type('Choose Regime', null, 'primary');
+    }
+}
+,
 
 
-
-                      d.hide();
-                  }
-              });
-
-              d.show();
-
-
-
-
-              })
-              frm.change_custom_button_type('Choose Regime', null, 'primary');
-
-
-
-          }
-
-  },
 
 
 
