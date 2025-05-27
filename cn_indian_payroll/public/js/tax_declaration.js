@@ -3855,6 +3855,8 @@ var array
 
 frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
+
+
   refresh:function(frm)
   {
 
@@ -3863,8 +3865,13 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
+
+
       if(frm.doc.custom_tax_regime=="Old Regime")
       {
+
+
+
       frm.set_df_property("custom_declaration_form","hidden",0)
       const wrapper = frm.fields_dict.custom_declaration_form.$wrapper;
       const formContainer = document.createElement("div");
@@ -3892,6 +3899,12 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   isUpdating = true;
 
 
+                  // Update form data and suppress is_dirty
+
+                  // isUpdating = true;
+
+
+
                   const a = parseFloat(data.pfValue || 0);
 
                   const b = parseFloat(data.aValue2 || 0);
@@ -3915,10 +3928,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                   data.total80C = total;
 
-
-
-
-                  // console.log(data,"999999999999999999")
 
                   const mediclaim_self_below = parseFloat(data.amount || 0);      // A
                   const mediclaim_self_above = parseFloat(data.amount3 || 0);     // B
@@ -3974,9 +3983,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                   (eligible_heal_self || 0) +
                   (eligible_heal_parent || 0);
 
-                  console.log(total_eligible_amount,"*********************")
-
-                  // // Optional: Assign back to data
 
                   data.amount_80d_eligible_amount = total_eligible_amount;
 
@@ -3987,8 +3993,15 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                   frm.set_value("custom_declaration_form_data", JSON.stringify(data));
 
-                  isUpdating = false;
+                  // isUpdating = false;
+
+
+                  // frappe.model.set_doc_dirty(frm.doc, false);
+
+                  // frm.dirty = false;
+
               });
+
           })
           .catch((err) => {
               console.error("Error creating Form.io form:", err);
@@ -4000,6 +4013,8 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
       {
         frm.set_df_property("custom_declaration_form","hidden",1)
       }
+
+
 
 
       if(frm.doc.docstatus==1)
@@ -4092,6 +4107,15 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
     {
       frm.set_value("custom_check",0)
     }
+  },
+
+  custom_declaration_form_data(frm)
+  {
+
+      process_form_data(frm);
+
+
+
   }
 
 
@@ -5012,5 +5036,149 @@ function tds_projection_html(frm) {
           }
       });
 
+  }
+}
+
+
+
+
+async function process_form_data(frm) {
+  const form_data = JSON.parse(frm.doc.custom_declaration_form_data || '{}');
+
+  if (["Approved", "Pending"].includes(frm.doc.custom_status)) {
+      let declarations = [];
+
+      if (frm.doc.custom_tax_regime === "Old Regime") {
+          // Get mediclaim values
+          let mediclaim_self_below = parseFloat(form_data["amount"] || 0);
+          let mediclaim_self_above = parseFloat(form_data["amount3"] || 0);
+          let mediclaim_parent_below = parseFloat(form_data["mpAmount3"] || 0);
+          let mediclaim_parent_above = parseFloat(form_data["mpAmount4"] || 0);
+          let heal_self = parseFloat(form_data["mp5"] || 0);
+          let heal_parent = parseFloat(form_data["mpAmount6"] || 0);
+
+          // Limits
+          let limit_self_below = 25000,
+              limit_self_above = 50000,
+              limit_parent_below = 25000,
+              limit_parent_above = 50000,
+              limit_health_checkup_total = 5000;
+
+          // Step 1
+          let eligible_self_below = Math.min(mediclaim_self_below, limit_self_below);
+          let eligible_self_above = Math.min(mediclaim_self_above, limit_self_above);
+          let eligible_parent_below = Math.min(mediclaim_parent_below, limit_parent_below);
+          let eligible_parent_above = Math.min(mediclaim_parent_above, limit_parent_above);
+
+          // Step 2
+          let eligible_heal_self = Math.min(
+              heal_self,
+              limit_self_below - eligible_self_below,
+              limit_self_above - eligible_self_above
+          );
+          let eligible_heal_parent = Math.min(
+              heal_parent,
+              limit_parent_below - eligible_parent_below,
+              limit_parent_above - eligible_parent_above
+          );
+
+          // Step 3: cap total health checkup
+          let total_health_checkup = eligible_heal_self + eligible_heal_parent;
+          if (total_health_checkup > limit_health_checkup_total) {
+              if (eligible_heal_self >= limit_health_checkup_total) {
+                  eligible_heal_self = limit_health_checkup_total;
+                  eligible_heal_parent = 0;
+              } else {
+                  eligible_heal_parent = limit_health_checkup_total - eligible_heal_self;
+              }
+          }
+
+          // Update form_data
+          form_data["amount"] = eligible_self_below;
+          form_data["amount3"] = eligible_self_above;
+          form_data["mpAmount3"] = eligible_parent_below;
+          form_data["mpAmount4"] = eligible_parent_above;
+          form_data["mp5"] = eligible_heal_self;
+          form_data["mpAmount6"] = eligible_heal_parent;
+      }
+
+      // Declarations list to loop
+      const numbers = frm.doc.custom_tax_regime === "Old Regime" ? [
+          { field: "amount", name: "Mediclaim Self, Spouse & Children (Below 60 years)" },
+          { field: "amount3", name: "Mediclaim Self (Senior Citizen - 60 years & above)" },
+          { field: "mpAmount3", name: "Parents (Below 60 years)" },
+          { field: "mpAmount4", name: "Parents (Senior Citizen - 60 years & above)" },
+          { field: "mp5", name: "Preventive Checkup (Self + Family)" },
+          { field: "mpAmount6", name: "Preventive Checkup (Parents)" },
+          { field: "hlAmount", name: "Interest Paid On Home Loan" },
+          { field: "pfValue", name: "Investments In PF(Auto)" },
+          { field: "aValue2", name: "Pension Scheme Investments & ULIP" },
+          { field: "bValue1", name: "Housing Loan Principal Repayment" },
+          { field: "amount4", name: "PPF - Public Provident Fund" },
+          { field: "dValue1", name: "Home Loan Account Of National Housing Bank" },
+          { field: "eValue1", name: "LIC- Life Insurance Premium Directly Paid By Employee" },
+          { field: "fValue1", name: "NSC - National Saving Certificate" },
+          { field: "gValue1", name: "Mutual Funds - Notified Under Clause 23D Of Section 10" },
+          { field: "hValue1", name: "ELSS - Equity Link Saving Scheme Of Mutual Funds" },
+          { field: "iValue1", name: "Tuition Fees For Full Time Education" },
+          { field: "jValue1", name: "Fixed Deposits In Banks (Period As Per Income Tax Guidelines)" },
+          { field: "kValue1", name: "5 Years Term Deposit An Account Under Post Office Term Deposit Rules" },
+          { field: "kValue2", name: "Others" },
+          { field: "fourValue", name: "(Medical treatment / insurance of handicapped dependant)" },
+          { field: "fiveNumber", name: "Medical treatment (specified diseases only)" },
+          { field: "sixNumber", name: "Interest repayment of Loan for higher education" },
+          { field: "sevenNumber", name: "Deduction for Physically Disabled" },
+          { field: "eightNumber", name: "Donation U/S 80G" },
+          { field: "nineNumber", name: "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)" },
+          { field: "tenNumber", name: "First HSG Loan Interest Ded.(80EE)" },
+          { field: "elevenNumber", name: "Contribution in National Pension Scheme" },
+          { field: "twelveNumber1", name: "Tax Incentive for Affordable Housing for Ded U/S 80EEA" },
+          { field: "fifteenNumber", name: "Tax Incentives for Electric Vehicles for Ded U/S 80EEB" },
+          { field: "sixteenNumber", name: "Donations/contribution made to a political party or an electoral trust" },
+          { field: "seventeenNumber", name: "Interest on deposits in saving account for Ded U/S 80TTA" },
+          { field: "eighteenNumber", name: "Interest on deposits in saving account for Ded U/S 80TTB" },
+          { field: "nineteenNumber", name: "P.T. Paid by employee" },
+          { field: "twentyNumber", name: "Deduction U/S 80GG" },
+          { field: "twentyoneNumber", name: "Rajiv Gandhi Equity Saving Scheme 80CCG" },
+          { field: "twentyFour", name: "Uniform Allowance" },
+          { field: "thirteen", name: "Education Allowance" },
+          { field: "twentysix", name: "Hostel Allowance" },
+          { field: "twentyseven", name: "Gratuity" },
+          { field: "twentyeight", name: "LTA U/s 10 (5)" },
+      ] : [
+          { field: "nineNumber", name: "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)" }
+      ];
+
+      for (let item of numbers) {
+          const value = parseFloat(form_data[item.field] || 0);
+          if (value <= 0) continue;
+
+          // Fetch sub-category details from server
+          await frappe.call({
+              method: "frappe.client.get_list",
+              args: {
+                  doctype: "Employee Tax Exemption Sub Category",
+                  filters: { is_active: 1, name: item.name },
+                  fields: ["name", "exemption_category", "max_amount"]
+              },
+              async callback(r) {
+                  if (r.message && r.message.length > 0) {
+                      declarations.push({
+                          exemption_sub_category: r.message[0].name,
+                          exemption_category: r.message[0].exemption_category,
+                          max_amount: r.message[0].max_amount,
+                          amount: value
+                      });
+                  }
+              }
+          });
+      }
+
+      // Clear and repopulate child table
+      frm.clear_table("declarations");
+      declarations.forEach(row => {
+          frm.add_child("declarations", row);
+      });
+      frm.refresh_field("declarations");
   }
 }

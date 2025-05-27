@@ -61,7 +61,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             self.custom_declaration_form_data = json.dumps(form_data)
 
     def before_update_after_submit(self):
-        self.process_form_data()
+        # self.process_form_data()
         self.mediclaim_condition()
 
         self.calculate_hra_breakup()
@@ -69,6 +69,65 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.validation_on_section10()
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
+        self.update_json_data()
+
+
+    def update_json_data(self):
+        if self.declarations:
+            form_data = json.loads(self.custom_declaration_form_data or "{}")
+
+            # Mapping: name → field
+            field_map = {
+                "Mediclaim Self, Spouse & Children (Below 60 years)": "amount",
+                "Mediclaim Self (Senior Citizen - 60 years & above)": "amount3",
+                "Parents (Below 60 years)": "mpAmount3",
+                "Parents (Senior Citizen - 60 years & above)": "mpAmount4",
+                "Preventive Checkup (Self + Family)": "mp5",
+                "Preventive Checkup (Parents)": "mpAmount6",
+                "Interest Paid On Home Loan": "hlAmount",
+                "Investments In PF(Auto)": "pfValue",
+                "Pension Scheme Investments & ULIP": "aValue2",
+                "Housing Loan Principal Repayment": "bValue1",
+                "PPF - Public Provident Fund": "amount4",
+                "Home Loan Account Of National Housing Bank": "dValue1",
+                "LIC- Life Insurance Premium Directly Paid By Employee": "eValue1",
+                "NSC - National Saving Certificate": "fValue1",
+                "Mutual Funds - Notified Under Clause 23D Of Section 10": "gValue1",
+                "ELSS - Equity Link Saving Scheme Of Mutual Funds": "hValue1",
+                "Tuition Fees For Full Time Education": "iValue1",
+                "Fixed Deposits In Banks (Period As Per Income Tax Guidelines)": "jValue1",
+                "5 Years Term Deposit An Account Under Post Office Term Deposit Rules": "kValue1",
+                "Others": "kValue2",
+                "(Medical treatment / insurance of handicapped dependant)": "fourValue",
+                "Medical treatment (specified diseases only)": "fiveNumber",
+                "Interest repayment of Loan for higher education": "sixNumber",
+                "Deduction for Physically Disabled": "sevenNumber",
+                "Donation U/S 80G": "eightNumber",
+                "NPS Deduction U/S 80CCD(2)(Employer NPS deduction)": "nineNumber",
+                "First HSG Loan Interest Ded.(80EE)": "tenNumber",
+                "Contribution in National Pension Scheme": "elevenNumber",
+                "Tax Incentive for Affordable Housing for Ded U/S 80EEA": "twelveNumber1",
+                "Tax Incentives for Electric Vehicles for Ded U/S 80EEB": "fifteenNumber",
+                "Donations/contribution made to a political party or an electoral trust": "sixteenNumber",
+                "Interest on deposits in saving account for Ded U/S 80TTA": "seventeenNumber",
+                "Interest on deposits in saving account for Ded U/S 80TTB": "eighteenNumber",
+                "P.T. Paid by employee": "nineteenNumber",
+                "Deduction U/S 80GG": "twentyNumber",
+                "Rajiv Gandhi Equity Saving Scheme 80CCG": "twentyoneNumber",
+                "Uniform Allowance": "twentyFour",
+                "Education Allowance": "thirteen",
+                "Hostel Allowance": "twentysix",
+                "Gratuity": "twentyseven",
+                "LTA U/s 10 (5)": "twentyeight",
+            }
+
+            for row in self.declarations:
+                key = field_map.get(row.exemption_sub_category)
+                if key:
+                    form_data[key] = round(row.amount)
+
+            self.custom_declaration_form_data = json.dumps(form_data)
+
 
     def mediclaim_condition(self):
         if self.custom_tax_regime == "Old Regime":
