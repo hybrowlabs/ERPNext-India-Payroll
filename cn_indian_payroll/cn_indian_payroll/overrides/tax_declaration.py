@@ -29,7 +29,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     #     super().validate()
 
-    # def before_save(self):
+    def before_save(self):
+        self.update_json_data()
     #     if self.custom_tax_regime == "Old Regime":
     #         form_data = json.loads(self.custom_declaration_form_data or "{}")
 
@@ -61,16 +62,16 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     #         self.custom_declaration_form_data = json.dumps(form_data)
 
     def before_update_after_submit(self):
-        pass
+        self.update_json_data()
         # self.process_form_data()
-        # self.mediclaim_condition()
+        self.mediclaim_condition()
 
-        # self.calculate_hra_breakup()
-        # self.update_tax_declaration()
-        # self.validation_on_section10()
-        # self.set_total_declared_amount()
-        # self.set_total_exemption_amount()
-        # self.update_json_data()
+        self.calculate_hra_breakup()
+        self.update_tax_declaration()
+        self.validation_on_section10()
+        self.set_total_declared_amount()
+        self.set_total_exemption_amount()
+
 
 
     def update_json_data(self):
