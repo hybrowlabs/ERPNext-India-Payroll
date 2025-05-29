@@ -8,8 +8,9 @@
  "field_order": [
   "lop_reversal_details_section",
   "employee",
-  "payroll_entry",
   "payroll_period",
+  "currency",
+  "payroll_entry",
   "auto_submit",
   "company",
   "salary_slip",
@@ -155,6 +156,13 @@
    "label": "Payroll Period",
    "options": "Payroll Period",
    "reqd": 1
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -165,7 +173,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-05-27 16:13:09.064867",
+ "modified": "2025-05-29 12:10:53.979905",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
