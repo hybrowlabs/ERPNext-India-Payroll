@@ -42,6 +42,7 @@ class CustomSalarySlip(SalarySlip):
         super().on_submit()
         self.insert_bonus_accruals()
         self.employee_accrual_insert()
+        self.update_benefit_claim_amount()
 
 
     def before_save(self):
@@ -62,6 +63,7 @@ class CustomSalarySlip(SalarySlip):
     def validate(self):
         super().validate()
         self.set_sub_period()
+        self.apply_lop_amount_in_reimbursement_component()
 
     def on_cancel(self):
         super().on_cancel()
@@ -100,6 +102,92 @@ class CustomSalarySlip(SalarySlip):
             for accrual in benefit_accruals:
                 benefit_doc = frappe.get_doc('Employee Benefit Accrual', accrual.name)
                 benefit_doc.delete()
+
+
+    def update_benefit_claim_amount(self):
+        if not self.earnings:
+            return
+
+        for earning in self.earnings:
+            additional_salary_name = earning.get("additional_salary")
+            if not additional_salary_name:
+                continue
+
+            # Fetch the Additional Salary document safely
+            additional_salary = frappe.get_value(
+                "Additional Salary",
+                additional_salary_name,
+                ["ref_doctype", "ref_docname"],
+            )
+
+            if not additional_salary:
+                frappe.log_error(
+                    f"Additional Salary '{additional_salary_name}' not found.",
+                    "update_benefit_claim_amount",
+                )
+                continue
+
+            ref_doctype, ref_docname = additional_salary
+
+            # Check if it's linked to an Employee Benefit Claim
+            if ref_doctype == "Employee Benefit Claim" and ref_docname:
+                try:
+                    benefit_claim = frappe.get_doc(
+                        "Employee Benefit Claim", ref_docname
+                    )
+                    benefit_claim.custom_is_paid = 1
+                    benefit_claim.custom_paid_amount = earning.amount
+                    benefit_claim.save(ignore_permissions=True)
+                except frappe.DoesNotExistError:
+                    frappe.log_error(
+                        f"Employee Benefit Claim '{ref_docname}' not found.",
+                        "update_benefit_claim_amount",
+                    )
+
+
+
+    def apply_lop_amount_in_reimbursement_component(self):
+        if not self.custom_salary_structure_assignment:
+            frappe.throw("Salary Structure Assignment not linked.")
+
+        ssa_doc = frappe.get_doc(
+            "Salary Structure Assignment", self.custom_salary_structure_assignment
+        )
+
+        if not self.earnings:
+            return
+
+        for earning in self.earnings:
+            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                if reimbursement.reimbursements == earning.salary_component:
+                    if self.total_working_days and self.payment_days:
+                        prorated_amount = round(
+                            (reimbursement.monthly_total_amount or 0)
+                            / self.total_working_days
+                            * (self.total_working_days - self.payment_days),
+                            2,
+                        )
+
+                        earning.amount -= prorated_amount
+
+            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                lta_component = frappe.get_doc(
+                    "Salary Component", reimbursement.reimbursements
+                )
+                if lta_component.component_type == "LTA Reimbursement":
+                    if component.component_type in ["LTA Taxable", "LTA Non Taxable"]:
+                        if self.total_working_days and self.payment_days:
+                            prorated_amount = round(
+                                (reimbursement.monthly_total_amount or 0)
+                                / self.total_working_days
+                                * (self.total_working_days - self.payment_days),
+                                2,
+                            )
+                            earning.amount -= prorated_amount
+                    break
+
 
 
 
@@ -154,7 +242,6 @@ class CustomSalarySlip(SalarySlip):
 
 
         self.custom_month_count=sub_period-1
-        print(sub_period,"*************************\n\n\n\n\n\n")
 
 
     def compute_income_tax_breakup(self):
@@ -1901,8 +1988,8 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def add_employee_benefits(self):
-        pass
+    # def add_employee_benefits(self):
+    #     pass
 
 
 

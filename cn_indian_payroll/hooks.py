@@ -240,7 +240,7 @@ fixtures = [
 
 doctype_js = {
     "Payroll Entry": "public/js/payroll.js",
-    "Employee Benefit Claim": "public/js/employee_benefit_claim.js",
+    "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
@@ -280,6 +280,8 @@ doc_events = {
     },
     "LTA Claim": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.validate",
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.on_submit",
+        "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lta_claim.before_submit",
     },
 
     "Salary Appraisal Calculation": {
@@ -292,10 +294,7 @@ doc_events = {
     #     # "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
     # },
 
-    # "Salary Slip": {
-    #     "on_trash": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.on_trash",
-    #     # "before_delete": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.before_delete",
-    # },
+
 
 }
 
