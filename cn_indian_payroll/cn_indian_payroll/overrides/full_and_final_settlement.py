@@ -5,6 +5,8 @@ from hrms.hr.doctype.full_and_final_statement.full_and_final_statement import (
     FullandFinalStatement,
 )
 
+from datetime import datetime
+
 
 class CustomFullAndFinalStatement(FullandFinalStatement):
     def get_payable_component(self):
@@ -73,21 +75,93 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
         pass
 
     def on_submit(self):
+        transaction_date = datetime.strptime(
+            str(self.transaction_date), "%Y-%m-%d"
+        ).date()
+        original_payable_component = []
+        original_receivable_component = []
+
         if self.payables:
+            # First pass: collect all valid components and insert additional salary
             for payable in self.payables:
-                if payable.amount > 0 and payable.custom_reference_component:
+                if payable.reference_document_type != "Salary Slip":
+                    component = payable.custom_reference_component
+                    amount = payable.amount or 0
+
+                    if amount > 0 and component:
+                        # Create Additional Salary for payables
+                        additional_salary = frappe.get_doc(
+                            {
+                                "doctype": "Additional Salary",
+                                "employee": self.employee,
+                                "amount": amount,
+                                "salary_component": component,
+                                "company": self.company,
+                                "payroll_date": self.transaction_date,
+                            }
+                        )
+                        additional_salary.insert()
+                        additional_salary.submit()
+
+                        original_payable_component.append(
+                            {"salary_component": component, "amount": amount}
+                        )
+
+        if self.receivables:
+            for receivable in self.receivables:
+                component = receivable.custom_reference_component
+                amount = receivable.amount or 0
+
+                if amount > 0 and component:
+                    # Create Additional Salary for receivables
                     additional_salary = frappe.get_doc(
                         {
                             "doctype": "Additional Salary",
                             "employee": self.employee,
-                            "amount": payable.amount,
-                            "salary_component": payable.custom_reference_component,
+                            "amount": amount,
+                            "salary_component": component,
                             "company": self.company,
                             "payroll_date": self.transaction_date,
                         }
                     )
                     additional_salary.insert()
                     additional_salary.submit()
+
+                    original_receivable_component.append(
+                        {"salary_component": component, "amount": amount}
+                    )
+
+        # Update Salary Slip with components
+        for payable in self.payables:
+            if (
+                payable.reference_document_type == "Salary Slip"
+                and payable.reference_document
+            ):
+                salary_slip = frappe.get_doc("Salary Slip", payable.reference_document)
+
+                # start_date = salary_slip.start_date
+                # end_date = salary_slip.end_date
+
+                # if isinstance(start_date, str):
+                #     start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+                # if isinstance(end_date, str):
+                #     end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+                # if start_date <= transaction_date <= end_date:
+                #     for comp in original_payable_component:
+                #         salary_slip.append("earnings", {
+                #             "salary_component": comp["salary_component"],
+                #             "amount": comp["amount"]
+                #         })
+
+                #     for comp in original_receivable_component:
+                #         salary_slip.append("deductions", {
+                #             "salary_component": comp["salary_component"],
+                #             "amount": comp["amount"]
+                #         })
+
+                salary_slip.custom_f_and_f_updated = 1
+                salary_slip.save()
 
 
 @frappe.whitelist()
