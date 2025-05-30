@@ -30,6 +30,7 @@ def get_salary_slips(filters=None):
 
     for structure in salary_structure_assignments:
         employee_id = structure["employee"]
+        # frappe.msgprint(str(structure.name))
 
         if (
             employee_id not in latest_salary_structure
@@ -47,6 +48,9 @@ def get_salary_slips(filters=None):
     unique_salary_structures = list(latest_salary_structure.values())
     first_unique_salary_structures = list(first_salary_structure.values())
 
+    # frappe.msgprint(str(unique_salary_structures))
+    # frappe.msgprint(str(first_unique_salary_structures))
+
     first_employee_details = [
         {
             "employee": item["employee"],
@@ -55,6 +59,8 @@ def get_salary_slips(filters=None):
         }
         for item in first_unique_salary_structures
     ]
+
+    # frappe.msgprint(str(first_employee_details))
 
     salary_components = {}
     final_data = []
@@ -81,7 +87,7 @@ def get_salary_slips(filters=None):
             filters={
                 "employee": structure["employee"],
                 "custom_payroll_period": structure["custom_payroll_period"],
-                "docstatus": ["in", [0, 1]],
+                "docstatus": ["in", [1]],
                 "company": structure["company"],
             },
             fields=["name"],
@@ -154,6 +160,19 @@ def get_salary_slips(filters=None):
             None,
         )
 
+        first_employee = next(
+            (
+                d
+                for d in unique_salary_structures
+                if d["employee"] == structure["employee"]
+            ),
+            None,
+        )
+
+        # frappe.msgprint(str(last_employee_detail))
+
+        # frappe.msgprint(str(first_employee))
+
         if last_employee_detail:
             payroll_period_doc = frappe.get_doc(
                 "Payroll Period", structure["custom_payroll_period"]
@@ -181,16 +200,19 @@ def get_salary_slips(filters=None):
             # frappe.msgprint(f"Month Count: {month_count}")
 
             salary_slip = make_salary_slip(
-                source_name=last_employee_detail["salary_structure"],
+                source_name=first_employee["salary_structure"],
                 employee=structure["employee"],
                 print_format="Salary Slip Standard",
-                posting_date=last_employee_detail["from_date"],
+                posting_date=first_employee["from_date"],
                 for_preview=1,
             )
 
             processed_components = set()
 
             for projection_earning in salary_slip.earnings:
+                # frappe.msgprint(
+                #     f"Processing Salary Component: {projection_earning.amount}"
+                # )
                 get_tax_component = frappe.get_doc(
                     "Salary Component", projection_earning.salary_component
                 )
@@ -1344,11 +1366,24 @@ def get_salary_slips(filters=None):
 
             salary_data["tax_paid"] = salary_slip_sum
 
-            salary_data["new_regime_tax"] = new_regime_payable / month_count
-            salary_data["old_regime_tax"] = old_regime_payable / month_count
+            salary_data["new_regime_tax"] = round(
+                (new_regime_payable - salary_slip_sum) / (month_count - slip_count)
+            )
+            salary_data["old_regime_tax"] = round(
+                (old_regime_payable - salary_slip_sum) / (month_count - slip_count)
+            )
 
-            new_regime_tax_amount = new_regime_payable / month_count
-            old_regime_tax_amount = old_regime_payable / month_count
+            # frappe.msgprint(str(slip_count))
+
+            # new_regime_tax_amount = new_regime_payable / month_count
+            # old_regime_tax_amount = old_regime_payable / month_count
+
+            new_regime_tax_amount = round(
+                (new_regime_payable - salary_slip_sum) / (month_count - slip_count)
+            )
+            old_regime_tax_amount = round(
+                (old_regime_payable - salary_slip_sum) / (month_count - slip_count)
+            )
 
             beneficial = min(new_regime_tax_amount, old_regime_tax_amount)
 

@@ -45,10 +45,54 @@ frappe.ui.form.on('Leave Encashment Child', {
                 frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
             }
         }
+
+
+        let total = 0;
+
+        // Sum amounts in custom_calculated_amount
+        if (frm.doc.custom_calculated_amount && frm.doc.custom_calculated_amount.length > 0) {
+            $.each(frm.doc.custom_calculated_amount, function(i, row) {
+                total += row.amount || 0;
+            });
+        }
+
+        // Sum amounts in custom_locked_leave
+        if (frm.doc.custom_locked_leave && frm.doc.custom_locked_leave.length > 0) {
+            $.each(frm.doc.custom_locked_leave, function(i, row) {
+                total += row.amount || 0;
+            });
+        }
+
+
+        if (total > 0) {
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Company",
+                    name: frm.doc.company
+                },
+                callback: function(res) {
+                    if (res && res.message && res.message.custom_leave_encashment_component) {
+                        let target_component = res.message.custom_leave_encashment_component;
+
+                        console.log("METCHING")
+
+                        // Loop through payables and update matching component's amount
+                        frm.doc.payables.forEach((v) => {
+                            if (v.custom_reference_component === target_component) {
+                                frappe.model.set_value(v.doctype, v.name, "amount", total);
+                            }
+                        });
+
+                        // Refresh the payables field in the form UI
+                        frm.refresh_field("payables");
+                    }
+                }
+            });
+        }
     },
 
-    encashment_days:function(frm,cdt, cdn)
-    {
+    encashment_days: function(frm, cdt, cdn) {
         var d = locals[cdt][cdn];
 
         if (d.encashment_days) {
@@ -57,7 +101,51 @@ frappe.ui.form.on('Leave Encashment Child', {
             }
         }
 
+        let total = 0;
+
+        // Sum amounts in custom_calculated_amount
+        if (frm.doc.custom_calculated_amount && frm.doc.custom_calculated_amount.length > 0) {
+            $.each(frm.doc.custom_calculated_amount, function(i, row) {
+                total += row.amount || 0;
+            });
+        }
+
+        // Sum amounts in custom_locked_leave
+        if (frm.doc.custom_locked_leave && frm.doc.custom_locked_leave.length > 0) {
+            $.each(frm.doc.custom_locked_leave, function(i, row) {
+                total += row.amount || 0;
+            });
+        }
+
+
+        if (total > 0) {
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Company",
+                    name: frm.doc.company
+                },
+                callback: function(res) {
+                    if (res && res.message && res.message.custom_leave_encashment_component) {
+                        let target_component = res.message.custom_leave_encashment_component;
+
+                        console.log("METCHING")
+
+                        // Loop through payables and update matching component's amount
+                        frm.doc.payables.forEach((v) => {
+                            if (v.custom_reference_component === target_component) {
+                                frappe.model.set_value(v.doctype, v.name, "amount", total);
+                            }
+                        });
+
+                        // Refresh the payables field in the form UI
+                        frm.refresh_field("payables");
+                    }
+                }
+            });
+        }
     }
+
 });
 
 
@@ -76,10 +164,59 @@ function get_accrued_components(frm) {
             frm.clear_table('custom_accrued_benefit');
             frm.clear_table('custom_accrued_component_summary');
 
+            frm.clear_table('custom_calculated_amount');
+            frm.clear_table('custom_calculated_amount');
+
+            frm.clear_table('custom_emplloyee_tax_deduction');
+            frm.clear_table('custom_emplloyee_tax_deduction');
+
+
+
+
+
             if (response.message) {
                 const bonusList = response.message.bonus_list || [];
                 const reimbursementList = response.message.reimbursement_list || [];
                 const final_arrayList = response.message.final_array || [];
+
+                const leave_encashment_list=response.message.leave_encashment||[]
+
+                const tax_list=response.message.tax_list||[]
+
+
+
+                let totalAmount = leave_encashment_list.reduce((sum, row) => {
+                    return sum + (row.amount || 0);
+                }, 0);
+
+                if (totalAmount > 0) {
+                    frappe.call({
+                        method: "frappe.client.get",
+                        args: {
+                            doctype: "Company",
+                            name: frm.doc.company
+                        },
+                        callback: function(res) {
+                            if (res && res.message && res.message.custom_leave_encashment_component) {
+                                let target_component = res.message.custom_leave_encashment_component;
+
+                                // Loop through payables and update matching component's amount
+                                frm.doc.payables.forEach((v, i) => {
+                                    if (v.custom_reference_component === target_component) {
+                                        // Update the amount using frappe.model.set_value for proper change detection
+                                        frappe.model.set_value(v.doctype, v.name, "amount", totalAmount);
+                                        // If you want to break the loop after first match, you can do it like this:
+                                        // return false;
+                                    }
+                                });
+
+                                // Refresh the payables field in the form UI
+                                frm.refresh_field("payables");
+                            }
+                        }
+                    });
+                }
+
 
                 // Add bonus entries
                 bonusList.forEach(row => {
@@ -158,12 +295,42 @@ function get_accrued_components(frm) {
                     child.balance_amount = row.balance_amount;
                 });
 
+                leave_encashment_list.forEach(row=>{
+
+                    let child = frm.add_child('custom_calculated_amount');
+                    child.leave_type = row.leave_type;
+                    child.encashment_days = row.encashment_days;
+                    child.basic_amount = row.basic_amount;
+                    child.amount = row.amount;
+
+                })
+
+                tax_list.forEach(row=>{
+
+                    let child = frm.add_child('custom_emplloyee_tax_deduction');
+                    child.date = row.date;
+                    child.salary_slip_id = row.id;
+                    child.payment_days = row.payment_days;
+                    child.salary_component = row.salary_component;
+                    child.amount = row.amount;
+
+                })
+
+
                 frm.refresh_field('custom_accrued_component_summary');
 
             }
 
             frm.refresh_field('custom_accrued_benefit');
             frm.refresh_field('custom_accrued_component_summary');
+            frm.refresh_field('custom_calculated_amount');
+            frm.refresh_field('custom_emplloyee_tax_deduction');
+
+
+
+
+
+
         }
     });
 }
