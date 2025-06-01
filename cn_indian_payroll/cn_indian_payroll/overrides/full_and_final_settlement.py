@@ -5,6 +5,8 @@ from hrms.hr.doctype.full_and_final_statement.full_and_final_statement import (
     FullandFinalStatement,
 )
 
+from datetime import datetime
+
 
 class CustomFullAndFinalStatement(FullandFinalStatement):
     def get_payable_component(self):
@@ -73,21 +75,72 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
         pass
 
     def on_submit(self):
+        transaction_date = datetime.strptime(
+            str(self.transaction_date), "%Y-%m-%d"
+        ).date()
+        original_payable_component = []
+        original_receivable_component = []
+
         if self.payables:
             for payable in self.payables:
-                if payable.amount > 0 and payable.custom_reference_component:
+                if payable.reference_document_type != "Salary Slip":
+                    component = payable.custom_reference_component
+                    amount = payable.amount or 0
+
+                    if amount > 0 and component:
+                        additional_salary = frappe.get_doc(
+                            {
+                                "doctype": "Additional Salary",
+                                "employee": self.employee,
+                                "amount": amount,
+                                "salary_component": component,
+                                "company": self.company,
+                                "payroll_date": self.transaction_date,
+                                "ref_doctype": "Full and Final Statement",
+                                "ref_docname": self.name,
+                            }
+                        )
+                        additional_salary.insert()
+                        additional_salary.submit()
+
+                        original_payable_component.append(
+                            {"salary_component": component, "amount": amount}
+                        )
+
+        if self.receivables:
+            for receivable in self.receivables:
+                component = receivable.custom_reference_component
+                amount = receivable.amount or 0
+
+                if amount > 0 and component:
                     additional_salary = frappe.get_doc(
                         {
                             "doctype": "Additional Salary",
                             "employee": self.employee,
-                            "amount": payable.amount,
-                            "salary_component": payable.custom_reference_component,
+                            "amount": amount,
+                            "salary_component": component,
                             "company": self.company,
                             "payroll_date": self.transaction_date,
+                            "ref_doctype": "Full and Final Statement",
+                            "ref_docname": self.name,
                         }
                     )
                     additional_salary.insert()
                     additional_salary.submit()
+
+                    original_receivable_component.append(
+                        {"salary_component": component, "amount": amount}
+                    )
+
+        for payable in self.payables:
+            if (
+                payable.reference_document_type == "Salary Slip"
+                and payable.reference_document
+            ):
+                salary_slip = frappe.get_doc("Salary Slip", payable.reference_document)
+
+                salary_slip.custom_f_and_f_updated = 1
+                salary_slip.save()
 
 
 @frappe.whitelist()
@@ -98,6 +151,86 @@ def get_accrued_components(employee, company, relieving_date):
     relieving_date = getdate(relieving_date)
     bonus_list = []
     reimbursement_list = []
+    leave_encashment_list = []
+
+    tax_list = []
+
+    # Get latest Salary Structure Assignment
+    get_latest_ssa = frappe.get_list(
+        "Salary Structure Assignment",
+        filters={
+            "employee": employee,
+            "company": company,
+            "docstatus": 1,
+            "from_date": ["<=", relieving_date],
+        },
+        fields=["name", "custom_payroll_period"],
+        order_by="from_date desc",
+        limit=1,
+    )
+
+    if get_latest_ssa:
+        payroll_period = get_latest_ssa[0].custom_payroll_period
+
+        get_salary_slip = frappe.get_all(
+            "Salary Slip",
+            filters={
+                "employee": employee,
+                "company": company,
+                "docstatus": ["in", [0, 1]],
+                "custom_payroll_period": payroll_period,
+            },
+            fields=["name"],
+        )
+
+        if get_salary_slip:
+            for slip in get_salary_slip:
+                get_each_sl = frappe.get_doc("Salary Slip", slip.name)
+                for deduction in get_each_sl.deductions:
+                    get_pt = frappe.get_doc(
+                        "Salary Component", deduction.salary_component
+                    )
+                    if get_pt.component_type == "Professional Tax":
+                        tax_list.append(
+                            {
+                                "salary_component": deduction.salary_component,
+                                "amount": deduction.amount,
+                                "id": get_each_sl.name,
+                                "date": get_each_sl.posting_date,
+                                "payment_days": get_each_sl.payment_days,
+                            }
+                        )
+                    if (
+                        get_pt.is_income_tax_component
+                        and get_pt.variable_based_on_taxable_salary
+                    ):
+                        tax_list.append(
+                            {
+                                "salary_component": deduction.salary_component,
+                                "amount": deduction.amount,
+                                "id": get_each_sl.name,
+                                "date": get_each_sl.posting_date,
+                                "payment_days": get_each_sl.payment_days,
+                            }
+                        )
+
+    leave_encashment = frappe.get_all(
+        "Leave Encashment",
+        filters={
+            "employee": employee,
+            "docstatus": 1,
+        },
+        fields=["*"],
+    )
+    for encashment in leave_encashment:
+        leave_encashment_list.append(
+            {
+                "leave_type": encashment.leave_type,
+                "encashment_days": encashment.encashment_days,
+                "basic_amount": encashment.custom_basic_amount,
+                "amount": encashment.encashment_amount,
+            }
+        )
 
     # Fetch bonus accruals
     bonuses = frappe.get_all(
@@ -248,30 +381,6 @@ def get_accrued_components(employee, company, relieving_date):
         "bonus_list": bonus_list,
         "reimbursement_list": reimbursement_list,
         "final_array": final_array,
+        "leave_encashment": leave_encashment_list,
+        "tax_list": tax_list,
     }
-
-
-# def before_save(self,method):
-#     calculated_leave=0
-#     if len(self.custom_calculated_amount)>0:
-#         for v in self.custom_calculated_amount:
-#             calculated_leave+=v.amount
-
-#     locked_leave=0
-#     if len(self.custom_locked_leave)>0:
-#         for t in self.custom_locked_leave:
-#             locked_leave+=t.amount
-
-
-#     if len(self.payables)>0:
-#         for i in self.payables:
-#             if i.reference_document_type=="Leave Encashment":
-#                 i.amount=round(locked_leave+calculated_leave)
-
-
-# def before_save(self, method):
-#     calculated_leave = sum(v.amount for v in self.custom_calculated_amount)
-#     locked_leave = sum(t.amount for t in self.custom_locked_leave)
-#     for payable in self.payables:
-#         if payable.component == "Leave Encashment":
-#             payable.amount = round(locked_leave + calculated_leave)

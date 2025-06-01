@@ -5088,10 +5088,21 @@ function tds_projection_html(frm) {
                           </tr>
 
                           <tr>
-                            <td>Current Tax</td>
-                            <td>₹ ${Math.round(((old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted) / num_months))}</td>
-                            <td>₹ ${Math.round(((new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted) / num_months))}</td>
-                          </tr>
+                          <td>Current Tax</td>
+                          <td>
+                            ₹ ${Math.round(
+                              (old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted - salary_slip_sum) /
+                              (num_months - salary_slip_count)
+                            )}
+                          </td>
+                          <td>
+                            ₹ ${Math.round(
+                              (new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted - salary_slip_sum) /
+                              (num_months - salary_slip_count)
+                            )}
+                          </td>
+                        </tr>
+
 
 
 

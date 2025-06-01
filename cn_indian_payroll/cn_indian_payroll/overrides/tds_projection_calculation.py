@@ -21,6 +21,9 @@ def get_doc_data(doc_name, employee, company, payroll_period):
     start = None
     end = None
 
+    old_annual_taxable_income = []
+    new_annual_taxable_income = []
+
     if employee:
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
@@ -181,7 +184,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
             filters={
                 "employee": employee,
                 "custom_payroll_period": payroll_period,
-                "docstatus": ["in", [0, 1]],
+                "docstatus": ["in", [1]],
             },
             fields=["*"],
             order_by="posting_date desc",
