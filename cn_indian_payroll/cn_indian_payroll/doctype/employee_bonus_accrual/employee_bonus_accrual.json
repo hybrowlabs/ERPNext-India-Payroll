@@ -145,8 +145,9 @@
    "allow_on_submit": 1,
    "fetch_from": "salary_structure_assignment.custom_payroll_period",
    "fieldname": "payroll_period",
-   "fieldtype": "Data",
-   "label": "Payroll Period"
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period"
   },
   {
    "allow_on_submit": 1,
@@ -180,7 +181,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-15 11:29:41.883474",
+ "modified": "2025-05-30 17:36:44.372607",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

@@ -157,27 +157,13 @@ class CustomSalarySlip(SalarySlip):
         if not self.earnings:
             return
 
-        for earning in self.earnings:
-            component = frappe.get_doc("Salary Component", earning.salary_component)
+        if not self.salary_withholding:
+            for earning in self.earnings:
+                component = frappe.get_doc("Salary Component", earning.salary_component)
 
-            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
-                if reimbursement.reimbursements == earning.salary_component:
-                    if self.total_working_days and self.payment_days:
-                        prorated_amount = round(
-                            (reimbursement.monthly_total_amount or 0)
-                            / self.total_working_days
-                            * (self.total_working_days - self.payment_days),
-                            2,
-                        )
-
-                        earning.amount -= prorated_amount
-
-            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
-                lta_component = frappe.get_doc(
-                    "Salary Component", reimbursement.reimbursements
-                )
-                if lta_component.component_type == "LTA Reimbursement":
-                    if component.component_type in ["LTA Taxable", "LTA Non Taxable"]:
+                # Step 1: Standard reimbursement-based LOP adjustment
+                for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                    if reimbursement.reimbursements == earning.salary_component:
                         if self.total_working_days and self.payment_days:
                             prorated_amount = round(
                                 (reimbursement.monthly_total_amount or 0)
@@ -185,8 +171,29 @@ class CustomSalarySlip(SalarySlip):
                                 * (self.total_working_days - self.payment_days),
                                 2,
                             )
+
                             earning.amount -= prorated_amount
-                    break
+
+                # Step 2: Handle special case for LTA reimbursement → apply to taxable/non-taxable LTA
+                for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                    lta_component = frappe.get_doc(
+                        "Salary Component", reimbursement.reimbursements
+                    )
+                    if lta_component.component_type == "LTA Reimbursement":
+                        if component.component_type in [
+                            "LTA Taxable",
+                            "LTA Non Taxable",
+                        ]:
+                            if self.total_working_days and self.payment_days:
+                                prorated_amount = round(
+                                    (reimbursement.monthly_total_amount or 0)
+                                    / self.total_working_days
+                                    * (self.total_working_days - self.payment_days),
+                                    2,
+                                )
+                                earning.amount -= prorated_amount
+                        break
+
 
 
 
