@@ -40,21 +40,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
     refresh(frm)
     {
 
-        // $('[data-fieldname="custom_preview_tax_projection"]').css('color', 'black');
-
-        // $('input[data-fieldname="custom_preview_tax_projection"]').css("background-color","#FFE4C4")
-
-
-        if(frm.doc.docstatus==1)
-            {
-
-
-                    change_regime(frm)
-
-            }
-
-
-
                 setTimeout(() => {
 
                     frm.remove_custom_button('Payroll Entry', 'Create');
@@ -101,8 +86,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
     custom_nps_percentage(frm) {
-
-
 
         if (frm.doc.custom_is_nps==1)
 

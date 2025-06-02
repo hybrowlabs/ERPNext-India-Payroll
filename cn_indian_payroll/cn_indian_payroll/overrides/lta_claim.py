@@ -170,6 +170,8 @@ def get_max_amount(doc):
                     fields=["amount"],
                 )
                 accrued_total = sum([row.amount for row in accruals])
+
+                # frappe.msgprint(str(accrued_total))
                 accrued_months = len(accruals)
 
                 # Get effective start date
@@ -183,6 +185,9 @@ def get_max_amount(doc):
                 year_diff = end_date.year - effective_start_date.year
                 month_diff = end_date.month - effective_start_date.month
                 total_months = (year_diff * 12 + month_diff) + 1
+
+                # frappe.msgprint(str(total_months))
+                # frappe.msgprint(str(accrued_months))
 
                 # Calculate future eligible amount
                 future_eligible = (total_months - accrued_months) * eligible_amount
