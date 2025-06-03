@@ -71,8 +71,8 @@ def update_reimbursement_accruals(self):
 def insert_additional_salary(self):
     component_array = []
 
-    if len(self.salary_arrear_components) > 0:
-        for i in self.salary_arrear_components:
+    if len(self.arrear_breakdown) > 0:
+        for i in self.arrear_breakdown:
             component_array.append(
                 {"component": i.salary_component, "amount": i.difference}
             )
@@ -114,8 +114,8 @@ def insert_additional_salary(self):
                             "currency": "INR",
                             "amount": insert["amount"],
                             "docstatus": 1,
-                            "custom_salary_appraisal_calculation": self.name,
-                            "custom_employee_promotion_id": self.employee_promotion_id,
+                            "ref_doctype": "Salary Appraisal Calculation",
+                            "ref_docname": self.name,
                         }
                     )
                     insert_doc.insert()

@@ -49,6 +49,13 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 }, 10);
 
 
+                if (frm.doc.custom_promotion_id) {
+                    frm.add_custom_button(__('View Employee Promotion'), function() {
+                        frappe.set_route('Form', 'Employee Promotion', frm.doc.custom_promotion_id);
+                    }, __('Actions'));
+                }
+
+
 
                 if (frm.doc.employee && frm.doc.docstatus==1)
                 {
