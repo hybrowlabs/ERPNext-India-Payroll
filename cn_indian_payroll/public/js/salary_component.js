@@ -1,6 +1,5 @@
 frappe.ui.form.on('Salary Component', {
 	refresh(frm) {
-		// Apply visibility rules on form load
 		frm.trigger('toggle_appraisal_visibility');
 	},
 
@@ -21,7 +20,6 @@ frappe.ui.form.on('Salary Component', {
 		const is_reimbursement = frm.doc.custom_is_reimbursement;
 		const is_accrual = frm.doc.custom_is_accrual;
 
-		// Hide the field if any of the flags are true
 		if (is_arrear || is_reimbursement || is_accrual) {
 			frm.set_df_property('custom_is_part_of_appraisal', 'hidden', 1);
 		} else {

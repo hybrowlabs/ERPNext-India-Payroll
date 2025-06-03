@@ -62,7 +62,6 @@ def create_salary_structure_assignment_worker(company, payroll_period, income_ta
                     "currency": ssa.currency,
                     "base": ssa.base,
 
-                    # Custom Fields
                     "custom_is_uniform_allowance": ssa.custom_is_uniform_allowance,
                     "custom_uniform_allowance_value": ssa.custom_uniform_allowance_value,
                     "custom_is_medical_allowance": ssa.custom_is_medical_allowance,
@@ -80,7 +79,6 @@ def create_salary_structure_assignment_worker(company, payroll_period, income_ta
                     "custom_nps_percentage": ssa.custom_nps_percentage,
                 })
 
-                # Copy child table entries
                 for row in ssa.get("custom_employee_reimbursements", []):
                     new_ssa.append("custom_employee_reimbursements", {
                         "reimbursements": row.reimbursements,

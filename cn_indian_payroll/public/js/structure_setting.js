@@ -20,7 +20,6 @@ frappe.ui.form.on('Structure Setting', {
             });
         });
 
-        // Listen for real-time progress updates
         frappe.realtime.on("ssa_progress", function (data) {
             if (data.progress) {
                 frappe.show_progress(__('Creating Assignments'), data.progress, 100, __('Working...'));
