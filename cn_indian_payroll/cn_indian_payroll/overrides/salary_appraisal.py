@@ -120,6 +120,12 @@ def insert_additional_salary(self):
                     )
                     insert_doc.insert()
 
+    if self.promotion_reference:
+        get_doc = frappe.get_doc("Employee Promotion", self.promotion_reference)
+        get_doc.custom_status = "Completed"
+        get_doc.save()
+        get_doc.reload()
+
 
 def cancel_additional_salary(self):
     get_appraisal_additional = frappe.get_list(

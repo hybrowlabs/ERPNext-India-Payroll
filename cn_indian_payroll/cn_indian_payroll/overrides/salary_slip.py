@@ -45,22 +45,7 @@ class CustomSalarySlip(SalarySlip):
     def validate(self):
         super().validate()
         self.set_sub_period()
-        # self.insert_other_perquisites()
         self.apply_lop_amount_in_reimbursement_component()
-
-    def before_save(self):
-        self.new_joinee()
-        self.insert_lop_days()
-        self.set_taxale()
-        self.actual_amount_ctc()
-        self.set_month()
-
-        self.update_declaration_component()
-        self.update_total_lop()
-        self.arrear_ytd()
-        self.food_coupon()
-        self.tax_calculation()
-        self.calculate_grosspay()
 
         self.custom_previous_taxable_earnings = (
             self.previous_taxable_earnings_before_exemption
@@ -79,6 +64,21 @@ class CustomSalarySlip(SalarySlip):
                 if earning.is_tax_applicable == 1:
                     total_ctc_taxable_amount += earning.default_amount
             self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+
+        self.insert_other_perquisites()
+
+    def before_save(self):
+        self.new_joinee()
+        self.insert_lop_days()
+        self.set_taxale()
+        self.actual_amount_ctc()
+        self.set_month()
+        self.update_declaration_component()
+        self.update_total_lop()
+        self.arrear_ytd()
+        self.food_coupon()
+        self.tax_calculation()
+        self.calculate_grosspay()
 
     def on_cancel(self):
         super().on_cancel()
@@ -505,19 +505,21 @@ class CustomSalarySlip(SalarySlip):
     def insert_other_perquisites(self):
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
-            filters={"employee": self.employee, "docstatus": 1},
+            filters={
+                "employee": self.employee,
+                "docstatus": 1,
+                "from_date": ["<=", self.end_date],
+            },
             fields=["name"],
             order_by="from_date desc",
             limit=1,
         )
 
         if latest_salary_structure:
-            # Get the Salary Structure Assignment document
             salary_structure_doc = frappe.get_doc(
                 "Salary Structure Assignment", latest_salary_structure[0].name
             )
 
-            # Get the list of existing salary components in earnings
             existing_components = [
                 earning.salary_component for earning in self.earnings
             ]

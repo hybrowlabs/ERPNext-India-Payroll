@@ -39,20 +39,23 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "employee",
    "fieldtype": "Link",
    "label": "Employee",
-   "options": "Employee"
+   "options": "Employee",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "accrual_date",
    "fieldtype": "Date",
-   "label": "Accrual Date"
+   "label": "Accrual Date",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_yukg",
@@ -63,7 +66,8 @@
    "fieldname": "salary_structure",
    "fieldtype": "Link",
    "label": "Salary Structure",
-   "options": "Salary Structure"
+   "options": "Salary Structure",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -80,14 +84,16 @@
    "fieldname": "salary_structure_assignment",
    "fieldtype": "Link",
    "label": "Salary Structure Assignment",
-   "options": "Salary Structure Assignment"
+   "options": "Salary Structure Assignment",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "salary_component",
    "fieldtype": "Link",
    "label": "Salary Component",
-   "options": "Salary Component"
+   "options": "Salary Component",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_lapc",
@@ -98,33 +104,38 @@
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "amount",
    "fieldtype": "Float",
-   "label": "Amount"
+   "label": "Amount",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "bonus_paid_date",
    "fieldtype": "Date",
-   "label": "Bonus Paid Date"
+   "label": "Bonus Paid Date",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_paid",
    "fieldtype": "Check",
-   "label": "Is Paid"
+   "label": "Is Paid",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "payroll_entry",
    "fieldtype": "Link",
    "label": "Payroll Entry",
-   "options": "Payroll Entry"
+   "options": "Payroll Entry",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -132,7 +143,8 @@
    "fieldname": "accrual_paid_on",
    "fieldtype": "Select",
    "label": "Accrual Paid on",
-   "options": "Payroll\nF and F"
+   "options": "Payroll\nF and F",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -140,48 +152,55 @@
    "fieldname": "payroll_period",
    "fieldtype": "Link",
    "label": "Payroll Period",
-   "options": "Payroll Period"
+   "options": "Payroll Period",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "label": "Employee Name"
+   "label": "Employee Name",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "salary_slip",
    "fieldtype": "Link",
    "label": "Salary Slip",
-   "options": "Salary Slip"
+   "options": "Salary Slip",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fetch_from": "salary_slip.total_working_days",
    "fieldname": "working_days",
    "fieldtype": "Float",
-   "label": "Working Days"
+   "label": "Working Days",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fetch_from": "salary_slip.payment_days",
    "fieldname": "payment_day",
    "fieldtype": "Float",
-   "label": "Payment Day"
+   "label": "Payment Day",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fetch_from": "salary_slip.custom_total_leave_without_pay",
    "fieldname": "total_lwp",
    "fieldtype": "Float",
-   "label": "Total LWP"
+   "hidden": 1,
+   "label": "Total LWP",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-29 15:46:24.801810",
+ "modified": "2025-06-03 11:09:59.393637",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

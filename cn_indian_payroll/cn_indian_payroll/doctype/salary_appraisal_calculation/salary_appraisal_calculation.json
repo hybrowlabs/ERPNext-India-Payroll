@@ -40,6 +40,7 @@
    "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -52,6 +53,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -62,7 +64,8 @@
    "fieldname": "reimbursement_components",
    "fieldtype": "Table",
    "label": "Reimbursement Components",
-   "options": "Salary Appraisal Child"
+   "options": "Salary Appraisal Child",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_ajlu",
@@ -72,7 +75,8 @@
    "fieldname": "bonus_components",
    "fieldtype": "Table",
    "label": "Bonus Components",
-   "options": "Salary Appraisal Child"
+   "options": "Salary Appraisal Child",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -90,47 +94,55 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "previous_salary_structure_assignment",
    "fieldtype": "Link",
    "label": "Previous Salary Structure Assignment",
-   "options": "Salary Structure Assignment"
+   "options": "Salary Structure Assignment",
+   "read_only": 1
   },
   {
    "fieldname": "previous_effective_date",
    "fieldtype": "Date",
-   "label": "Previous Effective Date"
+   "label": "Previous Effective Date",
+   "read_only": 1
   },
   {
    "fieldname": "revised_salary_structure_assignment",
    "fieldtype": "Link",
    "label": "Revised Salary Structure Assignment",
-   "options": "Salary Structure Assignment"
+   "options": "Salary Structure Assignment",
+   "read_only": 1
   },
   {
    "fieldname": "revised_effective_date",
    "fieldtype": "Date",
-   "label": "Revised Effective Date"
+   "label": "Revised Effective Date",
+   "read_only": 1
   },
   {
    "description": "(Components which includes is part of appraisal)",
    "fieldname": "previous_revised_salary_components",
    "fieldtype": "Table",
    "label": "Previous / Revised Salarycomponents",
-   "options": "Salary Revision Child"
+   "options": "Salary Revision Child",
+   "read_only": 1
   },
   {
    "fieldname": "arrear_breakdown",
    "fieldtype": "Table",
    "label": "Arrear Components",
-   "options": "Salary Appraisal Child"
+   "options": "Salary Appraisal Child",
+   "read_only": 1
   },
   {
    "fieldname": "promotion_reference",
    "fieldtype": "Data",
-   "label": "Employee Promotion Reference"
+   "label": "Employee Promotion Reference",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -141,7 +153,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-06-03 08:32:53.202143",
+ "modified": "2025-06-03 12:04:01.205240",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",
