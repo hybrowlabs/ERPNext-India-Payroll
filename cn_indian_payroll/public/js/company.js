@@ -2,8 +2,6 @@ frappe.ui.form.on('Company', {
     refresh(frm) {
 
         let component = [];
-
-        // Run both queries in parallel and wait until both complete
         Promise.all([
             frappe.db.get_list('Salary Component', {
                 filters: {

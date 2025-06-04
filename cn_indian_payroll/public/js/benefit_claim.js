@@ -26,15 +26,14 @@ frappe.ui.form.on('Employee Benefit Claim', {
 
     },
 
-        // claim_date: function(frm) {
-    //     if (frm.doc.claim_date < frappe.datetime.now_date()) {
-    //         frm.set_value("claim_date", undefined);
-    //         frappe.msgprint(__('Claim date cannot be in the past.'));
-    //     }
-    // }
+    claim_date: function(frm) {
+        if (frm.doc.claim_date < frappe.datetime.now_date()) {
+            frm.set_value("claim_date", undefined);
+            frappe.msgprint(__('Claim date cannot be in the past.'));
+        }
+    }
 });
 
-// Define get_employee_details as a global function
 function get_employee_details(frm) {
     if (frm.doc.employee) {
         frappe.call({
@@ -58,7 +57,7 @@ function get_employee_details(frm) {
                     } else {
                         frm.set_query("earning_component", function() {
                             return {
-                                filters: { name: ["in", []] }  // Empty list fallback
+                                filters: { name: ["in", []] }
                             };
                         });
                     }

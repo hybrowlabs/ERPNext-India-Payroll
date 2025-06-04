@@ -230,7 +230,6 @@ app_license = "mit"
 fixtures = [
     {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
     {"dt":"Income Tax Regime"},
-    # {"dt":"Payroll Configuration","filters":{"name":"Payroll Configuration"}},
     {"dt":"Employee Tax Exemption Sub Category"},
     {"dt":"Employee Tax Exemption Category"},
     {"dt":"Salary Component Library Item"},
@@ -253,9 +252,7 @@ doctype_js = {
     "Company": "public/js/company.js",
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
-
     "Full and Final Statement": "public/js/f_and_f.js",
-
     "Leave Encashment": "public/js/leave_encashment.js",
 
 

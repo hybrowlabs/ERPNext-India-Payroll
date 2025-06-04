@@ -28,16 +28,7 @@ from frappe.utils import (
 from datetime import datetime, timedelta
 from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
 
-
-
-
-
-
 class CustomSalarySlip(SalarySlip):
-
-
-
-
     def on_submit(self):
         super().on_submit()
         self.insert_bonus_accruals()
@@ -113,7 +104,6 @@ class CustomSalarySlip(SalarySlip):
             if not additional_salary_name:
                 continue
 
-            # Fetch the Additional Salary document safely
             additional_salary = frappe.get_value(
                 "Additional Salary",
                 additional_salary_name,
@@ -129,7 +119,6 @@ class CustomSalarySlip(SalarySlip):
 
             ref_doctype, ref_docname = additional_salary
 
-            # Check if it's linked to an Employee Benefit Claim
             if ref_doctype == "Employee Benefit Claim" and ref_docname:
                 try:
                     benefit_claim = frappe.get_doc(
@@ -161,7 +150,6 @@ class CustomSalarySlip(SalarySlip):
             for earning in self.earnings:
                 component = frappe.get_doc("Salary Component", earning.salary_component)
 
-                # Step 1: Standard reimbursement-based LOP adjustment
                 for reimbursement in ssa_doc.custom_employee_reimbursements or []:
                     if reimbursement.reimbursements == earning.salary_component:
                         if self.total_working_days and self.payment_days:
@@ -174,7 +162,6 @@ class CustomSalarySlip(SalarySlip):
 
                             earning.amount -= prorated_amount
 
-                # Step 2: Handle special case for LTA reimbursement → apply to taxable/non-taxable LTA
                 for reimbursement in ssa_doc.custom_employee_reimbursements or []:
                     lta_component = frappe.get_doc(
                         "Salary Component", reimbursement.reimbursements
@@ -262,7 +249,6 @@ class CustomSalarySlip(SalarySlip):
         self.income_from_other_sources = self.get_income_form_other_sources()
         self.total_earnings = self.ctc + self.income_from_other_sources
 
-        # Fetch payroll period once
         payroll_period = frappe.get_value(
             'Payroll Period',
             {'company': self.company, 'name': self.payroll_period.name},
@@ -270,16 +256,13 @@ class CustomSalarySlip(SalarySlip):
             as_dict=True
         )
 
-        # If payroll period is not found, return without further processing
         if not payroll_period:
             return
 
-        # If payroll period is found, process further
         start_date = frappe.utils.getdate(payroll_period["start_date"])
         end_date = frappe.utils.getdate(payroll_period["end_date"])
         fiscal_year = payroll_period["name"]
 
-        # Calculate loan perquisites within the fiscal year
         loan_repayments = frappe.get_list(
             'Loan Repayment Schedule',
             filters={
@@ -298,7 +281,6 @@ class CustomSalarySlip(SalarySlip):
                     total_perq += entry.perquisite_amount
         self.custom_perquisite_amount = total_perq
 
-        # Tax slab logic
         if hasattr(self, "tax_slab") and self.tax_slab:
             if self.tax_slab.allow_tax_exemption:
                 self.standard_tax_exemption_amount = self.tax_slab.standard_tax_exemption_amount
@@ -310,7 +292,6 @@ class CustomSalarySlip(SalarySlip):
                 self.get_total_exemption_amount() - self.standard_tax_exemption_amount
             )
 
-        # Final Taxable Income Calculation
         self.annual_taxable_amount = (
             self.total_earnings
             + self.custom_perquisite_amount
@@ -433,10 +414,8 @@ class CustomSalarySlip(SalarySlip):
         )
 
         if latest_salary_structure:
-            # Get the Salary Structure Assignment document
             salary_structure_doc = frappe.get_doc("Salary Structure Assignment", latest_salary_structure[0].name)
 
-            # Get the list of existing salary components in earnings
             existing_components = [earning.salary_component for earning in self.earnings]
 
             for perquisite in salary_structure_doc.custom_other_perquisites:
@@ -545,7 +524,6 @@ class CustomSalarySlip(SalarySlip):
                         amount, additional_amount = earning.amount, earning.additional_amount
                     else:
                         amount, additional_amount = earning.default_amount, earning.additional_amount
-                #condition for current tax  component
                 if earning.is_tax_applicable:
                     if earning.is_flexible_benefit:
                         flexi_benefits += amount
@@ -554,7 +532,6 @@ class CustomSalarySlip(SalarySlip):
                         taxable_earnings += amount - additional_amount
                         additional_income += additional_amount
 
-                        # Get additional amount based on future recurring additional salary
                         if additional_amount and earning.is_recurring_additional_salary:
                             additional_income += self.get_future_recurring_additional_amount(
                                 earning.additional_salary, earning.additional_amount
@@ -562,7 +539,6 @@ class CustomSalarySlip(SalarySlip):
 
                         if earning.deduct_full_tax_on_selected_payroll_date:
                             additional_income_with_full_tax += additional_amount
-            # print(taxable_earnings,"taxable_earnings------")
 
             if allow_tax_exemption:
                 for ded in self.deductions:
@@ -578,7 +554,7 @@ class CustomSalarySlip(SalarySlip):
                         if additional_amount and ded.is_recurring_additional_salary:
                             additional_income -= self.get_future_recurring_additional_amount(
                                 ded.additional_salary, ded.additional_amount
-                            )  # Used ded.additional_amount to consider the amount for the full month
+                            )
 
             return frappe._dict(
                 {
@@ -638,16 +614,13 @@ class CustomSalarySlip(SalarySlip):
                     )
 
 
-        # Check if tax exemption is allowed and get exempted amount
         if allow_tax_exemption:
             exempted_amount = self.get_salary_slip_details(
                 start_date, end_date, parentfield="deductions", exempted_from_income_tax=1
             )
 
-        # Get opening taxable earnings for the period
         opening_taxable_earning = self.get_opening_for("taxable_earnings_till_date", start_date, end_date)
 
-        # Calculate and return the final taxable earnings
         return (taxable_earnings + opening_taxable_earning) - exempted_amount, exempted_amount
 
 
@@ -690,7 +663,6 @@ class CustomSalarySlip(SalarySlip):
             .where(ss.end_date.between(start_date, end_date))
         )
 
-        # Add conditions if they are provided
         if is_tax_applicable is not None:
             query = query.where(sd.is_tax_applicable == is_tax_applicable)
 
@@ -715,29 +687,9 @@ class CustomSalarySlip(SalarySlip):
         if custom_tax_regime:
             query = query.where(ss.custom_tax_regime == custom_tax_regime)
 
-        # Run the query and return the result
         result = query.run()
 
         return flt(result[0][0]) if result else 0.0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -757,8 +709,6 @@ class CustomSalarySlip(SalarySlip):
                     },
                     fields=['name']
                 )
-
-
                 if len(get_fd_component) > 0:
                     for k in get_fd_component:
                         get_slip=frappe.get_doc("Salary Slip",k.name)
@@ -766,10 +716,8 @@ class CustomSalarySlip(SalarySlip):
                             if m.is_tax_applicable==0 and m.custom_regime == "New Regime":
                                 food_coupon_array.append(m.amount)
 
-
-            g1=sum(food_coupon_array)
-
-            food_coupon_component.custom_total_ytd=g1
+            fd_sum=sum(food_coupon_array)
+            food_coupon_component.custom_total_ytd=fd_sum
 
 
 
@@ -818,21 +766,6 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-
-
-    # def new_joinee(self):
-    #     if self.employee:
-    #         employee_doc = frappe.get_doc("Employee", self.employee)
-
-    #         start_date = frappe.utils.getdate(self.start_date)
-    #         end_date = frappe.utils.getdate(self.end_date)
-
-    #         if start_date <= employee_doc.date_of_joining <= end_date:
-    #             self.custom_new_joinee="New Joinee"
-    #         else:
-    #             self.custom_new_joinee="-"
-
-
     def add_reimbursement_taxable_new_doc(self):
         if len(self.earnings)>0:
             for lta_component in self.earnings:
@@ -851,8 +784,6 @@ class CustomSalarySlip(SalarySlip):
         current_basic_value = current_hra_value = current_nps_value = current_epf_value = current_pt_value = 0
         previous_basic_value = previous_hra_value = previous_nps_value = previous_epf_value = previous_pt_value = 0
         future_basic_value = future_hra_value = future_nps_value = future_epf_value = future_pt_value = 0
-
-        # basic_rule2=non_metro_or_metro=final_hra_exemption=0
 
         get_company = frappe.get_doc("Company", self.company)
         if get_company.basic_component:
@@ -929,20 +860,13 @@ class CustomSalarySlip(SalarySlip):
             if declaration:
                 form_data = json.loads(declaration[0].custom_declaration_form_data or '{}')
                 get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
-
-
                 form_data['nineNumber'] = round(previous_nps_value+future_nps_value+current_nps_value)
                 form_data['pfValue'] = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
                 form_data['nineteenNumber'] = round(previous_pt_value+future_pt_value+current_pt_value)
-
-
-
-
                 get_each_doc.custom_posting_date=self.posting_date
                 get_each_doc.custom_declaration_form_data = json.dumps(form_data)
 
                 if get_each_doc.monthly_house_rent>0:
-
                     ss_assignment = frappe.get_list(
                     "Salary Structure Assignment",
                     filters={
@@ -990,15 +914,11 @@ class CustomSalarySlip(SalarySlip):
                             annual_hra_amount = get_each_doc.monthly_house_rent * month_count
 
                             basic_rule2 = round(annual_hra_amount - percentage)
-
-
                             if get_each_doc.rented_in_metro_city == 0:
                                 non_metro_or_metro = (total_basic_amount * 40) / 100
                             elif get_each_doc.rented_in_metro_city == 1:
                                 non_metro_or_metro = (total_basic_amount * 50) / 100
 
-
-                            # HRA Exemption rule
                             final_hra_exemption = round(
                                 min(basic_rule2, annual_hra_amount, non_metro_or_metro)
                             )
@@ -1101,8 +1021,6 @@ class CustomSalarySlip(SalarySlip):
         for bonus in self.earnings:
             bonus_component=frappe.get_doc("Salary Component",bonus.salary_component)
             if bonus_component.custom_is_accrual==1:
-                # frappe.msgprint(str(bonus_component.name))
-
                 bonus_accrual= frappe.get_list(
                         'Employee Bonus Accrual',
                         filters={'salary_slip': self.name},
@@ -1111,7 +1029,6 @@ class CustomSalarySlip(SalarySlip):
                     )
 
                 if len(bonus_accrual)>0:
-                    # frappe.msgprint(str(bonus_accrual[0].name))
                     accrual_each_doc=frappe.get_doc("Employee Bonus Accrual",bonus_accrual[0].name)
                     accrual_each_doc.amount=bonus.amount
                     accrual_each_doc.save()
@@ -1156,36 +1073,15 @@ class CustomSalarySlip(SalarySlip):
             months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
             self.custom_month_count=months_t2_to_t1
 
-
-
-
-
     def set_month(self):
-
-
-
         date_str = str(self.start_date)
-
-
         month_str = date_str[5:7]
-
-
         month_number = int(month_str)
-
-
         month_names = ["", "January", "February", "March", "April", "May", "June",
                     "July", "August", "September", "October", "November", "December"]
 
         month_name = month_names[month_number]
-
         self.custom_month=month_name
-
-
-
-
-
-
-
 
 
 
@@ -1197,10 +1093,11 @@ class CustomSalarySlip(SalarySlip):
 
 
     def actual_amount_ctc(self):
+        print("33333333333333333333333333333333\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
         if self.earnings:
             for k in self.earnings:
                 if self.payment_days and self.payment_days > 0:
-                    k.custom_actual_amount = round((k.amount * self.total_working_days) / self.payment_days)
+                    k.custom_actual_amount = (k.amount * self.total_working_days) / self.payment_days
                 else:
                     k.custom_actual_amount = 0
 
@@ -1210,27 +1107,20 @@ class CustomSalarySlip(SalarySlip):
                 original_amount = float(deduction.amount or 0)
 
                 if self.payment_days and self.payment_days > 0:
-                    deduction.custom_actual_amount = round((original_amount * self.total_working_days) / self.payment_days)
+                    deduction.custom_actual_amount = (original_amount * self.total_working_days) / self.payment_days
                 else:
                     deduction.custom_actual_amount = 0
 
                 if component_doc.component_type == "ESIC":
                     deduction.amount = math.ceil(original_amount)
-                else:
-                    deduction.amount = round(original_amount)
+                # else:
+                #     deduction.amount = round(original_amount)
 
 
         if self.total_deduction or self.total_loan_repayment:
             self.custom_total_deduction_amount = (self.total_deduction or 0) + (self.total_loan_repayment or 0)
         else:
             self.custom_total_deduction_amount = 0
-
-
-
-
-
-
-
 
 
 
@@ -1270,11 +1160,7 @@ class CustomSalarySlip(SalarySlip):
             if len(self.earnings) > 0:
                 benefit_component = []
                 component_amount_dict = {}
-
                 benefit_component_demo=[]
-
-
-
                 benefit_application = frappe.get_list(
                     'Employee Benefit Claim',
                     filters={
@@ -1323,7 +1209,6 @@ class CustomSalarySlip(SalarySlip):
                                 if demo['component'] == j.salary_component:
                                     demo['settlement'] += j.total_settlement
                                     demo['amount']+=j.total_settlement
-            # frappe.msgprint(str(benefit_component_demo))
 
             benefit_component_amount1 = []
             for data in benefit_component_demo:
@@ -1368,10 +1253,6 @@ class CustomSalarySlip(SalarySlip):
                 for earnings in self.earnings:
                     if earnings.salary_component == component_data['component']:
                         earnings.amount = component_data['total_amount']
-
-
-
-
 
 
 

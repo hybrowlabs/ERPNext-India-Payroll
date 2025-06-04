@@ -130,4 +130,4 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         new_declaration.insert()
         new_declaration.submit()
         frappe.db.commit()
-        frappe.msgprint("Tax Exemption declaration is created")
+        # frappe.msgprint("Tax Exemption declaration is created")

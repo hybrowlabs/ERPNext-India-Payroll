@@ -4,10 +4,6 @@ frappe.ui.form.on('Loan', {
         if(frm.is_new())
         {
 
-
-
-
-
             if(frm.doc.applicant_type=="Employee" && frm.doc.loan_product)
                 {
                     frappe.call({
@@ -25,15 +21,7 @@ frappe.ui.form.on('Loan', {
                                     {
 
                                                 frm.set_value("custom_loan_perquisite_rate_of_interest",res.message[0].custom_loan_perquisite_rate_of_interest)
-
-
-
                                     }
-
-
-
-
-
                             }
                         }
                     })
@@ -58,20 +46,12 @@ frappe.ui.form.on('Loan', {
                         },
                         callback: function(res) {
                             if (res.message) {
-                                // console.log(res.message,"222")
                                 frm.set_value("monthly_repayment_amount",res.message.repayment_amount)
                             }
                         }
                     })
 
                 }
-
-
-
-
-
-
-
 
         }
 
@@ -98,8 +78,6 @@ frappe.ui.form.on('Loan', {
 
                         if(frm.doc.loan_amount>res.message[0].custom_loan_perquisite_threshold_amount)
                             {
-
-
 
                                 if(frm.doc.applicant_type=="Employee")
                                     {
@@ -143,9 +121,6 @@ frappe.ui.form.on('Loan', {
 
                             if(frm.doc.loan_amount>res.message[0].custom_loan_perquisite_threshold_amount)
                                 {
-
-
-
                                     if(frm.doc.applicant_type=="Employee")
                                         {
                                             frm.set_value("custom_loan_perquisite_rate_of_interest",res.message[0].custom_loan_perquisite_rate_of_interest)
