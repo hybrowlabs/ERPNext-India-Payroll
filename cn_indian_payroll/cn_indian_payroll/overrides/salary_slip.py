@@ -7,6 +7,8 @@ from frappe.query_builder import Order
 from frappe import _
 import math
 
+from collections import defaultdict
+
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
@@ -47,23 +49,30 @@ class CustomSalarySlip(SalarySlip):
         self.set_sub_period()
         self.apply_lop_amount_in_reimbursement_component()
 
-        # self.custom_previous_taxable_earnings = (
-        #     self.previous_taxable_earnings_before_exemption
-        # )
-        # self.custom_current_taxable_earnings = (
-        #     self.current_structured_taxable_earnings_before_exemption
-        # )
+        if self.previous_taxable_earnings_before_exemption:
+            self.custom_previous_taxable_earnings = (
+                self.previous_taxable_earnings_before_exemption
+            )
 
-        # self.custom_future_taxable_earnings = (
-        #     self.future_structured_taxable_earnings_before_exemption
-        # )
-        # self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
-        # if self.earnings:
-        #     total_ctc_taxable_amount = 0
-        #     for earning in self.earnings:
-        #         if earning.is_tax_applicable == 1:
-        #             total_ctc_taxable_amount += earning.default_amount
-        #     self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        if self.current_structured_taxable_earnings_before_exemption:
+            self.custom_current_taxable_earnings = (
+                self.current_structured_taxable_earnings_before_exemption
+            )
+
+        if self.future_structured_taxable_earnings_before_exemption:
+            self.custom_future_taxable_earnings = (
+                self.future_structured_taxable_earnings_before_exemption
+            )
+
+        if self.ctc or self.non_taxable_earnings:
+            self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
+
+        if self.earnings:
+            total_ctc_taxable_amount = 0
+            for earning in self.earnings:
+                if earning.is_tax_applicable == 1:
+                    total_ctc_taxable_amount += earning.default_amount
+            self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
         self.insert_other_perquisites()
 
@@ -845,59 +854,8 @@ class CustomSalarySlip(SalarySlip):
 
         return flt(result[0][0]) if result else 0.0
 
-    # def on_cancel(self):
-    #     get_benefit_accrual = frappe.db.get_list(
-    #         "Employee Benefit Accrual",
-    #         filters={
-    #             "salary_slip": self.name,
-    #             "employee": self.employee,
-    #             "docstatus": 1,
-    #         },
-    #         fields=["*"],
-    #     )
-
-    #     if len(get_benefit_accrual) > 0:
-    #         for j in get_benefit_accrual:
-    #             arrear_doc = frappe.get_doc("Employee Benefit Accrual", j.name)
-    #             arrear_doc.docstatus = 2
-    #             arrear_doc.save()
-
-    #             frappe.delete_doc("Employee Benefit Accrual", j.name)
-
     def food_coupon(self):
-        food_coupon_array = []
-
-        for food_coupon_component in self.earnings:
-            if (
-                food_coupon_component.is_tax_applicable == 1
-                and food_coupon_component.custom_regime == "New Regime"
-            ):
-                get_fd_component = frappe.get_list(
-                    "Salary Slip",
-                    filters={
-                        "employee": self.employee,
-                        "custom_payroll_period": self.custom_payroll_period,
-                        "docstatus": 1,
-                    },
-                    fields=["name"],
-                )
-
-                if len(get_fd_component) > 0:
-                    for k in get_fd_component:
-                        get_slip = frappe.get_doc("Salary Slip", k.name)
-                        for m in get_slip.earnings:
-                            if (
-                                m.is_tax_applicable == 0
-                                and m.custom_regime == "New Regime"
-                            ):
-                                food_coupon_array.append(m.amount)
-
-            g1 = sum(food_coupon_array)
-
-            food_coupon_component.custom_total_ytd = g1
-
-    def arrear_ytd(self):
-        get_arrear_component = frappe.db.get_list(
+        past_salary_slips = frappe.db.get_list(
             "Salary Slip",
             filters={
                 "employee": self.employee,
@@ -907,32 +865,117 @@ class CustomSalarySlip(SalarySlip):
             fields=["name"],
         )
 
-        if get_arrear_component:
-            arrear_ytd_sum = {}
+        food_coupon_array = []
 
-            for arrear in get_arrear_component:
-                if self.name != arrear.name:
-                    get_arrear_doc = frappe.get_doc("Salary Slip", arrear.name)
+        for slip in past_salary_slips:
+            slip_doc = frappe.get_doc("Salary Slip", slip.name)
+            for earning in slip_doc.earnings:
+                if (
+                    earning.is_tax_applicable == 0
+                    and earning.custom_regime == "New Regime"
+                ):
+                    food_coupon_array.append(earning.amount)
 
-                    if get_arrear_doc.earnings:
-                        for earning in get_arrear_doc.earnings:
-                            get_arrear = frappe.get_doc(
-                                "Salary Component", earning.salary_component
-                            )
+        total_food_coupon_ytd = sum(food_coupon_array)
 
-                            if get_arrear.custom_component:
-                                arrear_component = get_arrear.custom_component
+        for earning in self.earnings:
+            if earning.is_tax_applicable == 1 and earning.custom_regime == "New Regime":
+                earning.custom_total_ytd = total_food_coupon_ytd
 
-                                if arrear_component not in arrear_ytd_sum:
-                                    arrear_ytd_sum[arrear_component] = 0
+    def arrear_ytd(self):
+        arrear_slips = frappe.db.get_list(
+            "Salary Slip",
+            filters={
+                "employee": self.employee,
+                "custom_payroll_period": self.custom_payroll_period,
+                "docstatus": 1,
+                "name": ("!=", self.name),
+            },
+            fields=["name"],
+        )
 
-                                arrear_ytd_sum[arrear_component] += earning.amount
+        if not arrear_slips:
+            return
 
-            for current_earning in self.earnings:
-                if current_earning.salary_component in arrear_ytd_sum:
-                    current_earning.custom_arrear_ytd = arrear_ytd_sum[
-                        current_earning.salary_component
-                    ]
+        # Store YTD arrears component-wise
+        arrear_ytd_sum = defaultdict(float)
+
+        for slip in arrear_slips:
+            doc = frappe.get_doc("Salary Slip", slip.name)
+
+            for section in ["earnings", "deductions"]:
+                for row in doc.get(section):
+                    component_doc = frappe.get_doc(
+                        "Salary Component", row.salary_component
+                    )
+
+                    if component_doc.custom_component:
+                        arrear_ytd_sum[component_doc.custom_component] += row.amount
+
+        # Update current slip's earnings and deductions with YTD arrear value
+        for row in self.earnings:
+            if row.salary_component in arrear_ytd_sum:
+                row.custom_arrear_ytd = arrear_ytd_sum[row.salary_component]
+
+        for row in self.deductions:
+            if row.salary_component in arrear_ytd_sum:
+                row.custom_arrear_ytd = arrear_ytd_sum[row.salary_component]
+
+    # def arrear_ytd(self):
+    #     get_arrear_component = frappe.db.get_list(
+    #         "Salary Slip",
+    #         filters={
+    #             "employee": self.employee,
+    #             "custom_payroll_period": self.custom_payroll_period,
+    #             "docstatus": 1,
+    #         },
+    #         fields=["name"],
+    #     )
+
+    #     if get_arrear_component:
+    #         arrear_ytd_sum = {}
+
+    #         for arrear in get_arrear_component:
+    #             if self.name != arrear.name:
+    #                 get_arrear_doc = frappe.get_doc("Salary Slip", arrear.name)
+
+    #                 if get_arrear_doc.earnings:
+    #                     for earning in get_arrear_doc.earnings:
+    #                         get_arrear = frappe.get_doc(
+    #                             "Salary Component", earning.salary_component
+    #                         )
+
+    #                         if get_arrear.custom_component:
+    #                             arrear_component = get_arrear.custom_component
+
+    #                             if arrear_component not in arrear_ytd_sum:
+    #                                 arrear_ytd_sum[arrear_component] = 0
+
+    #                             arrear_ytd_sum[arrear_component] += earning.amount
+    #                 if get_arrear_doc.deductions:
+    #                     for deduction in get_arrear_doc.deductions:
+    #                         get_arrear = frappe.get_doc(
+    #                             "Salary Component", deduction.salary_component
+    #                         )
+
+    #                         if get_arrear.custom_component:
+    #                             arrear_component = get_arrear.custom_component
+
+    #                             if arrear_component not in arrear_ytd_sum:
+    #                                 arrear_ytd_sum[arrear_component] = 0
+
+    #                             arrear_ytd_sum[arrear_component] += earning.amount
+
+    #         for current_earning in self.earnings:
+    #             if current_earning.salary_component in arrear_ytd_sum:
+    #                 current_earning.custom_arrear_ytd = arrear_ytd_sum[
+    #                     current_earning.salary_component
+    #                 ]
+    #         for current_deduction in self.deductions:
+    #             if current_deduction.salary_component in arrear_ytd_sum:
+    #                 current_deduction.custom_arrear_ytd = arrear_ytd_sum[
+    #                     current_earning.salary_component
+    #                 ]
 
     def new_joinee(self):
         if self.employee:
@@ -1322,8 +1365,6 @@ class CustomSalarySlip(SalarySlip):
                                     "max_amount": earning.amount * 12,
                                 }
                             )
-
-            # frappe.msgprint(str(update_component_array))
 
             if update_component_array:
                 declaration = frappe.get_list(
