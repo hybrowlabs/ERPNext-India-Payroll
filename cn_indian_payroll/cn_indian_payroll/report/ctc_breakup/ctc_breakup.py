@@ -19,21 +19,37 @@ def get_all_employee(filters=None):
         "Salary Structure Assignment", filters=conditions1, fields=["*"]
     )
 
-    salary_components = set()
     reimbursement_components = set()
+    all_used_components = []
     data = []
 
-    # Get ordered salary components
-    ctc_components = frappe.get_all(
-        "Salary Component",
-        filters={"do_not_include_in_total": 0, "custom_sequence": [">", 0]},
-        fields=["name"],
-        order_by="custom_sequence asc",
-    )
-    ordered_ctc_components = [comp["name"] for comp in ctc_components]
-    ctc_components_set = set(ordered_ctc_components)  # for fast lookup
-
     for each_employee in get_all_ssa:
+        # Get components from assigned salary structure
+        structure = frappe.get_doc(
+            "Salary Structure", each_employee.get("salary_structure")
+        )
+
+        structure_component_names = set()
+        for comp in structure.get("earnings", []) + structure.get("deductions", []):
+            if comp.salary_component:
+                structure_component_names.add(comp.salary_component)
+
+        # Filter salary components based on structure & sequence
+        matching_ctc_components = frappe.get_all(
+            "Salary Component",
+            filters={
+                "name": ["in", list(structure_component_names)],
+                "do_not_include_in_total": 0,
+                "custom_sequence": [">", 0],
+            },
+            fields=["name"],
+            order_by="custom_sequence asc",
+        )
+
+        ordered_ctc_components = [comp["name"] for comp in matching_ctc_components]
+        ctc_components_set = set(ordered_ctc_components)
+        all_used_components.extend(ordered_ctc_components)
+
         # Initialize row data
         row = {
             "employee": each_employee.get("employee"),
@@ -45,7 +61,7 @@ def get_all_employee(filters=None):
             "regime": each_employee.get("income_tax_slab"),
         }
 
-        # Calculate allowances
+        # Allowance calculations
         hra_amount = special_amount = car_amount = incentive_amount = driver_amount = 0
 
         if each_employee.get("custom_is_special_hra") == 1:
@@ -61,7 +77,7 @@ def get_all_employee(filters=None):
         if each_employee.get("custom_is_extra_driver_salary") == 1:
             driver_amount = each_employee.get("custom_extra_driver_salary_value") / 12
 
-        # Reimbursement values
+        # Reimbursements
         reimbursements = frappe.get_all(
             "Employee Reimbursements",
             filters={"parent": each_employee.get("name")},
@@ -76,7 +92,7 @@ def get_all_employee(filters=None):
                 reimbursement_components.add(component_name)
                 row[component_name] = round(row.get(component_name, 0) + amount)
 
-        # Generate salary slip preview
+        # Generate salary slip
         salary_slip = make_salary_slip(
             source_name=each_employee.get("salary_structure"),
             employee=each_employee.get("employee"),
@@ -90,7 +106,6 @@ def get_all_employee(filters=None):
             component_name = earning.salary_component
             if component_name in ctc_components_set:
                 amount = earning.amount or 0
-                salary_components.add(component_name)
                 row[component_name] = round(row.get(component_name, 0) + amount)
 
         # Deductions
@@ -98,8 +113,11 @@ def get_all_employee(filters=None):
             component_name = deduction.salary_component
             if component_name in ctc_components_set:
                 amount = deduction.amount or 0
-                salary_components.add(component_name)
                 row[component_name] = round(row.get(component_name, 0) + amount)
+
+        # Set missing components to 0
+        for component in ordered_ctc_components:
+            row.setdefault(component, 0)
 
         # Add allowance values
         row["special_hra"] = round(hra_amount)
@@ -108,9 +126,13 @@ def get_all_employee(filters=None):
         row["incentive"] = round(incentive_amount)
         row["extra_driver_salary"] = round(driver_amount)
 
+        # Set missing reimbursements to 0
+        for component in reimbursement_components:
+            row.setdefault(component, 0)
+
         data.append(row)
 
-    # Column definitions
+    # Prepare column headers
     columns = [
         {
             "label": "Employee",
@@ -156,17 +178,24 @@ def get_all_employee(filters=None):
         },
     ]
 
-    # Add ordered salary components as columns
-    for component in ordered_ctc_components:
-        if component in salary_components:
-            columns.append(
-                {
-                    "label": component,
-                    "fieldname": component,
-                    "fieldtype": "Currency",
-                    "width": 150,
-                }
-            )
+    # Remove duplicates and preserve order of components
+    seen = set()
+    unique_ordered_components = []
+    for comp in all_used_components:
+        if comp not in seen:
+            seen.add(comp)
+            unique_ordered_components.append(comp)
+
+    # Add matched salary components
+    for component in unique_ordered_components:
+        columns.append(
+            {
+                "label": component,
+                "fieldname": component,
+                "fieldtype": "Currency",
+                "width": 150,
+            }
+        )
 
     # Add allowances
     columns.extend(
