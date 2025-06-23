@@ -23,13 +23,15 @@ def get_all_employee(filters=None):
     reimbursement_components = set()
     data = []
 
+    # Get ordered salary components
     ctc_components = frappe.get_all(
         "Salary Component",
         filters={"do_not_include_in_total": 0, "custom_sequence": [">", 0]},
-        fields=["*"],
+        fields=["name"],
         order_by="custom_sequence asc",
     )
-    ctc_components_set = set(component.name for component in ctc_components)
+    ordered_ctc_components = [comp["name"] for comp in ctc_components]
+    ctc_components_set = set(ordered_ctc_components)  # for fast lookup
 
     for each_employee in get_all_ssa:
         # Initialize row data
@@ -59,6 +61,7 @@ def get_all_employee(filters=None):
         if each_employee.get("custom_is_extra_driver_salary") == 1:
             driver_amount = each_employee.get("custom_extra_driver_salary_value") / 12
 
+        # Reimbursement values
         reimbursements = frappe.get_all(
             "Employee Reimbursements",
             filters={"parent": each_employee.get("name")},
@@ -67,13 +70,13 @@ def get_all_employee(filters=None):
 
         for reimbursement in reimbursements:
             component_name = reimbursement.get("reimbursements")
-            amount = reimbursement.get("monthly_total_amount")
+            amount = reimbursement.get("monthly_total_amount") or 0
 
             if component_name:
                 reimbursement_components.add(component_name)
                 row[component_name] = round(row.get(component_name, 0) + amount)
 
-        # Generate the salary slip for each employee
+        # Generate salary slip preview
         salary_slip = make_salary_slip(
             source_name=each_employee.get("salary_structure"),
             employee=each_employee.get("employee"),
@@ -82,22 +85,23 @@ def get_all_employee(filters=None):
             for_preview=1,
         )
 
+        # Earnings
         for earning in salary_slip.earnings:
             component_name = earning.salary_component
             if component_name in ctc_components_set:
-                amount = earning.amount
+                amount = earning.amount or 0
                 salary_components.add(component_name)
                 row[component_name] = round(row.get(component_name, 0) + amount)
 
-        # Process deductions
+        # Deductions
         for deduction in salary_slip.deductions:
             component_name = deduction.salary_component
             if component_name in ctc_components_set:
-                amount = deduction.amount
+                amount = deduction.amount or 0
                 salary_components.add(component_name)
                 row[component_name] = round(row.get(component_name, 0) + amount)
 
-        # Add allowances to row
+        # Add allowance values
         row["special_hra"] = round(hra_amount)
         row["special_conveyance"] = round(special_amount)
         row["car_allowance"] = round(car_amount)
@@ -106,7 +110,7 @@ def get_all_employee(filters=None):
 
         data.append(row)
 
-    # Define columns with employee details, salary components, and allowances
+    # Column definitions
     columns = [
         {
             "label": "Employee",
@@ -124,78 +128,84 @@ def get_all_employee(filters=None):
             "label": "Effective From",
             "fieldname": "from_date",
             "fieldtype": "Date",
-            "width": 200,
+            "width": 150,
         },
         {
             "label": "Date of Joining",
             "fieldname": "doj",
             "fieldtype": "Date",
-            "width": 200,
+            "width": 150,
         },
-        {"label": "Annual CTC", "fieldname": "base", "fieldtype": "Data", "width": 200},
+        {
+            "label": "Annual CTC",
+            "fieldname": "base",
+            "fieldtype": "Currency",
+            "width": 150,
+        },
         {
             "label": "Monthly CTC",
             "fieldname": "monthly_ctc",
-            "fieldtype": "Data",
-            "width": 200,
+            "fieldtype": "Currency",
+            "width": 150,
         },
         {
             "label": "Income Tax Regime",
             "fieldname": "regime",
             "fieldtype": "Data",
-            "width": 200,
+            "width": 150,
         },
     ]
 
-    # Adding salary components to the columns
-    for component in salary_components:
-        columns.append(
-            {
-                "label": component,
-                "fieldname": component,
-                "fieldtype": "Currency",
-                "width": 150,
-            }
-        )
+    # Add ordered salary components as columns
+    for component in ordered_ctc_components:
+        if component in salary_components:
+            columns.append(
+                {
+                    "label": component,
+                    "fieldname": component,
+                    "fieldtype": "Currency",
+                    "width": 150,
+                }
+            )
 
-    # Adding allowances and extra fields to the columns
+    # Add allowances
     columns.extend(
         [
             {
                 "label": "Special HRA",
                 "fieldname": "special_hra",
                 "fieldtype": "Currency",
-                "width": 200,
+                "width": 150,
             },
             {
                 "label": "Special Conveyance",
                 "fieldname": "special_conveyance",
                 "fieldtype": "Currency",
-                "width": 200,
+                "width": 150,
             },
             {
                 "label": "Car Allowance",
                 "fieldname": "car_allowance",
                 "fieldtype": "Currency",
-                "width": 200,
+                "width": 150,
             },
             {
                 "label": "Incentive",
                 "fieldname": "incentive",
                 "fieldtype": "Currency",
-                "width": 200,
+                "width": 150,
             },
             {
                 "label": "Extra Driver Salary",
                 "fieldname": "extra_driver_salary",
                 "fieldtype": "Currency",
-                "width": 200,
+                "width": 150,
             },
         ]
     )
 
-    # Adding reimbursement components to the columns
-    for component in reimbursement_components:
+    # Add reimbursement components
+    for component in sorted(reimbursement_components):
         columns.append(
             {
                 "label": component,
