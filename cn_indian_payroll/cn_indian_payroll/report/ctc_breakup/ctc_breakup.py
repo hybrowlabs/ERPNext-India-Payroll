@@ -25,7 +25,7 @@ def get_all_employee(filters=None):
 
     ctc_components = frappe.get_all(
         "Salary Component",
-        filters={"custom_is_part_of_ctc": 1},
+        filters={"do_not_include_in_total": 0, "custom_sequence": [">", 0]},
         fields=["*"],
         order_by="custom_sequence asc",
     )
