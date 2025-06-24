@@ -1059,9 +1059,13 @@ class CustomSalarySlip(SalarySlip):
                     )
                 if component_type == "Professional Tax":
                     current_pt_value = deduction.amount
+
+                    # frappe.msgprint(str(current_pt_value))
                     future_pt_value = (deduction.custom_actual_amount) * (
                         self.custom_month_count
                     )
+
+                    # frappe.msgprint(str(future_pt_value))
         get_previous_salary_slip = frappe.get_list(
             "Salary Slip",
             filters={
@@ -1094,6 +1098,8 @@ class CustomSalarySlip(SalarySlip):
                             previous_epf_value += deduction.amount
                         if component_type == "Professional Tax":
                             previous_pt_value += deduction.amount
+
+                        # frappe.msgprint(str(previous_pt_value))
 
         if self.custom_tax_regime == "Old Regime":
             declaration = frappe.get_list(
@@ -1498,13 +1504,17 @@ class CustomSalarySlip(SalarySlip):
 
     def actual_amount_ctc(self):
         if self.earnings:
-            for k in self.earnings:
-                if self.payment_days and self.payment_days > 0:
-                    k.custom_actual_amount = round(
-                        (k.amount * self.total_working_days) / self.payment_days
-                    )
+            for earning in self.earnings:
+                if earning.depends_on_payment_days == 1:
+                    if self.payment_days and self.payment_days > 0:
+                        earning.custom_actual_amount = round(
+                            (earning.amount * self.total_working_days)
+                            / self.payment_days
+                        )
+                    else:
+                        earning.custom_actual_amount = 0
                 else:
-                    k.custom_actual_amount = 0
+                    earning.custom_actual_amount = earning.amount
 
         if self.deductions:
             for deduction in self.deductions:
@@ -1513,17 +1523,21 @@ class CustomSalarySlip(SalarySlip):
                 )
                 original_amount = float(deduction.amount or 0)
 
-                if self.payment_days and self.payment_days > 0:
-                    deduction.custom_actual_amount = round(
-                        (original_amount * self.total_working_days) / self.payment_days
-                    )
-                else:
-                    deduction.custom_actual_amount = 0
+                if deduction.depends_on_payment_days == 1:
+                    if self.payment_days and self.payment_days > 0:
+                        deduction.custom_actual_amount = round(
+                            (original_amount * self.total_working_days)
+                            / self.payment_days
+                        )
+                    else:
+                        deduction.custom_actual_amount = 0
 
-                if component_doc.component_type == "ESIC":
-                    deduction.amount = math.ceil(original_amount)
+                    if component_doc.component_type == "ESIC":
+                        deduction.amount = math.ceil(original_amount)
+                    else:
+                        deduction.amount = round(original_amount)
                 else:
-                    deduction.amount = round(original_amount)
+                    deduction.custom_actual_amount = original_amount
 
         if self.total_deduction or self.total_loan_repayment:
             self.custom_total_deduction_amount = (self.total_deduction or 0) + (
