@@ -76,7 +76,13 @@ def get_salary_slips(filters=None):
         employee = frappe.get_value(
             "Employee",
             structure["employee"],
-            ["pan_number", "personal_email", "company_email"],
+            [
+                "pan_number",
+                "personal_email",
+                "company_email",
+                "department",
+                "designation",
+            ],
             as_dict=True,
         )
 
