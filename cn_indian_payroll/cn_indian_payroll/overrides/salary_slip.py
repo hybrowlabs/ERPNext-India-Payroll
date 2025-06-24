@@ -314,6 +314,26 @@ class CustomSalarySlip(SalarySlip):
             )
         )
 
+        self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
+
+        if hasattr(self, "total_structured_tax_amount") and hasattr(
+            self, "current_structured_tax_amount"
+        ):
+            self.future_income_tax_deductions = (
+                self.total_structured_tax_amount
+                + self.get("full_tax_on_additional_earnings", 0)
+                - self.income_tax_deducted_till_date
+            )
+
+            self.current_month_income_tax = (
+                self.current_structured_tax_amount
+                + self.get("full_tax_on_additional_earnings", 0)
+            )
+
+            self.total_income_tax = (
+                self.income_tax_deducted_till_date + self.future_income_tax_deductions
+            )
+
     def check_sal_struct(self):
         ss = frappe.qb.DocType("Salary Structure")
         ssa = frappe.qb.DocType("Salary Structure Assignment")
