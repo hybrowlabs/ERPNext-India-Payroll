@@ -1560,8 +1560,8 @@ class CustomSalarySlip(SalarySlip):
                     deduction.custom_actual_amount = original_amount
 
         if self.total_deduction or self.total_loan_repayment:
-            self.custom_total_deduction_amount = (self.total_deduction or 0) + (
-                self.total_loan_repayment or 0
+            self.custom_total_deduction_amount = round(
+                (self.total_deduction or 0) + (self.total_loan_repayment or 0)
             )
         else:
             self.custom_total_deduction_amount = 0
