@@ -1295,6 +1295,7 @@ class CustomSalarySlip(SalarySlip):
                                         "exemption_amount": final_hra_exemption,
                                     },
                                 )
+                get_each_doc.workflow_state = "Approved"
 
                 get_each_doc.save()
                 frappe.db.commit()
@@ -1325,6 +1326,7 @@ class CustomSalarySlip(SalarySlip):
 
                 get_each_doc.custom_posting_date = self.posting_date
                 get_each_doc.custom_declaration_form_data = json.dumps(form_data)
+                get_each_doc.workflow_state = "Approved"
 
                 get_each_doc.save()
                 frappe.db.commit()
