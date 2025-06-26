@@ -49,30 +49,30 @@ class CustomSalarySlip(SalarySlip):
         self.set_sub_period()
         self.apply_lop_amount_in_reimbursement_component()
 
-        if self.previous_taxable_earnings_before_exemption:
-            self.custom_previous_taxable_earnings = (
-                self.previous_taxable_earnings_before_exemption
-            )
+        # if self.previous_taxable_earnings_before_exemption:
+        #     self.custom_previous_taxable_earnings = (
+        #         self.previous_taxable_earnings_before_exemption
+        #     )
 
-        if self.current_structured_taxable_earnings_before_exemption:
-            self.custom_current_taxable_earnings = (
-                self.current_structured_taxable_earnings_before_exemption
-            )
+        # if self.current_structured_taxable_earnings_before_exemption:
+        #     self.custom_current_taxable_earnings = (
+        #         self.current_structured_taxable_earnings_before_exemption
+        #     )
 
-        if self.future_structured_taxable_earnings_before_exemption:
-            self.custom_future_taxable_earnings = (
-                self.future_structured_taxable_earnings_before_exemption
-            )
+        # if self.future_structured_taxable_earnings_before_exemption:
+        #     self.custom_future_taxable_earnings = (
+        #         self.future_structured_taxable_earnings_before_exemption
+        #     )
 
-        if self.ctc or self.non_taxable_earnings:
-            self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
+        # if self.ctc or self.non_taxable_earnings:
+        #     self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
 
-        if self.earnings:
-            total_ctc_taxable_amount = 0
-            for earning in self.earnings:
-                if earning.is_tax_applicable == 1:
-                    total_ctc_taxable_amount += earning.default_amount
-            self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        # if self.earnings:
+        #     total_ctc_taxable_amount = 0
+        #     for earning in self.earnings:
+        #         if earning.is_tax_applicable == 1:
+        #             total_ctc_taxable_amount += earning.default_amount
+        #     self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
         self.insert_other_perquisites()
 
