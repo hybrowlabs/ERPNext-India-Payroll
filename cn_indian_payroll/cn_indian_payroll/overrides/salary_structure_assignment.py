@@ -5,6 +5,7 @@ from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignmen
 
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from frappe.utils import getdate
+import datetime
 
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):

@@ -1043,49 +1043,49 @@ class CustomSalarySlip(SalarySlip):
         if get_company.hra_component:
             current_hra = get_company.hra_component
 
-        salary_components = {
-            d.name: d.component_type
-            for d in frappe.get_list(
-                "Salary Component", fields=["name", "component_type"]
-            )
-        }
-
         if self.earnings:
             for earning in self.earnings:
-                component_type = salary_components.get(earning.salary_component)
-                if component_type == "NPS":
-                    current_nps_value = earning.amount
-                    future_nps_value = (earning.custom_actual_amount) * (
-                        self.custom_month_count
-                    )
+                component_data = frappe.get_doc(
+                    "Salary Component", earning.salary_component
+                )
+                if component_data.component_type == "NPS":
+                    current_nps_value += earning.amount or 0
+                    if component_data.custom_is_arrear == 0:
+                        future_nps_value = (
+                            earning.custom_actual_amount or 0
+                        ) * self.custom_month_count
+
                 if earning.salary_component == current_basic:
-                    current_basic_value = earning.amount
-                    future_basic_value = (earning.custom_actual_amount) * (
-                        self.custom_month_count
-                    )
+                    current_basic_value += earning.amount
+                    if component_data.custom_is_arrear == 0:
+                        future_basic_value = (earning.custom_actual_amount) * (
+                            self.custom_month_count
+                        )
                 if earning.salary_component == current_hra:
-                    current_hra_value = earning.amount
-                    future_hra_value = (earning.custom_actual_amount) * (
-                        self.custom_month_count
-                    )
+                    current_hra_value += earning.amount
+                    if component_data.custom_is_arrear == 0:
+                        future_hra_value = (earning.custom_actual_amount) * (
+                            self.custom_month_count
+                        )
 
         if self.deductions:
             for deduction in self.deductions:
-                component_type = salary_components.get(deduction.salary_component)
-                if component_type == "EPF":
-                    current_epf_value = deduction.amount
-                    future_epf_value = (deduction.custom_actual_amount) * (
-                        self.custom_month_count
-                    )
-                if component_type == "Professional Tax":
-                    current_pt_value = deduction.amount
+                component_data = frappe.get_doc(
+                    "Salary Component", deduction.salary_component
+                )
+                if component_data.component_type == "EPF":
+                    current_epf_value += deduction.amount
+                    if component_data.custom_is_arrear == 0:
+                        future_epf_value = (deduction.custom_actual_amount) * (
+                            self.custom_month_count
+                        )
+                if component_data.component_type == "Professional Tax":
+                    current_pt_value += deduction.amount
 
-                    # frappe.msgprint(str(current_pt_value))
-                    future_pt_value = (deduction.custom_actual_amount) * (
-                        self.custom_month_count
-                    )
-
-                    # frappe.msgprint(str(future_pt_value))
+                    if component_data.custom_is_arrear == 0:
+                        future_pt_value = (deduction.custom_actual_amount) * (
+                            self.custom_month_count
+                        )
         get_previous_salary_slip = frappe.get_list(
             "Salary Slip",
             filters={
@@ -1101,8 +1101,10 @@ class CustomSalarySlip(SalarySlip):
                 previous_salary_slip = frappe.get_doc("Salary Slip", slip.name)
                 if previous_salary_slip.earnings:
                     for earning in previous_salary_slip.earnings:
-                        component_type = salary_components.get(earning.salary_component)
-                        if component_type == "NPS":
+                        component_data = frappe.get_doc(
+                            "Salary Component", earning.salary_component
+                        )
+                        if component_data.component_type == "NPS":
                             previous_nps_value += earning.amount
                         if earning.salary_component == current_basic:
                             previous_basic_value += earning.amount
@@ -1111,15 +1113,13 @@ class CustomSalarySlip(SalarySlip):
 
                 if previous_salary_slip.deductions:
                     for deduction in previous_salary_slip.deductions:
-                        component_type = salary_components.get(
-                            deduction.salary_component
+                        component_data = frappe.get_doc(
+                            "Salary Component", deduction.salary_component
                         )
-                        if component_type == "EPF":
+                        if component_data.component_type == "EPF":
                             previous_epf_value += deduction.amount
-                        if component_type == "Professional Tax":
+                        if component_data.component_type == "Professional Tax":
                             previous_pt_value += deduction.amount
-
-                        # frappe.msgprint(str(previous_pt_value))
 
         if self.custom_tax_regime == "Old Regime":
             declaration = frappe.get_list(
