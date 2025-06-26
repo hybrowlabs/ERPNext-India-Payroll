@@ -87,7 +87,7 @@ def get_salary_slips(filters=None):
             filters={
                 "employee": structure["employee"],
                 "custom_payroll_period": structure["custom_payroll_period"],
-                "docstatus": ["in", [1]],
+                "docstatus": ["in", [0, 1]],
                 "company": structure["company"],
             },
             fields=["name"],
@@ -1367,10 +1367,12 @@ def get_salary_slips(filters=None):
             salary_data["tax_paid"] = salary_slip_sum
 
             salary_data["new_regime_tax"] = round(
-                (new_regime_payable - salary_slip_sum) / (month_count - slip_count)
+                (new_regime_payable - salary_slip_sum)
+                / ((month_count - slip_count) + 1)
             )
             salary_data["old_regime_tax"] = round(
-                (old_regime_payable - salary_slip_sum) / (month_count - slip_count)
+                (old_regime_payable - salary_slip_sum)
+                / ((month_count - slip_count) + 1)
             )
 
             # frappe.msgprint(str(slip_count))
