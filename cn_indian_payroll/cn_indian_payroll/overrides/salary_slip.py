@@ -627,7 +627,11 @@ class CustomSalarySlip(SalarySlip):
 
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
-            filters={"employee": self.employee, "docstatus": 1},
+            filters={
+                "employee": self.employee,
+                "docstatus": 1,
+                "from_date": ["<=", self.end_date],
+            },
             fields=["*"],
             order_by="from_date desc",
             limit=1,
@@ -754,32 +758,86 @@ class CustomSalarySlip(SalarySlip):
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
             filters={"employee": self.employee, "docstatus": 1},
-            fields=["*"],
+            fields=["custom_tax_regime"],
             order_by="from_date desc",
             limit=1,
         )
 
         custom_tax_regime = latest_salary_structure[0].custom_tax_regime
 
-        for earning in self.earnings:
-            if custom_tax_regime == earning.custom_regime:
-                taxable_earnings = self.get_salary_slip_details(
-                    start_date,
-                    end_date,
-                    parentfield="earnings",
-                    is_tax_applicable=1,
-                    custom_tax_exemption_applicable_based_on_regime=1,
-                )
-                # frappe.msgprint(str(taxable_earnings))
+        # Check if any earnings are assigned with the current regime
+        regime_matched = any(
+            earning.custom_regime == custom_tax_regime or earning.custom_regime == "All"
+            for earning in self.earnings
+        )
 
-            else:
-                taxable_earnings = self.get_salary_slip_details(
-                    start_date,
-                    end_date,
-                    parentfield="earnings",
-                    is_tax_applicable=1,
-                    custom_regime="All",
-                )
+        # Build the filters
+        if regime_matched:
+            # Get both matching regime and "All"
+            taxable_earnings = self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="earnings",
+                is_tax_applicable=1,
+                custom_tax_exemption_applicable_based_on_regime=1,
+                custom_regime=custom_tax_regime,  # match specific regime
+            ) + self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="earnings",
+                is_tax_applicable=1,
+                custom_tax_exemption_applicable_based_on_regime=1,
+                custom_regime="All",  # include "All"
+            )
+        else:
+            # Use only regime "All"
+            taxable_earnings = self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="earnings",
+                is_tax_applicable=1,
+                custom_regime="All",
+            )
+
+        print(
+            "\n\n\n\n\n\n\n\n\n\n==================",
+            taxable_earnings,
+            "\n\n\n\n\n\n\n\n\n\n",
+        )
+
+        # latest_salary_structure = frappe.get_list(
+        #     "Salary Structure Assignment",
+        #     filters={"employee": self.employee, "docstatus": 1},
+        #     fields=["*"],
+        #     order_by="from_date desc",
+        #     limit=1,
+        # )
+
+        # custom_tax_regime = latest_salary_structure[0].custom_tax_regime
+
+        # for earning in self.earnings:
+        #     if custom_tax_regime == earning.custom_regime:
+
+        #         taxable_earnings = self.get_salary_slip_details(
+        #             start_date,
+        #             end_date,
+        #             parentfield="earnings",
+        #             is_tax_applicable=1,
+        #             custom_tax_exemption_applicable_based_on_regime=1,
+        #         )
+
+        #         print("\n\n\n\n\n\n\n\n\n\n==================",taxable_earnings, "\n\n\n\n\n\n\n\n\n\n")
+        #     # else:
+        #     #     print("\n\n\n\n\n\n\n\n\n\n+++++++++++++++++",taxable_earnings, "\n\n\n\n\n\n\n\n\n\n")
+        #     #     taxable_earnings = self.get_salary_slip_details(
+        #     #         start_date,
+        #     #         end_date,
+        #     #         parentfield="earnings",
+        #     #         is_tax_applicable=1,
+        #     #         custom_regime="All",
+        #     #     )
+
+        # print("\n\n\n\n\n\n\n\n\n\ntaxable earning",taxable_earnings, "\n\n\n\n\n\n\n\n\n\n")
 
         # Check if tax exemption is allowed and get exempted amount
         if allow_tax_exemption:
