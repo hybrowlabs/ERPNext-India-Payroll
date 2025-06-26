@@ -7661,7 +7661,7 @@
    "name": "Salary Structure Assignment-status",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Draft\nHOD Approval Pending\nAdministrator Approval Pending\nApproved\nRejected",
+   "options": "Draft\nHOD Approval Pending\nAdministrator Approval Pending\nHR Head Approval Pending\nRejected by HR Head\nApproved\nRejected",
    "owner": "Administrator",
    "permlevel": 0,
    "placeholder": null,
