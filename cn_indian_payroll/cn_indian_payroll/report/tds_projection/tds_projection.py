@@ -363,16 +363,20 @@ def get_salary_slips(filters=None):
                 )
 
                 salary_data["new_annual_taxable_income"] = max(
-                    new_total_income - total, 0
+                    (new_total_income + loan_perquisite_total) - total, 0
                 )
                 salary_data["old_annual_taxable_income"] = max(
-                    old_total_income - (50000 + epf_amount + pt_amount + nps_deduction),
+                    (old_total_income + loan_perquisite_total)
+                    - (50000 + epf_amount + pt_amount + nps_deduction),
                     0,
                 )
 
-                new_annual_taxable_income_value = max(new_total_income - total, 0)
+                new_annual_taxable_income_value = max(
+                    (new_total_income + loan_perquisite_total) - total, 0
+                )
                 old_annual_taxable_income_value = max(
-                    old_total_income - (50000 + epf_amount + pt_amount + nps_deduction),
+                    (old_total_income + loan_perquisite_total)
+                    - (50000 + epf_amount + pt_amount + nps_deduction),
                     0,
                 )
 
@@ -928,17 +932,21 @@ def get_salary_slips(filters=None):
                 salary_data["new_total_deduction"] = nps_deduction + 75000
 
                 salary_data["old_annual_taxable_income"] = round(
-                    (old_total_income - total)
+                    ((old_total_income + loan_perquisite_total) - total)
                 )
 
                 salary_data["new_annual_taxable_income"] = max(
-                    new_total_income - nps_deduction - 75000, 0
+                    (new_total_income + loan_perquisite_total) - nps_deduction - 75000,
+                    0,
                 )
 
                 new_annual_taxable_income_value = max(
-                    new_total_income - nps_deduction - 75000, 0
+                    (new_total_income + loan_perquisite_total) - nps_deduction - 75000,
+                    0,
                 )
-                old_annual_taxable_income_value = max((old_total_income - total), 0)
+                old_annual_taxable_income_value = max(
+                    ((old_total_income + loan_perquisite_total) - total), 0
+                )
 
                 latest_tax_slab = frappe.get_list(
                     "Income Tax Slab",
