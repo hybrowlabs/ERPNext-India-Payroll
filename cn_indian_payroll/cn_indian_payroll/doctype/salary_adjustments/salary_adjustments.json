@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SAL-AR-{employee}-{#####}",
+ "creation": "2025-07-01 09:16:31.830265",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "branch",
+  "designation",
+  "number_of_present_days",
+  "column_break_niqf",
+  "company",
+  "posting_date",
+  "additional_salary_date",
+  "section_break_eoer",
+  "earning_arrear_breakup",
+  "section_break_cdww",
+  "deduction_arrear_breakup",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_present_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Number of present days",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_niqf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "additional_salary_date",
+   "fieldtype": "Date",
+   "label": "Additional Salary Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_eoer",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "earning_arrear_breakup",
+   "fieldtype": "Table",
+   "label": "Earning Arrear Breakup",
+   "options": "LOP Reversal Child"
+  },
+  {
+   "fieldname": "section_break_cdww",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "deduction_arrear_breakup",
+   "fieldtype": "Table",
+   "label": "Deduction Arrear Breakup",
+   "options": "LOP Reversal Child"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Salary Adjustments",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-01 09:24:11.589645",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Salary Adjustments",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
