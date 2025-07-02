@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ARR-JOI-{employee}-{####}",
+ "creation": "2025-07-02 23:01:25.381779",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_fuz9",
+  "amended_from",
+  "employee",
+  "employee_name",
+  "joining_date",
+  "branch",
+  "designation",
+  "number_of_present_days",
+  "column_break_pfim",
+  "company",
+  "posting_date",
+  "additional_salary_date",
+  "section_break_ngin",
+  "earning_breakup",
+  "section_break_grsu",
+  "deduction_breakup"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_fuz9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Joining Salary Arrear",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_present_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Number of Present Days",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pfim",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "additional_salary_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Additional Salary Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_ngin",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "earning_breakup",
+   "fieldtype": "Table",
+   "label": "Earning Breakup",
+   "options": "LOP Reversal Child"
+  },
+  {
+   "fieldname": "section_break_grsu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "deduction_breakup",
+   "fieldtype": "Table",
+   "label": "Deduction Breakup",
+   "options": "LOP Reversal Child"
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "joining_date",
+   "fieldtype": "Date",
+   "label": "Joining Date",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Additional Salary",
+   "link_fieldname": "ref_docname"
+  }
+ ],
+ "modified": "2025-07-02 23:12:57.607941",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Joining Salary Arrear",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
