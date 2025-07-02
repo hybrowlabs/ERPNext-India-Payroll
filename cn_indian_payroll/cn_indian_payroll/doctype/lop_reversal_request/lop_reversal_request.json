@@ -95,6 +95,7 @@
   {
    "fieldname": "salary_slip",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salary Slip",
    "options": "Salary Slip",
    "read_only": 1
@@ -125,7 +126,7 @@
    "link_fieldname": "custom_lop_reversal_request"
   }
  ],
- "modified": "2025-07-02 20:48:31.895310",
+ "modified": "2025-07-02 23:24:30.885485",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal Request",
