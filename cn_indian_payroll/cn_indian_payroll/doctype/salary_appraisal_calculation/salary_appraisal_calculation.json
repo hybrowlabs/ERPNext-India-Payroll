@@ -1,23 +1,24 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:SAC-{employee}-{MM}-{#####}",
  "creation": "2024-08-01 10:24:35.898361",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "old_salary_structure_assignment_id",
-  "employee_promotion_id",
-  "old_from_date",
+  "previous_salary_structure_assignment",
+  "promotion_reference",
+  "previous_effective_date",
   "column_break_ozck",
   "posting_date",
   "company",
-  "new_salary_structure_assignment_id",
-  "new_from_date",
+  "revised_salary_structure_assignment",
+  "revised_effective_date",
   "section_break_ugei",
-  "old_structure_child",
+  "previous_revised_salary_components",
   "section_break_cwor",
-  "salary_arrear_components",
+  "arrear_breakdown",
   "section_break_jakm",
   "reimbursement_components",
   "section_break_ajlu",
@@ -39,23 +40,12 @@
    "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
+   "read_only": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "old_structure_child",
-   "fieldtype": "Table",
-   "label": "Old Structure Child",
-   "options": "Salary Revision Child"
   },
   {
    "fieldname": "section_break_cwor",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "salary_arrear_components",
-   "fieldtype": "Table",
-   "label": "Salary Arrear Components",
-   "options": "Salary Appraisal Child"
   },
   {
    "default": "Now",
@@ -63,6 +53,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -73,7 +64,8 @@
    "fieldname": "reimbursement_components",
    "fieldtype": "Table",
    "label": "Reimbursement Components",
-   "options": "Salary Appraisal Child"
+   "options": "Salary Appraisal Child",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_ajlu",
@@ -83,7 +75,8 @@
    "fieldname": "bonus_components",
    "fieldtype": "Table",
    "label": "Bonus Components",
-   "options": "Salary Appraisal Child"
+   "options": "Salary Appraisal Child",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -101,43 +94,70 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "employee_promotion_id",
+   "fieldname": "previous_salary_structure_assignment",
+   "fieldtype": "Link",
+   "label": "Previous Salary Structure Assignment",
+   "options": "Salary Structure Assignment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_effective_date",
+   "fieldtype": "Date",
+   "label": "Previous Effective Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revised_salary_structure_assignment",
+   "fieldtype": "Link",
+   "label": "Revised Salary Structure Assignment",
+   "options": "Salary Structure Assignment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revised_effective_date",
+   "fieldtype": "Date",
+   "label": "Revised Effective Date",
+   "read_only": 1
+  },
+  {
+   "description": "(Components which includes is part of appraisal)",
+   "fieldname": "previous_revised_salary_components",
+   "fieldtype": "Table",
+   "label": "Previous / Revised Salarycomponents",
+   "options": "Salary Revision Child",
+   "read_only": 1
+  },
+  {
+   "fieldname": "arrear_breakdown",
+   "fieldtype": "Table",
+   "label": "Arrear Components",
+   "options": "Salary Appraisal Child",
+   "read_only": 1
+  },
+  {
+   "fieldname": "promotion_reference",
    "fieldtype": "Data",
-   "label": "Employee Promotion ID"
-  },
-  {
-   "fieldname": "old_salary_structure_assignment_id",
-   "fieldtype": "Link",
-   "label": "Old Salary Structure Assignment ID",
-   "options": "Salary Structure Assignment"
-  },
-  {
-   "fieldname": "new_salary_structure_assignment_id",
-   "fieldtype": "Link",
-   "label": "New Salary Structure Assignment ID",
-   "options": "Salary Structure Assignment"
-  },
-  {
-   "fieldname": "old_from_date",
-   "fieldtype": "Date",
-   "label": "Old From Date"
-  },
-  {
-   "fieldname": "new_from_date",
-   "fieldtype": "Date",
-   "label": "New From date"
+   "label": "Employee Promotion Reference",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2025-01-30 11:59:49.716412",
+ "links": [
+  {
+   "link_doctype": "Additional Salary",
+   "link_fieldname": "ref_docname"
+  }
+ ],
+ "modified": "2025-06-03 12:04:01.205240",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -153,6 +173,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

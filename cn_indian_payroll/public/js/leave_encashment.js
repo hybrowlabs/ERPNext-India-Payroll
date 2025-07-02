@@ -1,7 +1,5 @@
 frappe.ui.form.on('Leave Encashment', {
 	refresh(frm) {
-
-
         if(frm.doc.encashment_days)
             {
                 if(frm.doc.custom_basic_amount)
@@ -14,8 +12,7 @@ frappe.ui.form.on('Leave Encashment', {
 
     encashment_days:function(frm)
     {
-
-        if(frm.doc.encashment_days)
+       if(frm.doc.encashment_days)
         {
             if(frm.doc.custom_basic_amount)
             {

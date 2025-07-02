@@ -18,12 +18,6 @@ frappe.ui.form.on('Payroll Entry', {
             }
 
 
-
-
-
-
-
-
             if(frm.doc.custom_bonus_payment_mode=="Bonus Payout")
 
                 {
@@ -38,71 +32,59 @@ frappe.ui.form.on('Payroll Entry', {
 
 
 
+        // if(frm.doc.salary_slips_created==1)
+        //     {
 
 
 
+        // if (frm.doc.custom_bonus_payment_mode == "Bonus Accrual" && frm.doc.custom_bonus_accrual_created == 0)
+
+
+        //     {
+
+        //         create_bonus_accrual_entry(frm)
+
+        //     }
+
+
+        // }
+
+    // if(frm.doc.custom_bonus_accrual_created==1 && frm.doc.custom_bonus_accrual_submit==0)
+    //     {
+
+    //         if (frm.doc.custom_bonus_payment_mode == "Bonus Accrual" )
+    //         {
+
+    //         frm.add_custom_button(__("Submit Bonus Accrual"),function()
+    //             {
+
+    //                  frappe.call({
+
+    //                     "method":"cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.get_submit",
+    //                     args:{
+
+    //                         payroll_entry: frm.doc.name
+
+    //                     },
+    //                     callback :function(res)
+    //                     {
+    //                         if(res.message)
+    //                             {
+    //                                 frm.set_value("custom_bonus_accrual_submit",1)
+    //                                 frm.save('Update');
+    //                             }
+
+    //                     }
+
+    //         })
+
+    //             })
+
+    //         }
 
 
 
-
-        if(frm.doc.salary_slips_created==1)
-            {
-
-
-
-        if (frm.doc.custom_bonus_payment_mode == "Bonus Accrual" && frm.doc.custom_bonus_accrual_created == 0)
-
-
-            {
-
-                create_bonus_accrual_entry(frm)
-
-
-
-
-
-
-            }
-
-
-        }
-
-    if(frm.doc.custom_bonus_accrual_created==1 && frm.doc.custom_bonus_accrual_submit==0)
-        {
-
-            if (frm.doc.custom_bonus_payment_mode == "Bonus Accrual" )
-            {
-
-            frm.add_custom_button(__("Submit Bonus Accrual"),function()
-                {
-
-                     frappe.call({
-
-                        "method":"cn_indian_payroll.cn_indian_payroll.overrides.accrual_bonus.get_submit",
-                        args:{
-
-                            payroll_entry: frm.doc.name
-
-                        },
-                        callback :function(res)
-                        {
-                            if(res.message)
-                                {
-                                    frm.set_value("custom_bonus_accrual_submit",1)
-                                    frm.save('Update');
-                                }
-
-                        }
-
-            })
-
-                })
-
-            }
-
-
-
-        }
+    //     }
 
 
 
@@ -192,23 +174,23 @@ frappe.ui.form.on('Payroll Entry', {
     },
 
 
-    after_save(frm)
-    {
-        if(frm.doc.custom_bonus_accrual_created==1 && frm.doc.custom_bonus_accrual_submit==0)
-            {
-                msgprint("Employee Bonus Accrual Created")
+    // after_save(frm)
+    // {
+    //     if(frm.doc.custom_bonus_accrual_created==1 && frm.doc.custom_bonus_accrual_submit==0)
+    //         {
+    //             msgprint("Employee Bonus Accrual Created")
 
 
-            }
+    //         }
 
 
-            if(frm.doc.custom_bonus_accrual_submit==1)
-                {
-                    msgprint("Employee Bonus Accrual Submitted")
+    //         if(frm.doc.custom_bonus_accrual_submit==1)
+    //             {
+    //                 msgprint("Employee Bonus Accrual Submitted")
 
 
-                }
-    },
+    //             }
+    // },
 
     posting_date: function(frm) {
         if (frm.doc.posting_date > frappe.datetime.get_today()) {
