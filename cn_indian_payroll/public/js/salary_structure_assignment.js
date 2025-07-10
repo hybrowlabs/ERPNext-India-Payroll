@@ -166,9 +166,9 @@ async function processSalaryComponents(frm) {
         args: {
             source_name: frm.doc.salary_structure,
             employee: frm.doc.employee,
-            print_format: 'Salary Slip Standard for CTC',
+            print_format: 'Salary Slip Standard',
             docstatus: frm.doc.docstatus,
-            // posting_date: frm.doc.from_date,
+            posting_date: frm.doc.from_date,
             for_preview: 1,
         }
     });
