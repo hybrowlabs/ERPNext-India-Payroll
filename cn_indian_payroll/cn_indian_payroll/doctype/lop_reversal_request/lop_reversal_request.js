@@ -12,7 +12,7 @@ frappe.ui.form.on("LOP Reversal Request", {
 				new_doc.payroll_period = frm.doc.payroll_period;
 				new_doc.company = frm.doc.company;
 				new_doc.salary_slip = frm.doc.salary_slip;
-				new_doc.custom_lop_reversal_request = frm.doc.name;
+				new_doc.lop_reversal_request = frm.doc.name;
 				// new_doc.lop_month_reversal = frm.doc.select_the_month_to_reverse;
 				new_doc.number_of_days = frm.doc.number_of_days_planning_to_reverse;
 

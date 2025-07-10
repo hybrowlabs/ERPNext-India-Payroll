@@ -123,10 +123,10 @@
  "links": [
   {
    "link_doctype": "LOP Reversal",
-   "link_fieldname": "custom_lop_reversal_request"
+   "link_fieldname": "lop_reversal_request"
   }
  ],
- "modified": "2025-07-02 23:21:17.294628",
+ "modified": "2025-07-10 23:39:00.476000",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal Request",
