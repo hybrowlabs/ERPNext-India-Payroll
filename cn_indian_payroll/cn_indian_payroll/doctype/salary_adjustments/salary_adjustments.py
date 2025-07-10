@@ -73,8 +73,8 @@ class SalaryAdjustments(Document):
             source_name=salary_structure,
             employee=self.employee,
             print_format="Salary Slip Standard",
-            # posting_date=from_date,
-            # for_preview=1,
+            posting_date=from_date,
+            for_preview=1,
         )
 
         processed_components = []
