@@ -160,6 +160,8 @@ custom__car_perquisite(frm)
 
 async function processSalaryComponents(frm) {
 
+
+
     var total_ctc=[]
     const response = await frappe.call({
         method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
@@ -167,7 +169,7 @@ async function processSalaryComponents(frm) {
             source_name: frm.doc.salary_structure,
             employee: frm.doc.employee,
             print_format: 'Salary Slip Standard',
-            docstatus: frm.doc.docstatus,
+            docstatus: 1,
             posting_date: frm.doc.from_date,
             for_preview: 1,
         }
@@ -176,7 +178,6 @@ async function processSalaryComponents(frm) {
     if (response.message) {
 
         console.log(response.message.earnings);
-        // Define the tables for earnings, reimbursements, deductions, and additional components
         let salaryBreakup = `
             <table class="table table-bordered small">
                 <thead>
@@ -330,7 +331,7 @@ async function processSalaryComponents(frm) {
             return accumulator + currentValue;
         }, 0);
 
-        console.log(sum);
+        // console.log(sum);
 
 
         if (frm.doc.base) {
