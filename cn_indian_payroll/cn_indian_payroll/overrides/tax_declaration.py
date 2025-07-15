@@ -26,32 +26,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def before_save(self):
         self.update_json_data()
-        if self.custom_tax_regime == "Old Regime":
-            form_data = json.loads(self.custom_declaration_form_data or "{}")
-
-            for k in self.declarations:
-                if k.exemption_sub_category == "Employee Provident Fund (Auto)":
-                    form_data["pfValue"] = round(k.amount)
-
-                elif k.exemption_sub_category == "NPS Contribution by Employer":
-                    form_data["nineNumber"] = round(k.amount)
-
-                elif k.exemption_sub_category == "Tax on employment (Professional Tax)":
-                    form_data["nineteenNumber"] = round(k.amount)
-
-            self.custom_declaration_form_data = json.dumps(form_data)
-
-        if self.custom_tax_regime == "New Regime":
-            form_data = json.loads(self.custom_declaration_form_data or "{}")
-
-            for k in self.declarations:
-                if k.exemption_sub_category == "NPS Contribution by Employer":
-                    form_data["nineNumber"] = round(k.amount)
-
-            self.custom_declaration_form_data = json.dumps(form_data)
 
     def before_update_after_submit(self):
-        self.update_json_data()
+
         # self.process_form_data()
         # self.mediclaim_condition()
 
@@ -119,6 +96,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
             self.custom_declaration_form_data = json.dumps(form_data)
 
+
     def mediclaim_condition(self):
         if self.custom_tax_regime == "Old Regime":
             form_data = json.loads(self.custom_declaration_form_data or "{}")
@@ -156,7 +134,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         form_data = json.loads(self.custom_declaration_form_data or "{}")
 
         allowances = {
-            "twentyeight": "LTA Allowance",
+
             "twentysix": "Hostel Allowance",
             "twentyseven": "Gratuity",
             "twentyFour": "Uniform Allowance",
@@ -186,11 +164,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         ):
             frappe.throw("You are not allow to define the Hostel Allowance")
 
-        if (
-            "LTA Allowance" in selected_allowances.values()
-            and required_components.get("twentyeight") is None
-        ):
-            frappe.throw("You are not allow to define the LTA Allowance")
+
 
         if (
             "Uniform Allowance" in selected_allowances.values()
@@ -245,14 +219,17 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 frappe.throw(f"You are not eligible to declare {allowances[key]}")
 
     def set_total_exemption_amount(self):
+
         self.total_exemption_amount = flt(
             get_total_exemption_amount(self.declarations),
             self.precision("total_exemption_amount"),
         )
+        # frappe.msgprint(str(self.total_exemption_amount))
         if self.annual_hra_exemption:
             self.total_exemption_amount = (
                 self.total_exemption_amount + self.annual_hra_exemption
             )
+
 
     def on_cancel(self):
         self.cancel_declaration_history()
@@ -272,7 +249,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def update_hra_breakup(self):
         if self.monthly_house_rent:
-            if self.workflow_state in ["Approved"]:
+            if self.custom_status in ["Approved"]:
                 array = []
                 for t1 in self.custom_hra_breakup:
                     array.append(
@@ -324,7 +301,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     frappe.db.commit()
 
     def update_tax_declaration(self):
-        if self.workflow_state in ["Approved"]:
+        if self.custom_status in ["Approved"]:
             if len(self.declarations) > 0:
                 tax_component = []
                 for component in self.declarations:

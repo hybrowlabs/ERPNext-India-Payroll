@@ -8,8 +8,8 @@
  "field_order": [
   "lop_reversal_details_section",
   "employee",
+  "payroll_period",
   "payroll_entry",
-  "auto_submit",
   "company",
   "salary_slip",
   "working_days",
@@ -77,13 +77,6 @@
    "search_index": 1
   },
   {
-   "default": "0",
-   "fieldname": "auto_submit",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Auto Submit"
-  },
-  {
    "fieldname": "lop_month_reversal",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -147,6 +140,13 @@
    "fieldtype": "Float",
    "label": "LOP Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -157,7 +157,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-05-12 16:33:01.065369",
+ "modified": "2025-07-08 14:23:12.307828",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",

@@ -238,6 +238,7 @@ fixtures = [
 ]
 
 doctype_js = {
+
     "Payroll Entry": "public/js/payroll.js",
     "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
@@ -275,7 +276,7 @@ doc_events = {
     "LOP Reversal": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
-        "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.before_save",
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.validate",
 
     },
 

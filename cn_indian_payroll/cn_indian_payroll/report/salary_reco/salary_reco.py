@@ -88,7 +88,7 @@ def get_salary_slips(filters=None):
             "month": j2.custom_month,
             "gross_pay": j2.custom_statutory_grosspay,
             "status": employee_data.status ,
-            "remark":j1.custom_new_joinee,
+            # "remark":j1.custom_new_joinee,
             # "remark":"-"
 
         }

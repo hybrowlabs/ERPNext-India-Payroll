@@ -12,7 +12,6 @@ class CustomAdditionalSalary(AdditionalSalary):
         self.validate_tax_component_overwrite()
 
     def on_cancel(self):
-    # Find all draft Salary Slips where payroll_date falls between start_date and end_date
         salary_slips = frappe.get_list(
             'Salary Slip',
             filters={
@@ -26,8 +25,6 @@ class CustomAdditionalSalary(AdditionalSalary):
 
         for slip in salary_slips:
             ss_doc = frappe.get_doc('Salary Slip', slip.name)
-
-            # Filter out earnings and deductions linked to this additional salary
             updated_earnings = [
                 d for d in ss_doc.earnings
                 if d.additional_salary != self.name
@@ -37,9 +34,7 @@ class CustomAdditionalSalary(AdditionalSalary):
                 if d.additional_salary != self.name
             ]
 
-            # Update the child tables
             ss_doc.set('earnings', updated_earnings)
             ss_doc.set('deductions', updated_deductions)
 
-            # Save the updated Salary Slip
             ss_doc.save()

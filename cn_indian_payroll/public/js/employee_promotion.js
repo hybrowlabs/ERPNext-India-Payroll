@@ -8,7 +8,7 @@ frappe.ui.form.on('Employee Promotion', {
                     frm.save('Submit');
                 });
             } else {
-                frm.page.clear_primary_action(); // removes the default button
+                frm.page.clear_primary_action();
             }
         }
 

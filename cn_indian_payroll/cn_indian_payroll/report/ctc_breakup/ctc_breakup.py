@@ -26,10 +26,11 @@ def get_all_employee(filters=None):
 
     ctc_components = frappe.get_all(
         "Salary Component",
-        filters={"do_not_include_in_total": 0},
+        filters={"do_not_include_in_total": 0,"custom_sequence": [">", 0]},
         fields=["*"],
         order_by="custom_sequence asc"
     )
+    frappe.msgprint(f"CTC Components: {ctc_components}")
     ctc_components_set = {component.name for component in ctc_components}
 
     for each_employee in get_all_ssa:

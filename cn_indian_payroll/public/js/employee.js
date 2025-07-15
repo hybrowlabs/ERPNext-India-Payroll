@@ -1,9 +1,9 @@
 frappe.ui.form.on('Employee', {
     refresh: function(frm) {
-        // Main button group: "Details"
+
         frm.add_custom_button('Details', null, 'Actions');
 
-        // Sub-buttons under "Details"
+
         if (frappe.user.has_role("HR Manager") || frappe.user.has_role("Payroll Manager")) {
             frm.add_custom_button('Assign New CTC', function() {
 

@@ -20,7 +20,7 @@ frappe.ui.form.on('Loan', {
                                 if(frm.doc.loan_amount>res.message[0].custom_loan_perquisite_threshold_amount)
                                     {
 
-                                                frm.set_value("custom_loan_perquisite_rate_of_interest",res.message[0].custom_loan_perquisite_rate_of_interest)
+                                        frm.set_value("custom_loan_perquisite_rate_of_interest",res.message[0].custom_loan_perquisite_rate_of_interest)
                                     }
                             }
                         }

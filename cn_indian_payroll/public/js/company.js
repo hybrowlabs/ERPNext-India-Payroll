@@ -18,11 +18,9 @@ frappe.ui.form.on('Company', {
                 fields: ['name']
             })
         ]).then(([accrualList, reimbursementList]) => {
-            // Combine both results
             const allComponents = [...accrualList, ...reimbursementList];
             component = allComponents.map(d => d.name);
 
-            // Now define the query with the filled list
             frm.fields_dict['custom_accrued_component_payable_account'].grid.get_field('salary_component').get_query = function(doc, cdt, cdn) {
                 return {
                     filters: [
@@ -32,7 +30,6 @@ frappe.ui.form.on('Company', {
             };
         });
 
-        // Set query for 'payable_account' in child table
         frm.fields_dict['custom_accrued_component_payable_account'].grid.get_field('payable_account').get_query = function(doc, cdt, cdn) {
             return {
                 filters: [
