@@ -114,6 +114,8 @@ import frappe
 from datetime import datetime
 
 def get_salary_slips(filters=None):
+    basic_component=None
+    da_component=None
     if filters is None:
         filters = {}
 
