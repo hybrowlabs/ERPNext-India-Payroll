@@ -209,6 +209,35 @@ async function processSalaryComponents(frm) {
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
+                if(res.message.round_to_the_nearest_integer == 0)
+                {
+
+                total_ctc.push(v.default_amount)
+                let newRow = tableBody.insertRow();
+
+                let componentCell = newRow.insertCell();
+                componentCell.textContent = res.message.name;
+
+                let roundedAmount = (v.default_amount);
+                let formattedAmount = roundedAmount.toLocaleString();
+                let amountCell = newRow.insertCell();
+                amountCell.className = "text-right";
+                amountCell.textContent = formattedAmount;
+
+                let annualAmount = Math.round((v.default_amount) * 12);
+                let formattedAnnualAmount = annualAmount.toLocaleString();
+                let annualAmountCell = newRow.insertCell();
+                annualAmountCell.className = "text-right";
+                annualAmountCell.textContent = formattedAnnualAmount;
+
+
+                totalMonthlyEarnings += roundedAmount;
+                totalAnnualEarnings += annualAmount;
+
+                }
+
+                else{
+
                 total_ctc.push(Math.round(v.default_amount))
                 let newRow = tableBody.insertRow();
 
@@ -230,6 +259,8 @@ async function processSalaryComponents(frm) {
                 // Accumulate totals
                 totalMonthlyEarnings += roundedAmount;
                 totalAnnualEarnings += annualAmount;
+
+                }
             }
         }
 
@@ -303,27 +334,59 @@ async function processSalaryComponents(frm) {
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
-                total_ctc.push(Math.round(v.default_amount))
-                let newRow = deductionTableBody.insertRow();
+                if(res.message.round_to_the_nearest_integer == 0)
+                    {
 
-                let componentCell = newRow.insertCell();
-                componentCell.textContent = res.message.name;
+                        total_ctc.push(v.default_amount)
+                        let newRow = deductionTableBody.insertRow();
 
-                let roundedAmount = Math.round(v.default_amount);
-                let formattedAmount = roundedAmount.toLocaleString();
-                let amountCell = newRow.insertCell();
-                amountCell.className = "text-right";
-                amountCell.textContent = formattedAmount;
+                        let componentCell = newRow.insertCell();
+                        componentCell.textContent = res.message.name;
 
-                let annualAmount = Math.round(v.default_amount)*12;
-                let formattedAnnualAmount = annualAmount.toLocaleString();
-                let annualAmountCell = newRow.insertCell();
-                annualAmountCell.className = "text-right";
-                annualAmountCell.textContent = formattedAnnualAmount;
+                        let roundedAmount = (v.default_amount);
+                        let formattedAmount = roundedAmount.toLocaleString();
+                        let amountCell = newRow.insertCell();
+                        amountCell.className = "text-right";
+                        amountCell.textContent = formattedAmount;
 
-                // Accumulate totals
-                totalMonthlyDeductions += roundedAmount;
-                totalAnnualDeductions += annualAmount;
+                        let annualAmount = Math.round((v.default_amount)*12);
+                        let formattedAnnualAmount = annualAmount.toLocaleString();
+                        let annualAmountCell = newRow.insertCell();
+                        annualAmountCell.className = "text-right";
+                        annualAmountCell.textContent = formattedAnnualAmount;
+
+                        // Accumulate totals
+                        totalMonthlyDeductions += roundedAmount;
+                        totalAnnualDeductions += annualAmount;
+
+
+
+                    }
+                    else{
+
+                        total_ctc.push(Math.round(v.default_amount))
+                        let newRow = deductionTableBody.insertRow();
+
+                        let componentCell = newRow.insertCell();
+                        componentCell.textContent = res.message.name;
+
+                        let roundedAmount = Math.round(v.default_amount);
+                        let formattedAmount = roundedAmount.toLocaleString();
+                        let amountCell = newRow.insertCell();
+                        amountCell.className = "text-right";
+                        amountCell.textContent = formattedAmount;
+
+                        let annualAmount = Math.round(v.default_amount)*12;
+                        let formattedAnnualAmount = annualAmount.toLocaleString();
+                        let annualAmountCell = newRow.insertCell();
+                        annualAmountCell.className = "text-right";
+                        annualAmountCell.textContent = formattedAnnualAmount;
+
+                        // Accumulate totals
+                        totalMonthlyDeductions += roundedAmount;
+                        totalAnnualDeductions += annualAmount;
+
+                    }
             }
         }
 
