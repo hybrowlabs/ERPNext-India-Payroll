@@ -14,48 +14,69 @@ def on_submit(self, method):
     reimbursement_accrual_update(self)
     bonus_accrual_update(self)
 
-
-def reimbursement_accrual_update(self):
-    lop_reversal = frappe.get_all(
-        "Employee Benefit Accrual",
-        filters={
-            "employee": self.employee,
-            "docstatus": 1,
-            "salary_slip": self.salary_slip,
-        },
-        fields=["*"],
-    )
-
-    for record in lop_reversal:
-        each_doc = frappe.get_doc("Employee Benefit Accrual", record.name)
-        lop_reversal_amount = (
-            each_doc.amount / each_doc.payment_days
-        ) * self.number_of_days
-        eligible_amount = each_doc.amount + lop_reversal_amount
-        each_doc.amount = round(eligible_amount)
-        each_doc.save()
+def on_cancel(self, method):
+    cancel_benefit_accrual(self)
+    cancel_bonus_accrual(self)
 
 
 def bonus_accrual_update(self):
-    lop_reversal_bonus = frappe.get_all(
+    bonus_accruals = frappe.get_all(
         "Employee Bonus Accrual",
         filters={
             "employee": self.employee,
             "docstatus": 1,
             "salary_slip": self.salary_slip,
         },
-        fields=["*"],
+        fields=["name", "amount", "payment_day", "salary_component"],
     )
 
-    for bonus in lop_reversal_bonus:
-        each_doc_bonus = frappe.get_doc("Employee Bonus Accrual", bonus.name)
-        lop_reversal_amount_bonus = (
-            each_doc_bonus.amount / each_doc_bonus.payment_day
-        ) * self.number_of_days
+    for record in bonus_accruals:
+        if not record.payment_day or record.payment_day == 0:
+            continue
 
-        eligible_amount_bonus = each_doc_bonus.amount + lop_reversal_amount_bonus
-        each_doc_bonus.amount = round(eligible_amount_bonus)
-        each_doc_bonus.save()
+        bonus_component = frappe.get_doc("Salary Component", record.salary_component)
+
+        if bonus_component.depends_on_payment_days == 1:
+            reversal_amount = (record.amount / record.payment_day) * self.number_of_days
+            updated_amount = record.amount + reversal_amount
+
+            bonus_doc = frappe.get_doc("Employee Bonus Accrual", record.name)
+            bonus_doc.amount = round(updated_amount)
+            bonus_doc.lop_reversal_days = self.number_of_days
+            bonus_doc.save()
+
+
+
+
+
+
+def reimbursement_accrual_update(self):
+    benefit_accruals = frappe.get_all(
+        "Employee Benefit Accrual",
+        filters={
+            "employee": self.employee,
+            "docstatus": 1,
+            "salary_slip": self.salary_slip,
+        },
+        fields=["name", "amount", "payment_days", "salary_component"],
+    )
+
+    for record in benefit_accruals:
+        if not record.payment_days or record.payment_days == 0:
+            continue
+
+        component = frappe.get_doc("Salary Component", record.salary_component)
+
+        if component.depends_on_payment_days == 1:
+            frappe.msgprint(str(component.name))
+            reversal_amount = (record.amount / record.payment_days) * self.number_of_days
+            updated_amount = record.amount + reversal_amount
+
+            accrual_doc = frappe.get_doc("Employee Benefit Accrual", record.name)
+            accrual_doc.amount = round(updated_amount)
+            accrual_doc.lop_reversal_days = self.number_of_days
+            accrual_doc.save()
+
 
 
 def validate_days(self):
@@ -148,7 +169,9 @@ def insert_additional_salary(self):
         additional_salary.submit()
 
 
-def on_cancel(self, method):
+
+
+def cancel_benefit_accrual(self):
     additional_arrears = frappe.get_all(
         "Additional Salary", filters={"ref_docname": self.name}, fields=["name"]
     )
@@ -170,13 +193,18 @@ def on_cancel(self, method):
         accrual_doc = frappe.get_doc("Employee Benefit Accrual", accrual.name)
         total_payment_day = (accrual_doc.payment_days or 0) + self.number_of_days
         if total_payment_day > 0:
-            lop_reversal_amount = (
-                accrual_doc.amount / total_payment_day
-            ) * self.number_of_days
-            eligible_amount = accrual_doc.amount - lop_reversal_amount
-            accrual_doc.amount = round(eligible_amount)
-            accrual_doc.save()
+            reimbursement_component=frappe.get_doc("Salary Component",accrual_doc.salary_component)
+            if reimbursement_component.depends_on_payment_days==1:
+                lop_reversal_amount = (
+                    accrual_doc.amount / total_payment_day
+                ) * self.number_of_days
+                eligible_amount = accrual_doc.amount - lop_reversal_amount
 
+                accrual_doc.amount = round(eligible_amount)
+                accrual_doc.lop_reversal_days=accrual_doc.lop_reversal_days-self.number_of_days
+                accrual_doc.save()
+
+def cancel_bonus_accrual(self):
     bonus_accruals = frappe.get_all(
         "Employee Bonus Accrual",
         filters={
@@ -191,9 +219,12 @@ def on_cancel(self, method):
         bonus_doc = frappe.get_doc("Employee Bonus Accrual", bonus.name)
         total_payment_day = (bonus_doc.payment_day or 0) + self.number_of_days
         if total_payment_day > 0:
-            reversal_amount = (
-                bonus_doc.amount / total_payment_day
-            ) * self.number_of_days
-            eligible_amount = bonus_doc.amount - reversal_amount
-            bonus_doc.amount = round(eligible_amount)
-            bonus_doc.save()
+            bonus_component=frappe.get_doc("Salary Component",bonus_doc.salary_component)
+            if bonus_component.depends_on_payment_days==1:
+                reversal_amount = (
+                    bonus_doc.amount / total_payment_day
+                ) * self.number_of_days
+                eligible_amount = bonus_doc.amount - reversal_amount
+                bonus_doc.amount = round(eligible_amount)
+                bonus_doc.lop_reversal_days=bonus_doc.lop_reversal_days-self.number_of_days
+                bonus_doc.save()

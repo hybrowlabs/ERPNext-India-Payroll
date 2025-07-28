@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:state_name",
+ "creation": "2025-07-17 11:36:00.072884",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "state_name",
+  "minimum_wages_section",
+  "min_wages",
+  "lwf_frequency_section",
+  "frequency"
+ ],
+ "fields": [
+  {
+   "fieldname": "state_name",
+   "fieldtype": "Data",
+   "label": "State Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "minimum_wages_section",
+   "fieldtype": "Section Break",
+   "label": "Minimum Wages"
+  },
+  {
+   "fieldname": "min_wages",
+   "fieldtype": "Table",
+   "label": "Min Wages",
+   "options": "Minimum Wages"
+  },
+  {
+   "fieldname": "lwf_frequency_section",
+   "fieldtype": "Section Break",
+   "label": "LWF Frequency"
+  },
+  {
+   "fieldname": "frequency",
+   "fieldtype": "Table MultiSelect",
+   "label": "Frequency",
+   "options": "LWF Frequency"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-24 14:38:37.895425",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "State",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

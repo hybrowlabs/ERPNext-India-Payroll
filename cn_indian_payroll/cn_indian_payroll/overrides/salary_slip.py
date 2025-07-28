@@ -6,9 +6,6 @@ from frappe.query_builder import Order
 from frappe import _
 import math
 
-
-
-
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
 	add_days,
@@ -25,8 +22,9 @@ from frappe.utils import (
 	money_in_words,
 	rounded,
 )
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
+from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 from collections import defaultdict
 
 class CustomSalarySlip(SalarySlip):
@@ -61,6 +59,203 @@ class CustomSalarySlip(SalarySlip):
         super().on_cancel()
         self.delete_bonus_accruals()
         self.delete_benefit_accruals()
+
+
+    def calculate_variable_tax(self, tax_component):
+        self.previous_total_paid_taxes = self.get_tax_paid_in_period(
+            self.payroll_period.start_date, self.start_date, tax_component
+        )
+
+        # Structured tax amount
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_taxable_earnings_without_full_tax_addl_components,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
+
+        self.current_structured_tax_amount = (
+            self.total_structured_tax_amount - self.previous_total_paid_taxes
+        ) / self.remaining_sub_periods
+
+        # Total taxable earnings with additional earnings with full tax
+        self.full_tax_on_additional_earnings = 0.0
+        if self.current_additional_earnings_with_full_tax:
+            self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
+                self,
+                self.total_taxable_earnings,
+                self.tax_slab,
+                self.whitelisted_globals,
+                eval_locals,
+            )
+            self.full_tax_on_additional_earnings = (
+                self.total_tax_amount - self.total_structured_tax_amount
+            )
+
+        current_tax_amount = (
+            self.current_structured_tax_amount + self.full_tax_on_additional_earnings
+        )
+        if flt(current_tax_amount) < 0:
+            current_tax_amount = 0
+
+        self._component_based_variable_tax[tax_component].update(
+            {
+                "previous_total_paid_taxes": self.previous_total_paid_taxes,
+                "total_structured_tax_amount": self.total_structured_tax_amount,
+                "current_structured_tax_amount": self.current_structured_tax_amount,
+                "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
+                "current_tax_amount": current_tax_amount,
+            }
+        )
+
+        return current_tax_amount
+
+
+
+
+
+    def eval_condition_and_formula(self, struct_row, data):
+        try:
+            condition, formula, amount = struct_row.condition, struct_row.formula, struct_row.amount
+            if condition and not _safe_eval(condition, self.whitelisted_globals, data):
+                return None
+            if struct_row.amount_based_on_formula and formula:
+                amount = flt(
+                    _safe_eval(formula, self.whitelisted_globals, data), struct_row.precision("amount")
+                )
+            if amount:
+                data[struct_row.abbr] = amount
+
+            return amount
+
+        except NameError as ne:
+            throw_error_message(
+                struct_row,
+                ne,
+                title=_("Name error"),
+                description=_("This error can be due to missing or deleted field."),
+            )
+        except SyntaxError as se:
+            throw_error_message(
+                struct_row,
+                se,
+                title=_("Syntax error"),
+                description=_("This error can be due to invalid syntax."),
+            )
+        except Exception as exc:
+            throw_error_message(
+                struct_row,
+                exc,
+                title=_("Error in formula or condition"),
+                description=_("This error can be due to invalid formula or condition."),
+            )
+            raise
+
+
+
+
+    # def get_working_days_details(self, lwp=None, for_preview=0):
+    #     payroll_settings = frappe.get_cached_value(
+    #         "Payroll Settings",
+    #         None,
+    #         (
+    #             "payroll_based_on",
+    #             "include_holidays_in_total_working_days",
+    #             "consider_marked_attendance_on_holidays",
+    #             "daily_wages_fraction_for_half_day",
+    #             "consider_unmarked_attendance_as",
+    #         ),
+    #         as_dict=1,
+    #     )
+
+    #     consider_marked_attendance_on_holidays = (
+    #         payroll_settings.include_holidays_in_total_working_days
+    #         and payroll_settings.consider_marked_attendance_on_holidays
+    #     )
+
+    #     daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
+
+    #     working_days = date_diff(self.end_date, self.start_date) + 1
+    #     working_days_test=0
+    #     if for_preview:
+    #         self.total_working_days = working_days
+    #         self.payment_days = working_days
+    #         return
+
+    #     holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
+    #     working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
+
+    #     sundays = [d for d in holidays if d.weekday() == 6]
+
+
+    #     working_days_test = (working_days-len(sundays))
+
+    #     self.custom_working_days_exclude_holiday=working_days_test
+
+    #     if not cint(payroll_settings.include_holidays_in_total_working_days):
+    #         working_days_list = [i for i in working_days_list if i not in holidays]
+
+    #         working_days -= len(holidays)
+
+    #         if working_days < 0:
+    #             frappe.throw(_("There are more holidays than working days this month."))
+
+    #     if not payroll_settings.payroll_based_on:
+    #         frappe.throw(_("Please set Payroll based on in Payroll settings"))
+
+    #     if payroll_settings.payroll_based_on == "Attendance":
+    #         actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
+    #             holidays, daily_wages_fraction_for_half_day, consider_marked_attendance_on_holidays
+    #         )
+    #         self.absent_days = absent
+    #     else:
+    #         actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
+    #             holidays, working_days_list, daily_wages_fraction_for_half_day
+    #         )
+
+    #     if not lwp:
+    #         lwp = actual_lwp
+    #     elif lwp != actual_lwp:
+    #         frappe.msgprint(
+    #             _("Leave Without Pay does not match with approved {} records").format(
+    #                 payroll_settings.payroll_based_on
+    #             )
+    #         )
+
+    #     self.leave_without_pay = lwp
+    #     self.total_working_days = working_days
+
+    #     payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
+
+    #     if flt(payment_days) > flt(lwp):
+    #         self.payment_days = flt(payment_days) - flt(lwp)
+
+    #         if payroll_settings.payroll_based_on == "Attendance":
+    #             self.payment_days -= flt(absent)
+
+    #         consider_unmarked_attendance_as = payroll_settings.consider_unmarked_attendance_as or "Present"
+
+    #         if (
+    #             payroll_settings.payroll_based_on == "Attendance"
+    #             and consider_unmarked_attendance_as == "Absent"
+    #         ):
+    #             unmarked_days = self.get_unmarked_days(
+    #                 payroll_settings.include_holidays_in_total_working_days, holidays
+    #             )
+    #             half_absent_days = self.get_half_absent_days(
+    #                 payroll_settings.include_holidays_in_total_working_days,
+    #                 consider_marked_attendance_on_holidays,
+    #                 holidays,
+    #             )
+    #             self.absent_days += (
+    #                 unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
+    #             )  # will be treated as absent
+    #             self.payment_days -= unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
+    #     else:
+    #         self.payment_days = 0
+
 
 
 
@@ -149,38 +344,45 @@ class CustomSalarySlip(SalarySlip):
 
         if not self.salary_withholding:
             for earning in self.earnings:
-                component = frappe.get_doc("Salary Component", earning.salary_component)
+                if earning.additional_salary:
+                    get_additional_salary=frappe.get_doc("Additional Salary",earning.additional_salary)
 
-                for reimbursement in ssa_doc.custom_employee_reimbursements or []:
-                    if reimbursement.reimbursements == earning.salary_component:
-                        if self.total_working_days and self.payment_days:
-                            prorated_amount = round(
-                                (reimbursement.monthly_total_amount or 0)
-                                / self.total_working_days
-                                * (self.total_working_days - self.payment_days),
-                                2,
-                            )
+                    if get_additional_salary.ref_doctype=="Employee Benefit Claim":
 
-                            earning.amount -= prorated_amount
+                        component = frappe.get_doc("Salary Component", get_additional_salary.salary_component)
+                        if component.depends_on_payment_days == 1:
+                            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                                if reimbursement.reimbursements == get_additional_salary.salary_component:
 
-                for reimbursement in ssa_doc.custom_employee_reimbursements or []:
-                    lta_component = frappe.get_doc(
-                        "Salary Component", reimbursement.reimbursements
-                    )
-                    if lta_component.component_type == "LTA Reimbursement":
-                        if component.component_type in [
-                            "LTA Taxable",
-                            "LTA Non Taxable",
-                        ]:
-                            if self.total_working_days and self.payment_days:
-                                prorated_amount = round(
-                                    (reimbursement.monthly_total_amount or 0)
-                                    / self.total_working_days
-                                    * (self.total_working_days - self.payment_days),
-                                    2,
-                                )
-                                earning.amount -= prorated_amount
-                        break
+                                    if self.total_working_days and self.payment_days:
+
+                                        prorated_amount = round(
+                                            (reimbursement.monthly_total_amount or 0)
+                                            / self.total_working_days
+                                            * (self.total_working_days - self.payment_days),
+                                            2,
+                                        )
+
+                                        earning.amount  = get_additional_salary.amount - prorated_amount
+
+                    if get_additional_salary.ref_doctype == "LTA Claim":
+                        component = frappe.get_doc("Salary Component", get_additional_salary.salary_component)
+
+                        for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                            lta_component = frappe.get_doc("Salary Component", reimbursement.reimbursements)
+
+                            if lta_component.component_type == "LTA Reimbursement" and \
+                            component.component_type in ["LTA Taxable", "LTA Non Taxable"]:
+
+                                if self.total_working_days and self.payment_days:
+                                    lop_days = self.total_working_days - self.payment_days
+                                    prorated_amount = round(
+                                        (reimbursement.monthly_total_amount or 0) / self.total_working_days * lop_days,
+                                        2
+                                    )
+                                    earning.amount = get_additional_salary.amount - prorated_amount
+                                break
+
 
 
 
@@ -1251,20 +1453,37 @@ class CustomSalarySlip(SalarySlip):
         if self.custom_salary_structure_assignment:
             child_doc = frappe.get_doc('Salary Structure Assignment',self.custom_salary_structure_assignment)
             if child_doc.custom_employee_reimbursements:
-                for i in child_doc.custom_employee_reimbursements:
-                    accrual_insert = frappe.get_doc({
-                        'doctype': 'Employee Benefit Accrual',
-                        'employee': self.employee,
-                        'payroll_entry': self.payroll_entry,
-                        'amount': round((i.monthly_total_amount/self.total_working_days)*self.payment_days),
-                        'salary_component': i.reimbursements,
-                        'benefit_accrual_date': self.posting_date,
-                        'salary_slip':self.name,
-                        'payroll_period':child_doc.custom_payroll_period
+                for reimbursement in child_doc.custom_employee_reimbursements:
+                    reimbursement_component=frappe.get_doc("Salary Component",reimbursement.reimbursements)
+                    if reimbursement_component.depends_on_payment_days==1:
+                        accrual_insert = frappe.get_doc({
+                            'doctype': 'Employee Benefit Accrual',
+                            'employee': self.employee,
+                            'payroll_entry': self.payroll_entry,
+                            'amount': round((reimbursement.monthly_total_amount/self.total_working_days)*self.payment_days),
+                            'salary_component': reimbursement.reimbursements,
+                            'benefit_accrual_date': self.posting_date,
+                            'salary_slip':self.name,
+                            'payroll_period':child_doc.custom_payroll_period
 
-                        })
-                    accrual_insert.insert()
-                    accrual_insert.submit()
+                            })
+                        accrual_insert.insert()
+                        accrual_insert.submit()
+                    else:
+                        accrual_insert = frappe.get_doc({
+                            'doctype': 'Employee Benefit Accrual',
+                            'employee': self.employee,
+                            'payroll_entry': self.payroll_entry,
+                            'amount': round(reimbursement.monthly_total_amount),
+                            'salary_component': reimbursement.reimbursements,
+                            'benefit_accrual_date': self.posting_date,
+                            'salary_slip':self.name,
+                            'payroll_period':child_doc.custom_payroll_period
+
+                            })
+                        accrual_insert.insert()
+                        accrual_insert.submit()
+
 
 
     def calculate_grosspay(self):
@@ -1559,3 +1778,151 @@ class CustomSalarySlip(SalarySlip):
             self.custom_total_amount = round(
                 self.custom_total_tax_on_income + self.custom_surcharge + self.custom_education_cess
             )
+
+
+def _safe_eval(code: str, eval_globals: dict | None = None, eval_locals: dict | None = None):
+	import unicodedata
+	code = unicodedata.normalize("NFKC", code)
+
+	_check_attributes(code)
+
+
+	whitelisted_globals = {
+		"int": int,
+		"float": float,
+		"long": int,
+		"round": round,
+		"sum": sum,
+		"min": min,
+		"max": max,
+		"next": next,
+		"len": len,
+	}
+
+	if not eval_globals:
+		eval_globals = {}
+
+	eval_globals["__builtins__"] = {}
+	eval_globals.update(whitelisted_globals)
+
+	return eval(code, eval_globals, eval_locals)  # nosemgrep
+
+
+def _check_attributes(code: str) -> None:
+	import ast
+
+	from frappe.utils.safe_exec import UNSAFE_ATTRIBUTES
+
+	unsafe_attrs = set(UNSAFE_ATTRIBUTES).union(["__"]) - {"format"}
+
+	for attribute in unsafe_attrs:
+		if attribute in code:
+			raise SyntaxError(f'Illegal rule {frappe.bold(code)}. Cannot use "{attribute}"')
+
+	BLOCKED_NODES = (ast.NamedExpr,)
+
+	tree = ast.parse(code, mode="eval")
+	for node in ast.walk(tree):
+		if isinstance(node, BLOCKED_NODES):
+			raise SyntaxError(f"Operation not allowed: line {node.lineno} column {node.col_offset}")
+		if isinstance(node, ast.Attribute) and isinstance(node.attr, str) and node.attr in UNSAFE_ATTRIBUTES:
+			raise SyntaxError(f'Illegal rule {frappe.bold(code)}. Cannot use "{node.attr}"')
+
+def throw_error_message(row, error, title, description=None):
+	data = frappe._dict(
+		{
+			"doctype": row.parenttype,
+			"name": row.parent,
+			"doclink": get_link_to_form(row.parenttype, row.parent),
+			"row_id": row.idx,
+			"error": error,
+			"title": title,
+			"description": description or "",
+		}
+	)
+
+	message = _(
+		"Error while evaluating the {doctype} {doclink} at row {row_id}. <br><br> <b>Error:</b> {error} <br><br> <b>Hint:</b> {description}"
+	).format(**data)
+
+	frappe.throw(message, title=title)
+
+
+def override_calculate_tax_by_tax_slab(
+    self, annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
+    eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
+    base_tax = 0
+    rebate = 0
+    other_taxes_and_charges = 0
+    custom_tds_already_deducted_amount = 0
+
+    # Step 1: Calculate base tax from slabs
+    for slab in tax_slab.slabs:
+        cond = cstr(slab.condition).strip()
+        if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+            continue
+
+        from_amt = slab.from_amount
+        to_amt = slab.to_amount or annual_taxable_earning
+        rate = slab.percent_deduction * 0.01
+
+        if annual_taxable_earning > from_amt:
+            taxable_range = min(annual_taxable_earning, to_amt) - from_amt
+            base_tax += taxable_range * rate
+
+    # Step 2: Marginal Relief (Rebate Logic)
+
+    if (
+        tax_slab.custom_marginal_relief_applicable
+        and tax_slab.custom_minmum_value
+        and tax_slab.custom_maximun_value
+    ):
+        if (
+            tax_slab.custom_minmum_value
+            < annual_taxable_earning
+            < tax_slab.custom_maximun_value
+        ):
+            excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+            if base_tax > excess_income:
+                rebate = base_tax - excess_income
+                base_tax -= rebate
+
+    # Step 3: Cess and Other Charges AFTER Rebate
+    for d in tax_slab.other_taxes_and_charges:
+        if (
+            flt(d.min_taxable_income)
+            and flt(d.min_taxable_income) > annual_taxable_earning
+        ):
+            continue
+        if (
+            flt(d.max_taxable_income)
+            and flt(d.max_taxable_income) < annual_taxable_earning
+        ):
+            continue
+
+        charge_percent = flt(d.percent)
+        charge = base_tax * charge_percent / 100.0
+        other_taxes_and_charges += charge
+
+    declaration = frappe.db.get_value(
+        "Employee Tax Exemption Declaration",
+        {
+            "employee": self.employee,
+            "payroll_period": self.payroll_period.name,
+            "docstatus": 1,
+        },
+        "custom_tds_already_deducted_amount",
+        as_dict=True,
+        cache=True,
+    )
+    if declaration:
+        custom_tds_already_deducted_amount = (
+            declaration.custom_tds_already_deducted_amount or 0.0
+        )
+
+    final_tax = (
+        base_tax + other_taxes_and_charges
+    ) - custom_tds_already_deducted_amount
+
+    return round(final_tax, 2), round(other_taxes_and_charges, 2)

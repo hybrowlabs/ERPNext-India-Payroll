@@ -21,7 +21,8 @@
   "allow_claim_across_outside_payroll_period",
   "salary_slip",
   "payment_days",
-  "working_days"
+  "working_days",
+  "lop_reversal_days"
  ],
  "fields": [
   {
@@ -128,12 +129,19 @@
    "fieldname": "working_days",
    "fieldtype": "Float",
    "label": "Working Days"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "lop_reversal_days",
+   "fieldtype": "Float",
+   "label": "LOP Reversal Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-01 16:15:32.017559",
+ "modified": "2025-07-27 11:35:57.301967",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",

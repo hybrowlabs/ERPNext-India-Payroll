@@ -66,7 +66,7 @@ def benefit_claim(doc):
     doc = frappe.get_doc(frappe.parse_json(doc))
     component_array = []
 
-    # Get the LTA Reimbursement Salary Component
+
     lta_component_list = frappe.get_list(
         "Salary Component",
         filters={"component_type": "LTA Reimbursement"},
@@ -75,7 +75,7 @@ def benefit_claim(doc):
     )
     lta_component = lta_component_list[0].name if lta_component_list else None
 
-    # Get the latest applicable Salary Structure Assignment
+
     get_ssa = frappe.get_list(
         "Salary Structure Assignment",
         filters={
@@ -105,7 +105,7 @@ def benefit_claim(doc):
 def get_max_amount(doc):
     doc = frappe.get_doc(frappe.parse_json(doc))
 
-    # Get the latest applicable Salary Structure Assignment
+
     get_ssa = frappe.get_list(
         "Salary Structure Assignment",
         filters={
@@ -131,7 +131,7 @@ def get_max_amount(doc):
                 "Salary Component", component.reimbursements
             )
 
-            # Common claims retrieval
+
             claims = frappe.get_all(
                 "Employee Benefit Claim",
                 filters={
@@ -144,7 +144,7 @@ def get_max_amount(doc):
             )
             claimed_total = sum([row.custom_paid_amount for row in claims])
 
-            # For non-Vehicle Maintenance components
+
             if salary_component.component_type != "Vehicle Maintenance Reimbursement":
                 accruals = frappe.get_all(
                     "Employee Benefit Accrual",
@@ -183,12 +183,12 @@ def get_max_amount(doc):
 
                 effective_start_date = max(start_date, from_date)
 
-                # Calculate total number of months including start and end month
+
                 year_diff = end_date.year - effective_start_date.year
                 month_diff = end_date.month - effective_start_date.month
                 total_months = (year_diff * 12 + month_diff) + 1
 
-                # Calculate future eligible (remaining) months
+
                 future_eligible = (total_months - accrued_months) * eligible_amount
 
                 # Final max amount = accrued + future - claimed

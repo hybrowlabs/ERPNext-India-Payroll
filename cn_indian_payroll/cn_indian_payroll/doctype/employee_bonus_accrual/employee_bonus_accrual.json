@@ -21,6 +21,7 @@
   "working_days",
   "payment_day",
   "total_lwp",
+  "lop_reversal_days",
   "payroll_period",
   "amended_from",
   "section_break_lapc",
@@ -176,12 +177,19 @@
    "fieldname": "total_lwp",
    "fieldtype": "Float",
    "label": "Total LWP"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "lop_reversal_days",
+   "fieldtype": "Float",
+   "label": "LOP Reversal Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-30 17:36:44.372607",
+ "modified": "2025-07-27 11:15:20.416136",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

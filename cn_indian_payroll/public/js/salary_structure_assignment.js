@@ -55,6 +55,50 @@ frappe.ui.form.on('Salary Structure Assignment', {
             }
         }
 
+        frm.fields_dict['custom_other_perquisite_components'].grid.get_field('component').get_query = function(doc, cdt, cdn) {
+            var child = locals[cdt][cdn];
+
+            return {
+                filters:[
+                    ['custom_perquisite', '=', 1]
+                ]
+            }
+        }
+
+
+
+        if (frm.doc.custom_lwf_state) {
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "State",
+                    name: frm.doc.custom_lwf_state
+                },
+                callback: function(res) {
+                    if (res.message && res.message.frequency) {
+
+
+                        let frequency_array = res.message.frequency.map(row => row.frequency);
+
+
+                        frm.set_value("custom_frequency", frequency_array[0]);
+
+                        frm.set_query("custom_frequency", function() {
+                            return {
+                                filters: {
+                                    name: ["in", frequency_array]
+                                }
+                            };
+                        });
+                    }
+                }
+            });
+        }
+
+
+
+
+
     },
 
 
@@ -73,6 +117,38 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
     },
+
+    custom_lwf_state: function(frm) {
+        if (frm.doc.custom_lwf_state) {
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "State",
+                    name: frm.doc.custom_lwf_state
+                },
+                callback: function(res) {
+                    if (res.message && res.message.frequency) {
+
+
+                        let frequency_array = res.message.frequency.map(row => row.frequency);
+
+
+                        frm.set_value("custom_frequency", frequency_array[0]);
+
+                        frm.set_query("custom_frequency", function() {
+                            return {
+                                filters: {
+                                    name: ["in", frequency_array]
+                                }
+                            };
+                        });
+                    }
+                }
+            });
+        }
+    },
+
+
 
 
     custom_driver_provided_by_company(frm)
@@ -183,7 +259,7 @@ async function processSalaryComponents(frm) {
         }
 
 
-        if (frm.doc.custom_statistical_amount > 0) {
+        if (frm.doc.custom_total_amount > 0) {
             let reimbursementBreakup = `
                 <table class="table table-bordered small">
                     <thead>

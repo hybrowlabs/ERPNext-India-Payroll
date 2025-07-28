@@ -20,6 +20,8 @@ frappe.ui.form.on("LOP Reversal", {
 				"working_days",
 				"lop_days",
 				"max_lop_days",
+				"paid_days",
+
 			].forEach((f) => frm.set_value(f, undefined));
 			return;
 		}
@@ -40,6 +42,7 @@ frappe.ui.form.on("LOP Reversal", {
 					"leave_without_pay",
 					"end_date",
 					"total_working_days",
+					"payment_days",
 				],
 			},
 			callback(res) {
@@ -61,6 +64,7 @@ frappe.ui.form.on("LOP Reversal", {
 							posting_date: d.end_date,
 							month_name,
 							working_days: d.total_working_days,
+							paid_days:d.payment_days,
 						});
 					}
 				});
@@ -89,6 +93,7 @@ frappe.ui.form.on("LOP Reversal", {
 				"max_lop_days",
 				selected_entry.absent_days + selected_entry.leave_without_pay,
 			);
+			frm.set_value("paid_days",selected_entry.paid_days)
 		}
 
 		if (frm.doc.days_to_reverse && frm.doc.docstatus === 0) {

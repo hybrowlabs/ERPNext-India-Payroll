@@ -1,0 +1,489 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Andhra Pradesh",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:43:09.534728",
+  "name": "Andhra Pradesh",
+  "state_name": "Andhra Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.301963",
+  "name": "Arunachal Pradesh",
+  "state_name": "Arunachal Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.305843",
+  "name": "Assam",
+  "state_name": "Assam"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.310073",
+  "name": "Bihar",
+  "state_name": "Bihar"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Chhattisgarh",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:43:49.789298",
+  "name": "Chhattisgarh",
+  "state_name": "Chhattisgarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Delhi",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:44:31.144093",
+  "name": "Delhi",
+  "state_name": "Delhi"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Goa",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:44:39.622883",
+  "name": "Goa",
+  "state_name": "Goa"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.332793",
+  "name": "Himachal Pradesh",
+  "state_name": "Himachal Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.337130",
+  "name": "Jharkhand",
+  "state_name": "Jharkhand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Karnataka",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:45:22.341181",
+  "name": "Karnataka",
+  "state_name": "Karnataka"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Madhya Pradesh",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:45:55.178865",
+  "name": "Madhya Pradesh",
+  "state_name": "Madhya Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Maharashtra",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:46:02.219671",
+  "name": "Maharashtra",
+  "state_name": "Maharashtra"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.357942",
+  "name": "Manipur",
+  "state_name": "Manipur"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.361772",
+  "name": "Meghalaya",
+  "state_name": "Meghalaya"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.365072",
+  "name": "Mizoram",
+  "state_name": "Mizoram"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.368288",
+  "name": "Nagaland",
+  "state_name": "Nagaland"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Punjab",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:46:40.094150",
+  "name": "Punjab",
+  "state_name": "Punjab"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.382419",
+  "name": "Sikkim",
+  "state_name": "Sikkim"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Tamil Nadu",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:47:25.795194",
+  "name": "Tamil Nadu",
+  "state_name": "Tamil Nadu"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Telangana",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:47:39.984614",
+  "name": "Telangana",
+  "state_name": "Telangana"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.400328",
+  "name": "Tripura",
+  "state_name": "Tripura"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.413434",
+  "name": "Uttarakhand",
+  "state_name": "Uttarakhand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "West Bengal",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [
+   {
+    "basic_daily_wage": 0.0,
+    "parent": "West Bengal",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Semi-Skilled",
+    "total_per_day": 0.0,
+    "vda_daily_wages": 0.0,
+    "zone": "Zone 1"
+   }
+  ],
+  "modified": "2025-07-24 14:46:25.770701",
+  "name": "West Bengal",
+  "state_name": "West Bengal"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Chandigarh",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:44:15.681921",
+  "name": "Chandigarh",
+  "state_name": "Chandigarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Chattisgarh",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 19:13:44.208717",
+  "name": "Chattisgarh",
+  "state_name": "Chattisgarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Haryana",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:45:08.359488",
+  "name": "Haryana",
+  "state_name": "Haryana"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Odisha",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-07-24 14:46:18.354808",
+  "name": "Odisha",
+  "state_name": "Odisha"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.379143",
+  "name": "Rajasthan",
+  "state_name": "Rajasthan"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [],
+  "min_wages": [],
+  "modified": "2025-07-17 11:56:59.408232",
+  "name": "Uttar Pradesh",
+  "state_name": "Uttar Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Kerala",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   },
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Kerala",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [
+   {
+    "basic_daily_wage": 0.0,
+    "parent": "Kerala",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Highly Skilled",
+    "total_per_day": 0.0,
+    "vda_daily_wages": 0.0,
+    "zone": "Zone 1"
+   }
+  ],
+  "modified": "2025-07-24 14:45:37.129105",
+  "name": "Kerala",
+  "state_name": "Kerala"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Gujarat",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "min_wages": [
+   {
+    "basic_daily_wage": 452.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Unskilled",
+    "total_per_day": 497.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 462.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Semi-Skilled",
+    "total_per_day": 507.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 474.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Skilled",
+    "total_per_day": 519.0,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 441.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Unskilled",
+    "total_per_day": 486.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   },
+   {
+    "basic_daily_wage": 452.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Semi-Skilled",
+    "total_per_day": 497.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   },
+   {
+    "basic_daily_wage": 462.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State",
+    "skill_level": "Skilled",
+    "total_per_day": 507.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   }
+  ],
+  "modified": "2025-07-24 14:44:57.678397",
+  "name": "Gujarat",
+  "state_name": "Gujarat"
+ }
+]

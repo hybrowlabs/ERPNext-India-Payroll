@@ -13,6 +13,7 @@
   "company",
   "salary_slip",
   "working_days",
+  "paid_days",
   "column_break_sucb",
   "lop_month_reversal",
   "additional_salary_date",
@@ -57,7 +58,7 @@
    "fieldname": "additional_salary_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Additional Salary Date",
+   "label": "Additional Salary Date / Payout Date",
    "reqd": 1
   },
   {
@@ -96,7 +97,7 @@
   {
    "fieldname": "working_days",
    "fieldtype": "Float",
-   "label": "Paid Days",
+   "label": "Working Days",
    "read_only": 1
   },
   {
@@ -147,6 +148,12 @@
    "label": "Payroll Period",
    "options": "Payroll Period",
    "reqd": 1
+  },
+  {
+   "fieldname": "paid_days",
+   "fieldtype": "Float",
+   "label": "Paid Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -157,7 +164,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-07-08 14:23:12.307828",
+ "modified": "2025-07-27 10:54:12.471495",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",

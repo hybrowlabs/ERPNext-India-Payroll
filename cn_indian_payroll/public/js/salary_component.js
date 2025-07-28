@@ -14,6 +14,22 @@ frappe.ui.form.on('Salary Component', {
 	refresh(frm) {
 		frm.trigger('toggle_appraisal_visibility');
 
+		frm.set_query('custom_lta_taxable_component', function() {
+			return {
+				filters: {
+					component_type:"LTA Taxable"
+				}
+			};
+		});
+
+		frm.set_query('custom_lta_non_taxable_component', function() {
+			return {
+				filters: {
+					component_type:"LTA Non Taxable"
+				}
+			};
+		});
+
 	},
 
 	custom_is_arrear: function(frm) {
@@ -22,15 +38,31 @@ frappe.ui.form.on('Salary Component', {
 		{
 			frm.set_value('depends_on_payment_days',0)
 			frm.set_df_property('depends_on_payment_days', 'hidden', 1)
+			frm.set_value("custom_component_sub_type","Variable")
 		}
 		else{
 			frm.set_value('depends_on_payment_days',1)
 			frm.set_df_property('depends_on_payment_days', 'hidden', 0);
+			frm.set_value("custom_component_sub_type","Fixed")
 		}
 	},
 
 	custom_is_reimbursement: function(frm) {
+
 		frm.trigger('toggle_appraisal_visibility');
+		if(frm.doc.custom_is_reimbursement)
+		{
+
+			frm.set_value("is_flexible_benefit",1)
+			frm.set_value("pay_against_benefit_claim",1)
+			frm.set_value("custom_component_sub_type","Variable")
+		}
+		else{
+			frm.set_value("is_flexible_benefit",0)
+			frm.set_value("pay_against_benefit_claim",0)
+			frm.set_value("custom_component_sub_type","Fixed")
+
+		}
 	},
 
 	custom_is_accrual: function(frm) {

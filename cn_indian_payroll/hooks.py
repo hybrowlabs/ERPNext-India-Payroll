@@ -230,12 +230,23 @@ app_license = "mit"
 fixtures = [
     {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
     {"dt":"Income Tax Regime"},
-    {"dt":"Employee Tax Exemption Sub Category"},
-    {"dt":"Employee Tax Exemption Category"},
+    # {"dt":"Employee Tax Exemption Sub Category"},
+    # {"dt":"Employee Tax Exemption Category"},
     {"dt":"Salary Component Library Item"},
+    {"dt":"State"},
+    {"dt":"Frequency"},
+    # {"dt": "Salary Component", "filters": {"component_type": "Professional Tax"}},
+
+
 
 
 ]
+
+
+doctype_list_js = {
+    "Employee Bonus Accrual": "public/js/employee_bonus_accrual_list.js",
+    "Employee Benefit Accrual": "public/js/employee_benefit_accrual_list.js",
+}
 
 doctype_js = {
 

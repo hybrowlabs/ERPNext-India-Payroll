@@ -457,6 +457,8 @@ def calculate_tds_projection(doc):
             new_annual_slab=new_annual_slab
         )
 
+        advance_tax=doc.get("custom_tds_already_deducted_amount")
+
         return {
                 "num_months": num_months if num_months else 0,
                 "month_count": month_count if month_count else 0,
@@ -478,6 +480,7 @@ def calculate_tds_projection(doc):
 
                 "old_regime_annual_taxable_income": round(old_regime_annual_taxable_income),
                 "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
+                "advance_tax":advance_tax,
 
                 "old_regime_from_amounts": slab_result.get("from_amount"),
                 "old_regime_to_amounts": slab_result.get("to_amount"),
@@ -505,6 +508,7 @@ def calculate_tds_projection(doc):
                 "new_regime_surcharge": slab_result.get("new_surcharge_m"),
                 "new_regime_education_cess": slab_result.get("new_education_cess"),
                 "total_tax_already_paid": slab_result.get("tax_already_paid")
+
 
 
                 }

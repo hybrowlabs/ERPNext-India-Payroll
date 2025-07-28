@@ -41,6 +41,7 @@ def update_bonus_accrual(self):
         if accrual_list:
             for accrual in accrual_list:
                 accrual_doc = frappe.get_doc('Employee Bonus Accrual', accrual.name)
+
                 updated_amount = accrual_doc.amount + (bonus_row.difference or 0)
                 accrual_doc.amount = max(updated_amount, 0)
                 accrual_doc.save()
