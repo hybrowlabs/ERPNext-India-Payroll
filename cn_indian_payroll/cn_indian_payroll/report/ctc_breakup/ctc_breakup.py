@@ -30,7 +30,7 @@ def get_all_employee(filters=None):
         fields=["*"],
         order_by="custom_sequence asc"
     )
-    frappe.msgprint(f"CTC Components: {ctc_components}")
+    # frappe.msgprint(f"CTC Components: {ctc_components}")
     ctc_components_set = {component.name for component in ctc_components}
 
     for each_employee in get_all_ssa:

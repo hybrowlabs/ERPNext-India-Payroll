@@ -259,7 +259,7 @@ async function processSalaryComponents(frm) {
         }
 
 
-        if (frm.doc.custom_total_amount > 0) {
+        if (frm.doc.custom_total_reimbursement_amount > 0) {
             let reimbursementBreakup = `
                 <table class="table table-bordered small">
                     <thead>

@@ -11,6 +11,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def on_submit(self):
         self.insert_tax_declaration_list()
         self.update_employee_promotion()
+        self.update_ctc_value()
 
     def on_cancel(self):
         self.cancel_declaration()
@@ -21,10 +22,37 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_perquisite()
         self.reimbursement_amount()
 
+
     def before_update_after_submit(self):
         self.update_min_wages()
         self.update_perquisite()
         self.reimbursement_amount()
+
+        self.update_ctc_value()
+
+
+    def update_ctc_value(self):
+        ctc_amount=0
+        reimbursement=round(self.custom_total_reimbursement_amount or 0)
+        ctc_salary_slip = make_salary_slip(
+                    source_name=self.salary_structure,
+                    employee=self.employee,
+                    print_format='Salary Slip Standard',
+                    posting_date=self.from_date,
+                    for_preview=1,
+                )
+
+        for new_earning in ctc_salary_slip.earnings:
+            earning_component=frappe.get_doc("Salary Component",new_earning.salary_component)
+            if earning_component.custom_is_part_of_ctc==1:
+                ctc_amount+=round(new_earning.amount)
+        for new_deduction in ctc_salary_slip.deductions:
+            deduction_component=frappe.get_doc("Salary Component",new_deduction.salary_component)
+            if deduction_component.custom_is_part_of_ctc==1:
+                ctc_amount+=round(new_deduction.amount)
+        self.base=(ctc_amount+reimbursement)*12
+
+
 
 
     def reimbursement_amount(self):
@@ -33,7 +61,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             for reimbursement in self.custom_employee_reimbursements:
                 total_amount += reimbursement.monthly_total_amount
 
-        self.custom_total_amount = total_amount
+        self.custom_total_reimbursement_amount = total_amount
 
     def update_perquisite(self):
         if not self.custom_other_perquisite_components:
