@@ -246,7 +246,7 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount * 12);
+                let annualAmount = Math.round(v.amount)*12;
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -340,7 +340,7 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount * 12);
+                let annualAmount = Math.round(v.amount) * 12;
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
