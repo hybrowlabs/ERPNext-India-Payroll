@@ -18,13 +18,13 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def validate(self):
         super().validate()
-        self.update_min_wages()
+        # self.update_min_wages()
         self.update_perquisite()
         self.reimbursement_amount()
 
 
     def before_update_after_submit(self):
-        self.update_min_wages()
+        # self.update_min_wages()
         self.update_perquisite()
         self.reimbursement_amount()
 
