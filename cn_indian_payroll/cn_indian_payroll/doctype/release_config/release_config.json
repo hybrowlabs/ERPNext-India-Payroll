@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{company}/{payroll_period}",
+ "creation": "2025-08-04 12:52:01.052426",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "add_configuration_section",
+  "company",
+  "payroll_period",
+  "column_break_ymlp",
+  "frequency_type",
+  "section_break_fccz",
+  "locking_doctypes",
+  "locking_period_section",
+  "date_config",
+  "section_break_cprr",
+  "locking_period_months"
+ ],
+ "fields": [
+  {
+   "fieldname": "add_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Add Configuration"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ymlp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "frequency_type",
+   "fieldtype": "Select",
+   "label": "Frequency Type",
+   "options": "\nMonthly\nNew Joinee\nSeperation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_fccz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "locking_period_section",
+   "fieldtype": "Section Break",
+   "label": "Locking Period"
+  },
+  {
+   "fieldname": "date_config",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_cprr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "locking_period_months",
+   "fieldtype": "Table",
+   "label": "Locking Period Months",
+   "options": "Release Config Child"
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payroll Period",
+   "options": "Payroll Period",
+   "reqd": 1
+  },
+  {
+   "fieldname": "locking_doctypes",
+   "fieldtype": "Table MultiSelect",
+   "in_standard_filter": 1,
+   "label": "Locking Doctypes",
+   "options": "Release Config Doctype Child",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-04 14:41:48.403851",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Release Config",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
