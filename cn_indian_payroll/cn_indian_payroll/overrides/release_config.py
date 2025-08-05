@@ -25,7 +25,7 @@ def get_date_format(start_date, end_date, payroll_period, docname):
         formatted_month = current_date.strftime("%b-%Y")
 
 
-        month_start = current_date.replace(day=1)
+        month_start = current_date
 
         try:
             month_end = current_date.replace(day=end_day)
