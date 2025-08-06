@@ -40,21 +40,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
     refresh(frm)
     {
 
-        // $('[data-fieldname="custom_preview_tax_projection"]').css('color', 'black');
-
-        // $('input[data-fieldname="custom_preview_tax_projection"]').css("background-color","#FFE4C4")
-
-
-        if(frm.doc.docstatus==1)
-            {
-
-
-                    change_regime(frm)
-
-            }
-
-
-
                 setTimeout(() => {
 
                     frm.remove_custom_button('Payroll Entry', 'Create');
@@ -62,6 +47,13 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     // frm.remove_custom_button('Chose Regime');
 
                 }, 10);
+
+
+                if (frm.doc.custom_promotion_id) {
+                    frm.add_custom_button(__('View Employee Promotion'), function() {
+                        frappe.set_route('Form', 'Employee Promotion', frm.doc.custom_promotion_id);
+                    }, __('Actions'));
+                }
 
 
 
@@ -101,8 +93,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
     custom_nps_percentage(frm) {
-
-
 
         if (frm.doc.custom_is_nps==1)
 

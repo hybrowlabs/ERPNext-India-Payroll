@@ -184,7 +184,7 @@ def get_doc_data(doc_name, employee, company, payroll_period):
             filters={
                 "employee": employee,
                 "custom_payroll_period": payroll_period,
-                "docstatus": ["in", [1]],
+                "docstatus": ["in", [0, 1]],
             },
             fields=["*"],
             order_by="posting_date desc",

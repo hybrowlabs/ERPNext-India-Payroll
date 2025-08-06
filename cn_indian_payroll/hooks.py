@@ -40,7 +40,10 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {
+    "Employee Bonus Accrual": "public/js/employee_bonus_accrual_list.js",
+    "Employee Benefit Accrual": "public/js/employee_benefit_accrual_list.js",
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -239,17 +242,14 @@ app_license = "mit"
 # }
 
 fixtures = [
-    # {"dt": "Custom Field", "filters": {"module": "cn-indian-payroll"}},
-    {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
-    # {"dt": "Property Setter", "filters": {"module": "cn-indian-payroll"}},
+    {"dt": "Print Format", "filters": {"module": "cn-indian-payroll", "disabled": 0}},
     {"dt": "Income Tax Regime"},
     {"dt": "Report", "filters": {"name": "Salary Slip Registers"}},
-    {"dt": "Translation", "filters": {"name": "Reimbursement Claim"}},
     {"dt": "Workflow", "filters": {"name": "declaration Approve"}},
     {"dt": "Workspace", "filters": {"module": "cn-indian-payroll"}},
-    # {"dt":"Employee Tax Exemption Sub Category"},
+    {"dt": "Workflow State"},
     # {"dt":"Employee Tax Exemption Category"},
-    # {"dt":"Salary Component"},
+    {"dt": "Salary Component"},
     # {"dt":"Income Tax Slab","filters": {"name": ["in", ["Old Regime", "New Regime"]]}},
     # {"dt":"Salary Structure"},
 ]
@@ -264,7 +264,7 @@ doctype_js = {
     "LOP Reversal": "public/js/lop_reversal.js",
     "Loan": "public/js/loan.js",
     "Loan Product": "public/js/loan_product.js",
-    "Salary Slip": "public/js/salary_slip.js",
+    # "Salary Slip": "public/js/salary_slip.js",
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
