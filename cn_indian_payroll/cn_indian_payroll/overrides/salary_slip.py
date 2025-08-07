@@ -61,29 +61,29 @@ class CustomSalarySlip(SalarySlip):
         self.delete_benefit_accruals()
 
 
-    # def set_salary_structure_assignment(self):
-    #     self._salary_structure_assignment = frappe.db.get_value(
-    #         "Salary Structure Assignment",
-    #         {
-    #             "employee": self.employee,
-    #             "salary_structure": self.salary_structure,
-    #             "from_date": ("<=", self.actual_end_date),
-    #             "docstatus": 1,
-    #         },
-    #         "*",
-    #         order_by="from_date desc",
-    #         as_dict=True,
-    #     )
+    def set_salary_structure_assignment(self):
+        self._salary_structure_assignment = frappe.db.get_value(
+            "Salary Structure Assignment",
+            {
+                "employee": self.employee,
+                "salary_structure": self.salary_structure,
+                "from_date": ("<=", self.actual_end_date),
+                "docstatus": 1,
+            },
+            "*",
+            order_by="from_date desc",
+            as_dict=True,
+        )
 
-    #     if not self._salary_structure_assignment:
-    #         frappe.throw(
-    #             _(
-    #                 "Please assign a Salary Structure for Employee {0} applicable from or before {1} first"
-    #             ).format(
-    #                 frappe.bold(self.employee_name),
-    #                 frappe.bold(formatdate(self.actual_start_date)),
-    #             )
-    #         )
+        if not self._salary_structure_assignment:
+            frappe.throw(
+                _(
+                    "Please assign a Salary Structure for Employee {0} applicable from or before {1} first"
+                ).format(
+                    frappe.bold(self.employee_name),
+                    frappe.bold(formatdate(self.actual_start_date)),
+                )
+            )
 
 
     def calculate_variable_tax(self, tax_component):

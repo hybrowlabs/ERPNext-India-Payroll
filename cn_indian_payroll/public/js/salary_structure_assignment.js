@@ -101,6 +101,16 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
     },
 
+    custom_lwf:function(frm)
+    {
+        if(frm.doc.custom_lwf==0)
+        {
+            frm.set_value("custom_lwf_state",undefined)
+            // frm.set_default_property("custom_frequency","hidden",1)
+        }
+
+    },
+
 
     custom_cubic_capacity_of_company(frm)
     {
