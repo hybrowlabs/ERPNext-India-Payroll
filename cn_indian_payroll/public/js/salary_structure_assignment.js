@@ -96,6 +96,15 @@ frappe.ui.form.on('Salary Structure Assignment', {
         }
 
 
+        frm.set_query("custom_lwf_state", function() {
+            return {
+                filters: {
+                   "lwf_applicable":1
+                }
+            };
+        });
+
+
 
 
 

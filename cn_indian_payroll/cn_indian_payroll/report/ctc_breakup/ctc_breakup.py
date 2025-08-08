@@ -32,7 +32,7 @@ def get_all_employee(filters=None):
     ctc_components_set = set(component.name for component in ctc_components)
 
     for each_employee in get_all_ssa:
-        # Initialize row data
+
         row = {
             "employee": each_employee.get("employee"),
             "employee_name": each_employee.get("employee_name"),
