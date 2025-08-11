@@ -145,7 +145,7 @@ def get_max_amount(doc):
             claimed_total = sum([row.custom_paid_amount for row in claims])
 
 
-            if salary_component.component_type != "Vehicle Maintenance Reimbursement":
+            if salary_component.custom_claim_based_on == "Monthly":
                 accruals = frappe.get_all(
                     "Employee Benefit Accrual",
                     filters={
@@ -162,7 +162,7 @@ def get_max_amount(doc):
 
                 return max_amount
 
-            else:
+            elif salary_component.custom_claim_based_on == "Yearly":
                 accruals = frappe.get_all(
                     "Employee Benefit Accrual",
                     filters={
