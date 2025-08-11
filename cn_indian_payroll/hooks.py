@@ -235,6 +235,7 @@ fixtures = [
     {"dt":"Salary Component Library Item"},
     {"dt":"State"},
     {"dt":"Frequency"},
+    {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
     # {"dt": "Salary Component", "filters": {"component_type": "Professional Tax"}},
 
 
