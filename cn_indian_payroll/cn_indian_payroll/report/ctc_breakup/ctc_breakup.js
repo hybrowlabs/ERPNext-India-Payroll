@@ -23,8 +23,16 @@ frappe.query_reports["CTC BreakUp"] = {
             "label": "Effective From",
             "fieldname": "from_date",
             "fieldtype": "Date",
-
             "width": 200
+        },
+
+        {
+            "label": "Company",
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "options": "Company",
+            "width": 200,
+            'reqd': 1
         },
 
 

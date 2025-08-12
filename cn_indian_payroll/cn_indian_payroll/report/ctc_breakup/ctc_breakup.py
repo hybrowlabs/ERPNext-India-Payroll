@@ -15,6 +15,9 @@ def get_all_employee(filters=None):
     if filters.get("from_date"):
         conditions1["from_date"] = (">=", filters["from_date"])
 
+    if filters.get("company"):
+        conditions1["company"] =  filters["company"]
+
     get_all_ssa = frappe.get_list(
         "Salary Structure Assignment", filters=conditions1, fields=["*"]
     )
@@ -38,6 +41,10 @@ def get_all_employee(filters=None):
             "employee_name": each_employee.get("employee_name"),
             "from_date": each_employee.get("from_date"),
             "doj": each_employee.get("custom_date_of_joining"),
+
+            "fixed_gross_annual":each_employee.get("custom_fixed_gross_annual") if each_employee.get("custom_fixed_gross_annual") else 0,
+            "fixed_gross_monthly":round(each_employee.get("custom_fixed_gross_annual")/12) if each_employee.get("custom_fixed_gross_annual") else 0,
+
             "base": each_employee.get("base"),
             "monthly_ctc": round(each_employee.get("base") / 12),
             "regime": each_employee.get("income_tax_slab"),
@@ -100,17 +107,30 @@ def get_all_employee(filters=None):
             "width": 200,
         },
         {
+            "label": "Date of Joining",
+            "fieldname": "doj",
+            "fieldtype": "Date",
+            "width": 200,
+        },
+        {
             "label": "Effective From",
             "fieldname": "from_date",
             "fieldtype": "Date",
             "width": 200,
         },
         {
-            "label": "Date of Joining",
-            "fieldname": "doj",
-            "fieldtype": "Date",
+            "label": "Fixed Gross Annual",
+            "fieldname": "fixed_gross_annual",
+            "fieldtype": "Currency",
             "width": 200,
         },
+        {
+            "label": "Fixed Gross Monthly",
+            "fieldname": "fixed_gross_monthly",
+            "fieldtype": "Currency",
+            "width": 200,
+        },
+
         {"label": "Annual CTC", "fieldname": "base", "fieldtype": "Data", "width": 200},
         {
             "label": "Monthly CTC",

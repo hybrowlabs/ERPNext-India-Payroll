@@ -23,6 +23,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.reimbursement_amount()
 
 
+
+
+
     def before_update_after_submit(self):
         self.update_min_wages()
         # self.update_perquisite()
@@ -32,25 +35,26 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
     def update_ctc_value(self):
-        ctc_amount=0
-        reimbursement=round(self.custom_total_reimbursement_amount or 0)
-        ctc_salary_slip = make_salary_slip(
-                    source_name=self.salary_structure,
-                    employee=self.employee,
-                    print_format='Salary Slip Standard',
-                    posting_date=self.from_date,
-                    for_preview=1,
-                )
+        if self.custom_fixed_gross_annual:
+            ctc_amount_annual=0
+            reimbursement=round(self.custom_total_reimbursement_amount*12 or 0)
+            ctc_salary_slip = make_salary_slip(
+                        source_name=self.salary_structure,
+                        employee=self.employee,
+                        print_format='Salary Slip Standard',
+                        posting_date=self.from_date,
+                        for_preview=1,
+                    )
 
-        for new_earning in ctc_salary_slip.earnings:
-            earning_component=frappe.get_doc("Salary Component",new_earning.salary_component)
-            if earning_component.custom_is_part_of_ctc==1:
-                ctc_amount+=round(new_earning.amount)
-        for new_deduction in ctc_salary_slip.deductions:
-            deduction_component=frappe.get_doc("Salary Component",new_deduction.salary_component)
-            if deduction_component.custom_is_part_of_ctc==1:
-                ctc_amount+=round(new_deduction.amount)
-        self.base=(ctc_amount+reimbursement)*12
+            for new_earning in ctc_salary_slip.earnings:
+                earning_component=frappe.get_doc("Salary Component",new_earning.salary_component)
+                if earning_component.custom_is_part_of_ctc==1:
+                    ctc_amount_annual+=round(new_earning.amount*12)
+            for new_deduction in ctc_salary_slip.deductions:
+                deduction_component=frappe.get_doc("Salary Component",new_deduction.salary_component)
+                if deduction_component.custom_is_part_of_ctc==1:
+                    ctc_amount_annual+=round(new_deduction.amount*12)
+            self.base=(ctc_amount_annual+reimbursement)
 
 
 

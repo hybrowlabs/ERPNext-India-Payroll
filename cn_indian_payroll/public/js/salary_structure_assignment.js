@@ -3,6 +3,215 @@
 frappe.ui.form.on('Salary Structure Assignment', {
 
 
+    custom_meal_card:function(frm)
+    {
+        if(frm.doc.custom_meal_card)
+        {
+            frm.trigger('get_meal_card_amount');
+        }
+
+    },
+
+    custom_telecom_wallet:function(frm)
+    {
+        if(frm.doc.custom_telecom_wallet)
+        {
+            frm.trigger('get_telecom_amount');
+        }
+    },
+    custom_attire_wallet:function(frm)
+    {
+        if(frm.doc.custom_attire_wallet)
+        {
+            frm.trigger('get_attire_wallet');
+        }
+    },
+    custom_fuel_wallet:function(frm)
+    {
+        if(frm.doc.custom_fuel_wallet)
+        {
+            frm.trigger('get_fuel_wallet');
+        }
+    },
+    custom_gift_wallet:function(frm)
+    {
+        if(frm.doc.custom_gift_wallet)
+        {
+            frm.trigger('get_gift_wallet');
+        }
+    },
+
+
+
+
+
+    get_meal_card_amount: function(frm) {
+
+        if(frm.doc.custom_meal_card)
+        {
+
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Salary Component",
+                    filters: {
+                        "custom_variable_name": "custom_meal_card_amount_annual",
+                        "disabled": 0
+                    },
+                    fields: ["custom_variable_name", "custom_value"],
+                },
+                callback: function(res) {
+                    if (res.message && res.message.length > 0) {
+                        let value = res.message[0].custom_value || "";
+                        let values_array = [];
+                        value.split(",").forEach(function(item) {
+                            values_array.push(item.trim());
+                        });
+                         frm.set_df_property('custom_meal_card_amount_annual', 'options', values_array.join("\n"));
+                        frm.refresh_field('custom_meal_card_amount_annual');
+                    } else {
+                        frappe.msgprint("No Meal Card data found.");
+                    }
+                }
+            });
+
+        }
+
+    },
+
+    get_telecom_amount: function(frm) {
+        if(frm.doc.custom_telecom_wallet)
+            {
+
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Salary Component",
+                    filters: {
+                        "custom_variable_name": "custom_telecom_wallet_amount_annual",
+                        "disabled": 0
+                    },
+                    fields: ["custom_variable_name", "custom_value"],
+                },
+                callback: function(res) {
+                    if (res.message && res.message.length > 0) {
+                        let value = res.message[0].custom_value || "";
+                        let values_array = [];
+                        value.split(",").forEach(function(item) {
+                            values_array.push(item.trim());
+                        });
+                         frm.set_df_property('custom_telecom_wallet_amount_annual', 'options', values_array.join("\n"));
+                        frm.refresh_field('custom_telecom_wallet_amount_annual');
+                    } else {
+                        frappe.msgprint("No Telecom data found.");
+                    }
+                }
+            });
+        }
+
+    },
+
+    get_attire_wallet: function(frm) {
+
+        if(frm.doc.custom_attire_wallet)
+            {
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Salary Component",
+                    filters: {
+                        "custom_variable_name": "custom_attire_wallet_amountannual",
+                        "disabled": 0
+                    },
+                    fields: ["custom_variable_name", "custom_value"],
+                },
+                callback: function(res) {
+                    if (res.message && res.message.length > 0) {
+                        let value = res.message[0].custom_value || "";
+                        let values_array = [];
+                        value.split(",").forEach(function(item) {
+                            values_array.push(item.trim());
+                        });
+                         frm.set_df_property('custom_attire_wallet_amountannual', 'options', values_array.join("\n"));
+                        frm.refresh_field('custom_attire_wallet_amountannual');
+                    } else {
+                        frappe.msgprint("No data found. please mention variable name as custom_attire_wallet_amountannual in Salary Component");
+                    }
+                }
+            });
+        }
+
+    },
+    get_fuel_wallet: function(frm) {
+        if(frm.doc.custom_fuel_wallet)
+            {
+
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Salary Component",
+                    filters: {
+                        "custom_variable_name": "custom_fuel_wallet_amount_annual",
+                        "disabled": 0
+                    },
+                    fields: ["custom_variable_name", "custom_value"],
+                },
+                callback: function(res) {
+                    if (res.message && res.message.length > 0) {
+                        let value = res.message[0].custom_value || "";
+                        let values_array = [];
+                        value.split(",").forEach(function(item) {
+                            values_array.push(item.trim());
+                        });
+                         frm.set_df_property('custom_fuel_wallet_amount_annual', 'options', values_array.join("\n"));
+                        frm.refresh_field('custom_fuel_wallet_amount_annual');
+                    } else {
+                        frappe.msgprint("No data found. please mention variable name as custom_fuel_wallet_amount_annual in Salary Component");
+                    }
+                }
+            });
+        }
+
+    },
+
+    get_gift_wallet: function(frm) {
+        if(frm.doc.custom_gift_wallet)
+            {
+
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Salary Component",
+                    filters: {
+                        "custom_variable_name": "custom_gift_wallet_amountannual",
+                        "disabled": 0
+                    },
+                    fields: ["custom_variable_name", "custom_value"],
+                },
+                callback: function(res) {
+                    if (res.message && res.message.length > 0) {
+                        let value = res.message[0].custom_value || "";
+                        let values_array = [];
+                        value.split(",").forEach(function(item) {
+                            values_array.push(item.trim());
+                        });
+                         frm.set_df_property('custom_gift_wallet_amountannual', 'options', values_array.join("\n"));
+                        frm.refresh_field('custom_gift_wallet_amountannual');
+                    } else {
+                        frappe.msgprint("No data found. please mention variable name as custom_gift_wallet_amountannual in Salary Component");
+                    }
+                }
+            });
+        }
+
+    },
+
+
+
+
+
+
+
     onload: function(frm) {
             if (frm.doc.custom_promotion_id && frm.is_new()) {
                 frappe.call({
@@ -31,6 +240,12 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
     refresh(frm)
     {
+
+        frm.trigger('get_meal_card_amount');
+        frm.trigger('get_telecom_amount');
+        frm.trigger('get_attire_wallet');
+        frm.trigger('get_fuel_wallet');
+        frm.trigger('get_gift_wallet');
 
         if (frm.doc.custom_promotion_id) {
             frm.add_custom_button(__('View Employee Promotion'), function() {
@@ -209,6 +424,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 async function processSalaryComponents(frm) {
 
     var total_ctc=[]
+    var total_annual_ctc=[]
     const response = await frappe.call({
         method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
         args: {
@@ -254,6 +470,7 @@ async function processSalaryComponents(frm) {
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
                 total_ctc.push(Math.round(v.amount))
+                total_annual_ctc.push(Math.round(v.amount*12))
                 let newRow = tableBody.insertRow();
 
                 let componentCell = newRow.insertCell();
@@ -265,7 +482,7 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount)*12;
+                let annualAmount = Math.round(v.amount*12);
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -305,6 +522,7 @@ async function processSalaryComponents(frm) {
                 amountCell.textContent = component.monthly_total_amount.toLocaleString();
 
                 total_ctc.push(Math.round(component.monthly_total_amount))
+                total_annual_ctc.push(Math.round(component.monthly_total_amount * 12))
 
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -348,6 +566,7 @@ async function processSalaryComponents(frm) {
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
                 total_ctc.push(Math.round(v.amount))
+                total_annual_ctc.push(Math.round(v.amount*12))
                 let newRow = deductionTableBody.insertRow();
 
                 let componentCell = newRow.insertCell();
@@ -359,7 +578,7 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount) * 12;
+                let annualAmount = Math.round(v.amount * 12);
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -376,6 +595,9 @@ async function processSalaryComponents(frm) {
         }, 0);
 
         console.log(sum);
+        var sum_annual = total_annual_ctc.reduce(function(accumulator, currentValue) {
+            return accumulator + currentValue;
+        }, 0);
 
 
         if (frm.doc.base) {
@@ -404,7 +626,7 @@ async function processSalaryComponents(frm) {
             componentCell.textContent = "Total CTC";
 
             let monthlyAmount = Math.round(sum);
-            let annualAmount = Math.round(monthlyAmount*12);
+            let annualAmount = Math.round(sum_annual);
 
 
 
