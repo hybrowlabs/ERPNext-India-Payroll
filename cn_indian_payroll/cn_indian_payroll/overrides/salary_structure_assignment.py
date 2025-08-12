@@ -31,7 +31,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         # self.update_perquisite()
         self.reimbursement_amount()
 
-        self.update_ctc_value()
+        self.update_ctc_value_after_update()
 
 
     def update_ctc_value(self):
@@ -59,6 +59,31 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
             frappe.db.set_value(self.doctype, self.name, "base", ctc_amount_annual + reimbursement, update_modified=False)
             self.reload()
+
+    def update_ctc_value_after_update(self):
+        if self.custom_fixed_gross_annual:
+            ctc_amount_annual = 0
+            reimbursement = round(self.custom_total_reimbursement_amount * 12 or 0)
+
+            ctc_salary_slip = make_salary_slip(
+                source_name=self.salary_structure,
+                employee=self.employee,
+                print_format='Salary Slip Standard',
+                posting_date=self.from_date,
+                for_preview=1,
+            )
+
+            for new_earning in ctc_salary_slip.earnings:
+                earning_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                if earning_component.custom_is_part_of_ctc == 1:
+                    ctc_amount_annual += round(new_earning.amount * 12)
+
+            for new_deduction in ctc_salary_slip.deductions:
+                deduction_component = frappe.get_doc("Salary Component", new_deduction.salary_component)
+                if deduction_component.custom_is_part_of_ctc == 1:
+                    ctc_amount_annual += round(new_deduction.amount * 12)
+
+            self.base = ctc_amount_annual + reimbursement
 
 
 
