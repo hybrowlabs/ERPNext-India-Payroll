@@ -51,6 +51,8 @@ def execute(filters=None):
 			"leave_without_pay": ss.leave_without_pay,
 			"absent_days": ss.absent_days,
 			"payment_days": ss.payment_days,
+			"arrear_days": ss.custom_lop_reversal_days,
+			"total_payment_days": ss.payment_days + ss.custom_lop_reversal_days,
 			"currency": currency or company_currency,
 			"total_loan_repayment": ss.total_loan_repayment,
 		}
@@ -58,10 +60,11 @@ def execute(filters=None):
 		update_column_width(ss, columns)
 
 		for e in earning_types:
-			row.update({frappe.scrub(e): ss_earning_map.get(ss.name, {}).get(e)})
+			row[frappe.scrub(e)] = flt(ss_earning_map.get(ss.name, {}).get(e, 0.0))
 
+    # Initialize all deduction columns to 0
 		for d in ded_types:
-			row.update({frappe.scrub(d): ss_ded_map.get(ss.name, {}).get(d)})
+			row[frappe.scrub(d)] = flt(ss_ded_map.get(ss.name, {}).get(d, 0.0))
 
 		if currency == company_currency:
 			row.update(
@@ -71,10 +74,13 @@ def execute(filters=None):
 					"net_pay": flt(ss.net_pay) * flt(ss.exchange_rate),
 				}
 			)
-
 		else:
 			row.update(
-				{"gross_pay": ss.gross_pay, "total_deduction": ss.total_deduction, "net_pay": ss.net_pay}
+				{
+					"gross_pay": flt(ss.gross_pay),
+					"total_deduction": flt(ss.total_deduction),
+					"net_pay": flt(ss.net_pay)
+				}
 			)
 
 		data.append(row)
@@ -214,6 +220,19 @@ def get_columns(earning_types, ded_types):
 			"fieldtype": "Float",
 			"width": 150,
 		},
+		{
+			"label": _("Arrear Days"),
+			"fieldname": "arrear_days",
+			"fieldtype": "Float",
+			"width": 150,
+		},
+		{
+			"label": _("Total Payment Days"),
+			"fieldname": "total_payment_days",
+			"fieldtype": "Float",
+			"width": 150,
+		},
+
 	]
 
 	for earning in earning_types:
@@ -221,8 +240,8 @@ def get_columns(earning_types, ded_types):
 			{
 				"label": earning,
 				"fieldname": frappe.scrub(earning),
-				"fieldtype": "Currency",
-				"options": "currency",
+				"fieldtype": "Float",
+
 				"width": 120,
 			}
 		)
@@ -231,8 +250,8 @@ def get_columns(earning_types, ded_types):
 		{
 			"label": _("Gross Earnings"),
 			"fieldname": "gross_pay",
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
+
 			"width": 120,
 		}
 	)
@@ -242,8 +261,8 @@ def get_columns(earning_types, ded_types):
 			{
 				"label": deduction,
 				"fieldname": frappe.scrub(deduction),
-				"fieldtype": "Currency",
-				"options": "currency",
+				"fieldtype": "Float",
+
 				"width": 120,
 			}
 		)
@@ -253,29 +272,29 @@ def get_columns(earning_types, ded_types):
 			{
 				"label": _("Loan Repayment"),
 				"fieldname": "total_loan_repayment",
-				"fieldtype": "Currency",
-				"options": "currency",
+				"fieldtype": "Float",
+
 				"width": 120,
 			},
 			{
 				"label": _("Total Deduction"),
 				"fieldname": "total_deduction",
-				"fieldtype": "Currency",
-				"options": "currency",
+				"fieldtype": "Float",
+
 				"width": 120,
 			},
 			{
 				"label": _("Net Pay"),
 				"fieldname": "net_pay",
-				"fieldtype": "Currency",
-				"options": "currency",
+				"fieldtype": "Float",
+
 				"width": 120,
 			},
 			{
 				"label": _("Currency"),
 				"fieldtype": "Data",
 				"fieldname": "currency",
-				"options": "Currency",
+
 				"hidden": 1,
 			},
 		]
