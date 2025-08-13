@@ -82,15 +82,32 @@ def execute(filters=None):
 	return columns, data
 
 
+# def get_earning_and_deduction_types(salary_slips):
+# 	salary_component_and_type = {_("Earning"): [], _("Deduction"): []}
+
+# 	for salary_component in get_salary_components(salary_slips):
+# 		component_type = get_salary_component_type(salary_component)
+# 		salary_component_and_type[_(component_type)].append(salary_component)
+
+# 	return sorted(salary_component_and_type[_("Earning")]), sorted(salary_component_and_type[_("Deduction")])
+
+
+
 def get_earning_and_deduction_types(salary_slips):
-	salary_component_and_type = {_("Earning"): [], _("Deduction"): []}
+    salary_component_and_type = {_("Earning"): [], _("Deduction"): []}
 
-	for salary_component in get_salary_components(salary_slips):
-		component_type = get_salary_component_type(salary_component)
-		salary_component_and_type[_(component_type)].append(salary_component)
+    for comp in get_salary_components(salary_slips):
+        component_type = get_salary_component_type(comp["salary_component"])
+        salary_component_and_type[_(component_type)].append({
+            "name": comp["salary_component"],
+            "seq": comp["custom_sequence"] or 9999  # large number for null
+        })
 
-	return sorted(salary_component_and_type[_("Earning")]), sorted(salary_component_and_type[_("Deduction")])
+    # Sort by sequence number, then by name
+    earning_sorted = [c["name"] for c in sorted(salary_component_and_type[_("Earning")], key=lambda x: (x["seq"], x["name"]))]
+    deduction_sorted = [c["name"] for c in sorted(salary_component_and_type[_("Deduction")], key=lambda x: (x["seq"], x["name"]))]
 
+    return earning_sorted, deduction_sorted
 
 def update_column_width(ss, columns):
 	if ss.branch is not None:
@@ -266,17 +283,35 @@ def get_columns(earning_types, ded_types):
 	return columns
 
 
+# def get_salary_components(salary_slips):
+#     return (
+#         frappe.qb.from_(salary_detail)
+#         .where(
+#             (salary_detail.amount != 0)
+#             & (salary_detail.parent.isin([d.name for d in salary_slips]))
+#             & (salary_detail.do_not_include_in_total == 0)  # Exclude components where this is 1
+#         )
+#         .select(salary_detail.salary_component)
+#         .distinct()
+#     ).run(pluck=True)
+
 def get_salary_components(salary_slips):
     return (
         frappe.qb.from_(salary_detail)
+        .join(salary_component)
+        .on(salary_detail.salary_component == salary_component.name)
         .where(
             (salary_detail.amount != 0)
             & (salary_detail.parent.isin([d.name for d in salary_slips]))
             & (salary_detail.do_not_include_in_total == 0)  # Exclude components where this is 1
         )
-        .select(salary_detail.salary_component)
+        .select(
+            salary_detail.salary_component,
+            salary_component.custom_sequence
+        )
         .distinct()
-    ).run(pluck=True)
+    ).run(as_dict=True)
+
 
 
 
