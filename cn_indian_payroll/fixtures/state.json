@@ -2,25 +2,9 @@
  {
   "docstatus": 0,
   "doctype": "State",
-  "frequency": [
-   {
-    "frequency": "Yearly",
-    "parent": "Andhra Pradesh",
-    "parentfield": "frequency",
-    "parenttype": "State"
-   }
-  ],
-  "lwf_applicable": 0,
-  "min_wages": [],
-  "modified": "2025-07-24 14:43:09.534728",
-  "name": "Andhra Pradesh",
-  "state_name": "Andhra Pradesh"
- },
- {
-  "docstatus": 0,
-  "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.301963",
   "name": "Arunachal Pradesh",
@@ -31,6 +15,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.305843",
   "name": "Assam",
@@ -41,44 +26,11 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.310073",
   "name": "Bihar",
   "state_name": "Bihar"
- },
- {
-  "docstatus": 0,
-  "doctype": "State",
-  "frequency": [
-   {
-    "frequency": "Half-Yearly",
-    "parent": "Chhattisgarh",
-    "parentfield": "frequency",
-    "parenttype": "State"
-   }
-  ],
-  "lwf_applicable": 0,
-  "min_wages": [],
-  "modified": "2025-07-24 14:43:49.789298",
-  "name": "Chhattisgarh",
-  "state_name": "Chhattisgarh"
- },
- {
-  "docstatus": 0,
-  "doctype": "State",
-  "frequency": [
-   {
-    "frequency": "Half-Yearly",
-    "parent": "Delhi",
-    "parentfield": "frequency",
-    "parenttype": "State"
-   }
-  ],
-  "lwf_applicable": 0,
-  "min_wages": [],
-  "modified": "2025-07-24 14:44:31.144093",
-  "name": "Delhi",
-  "state_name": "Delhi"
  },
  {
   "docstatus": 0,
@@ -91,9 +43,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:44:39.622883",
+  "modified": "2025-08-18 15:45:34.766530",
   "name": "Goa",
   "state_name": "Goa"
  },
@@ -102,6 +55,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.332793",
   "name": "Himachal Pradesh",
@@ -112,6 +66,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.337130",
   "name": "Jharkhand",
@@ -128,9 +83,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:45:22.341181",
+  "modified": "2025-08-18 15:48:33.656682",
   "name": "Karnataka",
   "state_name": "Karnataka"
  },
@@ -145,9 +101,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:45:55.178865",
+  "modified": "2025-08-18 15:48:49.306673",
   "name": "Madhya Pradesh",
   "state_name": "Madhya Pradesh"
  },
@@ -162,9 +119,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:46:02.219671",
+  "modified": "2025-08-18 15:46:51.163486",
   "name": "Maharashtra",
   "state_name": "Maharashtra"
  },
@@ -173,6 +131,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.357942",
   "name": "Manipur",
@@ -183,6 +142,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.361772",
   "name": "Meghalaya",
@@ -193,6 +153,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.365072",
   "name": "Mizoram",
@@ -203,6 +164,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.368288",
   "name": "Nagaland",
@@ -219,9 +181,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:46:40.094150",
+  "modified": "2025-08-18 15:33:55.800672",
   "name": "Punjab",
   "state_name": "Punjab"
  },
@@ -230,6 +193,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.382419",
   "name": "Sikkim",
@@ -246,9 +210,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:47:25.795194",
+  "modified": "2025-08-18 15:49:36.034109",
   "name": "Tamil Nadu",
   "state_name": "Tamil Nadu"
  },
@@ -263,9 +228,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:47:39.984614",
+  "modified": "2025-08-18 15:47:21.467045",
   "name": "Telangana",
   "state_name": "Telangana"
  },
@@ -274,6 +240,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.400328",
   "name": "Tripura",
@@ -284,6 +251,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.413434",
   "name": "Uttarakhand",
@@ -300,20 +268,21 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [
    {
     "basic_daily_wage": 0.0,
     "parent": "West Bengal",
     "parentfield": "min_wages",
     "parenttype": "State",
-    "skill_level": "Semi-Skilled",
+    "skill_level": "Semi-skilled",
     "total_per_day": 0.0,
     "vda_daily_wages": 0.0,
     "zone": "Zone 1"
    }
   ],
-  "modified": "2025-07-24 14:46:25.770701",
+  "modified": "2025-08-18 15:49:56.112080",
   "name": "West Bengal",
   "state_name": "West Bengal"
  },
@@ -328,9 +297,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:44:15.681921",
+  "modified": "2025-08-18 15:47:36.582715",
   "name": "Chandigarh",
   "state_name": "Chandigarh"
  },
@@ -345,9 +315,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 19:13:44.208717",
+  "modified": "2025-08-18 15:44:15.505153",
   "name": "Chattisgarh",
   "state_name": "Chattisgarh"
  },
@@ -362,9 +333,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:45:08.359488",
+  "modified": "2025-08-18 15:45:22.580685",
   "name": "Haryana",
   "state_name": "Haryana"
  },
@@ -379,9 +351,10 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [],
-  "modified": "2025-07-24 14:46:18.354808",
+  "modified": "2025-08-18 15:49:06.525057",
   "name": "Odisha",
   "state_name": "Odisha"
  },
@@ -390,6 +363,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.379143",
   "name": "Rajasthan",
@@ -400,6 +374,7 @@
   "doctype": "State",
   "frequency": [],
   "lwf_applicable": 0,
+  "lwf_designation": null,
   "min_wages": [],
   "modified": "2025-07-17 11:56:59.408232",
   "name": "Uttar Pradesh",
@@ -414,15 +389,10 @@
     "parent": "Kerala",
     "parentfield": "frequency",
     "parenttype": "State"
-   },
-   {
-    "frequency": "Half-Yearly",
-    "parent": "Kerala",
-    "parentfield": "frequency",
-    "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [
    {
     "basic_daily_wage": 0.0,
@@ -435,7 +405,7 @@
     "zone": "Zone 1"
    }
   ],
-  "modified": "2025-07-24 14:45:37.129105",
+  "modified": "2025-08-18 15:46:15.893667",
   "name": "Kerala",
   "state_name": "Kerala"
  },
@@ -450,7 +420,8 @@
     "parenttype": "State"
    }
   ],
-  "lwf_applicable": 0,
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
   "min_wages": [
    {
     "basic_daily_wage": 452.0,
@@ -467,7 +438,7 @@
     "parent": "Gujarat",
     "parentfield": "min_wages",
     "parenttype": "State",
-    "skill_level": "Semi-Skilled",
+    "skill_level": "Semi-skilled",
     "total_per_day": 507.5,
     "vda_daily_wages": 45.5,
     "zone": "Zone 1"
@@ -497,7 +468,7 @@
     "parent": "Gujarat",
     "parentfield": "min_wages",
     "parenttype": "State",
-    "skill_level": "Semi-Skilled",
+    "skill_level": "Semi-skilled",
     "total_per_day": 497.5,
     "vda_daily_wages": 45.5,
     "zone": "Zone 2"
@@ -513,8 +484,44 @@
     "zone": "Zone 2"
    }
   ],
-  "modified": "2025-07-24 14:44:57.678397",
+  "modified": "2025-08-18 15:48:14.635493",
   "name": "Gujarat",
   "state_name": "Gujarat"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Andhra Pradesh",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
+  "min_wages": [],
+  "modified": "2025-08-18 15:35:33.677820",
+  "name": "Andhra Pradesh",
+  "state_name": "Andhra Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Delhi",
+    "parentfield": "frequency",
+    "parenttype": "State"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "BELOW MANAGERIAL CADRE",
+  "min_wages": [],
+  "modified": "2025-08-18 15:47:53.409441",
+  "name": "Delhi",
+  "state_name": "Delhi"
  }
 ]

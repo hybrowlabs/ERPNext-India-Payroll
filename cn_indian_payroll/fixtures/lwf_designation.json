@@ -1,0 +1,23 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "LWF Designation",
+  "lwf_state": "BELOW MANAGERIAL CADRE",
+  "modified": "2025-08-18 15:32:31.496600",
+  "name": "BELOW MANAGERIAL CADRE"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "LWF Designation",
+  "lwf_state": "ALL EMPLOYEES",
+  "modified": "2025-08-18 15:32:43.567841",
+  "name": "ALL EMPLOYEES"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "LWF Designation",
+  "lwf_state": "BELOW SUPERVISORY CADER ONLY",
+  "modified": "2025-08-18 15:33:21.707883",
+  "name": "BELOW SUPERVISORY CADER ONLY"
+ }
+]

@@ -11,7 +11,8 @@
   "min_wages",
   "lwf_frequency_section",
   "lwf_applicable",
-  "frequency"
+  "frequency",
+  "lwf_designation"
  ],
  "fields": [
   {
@@ -47,12 +48,20 @@
    "fieldname": "lwf_applicable",
    "fieldtype": "Check",
    "label": "LWF Applicable"
+  },
+  {
+   "depends_on": "lwf_applicable",
+   "fieldname": "lwf_designation",
+   "fieldtype": "Link",
+   "label": "LWF Designation",
+   "mandatory_depends_on": "lwf_applicable",
+   "options": "LWF Designation"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-08 12:13:22.393010",
+ "modified": "2025-08-18 15:52:32.191098",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "State",
