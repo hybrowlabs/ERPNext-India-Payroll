@@ -22,13 +22,13 @@ frappe.query_reports["Monthly Salary Record"] = {
             "reqd": 1
         },
         {
-            "fieldname": "from_date",
+            "fieldname": "start_date",
             "label": __("From Date"),
             "fieldtype": "Date",
             "reqd": 1
         },
         {
-            "fieldname": "to_date",
+            "fieldname": "end_date",
             "label": __("To Date"),
             "fieldtype": "Date",
             "reqd": 1

@@ -248,6 +248,10 @@ def get_used_components(filters):
         conditions["employee"] = filters["employee"]
     if filters.get("custom_payroll_period"):
         conditions["custom_payroll_period"] = filters["custom_payroll_period"]
+    if filters.get("start_date"):
+        conditions["start_date"] = [">=", filters["start_date"]]
+    if filters.get("end_date"):
+        conditions["end_date"] = ["<=", filters["end_date"]]
 
     slips = frappe.get_all("Salary Slip", filters=conditions, fields=["name"])
     slip_names = [s.name for s in slips]
@@ -340,6 +344,11 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
         conditions["employee"] = filters["employee"]
     if filters.get("custom_payroll_period"):
         conditions["custom_payroll_period"] = filters["custom_payroll_period"]
+    if filters.get("start_date"):
+        conditions["start_date"] = [">=", filters["start_date"]]
+    if filters.get("end_date"):
+        conditions["end_date"] = ["<=", filters["end_date"]]
+
 
     salary_slips = frappe.get_all(
         "Salary Slip",
@@ -347,7 +356,7 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
         fields=[
             "name", "employee", "employee_name", "company", "custom_payroll_period",
             "gross_pay", "total_deduction", "net_pay", "total_working_days",
-            "absent_days", "leave_without_pay", "payment_days",
+            "absent_days", "leave_without_pay", "payment_days","start_date", "end_date",
             "custom_lop_reversal_days", "custom_month","custom_statutory_grosspay","custom_net_pay_amount"
         ]
     )
