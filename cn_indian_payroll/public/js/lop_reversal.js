@@ -59,8 +59,8 @@ frappe.ui.form.on("LOP Reversal", {
 
 						frm.lwp_array.push({
 							salary_slip: d.name,
-							absent_days: parseInt(d.absent_days) || 0,
-							leave_without_pay: parseInt(d.leave_without_pay) || 0,
+							absent_days: (d.absent_days) || 0,
+							leave_without_pay:(d.leave_without_pay) || 0,
 							posting_date: d.end_date,
 							month_name,
 							working_days: d.total_working_days,
