@@ -889,7 +889,7 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
             "parent": ["in", slip_names],
             "parenttype": "Salary Slip",
             "parentfield": "earnings",
-            "do_not_include_in_total": 0
+            # "do_not_include_in_total": 0
         },
         fields=["parent", "salary_component", "amount"]
     )
