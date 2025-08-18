@@ -69,15 +69,15 @@ def execute(filters=None):
 		if currency == company_currency:
 			row.update(
 				{
-					"gross_pay": flt(ss.gross_pay) * flt(ss.exchange_rate),
-					"total_deduction": flt(ss.total_deduction) * flt(ss.exchange_rate),
-					"net_pay": flt(ss.net_pay) * flt(ss.exchange_rate),
+					"gross_pay": flt(ss.custom_statutory_grosspay) ,
+					"total_deduction": flt(ss.total_deduction) ,
+					"net_pay": flt(ss.net_pay),
 				}
 			)
 		else:
 			row.update(
 				{
-					"gross_pay": flt(ss.gross_pay),
+					"gross_pay": flt(ss.custom_statutory_grosspay),
 					"total_deduction": flt(ss.total_deduction),
 					"net_pay": flt(ss.net_pay)
 				}
