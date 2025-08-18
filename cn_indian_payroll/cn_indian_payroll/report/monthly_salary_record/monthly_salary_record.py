@@ -466,7 +466,6 @@
 
 
 
-
 import frappe
 from collections import defaultdict
 
@@ -491,7 +490,7 @@ def split_and_sort_components(components):
     comp_sequence_map = {}
     for c in components:
         comp = frappe.get_cached_doc("Salary Component", c)
-        comp_sequence_map[c] = comp.custom_sequence or 9999  # default high number if not set
+        comp_sequence_map[c] = comp.custom_sequence or 9999
         if comp.custom_component_sub_type == "Fixed":
             fixed.append(c)
         else:
@@ -504,17 +503,18 @@ def split_and_sort_components(components):
 
 def get_used_components(filters):
     """Fetch salary components actually used in selected Salary Slips (only do_not_include_in_total=0)."""
-    conditions = {"docstatus": ["in", [0, 1]]}
+    conditions = [["docstatus", "in", [0, 1]]]
+
     if filters.get("company"):
-        conditions["company"] = filters["company"]
+        conditions.append(["company", "=", filters["company"]])
     if filters.get("employee"):
-        conditions["employee"] = filters["employee"]
+        conditions.append(["employee", "=", filters["employee"]])
     if filters.get("custom_payroll_period"):
-        conditions["custom_payroll_period"] = filters["custom_payroll_period"]
+        conditions.append(["custom_payroll_period", "=", filters["custom_payroll_period"]])
     if filters.get("start_date"):
-        conditions["start_date"] = [">=", filters["start_date"]]
+        conditions.append(["start_date", ">=", filters["start_date"]])
     if filters.get("end_date"):
-        conditions["end_date"] = ["<=", filters["end_date"]]
+        conditions.append(["end_date", "<=", filters["end_date"]])
 
     slips = frappe.get_all("Salary Slip", filters=conditions, fields=["name"])
     slip_names = [s.name for s in slips]
@@ -522,7 +522,7 @@ def get_used_components(filters):
     if not slip_names:
         return [], []
 
-    # Fetch child rows (earnings & deductions) at once
+    # Fetch child rows (earnings & deductions)
     earnings = frappe.get_all(
         "Salary Detail",
         filters={
@@ -600,17 +600,18 @@ def get_columns(fixed_earnings, variable_earnings, fixed_deductions, variable_de
 
 
 def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, variable_deductions):
-    conditions = {"docstatus": ["in", [0, 1]]}
+    conditions = [["docstatus", "in", [0, 1]]]
+
     if filters.get("company"):
-        conditions["company"] = filters["company"]
+        conditions.append(["company", "=", filters["company"]])
     if filters.get("employee"):
-        conditions["employee"] = filters["employee"]
+        conditions.append(["employee", "=", filters["employee"]])
     if filters.get("custom_payroll_period"):
-        conditions["custom_payroll_period"] = filters["custom_payroll_period"]
+        conditions.append(["custom_payroll_period", "=", filters["custom_payroll_period"]])
     if filters.get("start_date"):
-        conditions["start_date"] = [">=", filters["start_date"]]
+        conditions.append(["start_date", ">=", filters["start_date"]])
     if filters.get("end_date"):
-        conditions["end_date"] = ["<=", filters["end_date"]]
+        conditions.append(["end_date", "<=", filters["end_date"]])
 
     salary_slips = frappe.get_all(
         "Salary Slip",
@@ -618,8 +619,8 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
         fields=[
             "name", "employee", "employee_name", "company", "custom_payroll_period",
             "gross_pay", "total_deduction", "net_pay", "total_working_days",
-            "absent_days", "leave_without_pay", "payment_days","start_date", "end_date",
-            "custom_lop_reversal_days", "custom_month","custom_statutory_grosspay","custom_net_pay_amount"
+            "absent_days", "leave_without_pay", "payment_days", "start_date", "end_date",
+            "custom_lop_reversal_days", "custom_month", "custom_statutory_grosspay", "custom_net_pay_amount"
         ]
     )
     slip_names = [s.name for s in salary_slips]
@@ -650,7 +651,7 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
         fields=["parent", "salary_component", "amount"]
     )
 
-    # Fetch employee join dates in bulk
+    # Fetch employee join dates
     employee_ids = list({s.employee for s in salary_slips})
     employees = frappe.get_all(
         "Employee",
@@ -663,7 +664,6 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
     earnings_by_slip = defaultdict(list)
     for e in earnings:
         earnings_by_slip[e.parent].append(e)
-
     deductions_by_slip = defaultdict(list)
     for d in deductions:
         deductions_by_slip[d.parent].append(d)
