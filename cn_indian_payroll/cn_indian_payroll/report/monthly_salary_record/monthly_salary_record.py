@@ -777,7 +777,7 @@ def get_used_components(filters):
             "parent": ["in", slip_names],
             "parenttype": "Salary Slip",
             "parentfield": "earnings",
-            "do_not_include_in_total": 0
+            # "do_not_include_in_total": 0
         },
         fields=["salary_component"]
     )
