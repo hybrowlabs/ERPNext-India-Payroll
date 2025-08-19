@@ -22,11 +22,11 @@ frappe.query_reports["Monthly Salary Record"] = {
             "reqd": 1
         },
         {
-            fieldname: "custom_month",
-            label: __("Month"),
-            fieldtype: "Select",
-            options: [
-                "",
+            "fieldname": "custom_month",
+            "label": __("Month"),
+            "fieldtype": "Select",
+            "options": [
+                "All",
                 "January",
                 "February",
                 "March",
@@ -40,9 +40,8 @@ frappe.query_reports["Monthly Salary Record"] = {
                 "November",
                 "December"
             ],
-
+            "default": "All",
+            "reqd": 1
         }
-
-
     ]
 };
