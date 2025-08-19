@@ -1514,6 +1514,7 @@ class CustomSalarySlip(SalarySlip):
     def calculate_grosspay(self):
         gross_pay_sum = 0
         gross_pay_year_sum = 0
+        net_pay=0
 
         if self.earnings:
             for gross_pay in self.earnings:
@@ -1528,8 +1529,9 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_statutory_grosspay = round(gross_pay_sum)
         self.custom_statutory_year_to_date = round(gross_pay_year_sum)
+        net_pay = round(gross_pay_sum - self.custom_total_deduction_amount)
 
-        self.custom_net_pay_amount= round(self.custom_statutory_grosspay - self.custom_total_deduction_amount)
+        self.custom_net_pay_amount= net_pay
 
 
 
