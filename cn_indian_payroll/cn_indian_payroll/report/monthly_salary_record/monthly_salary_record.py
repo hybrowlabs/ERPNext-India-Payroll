@@ -1148,7 +1148,7 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
     # Fetch earnings & deductions in bulk
     earnings = frappe.get_all(
         "Salary Detail",
-        filters={"parent": ["in", slip_names], "parenttype": "Salary Slip", "parentfield": "earnings", "do_not_include_in_total": 0},
+        filters={"parent": ["in", slip_names], "parenttype": "Salary Slip", "parentfield": "earnings"},
         fields=["parent", "salary_component", "amount"]
     )
     deductions = frappe.get_all(
