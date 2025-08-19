@@ -43,6 +43,7 @@ class CustomSalarySlip(SalarySlip):
         self.food_coupon_tax()
         self.tax_calculation()
         self.calculate_grosspay()
+        self.net_pay_calculation()
 
 
 
@@ -1514,7 +1515,7 @@ class CustomSalarySlip(SalarySlip):
     def calculate_grosspay(self):
         gross_pay_sum = 0
         gross_pay_year_sum = 0
-        net_pay=0
+
 
         if self.earnings:
             for gross_pay in self.earnings:
@@ -1529,9 +1530,21 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_statutory_grosspay = round(gross_pay_sum)
         self.custom_statutory_year_to_date = round(gross_pay_year_sum)
-        net_pay = round(gross_pay_sum - self.custom_total_deduction_amount)
 
-        self.custom_net_pay_amount= net_pay
+
+    def net_pay_calculation(self):
+        gross_pay_sum = 0
+        if self.earnings:
+            for gross_pay in self.earnings:
+                if not gross_pay.salary_component:
+                    continue
+
+                component = frappe.get_doc('Salary Component', gross_pay.salary_component)
+
+                if component.custom_is_part_of_gross_pay == 1:
+                    gross_pay_sum += gross_pay.amount or 0
+        self.custom_net_pay_amount = round(gross_pay_sum-self.custom_total_deduction_amount)
+
 
 
 
