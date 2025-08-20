@@ -378,7 +378,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                 </tr>
                                 <tr>
                                     <th>Total Declared Amount</th>
-                                    <td><b>${Math.round(frm.doc.total_declared_amount || 0)}</b></td>
+                                    <td><b>${Math.round(frm.doc.total_declared_amount+frm.doc.monthly_house_rent || 0)}</b></td>
                                 </tr>
                                 <tr>
                                     <th>Total Exemption Eligible Amount</th>
@@ -398,27 +398,33 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                     const html = `
                         ${info_message}
+
+
+
+
                         <style>
                             .styled-declaration-table {
                                 width: 100%;
                                 border-collapse: collapse;
                                 margin-top: 15px;
                             }
-                            .styled-declaration-table th, .styled-declaration-table td {
+                            .styled-declaration-table,
+                            .styled-declaration-table th,
+                            .styled-declaration-table td {
+                                border: 2px solid #000; /* bold black borders */
+                            }
+                            .styled-declaration-table th,
+                            .styled-declaration-table td {
                                 padding: 12px;
-                                border: 1px solid #ccc;
                                 text-align: left;
+                                font-weight: bold; /* bold text inside cells */
                             }
-                            .styled-declaration-table th {
-                                background-color: #f7f7f7;
-                            }
-                            .input-field {
-                            width: 100%;
-                            font-weight: bold;
-                            border: 2px solid #000;
-                            padding: 5px;
-                            box-sizing: border-box;
-                        }
+                                .input-field {
+                                                width: 100%;
+                                                font-weight: bold;
+                                                border: 2px solid #000;
+                                                padding: 5px;
+                                                box-sizing: border-box;
                         </style>
 
 
