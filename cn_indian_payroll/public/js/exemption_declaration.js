@@ -347,7 +347,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                         `;
                     }
 
-                    const html = `
+                    const preview= `
                         ${info_message}
                         <style>
                             .styled-declaration-table {
@@ -388,6 +388,40 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                             </thead>
                         </table>
+
+
+
+                    `;
+
+                    frm.fields_dict.custom_declaration_total_preview.$wrapper.html(preview);
+                    frm.fields_dict.custom_declaration_total_preview.$wrapper.css("width", "100%");
+
+                    const html = `
+                        ${info_message}
+                        <style>
+                            .styled-declaration-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 15px;
+                            }
+                            .styled-declaration-table th, .styled-declaration-table td {
+                                padding: 12px;
+                                border: 1px solid #ccc;
+                                text-align: left;
+                            }
+                            .styled-declaration-table th {
+                                background-color: #f7f7f7;
+                            }
+                            .input-field {
+                            width: 100%;
+                            font-weight: bold;
+                            border: 2px solid #000;
+                            padding: 5px;
+                            box-sizing: border-box;
+                        }
+                        </style>
+
+
 
                         <table class="styled-declaration-table" id="declaration-table">
                             <thead>
