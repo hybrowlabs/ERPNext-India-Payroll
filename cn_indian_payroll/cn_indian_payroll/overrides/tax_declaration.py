@@ -99,13 +99,20 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def validation_on_section10(self):
         validation_sub_categories = []
         component_sub_category = []
+        current_lta_amount = 0
+        future_lta_amount = 0
 
+        # Only for Old Regime
         if self.custom_tax_regime != "Old Regime":
             return
 
+        # Step 1: Collect declared exemptions
         if self.declarations:
             for declaration in self.declarations:
-                sub_category_doc = frappe.get_doc("Employee Tax Exemption Sub Category", declaration.exemption_sub_category)
+                sub_category_doc = frappe.get_doc(
+                    "Employee Tax Exemption Sub Category",
+                    declaration.exemption_sub_category
+                )
                 component_type = sub_category_doc.custom_component_type
 
                 if component_type in [
@@ -117,6 +124,48 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 ]:
                     validation_sub_categories.append(component_type)
 
+                    # Special handling for LTA Reimbursement
+                    if component_type == "LTA Reimbursement":
+                        salary_slips = frappe.get_list(
+                            "Salary Slip",
+                            filters={
+                                "employee": self.employee,
+                                "docstatus": 1,
+                                "company": self.company,
+                                "custom_payroll_period": self.payroll_period,
+                            },
+                            fields=["name", "start_date"],
+                            order_by="start_date desc",
+                        )
+
+                        # If slips exist, take latest for "future", others for "current"
+                        if salary_slips:
+                            # latest slip → future LTA
+                            latest_slip = frappe.get_doc("Salary Slip", salary_slips[0].name)
+                            for earning in latest_slip.earnings:
+                                lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
+                                if lta_comp.component_type == "LTA Reimbursement":
+                                    future_lta_amount = round(earning.amount)*latest_slip.custom_month_count
+
+                            # older slips → current LTA
+                            for slip in salary_slips:
+                                prev_slip = frappe.get_doc("Salary Slip", slip.name)
+                                for earning in prev_slip.earnings:
+                                    lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
+                                    if lta_comp.component_type == "LTA Reimbursement":
+                                        current_lta_amount += round(earning.amount)
+                                        if declaration.amount> current_lta_amount+ future_lta_amount:
+
+                                            declaration.amount = current_lta_amount+ future_lta_amount
+                                        else:
+                                            declaration.amount = declaration.amount
+
+
+
+        if not validation_sub_categories:
+            return
+
+        # Step 3: Check Salary Structure Assignment
         ss_assignment = frappe.get_list(
             "Salary Structure Assignment",
             filters={
@@ -133,6 +182,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         if not ss_assignment:
             return
 
+        # Preview Salary Slip from Salary Structure
         salary_slip_preview = make_salary_slip(
             source_name=ss_assignment[0].salary_structure,
             employee=self.employee,
@@ -144,11 +194,14 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         if salary_slip_preview:
             for component in salary_slip_preview.earnings:
                 salary_component = frappe.get_doc("Salary Component", component.salary_component)
-                if salary_component.component_type=="Tax Exemption":
+                if salary_component.component_type == "Tax Exemption":
                     sub_category = salary_component.custom_sub_category
                     if sub_category:
                         component_sub_category.append(sub_category.strip())
+                if salary_component.component_type == "LTA Reimbursement":
+                    component_sub_category.append("LTA Reimbursement")
 
+        # Step 4: Match declared vs. salary structure
         unmatched = []
         for declared_sub in validation_sub_categories:
             if declared_sub.strip() not in component_sub_category:
@@ -156,9 +209,11 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         if unmatched:
             frappe.throw(
-                _("The following Section 10 components are not part of your salary (CTC), so you cannot claim exemption for them:<br><br>"
+                _("The following Section 10 components are not part of your salary (CTC), "
+                "so you cannot claim exemption for them:<br><br>"
                 + "<br>".join(f"<b>{u}</b>" for u in unmatched))
             )
+
 
 
 

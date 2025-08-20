@@ -742,7 +742,7 @@
    "label": "LTA Non Taxable Component",
    "length": 0,
    "link_filters": null,
-   "mandatory_depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
+   "mandatory_depends_on": "",
    "modified": "2024-08-12 23:21:08.866130",
    "modified_by": "Administrator",
    "module": "cn-indian-payroll",
