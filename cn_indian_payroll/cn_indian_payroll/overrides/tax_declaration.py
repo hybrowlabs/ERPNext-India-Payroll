@@ -102,6 +102,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         current_lta_amount = 0
         future_lta_amount = 0
         previous_lta_amount=0
+        total_lta=0
 
         # Only for Old Regime
         if self.custom_tax_regime != "Old Regime":
@@ -150,17 +151,32 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                                     current_lta_amount = round(earning.amount)
 
                             # older slips → current LTA
-                            for slip in salary_slips:
+                            # for slip in salary_slips:
+                            #     prev_slip = frappe.get_doc("Salary Slip", slip.name)
+                            #     for earning in prev_slip.earnings:
+                            #         lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
+                            #         if lta_comp.component_type == "LTA Reimbursement":
+                            #             previous_lta_amount += round(earning.amount)
+                            #             if declaration.amount> current_lta_amount+ future_lta_amount+ previous_lta_amount:
+
+                            #                 declaration.amount = current_lta_amount+ future_lta_amount+previous_lta_amount
+                            #             else:
+                            #                 declaration.amount = declaration.amount
+                            for slip in salary_slips[1:]:
                                 prev_slip = frappe.get_doc("Salary Slip", slip.name)
                                 for earning in prev_slip.earnings:
                                     lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
                                     if lta_comp.component_type == "LTA Reimbursement":
                                         previous_lta_amount += round(earning.amount)
-                                        if declaration.amount> current_lta_amount+ future_lta_amount+ previous_lta_amount:
 
-                                            declaration.amount = current_lta_amount+ future_lta_amount+previous_lta_amount
-                                        else:
-                                            declaration.amount = declaration.amount
+
+                            # validate declaration
+                            total_lta = current_lta_amount + future_lta_amount+previous_lta_amount
+                            if declaration.amount> total_lta:
+
+                                declaration.amount = total_lta
+                            else:
+                                declaration.amount = declaration.amount
 
 
 
