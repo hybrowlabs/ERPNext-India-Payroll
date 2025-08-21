@@ -101,6 +101,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         component_sub_category = []
         current_lta_amount = 0
         future_lta_amount = 0
+        previous_lta_amount=0
 
         # Only for Old Regime
         if self.custom_tax_regime != "Old Regime":
@@ -146,6 +147,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                                 lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
                                 if lta_comp.component_type == "LTA Reimbursement":
                                     future_lta_amount = round(earning.amount)*latest_slip.custom_month_count
+                                    current_lta_amount = round(earning.amount)
 
                             # older slips → current LTA
                             for slip in salary_slips:
@@ -153,10 +155,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                                 for earning in prev_slip.earnings:
                                     lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
                                     if lta_comp.component_type == "LTA Reimbursement":
-                                        current_lta_amount += round(earning.amount)
-                                        if declaration.amount> current_lta_amount+ future_lta_amount:
+                                        previous_lta_amount += round(earning.amount)
+                                        if declaration.amount> current_lta_amount+ future_lta_amount+ previous_lta_amount:
 
-                                            declaration.amount = current_lta_amount+ future_lta_amount
+                                            declaration.amount = current_lta_amount+ future_lta_amount+previous_lta_amount
                                         else:
                                             declaration.amount = declaration.amount
 
