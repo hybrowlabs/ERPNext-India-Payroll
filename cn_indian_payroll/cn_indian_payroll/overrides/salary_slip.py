@@ -1025,6 +1025,9 @@ class CustomSalarySlip(SalarySlip):
         current_basic_value = current_hra_value = current_nps_value = current_epf_value = current_pt_value = 0
         previous_basic_value = previous_hra_value = previous_nps_value = previous_epf_value = previous_pt_value = 0
         future_basic_value = future_hra_value = future_nps_value = future_epf_value = future_pt_value = 0
+        current_lta_value= 0
+        future_lta_value = 0
+        previous_lta_value = 0
 
         get_company = frappe.get_doc("Company", self.company)
         if get_company.basic_component:
@@ -1043,6 +1046,13 @@ class CustomSalarySlip(SalarySlip):
                     current_nps_value += earning.amount or 0
                     if earning_component_data.custom_is_arrear == 0 and earning_component_data.custom_component_sub_type=="Fixed":
                         future_nps_value = (
+                            earning.custom_actual_amount or 0
+                        ) * self.custom_month_count
+
+                if earning_component_data.component_type == "LTA Reimbursement":
+                    current_lta_value += earning.amount or 0
+                    if earning_component_data.custom_is_arrear == 0 and earning_component_data.custom_component_sub_type=="Fixed":
+                        future_lta_value = (
                             earning.custom_actual_amount or 0
                         ) * self.custom_month_count
 
@@ -1108,6 +1118,8 @@ class CustomSalarySlip(SalarySlip):
                             previous_basic_value += earning.amount
                         if earning.salary_component == current_hra:
                             previous_hra_value += earning.amount
+                        if component_data.component_type == "LTA Reimbursement":
+                            previous_lta_value += earning.amount
 
                 if previous_salary_slip.deductions:
                     for deduction in previous_salary_slip.deductions:
@@ -1140,6 +1152,7 @@ class CustomSalarySlip(SalarySlip):
                 total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
                 total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
                 total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
+                total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
 
                 for subcategory in get_each_doc.declarations:
                     check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
@@ -1152,6 +1165,12 @@ class CustomSalarySlip(SalarySlip):
 
                     elif check_component.custom_component_type == "Professional Tax":
                         subcategory.amount = total_pt
+
+                    elif check_component.custom_component_type == "LTA Reimbursement":
+                        if subcategory.amount>total_lta:
+                            subcategory.amount = total_lta
+                        else:
+                            subcategory.amount = subcategory.amount
 
                 for entry in form_data:
                     subcat = entry.get("sub_category") or entry.get("id")
@@ -1172,6 +1191,10 @@ class CustomSalarySlip(SalarySlip):
                         elif ctype == "Professional Tax":
                             entry["amount"] = total_pt
                             entry["value"] = total_pt
+                        elif ctype == "LTA Reimbursement":
+                            allowed_lta = min(entry.get("amount", 0), total_lta)
+                            entry["amount"] = allowed_lta
+                            entry["value"] = allowed_lta
 
                 get_each_doc.custom_posting_date = self.posting_date
                 get_each_doc.custom_declaration_form_data = json.dumps(form_data)
