@@ -87,56 +87,56 @@ class CustomSalarySlip(SalarySlip):
     #         )
 
 
-    # def calculate_variable_tax(self, tax_component):
-    #     self.previous_total_paid_taxes = self.get_tax_paid_in_period(
-    #         self.payroll_period.start_date, self.start_date, tax_component
-    #     )
+    def calculate_variable_tax(self, tax_component):
+        self.previous_total_paid_taxes = self.get_tax_paid_in_period(
+            self.payroll_period.start_date, self.start_date, tax_component
+        )
 
-    #     # Structured tax amount
-    #     eval_locals, default_data = self.get_data_for_eval()
-    #     self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
-    #         self,
-    #         self.total_taxable_earnings_without_full_tax_addl_components,
-    #         self.tax_slab,
-    #         self.whitelisted_globals,
-    #         eval_locals,
-    #     )
+        # Structured tax amount
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_taxable_earnings_without_full_tax_addl_components,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
 
-    #     self.current_structured_tax_amount = (
-    #         self.total_structured_tax_amount - self.previous_total_paid_taxes
-    #     ) / self.remaining_sub_periods
+        self.current_structured_tax_amount = (
+            self.total_structured_tax_amount - self.previous_total_paid_taxes
+        ) / self.remaining_sub_periods
 
-    #     # Total taxable earnings with additional earnings with full tax
-    #     self.full_tax_on_additional_earnings = 0.0
-    #     if self.current_additional_earnings_with_full_tax:
-    #         self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
-    #             self,
-    #             self.total_taxable_earnings,
-    #             self.tax_slab,
-    #             self.whitelisted_globals,
-    #             eval_locals,
-    #         )
-    #         self.full_tax_on_additional_earnings = (
-    #             self.total_tax_amount - self.total_structured_tax_amount
-    #         )
+        # Total taxable earnings with additional earnings with full tax
+        self.full_tax_on_additional_earnings = 0.0
+        if self.current_additional_earnings_with_full_tax:
+            self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
+                self,
+                self.total_taxable_earnings,
+                self.tax_slab,
+                self.whitelisted_globals,
+                eval_locals,
+            )
+            self.full_tax_on_additional_earnings = (
+                self.total_tax_amount - self.total_structured_tax_amount
+            )
 
-    #     current_tax_amount = (
-    #         self.current_structured_tax_amount + self.full_tax_on_additional_earnings
-    #     )
-    #     if flt(current_tax_amount) < 0:
-    #         current_tax_amount = 0
+        current_tax_amount = (
+            self.current_structured_tax_amount + self.full_tax_on_additional_earnings
+        )
+        if flt(current_tax_amount) < 0:
+            current_tax_amount = 0
 
-    #     self._component_based_variable_tax[tax_component].update(
-    #         {
-    #             "previous_total_paid_taxes": self.previous_total_paid_taxes,
-    #             "total_structured_tax_amount": self.total_structured_tax_amount,
-    #             "current_structured_tax_amount": self.current_structured_tax_amount,
-    #             "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
-    #             "current_tax_amount": current_tax_amount,
-    #         }
-    #     )
+        self._component_based_variable_tax[tax_component].update(
+            {
+                "previous_total_paid_taxes": self.previous_total_paid_taxes,
+                "total_structured_tax_amount": self.total_structured_tax_amount,
+                "current_structured_tax_amount": self.current_structured_tax_amount,
+                "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
+                "current_tax_amount": current_tax_amount,
+            }
+        )
 
-    #     return current_tax_amount
+        return current_tax_amount
 
 
 
@@ -1588,137 +1588,6 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    # def tax_calculation(self):
-
-    #     frappe.msgprint(str(self.employee))
-
-
-    #     latest_salary_structure = frappe.get_list('Salary Structure Assignment',
-    #                     filters={'employee': self.employee,'docstatus':1},
-    #                     fields=["*"],
-    #                     order_by='from_date desc',
-    #                     limit=1
-    #                 )
-
-    #     if self.annual_taxable_amount:
-    #         self.custom_taxable_amount=round(self.annual_taxable_amount)
-
-    #     if self.ctc and self.non_taxable_earnings:
-    #         self.custom_total_income_with_taxable_component=round(self.ctc-self.non_taxable_earnings)
-
-    #     if latest_salary_structure[0].income_tax_slab:
-    #         payroll_period=latest_salary_structure[0].custom_payroll_period
-    #         income_doc = frappe.get_doc('Income Tax Slab', latest_salary_structure[0].income_tax_slab)
-    #         total_value=[]
-    #         from_amount=[]
-    #         to_amount=[]
-    #         percentage=[]
-    #         total_array=[]
-    #         difference=[]
-
-    #         rebate=income_doc.custom_taxable_income_is_less_than
-    #         max_amount=income_doc.custom_maximum_amount
-
-    #         for i in income_doc.slabs:
-
-    #             array_list={
-    #                 'from':i.from_amount,
-    #                 'to':i.to_amount,
-    #                 'percent':i.percent_deduction
-    #                 }
-
-    #             total_array.append(array_list)
-    #         for slab in total_array:
-
-    #             if slab['to'] == 0.0:
-    #                 if round(self.annual_taxable_amount) >= slab['from']:
-    #                     tt1=round(self.annual_taxable_amount)-slab['from']
-    #                     tt2=slab['percent']
-    #                     tt3=round((tt1*tt2)/100)
-
-    #                     tt4=slab['from']
-    #                     tt5=slab['to']
-
-    #                     remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
-    #                     for slab in remaining_slabs:
-    #                         from_amount.append(slab['from'])
-    #                         to_amount.append(slab['to'])
-    #                         percentage.append(slab["percent"])
-    #                         difference.append(slab['to']-slab['from'])
-    #                         total_value.append((slab['to']-slab['from'])*slab["percent"]/100)
-    #                     from_amount.append(tt4)
-    #                     to_amount.append(tt5)
-    #                     percentage.append(tt2)
-    #                     difference.append(tt1)
-    #                     total_value.append(tt3)
-    #                 self.custom_tax_slab = []
-    #                 for i in range(len(from_amount)):
-    #                         self.append("custom_tax_slab", {
-    #                         "from_amount": from_amount[i],
-    #                         "to_amount": to_amount[i],
-    #                         "percentage":  percentage[i]   ,
-    #                         "tax_amount":total_value[i],
-    #                         "amount":difference[i]
-    #                     })
-
-    #             else:
-    #                 if slab['from'] <= round(self.annual_taxable_amount) <= slab['to']:
-    #                     tt1=round(self.annual_taxable_amount)-slab['from']
-    #                     tt2=slab['percent']
-    #                     tt3=(tt1*tt2)/100
-    #                     tt4=slab['from']
-    #                     tt5=slab['to']
-    #                     remaining_slabs = [s for s in total_array if s['from'] != slab['from'] and s['from'] < slab['from']]
-
-    #                     for slab in remaining_slabs:
-    #                         from_amount.append(slab['from'])
-    #                         to_amount.append(slab['to'])
-    #                         percentage.append(slab["percent"])
-    #                         difference.append(slab['to']-slab['from'])
-    #                         total_value.append((slab['to']-slab['from'])*slab["percent"]/100)
-    #                     from_amount.append(tt4)
-    #                     to_amount.append(tt5)
-    #                     percentage.append(tt2)
-    #                     difference.append(tt1)
-    #                     total_value.append(tt3)
-
-    #                 self.custom_tax_slab = []
-    #                 for i in range(len(from_amount)):
-    #                         self.append("custom_tax_slab", {
-    #                         "from_amount": from_amount[i],
-    #                         "to_amount": to_amount[i],
-    #                         "percentage":  percentage[i]   ,
-    #                         "tax_amount":total_value[i],
-    #                         "amount":difference[i]
-    #                     })
-
-
-
-    #         total_sum = sum(total_value)
-
-    #         if self.custom_taxable_amount<rebate:
-
-    #             self.custom_tax_on_total_income=total_sum
-    #             self.custom_rebate_under_section_87a=total_sum
-    #             self.custom_total_tax_on_income=0
-    #         else:
-    #             self.custom_total_tax_on_income=total_sum
-    #             self.custom_rebate_under_section_87a=0
-    #             self.custom_tax_on_total_income=total_sum-0
-
-    #         if self.custom_taxable_amount>5000000:
-
-    #             surcharge_m=(self.custom_total_tax_on_income*10)/100
-
-    #             self.custom_surcharge=round(surcharge_m)
-    #             self.custom_education_cess=round((surcharge_m+self.custom_total_tax_on_income)*4/100)
-    #         else:
-
-    #             self.custom_surcharge=0
-    #             self.custom_education_cess=(self.custom_surcharge+self.custom_total_tax_on_income)*4/100
-
-
-    #         self.custom_total_amount=round(self.custom_surcharge+self.custom_education_cess+self.custom_total_tax_on_income)
 
 
     def tax_calculation(self):
@@ -1913,81 +1782,81 @@ def throw_error_message(row, error, title, description=None):
 	frappe.throw(message, title=title)
 
 
-# def override_calculate_tax_by_tax_slab(
-#     self, annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
-# ):
-#     eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
-#     base_tax = 0
-#     rebate = 0
-#     other_taxes_and_charges = 0
-#     custom_tds_already_deducted_amount = 0
+def override_calculate_tax_by_tax_slab(
+    self, annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
+    eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
+    base_tax = 0
+    rebate = 0
+    other_taxes_and_charges = 0
+    custom_tds_already_deducted_amount = 0
 
-#     # Step 1: Calculate base tax from slabs
-#     for slab in tax_slab.slabs:
-#         cond = cstr(slab.condition).strip()
-#         if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
-#             continue
+    # Step 1: Calculate base tax from slabs
+    for slab in tax_slab.slabs:
+        cond = cstr(slab.condition).strip()
+        if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+            continue
 
-#         from_amt = slab.from_amount
-#         to_amt = slab.to_amount or annual_taxable_earning
-#         rate = slab.percent_deduction * 0.01
+        from_amt = slab.from_amount
+        to_amt = slab.to_amount or annual_taxable_earning
+        rate = slab.percent_deduction * 0.01
 
-#         if annual_taxable_earning > from_amt:
-#             taxable_range = min(annual_taxable_earning, to_amt) - from_amt
-#             base_tax += taxable_range * rate
+        if annual_taxable_earning > from_amt:
+            taxable_range = min(annual_taxable_earning, to_amt) - from_amt
+            base_tax += taxable_range * rate
 
-#     # Step 2: Marginal Relief (Rebate Logic)
+    # Step 2: Marginal Relief (Rebate Logic)
 
-#     if (
-#         tax_slab.custom_marginal_relief_applicable
-#         and tax_slab.custom_minmum_value
-#         and tax_slab.custom_maximun_value
-#     ):
-#         if (
-#             tax_slab.custom_minmum_value
-#             < annual_taxable_earning
-#             < tax_slab.custom_maximun_value
-#         ):
-#             excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
-#             if base_tax > excess_income:
-#                 rebate = base_tax - excess_income
-#                 base_tax -= rebate
+    if (
+        tax_slab.custom_marginal_relief_applicable
+        and tax_slab.custom_minmum_value
+        and tax_slab.custom_maximun_value
+    ):
+        if (
+            tax_slab.custom_minmum_value
+            < annual_taxable_earning
+            < tax_slab.custom_maximun_value
+        ):
+            excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+            if base_tax > excess_income:
+                rebate = base_tax - excess_income
+                base_tax -= rebate
 
-#     # Step 3: Cess and Other Charges AFTER Rebate
-#     for d in tax_slab.other_taxes_and_charges:
-#         if (
-#             flt(d.min_taxable_income)
-#             and flt(d.min_taxable_income) > annual_taxable_earning
-#         ):
-#             continue
-#         if (
-#             flt(d.max_taxable_income)
-#             and flt(d.max_taxable_income) < annual_taxable_earning
-#         ):
-#             continue
+    # Step 3: Cess and Other Charges AFTER Rebate
+    for d in tax_slab.other_taxes_and_charges:
+        if (
+            flt(d.min_taxable_income)
+            and flt(d.min_taxable_income) > annual_taxable_earning
+        ):
+            continue
+        if (
+            flt(d.max_taxable_income)
+            and flt(d.max_taxable_income) < annual_taxable_earning
+        ):
+            continue
 
-#         charge_percent = flt(d.percent)
-#         charge = base_tax * charge_percent / 100.0
-#         other_taxes_and_charges += charge
+        charge_percent = flt(d.percent)
+        charge = base_tax * charge_percent / 100.0
+        other_taxes_and_charges += charge
 
-#     declaration = frappe.db.get_value(
-#         "Employee Tax Exemption Declaration",
-#         {
-#             "employee": self.employee,
-#             "payroll_period": self.payroll_period.name,
-#             "docstatus": 1,
-#         },
-#         "custom_tds_already_deducted_amount",
-#         as_dict=True,
-#         cache=True,
-#     )
-#     if declaration:
-#         custom_tds_already_deducted_amount = (
-#             declaration.custom_tds_already_deducted_amount or 0.0
-#         )
+    declaration = frappe.db.get_value(
+        "Employee Tax Exemption Declaration",
+        {
+            "employee": self.employee,
+            "payroll_period": self.payroll_period.name,
+            "docstatus": 1,
+        },
+        "custom_tds_already_deducted_amount",
+        as_dict=True,
+        cache=True,
+    )
+    if declaration:
+        custom_tds_already_deducted_amount = (
+            declaration.custom_tds_already_deducted_amount or 0.0
+        )
 
-#     final_tax = (
-#         base_tax + other_taxes_and_charges
-#     ) - custom_tds_already_deducted_amount
+    final_tax = (
+        base_tax + other_taxes_and_charges
+    ) - custom_tds_already_deducted_amount
 
-#     return round(final_tax, 2), round(other_taxes_and_charges, 2)
+    return round(final_tax, 2), round(other_taxes_and_charges, 2)
