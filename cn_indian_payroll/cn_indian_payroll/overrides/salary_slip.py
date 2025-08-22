@@ -47,6 +47,27 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+        self.custom_previous_taxable_earnings = (
+            self.previous_taxable_earnings_before_exemption
+
+        )
+        self.custom_current_taxable_earnings = (
+            self.current_structured_taxable_earnings_before_exemption
+        )
+
+        self.custom_future_taxable_earnings = (
+            self.future_structured_taxable_earnings_before_exemption
+        )
+        self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
+        if self.earnings:
+            total_ctc_taxable_amount = 0
+            for earning in self.earnings:
+                if earning.is_tax_applicable == 1:
+                    total_ctc_taxable_amount += earning.default_amount
+        self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+
+
+
     def validate(self):
         super().validate()
         self.set_month()
@@ -88,6 +109,8 @@ class CustomSalarySlip(SalarySlip):
 
 
     def calculate_variable_tax(self, tax_component):
+
+
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -102,13 +125,18 @@ class CustomSalarySlip(SalarySlip):
             eval_locals,
         )
 
+
+
         self.current_structured_tax_amount = (
             self.total_structured_tax_amount - self.previous_total_paid_taxes
         ) / self.remaining_sub_periods
 
+
+
         # Total taxable earnings with additional earnings with full tax
         self.full_tax_on_additional_earnings = 0.0
         if self.current_additional_earnings_with_full_tax:
+
             self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
                 self,
                 self.total_taxable_earnings,
@@ -120,9 +148,13 @@ class CustomSalarySlip(SalarySlip):
                 self.total_tax_amount - self.total_structured_tax_amount
             )
 
+
         current_tax_amount = (
             self.current_structured_tax_amount + self.full_tax_on_additional_earnings
         )
+
+        # print("\n\n\n\n\n\n\n\n\n33333333333", current_tax_amount, "\n\n\n\n\n\n\n\n")
+
         if flt(current_tax_amount) < 0:
             current_tax_amount = 0
 
@@ -133,6 +165,7 @@ class CustomSalarySlip(SalarySlip):
                 "current_structured_tax_amount": self.current_structured_tax_amount,
                 "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
                 "current_tax_amount": current_tax_amount,
+
             }
         )
 
@@ -723,6 +756,8 @@ class CustomSalarySlip(SalarySlip):
         additional_income_with_full_tax = 0
         flexi_benefits = 0
         amount_exempted_from_income_tax = 0
+        additional_income_with_manual_tax = 0
+        additional_income_with_manual_full_tax=0
 
         tax_component = None
 
@@ -789,6 +824,15 @@ class CustomSalarySlip(SalarySlip):
                     if earning.deduct_full_tax_on_selected_payroll_date:
                         additional_income_with_full_tax += additional_amount
 
+                    if earning.additional_salary:
+
+                        get_additional_salary = frappe.get_doc("Additional Salary", earning.additional_salary)
+                        if get_additional_salary.custom_is_tax_manual_calculate and get_additional_salary.custom_tds_value:
+
+                            additional_income_with_manual_tax=get_additional_salary.custom_tds_value
+                            additional_income_with_manual_full_tax += additional_amount
+
+
         if allow_tax_exemption:
             for ded in self.deductions:
                 if ded.exempted_from_income_tax:
@@ -812,8 +856,54 @@ class CustomSalarySlip(SalarySlip):
                 "amount_exempted_from_income_tax": amount_exempted_from_income_tax,
                 "additional_income_with_full_tax": additional_income_with_full_tax,
                 "flexi_benefits": flexi_benefits,
+                "additional_income_with_manual_tax": additional_income_with_manual_tax,
+                "additional_income_with_manual_full_tax": additional_income_with_manual_full_tax,
             }
         )
+
+
+
+#NEW DEVELOPED CODE
+
+    # def compute_current_and_future_taxable_earnings(self):
+
+    #     self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
+    #     self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
+    #         ceil(self.remaining_sub_periods) - 1
+    #     )
+
+    #     current_taxable_earnings_before_exemption = (
+    #         self.current_taxable_earnings.taxable_earnings
+    #         + self.current_taxable_earnings.amount_exempted_from_income_tax
+    #     )
+    #     self.future_structured_taxable_earnings_before_exemption = (
+    #         current_taxable_earnings_before_exemption * (ceil(self.remaining_sub_periods) - 1)
+    #     )
+
+    #     # get taxable_earnings, addition_earnings for current actual payment days
+    #     self.current_taxable_earnings_for_payment_days = self.get_taxable_earnings(
+    #         self.tax_slab.allow_tax_exemption, based_on_payment_days=1
+    #     )
+
+    #     self.current_structured_taxable_earnings = (
+    #         self.current_taxable_earnings_for_payment_days.taxable_earnings
+    #     )
+
+    #     self.current_structured_taxable_earnings_before_exemption = (
+    #         self.current_structured_taxable_earnings
+    #         + self.current_taxable_earnings_for_payment_days.amount_exempted_from_income_tax
+    #     )
+
+
+    #     self.current_additional_earnings = self.current_taxable_earnings_for_payment_days.additional_income
+
+
+
+    #     self.current_additional_earnings_with_full_tax = (
+
+    #         self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
+    #     )
+
 
 
 
