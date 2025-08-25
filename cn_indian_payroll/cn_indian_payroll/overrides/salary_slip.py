@@ -148,6 +148,8 @@ class CustomSalarySlip(SalarySlip):
                 self.total_tax_amount - self.total_structured_tax_amount
             )
 
+        self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0.0
+
 
         current_tax_amount = (
             self.current_structured_tax_amount + self.full_tax_on_additional_earnings
@@ -863,46 +865,48 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-#NEW DEVELOPED CODE
+# NEW DEVELOPED CODE
 
-    # def compute_current_and_future_taxable_earnings(self):
+    def compute_current_and_future_taxable_earnings(self):
 
-    #     self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
-    #     self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
-    #         ceil(self.remaining_sub_periods) - 1
-    #     )
+        self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
+        self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
+            ceil(self.remaining_sub_periods) - 1
+        )
 
-    #     current_taxable_earnings_before_exemption = (
-    #         self.current_taxable_earnings.taxable_earnings
-    #         + self.current_taxable_earnings.amount_exempted_from_income_tax
-    #     )
-    #     self.future_structured_taxable_earnings_before_exemption = (
-    #         current_taxable_earnings_before_exemption * (ceil(self.remaining_sub_periods) - 1)
-    #     )
+        current_taxable_earnings_before_exemption = (
+            self.current_taxable_earnings.taxable_earnings
+            + self.current_taxable_earnings.amount_exempted_from_income_tax
+        )
+        self.future_structured_taxable_earnings_before_exemption = (
+            current_taxable_earnings_before_exemption * (ceil(self.remaining_sub_periods) - 1)
+        )
 
-    #     # get taxable_earnings, addition_earnings for current actual payment days
-    #     self.current_taxable_earnings_for_payment_days = self.get_taxable_earnings(
-    #         self.tax_slab.allow_tax_exemption, based_on_payment_days=1
-    #     )
+        # get taxable_earnings, addition_earnings for current actual payment days
+        self.current_taxable_earnings_for_payment_days = self.get_taxable_earnings(
+            self.tax_slab.allow_tax_exemption, based_on_payment_days=1
+        )
 
-    #     self.current_structured_taxable_earnings = (
-    #         self.current_taxable_earnings_for_payment_days.taxable_earnings
-    #     )
+        self.current_structured_taxable_earnings = (
+            self.current_taxable_earnings_for_payment_days.taxable_earnings
+        )
 
-    #     self.current_structured_taxable_earnings_before_exemption = (
-    #         self.current_structured_taxable_earnings
-    #         + self.current_taxable_earnings_for_payment_days.amount_exempted_from_income_tax
-    #     )
-
-
-    #     self.current_additional_earnings = self.current_taxable_earnings_for_payment_days.additional_income
+        self.current_structured_taxable_earnings_before_exemption = (
+            self.current_structured_taxable_earnings
+            + self.current_taxable_earnings_for_payment_days.amount_exempted_from_income_tax
+        )
 
 
+        self.current_additional_earnings = self.current_taxable_earnings_for_payment_days.additional_income
 
-    #     self.current_additional_earnings_with_full_tax = (
 
-    #         self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
-    #     )
+
+        self.current_additional_earnings_with_full_tax = (
+
+            self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
+        )
+
+
 
 
 

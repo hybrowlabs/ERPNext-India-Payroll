@@ -10,6 +10,7 @@ class CustomAdditionalSalary(AdditionalSalary):
         self.validate_employee_referral()
         self.validate_duplicate_additional_salary()
         self.validate_tax_component_overwrite()
+        self.validate_additional_tax_deduction_condition()
 
     def on_cancel(self):
         salary_slips = frappe.get_list(
@@ -38,3 +39,7 @@ class CustomAdditionalSalary(AdditionalSalary):
             ss_doc.set('deductions', updated_deductions)
 
             ss_doc.save()
+
+    def validate_additional_tax_deduction_condition(self):
+        if self.deduct_full_tax_on_selected_payroll_date and self.custom_is_tax_manual_calculate:
+            frappe.throw("Cannot select both 'Is Tax Auto Calculate' and 'Is Tax Manual Calculate' options.")
