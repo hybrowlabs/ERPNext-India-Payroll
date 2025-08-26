@@ -28,16 +28,144 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def before_save(self):
         self.update_json_data_in_declaration()
 
+
     def before_update_after_submit(self):
 
         self.calculate_hra_breakup()
         self.update_tax_declaration()
         # self.validation_on_section10()
+
+        self.set_max_amount_of_sub_category()
+
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
 
     def on_cancel(self):
         self.cancel_declaration_history()
+
+
+
+    def set_max_amount_of_sub_category(self):
+        if not self.declarations:
+            return
+
+        for subcategory in self.declarations:
+            if not subcategory.exemption_sub_category:
+                continue
+
+            check_component = frappe.get_doc(
+                "Employee Tax Exemption Sub Category", subcategory.exemption_sub_category
+            )
+
+            # Case 1: Fixed max amount > 0
+            if check_component.max_amount > 0:
+                subcategory.max_amount = check_component.max_amount
+
+            # Case 2: LTA Reimbursement with no max_amount
+            elif check_component.custom_component_type == "LTA Reimbursement" and check_component.max_amount == 0:
+                # Fetch salary slips for this payroll period
+                salary_slips = frappe.get_list(
+                    "Salary Slip",
+                    filters={
+                        "employee": self.employee,
+                        "docstatus": ["in", (0, 1)],
+                        "company": self.company,
+                        "custom_payroll_period": self.payroll_period,
+                    },
+                    fields=["name", "start_date", "custom_month_count"],
+                    order_by="start_date desc",
+                )
+
+                previous_lta_amount = 0
+                future_lta_amount = 0
+
+                if salary_slips:
+                    latest_slip = frappe.get_doc("Salary Slip", salary_slips[0].name)
+                    month_count = latest_slip.custom_month_count or 0
+
+                    # Accumulate LTA from past slips
+                    for slip in salary_slips:
+                        get_each_doc = frappe.get_doc("Salary Slip", slip.name)
+                        for earning in get_each_doc.earnings:
+                            lta_comp = frappe.get_doc("Salary Component", earning.salary_component)
+                            if lta_comp.component_type == "LTA Reimbursement":
+                                previous_lta_amount += round(earning.amount)
+
+                    # Simulate future LTA
+                    get_latest_structure = frappe.get_list(
+                        "Salary Structure Assignment",
+                        filters={
+                            "employee": self.employee,
+                            "docstatus": 1,
+                            "company": self.company,
+                            "custom_payroll_period": self.payroll_period,
+                        },
+                        fields=["name", "from_date", "salary_structure"],
+                        order_by="from_date desc",
+                        limit=1,
+                    )
+
+                    if get_latest_structure:
+                        salary_slip = make_salary_slip(
+                            source_name=get_latest_structure[0].salary_structure,
+                            employee=self.employee,
+                            print_format="Salary Slip Standard",
+                            posting_date=get_latest_structure[0].from_date,
+                            for_preview=1,
+                        )
+
+                        if salary_slip:
+                            for component in salary_slip.earnings:
+                                salary_component = frappe.get_doc("Salary Component", component.salary_component)
+                                if salary_component.component_type == "LTA Reimbursement":
+                                    future_lta_amount = round(component.amount) * month_count
+
+                    subcategory.max_amount = previous_lta_amount + future_lta_amount
+
+                else:
+                    # No salary slips → project using salary structure assignment
+                    get_latest_structure = frappe.get_list(
+                        "Salary Structure Assignment",
+                        filters={
+                            "employee": self.employee,
+                            "docstatus": 1,
+                            "company": self.company,
+                            "custom_payroll_period": self.payroll_period,
+                        },
+                        fields=["name", "from_date", "salary_structure"],
+                        order_by="from_date desc",
+                        limit=1,
+                    )
+
+                    if get_latest_structure:
+                        payroll_period = frappe.get_doc("Payroll Period", self.payroll_period)
+                        from_date = getdate(get_latest_structure[0].from_date)
+                        payroll_start_date = getdate(payroll_period.start_date)
+                        payroll_end_date = getdate(payroll_period.end_date)
+
+                        declaration_start_date = max(from_date, payroll_start_date)
+                        start = getdate(declaration_start_date)
+                        end = getdate(payroll_end_date)
+
+                        num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+
+                        salary_slip = make_salary_slip(
+                            source_name=get_latest_structure[0].salary_structure,
+                            employee=self.employee,
+                            print_format="Salary Slip Standard",
+                            posting_date=get_latest_structure[0].from_date,
+                            for_preview=1,
+                        )
+
+                        if salary_slip:
+                            for component in salary_slip.earnings:
+                                salary_component = frappe.get_doc("Salary Component", component.salary_component)
+                                if salary_component.component_type == "LTA Reimbursement":
+                                    subcategory.max_amount = round(component.amount) * num_months
+
+
+
+
 
     def update_json_data_in_declaration(self):
         total_nps = 0

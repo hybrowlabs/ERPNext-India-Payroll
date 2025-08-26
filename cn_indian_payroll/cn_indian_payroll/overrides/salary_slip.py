@@ -1248,6 +1248,10 @@ class CustomSalarySlip(SalarySlip):
                 total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
                 total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
 
+
+
+
+
                 for subcategory in get_each_doc.declarations:
                     check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
 
@@ -1262,9 +1266,9 @@ class CustomSalarySlip(SalarySlip):
 
                     elif check_component.custom_component_type == "LTA Reimbursement":
                         if subcategory.amount>total_lta:
-                            subcategory.amount = total_lta
+                            subcategory.max_amount = total_lta
                         else:
-                            subcategory.amount = subcategory.amount
+                            subcategory.max_amount = subcategory.amount
 
                 for entry in form_data:
                     subcat = entry.get("sub_category") or entry.get("id")

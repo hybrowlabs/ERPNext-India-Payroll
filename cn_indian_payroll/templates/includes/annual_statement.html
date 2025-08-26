@@ -1,0 +1,133 @@
+ <!-- <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Annual Tax Statement</title>
+  <style>
+    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; }
+    h2 { margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    tfoot td { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Annual Tax Statement</h2>
+  <p><b>Employee:</b> {{ employee }}<br>
+     <b>Payroll Period:</b> {{ payroll_period }}</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Particulars</th>
+        {% for m in months %}
+          <th>{{ m }}</th>
+        {% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in particulars %}
+        <tr>
+          <td>{{ row["name"] }}</td>
+          {% for val in row["values"] %}
+            <td>₹ {{ "{:,.2f}".format(val) }}</td>
+          {% endfor %}
+          <td>₹ {{ "{:,.2f}".format(row["total"]) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><b>Total</b></td>
+        {% for t in monthly_totals %}
+          <td>₹ {{ "{:,.2f}".format(t) }}</td>
+        {% endfor %}
+        <td>₹ {{ "{:,.2f}".format(grand_total) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Annual Tax Statement</title>
+  <style>
+    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; }
+    h2 { margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    tfoot td { font-weight: bold; }
+
+    /* Button styling */
+    .print-btn {
+      float: right;
+      margin-bottom: 16px;
+      padding: 6px 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .print-btn:hover {
+      background: #0056b3;
+    }
+
+    /* Hide button in print */
+    @media print {
+      .print-btn {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Annual Tax Statement</h2>
+  <p><b>Employee:</b> {{ employee }}<br>
+     <b>Payroll Period:</b> {{ payroll_period }}</p>
+
+     <button class="print-btn" onclick="window.print()">Print Statement</button>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>Particulars</th>
+        {% for m in months %}
+          <th>{{ m }}</th>
+        {% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in particulars %}
+        <tr>
+          <td>{{ row["name"] }}</td>
+          {% for val in row["values"] %}
+            <td> {{ "{:,.2f}".format(val) }}</td>
+          {% endfor %}
+          <td>{{ "{:,.2f}".format(row["total"]) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><b>Total</b></td>
+        {% for t in monthly_totals %}
+          <td> {{ "{:,.2f}".format(t) }}</td>
+        {% endfor %}
+        <td> {{ "{:,.2f}".format(grand_total) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+</html>

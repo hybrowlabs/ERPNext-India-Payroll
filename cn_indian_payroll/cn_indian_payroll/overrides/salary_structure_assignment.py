@@ -26,6 +26,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
 
+
     def before_update_after_submit(self):
         self.update_min_wages()
         # self.update_perquisite()
@@ -204,6 +205,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
         num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
 
+
         salary_slip = make_salary_slip(
             source_name=self.salary_structure,
             employee=self.employee,
@@ -223,9 +225,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 allowed_amount = min(total_amount, comp.max_amount or total_amount)
                 sub_categories.append({
                     "sub_category": comp.name,
-                    "max_amount": comp.max_amount,
+                    "max_amount": comp.max_amount or total_amount,
                     "amount": allowed_amount
                 })
+
 
         if self.custom_tax_regime == "New Regime" or self.custom_tax_regime == "Old Regime":
             for earning in salary_slip.earnings:
