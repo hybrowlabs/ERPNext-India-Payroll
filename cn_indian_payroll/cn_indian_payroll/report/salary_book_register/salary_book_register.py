@@ -66,15 +66,15 @@ def execute(filters=None):
 		if currency == company_currency:
 			row.update(
 				{
-					"gross_pay": flt(ss.gross_pay) * flt(ss.exchange_rate),
-					"total_deduction": flt(ss.total_deduction) * flt(ss.exchange_rate),
-					"net_pay": flt(ss.net_pay) * flt(ss.exchange_rate),
+					"gross_pay": round(flt(ss.gross_pay) * flt(ss.exchange_rate)),
+					"total_deduction": round(flt(ss.total_deduction) * flt(ss.exchange_rate)),
+					"net_pay": round(flt(ss.net_pay) * flt(ss.exchange_rate)),
 				}
 			)
 
 		else:
 			row.update(
-				{"gross_pay": ss.gross_pay, "total_deduction": ss.total_deduction, "net_pay": ss.net_pay}
+				{"gross_pay": round(ss.gross_pay), "total_deduction": round(ss.total_deduction), "net_pay": round(ss.net_pay)}
 			)
 
 		data.append(row)
@@ -344,10 +344,10 @@ def get_salary_slip_details(salary_slips, currency, company_currency, component_
     for d in result:
         ss_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, 0.0)
         if currency == company_currency:
-            ss_map[d.parent][d.salary_component] += flt(d.amount) * flt(
-                d.exchange_rate if d.exchange_rate else 1
+            ss_map[d.parent][d.salary_component] += round(flt(d.amount)) * round(flt(
+                d.exchange_rate if d.exchange_rate else 1)
             )
         else:
-            ss_map[d.parent][d.salary_component] += flt(d.amount)
+            ss_map[d.parent][d.salary_component] += round(flt(d.amount))
 
     return ss_map
