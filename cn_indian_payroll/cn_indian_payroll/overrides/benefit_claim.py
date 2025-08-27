@@ -96,7 +96,9 @@ def benefit_claim(doc):
 
         for component in ssa_doc.custom_employee_reimbursements:
             if component.reimbursements != lta_component:
-                component_array.append(component.reimbursements)
+                salary_component=frappe.get_doc("Salary Component",component.reimbursements)
+                if salary_component.pay_against_benefit_claim==1:
+                    component_array.append(component.reimbursements)
 
     return {"component_array": component_array, "payroll_period": payroll_period}
 
