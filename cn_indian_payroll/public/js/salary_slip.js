@@ -1,11 +1,11 @@
 frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
 
-        if(frm.doc.docstatus==1)
+        if(frm.doc.docstatus==1 || frm.doc.docstatus==0)
         {
 
 
-      frm.add_custom_button("View TDS Sheet", function () {
+      frm.add_custom_button("TDS Sheet", function () {
         if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
           frappe.msgprint(__('Please set Employee and Payroll Period first.'));
           return;
@@ -18,8 +18,6 @@ frappe.ui.form.on("Salary Slip", {
             payroll_period: frm.doc.custom_payroll_period,
             end_date: frm.doc.end_date,
             month: frm.doc.custom_month,
-            designation:frm.doc.designation,
-            department:frm.doc.department,
             tax_regime:frm.doc.custom_tax_regime
           },
           callback: function (r) {
@@ -33,11 +31,29 @@ frappe.ui.form.on("Salary Slip", {
             w.document.close();
           }
         });
-      });
+      },"View");
 
-      frm.change_custom_button_type('View TDS Sheet', null, 'primary');
+
+      frm.add_custom_button("Regular Payslip",function()
+      {
+
+      },"View")
+
+      frm.add_custom_button("Benefit Payslip",function()
+      {
+
+      },"View")
+
+
+
 
     }
+
+
+
+
+
+
 
 
     }

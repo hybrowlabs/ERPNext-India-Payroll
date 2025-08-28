@@ -55,7 +55,7 @@ import frappe
 from frappe.utils import getdate, add_months, flt
 
 @frappe.whitelist()
-def get_annual_statement_pdf(employee, payroll_period, end_date, month,designation,department,tax_regime):
+def get_annual_statement_pdf(employee, payroll_period, end_date, month,tax_regime):
     end_date = getdate(end_date)
 
     # Fetch payroll period (get its start and end date)
@@ -130,6 +130,8 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month,designati
     esic=employee_doc.custom_esic_number
     pf=employee_doc.provident_fund_account
     branch=employee_doc.branch
+    designation=employee_doc.designation
+    department=employee_doc.department
 
 
     last_slip_components = frappe.get_all(
