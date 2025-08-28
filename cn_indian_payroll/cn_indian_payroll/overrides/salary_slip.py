@@ -43,6 +43,7 @@ class CustomSalarySlip(SalarySlip):
         self.food_coupon_tax()
         self.tax_calculation()
         self.calculate_grosspay()
+        self.total_deduction_amount()
         self.net_pay_calculation()
 
 
@@ -76,6 +77,7 @@ class CustomSalarySlip(SalarySlip):
         self.insert_lopreversal_days()
         self.update_total_lop()
         self.set_taxale_regime()
+
 
     def on_cancel(self):
         super().on_cancel()
@@ -589,6 +591,7 @@ class CustomSalarySlip(SalarySlip):
 
 
     def check_sal_struct(self):
+
         ss = frappe.qb.DocType("Salary Structure")
         ssa = frappe.qb.DocType("Salary Structure Assignment")
 
@@ -641,6 +644,7 @@ class CustomSalarySlip(SalarySlip):
                 ),
                 title=_("Salary Structure Missing"),
             )
+
 
 
 
@@ -1500,11 +1504,27 @@ class CustomSalarySlip(SalarySlip):
                 else:
                     deduction.custom_actual_amount = original_amount
 
+    def total_deduction_amount(self):
+        if self.custom_employment_type:
+            get_com = frappe.get_doc("Employment Type", self.custom_employment_type)
+            if get_com.employee_type_name == "Consultant" or get_com.employee_type_name == "Intern":
+                # Remove Income Tax from deductions
+                self.deductions = [d for d in self.deductions if d.salary_component != "Income Tax"]
 
-        if self.total_deduction or self.total_loan_repayment:
-            self.custom_total_deduction_amount = (self.total_deduction or 0) + (self.total_loan_repayment or 0)
+        # Calculate total deductions
+        total_deduction_sum = 0
+        if self.deductions:
+            for deduction in self.deductions:
+                component = frappe.get_doc('Salary Component', deduction.salary_component)
+                if not component.do_not_include_in_total:
+                    total_deduction_sum += (deduction.amount or 0)
+
+        # Add loan repayment if any
+        if total_deduction_sum or self.total_loan_repayment:
+            self.custom_total_deduction_amount = (total_deduction_sum or 0) + (self.total_loan_repayment or 0)
         else:
             self.custom_total_deduction_amount = 0
+
 
 
 

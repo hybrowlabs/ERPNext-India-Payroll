@@ -1,5 +1,10 @@
 frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
+
+        if(frm.doc.docstatus==1)
+        {
+
+
       frm.add_custom_button("View TDS Sheet", function () {
         if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
           frappe.msgprint(__('Please set Employee and Payroll Period first.'));
@@ -32,7 +37,7 @@ frappe.ui.form.on("Salary Slip", {
 
       frm.change_custom_button_type('View TDS Sheet', null, 'primary');
 
-
+    }
 
 
     }
