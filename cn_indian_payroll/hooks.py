@@ -258,8 +258,6 @@ doctype_js = {
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     # "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
     "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
-    # "Additional Salary": "public/js/additional_salary.js",
-
 
     "LOP Reversal": "public/js/lop_reversal.js",
     "Loan": "public/js/loan.js",
@@ -285,6 +283,7 @@ override_doctype_class = {
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
     "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
+    "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.PayrollEntryOverride",
 
 }
 

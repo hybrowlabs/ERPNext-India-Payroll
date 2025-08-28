@@ -51,5 +51,14 @@ frappe.ui.form.on('Payroll Entry', {
                 });
             }
         }
-    }
+    },
+
+    custom_employment_type: function (frm) {
+		frm.events.clear_employee_table(frm);
+	},
+
+    clear_employee_table: function (frm) {
+		frm.clear_table("employees");
+		frm.refresh();
+	},
 });
