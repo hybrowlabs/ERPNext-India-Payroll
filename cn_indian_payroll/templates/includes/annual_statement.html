@@ -1,56 +1,3 @@
- <!-- <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Annual Tax Statement</title>
-  <style>
-    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; }
-    h2 { margin: 0 0 16px; }
-    table { border-collapse: collapse; width: 100%; font-size: 13px; }
-    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; }
-    th:first-child, td:first-child { text-align: left; }
-    tfoot td { font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h2>Annual Tax Statement</h2>
-  <p>Employee:</b> {{ employee }}<br>
-     Payroll Period:</b> {{ payroll_period }}</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Particulars</th>
-        {% for m in months %}
-          <th>{{ m }}</th>
-        {% endfor %}
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in particulars %}
-        <tr>
-          <td>{{ row["name"] }}</td>
-          {% for val in row["values"] %}
-            <td>₹ {{ "{:,.2f}".format(val) }}</td>
-          {% endfor %}
-          <td>₹ {{ "{:,.2f}".format(row["total"]) }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>Total</b></td>
-        {% for t in monthly_totals %}
-          <td>₹ {{ "{:,.2f}".format(t) }}</td>
-        {% endfor %}
-        <td>₹ {{ "{:,.2f}".format(grand_total) }}</td>
-      </tr>
-    </tfoot>
-  </table>
-</body>
-</html> -->
-
 
 
 <!DOCTYPE html>
@@ -114,7 +61,7 @@
   <h2>TDS Sheet in the Month of {{month}}</h2>
   <p>Employee:</b> {{ employee }}<br>
      Payroll Period:</b> {{ payroll_period }}</p>
-     <!-- Tax Paid Till {{month}}</b> -->
+
 
      <button class="print-btn" onclick="window.print()">Print Statement</button>
 

@@ -42,9 +42,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
     },
 
 
-
-
-
     get_meal_card_amount: function(frm) {
 
         if(frm.doc.custom_meal_card)
@@ -235,6 +232,11 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     }
                 });
             }
+
+
+            frm.trigger('consultant_gst')
+
+
     },
 
 
@@ -318,6 +320,9 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 }
             };
         });
+
+        frm.trigger('consultant_gst')
+
 
 
 
@@ -416,6 +421,43 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
             }
     },
+
+
+    consultant_gst:function(frm)
+    {
+
+        if (frm.doc.employee && frm.doc.docstatus!=2) {
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Employee",
+                    name: frm.doc.employee
+                },
+                callback: function (res) {
+                    if (res.message && res.message.employment_type) {
+                        console.log(res.message.employment_type,"11111")
+                        frappe.db.get_value("Employment Type", res.message.employment_type, "employee_type_name")
+                            .then(r => {
+                                if (r.message && r.message.employee_type_name) {
+
+                                    console.log(r.message.employee_type_name,"2222222222")
+                                    if (r.message.employee_type_name === "Consultant" || r.message.employee_type_name === "Consultants") {
+                                        frm.set_df_property("custom_gst_applicable_consultants", "hidden", 0);
+                                        frm.set_df_property("custom_gst_eligible", "hidden", 0);
+                                        frm.set_df_property("custom_gst_percentage", "hidden", 0);
+                                    } else {
+                                        frm.set_df_property("custom_gst_applicable_consultants", "hidden", 1);
+                                        frm.set_df_property("custom_gst_eligible", "hidden", 1);
+                                        frm.set_df_property("custom_gst_percentage", "hidden", 1);
+
+                                    }
+                                }
+                            });
+                    }
+                }
+            });
+        }
+    }
 
 
 })

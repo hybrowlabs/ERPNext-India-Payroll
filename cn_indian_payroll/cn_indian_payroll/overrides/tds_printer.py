@@ -1,52 +1,3 @@
-# import frappe
-# from frappe.utils.pdf import get_pdf
-
-# @frappe.whitelist()
-# def get_annual_statement_pdf(employee, payroll_period,start_date,end_date):
-
-
-
-
-
-#     # Define months
-#     months = [
-#         "April", "May", "June", "July", "August", "September",
-#         "October", "November", "December", "January-2026", "February-2026", "March-2026"
-#     ]
-
-#     # Example particulars with dummy data
-#     particulars = [
-#         {"name": "Basic Salary", "values": [5000 for _ in months]},
-#         {"name": "House Rent Allowance", "values": [3000 for _ in months]},
-#         {"name": "Special Allowance", "values": [2000 for _ in months]},
-#     ]
-
-#     # Add totals per row
-#     for row in particulars:
-#         row["total"] = sum(row["values"])
-
-#     # Calculate total for each month
-#     monthly_totals = [sum(row["values"][i] for row in particulars) for i in range(len(months))]
-
-#     # Grand total
-#     grand_total = sum(monthly_totals)
-
-#     context = {
-#         "employee": employee,
-#         "payroll_period": payroll_period,
-#         "months": months,
-#         "particulars": particulars,
-#         "monthly_totals": monthly_totals,
-#         "grand_total": grand_total
-#     }
-
-#     html = frappe.render_template("cn_indian_payroll/templates/includes/annual_statement.html", context)
-
-#     return {"html": html}
-
-
-
-
 
 
 
@@ -121,6 +72,18 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month,tax_regim
         order_by="custom_sequence asc"
     )
 
+    # frappe.msgprint(str(components))
+
+    # for deduction in component_names:
+    #     deduction_component=frappe.get_doc("Salary Component",deduction)
+
+    #     if deduction_component.component_type=="Provident Fund":
+
+    #     if  deduction_component.component_type=="Professional Tax":
+
+
+    #     if  deduction_component.component_type==1:
+
     # 3. Get the last available slip (for projection)
     last_slip = slips[-1]
     employee_doc=frappe.get_doc("Employee",last_slip.employee)
@@ -175,8 +138,11 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month,tax_regim
             "sub_type": comp.custom_component_sub_type
         })
 
+
     # 5. Monthly totals
     monthly_totals = [flt(sum(row["values"][i] for row in particulars), 0) for i in range(len(months))]
+
+
 
     # 6. Grand total
     grand_total = flt(sum(monthly_totals), 0)
