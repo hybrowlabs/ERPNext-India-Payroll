@@ -382,8 +382,8 @@ def get_salary_slip_details(salary_slips, currency, company_currency, component_
         .on(salary_slip.name == salary_detail.parent)
         .where(
             (salary_detail.parent.isin(salary_slips)) &
-            (salary_detail.parentfield == component_type) &
-            # (salary_detail.do_not_include_in_total == 0)  # Ensure we only get components where this is 0
+            (salary_detail.parentfield == component_type)
+            # &(salary_detail.do_not_include_in_total == 0)  # Ensure we only get components where this is 0
         )
         .select(
             salary_detail.parent,
