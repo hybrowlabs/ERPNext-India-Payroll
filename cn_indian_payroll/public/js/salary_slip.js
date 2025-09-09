@@ -34,15 +34,84 @@ frappe.ui.form.on("Salary Slip", {
       },"View");
 
 
-      frm.add_custom_button("Regular Payslip",function()
-      {
+      frm.add_custom_button("Regular Payslip", function () {
+        if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
+            frappe.msgprint(__('Please set Employee and Payroll Period first.'));
+            return;
+        }
 
-      },"View")
+        frappe.call({
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf",
+            args: {
+                id: frm.doc.name   // only need the salary slip name
+            },
+            callback: function (r) {
+                if (!r.message || !r.message.html) {
+                    frappe.msgprint(__('No HTML generated'));
+                    return;
+                }
+                const w = window.open("", "_blank");
+                w.document.open();
+                w.document.write(r.message.html);
+                w.document.close();
+            }
+        });
+    }, "View");
 
-      frm.add_custom_button("Benefit Payslip",function()
-      {
 
-      },"View")
+
+
+    frm.add_custom_button("Benefit Payslip", function () {
+      if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
+          frappe.msgprint(__('Please set Employee and Payroll Period first.'));
+          return;
+      }
+
+      frappe.call({
+          method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_benefit_payslip_pdf",
+          args: {
+              id: frm.doc.name   // only need the salary slip name
+          },
+          callback: function (r) {
+              if (!r.message || !r.message.html) {
+                  frappe.msgprint(__('No HTML generated'));
+                  return;
+              }
+              const w = window.open("", "_blank");
+              w.document.open();
+              w.document.write(r.message.html);
+              w.document.close();
+          }
+      });
+  }, "View");
+
+
+
+  frm.add_custom_button("Offcycle Payslip", function () {
+    if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
+        frappe.msgprint(__('Please set Employee and Payroll Period first.'));
+        return;
+    }
+
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_offcycle_payslip_pdf",
+        args: {
+            id: frm.doc.name   // only need the salary slip name
+        },
+        callback: function (r) {
+            if (!r.message || !r.message.html) {
+                frappe.msgprint(__('No HTML generated'));
+                return;
+            }
+            const w = window.open("", "_blank");
+            w.document.open();
+            w.document.write(r.message.html);
+            w.document.close();
+        }
+    });
+}, "View");
+
+
 
 
 

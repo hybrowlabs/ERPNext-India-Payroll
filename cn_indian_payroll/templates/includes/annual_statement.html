@@ -1,4 +1,4 @@
-
+<!--
 
 <!DOCTYPE html>
 <html>
@@ -116,6 +116,121 @@
           <td> {{ "{:,.0f}".format(t) }}</td>
         {% endfor %}
         <td> {{ "{:,.0f}".format(grand_total) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Annual Tax Statement</title>
+  <style>
+    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; }
+    h2 { margin: 0 0 16px; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #0d0606;
+      padding: 6px 8px;
+      text-align: right;
+      word-wrap: break-word;
+    }
+    .particulars-table th:first-child,
+    .particulars-table td:first-child {
+      text-align: left;
+      width: 15%;
+    }
+    .particulars-table th:last-child,
+    .particulars-table td:last-child {
+      min-width: 80px;
+    }
+    tfoot td { font-weight: bold; }
+
+    .print-btn {
+      float: right;
+      margin-bottom: 16px;
+      padding: 6px 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .print-btn:hover { background: #0056b3; }
+
+    @media print {
+      .print-btn { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <h2>TDS Sheet for {{ month }}</h2>
+  <p><b>Employee:</b> {{ employee }}<br>
+     <b>Payroll Period:</b> {{ payroll_period }}</p>
+
+  <button class="print-btn" onclick="window.print()">Print Statement</button>
+
+  <table>
+    <tr>
+      <td><b>Member Name:</b> {{ employee_name }}</td>
+      <td><b>Member Type:</b> Member</td>
+      <td><b>Member Code:</b> {{ employee }}</td>
+      <td><b>PAN Number:</b> {{ pan }}</td>
+    </tr>
+    <tr>
+      <td><b>Designation:</b> {{ designation }}</td>
+      <td><b>Department:</b> {{ department }}</td>
+      <td><b>Date Of Joining:</b> {{ date_of_joinee }}</td>
+      <td><b>Tax Regime:</b> {{ tax_regime }}</td>
+    </tr>
+    <tr>
+      <td><b>Provident Fund:</b> {{ pf }}</td>
+      <td><b>ESIC Number:</b> {{ esic }}</td>
+      <td><b>Current Office Location:</b> {{ branch }}</td>
+      <td></td>
+    </tr>
+  </table>
+
+  <br><br>
+
+  <table class="particulars-table">
+    <thead>
+      <tr>
+        <th>Particulars</th>
+        {% for m in months %}
+          <th>{{ m }}</th>
+        {% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in particulars %}
+        <tr>
+          <td>{{ row["name"] }}</td>
+          {% for val in row["values"] %}
+            <td>{{ "{:,.0f}".format(val) }}</td>
+          {% endfor %}
+          <td>{{ "{:,.0f}".format(row["total"]) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><b>Net Salary (Earnings - Deductions)</b></td>
+        {% for t in monthly_totals %}
+          <td>{{ "{:,.0f}".format(t) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(grand_total) }}</td>
       </tr>
     </tfoot>
   </table>

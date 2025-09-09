@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Payslip</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0; /* light gray background outside */
+      margin: 0;
+      padding: 20px;
+    }
+
+    .payslip-container {
+      width: 210mm; /* A4 width */
+      min-height: 297mm; /* A4 height */
+      margin: auto;
+      background: #fff;
+      padding: 20mm;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .print-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 8px 14px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .print-btn:hover {
+      background: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    td, th {
+      border: 1px solid #000;
+      padding: 6px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f2f2f2;
+      text-align: center;
+    }
+
+    .no-border td {
+      border: none;
+    }
+
+    hr {
+      margin: 15px 0;
+    }
+
+    @media print {
+      body {
+        background: none;
+        margin: 0;
+      }
+      .payslip-container {
+        box-shadow: none;
+        margin: 0;
+        width: auto;
+        min-height: auto;
+        padding: 0;
+      }
+      .print-btn {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="payslip-container">
+
+  <button class="print-btn" onclick="window.print()">🖨 Print / Download</button>
+
+  <!-- Company Header -->
+  {% if doc.company %}
+    {% set company = frappe.get_doc("Company", doc.company) %}
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <tr>
+        <td style="width: 30%; vertical-align: top; text-align: left; border: none;">
+          {% if company.custom_letter_head_image %}
+            <img src="{{ company.custom_letter_head_image }}" style="width: 100%; height: 100px; object-fit: contain;">
+          {% endif %}
+        </td>
+        <td style="width: 70%; vertical-align: top; text-align: center; border: none;">
+          {% if company.custom_letter_head_details %}
+            {% set paragraphs = company.custom_letter_head_details.split('\n') %}
+            {% for para in paragraphs %}
+              {% if para.strip() %}
+                {% if loop.index == 1 %}
+                  <p style="margin: 0; font-size: 18px; font-weight: bold;">{{ para }}</p>
+                {% else %}
+                  <p style="margin: 0; font-size: 13px;">{{ para }}</p>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          <br>
+          <p style="font-size: 16px; font-weight: bold;">
+            Salary Slip for the Month of {{ frappe.utils.formatdate(doc.end_date, "MMMM - YYYY") }}
+          </p>
+        </td>
+      </tr>
+    </table>
+  {% endif %}
+
+  <!-- Employee Info -->
+  <table class="no-border" style="margin-bottom: 20px;">
+    {% set employee = frappe.get_doc("Employee", doc.employee) %}
+    <tr>
+      <td style="width:25%">Employee ID</td>
+      <td style="width:25%">:&nbsp;{{ doc.employee }}</td>
+      <td style="width:25%">Employee Name</td>
+      <td style="width:25%">:&nbsp;{{ doc.employee_name }}</td>
+    </tr>
+    <tr>
+      <td>Date of Joining</td>
+      <td>:&nbsp;{{ employee.date_of_joining if employee.date_of_joining else 'N/A' }}</td>
+      <td>PF Number</td>
+      <td>:&nbsp;{{ employee.provident_fund_account if employee.provident_fund_account else 'N/A' }}</td>
+    </tr>
+    <tr>
+      <td>Department</td>
+      <td>:&nbsp;{{ employee.department if employee.department else 'N/A' }}</td>
+      <td>UAN Number</td>
+      <td>:&nbsp;{{ employee.custom_uan if employee.custom_uan else 'N/A' }}</td>
+    </tr>
+    <tr>
+      <td>Designation</td>
+      <td>:&nbsp;{{ employee.designation if employee.designation else 'N/A' }}</td>
+      <td>Bank Name</td>
+      <td>:&nbsp;{{ employee.bank_name if employee.bank_name else 'N/A' }}</td>
+    </tr>
+    <tr>
+      <td>Account Number</td>
+      <td>:&nbsp;{{ employee.bank_ac_no if employee.bank_ac_no else 'N/A' }}</td>
+      <td>IFSC Code</td>
+      <td>:&nbsp;{{ employee.ifsc_code if employee.ifsc_code else 'N/A' }}</td>
+    </tr>
+    <tr>
+      <td>No of Working Days</td>
+      <td>:&nbsp;{{ doc.total_working_days }}</td>
+      <td>No of Days Worked</td>
+      <td>:&nbsp;{{ doc.payment_days }}</td>
+    </tr>
+    <tr>
+      <td>LOP Days</td>
+      <td>:&nbsp;{{ doc.custom_total_leave_without_pay }}</td>
+      <td>Arrear Days</td>
+      <td>:&nbsp;</td>
+    </tr>
+  </table>
+
+  <hr>
+
+<!-- Earnings & Deductions -->
+<table>
+    <tr>
+      <th colspan="2">Earnings</th>
+      <th colspan="2">Deductions</th>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <th>Amount</th>
+      <th>Description</th>
+      <th>Amount</th>
+    </tr>
+
+    {# --- Filter earnings --- #}
+    {% set earnings_filtered = [] %}
+    {% for e in doc.earnings %}
+      {% set sc = frappe.get_doc("Salary Component", e.salary_component) %}
+      {% if sc.custom_is_part_of_gross_pay == 1 %}
+        {% set _ = earnings_filtered.append(e) %}
+      {% endif %}
+    {% endfor %}
+
+    {# --- Filter deductions --- #}
+    {% set deductions_filtered = doc.deductions | selectattr("do_not_include_in_total", "equalto", 0) | list %}
+
+    {% set max_len = [earnings_filtered|length, deductions_filtered|length] | max %}
+
+    {% for i in range(max_len) %}
+      <tr>
+        <!-- Earnings -->
+        <td>{{ earnings_filtered[i].salary_component if i < earnings_filtered|length else '' }}</td>
+        <td style="text-align:right;">
+          {{ earnings_filtered[i].amount|round(0) if i < earnings_filtered|length else '' }}
+        </td>
+
+        <!-- Deductions -->
+        <td>{{ deductions_filtered[i].salary_component if i < deductions_filtered|length else '' }}</td>
+        <td style="text-align:right;">
+          {{ deductions_filtered[i].amount|round(0) if i < deductions_filtered|length else '' }}
+        </td>
+      </tr>
+    {% endfor %}
+
+    <tr>
+      <td><b>Gross Earnings</b></td>
+      <td style="text-align:right;"><b>{{ doc.custom_statutory_grosspay|round }}</b></td>
+      <td><b>Total Deductions</b></td>
+      <td style="text-align:right;"><b>{{ doc.total_deduction|round }}</b></td>
+    </tr>
+    <tr>
+      <td><b>Net Pay</b></td>
+      <td style="text-align:right;"><b>{{ doc.custom_net_pay_amount|round }}</b></td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+
+  <br>
+  <p><b>In words:</b> {{ doc.custom_in_words }}</p>
+  <br><br>
+  <p style="text-align:center;">** This is a system generated payslip, hence signature not required. **</p>
+
+</div>
+
+</body>
+</html>

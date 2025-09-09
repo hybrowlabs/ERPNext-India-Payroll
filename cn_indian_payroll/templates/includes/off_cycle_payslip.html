@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Payslip</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0; /* light gray background outside */
+      margin: 0;
+      padding: 20px;
+    }
+
+    .payslip-container {
+      width: 210mm; /* A4 width */
+      min-height: 297mm; /* A4 height */
+      margin: auto;
+      background: #fff;
+      padding: 20mm;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .print-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 8px 14px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .print-btn:hover {
+      background: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    td, th {
+      border: 1px solid #000;
+      padding: 6px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f2f2f2;
+      text-align: center;
+    }
+
+    .no-border td {
+      border: none;
+    }
+
+    hr {
+      margin: 15px 0;
+    }
+
+    @media print {
+      body {
+        background: none;
+        margin: 0;
+      }
+      .payslip-container {
+        box-shadow: none;
+        margin: 0;
+        width: auto;
+        min-height: auto;
+        padding: 0;
+      }
+      .print-btn {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="payslip-container">
+
+  <button class="print-btn" onclick="window.print()">🖨 Print / Download</button>
+
+  <!-- Company Header -->
+  {% if doc.company %}
+    {% set company = frappe.get_doc("Company", doc.company) %}
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <tr>
+        <td style="width: 30%; vertical-align: top; text-align: left; border: none;">
+          {% if company.custom_letter_head_image %}
+            <img src="{{ company.custom_letter_head_image }}" style="width: 100%; height: 100px; object-fit: contain;">
+          {% endif %}
+        </td>
+        <td style="width: 70%; vertical-align: top; text-align: center; border: none;">
+          {% if company.custom_letter_head_details %}
+            {% set paragraphs = company.custom_letter_head_details.split('\n') %}
+            {% for para in paragraphs %}
+              {% if para.strip() %}
+                {% if loop.index == 1 %}
+                  <p style="margin: 0; font-size: 18px; font-weight: bold;">{{ para }}</p>
+                {% else %}
+                  <p style="margin: 0; font-size: 13px;">{{ para }}</p>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          <br>
+          <p style="font-size: 16px; font-weight: bold;">
+            Offcycle Slip for the Month of {{ frappe.utils.formatdate(doc.end_date, "MMMM - YYYY") }}
+          </p>
+        </td>
+      </tr>
+    </table>
+  {% endif %}
+
+  <table>
+    <tr>
+      <td colspan="2">Member Name:{{doc.employee_name}}</td>
+      <td>Member Type:</td>
+      <td>Member Code:</td>
+    </tr>
+    <tr>
+      <td colspan="2">Designation:{{doc.designation}}</td>
+      <td colspan="2"></td>
+    </tr>
+    <tr>
+      <td colspan="2">Department:{{doc.department}}</td>
+      <td colspan="2">No of Days in the Month:{{doc.total_working_days}}</td>
+    </tr>
+    <tr>
+      <td colspan="2">Date of Joining:</td>
+      <td colspan="2">Working Days:{{doc.payment_days}}</td>
+    </tr>
+    <tr>
+      <td colspan="2">Provident Fund:</td>
+      <td colspan="2">ESIC Number:</td>
+    </tr>
+    <tr>
+      <td colspan="2">Current Office Location:</td>
+      <td colspan="2">Increment Arrear Days:</td>
+    </tr>
+    <tr>
+      <td colspan="2">Total Arrear Days:</td>
+      <td colspan="2">LOP:{{doc.custom_total_leave_without_pay}}</td>
+    </tr>
+    <tr>
+      <td>Bank Name:</td>
+      <td>Account No.:</td>
+      <td>IFSC Code:</td>
+      <td>Branch Name:</td>
+    </tr>
+    <tr>
+      <td colspan="2">UAN No.:</td>
+      <td colspan="2">PAN No.:</td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <th colspan="5" style="color: black;"><b>Earnings</b></th>
+    </tr>
+    <tr>
+      <th>Component</th>
+      <th>Amount</th>
+      <th>Taxable Amount</th>
+
+    </tr>
+
+    {% set ns = namespace(total_reimbursement=0) %}
+
+    {% for e in doc.earnings %}
+      {% set sc = frappe.get_doc("Salary Component", e.salary_component) %}
+      {% if sc.custom_component_sub_type=="Variable" and  sc.custom_is_part_of_gross_pay==0 and sc.custom_is_reimbursement==0%}
+        <tr>
+          <td>{{ e.salary_component }}</td>
+          <td style="text-align:right;">{{ e.amount or '' }}</td>
+
+          <td style="text-align:right;">{{ e.amount or '' }}</td>
+        </tr>
+        {% set ns.total_reimbursement = ns.total_reimbursement + (e.amount or 0) %}
+      {% endif %}
+    {% endfor %}
+
+    <tr>
+      <td></td>
+
+      <td><b>Total</b></td>
+      <td style="text-align:right;"><b>{{ ns.total_reimbursement }}</b></td>
+    </tr>
+
+  </table>
+
+</div>
+
+</body>
+</html>

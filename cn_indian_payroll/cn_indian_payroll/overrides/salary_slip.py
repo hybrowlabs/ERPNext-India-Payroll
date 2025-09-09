@@ -1686,6 +1686,8 @@ class CustomSalarySlip(SalarySlip):
                     gross_pay_sum += gross_pay.amount or 0
         self.custom_net_pay_amount = round(gross_pay_sum-self.custom_total_deduction_amount)
 
+        self.custom_in_words = money_in_words(self.custom_net_pay_amount)
+
 
 
 

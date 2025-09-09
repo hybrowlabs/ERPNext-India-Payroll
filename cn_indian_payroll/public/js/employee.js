@@ -1,7 +1,7 @@
 frappe.ui.form.on('Employee', {
     refresh: function(frm) {
 
-        frm.add_custom_button('Details', null, 'Actions');
+
 
 
         if (frappe.user.has_role("HR Manager") || frappe.user.has_role("Payroll Manager")) {
