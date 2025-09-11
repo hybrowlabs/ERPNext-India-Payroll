@@ -33,6 +33,7 @@ class CustomSalarySlip(SalarySlip):
         self.insert_bonus_accruals()
         self.employee_accrual_insert()
         self.update_benefit_claim_amount()
+        self.update_employee_advance_amount()
 
 
     def before_save(self):
@@ -83,6 +84,7 @@ class CustomSalarySlip(SalarySlip):
         super().on_cancel()
         self.delete_bonus_accruals()
         self.delete_benefit_accruals()
+        self.cancel_employee_advance_amount()
 
 
     # def set_salary_structure_assignment(self):
@@ -108,6 +110,42 @@ class CustomSalarySlip(SalarySlip):
     #                 frappe.bold(formatdate(self.actual_start_date)),
     #             )
     #         )
+
+
+    def update_employee_advance_amount(self):
+        if not self.deductions:
+            return
+
+        for deduction in self.deductions:
+            if deduction.additional_salary:
+                get_additional_salary = frappe.get_doc("Additional Salary", deduction.additional_salary)
+
+                if get_additional_salary.ref_doctype == "Employee Advance" and get_additional_salary.ref_docname:
+                    component = frappe.get_doc("Employee Advance", get_additional_salary.ref_docname)
+
+                    # Update paid and balance amounts safely
+                    component.custom_total_paid_amount = (component.custom_total_paid_amount or 0) + (deduction.amount or 0)
+                    component.custom_total_balance_amount = (component.advance_amount or 0) - component.custom_total_paid_amount
+
+                    component.save(ignore_permissions=True)
+
+    def cancel_employee_advance_amount(self):
+        if not self.deductions:
+            return
+
+        for deduction in self.deductions:
+            if deduction.additional_salary:
+                get_additional_salary = frappe.get_doc("Additional Salary", deduction.additional_salary)
+
+                if get_additional_salary.ref_doctype == "Employee Advance" and get_additional_salary.ref_docname:
+                    component = frappe.get_doc("Employee Advance", get_additional_salary.ref_docname)
+
+                    # Revert paid and balance amounts safely
+                    component.custom_total_paid_amount = (component.custom_total_paid_amount or 0) - (deduction.amount or 0)
+                    component.custom_total_balance_amount = (component.advance_amount or 0) - component.custom_total_paid_amount
+
+                    component.save(ignore_permissions=True)
+
 
 
     def calculate_variable_tax(self, tax_component):

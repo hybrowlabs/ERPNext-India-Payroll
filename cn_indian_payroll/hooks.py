@@ -270,6 +270,8 @@ doctype_js = {
     "Salary Component": "public/js/salary_component.js",
     "Full and Final Statement": "public/js/f_and_f.js",
     "Leave Encashment": "public/js/leave_encashment.js",
+    "Employee Advance": "public/js/employee_advance.js",
+    # "Loan Application": "public/js/loan_application.js",
 
 
 
@@ -329,10 +331,13 @@ doc_events = {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_component.validate",
     },
 
-    # "Employee Promotion": {
-    #     "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
-    #     # "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
-    # },
+    "Employee Advance": {
+        "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.before_submit",
+    },
+
+    "Loan Application": {
+        "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.loan_application.before_submit",
+    },
 
 
 
