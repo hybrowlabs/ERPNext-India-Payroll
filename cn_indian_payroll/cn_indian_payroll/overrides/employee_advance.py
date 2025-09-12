@@ -373,3 +373,446 @@ def hold_installments(additional_salary_id, hold_option=None, hold_months=1, hol
 
 
     return "success"
+
+
+# @frappe.whitelist()
+# def get_advance_dashboard(employee):
+#     if not employee:
+#         return []
+
+#     advance_details = frappe.get_all(
+#         "Employee Advance",
+#         filters={"employee": employee, "docstatus": ["in", [0, 1]]},
+#         fields=["*"]
+#     )
+
+#     results = []
+
+#     for advance in advance_details:
+
+
+
+
+#         repayment_schedule = []
+#         balance_amount = float(advance.advance_amount or 0)
+#         start_date = advance.custom_repayment_start_date
+#         idx = 0
+
+
+
+#         get_additional_salary = frappe.get_all( 'Additional Salary', filters={ 'employee': employee, 'company': advance.company, 'ref_doctype': 'Employee Advance', 'ref_docname': advance.name, 'docstatus': 1 }, fields=['name', 'from_date', 'to_date', 'amount'], order_by='from_date asc' )
+
+#         if get_additional_salary:
+#             for rec in get_additional_salary:
+#                 from_date = getdate(rec.from_date)
+#                 to_date = getdate(rec.to_date)
+
+#                 total_months = ((to_date.year - from_date.year) * 12 +
+#                                 (to_date.month - from_date.month)) + 1
+
+#                 current_date = from_date
+#                 for i in range(total_months):
+#                     idx += 1
+
+#                     start_dt = current_date.replace(day=1)
+#                     end_dt = add_months(start_dt, 1) - datetime.timedelta(days=1)
+
+#                     salary_slips = frappe.get_all(
+#                         "Salary Slip",
+#                         filters={
+#                             "employee": employee,
+#                             "company": advance.company,
+#                             "docstatus": 1,
+#                             "start_date": start_dt,
+#                             "end_date": end_dt
+#                         },
+#                         fields=["name", "start_date", "end_date"],
+#                         limit=1
+#                     )
+
+#                     deducted = 1 if salary_slips else 0
+
+#                     if balance_amount > 0:
+#                         if balance_amount > flt(rec.amount):
+#                             pay_amount = flt(rec.amount)
+#                         else:
+#                             pay_amount = balance_amount
+
+#                         balance_amount -= pay_amount
+
+#                         repayment_schedule.append({
+#                             "idx": idx,
+#                             "payment_date": current_date,
+#                             "payment_amount": pay_amount,
+#                             "balance_amount": balance_amount,
+#                             "deducted": deducted
+#                         })
+
+#                     current_date = add_months(current_date, 1)
+
+#         else:
+
+
+#             if advance.custom_repayment_type == "One Time":
+#                 repayment_schedule.append({
+#                     "idx": 1,
+#                     "payment_date": start_date,
+#                     "payment_amount": float(advance.custom_monthly_repayment_amount or 0),
+#                     "balance_amount": 0
+#                 })
+
+#             elif advance.custom_repayment_type == "Recurring":
+#                 total_advance_amount = float(advance.advance_amount or 0)
+
+#                 if advance.custom_repayment_methods == "Repay Fixed Amount per Period":
+#                     fixed_amount = float(advance.custom_monthly_repayment_amount or 0)
+
+#                     if fixed_amount > 0:
+#                         total_months = int(total_advance_amount // fixed_amount)
+#                         if total_advance_amount % fixed_amount != 0:
+#                             total_months += 1
+
+#                         for i in range(total_months):
+#                             idx += 1
+#                             payment_date = add_months(start_date, i)
+
+#                             if balance_amount > fixed_amount:
+#                                 pay_amount = fixed_amount
+#                             else:
+#                                 pay_amount = balance_amount
+
+#                             balance_amount -= pay_amount
+#                             repayment_schedule.append({
+#                                 "idx": idx,
+#                                 "payment_date": payment_date,
+#                                 "payment_amount": pay_amount,
+#                                 "balance_amount": balance_amount
+#                             })
+
+#                 elif advance.custom_repayment_methods == "Repay Over Number of Periods":
+#                     total_months = int(advance.custom_repayment_period_in_months or 0)
+#                     if total_months > 0:
+#                         emi = total_advance_amount / total_months
+#                         for i in range(total_months):
+#                             idx += 1
+#                             payment_date = add_months(start_date, i)
+#                             balance_amount -= emi
+#                             repayment_schedule.append({
+#                                 "idx": idx,
+#                                 "payment_date": payment_date,
+#                                 "payment_amount": round(emi, 2),
+#                                 "balance_amount": round(balance_amount, 2)
+#                             })
+
+#             end_date = repayment_schedule[-1]["payment_date"] if repayment_schedule else None
+
+#             results.append({
+#                 "advance_type": advance.custom_advance_type,
+#                 "status": advance.status,
+#                 "total_advance_amount": advance.advance_amount,
+#                 "start_date": start_date,
+#                 "end_date": end_date,
+#                 "repayments": repayment_schedule
+#             })
+
+#         return results
+
+
+
+# import frappe
+# import datetime
+# from frappe.utils import flt, getdate, add_months
+
+# @frappe.whitelist()
+# def get_advance_dashboard(employee):
+#     if not employee:
+#         return []
+
+#     advance_details = frappe.get_all(
+#         "Employee Advance",
+#         filters={"employee": employee, "docstatus": ["in", [0, 1]]},
+#         fields=["*"]
+#     )
+
+#     results = []
+
+#     for advance in advance_details:
+#         repayment_schedule = []
+#         balance_amount = float(advance.advance_amount or 0)
+#         start_date = advance.custom_repayment_start_date
+#         idx = 0
+
+#         # Fetch Additional Salary linked to this advance
+#         get_additional_salary = frappe.get_all(
+#             "Additional Salary",
+#             filters={
+#                 "employee": employee,
+#                 "company": advance.company,
+#                 "ref_doctype": "Employee Advance",
+#                 "ref_docname": advance.name,
+#                 "docstatus": 1
+#             },
+#             fields=['name', 'from_date', 'to_date', 'amount'],
+#             order_by='from_date asc'
+#         )
+
+#         if get_additional_salary:
+#             # repayment schedule is based only on additional salary date ranges
+#             for rec in get_additional_salary:
+#                 from_date = getdate(rec.from_date)
+#                 to_date = getdate(rec.to_date)
+
+#                 total_months = ((to_date.year - from_date.year) * 12 +
+#                                 (to_date.month - from_date.month)) + 1
+
+#                 current_date = from_date
+#                 for i in range(total_months):
+#                     idx += 1
+#                     start_dt = current_date.replace(day=1)
+#                     end_dt = add_months(start_dt, 1) - datetime.timedelta(days=1)
+
+#                     # check salary slip for that month
+#                     salary_slips = frappe.get_all(
+#                         "Salary Slip",
+#                         filters={
+#                             "employee": employee,
+#                             "company": advance.company,
+#                             "docstatus": 1,
+#                             "start_date": start_dt,
+#                             "end_date": end_dt
+#                         },
+#                         fields=["name"],
+#                         limit=1
+#                     )
+
+#                     deducted = 1 if salary_slips else 0
+
+#                     if balance_amount > 0:
+#                         pay_amount = min(balance_amount, flt(rec.amount))
+#                         balance_amount -= pay_amount
+
+#                         repayment_schedule.append({
+#                             "idx": idx,
+#                             "payment_date": current_date,
+#                             "payment_amount": pay_amount,
+#                             "balance_amount": balance_amount,
+#                             "deducted": deducted
+#                         })
+
+#                     current_date = add_months(current_date, 1)
+
+#         else:
+#             # Fallback repayment logic when no Additional Salary exists
+#             if advance.custom_repayment_type == "One Time":
+#                 repayment_schedule.append({
+#                     "idx": 1,
+#                     "payment_date": start_date,
+#                     "payment_amount": float(advance.custom_monthly_repayment_amount or 0),
+#                     "balance_amount": 0,
+
+#                 })
+
+#             elif advance.custom_repayment_type == "Recurring":
+#                 total_advance_amount = float(advance.advance_amount or 0)
+
+#                 if advance.custom_repayment_methods == "Repay Fixed Amount per Period":
+#                     fixed_amount = float(advance.custom_monthly_repayment_amount or 0)
+
+#                     if fixed_amount > 0:
+#                         total_months = int(total_advance_amount // fixed_amount)
+#                         if total_advance_amount % fixed_amount != 0:
+#                             total_months += 1
+
+#                         for i in range(total_months):
+#                             idx += 1
+#                             payment_date = add_months(start_date, i)
+
+#                             pay_amount = min(balance_amount, fixed_amount)
+#                             balance_amount -= pay_amount
+
+#                             repayment_schedule.append({
+#                                 "idx": idx,
+#                                 "payment_date": payment_date,
+#                                 "payment_amount": pay_amount,
+#                                 "balance_amount": balance_amount
+#                             })
+
+#                 elif advance.custom_repayment_methods == "Repay Over Number of Periods":
+#                     total_months = int(advance.custom_repayment_period_in_months or 0)
+#                     if total_months > 0:
+#                         emi = total_advance_amount / total_months
+#                         for i in range(total_months):
+#                             idx += 1
+#                             payment_date = add_months(start_date, i)
+#                             balance_amount -= emi
+#                             repayment_schedule.append({
+#                                 "idx": idx,
+#                                 "payment_date": payment_date,
+#                                 "payment_amount": round(emi, 2),
+#                                 "balance_amount": round(balance_amount, 2)
+#                             })
+
+#         end_date = repayment_schedule[-1]["payment_date"] if repayment_schedule else None
+
+#         results.append({
+#             "advance_type": advance.custom_advance_type,
+#             "status": advance.status,
+#             "total_advance_amount": advance.advance_amount,
+#             "start_date": start_date,
+#             "end_date": end_date,
+#             "repayments": repayment_schedule,
+#             "total_paid_amount": ?,
+#             "balance_amount":?
+#         })
+
+#     return results
+
+
+import frappe
+import datetime
+from frappe.utils import flt, getdate, add_months
+
+@frappe.whitelist()
+def get_advance_dashboard(employee):
+    if not employee:
+        return []
+
+    advance_details = frappe.get_all(
+        "Employee Advance",
+        filters={"employee": employee, "docstatus": ["in", [0, 1]]},
+        fields=["*"]
+    )
+
+    results = []
+
+    for advance in advance_details:
+        repayment_schedule = []
+        balance_amount = float(advance.advance_amount or 0)
+        start_date = advance.custom_repayment_start_date
+        idx = 0
+
+        get_additional_salary = frappe.get_all(
+            "Additional Salary",
+            filters={
+                "employee": employee,
+                "company": advance.company,
+                "ref_doctype": "Employee Advance",
+                "ref_docname": advance.name,
+                "docstatus": 1
+            },
+            fields=['name', 'from_date', 'to_date', 'amount'],
+            order_by='from_date asc'
+        )
+
+        if get_additional_salary:
+            for rec in get_additional_salary:
+                from_date = getdate(rec.from_date)
+                to_date = getdate(rec.to_date)
+
+                total_months = ((to_date.year - from_date.year) * 12 +
+                                (to_date.month - from_date.month)) + 1
+
+                current_date = from_date
+                for i in range(total_months):
+                    idx += 1
+                    start_dt = current_date.replace(day=1)
+                    end_dt = add_months(start_dt, 1) - datetime.timedelta(days=1)
+
+                    salary_slips = frappe.get_all(
+                        "Salary Slip",
+                        filters={
+                            "employee": employee,
+                            "company": advance.company,
+                            "docstatus": 1,
+                            "start_date": start_dt,
+                            "end_date": end_dt
+                        },
+                        fields=["name"],
+                        limit=1
+                    )
+
+                    deducted = 1 if salary_slips else 0
+
+                    if balance_amount > 0:
+                        pay_amount = min(balance_amount, flt(rec.amount))
+                        balance_amount -= pay_amount
+
+                        repayment_schedule.append({
+                            "idx": idx,
+                            "payment_date": current_date,
+                            "payment_amount": pay_amount,
+                            "balance_amount": balance_amount,
+                            "deducted": deducted
+                        })
+
+                    current_date = add_months(current_date, 1)
+
+        else:
+            if advance.custom_repayment_type == "One Time":
+                repayment_schedule.append({
+                    "idx": 1,
+                    "payment_date": start_date,
+                    "payment_amount": float(advance.custom_monthly_repayment_amount or 0),
+                    "balance_amount": 0,
+                    "deducted": 0
+                })
+
+            elif advance.custom_repayment_type == "Recurring":
+                total_advance_amount = float(advance.advance_amount or 0)
+
+                if advance.custom_repayment_methods == "Repay Fixed Amount per Period":
+                    fixed_amount = float(advance.custom_monthly_repayment_amount or 0)
+
+                    if fixed_amount > 0:
+                        total_months = int(total_advance_amount // fixed_amount)
+                        if total_advance_amount % fixed_amount != 0:
+                            total_months += 1
+
+                        for i in range(total_months):
+                            idx += 1
+                            payment_date = add_months(start_date, i)
+
+                            pay_amount = min(balance_amount, fixed_amount)
+                            balance_amount -= pay_amount
+
+                            repayment_schedule.append({
+                                "idx": idx,
+                                "payment_date": payment_date,
+                                "payment_amount": pay_amount,
+                                "balance_amount": balance_amount,
+                                "deducted": 0
+                            })
+
+                elif advance.custom_repayment_methods == "Repay Over Number of Periods":
+                    total_months = int(advance.custom_repayment_period_in_months or 0)
+                    if total_months > 0:
+                        emi = total_advance_amount / total_months
+                        for i in range(total_months):
+                            idx += 1
+                            payment_date = add_months(start_date, i)
+                            balance_amount -= emi
+                            repayment_schedule.append({
+                                "idx": idx,
+                                "payment_date": payment_date,
+                                "payment_amount": round(emi, 2),
+                                "balance_amount": round(balance_amount, 2),
+                                "deducted": 0
+                            })
+
+        end_date = repayment_schedule[-1]["payment_date"] if repayment_schedule else None
+
+        total_paid_amount = sum(r["payment_amount"] for r in repayment_schedule if r.get("deducted") == 1)
+        final_balance = flt(advance.advance_amount) - total_paid_amount
+
+        results.append({
+            "advance_type": advance.custom_advance_type,
+            "status": advance.status,
+            "total_advance_amount": advance.advance_amount,
+            "start_date": start_date,
+            "end_date": end_date,
+            "repayments": repayment_schedule,
+            "total_paid_amount": total_paid_amount,
+            "balance_amount": final_balance
+        })
+
+    return results

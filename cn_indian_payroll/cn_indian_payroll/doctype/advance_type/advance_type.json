@@ -6,7 +6,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "title"
+  "active",
+  "title",
+  "policy_based_type",
+  "percentage"
  ],
  "fields": [
   {
@@ -14,11 +17,31 @@
    "fieldtype": "Data",
    "label": "Title",
    "unique": 1
+  },
+  {
+   "depends_on": "policy_based_type",
+   "description": "percentage that include the company policy",
+   "fieldname": "percentage",
+   "fieldtype": "Int",
+   "label": "Percentage",
+   "mandatory_depends_on": "policy_based_type"
+  },
+  {
+   "default": "0",
+   "fieldname": "policy_based_type",
+   "fieldtype": "Check",
+   "label": "Policy Based Type"
+  },
+  {
+   "default": "0",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-30 16:12:49.454558",
+ "modified": "2025-09-12 11:14:39.248469",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Advance Type",
@@ -38,6 +61,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -271,7 +271,7 @@ doctype_js = {
     "Full and Final Statement": "public/js/f_and_f.js",
     "Leave Encashment": "public/js/leave_encashment.js",
     "Employee Advance": "public/js/employee_advance.js",
-    # "Loan Application": "public/js/loan_application.js",
+    "Loan Application": "public/js/loan_application.js",
 
 
 
