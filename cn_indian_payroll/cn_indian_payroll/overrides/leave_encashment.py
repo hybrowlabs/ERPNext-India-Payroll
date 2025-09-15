@@ -45,6 +45,3 @@ class CustomLeaveEncashment(LeaveEncashment):
                 frappe.msgprint(
                     "Please Assign Salary Structure Assignment for Employee"
                 )
-
-    def create_additional_salary(self):
-        pass
