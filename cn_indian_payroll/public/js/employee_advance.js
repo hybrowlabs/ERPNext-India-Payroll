@@ -1,30 +1,18 @@
 frappe.ui.form.on('Employee Advance', {
     refresh(frm) {
 
-        if (frm.doc.status === "Paid" && frm.doc.repay_unclaimed_amount_from_salary) {
-            frm.add_custom_button(__('Deduct From Salary'), function() {
-                frappe.model.with_doctype("Additional Salary", function() {
-                    let new_doc = frappe.model.get_new_doc("Additional Salary");
-                    new_doc.employee = frm.doc.employee;
-                    new_doc.company = frm.doc.company;
-                    new_doc.amount = frm.doc.advance_amount;
-                    new_doc.ref_doctype = "Employee Advance";
-                    new_doc.ref_docname = frm.doc.name;
 
-                    frappe.set_route("Form", "Additional Salary", new_doc.name);
-                });
-            }).addClass("btn-primary");
-        }
+        frm.set_query("custom_deduction_component", function() {
+            return {
+                "filters": {
+                    "type": "Deduction"
+                }
+            };
+        });
 
-
-
-
-
-
-
-        if (frm.doc.docstatus === 1 && !frm.is_new()) {
+        if (!frm.is_new()) {
             frappe.call({
-                method: 'cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.get_advance_details',
+                method: 'cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.get_advance_dashboard_erp',
                 args: {
                     id: frm.doc.name,
                     employee: frm.doc.employee,
@@ -32,181 +20,271 @@ frappe.ui.form.on('Employee Advance', {
                     posting_date: frm.doc.posting_date
                 },
                 callback: function (r) {
-                    if (r.message) {
-                        const data = r.message;
+                    if (r.message && r.message.length > 0) {
+                        const data = r.message[0];   // First advance record
+                        const repayments = data.repayments || [];
 
-                        // Dashboard HTML
-                        const dashboard_html = `
-                            <div class="row text-center mb-4">
-                                <div class="col-md-3">
-                                    <div class="p-3" style="border:1px solid #ddd; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); background-color:#f9f9f9;">
-                                        <h6 class="text-muted">Advance Type</h6>
-                                        <h5>${data.advance_type}</h5>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="p-3" style="border:1px solid #ddd; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); background-color:#f9f9f9;">
-                                        <h6 class="text-muted">Total Advance Amount</h6>
-                                        <h5>₹${data.total_loan_amount.toLocaleString()}</h5>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="p-3" style="border:1px solid #ddd; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); background-color:#f9f9f9;">
-                                        <h6 class="text-muted">Total Paid</h6>
-                                        <h5>₹${data.total_paid.toLocaleString()}</h5>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="p-3" style="border:1px solid #ddd; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); background-color:#f9f9f9;">
-                                        <h6 class="text-muted">Balance</h6>
-                                        <h5>₹${data.balance_amount.toLocaleString()}</h5>
-                                    </div>
+                        console.log(repayments,"2222222")
+
+
+
+                    const dashboard_html = `
+                        <div class="row text-center mb-4">
+
+                            <!-- Advance Type -->
+                            <div class="col-md-3">
+                                <div class="p-3" style="border-radius:15px;
+                                                        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+                                                        background:linear-gradient(135deg,#f9f9f9,#f1f1f1);
+                                                        border:1px solid #ddd;">
+                                    <div style="font-size:28px; margin-bottom:5px; color:#007bff;">📑</div>
+                                    <h6 class="text-muted">Advance Type</h6>
+                                    <h5><b>${data.advance_type}</b></h5>
                                 </div>
                             </div>
-                        `;
 
-                        // Table HTML
+                            <!-- Total Advance Amount -->
+                            <div class="col-md-3">
+                                <div class="p-3" style="border-radius:15px;
+                                                        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+                                                        background:linear-gradient(135deg,#f9f9f9,#f1f1f1);
+                                                        border:1px solid #ddd;">
+                                    <div style="font-size:28px; margin-bottom:5px; color:#28a745;">💰</div>
+                                    <h6 class="text-muted">Total Advance</h6>
+                                    <h5><b>₹${(data.total_advance_amount || 0).toLocaleString()}</b></h5>
+                                </div>
+                            </div>
+
+                            <!-- Total Paid -->
+                            <div class="col-md-3">
+                                <div class="p-3" style="border-radius:15px;
+                                                        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+                                                        background:linear-gradient(135deg,#f9f9f9,#f1f1f1);
+                                                        border:1px solid #ddd;">
+                                    <div style="font-size:28px; margin-bottom:5px; color:#17a2b8;">✅</div>
+                                    <h6 class="text-muted">Total Paid</h6>
+                                    <h5><b>₹${(data.total_paid_amount || 0).toLocaleString()}</b></h5>
+                                </div>
+                            </div>
+
+                            <!-- Balance -->
+                            <div class="col-md-3">
+                                <div class="p-3" style="border-radius:15px;
+                                                        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+                                                        background:linear-gradient(135deg,#f9f9f9,#f1f1f1);
+                                                        border:1px solid #ddd;">
+                                    <div style="font-size:28px; margin-bottom:5px; color:#dc3545;">📉</div>
+                                    <h6 class="text-muted">Balance</h6>
+                                    <h5><b>₹${(data.balance_amount || 0).toLocaleString()}</b></h5>
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+
+
+
+                        const has_payroll_manager_role = frappe.user_roles.includes("Payroll Manager");
+
+
+
+
+                        // 2️⃣ Repayment Table HTML
                         let table_html = `
-                            <table id="installments-table"
+                            <table id="repayments-table"
                                    style="width:100%; border-collapse:collapse; text-align:center; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
                                 <thead style="background-color:grey; color:white;">
                                     <tr>
                                         <th style="padding:10px;">Sl. No.</th>
-                                        <th style="padding:10px;">Installment Date</th>
-                                        <th style="padding:10px;">Installment Amount</th>
+                                        <th style="padding:10px;">Payment Date</th>
+                                        <th style="padding:10px;">Payment Amount</th>
+                                        <th style="padding:10px;">Balance</th>
                                         <th style="padding:10px;">Additional Salary ID</th>
                                         <th style="padding:10px;">Deducted</th>
-                                        <th style="padding:10px;">Edit</th>
+
+                                        ${(has_payroll_manager_role && frm.doc.custom_final_status === "Approved" && frm.doc.docstatus === 1)
+                                            ? `<th style="padding:10px;">Edit</th>`
+                                            : ``}
                                     </tr>
                                 </thead>
                                 <tbody style="background-color:#fefefe;">
                         `;
 
-                        data.installments.forEach(inst => {
-                            const is_deducted = inst.deducted === 1 || inst.deducted === true;
 
+
+                        repayments.forEach(rp => {
+                            const is_deducted = rp.deducted === 1 || rp.deducted === true;
                             table_html += `
                                 <tr style="border-bottom:1px solid #ddd;">
-                                    <td style="padding:10px;">${inst.sl}</td>
-                                    <td style="padding:10px;" class="installment-date">${inst.date}</td>
-                                    <td style="padding:10px;">₹${inst.amount.toLocaleString()}</td>
-                                    <td style="padding:10px;" class="additional-salary-id">${inst.additional_salary_id}</td>
-                                    <td style="padding:10px;">
-                                        <input type="checkbox" class="deducted-checkbox" ${is_deducted ? "checked disabled" : ""}/>
+                                    <td style="padding:10px;">${rp.idx}</td>
+                                    <td style="padding:10px;" class="payment-date">${frappe.format(rp.payment_date, {fieldtype:"Date"})}</td>
+                                    <td style="padding:10px;">₹${(rp.payment_amount || 0).toLocaleString()}</td>
+                                    <td style="padding:10px;">₹${(rp.balance_amount || 0).toLocaleString()}</td>
+                                    <td style="padding:10px;" class="additional-salary-id">${rp.additional_salary_id || "-"}</td>
+                                   <td style="padding:10px;">
+                                        <input type="checkbox" class="deducted-checkbox" ${is_deducted ? "checked" : ""} style="pointer-events:none;"/>
                                     </td>
+
                                     <td style="padding:10px;">
-                                        <button class="btn btn-xs btn-primary edit-btn" ${is_deducted ? "disabled" : ""}>
-                                            Edit/Hold
-                                        </button>
+                                        ${(has_payroll_manager_role && frm.doc.custom_final_status === "Approved" && frm.doc.docstatus === 1)
+                                            ? `<button class="btn btn-xs btn-primary edit-btn" ${is_deducted ? "disabled" : ""}>Hold</button>`
+                                            : ``}
                                     </td>
+
                                 </tr>
                             `;
                         });
 
                         table_html += `</tbody></table>`;
 
+                        // 3️⃣ Combine dashboard + table
                         const full_html = dashboard_html + table_html;
 
+                        // 4️⃣ Render in custom field
                         frm.fields_dict.custom_repayment_dashboard.$wrapper.html(full_html);
 
-                        // Attach edit button actions
-                        frm.fields_dict.custom_repayment_dashboard.$wrapper
-                            .find(".edit-btn")
+                            frm.fields_dict.custom_repayment_dashboard.$wrapper
+                                .find(".edit-btn")
+                                .on("click", function () {
+                                    if (!frappe.user.has_role("Payroll Manager")) {
+                                        frappe.msgprint("You do not have permission to hold installments.");
+                                        return;
+                                    }
+
+                                    let row = $(this).closest("tr");
+                                    let date = row.find(".payment-date").text().trim();
+                                    let additional_salary_id = row.find(".additional-salary-id").text().trim();
+                                    let deducted = row.find(".deducted-checkbox").prop("checked");
+                                    let prev_date = row.prev().find(".payment-date").text().trim() || null;
 
 
-                            .on("click", function () {
+                                    let next_row = row.next("tr");
+
+                                    let next_date = null,
+                                        next_amount = null,
+
+                                        next_additional_salary_id = null
 
 
-                                if (!frappe.user.has_role("Payroll Manager")) {
-                                    frappe.msgprint("You do not have permission to hold installments.");
-                                    return;
-                                }
+                                    if (next_row.length) {
+                                        next_date = next_row.find(".payment-date").text().trim() || null;
+                                        next_amount = next_row.find("td:eq(2)").text().trim() || null; // Payment Amount
+                                        next_additional_salary_id = next_row.find(".additional-salary-id").text().trim() || null;
+                                    }
 
 
 
 
-                                let row = $(this).closest("tr");
-                                let date = row.find(".installment-date").text();
-                                let additional_salary_id = row.find(".additional-salary-id").text();
-                                let deducted = row.find(".deducted-checkbox").prop("checked");
-                                let prev_date = row.prev().find(".installment-date").text() || null;
+                                    if (deducted) {
+                                        frappe.msgprint("This installment is already deducted. Editing disabled.");
+                                        return;
+                                    }
 
-                                if (deducted) {
-                                    frappe.msgprint("This installment is already deducted. Editing disabled.");
-                                    return;
-                                }
+                                    // Format date (dd-mm-yyyy → yyyy-mm-dd)
+                                    let parts = date.split("-");
+                                    let formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
-                                let parts = date.split("-");
-                                let formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-
-                                let total_installments = $("#installments-table tbody tr").length;
-                                let row_index = parseInt(row.find("td:first").text());
-
-                                let remaining_installments = total_installments - row_index;
-
-                                let d = new frappe.ui.Dialog({
-                                    title: "Hold Installment",
-                                    size: "large",
-                                    fields: [
-                                        { fieldtype: "Section Break" },
-                                        { label: "Hold Option", fieldname: "hold_option", fieldtype: "Select", options: ["Recover Pending in Next Month", "Distribute Across Future Months", "Extend Repayment Period"], default: "Distribute Across Future Months" },
-                                        { fieldtype: "Column Break" },
-                                        { label: "Number of Months to Hold", fieldname: "number_of_months", fieldtype: "Int", default: 1, reqd: 1 },
-                                        { fieldtype: "Section Break" },
-                                        { label: "Holding Date", fieldname: "holding_date", fieldtype: "Date", default: formattedDate,read_only:1 },
-
-                                        { label: "Additional Salary ID", fieldname: "additional_salary_id", fieldtype: "Data", default: additional_salary_id,hidden: 1 },
-                                    ],
-                                    primary_action_label: "Submit",
-                                    primary_action(values) {
-
-                                        if (values.number_of_months > total_installments) {
-                                            frappe.msgprint("Number of months to hold cannot exceed total installments.");
-                                            return;
-                                        }
-
-                                        if (values.number_of_months > remaining_installments) {
-                                            frappe.msgprint(`Only ${remaining_installments} installment(s) are pending. You cannot hold ${values.number_of_months} months.`);
-                                            return;
-                                        }
+                                    let total_installments = $("#repayments-table tbody tr").length;
 
 
-                                        frappe.call({
-                                            method: "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.hold_installments",
-                                            args: {
-                                                additional_salary_id: values.additional_salary_id,
-                                                previous_date: prev_date,
-                                                hold_option: values.hold_option,
-                                                holding_date: values.holding_date,
-                                                number_of_months: values.number_of_months,
-                                                amount: values.amount,
-                                                advance_amount: frm.doc.advance_amount,
-                                                total_installments: total_installments
+                                    let row_index = parseInt(row.find("td:first").text());
+                                    let remaining_installments = total_installments - row_index;
+
+                                    let d = new frappe.ui.Dialog({
+                                        title: "Hold Installment",
+                                        size: "large",
+                                        fields: [
+                                            { fieldtype: "Section Break" },
+                                            {
+                                                label: "Hold Option",
+                                                fieldname: "hold_option",
+                                                fieldtype: "Select",
+                                                options: [
+                                                    "Recover Pending in Next Month",
+                                                    "Distribute Across Future Months",
+                                                    "Extend Repayment Period"
+                                                ],
+                                                default: "Distribute Across Future Months"
                                             },
-                                            callback: function (r) {
-                                                if (r.message === "success") {
-                                                    frappe.msgprint("Installment updated successfully.");
-                                                    d.hide();
-                                                    frm.reload_doc();
-                                                } else {
-                                                    frappe.msgprint("Error updating installment. Please try again.");
-                                                }
+                                            { fieldtype: "Column Break" },
+                                            {
+                                                label: "Number of Months to Hold",
+                                                fieldname: "number_of_months",
+                                                fieldtype: "Int",
+                                                default: 1,
+                                                reqd: 1
+                                            },
+                                            { fieldtype: "Section Break" },
+                                            {
+                                                label: "Holding Date",
+                                                fieldname: "holding_date",
+                                                fieldtype: "Date",
+                                                default: formattedDate,
+                                                read_only: 1
+                                            },
+                                            {
+                                                label: "Additional Salary ID",
+                                                fieldname: "additional_salary_id",
+                                                fieldtype: "Data",
+                                                default: additional_salary_id,
+                                                read_only: 1
                                             }
-                                        });
-                                        d.hide();
+                                        ],
+                                        primary_action_label: "Submit",
+                                        primary_action(values) {
 
-                                }
+                                            console.log(values)
+
+
+
+                                            if (values.number_of_months < 1) {
+                                                frappe.msgprint("Number of months to hold must be at least 1.");
+                                                return;
+                                            }
+
+                                            if (values.number_of_months > total_installments) {
+                                                frappe.msgprint("Number of months to hold cannot exceed total installments.");
+                                                return;
+                                            }
+
+                                            if (values.number_of_months > remaining_installments) {
+                                                frappe.msgprint(
+                                                    `Only ${remaining_installments} installment(s) are pending. You cannot hold ${values.number_of_months} months.`
+                                                );
+                                                return;
+                                            }
+
+                                            let row_amount = row.find("td:eq(2)").text().replace(/[₹,]/g, "").trim() || 0;
+                                            let row_id = additional_salary_id;
+
+                                            frappe.call({
+                                                method: "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.hold_installments",
+                                                args: {
+                                                    repayments: repayments,        // full table data
+                                                    idx: row_index,                // current row index
+                                                    hold_months: values.number_of_months,
+                                                    hold_option: values.hold_option,
+                                                    installment_id: row_id,        // selected row’s Additional Salary ID
+                                                    installment_amount: row_amount ,// selected row’s amount (cleaned)
+                                                    employee:frm.doc.employee,
+                                                    component:frm.doc.custom_deduction_component,
+                                                    doc_id:frm.doc.name,
+                                                    company:frm.doc.company
+                                                },
+                                                callback: function (r) {
+                                                    if (r.message === "success") {
+                                                        frappe.msgprint("Installment updated successfully.");
+                                                        d.hide();
+                                                        frm.reload_doc();
+                                                    } else {
+                                                        frappe.msgprint("Error updating installment. Please try again.");
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                    d.show();
                                 });
-                                d.show();
-                            });
-
-
-
-
-
-
-
-
 
 
 
@@ -214,5 +292,57 @@ frappe.ui.form.on('Employee Advance', {
                 }
             });
         }
+
+        if (frm.is_new()) {
+            frm.set_value("custom_repayment_dashboard", undefined);
+
+            // Clear the dashboard wrapper so it doesn't show old data
+            if (frm.fields_dict.custom_repayment_dashboard) {
+                frm.fields_dict.custom_repayment_dashboard.wrapper.innerHTML = "";
+            }
+        }
+
+
+
+
+
+
+
+    },
+
+
+    custom_repayment_type(frm)
+    {
+        if(frm.doc.custom_repayment_type=="One Time")
+        {
+            frm.set_value("custom_repayment_methods",undefined)
+            frm.set_value("custom_monthly_repayment_amount",undefined)
+            frm.set_value("custom_repayment_period_in_months",undefined)
+        }
+
+    },
+
+    custom_advance_type(frm)
+    {
+        if(frm.doc.employee && frm.doc.custom_advance_type)
+        {
+            frappe.call({
+                "method":"cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.get_advance_amount_checking",
+                args:{
+                    employee:frm.doc.employee,
+                    advance_type:frm.doc.custom_advance_type,
+                    posting_date:frm.doc.posting_date
+                },
+                callback:function(r)
+                {
+                    if(r.message)
+                    {
+                        frm.set_value("advance_amount",r.message)
+
+                    }
+                }
+            })
+        }
     }
+
 });

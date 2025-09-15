@@ -237,7 +237,7 @@ fixtures = [
     {"dt":"Frequency"},
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
-    # {"dt": "Salary Component", "filters": {"component_type": "Professional Tax"}},
+    {"dt": "Custom DocPerm", "filters": {"parent": "Employee Advance","role": "Payroll Manager"}},
 
 
 
@@ -333,6 +333,8 @@ doc_events = {
 
     "Employee Advance": {
         "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.before_submit",
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.validate",
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.on_submit",
     },
 
     "Loan Application": {
