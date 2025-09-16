@@ -114,7 +114,7 @@ def get_columns(fixed_earnings, variable_earnings, fixed_deductions, variable_de
         {"label": "Total Deductions", "fieldname": "total_deduction", "fieldtype": "Currency", "width": 150},
         {"label": "Net Pay", "fieldname": "net_pay", "fieldtype": "Currency", "width": 150},
         {"label": "GST Applicable", "fieldname": "gst_applicable", "fieldtype": "Check", "width": 150},
-		{"label": "Amount Paid", "fieldname": "amount_paid", "fieldtype": "Currency", "width": 150},
+		{"label": "GST percentage", "fieldname": "gst_percentage", "fieldtype": "Percentage", "width": 150},
     ]
 
     return (
@@ -152,7 +152,7 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
             "name", "employee", "employee_name", "company", "custom_payroll_period",
             "gross_pay", "total_deduction", "net_pay", "total_working_days",
             "absent_days", "leave_without_pay", "payment_days", "custom_lop_reversal_days",
-            "custom_month", "custom_statutory_grosspay", "custom_net_pay_amount","custom_employment_type"
+            "custom_month", "custom_statutory_grosspay", "custom_net_pay_amount","custom_employment_type","custom_salary_structure_assignment"
         ]
     )
 
@@ -188,6 +188,14 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
         total_lop_days = (slip.leave_without_pay or 0) + (slip.absent_days or 0)
         total_payment_days = (slip.payment_days or 0) + (slip.custom_lop_reversal_days or 0)
 
+        gst_applicable = 0
+        gst_percentage = 0
+
+        if slip.custom_salary_structure_assignment:
+            ssa = frappe.get_doc("Salary Structure Assignment", slip.custom_salary_structure_assignment)
+            gst_applicable = 1 if ssa.custom_gst_eligible else 0
+            gst_percentage = ssa.custom_gst_percentage if ssa.custom_gst_eligible else 0
+
         row = {
             "employee": slip.employee,
             "employee_name": slip.employee_name,
@@ -210,6 +218,8 @@ def get_data(filters, fixed_earnings, variable_earnings, fixed_deductions, varia
             "variable_earnings": 0,
             "fixed_deductions": 0,
             "variable_deductions": 0,
+            "gst_applicable": gst_applicable,
+            "gst_percentage": gst_percentage,
         }
 
         for ec in fixed_earnings + variable_earnings:
