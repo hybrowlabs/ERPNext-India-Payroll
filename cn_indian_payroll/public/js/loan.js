@@ -22,6 +22,8 @@ frappe.ui.form.on('Loan', {
 
                                         frm.set_value("custom_loan_perquisite_rate_of_interest",res.message[0].custom_loan_perquisite_rate_of_interest)
                                     }
+
+                                frm.set_value("rate_of_interest",res.message[0].rate_of_interest)
                             }
                         }
                     })
@@ -92,6 +94,12 @@ frappe.ui.form.on('Loan', {
                                     }
 
                                 }
+
+
+                                frm.set_value("rate_of_interest",res.message[0].rate_of_interest)
+
+
+
 
 
                     }

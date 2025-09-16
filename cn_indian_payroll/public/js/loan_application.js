@@ -1,119 +1,3 @@
-// frappe.ui.form.on('Loan Application', {
-//     refresh: function (frm) {
-//         if (!frm.doc.applicant || !frm.doc.name) {
-//             return;
-//         }
-
-//         // build static loan table
-//         const tableHtml = `
-//         <div style="overflow:auto; padding: 6px; background: #fff; margin-bottom: 15px;">
-//           <table class="table table-bordered" style="width:100%; border-collapse:collapse; font-size:13px;">
-//             <thead>
-//               <tr style="background:#f5f5f5;">
-//                 <th>Loan ID</th>
-//                 <th>Employee</th>
-//                 <th>Loan Type</th>
-//                 <th>Approved</th>
-//                 <th>EMI</th>
-//                 <th>Start Date</th>
-//                 <th>Tenure (mo)</th>
-//                 <th>Status</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               <tr>
-//                 <td>ACC-LOAN-2025-00001</td>
-//                 <td>Shinil N</td>
-//                 <td>Personal</td>
-//                 <td style="text-align:right;">₹ 500,000</td>
-//                 <td style="text-align:right;">₹ 3,000</td>
-//                 <td>2025-01-01</td>
-//                 <td>60</td>
-//                 <td>Approved</td>
-//               </tr>
-//             </tbody>
-//           </table>
-//         </div>
-//         `;
-
-//         // dashboard 7 boxes
-//         const dashboardHtml = `
-//         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
-//           <div class="dash-box"><div class="dash-title">Monthly Repayment</div><div class="dash-value">₹ 3,000</div></div>
-//           <div class="dash-box"><div class="dash-title">Total Months</div><div class="dash-value">60</div></div>
-//           <div class="dash-box"><div class="dash-title">Paid Months</div><div class="dash-value">12</div></div>
-//           <div class="dash-box"><div class="dash-title">Remaining Months</div><div class="dash-value">48</div></div>
-//           <div class="dash-box"><div class="dash-title">Total Loan Amount</div><div class="dash-value">₹ 500,000</div></div>
-//           <div class="dash-box"><div class="dash-title">Total Paid</div><div class="dash-value">₹ 36,000</div></div>
-//           <div class="dash-box"><div class="dash-title">Remaining Amount</div><div class="dash-value">₹ 464,000</div></div>
-//           <div class="dash-box"><div class="dash-title">Remaining Amount</div><div class="dash-value">₹ 464,000</div></div>
-
-//           </div>
-
-//         <style>
-//           .dash-box {
-//             background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #ddd;
-//           }
-//           .dash-title {
-//             font-size:12px; color:#666;
-//           }
-//           .dash-value {
-//             font-size:14px; font-weight:bold; color:#333;
-//           }
-//         </style>
-//         `;
-
-//         // reimbursement / repayment schedule table (collapsible)
-//         const reimbursementHtml = `
-//         <div style="margin-top:20px; border:1px solid #ddd; border-radius:6px;">
-//           <div style="background:#f5f5f5; padding:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
-//                onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-//             <span style="font-weight:bold;">Reimbursement / Repayment Schedule</span>
-//             <span style="font-size:12px; color:#666;">▼</span>
-//           </div>
-//           <div style="display:none; padding:10px;">
-//             <table class="table table-bordered" style="width:100%; border-collapse:collapse; font-size:13px;">
-//               <thead>
-//                 <tr style="background:#f5f5f5;">
-//                   <th>Payment Date</th>
-//                   <th>Principal Amount</th>
-//                   <th>Interest Amount</th>
-//                   <th>Total Payment</th>
-//                   <th>Balance Loan Amount</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 <tr>
-//                   <td>2025-02-01</td>
-//                   <td style="text-align:right;">₹ 2,500</td>
-//                   <td style="text-align:right;">₹ 500</td>
-//                   <td style="text-align:right;">₹ 3,000</td>
-//                   <td style="text-align:right;">₹ 497,500</td>
-//                 </tr>
-//                 <tr>
-//                   <td>2025-03-01</td>
-//                   <td style="text-align:right;">₹ 2,520</td>
-//                   <td style="text-align:right;">₹ 480</td>
-//                   <td style="text-align:right;">₹ 3,000</td>
-//                   <td style="text-align:right;">₹ 494,980</td>
-//                 </tr>
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-//         `;
-
-//         // combine all
-//         const finalHtml = tableHtml + dashboardHtml + reimbursementHtml;
-
-//         // display in custom field
-//         if (frm.fields_dict.custom_loan_dashboard) {
-//             frm.fields_dict.custom_loan_dashboard.wrapper.innerHTML = finalHtml;
-//         } else {
-//             frm.set_df_property("custom_loan_dashboard", "options", finalHtml);
-//         }
-//     }
-// });
 
 
 
@@ -141,22 +25,62 @@ frappe.ui.form.on('Loan Application', {
                 const loan = r.message[0]; // since 1 loan at a time
                 console.log("Loan Dashboard Response:", loan);
 
-                function makeDashBox(title, value) {
-                    return `
-                      <div style="
-                          background: #f9f9f9;
+                // function makeDashBox(title, value) {
+                //     return `
+                //       <div style="
+                //           background: #f9f9f9;
 
-                          border-radius: 8px;
-                          padding: 12px;
-                          text-align: center;
-                          box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-                          border:1px solid #000;
+                //           border-radius: 8px;
+                //           padding: 12px;
+                //           text-align: center;
+                //           box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                //           border:1px solid #000;
+                //       ">
+                //         <div style="font-size: 13px; color: #666; margin-bottom: 6px;">${title}</div>
+                //         <div style="font-size: 16px; font-weight: bold; color: #333;">${value}</div>
+                //       </div>
+                //     `;
+                // }
+
+                function makeDashBox(icon, title, value) {
+                  return `
+                    <div style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 12px;
+                      border: 1px solid #e5e7eb;
+                      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.68);
+                      display: flex;
+                      align-items: center;
+                      gap: 14px;
+                      transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    "
+                    onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 14px rgba(0,0,0,0.15)';"
+                    onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.08)';"
+                    >
+                      <div style="
+                        background: #f3f4f6;
+                        font-size: 22px;
+                        padding: 10px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 48px;
+                        min-height: 48px;
+                        color: #374151;
                       ">
-                        <div style="font-size: 13px; color: #666; margin-bottom: 6px;">${title}</div>
-                        <div style="font-size: 16px; font-weight: bold; color: #333;">${value}</div>
+                        ${icon}
                       </div>
-                    `;
+                      <div>
+                        <div style="font-size: 14px; color: #4b5563; font-weight: 500;">${title}</div>
+                        <div style="font-size: 18px; font-weight: 700; color: #111827;">${value}</div>
+                      </div>
+                    </div>
+                  `;
                 }
+
+
 
                 // Loan Table
                 let tableHtml = `
@@ -196,16 +120,29 @@ frappe.ui.form.on('Loan Application', {
 
 
                 // Dashboard 7 Boxes
+                // let dashboardHtml = `
+                // <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
+                //   ${makeDashBox("Monthly Repayment", "₹ " + (loan.monthly_repayment_amount || 0))}
+                //   ${makeDashBox("Total Months", loan.total_months || 0)}
+                //   ${makeDashBox("Paid Months", loan.paid_months || 0)}
+                //   ${makeDashBox("Remaining Months", loan.remaining_months || 0)}
+                //   ${makeDashBox("Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
+                //   ${makeDashBox("Total Paid", "₹ " + (loan.total_paid_amount || 0))}
+                //   ${makeDashBox("Remaining Amount", "₹ " + (loan.remaining_amount || 0))}
+                //   ${makeDashBox("Total Interest", "₹ " + (loan.remaining_amount || 0))}
+                // </div>
+                // `;
+
                 let dashboardHtml = `
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
-                  ${makeDashBox("Monthly Repayment", "₹ " + (loan.monthly_repayment_amount || 0))}
-                  ${makeDashBox("Total Months", loan.total_months || 0)}
-                  ${makeDashBox("Paid Months", loan.paid_months || 0)}
-                  ${makeDashBox("Remaining Months", loan.remaining_months || 0)}
-                  ${makeDashBox("Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
-                  ${makeDashBox("Total Paid", "₹ " + (loan.total_paid_amount || 0))}
-                  ${makeDashBox("Remaining Amount", "₹ " + (loan.remaining_amount || 0))}
-                  ${makeDashBox("Total Interest", "₹ " + (loan.remaining_amount || 0))}
+                  ${makeDashBox("📑", "Loan Type", loan.advance_type || "")}
+                  ${makeDashBox("💰", "Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
+                  ${makeDashBox("✅", "Total Paid", "₹ " + (loan.total_paid_amount || 0))}
+                  ${makeDashBox("📉", "Balance", "₹ " + (loan.remaining_amount || 0))}
+                  ${makeDashBox("📆", "Total Months", loan.total_months || 0)}
+                  ${makeDashBox("⏳", "Remaining Months", loan.remaining_months || 0)}
+                  ${makeDashBox("📊", "Paid Months", loan.paid_months || 0)}
+                  ${makeDashBox("💸", "Monthly Repayment", "₹ " + (loan.monthly_repayment_amount || 0))}
                 </div>
                 `;
 
