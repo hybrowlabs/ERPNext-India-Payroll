@@ -1031,7 +1031,14 @@ def get_used_components(filters):
     if filters.get("custom_month") and filters.get("custom_month") != "All":
         flt["custom_month"] = filters["custom_month"]
 
+    if filters.get("employment_type"):
+        flt["custom_employment_type"] = filters["employment_type"]
+
+    frappe.msgprint(str(flt))
+
+
     slips = frappe.get_all("Salary Slip", filters=flt, fields=["name"])
+    # frappe.msgprint(str(slips))
     slip_names = [s.name for s in slips]
     if not slip_names:
         return [], []
@@ -1045,6 +1052,8 @@ def get_used_components(filters):
         },
         fields=["salary_component"]
     )
+
+    frappe.msgprint(str(earnings))
 
     deductions = frappe.get_all(
         "Salary Detail",

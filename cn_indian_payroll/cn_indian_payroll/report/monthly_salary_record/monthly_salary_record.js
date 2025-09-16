@@ -22,6 +22,13 @@ frappe.query_reports["Monthly Salary Record"] = {
             "reqd": 1
         },
         {
+            "fieldname": "employment_type",
+            "label": __("Employment Type"),
+            "fieldtype": "Link",
+            "options": "Employment Type",
+            "reqd": 0
+        },
+        {
             "fieldname": "custom_month",
             "label": __("Month"),
             "fieldtype": "Select",

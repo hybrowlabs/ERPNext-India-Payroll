@@ -15,6 +15,9 @@ def update_status_cancelled(self):
 
 
 
+
+
+
 def cancel_additional_salary(self):
     get_appraisal_additional = frappe.get_list('Additional Salary',
             filters={'custom_employee_promotion_id':self.name},

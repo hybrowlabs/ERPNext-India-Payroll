@@ -336,6 +336,9 @@ def validate(self, method):
                 f"the allowable limit of {fmt_money(advance_amount)} based on attendance and salary."
             )
 
+    self.custom_total_paid_amount=0
+    self.custom_total_balance_amount=self.advance_amount
+
 
 @frappe.whitelist()
 def get_advance_amount_checking(employee, advance_type, posting_date):
@@ -633,3 +636,124 @@ def hold_installments(repayments, idx, hold_months, hold_option, employee, doc_i
 
 
     return "success"
+
+
+
+
+@frappe.whitelist()
+def edit_installment(repayments, idx, hold_months, hold_option, installment_id, installment_amount, employee, doc_id, component, company):
+    """
+    Edit an installment amount and adjust future installments based on hold_option.
+    """
+    import json
+    repayments = json.loads(repayments)
+
+    idx = int(idx)
+    hold_months = int(hold_months)
+    installment_amount = flt(installment_amount)
+
+    selected_row = next((r for r in repayments if r.get("idx") == idx), None)
+    if not selected_row:
+        frappe.throw(f"No repayment found for idx {idx}")
+
+    addl_doc = frappe.get_doc("Additional Salary", installment_id)
+    old_amount = flt(addl_doc.amount)
+
+    if installment_amount <= 0:
+        frappe.throw("Installment amount must be greater than 0")
+
+    addl_doc.amount = installment_amount
+    addl_doc.save(ignore_permissions=True)
+
+    balance_to_adjust = old_amount - installment_amount
+    if balance_to_adjust <= 0:
+        return "success"
+
+    if hold_option == "Recover Pending in Next Month":
+        held_rows = [r for r in repayments if idx <= r.get("idx") < idx + hold_months]
+
+        for r in held_rows:
+            if r.get("additional_salary_id"):
+                try:
+                    addl_doc = frappe.get_doc("Additional Salary", r["additional_salary_id"])
+                    addl_doc.amount = installment_amount
+                    addl_doc.save(ignore_permissions=True)
+                except Exception:
+                    frappe.log_error(frappe.get_traceback(), "Edit Installment - Update Held Rows")
+
+        next_row = next((r for r in repayments if r.get("idx") == idx + hold_months), None)
+        if next_row and next_row.get("additional_salary_id"):
+            try:
+                future_addl = frappe.get_doc("Additional Salary", next_row["additional_salary_id"])
+                future_addl.amount = flt(future_addl.amount) + (balance_to_adjust * hold_months)
+                future_addl.save(ignore_permissions=True)
+            except Exception:
+                frappe.log_error(frappe.get_traceback(), "Edit Installment - Recover Pending Adjustment")
+
+
+    if hold_option == "Distribute Across Future Months":
+        held_rows = [r for r in repayments if idx <= r.get("idx") < idx + hold_months]
+
+        for r in held_rows:
+            if r.get("additional_salary_id"):
+                try:
+                    addl_doc = frappe.get_doc("Additional Salary", r["additional_salary_id"])
+                    addl_doc.amount = installment_amount
+                    addl_doc.save(ignore_permissions=True)
+                except Exception:
+                    frappe.log_error(frappe.get_traceback(), "Edit Installment - Update Held Rows")
+
+        total_held_amount = balance_to_adjust * hold_months
+
+        future_rows = [r for r in repayments if r.get("idx") >= idx + hold_months]
+
+        if future_rows and total_held_amount > 0:
+            per_month_extra = total_held_amount / len(future_rows)
+
+            for r in future_rows:
+                if r.get("additional_salary_id"):
+                    try:
+                        addl_doc = frappe.get_doc("Additional Salary", r["additional_salary_id"])
+                        addl_doc.amount = flt(addl_doc.amount) + per_month_extra
+                        addl_doc.save(ignore_permissions=True)
+                    except Exception:
+                        frappe.log_error(
+                            message=frappe.get_traceback(),
+                            title="Distribute Across Future Months Error"
+                        )
+
+    return "success"
+
+
+
+
+
+@frappe.whitelist()
+def delete_un_deducted_additional_salaries(employee, id, company, settlement_date, remarks, settlement_amount):
+    """
+    Settles the advance fully and deletes all undeducted Additional Salary records.
+    """
+    doc = frappe.get_doc("Employee Advance", id)
+    doc.custom_total_paid_amount = settlement_amount+doc.custom_total_paid_amount
+    doc.custom_total_balance_amount = 0
+    doc.custom_settlement_date = settlement_date
+    doc.custom_remarks = remarks
+    doc.save(ignore_permissions=True)
+
+    results = get_advance_dashboard_erp(employee, id, company)
+
+    for advance in results:
+        for repayment in advance.get("repayments", []):
+            if repayment.get("deducted") == 0 and repayment.get("additional_salary_id"):
+                try:
+                    addl_doc = frappe.get_doc("Additional Salary", repayment["additional_salary_id"])
+                    if addl_doc.docstatus == 1:
+                        addl_doc.cancel()
+                    frappe.delete_doc("Additional Salary", repayment["additional_salary_id"], ignore_permissions=True, force=1)
+                except Exception:
+                    frappe.log_error(frappe.get_traceback(), "Cancel + Delete Additional Salary Failed")
+
+    return {
+        "status": "success",
+        "settlement_amount": settlement_amount
+    }
