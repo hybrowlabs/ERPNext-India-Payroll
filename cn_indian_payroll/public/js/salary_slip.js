@@ -27,7 +27,7 @@ frappe.ui.form.on("Salary Slip", {
             }
             const w = window.open("", "_blank");
             w.document.open();
-            w.document.write(r.message.html);   // load full HTML into popup
+            w.document.write(r.message.html);
             w.document.close();
           }
         });
