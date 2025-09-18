@@ -21,6 +21,8 @@
   "monthly_house_rent",
   "rented_in_metro_city",
   "hra_as_per_salary_structure",
+  "basic_as_per_salary_structure_annual",
+  "basic_as_per_salary_structure_10",
   "column_break_pysc",
   "annual_hra_exemption",
   "monthly_hra_exemption",
@@ -144,7 +146,7 @@
    "label": "Tax Exemption"
   },
   {
-   "depends_on": "eval:doc.income_tax==\"Old Regime\"",
+   "depends_on": "eval:doc.tax_regime==\"Old Regime\"",
    "fieldname": "section_break_hfwe",
    "fieldtype": "Section Break"
   },
@@ -170,11 +172,21 @@
    "fieldname": "tax_regime",
    "fieldtype": "Data",
    "label": "Tax Regime"
+  },
+  {
+   "fieldname": "basic_as_per_salary_structure_annual",
+   "fieldtype": "Data",
+   "label": "Basic as per Salary Structure (Annual)"
+  },
+  {
+   "fieldname": "basic_as_per_salary_structure_10",
+   "fieldtype": "Data",
+   "label": "Basic as per Salary Structure 10%"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-01 22:46:24.711380",
+ "modified": "2025-09-18 17:59:24.628014",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Declaration History",
@@ -194,6 +206,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

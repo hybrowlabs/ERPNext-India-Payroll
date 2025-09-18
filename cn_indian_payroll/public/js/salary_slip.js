@@ -18,7 +18,9 @@ frappe.ui.form.on("Salary Slip", {
             payroll_period: frm.doc.custom_payroll_period,
             end_date: frm.doc.end_date,
             month: frm.doc.custom_month,
-            tax_regime:frm.doc.custom_tax_regime
+            tax_regime:frm.doc.custom_tax_regime,
+            id:frm.doc.name,
+            income_tax_slab:frm.doc.custom_income_tax_slab
           },
           callback: function (r) {
             if (!r.message || !r.message.html) {

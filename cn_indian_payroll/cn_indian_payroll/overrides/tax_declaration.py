@@ -667,6 +667,13 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     each_doc.hra_as_per_salary_structure = self.salary_structure_hra
                     each_doc.annual_hra_exemption = self.annual_hra_exemption
                     each_doc.monthly_hra_exemption = self.monthly_hra_exemption
+
+                    each_doc.basic_as_per_salary_structure_annual = self.custom_basic
+                    each_doc.basic_as_per_salary_structure_10 = self.custom_basic_as_per_salary_structure
+
+
+
+
                     each_doc.total_declared_amount = self.total_declared_amount
                     each_doc.total_exemption_amount = self.total_exemption_amount
                     each_doc.income_tax = self.custom_income_tax
@@ -719,6 +726,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             "hra_as_per_salary_structure": self.salary_structure_hra,
                             "annual_hra_exemption": self.annual_hra_exemption,
                             "monthly_hra_exemption": self.monthly_hra_exemption,
+                            "basic_as_per_salary_structure_annual" :self.custom_basic,
+                            "basic_as_per_salary_structure_10" : self.custom_basic_as_per_salary_structure,
                             "declaration_details": [
                                 {
                                     "exemption_sub_category": entry["sub_category"],

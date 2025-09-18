@@ -2,7 +2,9 @@ import frappe
 from frappe.utils import getdate, add_months, flt
 
 @frappe.whitelist()
-def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regime):
+def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regime,id,income_tax_slab):
+
+
     end_date = getdate(end_date)
 
     period = frappe.db.get_value(
@@ -202,9 +204,67 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
 
     tds_net_sum = sum(offcycle_net_pay)
 
+    salary_slip_doc = frappe.get_doc("Salary Slip", id)
 
+    sub_category = frappe.get_list(
+        "Employee Tax Exemption Sub Category",
+        filters={"custom_component_type": "LTA Reimbursement"},
+        fields=["name"],
+        limit=1
+    )
+
+    lta_component = None
+    if sub_category:
+        lta_component = sub_category[0]["name"]
+
+    lta_array = []
+    hra_received=0
+    basic_as_per_salary_structure_10=0
+    hra_exemption=0
+    hra_percentage=0
+    if employee and payroll_period and end_date and month and tax_regime and income_tax_slab:
+        tax_exemption = frappe.get_list(
+            "Tax Declaration History",
+            filters={
+                "employee": employee,
+                "posting_date": ["<=", end_date],  # make sure end_date is a date object
+                "payroll_period": payroll_period,
+                "tax_regime": tax_regime
+            },
+            fields=["name", "posting_date"],
+            order_by="modified desc, posting_date desc",
+            limit=1
+        )
+
+        if tax_exemption:
+            section = frappe.get_doc("Tax Declaration History", tax_exemption[0]["name"])
+
+            for i in section.declaration_details:
+                if i.exemption_sub_category == lta_component:
+                    lta_array.append({
+                        "component": i.exemption_sub_category,
+                        "amount": i.maximum_exempted_amount
+                    })
+
+
+            hra_received=section.hra_as_per_salary_structure
+            basic_as_per_salary_structure_10=section.basic_as_per_salary_structure_10
+            hra_exemption=section.annual_hra_exemption
+            hra_percentage=section.hra_breakup[0].earned_basic
+
+            standard_tax_amount=frappe.get_doc("Income Tax Slab",income_tax_slab)
+            standard_amount=standard_tax_amount.standard_tax_exemption_amount
+
+
+
+    lta_sum = sum(item["amount"] for item in lta_array)
+
+    final_gross=(total_reimbursement_sum+total_earnings_sum+total_offcycle_earning_sum)
+
+    final_after_hra_exemption=(final_gross-lta_sum-hra_exemption)
 
     context = {
+        "doc": salary_slip_doc,
         "employee": employee,
         "payroll_period": payroll_period,
         "months": months,
@@ -240,7 +300,21 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
         "department": employee_doc.department,
         "designation": employee_doc.designation,
         "branch": employee_doc.branch,
-        "tds_already_deducted":tds_already_deducted
+        "tds_already_deducted":tds_already_deducted,
+        "final_gross":final_gross,
+
+        "lta_array":lta_array,
+        "lta_sum":lta_sum,
+
+        "hra_received":hra_received,
+        "basic_as_per_salary_structure_10":basic_as_per_salary_structure_10,
+        "hra_exemption":hra_exemption,
+        "hra_percentage":hra_percentage,
+        "final_after_hra_exemption":final_after_hra_exemption,
+        "standard_amount":standard_amount
+
+
+
     }
 
     html = frappe.render_template("cn_indian_payroll/templates/includes/annual_statement.html", context)
@@ -277,7 +351,7 @@ def get_payslip_pdf(id):
         "doc": slip
     }
 
-    # frappe.msgprint(str(context))
+
 
     html = frappe.render_template(
         "cn_indian_payroll/templates/includes/regular_payslip.html",

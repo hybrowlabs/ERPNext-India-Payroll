@@ -138,7 +138,7 @@ frappe.ui.form.on('Loan Application', {
                   ${makeDashBox("📑", "Loan Type", loan.loan_type || "")}
                   ${makeDashBox("💰", "Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
                   ${makeDashBox("✅", "Total Paid", "₹ " + (loan.total_paid_amount || 0))}
-                  ${makeDashBox("📉", "Rate of Interest", "₹ " + (loan.rate_of_interest || 0))}
+                  ${makeDashBox("📉", "Rate of Interest", + (loan.rate_of_interest || 0)+"%")}
                   ${makeDashBox("📆", "Total Months", loan.total_months || 0)}
                   ${makeDashBox("⏳", "Remaining Months", loan.remaining_months || 0)}
                   ${makeDashBox("📊", "Paid Months", loan.paid_months || 0)}

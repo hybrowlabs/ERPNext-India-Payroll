@@ -194,29 +194,39 @@
     {# --- Filter deductions --- #}
     {% set deductions_filtered = doc.deductions | selectattr("do_not_include_in_total", "equalto", 0) | list %}
 
+    {% for loan in doc.loans %}
+      {% set _ = deductions_filtered.append({
+          "salary_component": loan.loan_product,
+          "amount": loan.total_payment
+      }) %}
+    {% endfor %}
+
+
+
     {% set max_len = [earnings_filtered|length, deductions_filtered|length] | max %}
 
     {% for i in range(max_len) %}
-      <tr>
-        <!-- Earnings -->
-        <td>{{ earnings_filtered[i].salary_component if i < earnings_filtered|length else '' }}</td>
-        <td style="text-align:right;">
-          {{ earnings_filtered[i].amount|round(0) if i < earnings_filtered|length else '' }}
-        </td>
+  <tr>
+    <!-- Earnings -->
+    <td>{{ earnings_filtered[i].salary_component if i < earnings_filtered|length else '' }}</td>
+    <td style="text-align:right;">
+      {{ earnings_filtered[i].amount|round(0) if i < earnings_filtered|length else '' }}
+    </td>
 
-        <!-- Deductions -->
-        <td>{{ deductions_filtered[i].salary_component if i < deductions_filtered|length else '' }}</td>
-        <td style="text-align:right;">
-          {{ deductions_filtered[i].amount|round(0) if i < deductions_filtered|length else '' }}
-        </td>
-      </tr>
-    {% endfor %}
+    <!-- Deductions (including loans now) -->
+    <td>{{ deductions_filtered[i].salary_component if i < deductions_filtered|length else '' }}</td>
+    <td style="text-align:right;">
+      {{ deductions_filtered[i].amount|round(0) if i < deductions_filtered|length else '' }}
+    </td>
+  </tr>
+{% endfor %}
+
 
     <tr>
       <td><b>Gross Earnings</b></td>
       <td style="text-align:right;"><b>{{ doc.custom_statutory_grosspay|round }}</b></td>
       <td><b>Total Deductions</b></td>
-      <td style="text-align:right;"><b>{{ doc.total_deduction|round }}</b></td>
+      <td style="text-align:right;"><b>{{ doc.custom_total_deduction_amount|round }}</b></td>
     </tr>
     <tr>
       <td><b>Net Pay</b></td>
