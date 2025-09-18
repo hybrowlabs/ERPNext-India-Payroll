@@ -1,7 +1,7 @@
 
 
 import frappe
-from frappe.utils import flt, add_months, getdate,flt
+from frappe.utils import flt, add_months, getdate
 from frappe.utils import flt, getdate, add_months
 import calendar
 from frappe.utils import fmt_money
@@ -12,10 +12,19 @@ from frappe.utils import flt, cint, getdate, add_months, get_first_day
 
 
 def before_submit(self, method):
-    if  not self.custom_note_remarks or not self.custom_deduction_component:
-        frappe.throw("Please add Note/Remarks and Deduction component  in Note Section before Submit")
+    if self.custom_type == "Salary Advance":
+        if not self.custom_note_remarks or not self.custom_deduction_component:
+            frappe.throw("Please add Note/Remarks and select a Deduction Component in the Note Section before submitting.")
 
-    self.custom_total_balance_amount = (self.advance_amount or 0) - (self.custom_total_paid_amount or 0)
+        self.custom_total_balance_amount = (self.advance_amount or 0) - (self.custom_total_paid_amount or 0)
+
+    elif self.custom_type == "Reimbursement / Expense Advance":
+        if not self.custom_note_remarks:
+            frappe.throw("Please add Note/Remarks in the Note Section before submitting.")
+
+
+    if self.custom_final_status=="Pending":
+        frappe.throw("Please Select the Status Approved or Rejected")
 
 
 @frappe.whitelist()
@@ -339,6 +348,11 @@ def validate(self, method):
     self.custom_total_paid_amount=0
     self.custom_total_balance_amount=self.advance_amount
 
+    if self.employee and self.custom_type=="Salary Advance":
+        self.repay_unclaimed_amount_from_salary=0
+    elif self.employee and self.custom_type=="Reimbursement / Expense Advance":
+        self.repay_unclaimed_amount_from_salary=1
+
 
 @frappe.whitelist()
 def get_advance_amount_checking(employee, advance_type, posting_date):
@@ -353,8 +367,6 @@ def get_advance_amount_checking(employee, advance_type, posting_date):
 
     start_date = posting_date.replace(day=1)
     end_date = posting_date
-
-
 
     advance_type_doc = frappe.get_doc("Advance Type", advance_type)
 
@@ -406,85 +418,86 @@ def get_advance_amount_checking(employee, advance_type, posting_date):
 
 
 def on_submit(self, method):
-    if self.custom_final_status=="Approved" and self.custom_repayment_type=="One Time":
-        frappe.get_doc({
-            "doctype": "Additional Salary",
-            "employee": self.employee,
-            "company": self.company,
-            "salary_component": self.custom_deduction_component,
-            "amount": self.advance_amount,
-            "payroll_date": get_first_day(self.custom_repayment_start_date),
-            "ref_doctype": "Employee Advance",
-            "ref_docname": self.name
-        }).insert(ignore_permissions=True).submit()
+    if self.custom_type=="Salary Advance":
+        if self.custom_final_status=="Approved" and self.custom_repayment_type=="One Time":
+            frappe.get_doc({
+                "doctype": "Additional Salary",
+                "employee": self.employee,
+                "company": self.company,
+                "salary_component": self.custom_deduction_component,
+                "amount": self.advance_amount,
+                "payroll_date": get_first_day(self.custom_repayment_start_date),
+                "ref_doctype": "Employee Advance",
+                "ref_docname": self.name
+            }).insert(ignore_permissions=True).submit()
 
 
 
-    elif (
-        self.custom_final_status == "Approved"
-        and self.custom_repayment_type == "Recurring"
-        and self.custom_repayment_methods == "Repay Over Number of Periods"
-    ):
-        total_advance_amount = float(self.advance_amount or 0)
-        total_months = int(self.custom_repayment_period_in_months or 0)
-        start_date = self.custom_repayment_start_date
+        elif (
+            self.custom_final_status == "Approved"
+            and self.custom_repayment_type == "Recurring"
+            and self.custom_repayment_methods == "Repay Over Number of Periods"
+        ):
+            total_advance_amount = float(self.advance_amount or 0)
+            total_months = int(self.custom_repayment_period_in_months or 0)
+            start_date = self.custom_repayment_start_date
 
-        if total_months > 0:
-            emi = total_advance_amount / total_months
+            if total_months > 0:
+                emi = total_advance_amount / total_months
 
-            for i in range(total_months):
-                current_date = add_months(start_date, i)
-                frappe.get_doc({
-                    "doctype": "Additional Salary",
-                    "employee": self.employee,
-                    "company": self.company,
-                    "salary_component": self.custom_deduction_component,
-                    "amount": round(emi, 2),
-                    "payroll_date":get_first_day(current_date),
-                    "ref_doctype": "Employee Advance",
-                    "ref_docname": self.name
-                }).insert(ignore_permissions=True).submit()
+                for i in range(total_months):
+                    current_date = add_months(start_date, i)
+                    frappe.get_doc({
+                        "doctype": "Additional Salary",
+                        "employee": self.employee,
+                        "company": self.company,
+                        "salary_component": self.custom_deduction_component,
+                        "amount": round(emi, 2),
+                        "payroll_date":get_first_day(current_date),
+                        "ref_doctype": "Employee Advance",
+                        "ref_docname": self.name
+                    }).insert(ignore_permissions=True).submit()
 
 
 
-    elif (
-        self.custom_final_status == "Approved"
-        and self.custom_repayment_type == "Recurring"
-        and self.custom_repayment_methods == "Repay Fixed Amount per Period"
-    ):
-        total_advance_amount = float(self.advance_amount or 0)
-        fixed_amount = float(self.custom_monthly_repayment_amount or 0)
-        start_date = self.custom_repayment_start_date
+        elif (
+            self.custom_final_status == "Approved"
+            and self.custom_repayment_type == "Recurring"
+            and self.custom_repayment_methods == "Repay Fixed Amount per Period"
+        ):
+            total_advance_amount = float(self.advance_amount or 0)
+            fixed_amount = float(self.custom_monthly_repayment_amount or 0)
+            start_date = self.custom_repayment_start_date
 
-        if fixed_amount > 0:
-            total_months = int(total_advance_amount // fixed_amount)
-            remainder = total_advance_amount % fixed_amount
+            if fixed_amount > 0:
+                total_months = int(total_advance_amount // fixed_amount)
+                remainder = total_advance_amount % fixed_amount
 
-            for i in range(total_months):
-                current_date = add_months(start_date, i)
-                frappe.get_doc({
-                    "doctype": "Additional Salary",
-                    "employee": self.employee,
-                    "company": self.company,
-                    "salary_component": self.custom_deduction_component,
-                    "amount": fixed_amount,
-                    "payroll_date": get_first_day(current_date),
-                    "ref_doctype": "Employee Advance",
-                    "ref_docname": self.name
-                }).insert(ignore_permissions=True).submit()
+                for i in range(total_months):
+                    current_date = add_months(start_date, i)
+                    frappe.get_doc({
+                        "doctype": "Additional Salary",
+                        "employee": self.employee,
+                        "company": self.company,
+                        "salary_component": self.custom_deduction_component,
+                        "amount": fixed_amount,
+                        "payroll_date": get_first_day(current_date),
+                        "ref_doctype": "Employee Advance",
+                        "ref_docname": self.name
+                    }).insert(ignore_permissions=True).submit()
 
-            if remainder > 0:
-                last_month = add_months(start_date, total_months)
-                frappe.get_doc({
-                    "doctype": "Additional Salary",
-                    "employee": self.employee,
-                    "company": self.company,
-                    "salary_component": self.custom_deduction_component,
-                    "amount": remainder,
-                    "payroll_date": get_first_day(last_month),
-                    "ref_doctype": "Employee Advance",
-                    "ref_docname": self.name
-                }).insert(ignore_permissions=True).submit()
+                if remainder > 0:
+                    last_month = add_months(start_date, total_months)
+                    frappe.get_doc({
+                        "doctype": "Additional Salary",
+                        "employee": self.employee,
+                        "company": self.company,
+                        "salary_component": self.custom_deduction_component,
+                        "amount": remainder,
+                        "payroll_date": get_first_day(last_month),
+                        "ref_doctype": "Employee Advance",
+                        "ref_docname": self.name
+                    }).insert(ignore_permissions=True).submit()
 
 
 @frappe.whitelist()
@@ -726,15 +739,17 @@ def edit_installment(repayments, idx, hold_months, hold_option, installment_id, 
 
 
 
-
-
 @frappe.whitelist()
 def delete_un_deducted_additional_salaries(employee, id, company, settlement_date, remarks, settlement_amount):
     """
     Settles the advance fully and deletes all undeducted Additional Salary records.
     """
     doc = frappe.get_doc("Employee Advance", id)
-    doc.custom_total_paid_amount = settlement_amount+doc.custom_total_paid_amount
+
+    settlement_amount = flt(settlement_amount)
+    total_paid = flt(doc.custom_total_paid_amount)
+
+    doc.custom_total_paid_amount = settlement_amount + total_paid
     doc.custom_total_balance_amount = 0
     doc.custom_settlement_date = settlement_date
     doc.custom_remarks = remarks

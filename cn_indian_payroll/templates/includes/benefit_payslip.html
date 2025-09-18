@@ -120,11 +120,13 @@
     </table>
   {% endif %}
 
+  {% set employee = frappe.get_doc("Employee", doc.employee) %}
+
   <table>
     <tr>
       <td colspan="2">Member Name:{{doc.employee_name}}</td>
-      <td>Member Type:</td>
-      <td>Member Code:</td>
+      <td>Member Type:{{employee.employment_type}}</td>
+      <td>Member Code:{{employee.name}}</td>
     </tr>
     <tr>
       <td colspan="2">Designation:{{doc.designation}}</td>
@@ -135,30 +137,30 @@
       <td colspan="2">No of Days in the Month:{{doc.total_working_days}}</td>
     </tr>
     <tr>
-      <td colspan="2">Date of Joining:</td>
+      <td colspan="2">Date of Joining:{{employee.date_of_joining}}</td>
       <td colspan="2">Working Days:{{doc.payment_days}}</td>
     </tr>
     <tr>
-      <td colspan="2">Provident Fund:</td>
-      <td colspan="2">ESIC Number:</td>
+      <td colspan="2">Provident Fund Acc No.:{{employee.provident_fund_account}}</td>
+      <td colspan="2">ESIC Number:{{employee.custom_esic_number}}</td>
     </tr>
     <tr>
-      <td colspan="2">Current Office Location:</td>
-      <td colspan="2">Increment Arrear Days:</td>
+      <td colspan="2">Current Office Location:{{employee.branch}}</td>
+      <td colspan="2">Increment Arrear Days:{{doc.custom_lop_reversal_days}}</td>
     </tr>
     <tr>
-      <td colspan="2">Total Arrear Days:</td>
+      <td colspan="2">Total Arrear Days:{{doc.custom_lop_reversal_days}}</td>
       <td colspan="2">LOP:{{doc.custom_total_leave_without_pay}}</td>
     </tr>
     <tr>
-      <td>Bank Name:</td>
-      <td>Account No.:</td>
-      <td>IFSC Code:</td>
-      <td>Branch Name:</td>
+      <td>Bank Name:{{employee.bank_name}}</td>
+      <td>Account No.:{{employee.bank_ac_no}}</td>
+      <td>IFSC Code:{{employee.ifsc_code}}</td>
+      <td>Branch Name:{{employee.bank_name}}</td>
     </tr>
     <tr>
-      <td colspan="2">UAN No.:</td>
-      <td colspan="2">PAN No.:</td>
+      <td colspan="2">UAN No.:{{employee.custom_uan}}</td>
+      <td colspan="2">PAN No.:{{employee.pan_number}}</td>
     </tr>
   </table>
 

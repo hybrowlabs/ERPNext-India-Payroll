@@ -1,7 +1,8 @@
 
 import frappe
 
-
+from frappe.utils import getdate
+from datetime import datetime
 
 @frappe.whitelist()
 def get_additional_salary(payroll_id, company):
@@ -108,6 +109,21 @@ def additional_salary_submit(additional):
                     bonus_doc1.save()
 
 
+
+@frappe.whitelist()
+def update_payment_details(docname, debit_account_no, pay_mode, payment_instruction_date, credit_narration):
+    if docname:
+        date_obj = getdate(payment_instruction_date)
+        formatted_date = date_obj.strftime("%d-%b-%Y").upper()
+
+        payroll_doc=frappe.get_doc("Payroll Entry",docname)
+        payroll_doc.custom_debit_account_number=debit_account_no
+        payroll_doc.custom_pay_mode=pay_mode
+        payroll_doc.custom_payment_date=formatted_date
+        payroll_doc.custom_credit_narration=credit_narration
+
+        payroll_doc.custom_bank_sheet_generated=1
+        payroll_doc.save()
 
 
 

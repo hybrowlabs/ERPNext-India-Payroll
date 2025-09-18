@@ -12,6 +12,14 @@ frappe.query_reports["Bank mandate"] = {
         },
 
 		{
+            "fieldname": "custom_employment_type",
+            "label": __("Employment Type"),
+            "fieldtype": "Link",
+            "options": "Employment Type",
+            "reqd": 0
+        },
+
+		{
 			"label": "Month",
 			"fieldname": "month",
 			"fieldtype": "Select",

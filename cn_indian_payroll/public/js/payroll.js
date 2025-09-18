@@ -1,5 +1,82 @@
 frappe.ui.form.on('Payroll Entry', {
     refresh(frm) {
+
+
+
+        if (
+            frm.doc.custom_bank_sheet_generated == 0 &&
+            frm.doc.docstatus === 1 &&
+            frm.doc.status === "Submitted"
+        ) {
+            frm.add_custom_button(
+                __("Generate Bank Mandate Sheet"),
+                function() {
+                    let d = new frappe.ui.Dialog({
+                        title: __("Bank Mandate Details"),
+                        fields: [
+                            {
+                                label: "Debit Account No",
+                                fieldname: "debit_account_no",
+                                fieldtype: "Data",
+                                reqd: 1
+                            },
+                            {
+                                label: "Pay Mode",
+                                fieldname: "pay_mode",
+                                fieldtype: "Select",
+                                // options: ["NEFT", "RTGS", "IMPS"],
+                                options: ["N", "R", "I"],
+
+                                reqd: 1
+                            },
+                            {
+                                label: "Payment Instruction Date",
+                                fieldname: "payment_instruction_date",
+                                fieldtype: "Date",
+                                reqd: 1,
+                                default: frappe.datetime.get_today()
+                            },
+                            {
+                                label: "Credit Narration",
+                                fieldname: "credit_narration",
+                                fieldtype: "Small Text",
+                                reqd: 1
+
+                            }
+                        ],
+                        primary_action_label: __("Submit"),
+                        primary_action(values) {
+                            // Call backend with user inputs
+                            frappe.call({
+                                method: "cn_indian_payroll.cn_indian_payroll.overrides.additional_salary.update_payment_details",
+                                args: {
+                                    docname: frm.doc.name,
+                                    debit_account_no: values.debit_account_no,
+                                    pay_mode: values.pay_mode,
+                                    payment_instruction_date: values.payment_instruction_date,
+                                    credit_narration: values.credit_narration
+                                },
+                                callback: function(r) {
+                                    if (!r.exc) {
+                                        frappe.msgprint(__("Bank Mandate Sheet Generated Successfully"));
+                                        frm.reload_doc();
+                                    }
+                                }
+                            });
+                            d.hide();
+                        }
+                    });
+
+                    d.show();
+                },
+                __("Create")
+            );
+        }
+
+
+
+
+
         if (frm.doc.docstatus == 1 && frm.doc.status == "Submitted") {
             frm.add_custom_button(__("View Salary Register"), function () {
                 frappe.set_route("query-report", "Salary Book Register");

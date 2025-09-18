@@ -120,45 +120,54 @@
     </table>
   {% endif %}
 
+
+  {% set employee = frappe.get_doc("Employee", doc.employee) %}
+
+  {% set designation = frappe.get_doc("Designation", employee.designation) %}
+  {% set employment_type = frappe.get_doc("Employment Type", employee.employment_type) %}
+  {% set department = frappe.get_doc("Department", employee.department) %}
+  {% set branch = frappe.get_doc("Branch", employee.branch) %}
+
+
   <table>
     <tr>
       <td colspan="2">Member Name:{{doc.employee_name}}</td>
-      <td>Member Type:</td>
-      <td>Member Code:</td>
+      <td>Member Type:{{employment_type.employee_type_name}}</td>
+      <td>Member Code:{{employee.name}}</td>
     </tr>
     <tr>
-      <td colspan="2">Designation:{{doc.designation}}</td>
+      <td colspan="2">Designation:{{designation.designation_name}}</td>
       <td colspan="2"></td>
     </tr>
     <tr>
-      <td colspan="2">Department:{{doc.department}}</td>
+      <td colspan="2">Department:{{department}}</td>
       <td colspan="2">No of Days in the Month:{{doc.total_working_days}}</td>
     </tr>
     <tr>
-      <td colspan="2">Date of Joining:</td>
+      <td colspan="2">Date of Joining:{{employee.date_of_joining}}</td>
       <td colspan="2">Working Days:{{doc.payment_days}}</td>
     </tr>
     <tr>
-      <td colspan="2">Provident Fund:</td>
-      <td colspan="2">ESIC Number:</td>
+      <td colspan="2">Provident Fund:{{employee.provident_fund_account}}</td>
+      <td colspan="2">ESIC Number:{{employee.custom_esic_number}}</td>
     </tr>
     <tr>
-      <td colspan="2">Current Office Location:</td>
-      <td colspan="2">Increment Arrear Days:</td>
+      <td colspan="2">Current Office Location:{{branch}}</td>
+      <td colspan="2">Increment Arrear Days:{{doc.custom_lop_reversal_days  }}</td>
     </tr>
     <tr>
-      <td colspan="2">Total Arrear Days:</td>
+      <td colspan="2">Total Arrear Days:{{doc.custom_lop_reversal_days}}</td>
       <td colspan="2">LOP:{{doc.custom_total_leave_without_pay}}</td>
     </tr>
     <tr>
-      <td>Bank Name:</td>
-      <td>Account No.:</td>
-      <td>IFSC Code:</td>
-      <td>Branch Name:</td>
+      <td>Bank Name:{{employee.bank_name}}</td>
+      <td>Account No.:{{employee.bank_ac_no}}</td>
+      <td>IFSC Code:{{employee.ifsc_code}}</td>
+      <td>Branch Name:{{employee.bank_name}}</td>
     </tr>
     <tr>
-      <td colspan="2">UAN No.:</td>
-      <td colspan="2">PAN No.:</td>
+      <td colspan="2">UAN No.:{{employee.custom_uan}}</td>
+      <td colspan="2">PAN No.:{{employee.custom_aadhar_no }}</td>
     </tr>
   </table>
 
@@ -169,7 +178,6 @@
     <tr>
       <th>Component</th>
       <th>Amount</th>
-      <th>Taxable Amount</th>
 
     </tr>
 
@@ -182,14 +190,12 @@
           <td>{{ e.salary_component }}</td>
           <td style="text-align:right;">{{ e.amount or '' }}</td>
 
-          <td style="text-align:right;">{{ e.amount or '' }}</td>
         </tr>
         {% set ns.total_reimbursement = ns.total_reimbursement + (e.amount or 0) %}
       {% endif %}
     {% endfor %}
 
     <tr>
-      <td></td>
 
       <td><b>Total</b></td>
       <td style="text-align:right;"><b>{{ ns.total_reimbursement }}</b></td>

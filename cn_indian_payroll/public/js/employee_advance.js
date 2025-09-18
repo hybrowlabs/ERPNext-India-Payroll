@@ -2,6 +2,12 @@ frappe.ui.form.on('Employee Advance', {
     refresh(frm) {
 
 
+
+        if(frm.doc.custom_type=="Salary Advance")
+
+            {
+
+
         frm.set_query("custom_deduction_component", function() {
             return {
                 "filters": {
@@ -650,7 +656,7 @@ frm.fields_dict.custom_repayment_dashboard.$wrapper
         }
 
 
-
+    }
 
 
 
@@ -671,7 +677,7 @@ frm.fields_dict.custom_repayment_dashboard.$wrapper
 
     custom_advance_type(frm)
     {
-        if(frm.doc.employee && frm.doc.custom_advance_type)
+        if(frm.doc.employee && frm.doc.custom_advance_type && frm.doc.custom_type=="Salary Advance")
         {
             frappe.call({
                 "method":"cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.get_advance_amount_checking",
@@ -689,6 +695,20 @@ frm.fields_dict.custom_repayment_dashboard.$wrapper
                     }
                 }
             })
+        }
+    },
+
+
+    custom_type:function(frm)
+    {
+        if(frm.doc.custom_type=="Reimbursement / Expense Advance")
+        {
+            frm.set_value("custom_repayment_type",undefined)
+            frm.set_value("custom_repayment_methods",undefined)
+            frm.set_value("custom_repayment_start_date",undefined)
+            frm.set_value("custom_repayment_period_in_months",undefined)
+            frm.set_value("custom_monthly_repayment_amount",undefined)
+
         }
     }
 
