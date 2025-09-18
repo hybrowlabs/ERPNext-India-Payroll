@@ -35,6 +35,9 @@ def print_loan_dashboard(employee):
 
         # Repayment schedule
         repayment_schedule = []
+        paid_months=[]
+        unpaid_months=[]
+
         if loan_doc:
             repayment_entries = frappe.get_list(
                 "Loan Repayment Schedule",
@@ -57,6 +60,17 @@ def print_loan_dashboard(employee):
                         "total_payment": entry.total_payment,
                         "balance_loan_amount": entry.balance_loan_amount
                     })
+                    if entry.custom_deducted:
+                        paid_months.append(
+                            entry.total_payment
+                        )
+                    if not entry.custom_deducted:
+                        unpaid_months.append(entry.total_payment)
+
+        paid_months_count=len(paid_months)
+        unpaid_months_count=len(unpaid_months)
+        total_paid=sum(paid_months)
+        total_unpaid=sum(unpaid_months)
 
         results.append({
             "loan_name": loan.name,
@@ -71,11 +85,11 @@ def print_loan_dashboard(employee):
             "status": loan.status,
             "monthly_repayment_amount": loan.repayment_amount,
             "total_months": loan_tenure,
-            "paid_months": None,
-            "remaining_months": None,
+            "paid_months": paid_months_count,
+            "remaining_months": unpaid_months_count,
             "total_loan_amount": total_loan_amount,
-            "total_paid_amount": None,
-            "remaining_amount": None,
+            "total_paid_amount": total_paid,
+            "remaining_amount": total_unpaid,
             "repayment_schedule": repayment_schedule
         })
 
@@ -117,6 +131,8 @@ def print_loan_dashboard_erp(employee,id):
 
         # Repayment schedule
         repayment_schedule = []
+        paid_months=[]
+        unpaid_months=[]
         if loan_doc:
             repayment_entries = frappe.get_list(
                 "Loan Repayment Schedule",
@@ -137,10 +153,28 @@ def print_loan_dashboard_erp(employee,id):
                         "principal_amount": entry.principal_amount,
                         "interest_amount": entry.interest_amount,
                         "total_payment": entry.total_payment,
-                        "balance_loan_amount": entry.balance_loan_amount
+                        "balance_loan_amount": entry.balance_loan_amount,
+                        "deducted":entry.custom_deducted,
                     })
+                    if entry.custom_deducted:
+                        paid_months.append(
+                            entry.total_payment
+                        )
+                    if not entry.custom_deducted:
+                        unpaid_months.append(entry.total_payment)
+
+
+
             else:
                 repayment_schedule = []
+
+
+        paid_months_count=len(paid_months)
+        unpaid_months_count=len(unpaid_months)
+        total_paid=sum(paid_months)
+        total_unpaid=sum(unpaid_months)
+
+
 
         results.append({
             "loan_name": loan.name,
@@ -155,11 +189,11 @@ def print_loan_dashboard_erp(employee,id):
             "status": loan.status,
             "monthly_repayment_amount": loan.repayment_amount,
             "total_months": loan_tenure,
-            "paid_months": None,
-            "remaining_months": None,
+            "paid_months": paid_months_count,
+            "remaining_months": unpaid_months_count,
             "total_loan_amount": total_loan_amount,
-            "total_paid_amount": None,
-            "remaining_amount": None,
+            "total_paid_amount": total_paid,
+            "remaining_amount": total_unpaid,
             "repayment_schedule": repayment_schedule
         })
 

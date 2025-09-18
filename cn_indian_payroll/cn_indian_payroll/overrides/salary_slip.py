@@ -34,6 +34,7 @@ class CustomSalarySlip(SalarySlip):
         self.employee_accrual_insert()
         self.update_benefit_claim_amount()
         self.update_employee_advance_amount()
+        self.update_loan_deducted_amount()
 
 
     def before_save(self):
@@ -80,11 +81,14 @@ class CustomSalarySlip(SalarySlip):
         self.set_taxale_regime()
 
 
+
+
     def on_cancel(self):
         super().on_cancel()
         self.delete_bonus_accruals()
         self.delete_benefit_accruals()
         self.cancel_employee_advance_amount()
+        self.uncheck_loan_deducted_amount()
 
 
     # def set_salary_structure_assignment(self):
@@ -110,6 +114,60 @@ class CustomSalarySlip(SalarySlip):
     #                 frappe.bold(formatdate(self.actual_start_date)),
     #             )
     #         )
+
+
+
+
+    def update_loan_deducted_amount(self):
+        if self.loans:
+            for loan in self.loans:
+                # Fetch repayment schedule document
+                loan_schedule_name = frappe.db.get_value(
+                    "Loan Repayment Schedule", {"loan": loan.loan}, "name"
+                )
+                if loan_schedule_name:
+                    repayment_doc = frappe.get_doc("Loan Repayment Schedule", loan_schedule_name)
+
+                    start = getdate(self.start_date)
+                    end = getdate(self.end_date)
+
+                    for payment in repayment_doc.repayment_schedule:
+                        payment_date = getdate(payment.payment_date)
+
+                        if start <= payment_date <= end:
+                            payment.custom_deducted = 1
+                        else:
+                            payment.custom_deducted = 0   # optional reset
+
+                    repayment_doc.save()
+
+
+    def uncheck_loan_deducted_amount(self):
+        if self.loans:
+            for loan in self.loans:
+                # Fetch repayment schedule document
+                loan_schedule_name = frappe.db.get_value(
+                    "Loan Repayment Schedule", {"loan": loan.loan}, "name"
+                )
+                if loan_schedule_name:
+                    repayment_doc = frappe.get_doc("Loan Repayment Schedule", loan_schedule_name)
+
+                    start = getdate(self.start_date)
+                    end = getdate(self.end_date)
+
+                    for payment in repayment_doc.repayment_schedule:
+                        payment_date = getdate(payment.payment_date)
+
+                        if start <= payment_date <= end:
+                            payment.custom_deducted = 0
+                        else:
+                            payment.custom_deducted = 0
+
+                    repayment_doc.save()
+
+
+
+
 
 
     def update_employee_advance_amount(self):

@@ -135,10 +135,10 @@ frappe.ui.form.on('Loan Application', {
 
                 let dashboardHtml = `
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
-                  ${makeDashBox("📑", "Loan Type", loan.advance_type || "")}
+                  ${makeDashBox("📑", "Loan Type", loan.loan_type || "")}
                   ${makeDashBox("💰", "Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
                   ${makeDashBox("✅", "Total Paid", "₹ " + (loan.total_paid_amount || 0))}
-                  ${makeDashBox("📉", "Balance", "₹ " + (loan.remaining_amount || 0))}
+                  ${makeDashBox("📉", "Rate of Interest", "₹ " + (loan.rate_of_interest || 0))}
                   ${makeDashBox("📆", "Total Months", loan.total_months || 0)}
                   ${makeDashBox("⏳", "Remaining Months", loan.remaining_months || 0)}
                   ${makeDashBox("📊", "Paid Months", loan.paid_months || 0)}
@@ -158,6 +158,9 @@ frappe.ui.form.on('Loan Application', {
                             <td style="text-align:right; border:1px solid #000;">₹ ${(row.interest_amount || 0).toFixed(2)}</td>
                             <td style="text-align:right; border:1px solid #000;">₹ ${(row.total_payment || 0).toFixed(2)}</td>
                             <td style="text-align:right; border:1px solid #000;">₹ ${(row.balance_loan_amount || 0).toFixed(2)}</td>
+                            <td style="text-align:center; border:1px solid #000;">
+                              <input type="checkbox" disabled ${row.deducted ? "checked" : ""}>
+                            </td>
                             <td style="text-align:center; border:1px solid #000;">
                                 <button class="btn btn-sm btn-primary hold-btn"
                                         data-row-id="${i + 1}"
@@ -190,6 +193,7 @@ frappe.ui.form.on('Loan Application', {
                           <th style="border:1px solid #000;">Interest Amount</th>
                           <th style="border:1px solid #000;">Total Payment</th>
                           <th style="border:1px solid #000;">Balance Loan Amount</th>
+                          <th style="border:1px solid #000;">Deducted</th>
                           <th style="border:1px solid #000;">Hold</th>
                         </tr>
                       </thead>
