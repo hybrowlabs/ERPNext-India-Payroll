@@ -128,6 +128,51 @@ frappe.ui.form.on('Payroll Entry', {
                 });
             }
         }
+
+        if(frm.doc.employees) {
+            let new_joinee_salary_arrear = false;
+            $.each(frm.doc.employees, function(i, v) {
+                if(v.custom_new_joinee_with_salary_arrear) {
+                    new_joinee_salary_arrear = true;
+                }
+            });
+
+            if(new_joinee_salary_arrear && frm.doc.custom_salary_arrear_created == 0) {
+                frm.add_custom_button(
+                    __("Generate New Joinee Arrear"),
+                    function() {
+                        frappe.call({
+                            method: 'cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.create_new_joinee_arrear',
+                            args: {
+                                company: frm.doc.company,
+                                doc_id: frm.doc.name,
+                                start_date: frm.doc.start_date,
+                                end_date: frm.doc.end_date,
+                                employees: frm.doc.employees
+                            },
+                            freeze: true, // show "Processing..."
+                            freeze_message: __("Creating New Joinee Arrears..."),
+                            callback: function(response) {
+                                if (response.message) {
+
+                                    frappe.msgprint({
+                                        title: __("Success"),
+                                        message: __("New Joinee Arrear created successfully for all employees."),
+                                        indicator: "green"
+                                    });
+
+                                    frm.reload_doc();
+                                }
+                            }
+                        });
+
+                    }
+                );
+            }
+        }
+
+
+
     },
 
     custom_employment_type: function (frm) {

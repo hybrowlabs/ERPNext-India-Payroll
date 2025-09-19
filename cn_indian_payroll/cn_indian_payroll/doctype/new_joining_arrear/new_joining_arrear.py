@@ -49,11 +49,7 @@ class NewJoiningArrear(Document):
         if not self.employee:
             return
 
-        payout_date = datetime.strptime(self.payout_date, "%Y-%m-%d")
-        year = payout_date.year
-        month = payout_date.month
-
-        days_in_month = calendar.monthrange(year, month)[1]
+        payout_date = self.payout_date
 
         salary_structure_assignment = frappe.get_list(
             "Salary Structure Assignment",
