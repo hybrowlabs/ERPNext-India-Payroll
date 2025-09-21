@@ -69,7 +69,7 @@ class PayrollEntryOverride(PayrollEntry):
                     attendance_final_end_date = datetime.date(end_date.year, end_date.month, attendance_end_day)
                     if start_date <= date_of_joinee <= end_date:
                         custom_new_joinee = 1
-                    if attendance_final_end_date<= date_of_joinee <= end_date:
+                    if attendance_final_end_date< date_of_joinee <= end_date:
                         custom_new_joinee_with_salary_arrear=1
 
             valid_employees.append({

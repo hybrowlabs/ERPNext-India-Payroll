@@ -7,6 +7,8 @@ import calendar
 from frappe.utils import fmt_money
 from frappe.utils import add_months, get_first_day
 from frappe.utils import flt, cint, getdate, add_months, get_first_day
+from dateutil.relativedelta import relativedelta
+
 
 
 
@@ -365,55 +367,66 @@ def get_advance_amount_checking(employee, advance_type, posting_date):
     posting_date = getdate(posting_date)
     total_days = 0
 
-    start_date = posting_date.replace(day=1)
-    end_date = posting_date
 
-    advance_type_doc = frappe.get_doc("Advance Type", advance_type)
+    payroll_setting=frappe.get_doc("Payroll Settings")
+    if payroll_setting.custom_configure_attendance_cycle:
+        start=payroll_setting.custom_attendance_start_date
+        end=payroll_setting.custom_attendance_end_date
 
-    if advance_type_doc.policy_based_type == 1 and advance_type_doc.percentage:
-        attendance = frappe.db.get_all(
-            "Attendance",
-            filters={
-                "employee": employee,
-                "attendance_date": ["between", [start_date, end_date]],
-                "status": ["in", ["Present", "Half Day"]],
-                "docstatus": 1
-            },
-            fields=["status"]
-        )
+        end_date = posting_date.replace(day=end)
+        start_date = (end_date - relativedelta(months=1)).replace(day=start)
 
-        for att in attendance:
-            if att.status == "Present":
-                total_days += 1
-            elif att.status == "Half Day":
-                total_days += 0.5
+        advance_type_doc = frappe.get_doc("Advance Type", advance_type)
 
+        if advance_type_doc.policy_based_type == 1 and advance_type_doc.percentage:
+            attendance = frappe.db.get_all(
+                "Attendance",
+                filters={
+                    "employee": employee,
+                    "attendance_date": ["between", [start_date, end_date]],
+                    "status": ["in", ["Present", "Half Day"]],
+                    "docstatus": 1
+                },
+                fields=["status","name"]
+            )
 
-        if holiday_list:
-            holiday_doc = frappe.get_doc("Holiday List", holiday_list)
-            for h in holiday_doc.holidays:
-                if start_date <= h.holiday_date <= end_date:
+            for att in attendance:
+                if att.status == "Present":
                     total_days += 1
+                elif att.status == "Half Day":
+                    total_days += 0.5
 
-    get_salary_structure = frappe.db.get_all(
-        "Salary Structure Assignment",
-        filters={"employee": employee, "docstatus": 1},
-        fields=["*"],
-        order_by="from_date desc",
-        limit=1
-    )
-    if get_salary_structure:
-        salary_structure = frappe.get_doc("Salary Structure Assignment", get_salary_structure[0].name)
-        if salary_structure and total_days:
-            days_in_month = calendar.monthrange(posting_date.year, posting_date.month)[1]
 
-            per_day_salary = (salary_structure.custom_fixed_gross_annual / 12) / days_in_month
-            total_salary = per_day_salary * total_days
+            if holiday_list:
+                holiday_doc = frappe.get_doc("Holiday List", holiday_list)
+                for h in holiday_doc.holidays:
+                    if start_date <= h.holiday_date <= end_date:
+                        total_days += 1
 
-            advance_amount = (advance_type_doc.percentage / 100) * total_salary
+        get_salary_structure = frappe.db.get_all(
+            "Salary Structure Assignment",
+            filters={"employee": employee, "docstatus": 1},
+            fields=["*"],
+            order_by="from_date desc",
+            limit=1
+        )
+        if get_salary_structure:
+            salary_structure = frappe.get_doc("Salary Structure Assignment", get_salary_structure[0].name)
+            if salary_structure and total_days:
+                days_in_month = calendar.monthrange(posting_date.year, posting_date.month)[1]
 
-            return round(advance_amount, 2)
+                per_day_salary = (salary_structure.custom_fixed_gross_annual / 12) / days_in_month
+                total_salary = per_day_salary * total_days
 
+                advance_amount = (advance_type_doc.percentage / 100) * total_salary
+
+                return round(advance_amount, 2)
+        else:
+            return "Please create the Salary Structure Assignment for this Employee."
+
+
+    else:
+        return "Please mention the attendance cycle in payroll settings"
     return None
 
 
