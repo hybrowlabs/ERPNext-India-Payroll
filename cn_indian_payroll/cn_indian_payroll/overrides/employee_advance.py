@@ -9,6 +9,11 @@ from frappe.utils import add_months, get_first_day
 from frappe.utils import flt, cint, getdate, add_months, get_first_day
 from dateutil.relativedelta import relativedelta
 
+from cn_leave_shift_managment.api import get_holiday_dates
+from cn_leave_shift_managment.custom_apis import get_week_off_days
+
+
+
 
 
 
@@ -355,28 +360,34 @@ def validate(self, method):
     elif self.employee and self.custom_type=="Reimbursement / Expense Advance":
         self.repay_unclaimed_amount_from_salary=1
 
-
 @frappe.whitelist()
-def get_advance_amount_checking(employee, advance_type, posting_date):
+def get_advance_amount_checking(employee, advance_type, posting_date, company):
     if not (employee and advance_type and posting_date):
         return None
 
     emp_doc = frappe.get_doc("Employee", employee)
-    holiday_list = emp_doc.holiday_list
-
+    joining_date = emp_doc.date_of_joining
     posting_date = getdate(posting_date)
+
     total_days = 0
+    advance_amount = 0
 
+    payroll_setting = frappe.get_doc("Payroll Settings")
 
-    payroll_setting=frappe.get_doc("Payroll Settings")
     if payroll_setting.custom_configure_attendance_cycle:
-        start=payroll_setting.custom_attendance_start_date
-        end=payroll_setting.custom_attendance_end_date
+        start = payroll_setting.custom_attendance_start_date
+        end = payroll_setting.custom_attendance_end_date
 
         end_date = posting_date.replace(day=end)
         start_date = (end_date - relativedelta(months=1)).replace(day=start)
 
+        if joining_date and joining_date >= start_date:
+            start_date = joining_date
+
+        diff = (end_date - start_date).days + 1
+
         advance_type_doc = frappe.get_doc("Advance Type", advance_type)
+        company_doc = frappe.get_doc("Company", company)
 
         if advance_type_doc.policy_based_type == 1 and advance_type_doc.percentage:
             attendance = frappe.db.get_all(
@@ -384,50 +395,68 @@ def get_advance_amount_checking(employee, advance_type, posting_date):
                 filters={
                     "employee": employee,
                     "attendance_date": ["between", [start_date, end_date]],
-                    "status": ["in", ["Present", "Half Day"]],
+                    "status": ["in", ["Absent", "Half Day","On Leave"]],
                     "docstatus": 1
                 },
-                fields=["status","name"]
+                fields=["status", "name","leave_type"]
             )
 
             for att in attendance:
-                if att.status == "Present":
+                if att.status == "Absent":
                     total_days += 1
-                elif att.status == "Half Day":
-                    total_days += 0.5
+                elif att.status == "Half Day" and att.leave_type:
+                    leave_type=frappe.get_doc("Leave Type",att.leave_type)
+                    if leave_type.is_lwp:
+                        total_days += 0.5
 
-
-            if holiday_list:
-                holiday_doc = frappe.get_doc("Holiday List", holiday_list)
-                for h in holiday_doc.holidays:
-                    if start_date <= h.holiday_date <= end_date:
+                elif att.status == "On Leave" and att.leave_type:
+                    leave_type=frappe.get_doc("Leave Type",att.leave_type)
+                    if leave_type.is_lwp:
                         total_days += 1
 
-        get_salary_structure = frappe.db.get_all(
-            "Salary Structure Assignment",
-            filters={"employee": employee, "docstatus": 1},
-            fields=["*"],
-            order_by="from_date desc",
-            limit=1
-        )
-        if get_salary_structure:
-            salary_structure = frappe.get_doc("Salary Structure Assignment", get_salary_structure[0].name)
-            if salary_structure and total_days:
-                days_in_month = calendar.monthrange(posting_date.year, posting_date.month)[1]
 
-                per_day_salary = (salary_structure.custom_fixed_gross_annual / 12) / days_in_month
-                total_salary = per_day_salary * total_days
 
-                advance_amount = (advance_type_doc.percentage / 100) * total_salary
+            final_total = diff - total_days
 
-                return round(advance_amount, 2)
+            get_salary_structure = frappe.db.get_all(
+                "Salary Structure Assignment",
+                filters={"employee": employee, "docstatus": 1},
+                fields=["name"],
+                order_by="from_date desc",
+                limit=1
+            )
+
+            if get_salary_structure:
+                salary_structure = frappe.get_doc("Salary Structure Assignment", get_salary_structure[0].name)
+                if salary_structure and final_total:
+                    days_in_month = calendar.monthrange(posting_date.year, posting_date.month)[1]
+
+                    per_day_salary = (salary_structure.custom_fixed_gross_annual / 12) / days_in_month
+
+                    total_salary = per_day_salary * final_total
+
+                    advance_amount = (advance_type_doc.percentage / 100) * total_salary
+
+                    # ex:
+                    # 1.ctc/12
+                    # 2.amount/30 or 31
+                    # 3.amount*number of present days
+                    # 4.amount*80%
+
+                    # frappe.msgprint(str(advance_amount))
+
+                return {
+                    "amount": round(advance_amount, 2),
+                    "advance_account": company_doc.default_employee_advance_account
+                }
         else:
-            return "Please create the Salary Structure Assignment for this Employee."
-
+            return {
+                "amount": round(advance_amount, 2),
+                "advance_account": company_doc.default_employee_advance_account
+            }
 
     else:
         return "Please mention the attendance cycle in payroll settings"
-    return None
 
 
 def on_submit(self, method):

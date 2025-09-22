@@ -684,13 +684,14 @@ frm.fields_dict.custom_repayment_dashboard.$wrapper
                 args:{
                     employee:frm.doc.employee,
                     advance_type:frm.doc.custom_advance_type,
-                    posting_date:frm.doc.posting_date
+                    posting_date:frm.doc.posting_date,
+                    company:frm.doc.company
                 },
                 callback:function(r)
                 {
                     if(r.message)
                     {
-                        frm.set_value("advance_amount",r.message)
+                        frm.set_value("advance_amount",r.message.amount)
 
                     }
                 }

@@ -238,6 +238,7 @@ fixtures = [
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
     {"dt": "Custom DocPerm", "filters": {"parent": "Employee Advance","role": "Payroll Manager"}},
+    {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}}
 
 
 
