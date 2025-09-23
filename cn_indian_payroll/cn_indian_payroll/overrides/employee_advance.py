@@ -346,10 +346,12 @@ def validate(self, method):
     if self.employee and self.posting_date and self.custom_advance_type:
         advance_amount = get_advance_amount_checking(self.employee, self.custom_advance_type, self.posting_date,self.company)
 
-        if advance_amount is not None and flt(self.advance_amount) > flt(advance_amount):
+
+        if advance_amount and flt(self.advance_amount) > flt(advance_amount.get("amount", 0)):
             frappe.throw(
                 f"Advance amount {fmt_money(self.advance_amount)} exceeds "
-                f"the allowable limit of {fmt_money(advance_amount)} based on attendance and salary."
+                f"the allowable limit of {fmt_money(advance_amount.get('amount', 0))} "
+                f"based on attendance and salary."
             )
 
     self.custom_total_paid_amount=0
