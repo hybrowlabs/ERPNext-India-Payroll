@@ -303,6 +303,14 @@ frappe.ui.form.on('Loan Application', {
     }
 
 
+    },
+
+    applicant:function(frm)
+    {
+      if(frm.doc.applicant_type=="Employee")
+      {
+        frm.set_value("custom_employee",frm.doc.applicant)
+      }
     }
 
 

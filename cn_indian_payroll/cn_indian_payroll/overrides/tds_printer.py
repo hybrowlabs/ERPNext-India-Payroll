@@ -247,10 +247,13 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
                     })
 
 
-            hra_received=section.hra_as_per_salary_structure
-            basic_as_per_salary_structure_10=section.basic_as_per_salary_structure_10
-            hra_exemption=section.annual_hra_exemption
-            hra_percentage=section.hra_breakup[0].earned_basic
+            hra_received=section.hra_as_per_salary_structure if section.hra_as_per_salary_structure  else 0
+            basic_as_per_salary_structure_10=section.basic_as_per_salary_structure_10 if section.basic_as_per_salary_structure_10 else 0
+            hra_exemption=section.annual_hra_exemption if section.annual_hra_exemption else 0
+            if len(section.hra_breakup)>0:
+                hra_percentage=section.hra_breakup[0].earned_basic
+            else:
+                hra_percentage=0
 
             standard_tax_amount=frappe.get_doc("Income Tax Slab",income_tax_slab)
             standard_amount=standard_tax_amount.standard_tax_exemption_amount

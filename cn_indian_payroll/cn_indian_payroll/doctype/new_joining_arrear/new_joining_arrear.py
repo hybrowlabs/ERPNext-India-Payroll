@@ -105,6 +105,7 @@ class NewJoiningArrear(Document):
                             (new_earning.amount / new_salary_slip.total_working_days)
                             * self.number_of_present_days
                         ),
+                        "actual_amount":round(new_earning.amount)
                     }
                 )
                 processed_components.append(component_doc.name)
@@ -132,6 +133,7 @@ class NewJoiningArrear(Document):
                             (new_deduction.amount / new_salary_slip.total_working_days)
                             * self.number_of_present_days
                         ),
+                        "actual_amount":round(new_deduction.amount)
                     }
                 )
                 processed_components.append(component_doc.name)

@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "salary_component",
-  "amount"
+  "amount",
+  "actual_amount"
  ],
  "fields": [
   {
@@ -22,17 +23,24 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Amount"
+  },
+  {
+   "fieldname": "actual_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Actual Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-30 16:16:05.306678",
+ "modified": "2025-09-23 16:20:05.065012",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal Deduction Child",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

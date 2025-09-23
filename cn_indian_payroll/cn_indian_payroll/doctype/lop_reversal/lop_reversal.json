@@ -8,6 +8,9 @@
  "field_order": [
   "lop_reversal_details_section",
   "employee",
+  "employee_name",
+  "department",
+  "designation",
   "payroll_period",
   "payroll_entry",
   "company",
@@ -162,6 +165,26 @@
    "fieldtype": "Float",
    "label": "Paid Days",
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -172,7 +195,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-08-07 16:43:45.048279",
+ "modified": "2025-09-23 17:07:32.242088",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
