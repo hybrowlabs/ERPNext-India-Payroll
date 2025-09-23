@@ -26,6 +26,8 @@ from datetime import datetime, timedelta,date
 from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 from collections import defaultdict
+from dateutil.relativedelta import relativedelta
+
 
 class CustomSalarySlip(SalarySlip):
     def on_submit(self):
@@ -332,8 +334,6 @@ class CustomSalarySlip(SalarySlip):
             and payroll_settings.consider_marked_attendance_on_holidays
         )
 
-        # print("\n\n\n\n\n\n\n",consider_marked_attendance_on_holidays,"\n\n\n\n\n\n\n\n")
-
         daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
 
         working_days = date_diff(self.end_date, self.start_date) + 1
@@ -343,9 +343,6 @@ class CustomSalarySlip(SalarySlip):
             return
 
         holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-
-        print("\n\n\n\n\n\n\n\n\nholidaysholidays",holidays,"\n\n\n\n\n\n\n\n\n\n")
-
 
         working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
 
@@ -386,8 +383,6 @@ class CustomSalarySlip(SalarySlip):
 
         self.total_working_days = working_days
 
-        print("\n\n\n\n\n\n\n\n\n\n",self.total_working_days,"\n\n\n\n\n\n\n\n\n\n\n\n\n")
-
         payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
 
         if payroll_settings.payroll_based_on == "Attendance":
@@ -425,58 +420,72 @@ class CustomSalarySlip(SalarySlip):
         lwp = 0
         absent = 0
 
-        leave_type_map = self.get_leave_type_map()
-        attendance_details = self.get_employee_attendance(
-            start_date="2025-04-21", end_date="2025-03-20"
-        )
+        payroll_setting=frappe.get_doc("Payroll Settings")
+        if payroll_setting.payroll_based_on=="Attendance" and payroll_setting.custom_configure_attendance_cycle:
+            attendance_start_day=payroll_setting.custom_attendance_start_date
+            attendance_end_day=payroll_setting.custom_attendance_end_date
 
-        print("\n\n\n\n\n\n\nself.start_date1111",self.start_date,"\n\n\n\n\n\n\n\n\n")
-        print("\n\n\n\n\n\n\n\nself.actual_end_date2222",self.actual_end_date,"\n\n\n\n\n\n\n\n")
 
-        for d in attendance_details:
-            if (
-                d.status in ("Half Day", "On Leave")
-                and d.leave_type
-                and d.leave_type not in leave_type_map.keys()
-            ):
-                continue
+            start_date=getdate(self.start_date)
+            end_date=getdate(self.end_date)
 
-            # skip counting absent on holidays
-            if not consider_marked_attendance_on_holidays and getdate(d.attendance_date) in holidays:
-                if d.status in ["Absent", "Half Day"] or (
-                    d.leave_type
-                    and d.leave_type in leave_type_map.keys()
-                    and not leave_type_map[d.leave_type]["include_holiday"]
+
+            attendance_end_date = end_date.replace(day=attendance_end_day)
+            attendance_start_date = (attendance_end_date - relativedelta(months=1)).replace(day=attendance_start_day)
+
+            leave_type_map = self.get_leave_type_map()
+            attendance_details = self.get_employee_attendance(
+                start_date=attendance_start_date, end_date=attendance_end_date
+            )
+            # attendance_details = self.get_employee_attendance(
+			# start_date=self.start_date, end_date=self.actual_end_date
+		    # )
+
+
+            for d in attendance_details:
+                if (
+                    d.status in ("Half Day", "On Leave")
+                    and d.leave_type
+                    and d.leave_type not in leave_type_map.keys()
                 ):
                     continue
 
-            if d.leave_type:
-                fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type][
-                    "fraction_of_daily_salary_per_leave"
-                ]
+                # skip counting absent on holidays
+                if not consider_marked_attendance_on_holidays and getdate(d.attendance_date) in holidays:
+                    if d.status in ["Absent", "Half Day"] or (
+                        d.leave_type
+                        and d.leave_type in leave_type_map.keys()
+                        and not leave_type_map[d.leave_type]["include_holiday"]
+                    ):
+                        continue
 
-            if d.status == "Half Day" and d.leave_type and d.leave_type in leave_type_map.keys():
-                equivalent_lwp = 1 - daily_wages_fraction_for_half_day
+                if d.leave_type:
+                    fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type][
+                        "fraction_of_daily_salary_per_leave"
+                    ]
 
-                if leave_type_map[d.leave_type]["is_ppl"]:
-                    equivalent_lwp *= (
-                        fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
-                    )
-                lwp += equivalent_lwp
+                if d.status == "Half Day" and d.leave_type and d.leave_type in leave_type_map.keys():
+                    equivalent_lwp = 1 - daily_wages_fraction_for_half_day
 
-            elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
-                equivalent_lwp = 1
-                if leave_type_map[d.leave_type]["is_ppl"]:
-                    equivalent_lwp *= (
-                        fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
-                    )
-                lwp += equivalent_lwp
+                    if leave_type_map[d.leave_type]["is_ppl"]:
+                        equivalent_lwp *= (
+                            fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+                        )
+                    lwp += equivalent_lwp
 
-            elif d.status == "Absent":
-                absent += 1
+                elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
+                    equivalent_lwp = 1
+                    if leave_type_map[d.leave_type]["is_ppl"]:
+                        equivalent_lwp *= (
+                            fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+                        )
+                    lwp += equivalent_lwp
 
-        # print("\n\n\n\n\n\n\nlwplwplwp",lwp,"\n\n\n\n\n\n\n\n\n")
-        # print("\n\n\n\n\n\n\n\nabsentabsentabsent",absent,"\n\n\n\n\n\n\n\n\n")
+                elif d.status == "Absent":
+                    absent += 1
+
+        print("\n\n\n\n\n\n\nlwplwplwp",lwp,"\n\n\n\n\n\n\n\n\n")
+        print("\n\n\n\n\n\n\n\nabsentabsentabsent",absent,"\n\n\n\n\n\n\n\n\n")
 
         return lwp, absent
 

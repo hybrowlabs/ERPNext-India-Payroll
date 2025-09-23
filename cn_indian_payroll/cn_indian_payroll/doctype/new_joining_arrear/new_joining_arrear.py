@@ -15,6 +15,7 @@ class NewJoiningArrear(Document):
     def on_submit(self):
         self.insert_additional_salary()
 
+
     def insert_additional_salary(self):
         if not (self.earning_component or self.deduction_component):
             return

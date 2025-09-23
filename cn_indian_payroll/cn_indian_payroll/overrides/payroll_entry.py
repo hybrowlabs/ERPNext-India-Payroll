@@ -272,8 +272,11 @@ def create_new_joinee_arrear(company, doc_id, start_date, end_date, employees):
             attendance_end_date=payroll_setting.custom_attendance_end_date
             final_attendance_start_date = start_date.replace(day=attendance_start_date)
 
-            total_payment_days = (end_date - final_attendance_start_date).days + 1
             for emp in employees:
+                emp_doc = frappe.get_doc("Employee", emp.get("employee"))
+                date_of_joining = getdate(emp_doc.date_of_joining)
+                total_payment_days = (end_date - date_of_joining).days + 1
+
                 if emp.get("custom_new_joinee_with_salary_arrear"):
                     ssa = frappe.get_all(
                         "Salary Structure Assignment",
