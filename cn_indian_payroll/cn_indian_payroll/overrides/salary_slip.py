@@ -485,6 +485,8 @@ class CustomSalarySlip(SalarySlip):
                     absent += 1
 
         print("\n\n\n\n\n\n\nlwplwplwp",lwp,"\n\n\n\n\n\n\n\n\n")
+
+
         print("\n\n\n\n\n\n\n\nabsentabsentabsent",absent,"\n\n\n\n\n\n\n\n\n")
 
         return lwp, absent

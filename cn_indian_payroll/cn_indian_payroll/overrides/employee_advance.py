@@ -344,7 +344,7 @@ def get_advance_dashboard_erp(employee,id,company):
 
 def validate(self, method):
     if self.employee and self.posting_date and self.custom_advance_type:
-        advance_amount = get_advance_amount_checking(self.employee, self.custom_advance_type, self.posting_date)
+        advance_amount = get_advance_amount_checking(self.employee, self.custom_advance_type, self.posting_date,self.company)
 
         if advance_amount is not None and flt(self.advance_amount) > flt(advance_amount):
             frappe.throw(
@@ -361,7 +361,7 @@ def validate(self, method):
         self.repay_unclaimed_amount_from_salary=1
 
 @frappe.whitelist()
-def get_advance_amount_checking(employee, advance_type, posting_date, company):
+def get_advance_amount_checking(employee, advance_type, posting_date,company):
     if not (employee and advance_type and posting_date):
         return None
 
