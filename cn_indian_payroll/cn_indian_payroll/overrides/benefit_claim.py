@@ -61,6 +61,12 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
             insert_doc.submit()
 
 
+
+    def before_submit(self):
+        if self.custom_status=="Pending":
+            frappe.throw("Please Select the Status Approved or Rejected")
+
+
 @frappe.whitelist()
 def benefit_claim(doc):
     doc = frappe.get_doc(frappe.parse_json(doc))
