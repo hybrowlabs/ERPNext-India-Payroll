@@ -51,6 +51,7 @@ def print_loan_dashboard(employee):
 
             if get_doc.docstatus == 1 and get_doc.status in ["Initiated", "Active"]:
                 loan_tenure=get_doc.repayment_periods
+                monthly_repayment=get_doc.monthly_repayment_amount
                 total_loan_amount=get_doc.loan_amount
                 for entry in get_doc.repayment_schedule:
                     repayment_schedule.append({
@@ -83,14 +84,18 @@ def print_loan_dashboard(employee):
             "loan_start_date": loan_doc.repayment_start_date if loan_doc else None,
             "loan_tenure": loan_tenure,
             "status": loan.status,
-            "monthly_repayment_amount": loan.repayment_amount,
+            "monthly_repayment_amount": monthly_repayment,
             "total_months": loan_tenure,
             "paid_months": paid_months_count,
             "remaining_months": unpaid_months_count,
             "total_loan_amount": total_loan_amount,
             "total_paid_amount": total_paid,
             "remaining_amount": total_unpaid,
-            "repayment_schedule": repayment_schedule
+            "repayment_schedule": repayment_schedule,
+
+            "total_payment":loan_doc.total_payment,
+            "total_interest_payable":loan_doc.total_interest_payable,
+            "total_principal_paid":loan_doc.total_principal_paid,
         })
 
     return results
@@ -144,6 +149,7 @@ def print_loan_dashboard_erp(employee,id):
 
             get_doc=frappe.get_doc("Loan Repayment Schedule",loan_repayment)
             loan_tenure=get_doc.repayment_periods
+            monthly_repayment=get_doc.monthly_repayment_amount
 
             if get_doc.docstatus == 1 and get_doc.status in ["Initiated", "Active"]:
                 total_loan_amount=get_doc.loan_amount
@@ -187,14 +193,18 @@ def print_loan_dashboard_erp(employee,id):
             "loan_start_date": loan_doc.repayment_start_date if loan_doc else None,
             "loan_tenure": loan_tenure,
             "status": loan.status,
-            "monthly_repayment_amount": loan.repayment_amount,
+            "monthly_repayment_amount": monthly_repayment,
             "total_months": loan_tenure,
             "paid_months": paid_months_count,
             "remaining_months": unpaid_months_count,
             "total_loan_amount": total_loan_amount,
             "total_paid_amount": total_paid,
             "remaining_amount": total_unpaid,
-            "repayment_schedule": repayment_schedule
+            "repayment_schedule": repayment_schedule,
+
+            "total_payment":round(loan_doc.total_payment,2),
+            "total_interest_payable":round(loan_doc.total_interest_payable,2),
+            "total_principal_paid":round(loan_doc.total_principal_paid,2),
         })
 
     return results

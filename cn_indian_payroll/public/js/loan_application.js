@@ -107,42 +107,56 @@ frappe.ui.form.on('Loan Application', {
 
                 let dashboardHtml = `
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
-                  ${makeDashBox("📑", "Loan Type", loan.loan_type || "")}
-                  ${makeDashBox("💰", "Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
-                  ${makeDashBox("✅", "Total Paid", "₹ " + (loan.total_paid_amount || 0))}
-                  ${makeDashBox("📉", "Rate of Interest", + (loan.rate_of_interest || 0)+"%")}
-                  ${makeDashBox("📆", "Total Months", loan.total_months || 0)}
-                  ${makeDashBox("⏳", "Remaining Months", loan.remaining_months || 0)}
-                  ${makeDashBox("📊", "Paid Months", loan.paid_months || 0)}
-                  ${makeDashBox("💸", "Monthly Repayment", "₹ " + (loan.monthly_repayment_amount || 0))}
+                ${makeDashBox("📑", "Loan Type", loan.loan_type || "")}
+                ${makeDashBox("💰", "Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
+                ${makeDashBox("📈", "Standard Rate of Interest", (loan.standard_interest || 0) + "%")}
+                ${makeDashBox("📉", "Rate of Interest", (loan.rate_of_interest || 0) + "%")}
+                ${makeDashBox("🗓️", "Total Months", loan.total_months || 0)}
+                ${makeDashBox("⏳", "Remaining Months", loan.remaining_months || 0)}
+                ${makeDashBox("📊", "Paid Months", loan.paid_months || 0)}
+                ${makeDashBox("💸", "Monthly Repayment", "₹ " + (loan.monthly_repayment_amount || 0))}
+
+                ${makeDashBox("💰", "Total Payable Amount", "₹ " + (loan. total_payment|| 0))}
+                ${makeDashBox("📈", "Total Interest Payable", "₹ " + (loan. total_interest_payable|| 0))}
+                ${makeDashBox("🏦", "Total Principal Paid", "₹ " + (loan. total_principal_paid|| 0))}
+                ${makeDashBox("✅", "Total Paid", "₹ " + (loan.total_paid_amount || 0))}
+
                 </div>
                 `;
+
+
+
+
+                const has_payroll_manager_role = frappe.user_roles.includes("Payroll Manager");
 
 
                 let scheduleRows = "";
                 if (loan.repayment_schedule && loan.repayment_schedule.length > 0) {
                     loan.repayment_schedule.forEach((row, i) => {
-                        scheduleRows += `
-                        <tr>
-                            <td style="text-align:center; border:1px solid #000;">${i + 1}</td>
-                            <td style="border:1px solid #000;">${frappe.datetime.str_to_user(row.payment_date)}</td>
-                            <td style="text-align:right; border:1px solid #000;">₹ ${(row.principal_amount || 0).toFixed(2)}</td>
-                            <td style="text-align:right; border:1px solid #000;">₹ ${(row.interest_amount || 0).toFixed(2)}</td>
-                            <td style="text-align:right; border:1px solid #000;">₹ ${(row.total_payment || 0).toFixed(2)}</td>
-                            <td style="text-align:right; border:1px solid #000;">₹ ${(row.balance_loan_amount || 0).toFixed(2)}</td>
-                            <td style="text-align:center; border:1px solid #000;">
-                              <input type="checkbox" disabled ${row.deducted ? "checked" : ""}>
+                      scheduleRows += `
+                      <tr>
+                          <td style="text-align:center; border:1px solid #000;">${i + 1}</td>
+                          <td style="border:1px solid #000;">${frappe.datetime.str_to_user(row.payment_date)}</td>
+                          <td style="text-align:right; border:1px solid #000;">₹ ${(row.principal_amount || 0).toFixed(2)}</td>
+                          <td style="text-align:right; border:1px solid #000;">₹ ${(row.interest_amount || 0).toFixed(2)}</td>
+                          <td style="text-align:right; border:1px solid #000;">₹ ${(row.total_payment || 0).toFixed(2)}</td>
+                          <td style="text-align:right; border:1px solid #000;">₹ ${(row.balance_loan_amount || 0).toFixed(2)}</td>
+                          <td style="text-align:center; border:1px solid #000;">
+                            <input type="checkbox" disabled ${row.deducted ? "checked" : ""}>
+                          </td>
+                          <td style="text-align:center; border:1px solid #000;">
+                              ${(row.deducted === 0 && has_payroll_manager_role)
+                                  ? `<button class="btn btn-xs btn-primary hold-btn"
+                                            data-row-id="${i + 1}"
+                                            data-date="${row.payment_date}"
+                                            data-amount="${row.total_payment}">
+                                        Hold
+                                    </button>`
+                                  : ""}
                             </td>
-                            <td style="text-align:center; border:1px solid #000;">
-                                <button class="btn btn-sm btn-primary hold-btn"
-                                        data-row-id="${i + 1}"
-                                        data-date="${row.payment_date}"
-                                        data-amount="${row.total_payment}">
-                                    Hold
-                                </button>
-                            </td>
-                        </tr>
-                        `;
+                      </tr>
+                      `;
+
                    });
                 }
 
@@ -166,6 +180,7 @@ frappe.ui.form.on('Loan Application', {
                           <th style="border:1px solid #000;">Total Payment</th>
                           <th style="border:1px solid #000;">Balance Loan Amount</th>
                           <th style="border:1px solid #000;">Deducted</th>
+
                           <th style="border:1px solid #000;">Hold</th>
                         </tr>
                       </thead>

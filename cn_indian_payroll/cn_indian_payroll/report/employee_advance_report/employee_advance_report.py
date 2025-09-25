@@ -216,6 +216,7 @@ def get_repayment_schedule(advance):
                 "payment_amount": pay_amount,
                 "balance_amount": balance_amount,
                 "deducted": deducted,
+                "deducted": "✔" if deducted == 1 else "",
 
             })
     else:
@@ -226,7 +227,7 @@ def get_repayment_schedule(advance):
                 "payment_date": start_date,
                 "payment_amount": float(advance.advance_amount or 0),
                 "balance_amount": float(advance.advance_amount or 0),
-                "deducted": 0
+                "deducted": ""
             })
 
     return repayment_schedule
