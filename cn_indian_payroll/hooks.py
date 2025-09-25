@@ -309,6 +309,7 @@ doc_events = {
 
     "Loan Repayment Schedule": {
         "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_save",
+        "before_update_after_submit":"cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_update_after_submit",
 
     },
     "LTA Claim": {

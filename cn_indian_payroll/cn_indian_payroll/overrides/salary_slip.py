@@ -137,8 +137,6 @@ class CustomSalarySlip(SalarySlip):
 
                         if start <= payment_date <= end:
                             payment.custom_deducted = 1
-                        else:
-                            payment.custom_deducted = 0   # optional reset
 
                     repayment_doc.save()
 
@@ -161,8 +159,7 @@ class CustomSalarySlip(SalarySlip):
 
                         if start <= payment_date <= end:
                             payment.custom_deducted = 0
-                        else:
-                            payment.custom_deducted = 0
+
 
                     repayment_doc.save()
 

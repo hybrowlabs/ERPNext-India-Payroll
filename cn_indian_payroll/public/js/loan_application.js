@@ -23,24 +23,8 @@ frappe.ui.form.on('Loan Application', {
                 }
 
                 const loan = r.message[0]; // since 1 loan at a time
-                console.log("Loan Dashboard Response:", loan);
+                console.log("Loan Dashboard Response:", loan.repayment_schedule);
 
-                // function makeDashBox(title, value) {
-                //     return `
-                //       <div style="
-                //           background: #f9f9f9;
-
-                //           border-radius: 8px;
-                //           padding: 12px;
-                //           text-align: center;
-                //           box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-                //           border:1px solid #000;
-                //       ">
-                //         <div style="font-size: 13px; color: #666; margin-bottom: 6px;">${title}</div>
-                //         <div style="font-size: 16px; font-weight: bold; color: #333;">${value}</div>
-                //       </div>
-                //     `;
-                // }
 
                 function makeDashBox(icon, title, value) {
                   return `
@@ -119,19 +103,7 @@ frappe.ui.form.on('Loan Application', {
                     `;
 
 
-                // Dashboard 7 Boxes
-                // let dashboardHtml = `
-                // <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
-                //   ${makeDashBox("Monthly Repayment", "₹ " + (loan.monthly_repayment_amount || 0))}
-                //   ${makeDashBox("Total Months", loan.total_months || 0)}
-                //   ${makeDashBox("Paid Months", loan.paid_months || 0)}
-                //   ${makeDashBox("Remaining Months", loan.remaining_months || 0)}
-                //   ${makeDashBox("Total Loan Amount", "₹ " + (loan.total_loan_amount || 0))}
-                //   ${makeDashBox("Total Paid", "₹ " + (loan.total_paid_amount || 0))}
-                //   ${makeDashBox("Remaining Amount", "₹ " + (loan.remaining_amount || 0))}
-                //   ${makeDashBox("Total Interest", "₹ " + (loan.remaining_amount || 0))}
-                // </div>
-                // `;
+
 
                 let dashboardHtml = `
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 15px;">
@@ -216,18 +188,24 @@ frappe.ui.form.on('Loan Application', {
                 }
 
 
-
-            // Attach event listeners for Hold buttons
             $(frm.fields_dict.custom_loan_dashboard.wrapper)
                 .find(".hold-btn")
                 .on("click", function () {
+                  let row = $(this).closest("tr");
                     const rowId = $(this).data("row-id");
                     const paymentDate = $(this).data("date");
                     const amount = $(this).data("amount");
 
-                    // Open Dialog
+
+                    let row_index = parseInt(row.find("td:first").text());
+
+
+                    let remaining_installments = loan.loan_tenure - row_index;
+
+
                     let d = new frappe.ui.Dialog({
                         title: "Hold Repayment",
+                        size: "large",
                         fields: [
                             {
                                 label: "Payment Date",
@@ -236,29 +214,110 @@ frappe.ui.form.on('Loan Application', {
                                 default: paymentDate,
                                 read_only: 1
                             },
+                            { fieldtype: "Section Break" },
                             {
-                                label: "Days to Hold",
-                                fieldname: "days_to_hold",
-                                fieldtype: "Int",
-                                reqd: 1
+                                label: "Hold Option",
+                                fieldname: "hold_option",
+                                fieldtype: "Select",
+                                options: [
+                                    "Recover Pending in Next Month",
+                                    "Distribute Across Future Months",
+                                    "Extend Repayment Period"
+                                ],
+                                default: "Distribute Across Future Months"
                             },
-                            {
-                                label: "Amount",
-                                fieldname: "amount",
-                                fieldtype: "Currency",
-                                default: amount,
-                                read_only: 1
-                            }
+                            { fieldtype: "Column Break" },
+                          {
+                              label: "Number of Months to Hold",
+                              fieldname: "number_of_months",
+                              fieldtype: "Int",
+                              default: 1,
+                              reqd: 1
+                          },
+                          { fieldtype: "Section Break" },
+
                         ],
                         primary_action_label: "Submit",
                         primary_action(values) {
-                            console.log("Row ID:", rowId);
-                            console.log("Payment Date:", values.payment_date);
-                            console.log("Amount:", values.amount);
-                            console.log("Days to Hold:", values.days_to_hold);
+
+
+
+                          if (values.number_of_months < 1) {
+                            frappe.msgprint("Number of months to hold must be at least 1.");
+                            return;
+                        }
+
+                        if (values.number_of_months > loan.loan_tenure) {
+                            frappe.msgprint("Number of months to hold cannot exceed total installments.");
+                            return;
+                        }
+
+
+
+                        if (values.number_of_months > remaining_installments) {
+                              frappe.msgprint(
+                                  `Only ${remaining_installments} installment(s) are pending. You cannot hold ${values.number_of_months} months.`
+                              );
+                              return;
+                          }
+
+
+
+                          frappe.call({
+                            method: "cn_indian_payroll.cn_indian_payroll.overrides.loan_application.hold_installments",
+                            args: {
+
+                                payment_date:values.payment_date,
+                                employee:frm.doc.applicant,
+                                company:frm.doc.company,
+                                type:values.hold_option,
+                                number_of_months:values.number_of_months,
+                                doc_id:frm.doc.name,
+                            },
+                            callback: function (r) {
+                                if (r.message === "success") {
+                                    frappe.msgprint("Installment updated successfully.");
+                                    d.hide();
+                                    frm.reload_doc();
+                                } else {
+                                    frappe.msgprint("Error updating installment. Please try again.");
+                                }
+                            }
+                        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             d.hide();
                         }
                     });
+
+
+
+
+
+
+
+
+
+
+
+
 
                     d.show();
                 });

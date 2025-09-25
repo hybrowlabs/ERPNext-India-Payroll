@@ -344,15 +344,18 @@ def get_advance_dashboard_erp(employee,id,company):
 
 def validate(self, method):
     if self.employee and self.posting_date and self.custom_advance_type:
-        advance_amount = get_advance_amount_checking(self.employee, self.custom_advance_type, self.posting_date,self.company)
+
+        advance_type=frappe.get_doc("Advance Type",self.custom_advance_type)
+        if advance_type.policy_based_type==1 and advance_type.percentage:
+            advance_amount = get_advance_amount_checking(self.employee, self.custom_advance_type, self.posting_date,self.company)
 
 
-        if advance_amount and flt(self.advance_amount) > flt(advance_amount.get("amount", 0)):
-            frappe.throw(
-                f"Advance amount {fmt_money(self.advance_amount)} exceeds "
-                f"the allowable limit of {fmt_money(advance_amount.get('amount', 0))} "
-                f"based on attendance and salary."
-            )
+            if advance_amount and flt(self.advance_amount) > flt(advance_amount.get("amount", 0)):
+                frappe.throw(
+                    f"Advance amount {fmt_money(self.advance_amount)} exceeds "
+                    f"the allowable limit of {fmt_money(advance_amount.get('amount', 0))} "
+                    f"based on attendance and salary."
+                )
 
     self.custom_total_paid_amount=0
     self.custom_total_balance_amount=self.advance_amount
