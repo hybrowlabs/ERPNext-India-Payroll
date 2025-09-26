@@ -144,16 +144,33 @@ frappe.ui.form.on('Loan Application', {
                           <td style="text-align:center; border:1px solid #000;">
                             <input type="checkbox" disabled ${row.deducted ? "checked" : ""}>
                           </td>
-                          <td style="text-align:center; border:1px solid #000;">
-                              ${(row.deducted === 0 && has_payroll_manager_role)
-                                  ? `<button class="btn btn-xs btn-primary hold-btn"
-                                            data-row-id="${i + 1}"
-                                            data-date="${row.payment_date}"
-                                            data-amount="${row.total_payment}">
-                                        Hold
-                                    </button>`
-                                  : ""}
-                            </td>
+
+                          <!-- Hold Column -->
+                           <td style="text-align:center; border:1px solid #000; white-space:nowrap;">
+                            ${(row.deducted === 0 && has_payroll_manager_role)
+                              ? `<button class="btn btn-xs btn-primary hold-btn"
+                                        data-row-id="${i + 1}"
+                                        data-date="${row.payment_date}"
+                                        data-amount="${row.total_payment}">
+                                    Hold
+                                  </button><br>`
+                              : ""}
+
+                            ${(row.deducted === 0 && has_payroll_manager_role)
+                              ? `<button class="btn btn-xs btn-success edit-btn"
+                                        style="margin-top:5px;"
+                                        data-row-id="${i + 1}"
+                                        data-date="${row.payment_date}"
+                                        data-amount="${row.total_payment}">
+                                    Edit
+                                  </button>`
+                              : ""}
+                          </td>
+
+
+
+
+
                       </tr>
                       `;
 
@@ -182,6 +199,7 @@ frappe.ui.form.on('Loan Application', {
                           <th style="border:1px solid #000;">Deducted</th>
 
                           <th style="border:1px solid #000;">Hold</th>
+
                         </tr>
                       </thead>
                       <tbody>
@@ -303,39 +321,137 @@ frappe.ui.form.on('Loan Application', {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                             d.hide();
                         }
                     });
 
 
 
-
-
-
-
-
-
-
-
-
-
                     d.show();
                 });
+
+
+                $(document).on("click", ".edit-btn", function() {
+                  const rowId = $(this).data("row-id");
+                  const paymentDate = $(this).data("date");
+                  const amount = $(this).data("amount");
+                  let remaining_installments = loan.loan_tenure - rowId;
+                  let d = new frappe.ui.Dialog({
+                      title: "Edit Repayment Amount",
+                      size: "large",
+                      fields: [
+                        {
+                          label: "Payment Date",
+                          fieldname: "payment_date",
+                          fieldtype: "Date",
+                          default: paymentDate,
+                          read_only: 1
+                      },
+                      { fieldtype: "Section Break" },
+                      {
+                          label: "Hold Option",
+                          fieldname: "hold_option",
+                          fieldtype: "Select",
+                          options: [
+                              "Recover Pending in Next Month",
+                              "Distribute Across Future Months",
+
+                          ],
+                          default: "Distribute Across Future Months"
+                      },
+                      { fieldtype: "Column Break" },
+                    {
+                        label: "Number of Months to Hold",
+                        fieldname: "number_of_months",
+                        fieldtype: "Int",
+                        default: 1,
+                        reqd: 1
+                    },
+                    { fieldtype: "Section Break" },
+                    {
+                      label: "Repayment Amount",
+                      fieldname: "repayment_amount",
+                      fieldtype: "Float",
+                      reqd: 1
+                  },
+
+
+
+                      ],
+                      primary_action_label: "Update",
+                      primary_action(values) {
+
+
+
+
+
+                        console.log(values,"11111111111111111")
+
+
+                        if (values.number_of_months < 1) {
+                          frappe.msgprint("Number of months to hold must be at least 1.");
+                          return;
+                      }
+
+                      if (values.number_of_months > loan.loan_tenure) {
+                          frappe.msgprint("Number of months to hold cannot exceed total installments.");
+                          return;
+                      }
+
+
+
+                      if (values.number_of_months > remaining_installments) {
+                            frappe.msgprint(
+                                `Only ${remaining_installments} installment(s) are pending. You cannot hold ${values.number_of_months} months.`
+                            );
+                            return;
+                        }
+
+                        if(values.repayment_amount>0)
+                              {
+                                frappe.call({
+                                  method: "cn_indian_payroll.cn_indian_payroll.overrides.loan_application.edit_installment",
+                                  args: {
+                                      payment_date: values.payment_date,
+                                      employee: cur_frm.doc.applicant,
+                                      company: cur_frm.doc.company,
+                                      repayment_amount: values.repayment_amount,
+                                      doc_id: cur_frm.doc.name,
+                                      hold_option:values.hold_option,
+                                      number_of_months:values.number_of_months
+                                  },
+                                  callback: function(r) {
+                                      if (r.message === "success") {
+                                          frappe.msgprint("Repayment amount updated successfully.");
+                                          d.hide();
+                                          cur_frm.reload_doc();
+                                      } else {
+                                          frappe.msgprint("Error updating repayment. Please try again.");
+                                      }
+                                  }
+                              });
+
+                              }
+
+                          else
+                          {
+
+                              msgprint("Please mention the Repayment Amount")
+                          }
+
+
+
+                          d.hide();
+                      }
+                  });
+
+                  d.show();
+              });
+
+
+
+
+
 
             }
         });
