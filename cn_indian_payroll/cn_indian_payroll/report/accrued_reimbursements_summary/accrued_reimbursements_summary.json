@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-04-14 16:13:37.534537",
+ "modified": "2025-09-26 10:17:00.725680",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Accrued Reimbursements Summary",
@@ -29,6 +29,12 @@
   },
   {
    "role": "Employee"
+  },
+  {
+   "role": "Payroll Admin"
+  },
+  {
+   "role": "Payroll Manager"
   }
  ],
  "timeout": 0

@@ -331,7 +331,7 @@ frappe.ui.form.on('Loan Application', {
                 });
 
 
-                $(document).on("click", ".edit-btn", function() {
+              $(document).on("click", ".edit-btn", function() {
                   const rowId = $(this).data("row-id");
                   const paymentDate = $(this).data("date");
                   const amount = $(this).data("amount");
@@ -382,10 +382,10 @@ frappe.ui.form.on('Loan Application', {
                       primary_action(values) {
 
 
+                        if(values.repayment_amount > amount) {
+                          msgprint("You can't enter an amount greater than " + amount);
+                      }
 
-
-
-                        console.log(values,"11111111111111111")
 
 
                         if (values.number_of_months < 1) {
@@ -418,7 +418,8 @@ frappe.ui.form.on('Loan Application', {
                                       repayment_amount: values.repayment_amount,
                                       doc_id: cur_frm.doc.name,
                                       hold_option:values.hold_option,
-                                      number_of_months:values.number_of_months
+                                      number_of_months:values.number_of_months,
+                                      amount:amount
                                   },
                                   callback: function(r) {
                                       if (r.message === "success") {
