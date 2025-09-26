@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-26 16:17:40.696781",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "department",
+  "designation",
+  "column_break_yswa",
+  "company",
+  "transaction_date",
+  "payables_section",
+  "payable_earnings",
+  "receivables_section",
+  "receivable_deductions"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "column_break_yswa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transaction Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payables_section",
+   "fieldtype": "Section Break",
+   "label": "Payables"
+  },
+  {
+   "fieldname": "payable_earnings",
+   "fieldtype": "Table",
+   "label": "Payable Earnings",
+   "options": "Resettlement Payables"
+  },
+  {
+   "fieldname": "receivables_section",
+   "fieldtype": "Section Break",
+   "label": "Receivables"
+  },
+  {
+   "fieldname": "receivable_deductions",
+   "fieldtype": "Table",
+   "label": "Receivable Deductions",
+   "options": "Resettlement Receivables"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-26 17:18:27.990780",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Resettlement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -64,7 +64,6 @@ def calculate_tds_projection(doc):
 
             num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
 
-            # frappe.msgprint(str(num_months))
 
             loan_repayments = frappe.get_list(
                 "Loan Repayment Schedule",
