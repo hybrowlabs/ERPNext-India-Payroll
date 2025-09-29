@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:RESETTLE-{employee}-{######}",
  "creation": "2025-09-26 16:17:40.696781",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -8,13 +9,17 @@
   "employee",
   "department",
   "designation",
+  "relieving_date",
   "column_break_yswa",
   "company",
   "transaction_date",
+  "salary_slip_details_section",
+  "salary_slip_detail",
   "payables_section",
   "payable_earnings",
   "receivables_section",
-  "receivable_deductions"
+  "receivable_deductions",
+  "amended_from"
  ],
  "fields": [
   {
@@ -80,15 +85,44 @@
    "fieldtype": "Table",
    "label": "Receivable Deductions",
    "options": "Resettlement Receivables"
+  },
+  {
+   "fieldname": "salary_slip_details_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Slip Details"
+  },
+  {
+   "fieldname": "salary_slip_detail",
+   "fieldtype": "Table",
+   "label": "Salary Slip Detail",
+   "options": "Salary Slip Child"
+  },
+  {
+   "fetch_from": "employee.relieving_date",
+   "fieldname": "relieving_date",
+   "fieldtype": "Date",
+   "label": "Relieving Date"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Resettlement",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-09-26 17:18:27.990780",
+ "modified": "2025-09-29 12:19:41.192084",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Resettlement",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

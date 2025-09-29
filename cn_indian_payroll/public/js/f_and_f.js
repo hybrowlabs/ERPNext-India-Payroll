@@ -32,104 +32,104 @@ frappe.ui.form.on('Full and Final Statement', {
 
 
 
-frappe.ui.form.on('Leave Encashment Child', {
-    basic_amount: function (frm, cdt, cdn) {
-        var d = locals[cdt][cdn];
+// frappe.ui.form.on('Leave Encashment Child', {
+//     basic_amount: function (frm, cdt, cdn) {
+//         var d = locals[cdt][cdn];
 
-        if (d.basic_amount) {
-            if (d.encashment_days && d.leave_type) {
-                frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
-            }
-        }
-
-
-        let total = 0;
-
-        if (frm.doc.custom_calculated_amount && frm.doc.custom_calculated_amount.length > 0) {
-            $.each(frm.doc.custom_calculated_amount, function(i, row) {
-                total += row.amount || 0;
-            });
-        }
-
-        if (frm.doc.custom_locked_leave && frm.doc.custom_locked_leave.length > 0) {
-            $.each(frm.doc.custom_locked_leave, function(i, row) {
-                total += row.amount || 0;
-            });
-        }
+//         if (d.basic_amount) {
+//             if (d.encashment_days && d.leave_type) {
+//                 frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
+//             }
+//         }
 
 
-        if (total > 0) {
-            frappe.call({
-                method: "frappe.client.get",
-                args: {
-                    doctype: "Company",
-                    name: frm.doc.company
-                },
-                callback: function(res) {
-                    if (res && res.message && res.message.custom_leave_encashment_component) {
-                        let target_component = res.message.custom_leave_encashment_component;
+//         let total = 0;
 
-                        frm.doc.payables.forEach((v) => {
-                            if (v.custom_reference_component === target_component) {
-                                frappe.model.set_value(v.doctype, v.name, "amount", total);
-                            }
-                        });
+//         if (frm.doc.custom_calculated_amount && frm.doc.custom_calculated_amount.length > 0) {
+//             $.each(frm.doc.custom_calculated_amount, function(i, row) {
+//                 total += row.amount || 0;
+//             });
+//         }
 
-                        frm.refresh_field("payables");
-                    }
-                }
-            });
-        }
-    },
-
-    encashment_days: function(frm, cdt, cdn) {
-        var d = locals[cdt][cdn];
-
-        if (d.encashment_days) {
-            if (d.basic_amount && d.leave_type) {
-                frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
-            }
-        }
-
-        let total = 0;
-
-        if (frm.doc.custom_calculated_amount && frm.doc.custom_calculated_amount.length > 0) {
-            $.each(frm.doc.custom_calculated_amount, function(i, row) {
-                total += row.amount || 0;
-            });
-        }
-
-        if (frm.doc.custom_locked_leave && frm.doc.custom_locked_leave.length > 0) {
-            $.each(frm.doc.custom_locked_leave, function(i, row) {
-                total += row.amount || 0;
-            });
-        }
+//         if (frm.doc.custom_locked_leave && frm.doc.custom_locked_leave.length > 0) {
+//             $.each(frm.doc.custom_locked_leave, function(i, row) {
+//                 total += row.amount || 0;
+//             });
+//         }
 
 
-        if (total > 0) {
-            frappe.call({
-                method: "frappe.client.get",
-                args: {
-                    doctype: "Company",
-                    name: frm.doc.company
-                },
-                callback: function(res) {
-                    if (res && res.message && res.message.custom_leave_encashment_component) {
-                        let target_component = res.message.custom_leave_encashment_component;
-                        frm.doc.payables.forEach((v) => {
-                            if (v.custom_reference_component === target_component) {
-                                frappe.model.set_value(v.doctype, v.name, "amount", total);
-                            }
-                        });
+//         if (total > 0) {
+//             frappe.call({
+//                 method: "frappe.client.get",
+//                 args: {
+//                     doctype: "Company",
+//                     name: frm.doc.company
+//                 },
+//                 callback: function(res) {
+//                     if (res && res.message && res.message.custom_leave_encashment_component) {
+//                         let target_component = res.message.custom_leave_encashment_component;
 
-                        frm.refresh_field("payables");
-                    }
-                }
-            });
-        }
-    }
+//                         frm.doc.payables.forEach((v) => {
+//                             if (v.custom_reference_component === target_component) {
+//                                 frappe.model.set_value(v.doctype, v.name, "amount", total);
+//                             }
+//                         });
 
-});
+//                         frm.refresh_field("payables");
+//                     }
+//                 }
+//             });
+//         }
+//     },
+
+//     encashment_days: function(frm, cdt, cdn) {
+//         var d = locals[cdt][cdn];
+
+//         if (d.encashment_days) {
+//             if (d.basic_amount && d.leave_type) {
+//                 frappe.model.set_value(cdt, cdn, "amount", (d.basic_amount / 30) * d.encashment_days);
+//             }
+//         }
+
+//         let total = 0;
+
+//         if (frm.doc.custom_calculated_amount && frm.doc.custom_calculated_amount.length > 0) {
+//             $.each(frm.doc.custom_calculated_amount, function(i, row) {
+//                 total += row.amount || 0;
+//             });
+//         }
+
+//         if (frm.doc.custom_locked_leave && frm.doc.custom_locked_leave.length > 0) {
+//             $.each(frm.doc.custom_locked_leave, function(i, row) {
+//                 total += row.amount || 0;
+//             });
+//         }
+
+
+//         if (total > 0) {
+//             frappe.call({
+//                 method: "frappe.client.get",
+//                 args: {
+//                     doctype: "Company",
+//                     name: frm.doc.company
+//                 },
+//                 callback: function(res) {
+//                     if (res && res.message && res.message.custom_leave_encashment_component) {
+//                         let target_component = res.message.custom_leave_encashment_component;
+//                         frm.doc.payables.forEach((v) => {
+//                             if (v.custom_reference_component === target_component) {
+//                                 frappe.model.set_value(v.doctype, v.name, "amount", total);
+//                             }
+//                         });
+
+//                         frm.refresh_field("payables");
+//                     }
+//                 }
+//             });
+//         }
+//     }
+
+// });
 
 
 
