@@ -345,6 +345,10 @@ doc_events = {
         "validate":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.validate"
     },
 
+    # "Attendance Request": {
+    #     "validate":"cn_indian_payroll.cn_indian_payroll.overrides.attendance_request.validate"
+    # },
+
 
 
 }

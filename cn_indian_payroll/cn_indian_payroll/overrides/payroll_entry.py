@@ -255,6 +255,8 @@ def create_new_joinee_arrear(company, doc_id, start_date, end_date, employees):
                             arrear_doc.insert(ignore_permissions=True)
                             arrear_doc.submit()
                             frappe.db.commit()
+
+
                         get_payroll=frappe.get_doc("Payroll Entry",doc_id)
                         for d in get_payroll.employees:
                             if d.employee == emp.get("employee"):

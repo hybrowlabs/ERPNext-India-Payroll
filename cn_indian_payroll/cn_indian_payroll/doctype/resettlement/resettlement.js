@@ -10,7 +10,7 @@ frappe.ui.form.on("Resettlement", {
     employee: function(frm) {
         if (frm.doc.employee) {
 
-            // ✅ Get Employee document first
+
             frappe.db.get_doc("Employee", frm.doc.employee)
                 .then(employee => {
                     if (!employee.relieving_date) {
