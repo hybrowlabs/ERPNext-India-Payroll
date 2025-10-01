@@ -234,7 +234,7 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
             "Tax Declaration History",
             filters={
                 "employee": employee,
-                "posting_date": ["<=", end_date],  # make sure end_date is a date object
+                "posting_date": ["<=", end_date],
                 "payroll_period": payroll_period,
                 "tax_regime": tax_regime
             },

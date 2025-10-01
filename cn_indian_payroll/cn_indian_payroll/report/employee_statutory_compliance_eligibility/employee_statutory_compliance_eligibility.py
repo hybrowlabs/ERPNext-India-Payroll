@@ -24,13 +24,7 @@ def get_all_employee(filters=None):
 		"Employee",
 		filters=conditions,
 		fields=[
-			"name",
-			"employee_name",
-			"company",
-			"department",
-			"designation",
-			"employment_type",
-			"branch"
+			"*"
 		]
 	)
 
@@ -38,13 +32,23 @@ def get_all_employee(filters=None):
 		latest_salary_structure = frappe.get_list(
 			'Salary Structure Assignment',
 			filters={'employee': emp.name, 'docstatus': 1},
-			fields=["custom_is_epf", "custom_epf_type"],
+			fields=["*"],
 			order_by='from_date desc',
 			limit=1
 		)
 
 		pf_eligible = "Yes" if latest_salary_structure and latest_salary_structure[0].get("custom_is_epf") else "No"
 		pf_type = latest_salary_structure[0].get("custom_epf_type") if latest_salary_structure and latest_salary_structure[0].get("custom_is_epf") else None
+
+		esic_eligible="Yes" if latest_salary_structure and latest_salary_structure[0].get("custom_is_esic") else "No"
+
+		pt_eligible="Yes" if latest_salary_structure and latest_salary_structure[0].get("custom_state") else "No"
+		pt_state=latest_salary_structure[0].get("custom_state") if latest_salary_structure and latest_salary_structure[0].get("custom_state") else ""
+
+		lwf_eligible="Yes" if latest_salary_structure and latest_salary_structure[0].get("custom_lwf") else "No"
+		lwf_state=latest_salary_structure[0].get("custom_lwf_state") if latest_salary_structure and latest_salary_structure[0].get("custom_lwf") else ""
+		lwf_frequency=latest_salary_structure[0].get("custom_frequency") if latest_salary_structure and latest_salary_structure[0].get("custom_lwf") else ""
+
 
 		data.append({
 			"employee": emp.name,
@@ -56,9 +60,21 @@ def get_all_employee(filters=None):
 			"branch": emp.branch,
 			"pf_eligible": pf_eligible,
 			"pf_type": pf_type,
-			# "pan":emp.
-			# "uan":
-			# "pf_number":
+			"pan":emp.pan_number,
+			"uan":emp.custom_uan,
+			"pf_number":emp.provident_fund_account,
+			"pf_enrolment_status":emp.custom_pf_enrollment_status,
+			"esic_eligible":esic_eligible,
+			"esic_number":emp.custom_esic_number,
+			"esic_enrollment_status":emp.custom_esic_enrollment_status,
+			"pt_eligible":pt_eligible,
+			"pt_state":pt_state,
+			"lwf_eligible":lwf_eligible,
+			"lwf_state":lwf_state,
+			"lwf_frequency":lwf_frequency,
+
+
+
 
 		})
 
