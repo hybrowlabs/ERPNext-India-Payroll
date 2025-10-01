@@ -257,7 +257,6 @@ doctype_js = {
     "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
-    # "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
     "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
 
     "LOP Reversal": "public/js/lop_reversal.js",

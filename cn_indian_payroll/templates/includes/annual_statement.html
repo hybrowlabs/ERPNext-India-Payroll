@@ -383,34 +383,51 @@
 
     <tr>
       <td style="text-align: left;"><b>Total Chapter-VIA </b>  </td>
-      <td>Declared value</td>
-      <td>Deductible Value</td>
+      <td><b>Declared value</b></td>
+      <td><b>Deductible Value</b></td>
     </tr>
+
+
+    <!-- <tr>
+      <td style="text-align: left;"><b>    Deductible Value      </b>  </td>
+      <td>{{declaration}}</td>
+      <td></td>
+    </tr> -->
+
+
+    {% for row in declaration %}
+    <tr>
+      <td style="text-align: left;">{{ row.component }}</td>
+      <td style="text-align: right;">{{ "{:,.0f}".format(row.declared_amount) }}</td>
+      <td style="text-align: right;">{{ "{:,.0f}".format(row.eligible_amount) }}</td>
+    </tr>
+    {% endfor %}
 
 
     <tr>
-      <td style="text-align: left;"><b>    Deductible Value      </b>  </td>
+      <td style="text-align: left;"><b> Total Declaration Amount </b>  </td>
       <td></td>
-      <td></td>
+      <td><b>{{total_declaration}}</b></td>
     </tr>
+
 
     <tr>
       <td style="text-align: left;"><b> Net Taxable Income  </b>  </td>
       <td></td>
-      <td></td>
+      <td><b>{{net_taxable_income}}</b></td>
     </tr>
 
     <tr>
       <td style="text-align: left;"><b>Income Tax on Net Taxable Income (Before Rebate U/s 87A) </b>  </td>
       <td></td>
-      <td></td>
+      <td>{{total_tax_on_income}}</td>
     </tr>
 
 
     <tr>
       <td style="text-align: left;"><b> Rebate (U/s 87A) </b>  </td>
       <td></td>
-      <td></td>
+      <td>{{rebate}}</td>
     </tr>
 
     <tr>
@@ -429,20 +446,20 @@
     <tr>
       <td style="text-align: left;"><b>Education Cess</b>  </td>
       <td></td>
-      <td></td>
+      <td>{{education_cess}}</td>
     </tr>
 
     <tr>
       <td style="text-align: left;"><b>Surcharge</b>  </td>
       <td></td>
-      <td></td>
+      <td>{{surcharge}}</td>
     </tr>
 
 
     <tr>
       <td style="text-align: left;"><b>Net Tax Payable (A)</b>  </td>
       <td></td>
-      <td></td>
+      <td>{{tax_on_total_income}}</td>
     </tr>
 
     <tr>
@@ -466,14 +483,18 @@
     <tr>
       <td style="text-align: left;"><b>Remaining Months</b>  </td>
       <td></td>
-      <td></td>
+      <td>{{custom_month_count}}</td>
     </tr>
 
     <tr>
-      <td style="text-align: left;"><b>Monthly TDS</b>  </td>
+      <td style="text-align: left;"><b>Monthly TDS</b></td>
       <td></td>
-      <td></td>
+      <td>
+        {{tds}}
+      </td>
     </tr>
+
+
 
 
 

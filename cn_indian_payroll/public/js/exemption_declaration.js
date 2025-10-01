@@ -80,7 +80,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                             ? stored_data.find(item => item.id === row.name || item.sub_category === row.name)
                             : null;
 
-                        const stored_value = stored_row ? stored_row.max_amount || '' : '';
+                        // const stored_value = stored_row ? stored_row.max_amount || '' : '';
+
+                        const stored_value = stored_row ? stored_row.amount || '' : '';
 
                         // const stored_value = stored_row ? stored_row.value || stored_row.amount || '' : '';
 
@@ -90,7 +92,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                         if (frm.doc.custom_tax_regime === "New Regime") {
                             is_readonly = true;
                         } else if (frm.doc.custom_tax_regime === "Old Regime") {
-                            is_readonly = ["NPS", "Provident Fund", "Professional Tax"].includes(row.custom_component_type);
+                            is_readonly = ["NPS", "Provident Fund", "Professional Tax","LTA Reimbursement"].includes(row.custom_component_type);
                         }
 
                         const readonly_attr = is_readonly ? 'readonly' : '';

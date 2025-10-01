@@ -57,13 +57,13 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 "Employee Tax Exemption Sub Category", subcategory.exemption_sub_category
             )
 
-            # Case 1: Fixed max amount > 0
+
             if check_component.max_amount > 0:
                 subcategory.max_amount = check_component.max_amount
 
-            # Case 2: LTA Reimbursement with no max_amount
+
             elif check_component.custom_component_type == "LTA Reimbursement" and check_component.max_amount == 0:
-                # Fetch salary slips for this payroll period
+
                 salary_slips = frappe.get_list(
                     "Salary Slip",
                     filters={

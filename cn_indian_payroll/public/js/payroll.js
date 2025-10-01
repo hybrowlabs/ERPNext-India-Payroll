@@ -172,10 +172,10 @@ frappe.ui.form.on('Payroll Entry', {
         }
 
 
-        if(frm.doc.custom_salary_arrear_created==0)
-        {
-            frm.page.clear_primary_action();
-        }
+        // if(frm.doc.custom_salary_arrear_created==0)
+        // {
+        //     frm.page.clear_primary_action();
+        // }
 
         frm.change_custom_button_type('Generate New Joinee Arrear', null, 'primary');
 
