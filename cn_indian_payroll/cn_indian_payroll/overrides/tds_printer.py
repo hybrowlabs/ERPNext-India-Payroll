@@ -226,6 +226,7 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
     total_declaration=0
     net_taxable_income=0
     total_declaration_amount=0
+    standard_amount=0
 
     declaration=[]
     if employee and payroll_period and end_date and month and tax_regime and income_tax_slab:
