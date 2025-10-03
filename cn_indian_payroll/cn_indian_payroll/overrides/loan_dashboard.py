@@ -16,16 +16,22 @@ def print_loan_dashboard(employee):
     )
 
     results = []
-    loan_tenure=None
-    total_loan_amount=None
+
+    monthly_repayment=0
+    loan_tenure=0
+    total_loan_amount=0
+
+    total_payment=0
+    total_interest_payable=0
+    total_principal_paid=0
 
     for loan in loan_details:
-        # Fetch Loan Product details
+
         loan_product = None
         if loan.loan_product:
             loan_product = frappe.get_doc("Loan Product", loan.loan_product)
 
-        # Fetch linked Loan (if exists)
+
         loan_docs = frappe.get_list(
             "Loan",
             filters={"loan_application": loan.name},
@@ -33,7 +39,13 @@ def print_loan_dashboard(employee):
         )
         loan_doc = loan_docs[0] if loan_docs else None
 
-        # Repayment schedule
+        if loan_doc:
+
+            total_payment = round(loan_doc.total_payment, 2)
+            total_interest_payable = round(loan_doc.total_interest_payable, 2)
+            total_principal_paid = round(loan_doc.total_principal_paid, 2)
+
+
         repayment_schedule = []
         paid_months=[]
         unpaid_months=[]
@@ -93,9 +105,9 @@ def print_loan_dashboard(employee):
             "remaining_amount": total_unpaid,
             "repayment_schedule": repayment_schedule,
 
-            "total_payment":loan_doc.total_payment,
-            "total_interest_payable":loan_doc.total_interest_payable,
-            "total_principal_paid":loan_doc.total_principal_paid,
+            "total_payment":total_payment,
+            "total_interest_payable":total_interest_payable,
+            "total_principal_paid":total_principal_paid,
         })
 
     return results
@@ -117,16 +129,24 @@ def print_loan_dashboard_erp(employee,id):
     )
 
     results = []
-    loan_tenure=None
-    total_loan_amount=None
+
+
+
+    monthly_repayment=0
+    loan_tenure=0
+    total_loan_amount=0
+
+    total_payment=0
+    total_interest_payable=0
+    total_principal_paid=0
 
     for loan in loan_details:
-        # Fetch Loan Product details
+
         loan_product = None
         if loan.loan_product:
             loan_product = frappe.get_doc("Loan Product", loan.loan_product)
 
-        # Fetch linked Loan (if exists)
+
         loan_docs = frappe.get_list(
             "Loan",
             filters={"loan_application": loan.name},
@@ -134,7 +154,13 @@ def print_loan_dashboard_erp(employee,id):
         )
         loan_doc = loan_docs[0] if loan_docs else None
 
-        # Repayment schedule
+        if loan_doc:
+            total_payment = round(loan_doc.total_payment, 2)
+            total_interest_payable = round(loan_doc.total_interest_payable, 2)
+            total_principal_paid = round(loan_doc.total_principal_paid, 2)
+
+
+
         repayment_schedule = []
         paid_months=[]
         unpaid_months=[]
@@ -202,9 +228,9 @@ def print_loan_dashboard_erp(employee,id):
             "remaining_amount": total_unpaid,
             "repayment_schedule": repayment_schedule,
 
-            "total_payment":round(loan_doc.total_payment,2),
-            "total_interest_payable":round(loan_doc.total_interest_payable,2),
-            "total_principal_paid":round(loan_doc.total_principal_paid,2),
+            "total_payment":total_payment,
+            "total_interest_payable":total_interest_payable,
+            "total_principal_paid":total_principal_paid,
         })
 
     return results
