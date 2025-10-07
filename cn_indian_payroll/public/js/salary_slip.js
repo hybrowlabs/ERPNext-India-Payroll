@@ -1,6 +1,31 @@
 frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
 
+
+
+    //   frm.add_custom_button(__('View Payslip PDF'), function() {
+    //     const slip_id = encodeURIComponent(frm.doc.name);
+    //     const url = `/api/method/cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf_html?id=${slip_id}`;
+
+    //     fetch(url)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.content_type === 'text/html' && data.response) {
+    //                 const win = window.open('', '_blank'); // open new tab
+    //                 win.document.open();
+    //                 win.document.write(data.response); // inject the full HTML
+    //                 win.document.close();
+    //             } else {
+    //                 frappe.msgprint(__('No HTML content returned'));
+    //             }
+    //         })
+    //         .catch(err => {
+    //             console.error(err);
+    //             frappe.msgprint(__('Failed to load payslip'));
+    //         });
+    // }).addClass('btn-primary');
+
+
         if(frm.doc.docstatus==1 || frm.doc.docstatus==0)
         {
 
@@ -42,22 +67,32 @@ frappe.ui.form.on("Salary Slip", {
             return;
         }
 
+        // frappe.call({
+        //     method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf",
+        //     args: {
+        //         id: frm.doc.name   // only need the salary slip name
+        //     },
+        //     callback: function (r) {
+        //         if (!r.message || !r.message.html) {
+        //             frappe.msgprint(__('No HTML generated'));
+        //             return;
+        //         }
+        //         const w = window.open("", "_blank");
+        //         w.document.open();
+        //         w.document.write(r.message.html);
+        //         w.document.close();
+        //     }
+        // });
+
         frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf",
-            args: {
-                id: frm.doc.name   // only need the salary slip name
-            },
-            callback: function (r) {
-                if (!r.message || !r.message.html) {
-                    frappe.msgprint(__('No HTML generated'));
-                    return;
-                }
-                const w = window.open("", "_blank");
-                w.document.open();
-                w.document.write(r.message.html);
-                w.document.close();
-            }
-        });
+          method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf_json",
+          args: { id: frm.doc.name },
+          callback: function(r) {
+              const w = window.open("", "_blank");
+              w.document.write(r.message.html);
+          }
+      });
+
     }, "View");
 
 

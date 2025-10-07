@@ -400,39 +400,57 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @frappe.whitelist()
-def get_payslip_pdf(id):
-    # Fetch Salary Slip by name (id)
-    try:
-        slip = frappe.get_doc("Salary Slip", id)
-
-    except frappe.DoesNotExistError:
-        return {"html": "<p>No salary slip found.</p>"}
-
-    context = {
-        "doc": slip
-    }
-
-
-
-    html = frappe.render_template(
-        "cn_indian_payroll/templates/includes/regular_payslip.html",
-        context
-    )
+def get_payslip_pdf_json(id):
+    slip = frappe.get_doc("Salary Slip", id)
+    context = {"doc": slip}
+    html = frappe.render_template("cn_indian_payroll/templates/includes/regular_payslip.html", context)
     return {"html": html}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_payslip_pdf_html(id):
+    slip = frappe.get_doc("Salary Slip", id)
+    context = {"doc": slip}
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/regular_payslip.html", context
+    )
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @frappe.whitelist()
+# def get_payslip_pdf(id):
+#     # Fetch Salary Slip by name (id)
+#     try:
+#         slip = frappe.get_doc("Salary Slip", id)
+
+#     except frappe.DoesNotExistError:
+#         return {"html": "<p>No salary slip found.</p>"}
+
+#     context = {
+#         "doc": slip
+#     }
+
+
+
+#     html = frappe.render_template(
+#         "cn_indian_payroll/templates/includes/regular_payslip.html",
+#         context
+#     )
+#     return {"html": html}
 
 
 @frappe.whitelist()
