@@ -67,31 +67,31 @@ frappe.ui.form.on("Salary Slip", {
             return;
         }
 
-        // frappe.call({
-        //     method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf",
-        //     args: {
-        //         id: frm.doc.name   // only need the salary slip name
-        //     },
-        //     callback: function (r) {
-        //         if (!r.message || !r.message.html) {
-        //             frappe.msgprint(__('No HTML generated'));
-        //             return;
-        //         }
-        //         const w = window.open("", "_blank");
-        //         w.document.open();
-        //         w.document.write(r.message.html);
-        //         w.document.close();
-        //     }
-        // });
-
         frappe.call({
-          method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf_json",
-          args: { id: frm.doc.name },
-          callback: function(r) {
-              const w = window.open("", "_blank");
-              w.document.write(r.message.html);
-          }
-      });
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf",
+            args: {
+                id: frm.doc.name   // only need the salary slip name
+            },
+            callback: function (r) {
+                if (!r.message || !r.message.html) {
+                    frappe.msgprint(__('No HTML generated'));
+                    return;
+                }
+                const w = window.open("", "_blank");
+                w.document.open();
+                w.document.write(r.message.html);
+                w.document.close();
+            }
+        });
+
+      //   frappe.call({
+      //     method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf_json",
+      //     args: { id: frm.doc.name },
+      //     callback: function(r) {
+      //         const w = window.open("", "_blank");
+      //         w.document.write(r.message.html);
+      //     }
+      // });
 
     }, "View");
 

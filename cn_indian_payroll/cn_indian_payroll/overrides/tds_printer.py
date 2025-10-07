@@ -431,26 +431,26 @@ def get_payslip_pdf_html(id):
 
 
 
-# @frappe.whitelist()
-# def get_payslip_pdf(id):
-#     # Fetch Salary Slip by name (id)
-#     try:
-#         slip = frappe.get_doc("Salary Slip", id)
+@frappe.whitelist()
+def get_payslip_pdf(id):
+    # Fetch Salary Slip by name (id)
+    try:
+        slip = frappe.get_doc("Salary Slip", id)
 
-#     except frappe.DoesNotExistError:
-#         return {"html": "<p>No salary slip found.</p>"}
+    except frappe.DoesNotExistError:
+        return {"html": "<p>No salary slip found.</p>"}
 
-#     context = {
-#         "doc": slip
-#     }
+    context = {
+        "doc": slip
+    }
 
 
 
-#     html = frappe.render_template(
-#         "cn_indian_payroll/templates/includes/regular_payslip.html",
-#         context
-#     )
-#     return {"html": html}
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/regular_payslip.html",
+        context
+    )
+    return {"html": html}
 
 
 @frappe.whitelist()
