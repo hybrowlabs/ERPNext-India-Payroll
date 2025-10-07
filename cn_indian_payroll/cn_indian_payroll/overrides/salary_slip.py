@@ -1028,7 +1028,9 @@ class CustomSalarySlip(SalarySlip):
 
 
     def update_total_lop(self):
-        self.custom_total_leave_without_pay = (self.absent_days or 0) + self.leave_without_pay
+        # self.custom_total_leave_without_pay = (self.absent_days or 0) + self.leave_without_pay
+        self.custom_total_leave_without_pay = (self.absent_days or 0) + (self.leave_without_pay or 0)
+
 
 
 
