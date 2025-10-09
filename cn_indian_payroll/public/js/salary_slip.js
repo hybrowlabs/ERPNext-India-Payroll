@@ -5,7 +5,7 @@ frappe.ui.form.on("Salary Slip", {
 
     //   frm.add_custom_button(__('View Payslip PDF'), function() {
     //     const slip_id = encodeURIComponent(frm.doc.name);
-    //     const url = `/api/method/cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf_html?id=${slip_id}`;
+    //     const url = `/api/method/cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_benefit_payslip_pdf_html?id=${slip_id}`;
 
     //     fetch(url)
     //         .then(response => response.json())
