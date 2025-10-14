@@ -536,47 +536,45 @@ def get_benefit_payslip_pdf(id):
 
 @frappe.whitelist(allow_guest=True)
 def get_benefit_payslip_pdf_html(id):
-    try:
-        slip = frappe.get_doc("Salary Slip", id)
-        find = False
-
-        if slip.earnings:
-            for earning in slip.earnings:
-                get_component = frappe.get_doc("Salary Component", earning.salary_component)
-                if get_component.custom_is_reimbursement:
-                    find = True
-                    break
-
-    except frappe.DoesNotExistError:
-        return {"html": "<p>No salary slip found.</p>"}
+    slip = frappe.get_doc("Salary Slip", id)
+    
+    # Check if any earning component is a reimbursement
+    find = False
+    if slip.earnings:
+        for earning in slip.earnings:
+            component = frappe.get_cached_doc("Salary Component", earning.salary_component)
+            if component.custom_is_reimbursement:
+                find = True
+                break
 
     context = {"doc": slip}
 
     if find:
+        # Render Benefit Payslip
         html = frappe.render_template(
             "cn_indian_payroll/templates/includes/benefit_payslip.html",
             context
         )
-        return {"html": html}
     else:
-        return {
-            "html": """
-                <div style="
-                    padding: 12px;
-                    margin: 10px 0;
-                    border: 1px solid #f5c2c7;
-                    background-color: #f8d7da;
-                    color: #842029;
-                    border-radius: 6px;
-                    font-size: 14px;
-                    font-family: Arial, sans-serif;
-                ">
-                    ⚠️ No Reimbursement component found in salary slip.
-                </div>
-            """
-        }
+        # Render Warning Message inside HTML
+        html = """
+            <div style="
+                padding: 12px;
+                margin: 10px 0;
+                border: 1px solid #f5c2c7;
+                background-color: #f8d7da;
+                color: #842029;
+                border-radius: 6px;
+                font-size: 14px;
+                font-family: Arial, sans-serif;
+            ">
+                ⚠️ No Reimbursement component found in this salary slip.
+            </div>
+        """
 
-
+    # Set HTTP Response
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
 
 
 
@@ -635,43 +633,39 @@ def get_offcycle_payslip_pdf(id):
 
 
 
-import frappe
-
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def get_offcycle_payslip_pdf_html(id):
     try:
         slip = frappe.get_doc("Salary Slip", id)
 
+        # Flag to check Offcycle eligibility
         find = False
-
         if slip.earnings:
             for earning in slip.earnings:
-                get_component = frappe.get_doc("Salary Component", earning.salary_component)
+                component = frappe.get_cached_doc("Salary Component", earning.salary_component)
                 if (
-                    getattr(get_component, "custom_is_part_of_gross_pay", 0) == 0
-                    and getattr(get_component, "do_not_include_in_total", 0) == 1
-                    and getattr(get_component, "custom_component_sub_type", "") == "Variable"
+                    getattr(component, "custom_is_part_of_gross_pay", 0) == 0
+                    and getattr(component, "do_not_include_in_total", 0) == 1
+                    and getattr(component, "custom_component_sub_type", "") == "Variable"
                 ):
                     find = True
                     break
 
     except frappe.DoesNotExistError:
-        return {"html": "<p>No salary slip found.</p>"}
+        html = "<p>No salary slip found.</p>"
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "get_offcycle_payslip_pdf_html Error")
-        return {"html": f"<p style='color:red;'>Error: {str(e)}</p>"}
-
-    context = {"doc": slip}
-
-    if find:
-        html = frappe.render_template(
-            "cn_indian_payroll/templates/includes/off_cycle_payslip.html",
-            context
-        )
-        return {"html": html}
+        html = f"<p style='color:red;'>Error: {str(e)}</p>"
     else:
-        return {
-            "html": """
+        context = {"doc": slip}
+
+        if find:
+            html = frappe.render_template(
+                "cn_indian_payroll/templates/includes/off_cycle_payslip.html",
+                context
+            )
+        else:
+            html = """
                 <div style="
                     padding: 12px;
                     margin: 10px 0;
@@ -682,7 +676,10 @@ def get_offcycle_payslip_pdf_html(id):
                     font-size: 14px;
                     font-family: Arial, sans-serif;
                 ">
-                    ⚠️ No Offcycle component found in salary slip.
+                    ⚠️ No Offcycle component found in this salary slip.
                 </div>
             """
-        }
+
+    # Final Frappe HTTP Response
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
