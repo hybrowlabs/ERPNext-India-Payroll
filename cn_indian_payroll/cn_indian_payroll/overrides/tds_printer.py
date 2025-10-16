@@ -537,7 +537,7 @@ def get_benefit_payslip_pdf(id):
 @frappe.whitelist(allow_guest=True)
 def get_benefit_payslip_pdf_html(id):
     slip = frappe.get_doc("Salary Slip", id)
-    
+
     # Check if any earning component is a reimbursement
     find = False
     if slip.earnings:
