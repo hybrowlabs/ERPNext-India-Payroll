@@ -160,9 +160,6 @@ custom__car_perquisite(frm)
 
 async function processSalaryComponents(frm) {
 
-
-
-    var total_ctc=[]
     const response = await frappe.call({
         method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
         args: {
@@ -176,27 +173,13 @@ async function processSalaryComponents(frm) {
     });
 
     if (response.message) {
+        // Arrays to categorize components
+        let basicSalaryComponents = [];
+        let allowanceComponents = [];
+        let statutoryComponents = [];
+        let insuranceComponents = [];
 
-        console.log(response.message.earnings);
-        let salaryBreakup = `
-            <table class="table table-bordered small">
-                <thead>
-                    <tr>
-                        <th style="width: 16%">Salary Component (Earnings)</th>
-                        <th style="width: 16%" class="text-right">Monthly Amount</th>
-                        <th style="width: 16%" class="text-right">Annual Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="salary_breakup_body"></tbody>
-            </table>`;
-
-        document.getElementById("ctc_preview").innerHTML = salaryBreakup;
-        let tableBody = document.getElementById("salary_breakup_body");
-
-        let totalMonthlyEarnings = 0;
-        let totalAnnualEarnings = 0;
-
-        // Processing earnings components
+        // Process earnings components
         for (const v of response.message.earnings) {
             const res = await frappe.call({
                 method: "frappe.client.get",
@@ -208,62 +191,219 @@ async function processSalaryComponents(frm) {
             });
 
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
+                let roundedAmount, annualAmount;
 
-                if(res.message.round_to_the_nearest_integer == 0)
-                {
-
-                total_ctc.push(v.default_amount)
-                let newRow = tableBody.insertRow();
-
-                let componentCell = newRow.insertCell();
-                componentCell.textContent = res.message.name;
-
-                let roundedAmount = (v.default_amount);
-                let formattedAmount = roundedAmount.toLocaleString();
-                let amountCell = newRow.insertCell();
-                amountCell.className = "text-right";
-                amountCell.textContent = formattedAmount;
-
-                let annualAmount = Math.round((v.default_amount) * 12);
-                let formattedAnnualAmount = annualAmount.toLocaleString();
-                let annualAmountCell = newRow.insertCell();
-                annualAmountCell.className = "text-right";
-                annualAmountCell.textContent = formattedAnnualAmount;
-
-
-                totalMonthlyEarnings += roundedAmount;
-                totalAnnualEarnings += annualAmount;
-
+                if (res.message.round_to_the_nearest_integer == 0) {
+                    roundedAmount = v.default_amount;
+                    annualAmount = Math.round(v.default_amount * 12);
+                } else {
+                    roundedAmount = Math.round(v.default_amount);
+                    annualAmount = roundedAmount * 12;
                 }
 
-                else{
+                let componentData = {
+                    name: res.message.name,
+                    monthly: roundedAmount,
+                    annual: annualAmount,
+                    sequence: res.message.custom_sequence || v.idx || 999
+                };
 
-                total_ctc.push(Math.round(v.default_amount))
-                let newRow = tableBody.insertRow();
-
-                let componentCell = newRow.insertCell();
-                componentCell.textContent = res.message.name;
-
-                let roundedAmount = Math.round(v.default_amount);
-                let formattedAmount = roundedAmount.toLocaleString();
-                let amountCell = newRow.insertCell();
-                amountCell.className = "text-right";
-                amountCell.textContent = formattedAmount;
-
-                let annualAmount = Math.round(v.default_amount) * 12;
-                let formattedAnnualAmount = annualAmount.toLocaleString();
-                let annualAmountCell = newRow.insertCell();
-                annualAmountCell.className = "text-right";
-                annualAmountCell.textContent = formattedAnnualAmount;
-
-                // Accumulate totals
-                totalMonthlyEarnings += roundedAmount;
-                totalAnnualEarnings += annualAmount;
-
+                // Categorize based on is_basic or adhoc flag
+                if (res.message.custom_is_adhoc_or_basic == 1) {
+                    basicSalaryComponents.push(componentData);
+                } else {
+                    allowanceComponents.push(componentData);
                 }
             }
         }
 
+        // Process deductions components
+        for (const v of response.message.deductions) {
+            const res = await frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Salary Component",
+                    filters: { name: v.salary_component },
+                    fields: ["*"]
+                }
+            });
+
+            if (res.message && res.message.custom_is_part_of_ctc == 1) {
+                let roundedAmount, annualAmount;
+
+                if (res.message.round_to_the_nearest_integer == 0) {
+                    roundedAmount = v.default_amount;
+                    annualAmount = Math.round(v.default_amount * 12);
+                } else {
+                    roundedAmount = Math.round(v.default_amount);
+                    annualAmount = roundedAmount * 12;
+                }
+
+                let componentData = {
+                    name: res.message.name,
+                    monthly: roundedAmount,
+                    annual: annualAmount,
+                    sequence: res.message.custom_sequence || v.idx || 999
+                };
+
+                // Categorize based on insurance flag
+                if (res.message.custom_is_insurance == 1) {
+                    insuranceComponents.push(componentData);
+                } else {
+                    statutoryComponents.push(componentData);
+                }
+            }
+        }
+
+        // Sort components by sequence
+        basicSalaryComponents.sort((a, b) => a.sequence - b.sequence);
+        allowanceComponents.sort((a, b) => a.sequence - b.sequence);
+        statutoryComponents.sort((a, b) => a.sequence - b.sequence);
+        insuranceComponents.sort((a, b) => a.sequence - b.sequence);
+
+        // Calculate totals
+        let totalBasicMonthly = basicSalaryComponents.reduce((sum, c) => sum + c.monthly, 0);
+        let totalBasicAnnual = basicSalaryComponents.reduce((sum, c) => sum + c.annual, 0);
+
+        let totalAllowanceMonthly = allowanceComponents.reduce((sum, c) => sum + c.monthly, 0);
+        let totalAllowanceAnnual = allowanceComponents.reduce((sum, c) => sum + c.annual, 0);
+
+        let totalStatutoryMonthly = statutoryComponents.reduce((sum, c) => sum + c.monthly, 0);
+        let totalStatutoryAnnual = statutoryComponents.reduce((sum, c) => sum + c.annual, 0);
+
+        let totalInsuranceMonthly = insuranceComponents.reduce((sum, c) => sum + c.monthly, 0);
+        let totalInsuranceAnnual = insuranceComponents.reduce((sum, c) => sum + c.annual, 0);
+
+        let grossSalaryMonthly = totalBasicMonthly + totalAllowanceMonthly;
+        let grossSalaryAnnual = totalBasicAnnual + totalAllowanceAnnual;
+
+        let totalSalaryMonthly = grossSalaryMonthly + totalStatutoryMonthly + totalInsuranceMonthly;
+        let totalSalaryAnnual = grossSalaryAnnual + totalStatutoryAnnual + totalInsuranceAnnual;
+
+        // Helper function to create component rows
+        function createComponentRows(components) {
+            return components.map(c => `
+                <tr>
+                    <td class="header-left">${c.name}</td>
+                    <td class="data-center text-right">${Math.round(c.monthly).toLocaleString()}</td>
+                    <td class="data-center text-right">${Math.round(c.annual).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Build complete salary structure table
+        let salaryStructureTable = `
+            <style>
+                .salary-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                .salary-table th, .salary-table td {
+                    border: 1px solid #d1d8dd;
+                    padding: 8px;
+                }
+                .salary-table .header-title {
+                    background-color: #f5f7fa;
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                .salary-table .header-left {
+                    text-align: left;
+                    font-weight: 600;
+                }
+                .salary-table .header-center {
+                    text-align: center;
+                    font-weight: 600;
+                    background-color: #f5f7fa;
+                }
+                .salary-table .data-center {
+                    text-align: center;
+                }
+                .salary-table .statutory-row {
+                    background-color: #e8f4f8;
+                }
+                .salary-table .statutory-row td {
+                    font-weight: bold;
+                }
+                .salary-table .total-row {
+                    background-color: #f0f0f0;
+                    font-weight: bold;
+                }
+                .note-section {
+                    margin-top: 20px;
+                    font-size: 12px;
+                    color: #666;
+                }
+            </style>
+            <table class="salary-table">
+                <tr>
+                    <th colspan="3" class="header-title">Salary Structure w.e.f. ${frappe.datetime.str_to_user(frm.doc.from_date)}</th>
+                </tr>
+                <tr>
+                    <th class="header-left">COMPENSATION COMPONENTS</th>
+                    <th class="header-center">PER MONTH</th>
+                    <th class="header-center">PER ANNUM</th>
+                </tr>
+
+                <tr class="statutory-row"><td><strong>Basic Salary</strong></td><td></td><td></td></tr>
+                ${createComponentRows(basicSalaryComponents)}
+                <tr class="total-row">
+                    <td><strong>TOTAL BASIC SALARY</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalBasicMonthly).toLocaleString()}</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalBasicAnnual).toLocaleString()}</strong></td>
+                </tr>
+
+                <tr class="statutory-row"><td><strong>Allowances</strong></td><td></td><td></td></tr>
+                ${createComponentRows(allowanceComponents)}
+                <tr class="total-row">
+                    <td><strong>TOTAL ALLOWANCES</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalAllowanceMonthly).toLocaleString()}</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalAllowanceAnnual).toLocaleString()}</strong></td>
+                </tr>
+
+                <tr class="total-row">
+                    <td><strong>GROSS SALARY</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(grossSalaryMonthly).toLocaleString()}</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(grossSalaryAnnual).toLocaleString()}</strong></td>
+                </tr>
+
+                <tr class="statutory-row"><td><strong>STATUTORY PAYMENTS</strong></td><td></td><td></td></tr>
+                ${createComponentRows(statutoryComponents)}
+                <tr class="total-row">
+                    <td><strong>TOTAL STATUTORY PAYMENTS</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalStatutoryMonthly).toLocaleString()}</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalStatutoryAnnual).toLocaleString()}</strong></td>
+                </tr>
+
+                <tr class="statutory-row"><td><strong>HEALTH INSURANCE</strong></td><td></td><td></td></tr>
+                ${createComponentRows(insuranceComponents)}
+                <tr class="total-row">
+                    <td><strong>TOTAL HEALTH INSURANCE COST</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalInsuranceMonthly).toLocaleString()}</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalInsuranceAnnual).toLocaleString()}</strong></td>
+                </tr>
+
+                <tr class="total-row">
+                    <td><strong>TOTAL SALARY</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalSalaryMonthly).toLocaleString()}</strong></td>
+                    <td class="data-center text-right"><strong>${Math.round(totalSalaryAnnual).toLocaleString()}</strong></td>
+                </tr>
+            </table>
+
+            <div class="note-section">
+                <p>*Gratuity: Gratuity is payable as per the provisions of The Payment of the Gratuity Act, 1972.</p>
+            </div>
+        `;
+
+        document.getElementById("ctc_preview").innerHTML = salaryStructureTable;
+    }
+}
+
+
+// OLD CODE BELOW - KEPT FOR REFERENCE IF NEEDED
+/*
         // Handle reimbursements if applicable
         if (frm.doc.custom_statistical_amount > 0) {
             let reimbursementBreakup = `
@@ -513,11 +653,4 @@ async function processSalaryComponents(frm) {
                 annualAmountCell.textContent = formattedAnnualAmount;
             });
         }
-
-
-
-
-
-
-    }
-}
+*/
