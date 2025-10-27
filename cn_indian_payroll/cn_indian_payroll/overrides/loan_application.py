@@ -8,10 +8,55 @@ def before_submit(self, method):
     if  not self.custom_note_remark:
         frappe.throw("Please add Note/Remarks before Submit")
 
+    if self.status=="Open":
+        frappe.throw("Cannot Submit Loan Application with status 'Open'")
+
 
 def validate(self,method):
     if self.applicant_type=="Employee" and self.applicant:
         self.custom_employee=self.applicant
+
+
+
+def on_submit(self, method):
+    if self.status == "Approved":
+        loan_doc = frappe.get_doc({
+            "doctype": "Loan",
+            "applicant_type": self.applicant_type,
+            "loan_application": self.name,
+            "applicant": self.applicant,
+            "company": self.company,
+            "posting_date": self.posting_date,
+            "loan_product": self.loan_product,
+            "loan_amount": self.loan_amount,
+            "repay_from_salary": 1,
+            "repayment_schedule_type": self.repayment_method,
+            "rate_of_interest": self.rate_of_interest,
+            "repayment_method": self.repayment_method,
+            "repayment_amount": self.repayment_amount,
+            "repayment_periods": self.repayment_periods,
+            "repayment_start_date": self.custom_repayment_start_date,
+        })
+
+        loan_doc.insert(ignore_permissions=True)
+        loan_doc.submit()
+        frappe.db.commit()
+
+        if loan_doc:
+            disburse_doc = frappe.get_doc({
+                "doctype": "Loan Disbursement",
+                "against_loan": loan_doc.name,
+                "applicant_type": self.applicant_type,
+                "applicant": self.applicant,
+                "company": self.company,
+                "disbursement_date": self.posting_date,
+                "disbursed_amount": self.loan_amount,
+
+            })
+            disburse_doc.insert(ignore_permissions=True)
+            disburse_doc.submit()
+            frappe.db.commit()
+
 
 
 

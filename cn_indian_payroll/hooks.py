@@ -341,7 +341,8 @@ doc_events = {
 
     "Loan Application": {
         "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.loan_application.before_submit",
-        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.validate"
+        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.validate",
+        "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.on_submit",
     },
 
     # "Attendance Request": {
