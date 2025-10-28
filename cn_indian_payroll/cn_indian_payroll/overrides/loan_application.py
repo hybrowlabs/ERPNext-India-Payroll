@@ -11,6 +11,9 @@ def before_submit(self, method):
     if self.status=="Open":
         frappe.throw("Cannot Submit Loan Application with status 'Open'")
 
+    if not self.custom_repayment_start_date:
+        frappe.throw("Please set Repayment Start Date before Submit")
+
 
 def validate(self,method):
     if self.applicant_type=="Employee" and self.applicant:
