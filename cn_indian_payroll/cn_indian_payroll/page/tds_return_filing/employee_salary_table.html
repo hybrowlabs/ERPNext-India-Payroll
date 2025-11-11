@@ -1,0 +1,860 @@
+
+
+
+
+<style>
+    .tab-container {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fafafa;
+        padding: 15px;
+    }
+    .tab-buttons {
+        display: flex;
+        gap: 10px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .tab-buttons button {
+        padding: 8px 16px;
+        border: none;
+        background: #e9ecef;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    .tab-buttons button.active {
+        background: #007bff;
+        color: white;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .section {
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 20px;
+        background-color: #fff;
+    }
+    .section h5 {
+        margin-top: 0;
+        background: #f1f1f1;
+        padding: 6px 10px;
+        border-radius: 4px;
+        border-bottom: 1px solid #ccc;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 20px;
+    }
+    label {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 4px;
+    }
+    input, select {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        border: 1px solid #aaa;
+        padding: 8px;
+        text-align: left;
+    }
+    .submit-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin-top: 15px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .submit-btn:hover { background: #0056b3; }
+</style>
+
+<div class="tab-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" data-tab="form-tab">Form</button>
+        <button class="tab-btn" data-tab="challan-tab">Challan</button>
+        <button class="tab-btn" data-tab="annexure-tab">Annexure (Deductee Details)</button>
+        <button class="tab-btn" data-tab="other-services-tab">Other Services of TIN</button>
+    </div>
+
+    <!-- FORM TAB -->
+    <div id="form-tab" class="tab-content active">
+        <h4>Form 24Q - Quarterly Statement Details</h4>
+
+        <div class="section">
+            <h5>1. Particulars of Statement</h5>
+            <div class="form-grid">
+                <div id="company_container">
+
+                </div>
+                <div id="payroll_period_container">
+
+                </div>
+                <div>
+                    <label for="tan_number">Tax Deduction and Collection Account No. (TAN)*</label>
+                    <input id="tan_number" type="text" placeholder="Enter TAN">
+                </div>
+                <div id="fiscal_year_container">
+
+                </div>
+                <div>
+                    <label for="quarter_ended">Quarter Ended*</label>
+                    <select id="quarter_ended">
+                        <option>Q1 (Apr-Jun)</option>
+                        <option>Q2 (Jul-Sep)</option>
+                        <option>Q3 (Oct-Dec)</option>
+                        <option>Q4 (Jan-Mar)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="assessment_year">Assessment Year*</label>
+                    <input id="assessment_year" type="text" value="2026-27">
+                </div>
+                <div>
+                    <label for="pan_number">Permanent Account Number (PAN)</label>
+                    <input id="pan_number" type="text" placeholder="ABCDE1234F">
+                </div>
+                <div>
+                    <label for="is_revised_return">Is this a Revised Return?</label>
+                    <select id="is_revised_return">
+                        <option>No</option>
+                        <option>Yes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="revised_return"> Is this a Revised Return (Yes / No)</label>
+                    <select id="revised_return">
+                        <option>Yes</option>
+                        <option>No</option>
+
+                    </select>
+                </div>
+
+
+
+                <div>
+                    <label for="type_of_deductor">Type of Deductor*</label>
+                    <select id="type_of_deductor" required>
+                        <option value="">-- Select Type of Deductor --</option>
+                        <option value="Central Government">Central Government</option>
+                        <option value="State Government">State Government</option>
+
+                        <option value="Autonomous Body (Central Govt.)">Autonomous body (Central Govt.)</option>
+                        <option value="Autonomous Body (State Govt.)">Autonomous body (State Govt.)</option>
+                        <option value="Local Authority (Central Govt.)">Local Authority (Central Govt.)</option>
+                        <option value="Local Authority (State Govt.)">Local Authority (State Govt.)</option>
+                        <option value="Company">Company</option>
+                        <option value="Branch / Division of Company">Branch / Division of Company</option>
+                        <option value="Association of Person (AOP)">Association of Person (AOP)</option>
+                        <option value="Association of Person (Trust)">Association of Person (Trust)</option>
+                        <option value="Artificial Juridical Person">Artificial Juridical Person</option>
+                        <option value="Body of Individuals">Body of Individuals</option>
+                        <option value="Individual/HUF">Individual/HUF</option>
+                        <option value="Firm">Firm</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="original_receipt_number">Receipt Number of Original Return</label>
+                    <input id="original_receipt_number" type="text">
+                </div>
+
+                <div>
+                    <label for="original_prevoius_receipt_number">Receipt Number of Previous Return</label>
+                    <input id="original_prevoius_receipt_number" type="text">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h5>2. Particulars of Deductor (Employer)</h5>
+            <div class="form-grid">
+                <div>
+                    <label for="deductor_name">Name*</label>
+                    <input id="deductor_name" type="text" >
+                </div>
+
+
+
+                <div>
+                    <label for="ministry_name">Ministry/Dept Name</label>
+                    <input id="ministry_name" type="text" >
+
+                </div>
+
+                <div id="company_address">
+
+                </div>
+
+
+
+                <div id="branch_container">
+
+                </div>
+
+                <div>
+                    <label for="ministry_name_other">Ministry/Dept Name (Others)</label>
+                    <input id="ministry_name_other" type="text" >
+
+                </div>
+
+                <div>
+                    <label for="state">State*</label>
+                    <select id="state">
+                        <option value="">Select State</option>
+                        <!-- States -->
+                        <option>Andhra Pradesh</option>
+                        <option>Arunachal Pradesh</option>
+                        <option>Assam</option>
+                        <option>Bihar</option>
+                        <option>Chhattisgarh</option>
+                        <option>Goa</option>
+                        <option>Gujarat</option>
+                        <option>Haryana</option>
+                        <option>Himachal Pradesh</option>
+                        <option>Jharkhand</option>
+                        <option>Karnataka</option>
+                        <option>Kerala</option>
+                        <option>Madhya Pradesh</option>
+                        <option>Maharashtra</option>
+                        <option>Manipur</option>
+                        <option>Meghalaya</option>
+                        <option>Mizoram</option>
+                        <option>Nagaland</option>
+                        <option>Odisha</option>
+                        <option>Punjab</option>
+                        <option>Rajasthan</option>
+                        <option>Sikkim</option>
+                        <option>Tamil Nadu</option>
+                        <option>Telangana</option>
+                        <option>Tripura</option>
+                        <option>Uttar Pradesh</option>
+                        <option>Uttarakhand</option>
+                        <option>West Bengal</option>
+
+                        <!-- Union Territories -->
+                        <option>Andaman and Nicobar Islands</option>
+                        <option>Chandigarh</option>
+                        <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option>Delhi</option>
+                        <option>Jammu and Kashmir</option>
+                        <option>Ladakh</option>
+                        <option>Lakshadweep</option>
+                        <option>Puducherry</option>
+                    </select>
+                </div>
+
+                 <div>
+                    <label for="ddo_code">DDO Code</label>
+                    <input id="ddo_code" type="text" >
+
+                </div>
+
+                <div>
+                    <label for="ddo_registration_number">DDO Registration Number</label>
+                    <input id="ddo_registration_number" type="text" >
+
+                </div>
+
+                <div>
+                    <label for="pao_code">PAO Code</label>
+                    <input id="pao_code" type="text">
+                </div>
+                <div>
+                    <label for="pao_registration_number">PAO Registration Number</label>
+                    <input id="pao_registration_number" type="text">
+                </div>
+                <div>
+                    <label for="premises_name">Name of Premises/Building</label>
+                    <input id="premises_name" type="text">
+                </div>
+                <div>
+                    <label for="flat_no">Flat No.</label>
+                    <input id="flat_no" type="text">
+                </div>
+                <div>
+                    <label for="road_name">Road/Street/Lane</label>
+                    <input id="road_name" type="text">
+                </div>
+
+                <div>
+                    <label for="area_location">Area/ Location</label>
+                    <input id="area_location" type="text">
+                </div>
+
+
+                <div>
+                    <label for="city_district">Town/City/District</label>
+                    <input id="city_district" type="text">
+                </div>
+                <div>
+                    <label for="pin_code">PIN Code</label>
+                    <input id="pin_code" type="text" maxlength="6">
+                </div>
+
+                <div>
+                    <label for="gst">GSTIN</label>
+                    <input id="gst" type="text" maxlength="6">
+                </div>
+
+                <div>
+                    <label for="state_name">State</label>
+                    <select id="state_name">
+                        <option value="">Select State</option>
+                        <!-- States -->
+                        <option>Andhra Pradesh</option>
+                        <option>Arunachal Pradesh</option>
+                        <option>Assam</option>
+                        <option>Bihar</option>
+                        <option>Chhattisgarh</option>
+                        <option>Goa</option>
+                        <option>Gujarat</option>
+                        <option>Haryana</option>
+                        <option>Himachal Pradesh</option>
+                        <option>Jharkhand</option>
+                        <option>Karnataka</option>
+                        <option>Kerala</option>
+                        <option>Madhya Pradesh</option>
+                        <option>Maharashtra</option>
+                        <option>Manipur</option>
+                        <option>Meghalaya</option>
+                        <option>Mizoram</option>
+                        <option>Nagaland</option>
+                        <option>Odisha</option>
+                        <option>Punjab</option>
+                        <option>Rajasthan</option>
+                        <option>Sikkim</option>
+                        <option>Tamil Nadu</option>
+                        <option>Telangana</option>
+                        <option>Tripura</option>
+                        <option>Uttar Pradesh</option>
+                        <option>Uttarakhand</option>
+                        <option>West Bengal</option>
+
+                        <!-- Union Territories -->
+                        <option>Andaman and Nicobar Islands</option>
+                        <option>Chandigarh</option>
+                        <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option>Delhi</option>
+                        <option>Jammu and Kashmir</option>
+                        <option>Ladakh</option>
+                        <option>Lakshadweep</option>
+                        <option>Puducherry</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="telephone_number">Telephone Number</label>
+                    <input id="telephone_number" type="text" maxlength="6">
+                </div>
+
+                <div>
+                    <label for="telephone_number_alternate">Telephone Number(Alternate)</label>
+                    <input id="telephone_number_alternate" type="text" maxlength="6">
+                </div>
+
+                <div>
+                    <label for="email">Email</label>
+                    <input id="email" type="text" maxlength="6">
+                </div>
+
+                <div>
+                    <label for="email_alternate">Email (Alternate)</label>
+                    <input id="email_alternate" type="text" maxlength="6">
+                </div>
+
+
+                <div>
+                    <label for="account_office">Account Office Identification Number(AIN) of PA)/TAO/CDDO</label>
+                    <input id="account_office" type="text" maxlength="6">
+                </div>
+
+
+                <div>
+                    <label for="address_chnages">Has Address Changes Since Last Return*</label>
+                    <select id="address_chnages">
+                        <option>YES</option>
+                        <option>NO</option>
+
+                    </select>
+                </div>
+
+
+            </div>
+        </div>
+
+
+
+    <div class="section">
+    <h5>3. Particulars of Person Responsible for Deduction of Tax</h5>
+    <div class="form-grid">
+        <div>
+            <label for="responsible_person_name">Name*</label>
+            <input id="responsible_person_name" type="text">
+        </div>
+
+        <div>
+            <label for="designation">Designation*</label>
+            <input id="designation" type="text">
+        </div>
+
+        <div>
+            <label for="branch_division">Branch/Division*</label>
+            <input id="branch_division" type="text">
+        </div>
+
+        <div>
+            <label for="flat_no_responsible">Flat No./Door/Block No.</label>
+            <input id="flat_no_responsible" type="text">
+        </div>
+
+        <div>
+            <label for="premises_name_responsible">Name of Premises/Building/Village</label>
+            <input id="premises_name_responsible" type="text">
+        </div>
+
+        <div>
+            <label for="road_street_responsible">Road/Street/Lane/Post Office</label>
+            <input id="road_street_responsible" type="text">
+        </div>
+
+        <div>
+            <label for="area_locality_responsible">Area/Locality</label>
+            <input id="area_locality_responsible" type="text">
+        </div>
+
+        <div>
+            <label for="town_city_responsible">Town/City/District</label>
+            <input id="town_city_responsible" type="text">
+        </div>
+
+        <div>
+            <label for="state_responsible">State*</label>
+            <select id="state_responsible">
+                <option value="">Select State</option>
+                <!-- Indian States -->
+                <option>Andhra Pradesh</option>
+                <option>Arunachal Pradesh</option>
+                <option>Assam</option>
+                <option>Bihar</option>
+                <option>Chhattisgarh</option>
+                <option>Goa</option>
+                <option>Gujarat</option>
+                <option>Haryana</option>
+                <option>Himachal Pradesh</option>
+                <option>Jharkhand</option>
+                <option>Karnataka</option>
+                <option>Kerala</option>
+                <option>Madhya Pradesh</option>
+                <option>Maharashtra</option>
+                <option>Manipur</option>
+                <option>Meghalaya</option>
+                <option>Mizoram</option>
+                <option>Nagaland</option>
+                <option>Odisha</option>
+                <option>Punjab</option>
+                <option>Rajasthan</option>
+                <option>Sikkim</option>
+                <option>Tamil Nadu</option>
+                <option>Telangana</option>
+                <option>Tripura</option>
+                <option>Uttar Pradesh</option>
+                <option>Uttarakhand</option>
+                <option>West Bengal</option>
+                <!-- UTs -->
+                <option>Andaman and Nicobar Islands</option>
+                <option>Chandigarh</option>
+                <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                <option>Delhi</option>
+                <option>Jammu and Kashmir</option>
+                <option>Ladakh</option>
+                <option>Lakshadweep</option>
+                <option>Puducherry</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="pin_code_responsible">PIN Code*</label>
+            <input id="pin_code_responsible" type="text" maxlength="6">
+        </div>
+
+        <div>
+            <label for="telephone_responsible">Telephone No. (With STD Code)</label>
+            <input id="telephone_responsible" type="text">
+        </div>
+
+        <div>
+            <label for="mobile_responsible">Mobile No.*</label>
+            <input id="mobile_responsible" type="text" maxlength="10">
+        </div>
+
+        <div>
+            <label for="email_responsible">Email ID*</label>
+            <input id="email_responsible" type="email">
+        </div>
+
+        <div>
+            <label for="alternate_email_responsible">Alternate Email ID</label>
+            <input id="alternate_email_responsible" type="email">
+        </div>
+
+        <div>
+            <label for="responsible_person_pan">PAN of Person Responsible</label>
+            <input id="responsible_person_pan" type="text" maxlength="10">
+        </div>
+
+        <div>
+            <label for="responsible_person_aadhar">Aadhaar No. (if available)</label>
+            <input id="responsible_person_aadhar" type="text" maxlength="12">
+        </div>
+
+        <div>
+            <label for="change_in_person">Has Person Responsible Changed Since Last Return*</label>
+            <select id="change_in_person">
+                <option value="">Select</option>
+                <option>YES</option>
+                <option>NO</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="receipt_number">Receipt No.of earlier statement filled for form 24Q</label>
+            <input id="receipt_number" type="text" maxlength="12">
+        </div>
+
+
+    </div>
+</div>
+
+
+    </div>
+
+
+
+
+    <!-- CHALLAN TAB -->
+    <div id="challan-tab" class="tab-content">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h4>Challan Details</h4>
+    <button id="get-details-btn" style="background-color:#007bff; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">
+        ⚙️ Get Details
+    </button>
+</div>
+
+<!-- Scrollable container -->
+<div style="overflow-x: auto; max-width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 5px; margin-top:10px;">
+    <table id="challan-table" style="width: 2500px; border-collapse: collapse;">
+        <thead style="background: #f7f7f7; position: sticky; top: 0; z-index: 1;">
+            <tr>
+                <th>Sr. No.</th>
+                <th>Month</th>
+                <th>Update Mode for Challan</th>
+                <th>TDS (₹)</th>
+                <th>Education Cess (₹)</th>
+                <th>Fee (₹)</th>
+                <th>Last Total Tax Deposited (₹)</th>
+                <th>Cheque / DD No.</th>
+                <th>BSR Code / Receipt No. (Form 24G)</th>
+                <th>Date Deposited (Challan / Voucher)</th>
+                <th>Challan Serial No. / DDO Serial No. (Form 24G)</th>
+                <th>Interest Allocated (₹)</th>
+                <th>Others (₹)</th>
+                <th>Challan Balance</th>
+                <th>Section Code</th>
+                <th>Surcharge (₹)</th>
+                <th>Interest (₹)</th>
+                <th>Penalty / Others (₹)</th>
+                <th>Total Amount Deposited (₹)</th>
+                <th>Last BSR Code / 24G Receipt No.</th>
+                <th>Last Date Tax Deposited</th>
+                <th>Last DDO / Transfer Voucher / Challan Serial No.</th>
+                <th>Mode of Deposit (Book Adjustment)</th>
+                <th>Minor Head of Challan</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" id="sr_no" style="width:80px"></td>
+                <td><input type="text" id="month" style="width:80px"></td>
+                <td>
+                    <select id="update_mode_for_challan">
+                        <option value="">Select</option>
+                        <option value="Add">Add</option>
+                        <option value="Modify">Modify</option>
+                        <option value="Delete">Delete</option>
+                    </select>
+                </td>
+                <td><input type="number" id="tds" style="width:100px"></td>
+                <td><input type="number" id="education_cess" style="width:100px"></td>
+                <td><input type="number" id="fee" style="width:100px"></td>
+                <td><input type="number" id="last_total_tax_deposited" style="width:120px"></td>
+                <td><input type="text" id="cheque_dd_no" style="width:120px"></td>
+                <td><input type="text" id="bsr_code_receipt_number_of_form_24g" style="width:160px"></td>
+                <td><input type="date" id="date_deposited_through_challan_voucher"></td>
+                <td><input type="text" id="challan_serial_no_ddo_serial_no_of_form_24g" style="width:160px"></td>
+                <td><input type="number" id="interest_to_be_allocated" style="width:100px"></td>
+                <td><input type="number" id="others_amount" style="width:100px"></td>
+                <td><input type="number" id="challan_balance" style="width:100px"></td>
+                <td>
+                    <select id="section_code">
+                        <option value="">Select</option>
+                        <option value="92A">92A</option>
+                        <option value="92B">92B</option>
+                    </select>
+                </td>
+                <td><input type="number" id="surcharge" style="width:100px"></td>
+                <td><input type="number" id="interest" style="width:100px"></td>
+                <td><input type="number" id="penalty_others" style="width:100px"></td>
+                <td><input type="number" id="total_amount_deposited_as_per_challan" style="width:130px"></td>
+                <td><input type="text" id="bsr_code_24g_receipt_no" style="width:150px"></td>
+                <td><input type="date" id="last_date_on_which_tax_deposited"></td>
+                <td><input type="text" id="last_ddo_transfer_voucher_challan_serial_no" style="width:150px"></td>
+                <td>
+                    <select id="mode_of_deposit_through_book_adjustment">
+                        <option value="">Select</option>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="minor_head_of_challan">
+                        <option value="">Select</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="400">400</option>
+                    </select>
+                </td>
+                <td><button class="remove-row">🗑</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<button id="add-row" style="margin-top:10px;">➕ Add Row</button>
+
+</div>
+
+<script>
+document.getElementById("add-row").addEventListener("click", function() {
+const table = document.querySelector("#challan-table tbody");
+const newRow = table.rows[0].cloneNode(true);
+newRow.querySelectorAll("input, select").forEach(el => el.value = "");
+table.appendChild(newRow);
+});
+
+document.addEventListener("click", function(e) {
+if (e.target.classList.contains("remove-row")) {
+    const row = e.target.closest("tr");
+    if (document.querySelectorAll("#challan-table tbody tr").length > 1) {
+        row.remove();
+    } else {
+        alert("At least one row is required.");
+    }
+}
+});
+
+// ✅ Get Details button click event
+document.getElementById("get-details-btn").addEventListener("click", function() {
+alert("Fetching challan details...");
+console.log("Get Details button clicked!");
+});
+</script>
+
+
+
+<!-- ANNEXURE TAB -->
+<div id="annexure-tab" class="tab-content">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h4>Annexure Details</h4>
+
+</div>
+
+<!-- Scrollable container -->
+<div style="overflow-x: auto; max-width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 5px; margin-top:10px;">
+    <table id="annexure-table" style="width: 2800px; border-collapse: collapse;">
+        <thead style="background: #f7f7f7; position: sticky; top: 0; z-index: 1;">
+            <tr>
+                <th>Sr. No.</th>
+                <th>Challan Serial No.</th>
+                <th>BSR Code where Tax Deposited</th>
+                <th>Date on which Tax Deposited</th>
+                <th>Section Under Which Payment Made</th>
+                <th>Total TDS to be Allocated (₹)</th>
+                <th>Others (₹)</th>
+                <th>Employee Reference No.</th>
+                <th>PAN of the Employee</th>
+                <th>Date of Payment/Credit</th>
+                <th>TDS (₹)</th>
+                <th>Health & Education Cess (₹)</th>
+                <th>Last Total Tax Deducted (₹)</th>
+                <th>Total Tax Deposited (₹)</th>
+                <th>Update Mode for Deductee</th>
+                <th>Transfer Voucher/Challan Serial No.</th>
+                <th>Interest (₹)</th>
+                <th>Total Allocated Amount (₹)</th>
+                <th>Last PAN of Employee</th>
+                <th>Name of Employee</th>
+                <th>Amount Paid/Credited (₹)</th>
+                <th>Surcharge (₹)</th>
+                <th>Total Tax Deducted (₹)</th>
+                <th>Last Total Tax Deposited (₹)</th>
+                <th>Date of Deduction</th>
+                <th>Certificate No. u/s 197</th>
+                <th>Remarks</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" style="width:60px"></td>
+                <td><input type="text" style="width:140px"></td>
+                <td><input type="text" style="width:160px"></td>
+                <td><input type="date"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option>92A</option>
+                        <option>92B</option>
+                        <option>92C</option>
+                        <option>94P</option>
+                    </select>
+                </td>
+                <td><input type="number" style="width:120px"></td>
+                <td><input type="number" style="width:120px"></td>
+                <td><input type="text" style="width:180px"></td>
+                <td><input type="text" style="width:150px"></td>
+                <td><input type="date"></td>
+                <td><input type="number" style="width:120px"></td>
+                <td><input type="number" style="width:120px"></td>
+                <td><input type="number" style="width:130px"></td>
+                <td><input type="number" style="width:130px"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option>Add</option>
+                        <option>Update</option>
+                        <option>PAN Update</option>
+                    </select>
+                </td>
+                <td><input type="text" style="width:180px"></td>
+                <td><input type="number" style="width:120px"></td>
+                <td><input type="number" style="width:120px"></td>
+                <td><input type="text" style="width:150px"></td>
+                <td><input type="text" style="width:180px"></td>
+                <td><input type="number" style="width:130px"></td>
+                <td><input type="number" style="width:130px"></td>
+                <td><input type="number" style="width:130px"></td>
+                <td><input type="number" style="width:130px"></td>
+                <td><input type="date"></td>
+                <td><input type="text" style="width:180px"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option>Zero Deduction</option>
+                        <option>Lower Deduction</option>
+                        <option>Higher Deduction</option>
+                    </select>
+                </td>
+                <td><button class="remove-row">🗑</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- OTHER SERVICES TAB -->
+<div id="other-services-tab" class="tab-content">
+<h4>Other Services of TIN</h4>
+
+<table>
+    <tr>
+        <th>Service</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    <tr>
+        <td>FVU File Upload</td>
+        <td>Pending</td>
+        <td>
+            <label for="csi-upload" class="upload-label">Attach CSI File</label>
+            <input type="file" id="csi-upload" accept=".csi" style="display:none;">
+            <span id="csi-file-name" style="margin-left:10px; color:#007bff; font-weight:500;"></span>
+            <button id="clear-csi" class="clear-btn" style="display:none;">Clear</button>
+        </td>
+    </tr>
+</table>
+
+<button class="submit-btn" id="other-submit">Create RPU File</button>
+</div>
+
+<style>
+.upload-label {
+background-color: #007bff;
+color: white;
+padding: 6px 12px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 13px;
+font-weight: 500;
+}
+.upload-label:hover {
+background-color: #0056b3;
+}
+.clear-btn {
+background-color: #dc3545;
+color: white;
+padding: 5px 10px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+margin-left: 10px;
+font-size: 12px;
+}
+.clear-btn:hover {
+background-color: #b02a37;
+}
+.submit-btn {
+margin-top: 15px;
+background-color: #28a745;
+color: white;
+padding: 6px 14px;
+border-radius: 6px;
+cursor: pointer;
+border: none;
+}
+.submit-btn:hover {
+background-color: #218838;
+}
+</style>
+
+
+</div>

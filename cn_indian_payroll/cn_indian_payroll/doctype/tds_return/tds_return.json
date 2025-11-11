@@ -1,0 +1,479 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-27 01:53:51.262528",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_particulars_of_statement",
+  "for_quarter_ended",
+  "company",
+  "quarter_ended",
+  "tan",
+  "last_tan",
+  "pan",
+  "type_of_deductor",
+  "update_deductor_details",
+  "column_break_jnjr",
+  "financial_year",
+  "payroll_period",
+  "assessment_year",
+  "is_revised_return",
+  "last_deductor_type",
+  "original_return_receipt_no",
+  "receipt_number_of_previous_return",
+  "section_break_particulars_of_deductor",
+  "deductor_name",
+  "branch_division",
+  "ministry_dept_name_others",
+  "ddo_code",
+  "ddo_registration_no",
+  "flat_no",
+  "road_street_lane",
+  "city_district",
+  "telephone_no",
+  "telephone_no_alternate",
+  "ain_of_paoitociddo",
+  "column_break_komx",
+  "ministry_dept_name",
+  "state",
+  "pao_code",
+  "pao_registration_no",
+  "premises_name",
+  "area_location",
+  "pincode",
+  "email",
+  "email_alternate",
+  "gstn",
+  "has_address_changed",
+  "section_break_person_responsible",
+  "challans_column",
+  "same_as_above",
+  "responsible_person_name",
+  "designation",
+  "responsible_person_flat_no",
+  "responsible_person_road_street_lane",
+  "responsible_person_pincode",
+  "responsible_person_state",
+  "responsible_person_email",
+  "responsible_person_mobile_no",
+  "responsible_person_address_changed",
+  "job_id",
+  "column_break_lfjr",
+  "responsible_person_pan",
+  "responsible_person_premises_name",
+  "responsible_person_area_location",
+  "responsible_person_city_district",
+  "responsible_person_telephone_no",
+  "responsible_person_email_alternate",
+  "responsible_person_telephone_no_alternate",
+  "has_regular_statement_filed",
+  "receipt_no_of_earlier_statement",
+  "amended_from",
+  "section_break_qvii",
+  "deductee_details",
+  "challan_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_particulars_of_statement",
+   "fieldtype": "Section Break",
+   "label": "1. Particulars of Statement"
+  },
+  {
+   "fieldname": "for_quarter_ended",
+   "fieldtype": "Select",
+   "label": "For Quarter Ended",
+   "options": "\nQ1\nQ2\nQ3\nQ4",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "quarter_ended",
+   "fieldtype": "Data",
+   "label": "quarter_ended"
+  },
+  {
+   "fieldname": "tan",
+   "fieldtype": "Data",
+   "label": "Tax Deduction and Collection Account No. (TAN)"
+  },
+  {
+   "fieldname": "last_tan",
+   "fieldtype": "Data",
+   "label": "Last Tax Deduction and Collection Account No."
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "label": "Permanent Account Number"
+  },
+  {
+   "fieldname": "type_of_deductor",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type of Deductor",
+   "options": "\nCentral Government\nState Government\nStatutory body (Central Govt.)\nStatutory body (State Govt.)\nAutonomous body (Central Govt.)\nAutonomous body (State Govt.)\nLocal Authority (Central Govt.)\nLocal Authority (State Govt.)\nCompany\nBranch / Division of Company\nAssociation of Person (AOP)\nAssociation of Person (Trust)\nArtificial Juridical Person\nBody of Individuals\nIndividual/HUF\nFirm",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "update_deductor_details",
+   "fieldtype": "Select",
+   "label": "Update Deductor Details (Indicate only if any change in Deductor Details)",
+   "placeholder": "--select--",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jnjr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "financial_year",
+   "fieldtype": "Data",
+   "label": "Financial Year",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period"
+  },
+  {
+   "fieldname": "assessment_year",
+   "fieldtype": "Data",
+   "label": "Assessment Year"
+  },
+  {
+   "fieldname": "is_revised_return",
+   "fieldtype": "Select",
+   "label": "Is this a Revised Return (Yes / No)",
+   "options": "\nNo\nYes",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "last_deductor_type",
+   "fieldtype": "Data",
+   "label": "Last Deductor Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_return_receipt_no",
+   "fieldtype": "Data",
+   "label": "Receipt Number of Original Return"
+  },
+  {
+   "fieldname": "receipt_number_of_previous_return",
+   "fieldtype": "Data",
+   "label": "Receipt Number of Previous Return"
+  },
+  {
+   "fieldname": "section_break_particulars_of_deductor",
+   "fieldtype": "Section Break",
+   "label": "2. Particulars of Deductor (Employer)"
+  },
+  {
+   "fieldname": "deductor_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "branch_division",
+   "fieldtype": "Data",
+   "label": "Branch / Division (If any)"
+  },
+  {
+   "fieldname": "ministry_dept_name_others",
+   "fieldtype": "Data",
+   "label": "Ministry / Dept. Name (Others)"
+  },
+  {
+   "fieldname": "ddo_code",
+   "fieldtype": "Data",
+   "label": "DDO Code"
+  },
+  {
+   "fieldname": "ddo_registration_no",
+   "fieldtype": "Data",
+   "label": "DDO Registration Number"
+  },
+  {
+   "fieldname": "flat_no",
+   "fieldtype": "Data",
+   "label": "Flat No."
+  },
+  {
+   "fieldname": "road_street_lane",
+   "fieldtype": "Data",
+   "label": "Road / Street / Lane"
+  },
+  {
+   "fieldname": "city_district",
+   "fieldtype": "Data",
+   "label": "Town / City / District"
+  },
+  {
+   "fieldname": "telephone_no",
+   "fieldtype": "Data",
+   "label": "Telephone No."
+  },
+  {
+   "fieldname": "telephone_no_alternate",
+   "fieldtype": "Data",
+   "label": "Telephone No. (Alternate)"
+  },
+  {
+   "fieldname": "ain_of_paoitociddo",
+   "fieldtype": "Data",
+   "label": "Account Office Identification Number (AIN) of PAO/ITO/CDDO"
+  },
+  {
+   "fieldname": "column_break_komx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ministry_dept_name",
+   "fieldtype": "Data",
+   "label": "Ministry / Dept. Name"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "State Name",
+   "options": "\nAndhra Pradesh\nArunachal Pradesh\nAssam\nBihar\nChhattisgarh\nGoa\nGujarat\nHaryana\nHimachal Pradesh\nJharkhand\nKarnataka\nKerala\nMadhya Pradesh\nMaharashtra\nManipur\nMeghalaya\nMizoram\nNagaland\nOdisha\nPunjab\nRajasthan\nSikkim\nTamil Nadu\nTelangana\nTripura\nUttar Pradesh\nUttarakhand\nWest Bengal",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "pao_code",
+   "fieldtype": "Data",
+   "label": "PAO Code"
+  },
+  {
+   "fieldname": "pao_registration_no",
+   "fieldtype": "Data",
+   "label": "PAO Registration Number"
+  },
+  {
+   "fieldname": "premises_name",
+   "fieldtype": "Data",
+   "label": "Name of Premises / Building"
+  },
+  {
+   "fieldname": "area_location",
+   "fieldtype": "Data",
+   "label": "Area / Location"
+  },
+  {
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "PIN Code",
+   "width": "6"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "E-mail"
+  },
+  {
+   "fieldname": "email_alternate",
+   "fieldtype": "Data",
+   "label": "E-mail (Alternate)"
+  },
+  {
+   "fieldname": "gstn",
+   "fieldtype": "Data",
+   "label": "Goods and Services Tax Number (GSTN)"
+  },
+  {
+   "fieldname": "has_address_changed",
+   "fieldtype": "Select",
+   "label": "Has Address Changed Since Last Return",
+   "options": "\nNO\nYES",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "section_break_person_responsible",
+   "fieldtype": "Section Break",
+   "label": "3. Particulars of the Person Responsible for Deduction of Tax"
+  },
+  {
+   "fieldname": "challans_column",
+   "fieldtype": "Column Break",
+   "options": "TDS Challan Details"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "same_as_above",
+   "fieldtype": "Check",
+   "label": "Same as above"
+  },
+  {
+   "fieldname": "responsible_person_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "responsible_person_flat_no",
+   "fieldtype": "Data",
+   "label": "Flat No."
+  },
+  {
+   "fieldname": "responsible_person_road_street_lane",
+   "fieldtype": "Data",
+   "label": "Road / Street / Lane"
+  },
+  {
+   "fieldname": "responsible_person_pincode",
+   "fieldtype": "Data",
+   "label": "PIN Code"
+  },
+  {
+   "fieldname": "responsible_person_state",
+   "fieldtype": "Select",
+   "label": "State",
+   "options": "\nAndhra Pradesh\nArunachal Pradesh\nAssam\nBihar\nChhattisgarh\nGoa\nGujarat\nHaryana\nHimachal Pradesh\nJharkhand\nKarnataka\nKerala\nMadhya Pradesh\nMaharashtra\nManipur\nMeghalaya\nMizoram\nNagaland\nOdisha\nPunjab\nRajasthan\nSikkim\nTamil Nadu\nTelangana\nTripura\nUttar Pradesh\nUttarakhand\nWest Bengal",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "responsible_person_email",
+   "fieldtype": "Data",
+   "label": "E-mail"
+  },
+  {
+   "fieldname": "responsible_person_mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No."
+  },
+  {
+   "fieldname": "responsible_person_address_changed",
+   "fieldtype": "Select",
+   "label": "Has Address Changed Since Last Return",
+   "options": "\nNO\nYES",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "job_id",
+   "fieldtype": "Data",
+   "label": "Sandbox Job ID"
+  },
+  {
+   "fieldname": "column_break_lfjr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "responsible_person_pan",
+   "fieldtype": "Data",
+   "label": "Permanent Account Number"
+  },
+  {
+   "fieldname": "responsible_person_premises_name",
+   "fieldtype": "Data",
+   "label": "Name of Premises / Building"
+  },
+  {
+   "fieldname": "responsible_person_area_location",
+   "fieldtype": "Data",
+   "label": "Area / Location"
+  },
+  {
+   "fieldname": "responsible_person_city_district",
+   "fieldtype": "Data",
+   "label": "Town / City / District"
+  },
+  {
+   "fieldname": "responsible_person_telephone_no",
+   "fieldtype": "Data",
+   "label": "Telephone No."
+  },
+  {
+   "fieldname": "responsible_person_email_alternate",
+   "fieldtype": "Data",
+   "label": "E-mail (Alternate)"
+  },
+  {
+   "fieldname": "responsible_person_telephone_no_alternate",
+   "fieldtype": "Data",
+   "label": "Telephone No. (Alternate)"
+  },
+  {
+   "fieldname": "has_regular_statement_filed",
+   "fieldtype": "Select",
+   "label": "Has regular statement for Form 24Q filed for earlier period",
+   "options": "\nNO\nYES",
+   "placeholder": "--select--"
+  },
+  {
+   "fieldname": "receipt_no_of_earlier_statement",
+   "fieldtype": "Data",
+   "label": "Receipt No. of earlier Statement filed for Form 24Q"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "TDS RETURN",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_qvii",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "deductee_details",
+   "fieldtype": "Table",
+   "label": "Deductee Details",
+   "options": "TDS Annexure I Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "challan_details",
+   "fieldtype": "Table",
+   "label": "Challans",
+   "options": "TDS Challan Details",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-11 10:06:27.009024",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "TDS RETURN",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

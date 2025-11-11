@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-10 16:14:19.073159",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tan",
+  "financial_year",
+  "quarter",
+  "txt_file",
+  "csi_file",
+  "fvu_job_id",
+  "fvu_job_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "tan",
+   "fieldtype": "Data",
+   "label": "TAN"
+  },
+  {
+   "fieldname": "financial_year",
+   "fieldtype": "Data",
+   "label": "Financial Year"
+  },
+  {
+   "fieldname": "quarter",
+   "fieldtype": "Data",
+   "label": "Quarter"
+  },
+  {
+   "fieldname": "txt_file",
+   "fieldtype": "Attach",
+   "label": "TXT File"
+  },
+  {
+   "fieldname": "csi_file",
+   "fieldtype": "Attach",
+   "label": "CSI File"
+  },
+  {
+   "fieldname": "fvu_job_id",
+   "fieldtype": "Data",
+   "label": "FVU Job ID"
+  },
+  {
+   "fieldname": "fvu_job_status",
+   "fieldtype": "Data",
+   "label": "FVU Job Status"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-10 16:22:52.686296",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "TDS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
