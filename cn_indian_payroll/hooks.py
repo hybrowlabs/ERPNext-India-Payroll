@@ -250,7 +250,7 @@ fixtures = [
     {"dt": "Workflow State"},
     # {"dt":"Employee Tax Exemption Category"},
     {"dt": "Salary Component"},
-    # {"dt":"Income Tax Slab","filters": {"name": ["in", ["Old Regime", "New Regime"]]}},
+    {"dt": "Custom DocPerm", "filters": {"role": ["in", ["Payroll manager"]]}},
     # {"dt":"Salary Structure"},
 ]
 
