@@ -61,6 +61,33 @@ class CustomSalarySlip(SalarySlip):
         self.delete_benefit_accruals()
 
 
+
+
+    def set_salary_structure_assignment(self):
+        self._salary_structure_assignment = frappe.db.get_value(
+            "Salary Structure Assignment",
+            {
+                "employee": self.employee,
+                "salary_structure": self.salary_structure,
+                "from_date": ("<=", self.actual_end_date),
+                "docstatus": 1,
+            },
+            "*",
+            order_by="from_date desc",
+            as_dict=True,
+        )
+
+        if not self._salary_structure_assignment:
+            frappe.throw(
+                _(
+                    "Please assign a Salary Structure for Employee {0} applicable from or before {1} first"
+                ).format(
+                    frappe.bold(self.employee_name),
+                    frappe.bold(formatdate(self.actual_start_date)),
+                )
+            )
+
+
     def calculate_variable_tax(self, tax_component):
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
@@ -152,109 +179,6 @@ class CustomSalarySlip(SalarySlip):
                 description=_("This error can be due to invalid formula or condition."),
             )
             raise
-
-
-
-
-    # def get_working_days_details(self, lwp=None, for_preview=0):
-    #     payroll_settings = frappe.get_cached_value(
-    #         "Payroll Settings",
-    #         None,
-    #         (
-    #             "payroll_based_on",
-    #             "include_holidays_in_total_working_days",
-    #             "consider_marked_attendance_on_holidays",
-    #             "daily_wages_fraction_for_half_day",
-    #             "consider_unmarked_attendance_as",
-    #         ),
-    #         as_dict=1,
-    #     )
-
-    #     consider_marked_attendance_on_holidays = (
-    #         payroll_settings.include_holidays_in_total_working_days
-    #         and payroll_settings.consider_marked_attendance_on_holidays
-    #     )
-
-    #     daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
-
-    #     working_days = date_diff(self.end_date, self.start_date) + 1
-    #     working_days_test=0
-    #     if for_preview:
-    #         self.total_working_days = working_days
-    #         self.payment_days = working_days
-    #         return
-
-    #     holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-    #     working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
-
-    #     sundays = [d for d in holidays if d.weekday() == 6]
-
-
-    #     working_days_test = (working_days-len(sundays))
-
-    #     self.custom_working_days_exclude_holiday=working_days_test
-
-    #     if not cint(payroll_settings.include_holidays_in_total_working_days):
-    #         working_days_list = [i for i in working_days_list if i not in holidays]
-
-    #         working_days -= len(holidays)
-
-    #         if working_days < 0:
-    #             frappe.throw(_("There are more holidays than working days this month."))
-
-    #     if not payroll_settings.payroll_based_on:
-    #         frappe.throw(_("Please set Payroll based on in Payroll settings"))
-
-    #     if payroll_settings.payroll_based_on == "Attendance":
-    #         actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
-    #             holidays, daily_wages_fraction_for_half_day, consider_marked_attendance_on_holidays
-    #         )
-    #         self.absent_days = absent
-    #     else:
-    #         actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
-    #             holidays, working_days_list, daily_wages_fraction_for_half_day
-    #         )
-
-    #     if not lwp:
-    #         lwp = actual_lwp
-    #     elif lwp != actual_lwp:
-    #         frappe.msgprint(
-    #             _("Leave Without Pay does not match with approved {} records").format(
-    #                 payroll_settings.payroll_based_on
-    #             )
-    #         )
-
-    #     self.leave_without_pay = lwp
-    #     self.total_working_days = working_days
-
-    #     payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
-
-    #     if flt(payment_days) > flt(lwp):
-    #         self.payment_days = flt(payment_days) - flt(lwp)
-
-    #         if payroll_settings.payroll_based_on == "Attendance":
-    #             self.payment_days -= flt(absent)
-
-    #         consider_unmarked_attendance_as = payroll_settings.consider_unmarked_attendance_as or "Present"
-
-    #         if (
-    #             payroll_settings.payroll_based_on == "Attendance"
-    #             and consider_unmarked_attendance_as == "Absent"
-    #         ):
-    #             unmarked_days = self.get_unmarked_days(
-    #                 payroll_settings.include_holidays_in_total_working_days, holidays
-    #             )
-    #             half_absent_days = self.get_half_absent_days(
-    #                 payroll_settings.include_holidays_in_total_working_days,
-    #                 consider_marked_attendance_on_holidays,
-    #                 holidays,
-    #             )
-    #             self.absent_days += (
-    #                 unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
-    #             )  # will be treated as absent
-    #             self.payment_days -= unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
-    #     else:
-    #         self.payment_days = 0
 
 
 
