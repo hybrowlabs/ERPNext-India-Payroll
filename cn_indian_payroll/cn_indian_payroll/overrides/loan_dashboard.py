@@ -87,6 +87,8 @@ def print_loan_dashboard(employee):
 
         results.append({
             "loan_name": loan.name,
+            "employee":loan.applicant,
+            "employee_name":loan.applicant_name,
             "loan_type": loan.loan_product,
             "emi_type": loan.repayment_method,
             "loan_requested_amount": loan.loan_amount,

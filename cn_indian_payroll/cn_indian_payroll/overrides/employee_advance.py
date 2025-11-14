@@ -175,7 +175,9 @@ def get_advance_dashboard(employee):
             "end_date": end_date,
             "repayments": repayment_schedule,
             "total_paid_amount": total_paid_amount,
-            "balance_amount": final_balance
+            "balance_amount": final_balance,
+            "employee":advance.employee,
+            "employee_name":advance.employee_name
         })
 
     return results
