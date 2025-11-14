@@ -87,7 +87,7 @@
         <button class="tab-btn active" data-tab="form-tab">Form</button>
         <button class="tab-btn" data-tab="challan-tab">Challan</button>
         <button class="tab-btn" data-tab="annexure-tab">Annexure (Deductee Details)</button>
-        <button class="tab-btn" data-tab="other-services-tab">Other Services of TIN</button>
+        <button class="tab-btn" data-tab="other-services-tab">Download / Upload CSI File</button>
     </div>
 
     <!-- FORM TAB -->
@@ -792,7 +792,7 @@ console.log("Get Details button clicked!");
 
 <!-- OTHER SERVICES TAB -->
 <div id="other-services-tab" class="tab-content">
-<h4>Other Services of TIN</h4>
+<h4>Upload CSI File</h4>
 
 <table>
     <tr>
@@ -812,10 +812,47 @@ console.log("Get Details button clicked!");
         </td>
     </tr>
 </table>
+<br><br><br>
 
+    <h4>Download CSI File</h4>
+
+    <table>
+        <tr>
+            <th>TAN</th>
+            <th>Mobile No.</th>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Consent (Y/N)</th>
+            <th>Reason</th>
+            <th>Action</th>
+        </tr>
+
+        <tr>
+            <td><input type="text" id="tan" placeholder="Enter TAN"></td>
+            <td><input type="text" id="mobile" placeholder="Enter Mobile No."></td>
+            <td><input type="date" id="from-date"></td>
+            <td><input type="date" id="to-date"></td>
+            <td><input type="text" id="consent" maxlength="1" placeholder="Y/N"></td>
+            <td><input type="text" id="reason" placeholder="Reason"></td>
+            <td>
+                <button class="submit-csi-btn" id="csi-submit"
+                    style="
+                        background-color: #28a745;
+                        color: white;
+                        border: none;
+                        padding: 8px 14px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    ">
+                    Download CSI
+                </button>
+            </td>
+        </tr>
+    </table>
+
+<br><br><br>
 <button class="submit-btn" id="other-submit">Create RPU File</button>
 
-</div>
 
 <style>
 .upload-label {
