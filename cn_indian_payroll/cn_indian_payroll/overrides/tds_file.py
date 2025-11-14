@@ -141,13 +141,6 @@ def insert_tds_details(challan_data, annexure_data, fieldData):
         fiscal_year = fieldData.get("fiscal_year")
 
 
-        # frappe.msgprint(str(payroll_period))
-        # frappe.msgprint(str(quarter))
-        # frappe.msgprint(str(company))
-        # frappe.msgprint(str(fiscal_year))
-
-
-
 
 
         if not (payroll_period and quarter and company and fiscal_year):
@@ -166,8 +159,6 @@ def insert_tds_details(challan_data, annexure_data, fieldData):
 
 
         if not get_existing_tds:
-
-            frappe.msgprint(str("YES"))
 
             tds_doc = frappe.new_doc("TDS RETURN")
             tds_doc.company = company
@@ -303,20 +294,99 @@ def insert_tds_details(challan_data, annexure_data, fieldData):
             tds_doc.insert()
             frappe.db.commit()
 
-    #         return {
-    #             "success": True,
-    #             "tds_return": tds_doc.name,
-    #             "message": f"TDS RETURN created for {company} ({quarter})"
-    #         }
+            return {
+                "success": True,
+                "tds_return": tds_doc.name,
+                "message": f"TDS RETURN created for {company} ({quarter})"
+            }
 
         else:
-            # ✅ Update existing document (optional)
+
             existing_doc = frappe.get_doc("TDS RETURN", get_existing_tds[0])
+
             return {
                 "success": False,
+                "tds_return": existing_doc.name,
                 "message": f"TDS RETURN already exists: {existing_doc.name}"
             }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Insert TDS RETURN Error")
         frappe.throw(f"Error inserting TDS RETURN: {str(e)}")
+
+
+
+
+
+import frappe, base64
+from frappe.utils.file_manager import save_file
+
+@frappe.whitelist()
+def upload_csi_file(file_name, file_data, attached_to_doctype=None, attached_to_name=None):
+
+    try:
+        file_content = base64.b64decode(file_data)
+
+        saved_file = save_file(
+            fname=file_name,
+            content=file_content,
+            dt=attached_to_doctype,
+            dn=attached_to_name,
+            is_private=1
+        )
+
+        get_doc=frappe.get_doc(attached_to_doctype, attached_to_name)
+        get_doc.csi_file = saved_file.file_url
+        get_doc.save()
+        frappe.db.commit()
+
+        return {"success": True, "file_url": saved_file.file_url}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "CSI Upload Error")
+        frappe.throw(f"Error uploading CSI file: {str(e)}")
+
+
+
+
+
+@frappe.whitelist()
+def create_txt_file(basic_data, attached_to_name=None):
+    """Create TDS text file and save in File Manager attached to TDS RETURN"""
+    try:
+        if isinstance(basic_data, str):
+            basic_data = frappe.parse_json(basic_data)
+
+        payroll_period = basic_data.get("payroll_period")
+        quarter = basic_data.get("quarter_ended")
+        company = basic_data.get("company")
+        fiscal_year = basic_data.get("fiscal_year")
+
+        frappe.msgprint(f"Creating TDS file for {company}, {quarter}, {fiscal_year}")
+
+        get_existing_tds = frappe.get_all(
+            "TDS RETURN",
+            filters={
+                "company": company,
+                "quarter_ended": quarter,
+                "payroll_period": payroll_period
+            },
+            pluck="name"
+        )
+
+
+        if not get_existing_tds:
+            frappe.msgprint("Please Select CSI File")
+
+        else:
+            tds_doc = frappe.get_doc("TDS RETURN", get_existing_tds[0])
+
+            frappe.msgprint(f"TDS RETURN found: {tds_doc.name}")
+
+
+
+
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Create TDS TXT File Error")
+        frappe.throw(f"Error creating TDS text file: {str(e)}")

@@ -1,8 +1,5 @@
 
 
-
-
-
 frappe.pages['tds-return-filing'].on_page_load = function (wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
@@ -182,7 +179,7 @@ company_address_field.refresh_input();
 
 
         frappe.call({
-            method: "tds_app.tds_app.overrides.salary_slip.month_wise_tds_value",
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.month_wise_tds_value",
             args: {
                 company: company,
                 fiscal_year: fiscal_year,
@@ -376,58 +373,6 @@ company_address_field.refresh_input();
             }
         });
 
-        // // When "Save Services" button is clicked
-        // $(page.body).on("click", "#other-submit", function () {
-        //     if (!selectedCSIFile) {
-        //         frappe.msgprint("Please attach a CSI file before saving.");
-        //         return;
-        //     }
-
-        //     const formData = new FormData();
-        //     formData.append("file", selectedCSIFile);
-        //     formData.append("folder", "Home/Attachments");
-
-        //     // ✅ Add CSRF token (important for authenticated upload)
-        //     const csrf_token = frappe.csrf_token;
-
-        //     fetch("/api/method/upload_file", {
-        //         method: "POST",
-        //         body: formData,
-        //         headers: {
-        //             "X-Frappe-CSRF-Token": csrf_token
-        //         }
-        //     })
-        //     .then(r => r.json())
-        //     .then(data => {
-        //         console.log("Upload response:", data);
-        //         if (data.message && data.message.file_url) {
-        //             frappe.msgprint({
-        //                 title: "Success",
-        //                 message: `✅ CSI File uploaded successfully!<br>File URL: ${data.message.file_url}`,
-        //                 indicator: "green"
-        //             });
-
-        //             // ✅ Once file is uploaded successfully, generate RPU file
-
-
-        //         } else {
-        //             frappe.msgprint({
-        //                 title: "Error",
-        //                 message: "❌ File upload failed. Check console for details.",
-        //                 indicator: "red"
-        //             });
-        //             console.error(data);
-        //         }
-        //     })
-        //     .catch(err => {
-        //         console.error("Upload error:", err);
-        //         frappe.msgprint({
-        //             title: "Error",
-        //             message: "❌ Error uploading CSI file. Check console.",
-        //             indicator: "red"
-        //         });
-        //     });
-        // });
 
 
         // When "Save Services" button is clicked
@@ -446,7 +391,7 @@ company_address_field.refresh_input();
                 fieldData[id] = $(this).val();
             });
 
-            console.log("All Form Fields:11111111111111111", fieldData);
+            // console.log("All Form Fields:11111111111111111", fieldData);
 
             // 3️⃣ Collect Challan Table Data
             const challanRows = [];
@@ -459,7 +404,7 @@ company_address_field.refresh_input();
                 challanRows.push(rowData);
             });
 
-            console.log("Challan Table Data:", challanRows);
+            // console.log("Challan Table Data:", challanRows);
 
             // 4️⃣ Collect Annexure Table Data
             const annexureRows = [];
@@ -472,7 +417,7 @@ company_address_field.refresh_input();
                 annexureRows.push(rowData);
             });
 
-            console.log("Annexure Table Data:", annexureRows);
+            // console.log("Annexure Table Data:", annexureRows);
 
             const company_value = company_field.get_value();
             const fiscal_year_value = fiscal_field.get_value();
@@ -485,7 +430,7 @@ company_address_field.refresh_input();
             fieldData["branch"] = branch_value;
 
             frappe.call({
-                method: "tds_app.tds_app.overrides.salary_slip.insert_tds_details",
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.insert_tds_details",
                 args: {
                     challan_data: challanRows,
                     annexure_data: annexureRows,
@@ -494,8 +439,8 @@ company_address_field.refresh_input();
                 freeze: true,
                 freeze_message: "Saving TDS details...",
                 callback: function (r) {
-                    if (r.message && r.message.success) {
-                        // const tds_return_name = r.message.tds_return;
+                    if (r.message) {
+                        const tds_return_name = r.message.tds_return;
 
                         // frappe.msgprint({
                         //     title: "Success",
@@ -503,72 +448,67 @@ company_address_field.refresh_input();
                         //     indicator: "green",
                         // });
 
-                        // 7️⃣ Upload CSI file linked to this new TDS Return
-                        // upload_csi_file(selectedCSIFile, tds_return_name);
+
+                        upload_csi_file(selectedCSIFile, tds_return_name);
+                        create_txt_file(fieldData, tds_return_name);
+
                     }
-                    // else {
-                    //     frappe.msgprint({
-                    //         title: "Error",
-                    //         message: "❌ Failed to insert TDS Return. Check console.",
-                    //         indicator: "red",
-                    //     });
-                    //     console.error("Insert response:", r);
-                    // }
+
                 },
-                // error: function (r) {
-                //     frappe.msgprint("❌ Backend call failed. Check console.");
-                //     console.error(r);
-                // },
+
             });
         });
 
+        function upload_csi_file(file, tds_return_name) {
+            const reader = new FileReader();
 
-        // 🧩 Helper Function: Upload CSI File
-        function upload_csi_file(file, attached_to_name) {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("is_private", 0);
-            formData.append("doctype", "TDS RETURN");
-            formData.append("docname", attached_to_name);
-            formData.append("folder", "Home/Attachments");
+            reader.onload = function (event) {
+                const base64Data = event.target.result.split(",")[1];
 
-            const csrf_token = frappe.csrf_token;
+                // console.log(file.name,"file.namefile.name")
+                // console.log(base64Data,"base64Databas64Data")
+                // console.log(tds_return_name,"tds_return_nametds_return_name")
 
-            fetch("/api/method/upload_file", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Frappe-CSRF-Token": csrf_token,
-                },
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.message && data.message.file_url) {
-                        frappe.msgprint({
-                            title: "Success",
-                            message: `📁 CSI File uploaded successfully!<br><b>File URL:</b> ${data.message.file_url}`,
-                            indicator: "green",
-                        });
-                    } else {
-                        frappe.msgprint({
-                            title: "Error",
-                            message: "❌ CSI File upload failed. Check console for details.",
-                            indicator: "red",
-                        });
-                        console.error(data);
-                    }
-                })
-                .catch(err => {
-                    console.error("Upload error:", err);
-                    frappe.msgprint({
-                        title: "Error",
-                        message: "❌ Error uploading CSI file. Check console.",
-                        indicator: "red",
-                    });
+
+                frappe.call({
+                    method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.upload_csi_file",
+                    args: {
+                        file_name: file.name,
+                        file_data: base64Data,
+                        attached_to_doctype: "TDS RETURN",
+                        attached_to_name: tds_return_name,
+                    },
+                    freeze: true,
+                    freeze_message: "Uploading CSI file...",
+                    callback: function (r) {
+                        if (r.message) {
+
+                            console.log("CSI file upload response:", r.message);
+
+                        }
+                    },
                 });
+            };
+
+            reader.readAsDataURL(file);
         }
 
-
+        function create_txt_file(fieldData, tds_return_name) {
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.create_txt_file",
+                args: {
+                    basic_data: fieldData,
+                    attached_to_name: tds_return_name
+                },
+                freeze: true,
+                freeze_message: "Creating .txt file...",
+                callback: function (r) {
+                    if (r.message) {
+                        console.log("TXT file created:", r.message);
+                    }
+                },
+            });
+        }
 
 
 
