@@ -248,10 +248,9 @@ fixtures = [
     {"dt": "Workflow", "filters": {"name": "declaration Approve"}},
     {"dt": "Workspace", "filters": {"module": "cn-indian-payroll"}},
     {"dt": "Workflow State"},
-    # {"dt":"Employee Tax Exemption Category"},
     {"dt": "Salary Component"},
     {"dt": "Custom DocPerm", "filters": {"role": ["in", ["Payroll manager"]]}},
-    # {"dt":"Salary Structure"},
+    {"dt": "Custom Field", "filters": {"dt": "Payroll Settings"}},
 ]
 
 doctype_js = {
