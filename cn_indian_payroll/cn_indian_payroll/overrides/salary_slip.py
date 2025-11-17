@@ -1788,6 +1788,13 @@ class CustomSalarySlip(SalarySlip):
     #     return 0
 
     def insert_lop_days(self):
+        """Calculate total LOP reversal + arrear present days and store in custom field."""
+        import frappe
+
+        # Always initialize first at top level
+        total_lop_days = 0.0
+
+        # --- LOP Reversal Days ---
         benefit_application_days = frappe.get_list(
             "LOP Reversal",
             filters={
@@ -1799,12 +1806,28 @@ class CustomSalarySlip(SalarySlip):
         )
 
         if benefit_application_days:
-            total_lop_days = sum(
-                days["number_of_days"] for days in benefit_application_days
+            total_lop_days += sum(
+                float(d.get("number_of_days") or 0) for d in benefit_application_days
             )
-            self.custom_lop_reversal_days = total_lop_days
-        else:
-            self.custom_lop_reversal_days = 0
+
+        # --- Joining Salary Arrear (Present Days) ---
+        arrear_days = frappe.get_list(
+            "Joining Salary Arrear",
+            filters={
+                "employee": self.employee,
+                "additional_salary_date": ["between", [self.start_date, self.end_date]],
+                "docstatus": 1,
+            },
+            fields=["number_of_present_days"],
+        )
+
+        if arrear_days:
+            total_lop_days += sum(
+                float(d.get("number_of_present_days") or 0) for d in arrear_days
+            )
+
+        # --- Assign to custom field (always defined) ---
+        self.custom_lop_reversal_days = total_lop_days
 
     def driver_reimbursement_lop(self):
         driver_reimbursement_component_lop = []
@@ -2361,7 +2384,7 @@ class CustomSalarySlip(SalarySlip):
     def calculate_grosspay(self):
         gross_pay_sum = 0
 
-        gross_pay_year_sum = 0
+        # gross_pay_year_sum = 0
 
         reimbursement_sum = 0
 
@@ -2374,7 +2397,7 @@ class CustomSalarySlip(SalarySlip):
                 component = frappe.get_doc("Salary Component", i.salary_component)
                 if component.custom_is_part_of_gross_pay == 1:
                     gross_pay_sum += i.amount
-                    gross_pay_year_sum += i.year_to_date
+                    # gross_pay_year_sum += i.year_to_date
 
                 if (
                     component.custom_is_reimbursement == 1
@@ -2408,7 +2431,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_statutory_grosspay = round(gross_pay_sum)
 
-        self.custom_statutory_year_to_date = round(gross_pay_year_sum)
+        # self.custom_statutory_year_to_date = round(gross_pay_year_sum)
 
         self.custom_total_income = round(total_income)
 
