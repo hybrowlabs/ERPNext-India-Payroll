@@ -10,7 +10,9 @@
   "employee_name",
   "branch",
   "designation",
+  "department",
   "number_of_present_days",
+  "joining_date",
   "column_break_lxmj",
   "company",
   "posting_date",
@@ -113,6 +115,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "joining_date",
+   "fieldtype": "Date",
+   "label": "Joining Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
   }
  ],
  "grid_page_length": 50,
@@ -124,7 +140,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-05-15 00:45:15.224583",
+ "modified": "2025-11-18 19:46:31.025406",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Joining Salary Arrear",
