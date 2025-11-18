@@ -40,10 +40,10 @@
 #             filters={
 #                 "name": ["in", list(structure_component_names)],
 #                 "custom_is_part_of_ctc": 1,
-#                 "custom_sequence": [">", 0],
+#                 "custom_sequence_id": [">", 0],
 #             },
 #             fields=["name"],
-#             order_by="custom_sequence asc",
+#             order_by="custom_sequence_id asc",
 #         )
 
 #         ordered_ctc_components = [comp["name"] for comp in matching_ctc_components]
@@ -308,15 +308,15 @@ def get_all_employee(filters=None):
                 component_doc = frappe.get_value(
                     "Salary Component",
                     component_name,
-                    ["custom_sequence", "custom_is_part_of_ctc"],
+                    ["custom_sequence_id", "custom_is_part_of_ctc"],
                     as_dict=True,
                 )
                 if component_doc and component_doc.custom_is_part_of_ctc == 1:
                     # Safely convert sequence to int, fallback to 9999
                     sequence = (
-                        int(component_doc.custom_sequence)
-                        if component_doc.custom_sequence
-                        and str(component_doc.custom_sequence).isdigit()
+                        int(component_doc.custom_sequence_id)
+                        if component_doc.custom_sequence_id
+                        and str(component_doc.custom_sequence_id).isdigit()
                         else 9999
                     )
                     all_matched_components.add(component_name)

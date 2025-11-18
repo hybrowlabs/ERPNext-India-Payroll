@@ -111,7 +111,7 @@ def get_salary_slips(filters=None):
                     get_each_component = frappe.get_doc(
                         "Salary Component", earning.salary_component
                     )
-                    component_sequence = get_each_component.custom_sequence or 9999
+                    component_sequence = get_each_component.custom_sequence_id or 9999
 
                     if (
                         get_each_component.is_tax_applicable == 1
@@ -148,7 +148,9 @@ def get_salary_slips(filters=None):
                     get_tax_component_ded = frappe.get_doc(
                         "Salary Component", deduction.salary_component
                     )
-                    component_sequence = get_tax_component_ded.custom_sequence or 9999
+                    component_sequence = (
+                        get_tax_component_ded.custom_sequence_id or 9999
+                    )
 
                     if get_tax_component_ded.component_type == "EPF":
                         epf_amount_prev += deduction.amount
