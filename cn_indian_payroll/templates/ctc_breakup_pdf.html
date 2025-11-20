@@ -1,0 +1,97 @@
+<h2 style="text-align:center;">CTC Breakup Report</h2>
+
+<table width="100%" style="margin-bottom: 15px;">
+    <tr>
+        <td><b>Employee:</b> {{ employee_name }} ({{ employee }})</td>
+        <td style="text-align:right;"><b>Company:</b> {{ company }}</td>
+    </tr>
+    <tr>
+        <td><b>Department:</b> {{ department }}</td>
+        <td style="text-align:right;"><b>Salary Structure:</b> {{ salary_structure }}</td>
+    </tr>
+    <tr>
+        <td><b>Designation:</b> {{ designation }}</td>
+        <td style="text-align:right;"><b>Posting Date:</b> {{ posting_date }}</td>
+    </tr>
+</table>
+
+<hr>
+
+<h3>Earnings</h3>
+<table border="1" width="100%" cellpadding="5" cellspacing="0">
+    <tr>
+        <th style="width:50%;">Component</th>
+        <th style="width:25%; text-align:right;">Monthly Amount</th>
+        <th style="width:25%; text-align:right;">Annual Amount</th>
+    </tr>
+    {% for e in earnings %}
+    <tr>
+        <td>{{ e.salary_component }}</td>
+        <td style="text-align:right;">{{ "{:,.0f}".format(e.monthly_amount) }}</td>
+        <td style="text-align:right;">{{ "{:,.0f}".format(e.annual_amount) }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <th>Total Earnings</th>
+        <th style="text-align:right;">{{ "{:,.0f}".format(total_monthly_earnings) }}</th>
+        <th style="text-align:right;">{{ "{:,.0f}".format(total_annual_earnings) }}</th>
+    </tr>
+</table>
+
+<h3>Reimbursements</h3>
+<table border="1" width="100%" cellpadding="5" cellspacing="0">
+    <tr>
+        <tr>
+            <th style="width:50%;">Component</th>
+            <th style="width:25%; text-align:right;">Monthly Amount</th>
+            <th style="width:25%; text-align:right;">Annual Amount</th>
+        </tr>
+    </tr>
+    {% for r in reimbursements %}
+    <tr>
+        <td>{{ r.salary_component }}</td>
+        <td style="text-align:right;">{{ "{:,.0f}".format(r.monthly_amount) }}</td>
+        <td style="text-align:right;">{{ "{:,.0f}".format(r.annual_amount) }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <th>Total Reimbursements</th>
+        <th style="text-align:right;">{{ "{:,.0f}".format(total_monthly_reim) }}</th>
+        <th style="text-align:right;">{{ "{:,.0f}".format(total_annual_reim) }}</th>
+    </tr>
+</table>
+
+<h3>Deductions</h3>
+<table border="1" width="100%" cellpadding="5" cellspacing="0">
+    <tr>
+        <tr>
+            <th style="width:50%;">Component</th>
+            <th style="width:25%; text-align:right;">Monthly Amount</th>
+            <th style="width:25%; text-align:right;">Annual Amount</th>
+        </tr>
+    </tr>
+    {% for d in deductions %}
+    <tr>
+        <td>{{ d.salary_component }}</td>
+        <td style="text-align:right;">{{ "{:,.0f}".format(d.monthly_amount) }}</td>
+        <td style="text-align:right;">{{ "{:,.0f}".format(d.annual_amount) }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <th>Total Deductions</th>
+        <th style="text-align:right;">{{ "{:,.0f}".format(total_monthly_ded) }}</th>
+        <th style="text-align:right;">{{ "{:,.0f}".format(total_annual_ded) }}</th>
+    </tr>
+</table>
+
+<h3>Summary</h3>
+<table border="1" width="100%" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Total Monthly CTC</th>
+        <td style="text-align:right;">{{ "{:,.0f}".format(total_monthly_ctc) }}</td>
+    </tr>
+    <tr>
+        <th>Total Annual CTC</th>
+        <td style="text-align:right;">{{ "{:,.0f}".format(total_annual_ctc) }}</td>
+    </tr>
+</table>

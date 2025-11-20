@@ -10,8 +10,6 @@
   "abbr",
   "type",
   "component_type",
-  "lta_taxable_component",
-  "lta_non_taxable_component",
   "sequence",
   "component_added",
   "multi_select",
@@ -25,17 +23,10 @@
   "round_to_the_nearest_integer",
   "do_not_include_in_total",
   "remove_if_zero_valued",
-  "is_part_of_gross_pay",
   "disabled",
+  "accrual_component",
+  "arrear_component",
   "is_part_of_ctc",
-  "perquisite",
-  "is_accrual",
-  "accrual_paid_on",
-  "paidout_component",
-  "is_reimbursement",
-  "is_arrear",
-  "component",
-  "is_part_of_appraisal",
   "tax_applicable_based_on_regime",
   "regime",
   "condition__formula_tab",
@@ -46,6 +37,8 @@
   "flexible_benefits_tab",
   "is_flexible_benefit",
   "max_benefit_amount_yearly",
+  "payout_method",
+  "payout_unclaimed_amount_in_final_payroll_cycle",
   "column_break_damb",
   "pay_against_benefit_claim",
   "only_tax_impact_cannot_claim_but_part_of_taxable_income",
@@ -73,19 +66,7 @@
    "fieldname": "component_type",
    "fieldtype": "Select",
    "label": "Component Type",
-   "options": "\nProvident Fund\nProfessional Tax\nLTA Taxable\nLTA Non Taxable\nVehicle Maintenance\nLTA Reimbursement\nNPS\nEPF\nESIC"
-  },
-  {
-   "depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
-   "fieldname": "lta_taxable_component",
-   "fieldtype": "Data",
-   "label": "LTA Taxable Component"
-  },
-  {
-   "depends_on": "eval:doc.component_type==\"LTA Reimbursement\"",
-   "fieldname": "lta_non_taxable_component",
-   "fieldtype": "Data",
-   "label": "LTA Non Taxable Component"
+   "options": "\nProvident Fund\nProfessional Tax\nNPS\nEPF\nESIC"
   },
   {
    "fieldname": "sequence",
@@ -168,13 +149,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.type==\"Earning\"",
-   "fieldname": "is_part_of_gross_pay",
-   "fieldtype": "Check",
-   "label": "Is Part of Gross Pay"
-  },
-  {
-   "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
@@ -185,58 +159,6 @@
    "fieldname": "is_part_of_ctc",
    "fieldtype": "Check",
    "label": "Is Part of CTC"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.type==\"Earning\"",
-   "fieldname": "perquisite",
-   "fieldtype": "Check",
-   "label": "Perquisite"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.type==\"Earning\"",
-   "fieldname": "is_accrual",
-   "fieldtype": "Check",
-   "label": "Is Accrual"
-  },
-  {
-   "depends_on": "is_accrual",
-   "fieldname": "accrual_paid_on",
-   "fieldtype": "Select",
-   "label": "Accrual Paid on",
-   "options": "Payroll\nF and F"
-  },
-  {
-   "depends_on": "is_accrual",
-   "fieldname": "paidout_component",
-   "fieldtype": "Data",
-   "label": "Paidout Component"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.type==\"Earning\"",
-   "fieldname": "is_reimbursement",
-   "fieldtype": "Check",
-   "label": "Is Reimbursement"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_arrear",
-   "fieldtype": "Check",
-   "label": "Is Arrear"
-  },
-  {
-   "depends_on": "is_arrear",
-   "fieldname": "component",
-   "fieldtype": "Data",
-   "label": "Component"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_part_of_appraisal",
-   "fieldtype": "Check",
-   "label": "Is Part of Appraisal"
   },
   {
    "default": "0",
@@ -315,11 +237,35 @@
    "fieldname": "create_separate_payment_entry_against_benefit_claim",
    "fieldtype": "Check",
    "label": "Create Separate Payment Entry Against Benefit Claim"
+  },
+  {
+   "default": "0",
+   "fieldname": "accrual_component",
+   "fieldtype": "Check",
+   "label": "Accrual Component"
+  },
+  {
+   "default": "0",
+   "fieldname": "arrear_component",
+   "fieldtype": "Check",
+   "label": "Arrear Component"
+  },
+  {
+   "fieldname": "payout_method",
+   "fieldtype": "Select",
+   "label": "Payout Method",
+   "options": "\nAccrue and payout at end of payroll period\nAccrue per cycle, pay only on claim\nAllow claim for full benefit amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "payout_unclaimed_amount_in_final_payroll_cycle",
+   "fieldtype": "Check",
+   "label": "Payout Unclaimed Amount in Final Payroll Cycle"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-15 15:22:49.156067",
+ "modified": "2025-10-27 22:44:12.834737",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Component Library Item",

@@ -41,14 +41,15 @@
    "fieldname": "payroll_period",
    "fieldtype": "Link",
    "label": "Payroll Period",
-   "options": "Payroll Period"
+   "options": "Payroll Period",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-04-22 14:20:44.211687",
+ "modified": "2025-10-13 09:47:20.410199",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Structure Setting",

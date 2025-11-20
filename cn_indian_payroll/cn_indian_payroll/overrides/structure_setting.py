@@ -79,10 +79,10 @@ def create_salary_structure_assignment_worker(company, payroll_period, income_ta
                     "custom_nps_percentage": ssa.custom_nps_percentage,
                 })
 
-                for row in ssa.get("custom_employee_reimbursements", []):
-                    new_ssa.append("custom_employee_reimbursements", {
-                        "reimbursements": row.reimbursements,
-                        "monthly_total_amount": row.monthly_total_amount
+                for row in ssa.get("employee_benefits", []):
+                    new_ssa.append("employee_benefits", {
+                        "salary_component": row.salary_component,
+                        "amount": row.amount
                     })
 
                 new_ssa.insert()

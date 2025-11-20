@@ -1,62 +1,25 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2024-12-24 11:50:59.632430",
+ "creation": "2025-10-23 10:14:57.307358",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "date",
-  "payment_days",
-  "salary_slip_id",
-  "salary_component",
-  "accrued_amount",
-  "claimed_amount"
+  "title"
  ],
  "fields": [
   {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date"
-  },
-  {
-   "fieldname": "payment_days",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Payment Days"
-  },
-  {
-   "fieldname": "salary_slip_id",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Salary Slip ID",
-   "options": "Salary Slip"
-  },
-  {
-   "fieldname": "salary_component",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Salary Component",
-   "options": "Salary Component"
-  },
-  {
-   "fieldname": "accrued_amount",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Accrued Amount"
-  },
-  {
-   "fieldname": "claimed_amount",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Claimed Amount"
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-30 17:18:02.969158",
+ "modified": "2025-10-23 10:15:06.302413",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Accrued Benefit",

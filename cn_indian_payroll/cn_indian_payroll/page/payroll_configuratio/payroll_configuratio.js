@@ -106,6 +106,15 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                                 sequence: item.sequence,
 								visibility_type: item.visibility_type,
 								multi_select: item.multi_select,
+
+                                accrual_component: item.accrual_component,
+                                arrear_component: item.arrear_component,
+                                is_flexible_benefit: item.is_flexible_benefit,
+                                payout_method: item.payout_method,
+                                payout_unclaimed_amount_in_final_payroll_cycle: item.payout_unclaimed_amount_in_final_payroll_cycle
+
+
+
                             };
 
 							console.log("Row Data: ", rowData);
@@ -118,15 +127,6 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
                                 condition: rowData.condition
                             }];
 
-                            if (rowData.is_arrear) {
-                                salary_component_array.push({
-                                    component: `${rowData.salary_component}(Arrear)`,
-                                    abbr: `${rowData.abbr}Arrear`,
-                                    type: rowData.component_type,
-                                    formula: "",
-                                    condition: ""
-                                });
-                            }
 
                             let custom_field = [];
                             const Child_custom_field = [];

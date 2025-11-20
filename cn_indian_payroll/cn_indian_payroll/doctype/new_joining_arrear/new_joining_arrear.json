@@ -1,0 +1,203 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:JOI-ARR-{employee}-{MM}-{#####}",
+ "creation": "2025-10-09 23:56:23.526611",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "description",
+  "section_break_upmn",
+  "employee",
+  "employee_name",
+  "department",
+  "designation",
+  "joining_date",
+  "number_of_present_days",
+  "column_break_txim",
+  "company",
+  "posting_date",
+  "payroll_period",
+  "payout_date",
+  "payroll_entry",
+  "earning_arrear_component_section",
+  "earning_component",
+  "deduction_arrear_component_section",
+  "deduction_component",
+  "reimbursement_arrear_component_section",
+  "reimbursement_component",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "description",
+   "fieldtype": "HTML",
+   "label": "description"
+  },
+  {
+   "fieldname": "section_break_upmn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "joining_date",
+   "fieldtype": "Date",
+   "label": "Joining Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_present_days",
+   "fieldtype": "Float",
+   "label": "Number of Present Days",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_txim",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payout_date",
+   "fieldtype": "Date",
+   "label": "Payout Date  / Addional Salary date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "earning_arrear_component_section",
+   "fieldtype": "Section Break",
+   "label": "Earning Arrear Component"
+  },
+  {
+   "fieldname": "earning_component",
+   "fieldtype": "Table",
+   "label": "Earning Component",
+   "options": "Payroll Correction Child"
+  },
+  {
+   "fieldname": "deduction_arrear_component_section",
+   "fieldtype": "Section Break",
+   "label": "Deduction Arrear Component"
+  },
+  {
+   "fieldname": "deduction_component",
+   "fieldtype": "Table",
+   "label": "Deduction Component",
+   "options": "Payroll Correction Child"
+  },
+  {
+   "fieldname": "reimbursement_arrear_component_section",
+   "fieldtype": "Section Break",
+   "label": "Reimbursement Arrear Component"
+  },
+  {
+   "fieldname": "reimbursement_component",
+   "fieldtype": "Table",
+   "label": "Reimbursement Component",
+   "options": "Payroll Correction Child"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Payroll Entry",
+   "options": "Payroll Entry"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "New Joining Arrear",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Additional Salary",
+   "link_fieldname": "ref_docname"
+  }
+ ],
+ "modified": "2025-10-16 16:36:57.806262",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "New Joining Arrear",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

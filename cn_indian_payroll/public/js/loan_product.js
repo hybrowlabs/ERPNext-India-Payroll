@@ -7,4 +7,10 @@ frappe.ui.form.on('Loan Product', {
 
     },
 
+
+
+
+
+
+
 })

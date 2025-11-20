@@ -7,7 +7,7 @@ frappe.ui.form.on('Full and Final Statement', {
         if(frm.doc.employee)
         {
 
-            get_accrued_components(frm)
+            // get_accrued_components(frm)
 
 
         }

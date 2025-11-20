@@ -67,11 +67,11 @@ def get_salary_slips(filters=None):
             if earning.salary_component == basic_component:
                 basic += earning.amount
             get_doc = frappe.get_doc("Salary Component", earning.salary_component)
-            if get_doc.custom_is_arrear == 1 and get_doc.custom_component == basic_component:
+            if get_doc.arrear_component == 1:
                 basic += earning.amount
             if earning.salary_component == da_component:
                 da += earning.amount
-            if get_doc.custom_is_arrear == 1 and get_doc.custom_component == da_component:
+            if get_doc.arrear_component == 1:
                 da += earning.amount
 
         for deduction in each_salary_slip.deductions:

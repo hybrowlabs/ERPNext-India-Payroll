@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+  <meta charset="utf-8" />
+  <title>Annual Tax Statement</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, Arial, sans-serif;
+      margin: 24px;
+      color: #111827;
+    }
+    h2 { margin: 0 0 16px; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 6px 8px;
+      text-align: right;
+      word-wrap: break-word;
+    }
+    .particulars-table th:first-child,
+    .particulars-table td:first-child {
+      text-align: left;
+      width: 18%;
+      font-weight: 600;
+    }
+    .particulars-table th:last-child,
+    .particulars-table td:last-child {
+      min-width: 80px;
+    }
+    tfoot td {
+      font-weight: bold;
+      background: #f3f4f6;
+    }
+
+    .print-btn {
+      float: right;
+      margin-bottom: 16px;
+      padding: 6px 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .print-btn:hover { background: #0056b3; }
+
+    @media print {
+      .print-btn { display: none !important; }
+    }
+    @media print {
+    .print-btn { display: none !important; }
+
+    /* Prevent table headers from repeating on next page */
+    thead { display: table-row-group !important; }
+}
+  </style>
+</head>
+<body>
+
+  {% if doc.company %}
+  {% set company = frappe.get_doc("Company", doc.company) %}
+
+  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px;">
+
+    <!-- Logo on Left -->
+    <div style="flex: 0 0 auto;">
+      {% if company.custom_letter_head_image %}
+        <img src="{{ company.custom_letter_head_image }}"
+             style="max-height: 80px; max-width: 200px; object-fit: contain;">
+      {% endif %}
+    </div>
+
+    <!-- Company Details Centered -->
+
+    <div style="flex: 1; text-align: center;">
+      {% if company.custom_letter_head_details %}
+        {% set paragraphs = company.custom_letter_head_details.split('\n') %}
+        {% for para in paragraphs %}
+          {% if para.strip() %}
+            {% if loop.index == 1 %}
+              <p style="margin: 0; font-size: 18px; font-weight: bold;">{{ para }}</p>
+            {% else %}
+              <p style="margin: 0; font-size: 13px;">{{ para }}</p>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <br>
+      <p style="font-size: 16px; font-weight: bold; margin: 0;">
+        TDS Sheet for the Month of {{ frappe.utils.formatdate(doc.end_date, "MMMM - YYYY") }}
+      </p>
+    </div>
+
+
+  </div>
+
+{% endif %}
+
+
+  <button class="print-btn" onclick="window.print()">Print Statement</button>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+    <tr>
+      <td style="text-align: left;"><b>Employee Name:</b> {{ employee_name }}</td>
+      <td style="text-align: left;"><b>Employment Type:</b> Member</td>
+      <td style="text-align: left;"><b>Employee Code:</b> {{ employee }}</td>
+      <td style="text-align: left;"><b>PAN Number:</b> {{ pan or "N/A" }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: left;"><b>Designation:</b> {{ designation or "N/A" }}</td>
+      <td style="text-align: left;"><b>Department:</b> {{ department or "N/A" }}</td>
+      <td style="text-align: left;"><b>Date Of Joining:</b> {{ date_of_joinee or "N/A" }}</td>
+      <td style="text-align: left;"><b>Tax Regime:</b> {{ tax_regime }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: left;"><b>Provident Fund:</b> {{ pf or "N/A" }}</td>
+      <td style="text-align: left;"><b>ESIC Number:</b> {{ esic or "N/A" }}</td>
+      <td style="text-align: left;"><b>Current Office Location:</b> {{ branch or "N/A" }}</td>
+      <td style="text-align: left;"></td>
+    </tr>
+</table>
+
+
+  <br><br>
+
+  <table class="particulars-table">
+    <thead>
+      <tr>
+        <th>Particulars</th>
+        {% for m in months %}
+          <th>{{ m }}</th>
+        {% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <td colspan="{{ months|length + 2 }}"><strong>Earnings</strong></td>
+      </tr>
+      {% for row in earnings %}
+        <tr>
+          <td>{{ row["name"] }}</td>
+          {% for val in row["values"] %}
+            <td>{{ "{:,.0f}".format(val) }}</td>
+          {% endfor %}
+          <td>{{ "{:,.0f}".format(row["total"]) }}</td>
+        </tr>
+      {% endfor %}
+
+      <tr>
+        <td colspan="{{ months|length + 1 }}"><strong>Total Annual Gross</strong></td>
+        <td >{{total_earnings_sum}}</td>
+      </tr>
+
+
+      <tr>
+        <td colspan="{{ months|length + 2 }}"><strong>Deductions</strong></td>
+      </tr>
+      {% for row in deductions %}
+        <tr>
+          <td>{{ row["name"] }}</td>
+          {% for val in row["values"] %}
+            <td>{{ "{:,.0f}".format(val) }}</td>
+          {% endfor %}
+          <td>{{ "{:,.0f}".format(row["total"]) }}</td>
+        </tr>
+      {% endfor %}
+
+      <tr>
+        <td colspan="{{ months|length + 1 }}"><strong>Total Annual Deductions</strong></td>
+        <td >{{total_deduction_sum}}</td>
+      </tr>
+
+
+
+
+      <tr>
+        <td colspan="{{ months|length + 2 }}"><strong>Reimbursements</strong></td>
+      </tr>
+      {% for row in reimbursements %}
+        <tr>
+          <td>{{ row["name"] }}</td>
+          {% for val in row["values"] %}
+            <td>{{ "{:,.0f}".format(val) }}</td>
+          {% endfor %}
+          <td>{{ "{:,.0f}".format(row["total"]) }}</td>
+        </tr>
+      {% endfor %}
+
+      <tr>
+        <td colspan="{{ months|length + 1 }}"><strong>Total Annual Reimbursements</strong></td>
+        <td >{{total_reimbursement_sum}}</td>
+      </tr>
+
+
+
+
+
+      <tr>
+        <td>Deducted Amount</td>
+        {% for val in tds_amounts %}
+          <td>{{ "{:,.0f}".format(val) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(tds_amounts_sum) }}</td>
+      </tr>
+
+      <tr>
+        <td>Net Amount</td>
+        {% for val in offcycle_net_pay %}
+          <td>{{ "{:,.0f}".format(val) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(tds_net_sum) }}</td>
+      </tr>
+
+
+
+
+
+
+
+    </tbody>
+
+
+  </table>
+
+  <table style="width:100%; border-collapse: collapse;">
+    <tr>
+      <td style="text-align:center; font-weight:bold;">
+        DETAILS OF SALARY PAID AND ANY OTHER INCOME AND TAX DEDUCTED
+      </td>
+    </tr>
+  </table>
+
+  <table style="width:100%">
+    <tr>
+      <td style="text-align: left;"><b>Less CTC Reimbursements</b></td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    {% if lta_array %}
+
+      {% for row in lta_array %}
+        <tr>
+          <td style="text-align: left;">{{ row.component }}</td>
+          <td style="text-align:right;">{{ row.amount }}</td>
+          <td></td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <td style="text-align: left;"><b>Total</b></td>
+        <td style="text-align:right;"><b>{{lta_sum}}</b></td>
+        <td></td>
+      </tr>
+    {% endif %}
+    <tr>
+      <td style="text-align: left;">
+        <b>Gross Income after Deduction and Reimbursements</b>
+      </td>
+      <td></td>
+      <td><b>{{final_gross-lta_sum}}</b></td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">HRA Calculation</td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Basic + Dearness Allowance (40% or 50%)</td>
+      <td>{{hra_percentage}}</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">Rent Paid - 10% of Basic + Dearness Allowance</td>
+      <td>{{basic_as_per_salary_structure_10}}</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">H.R.A received</td>
+      <td>{{hra_received}}</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">HRA Exemption</td>
+      <td>{{hra_exemption}}</td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Total Section 10 Exemptions</td>
+
+      <td>{{hra_exemption}}</td>
+      <td></td>
+
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>    Total amount of Salary received after Section 10  </b>    </td>
+      <td></td>
+      <td><b>{{final_after_hra_exemption}}</b></td>
+
+
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Standard deduction under section 16(ia)    </td>
+
+      <td>{{standard_amount}}</td>
+      <td></td>
+
+
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b> Income chargeable under the head "Salaries"  </b>    </td>
+      <td></td>
+      <td><b>{{final_after_hra_exemption-standard_amount}}</b></td>
+
+
+
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"> Add: Income from Other Sources   </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">A. Income/Loss from house property   </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Total for Income/Loss from house property     </td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">B. Other Sources    </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Total from Other Sources    </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Gross Total Income </b>  </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Total Chapter-VIA </b>  </td>
+      <td><b>Declared value</b></td>
+      <td><b>Deductible Value</b></td>
+    </tr>
+
+
+    <!-- <tr>
+      <td style="text-align: left;"><b>    Deductible Value      </b>  </td>
+      <td>{{declaration}}</td>
+      <td></td>
+    </tr> -->
+
+
+    {% for row in declaration %}
+    <tr>
+      <td style="text-align: left;">{{ row.component }}</td>
+      <td style="text-align: right;">{{ "{:,.0f}".format(row.declared_amount) }}</td>
+      <td style="text-align: right;">{{ "{:,.0f}".format(row.eligible_amount) }}</td>
+    </tr>
+    {% endfor %}
+
+
+    <tr>
+      <td style="text-align: left;"><b> Total Declaration Amount </b>  </td>
+      <td></td>
+      <td><b>{{total_declaration}}</b></td>
+    </tr>
+
+
+    <tr>
+      <td style="text-align: left;"><b> Net Taxable Income  </b>  </td>
+      <td></td>
+      <td><b>{{net_taxable_income}}</b></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Income Tax on Net Taxable Income (Before Rebate U/s 87A) </b>  </td>
+      <td></td>
+      <td>{{total_tax_on_income}}</td>
+    </tr>
+
+
+    <tr>
+      <td style="text-align: left;"><b> Rebate (U/s 87A) </b>  </td>
+      <td></td>
+      <td>{{rebate}}</td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>     Income Tax After Rebate (u/s 87A)/Marginal Relief under New Tax Regime      </b>  </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+
+    <tr>
+      <td style="text-align: left;"><b>Marginal Relief</b>  </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Education Cess</b>  </td>
+      <td></td>
+      <td>{{education_cess}}</td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Surcharge</b>  </td>
+      <td></td>
+      <td>{{surcharge}}</td>
+    </tr>
+
+
+    <tr>
+      <td style="text-align: left;"><b>Net Tax Payable (A)</b>  </td>
+      <td></td>
+      <td>{{tax_on_total_income}}</td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Previous Employer TDS (B)</b>  </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Outside Tax / Advance Tax (C)</b>  </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Tax Deducted till Date by Current Employer (D)</b>  </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Remaining Months</b>  </td>
+      <td></td>
+      <td>{{custom_month_count}}</td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;"><b>Monthly TDS</b></td>
+      <td></td>
+      <td>
+        {{tds}}
+      </td>
+    </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </table>
+
+</body>
+</html>

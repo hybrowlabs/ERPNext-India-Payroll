@@ -5,12 +5,14 @@ from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_s
 from frappe.utils import getdate
 from datetime import datetime
 from frappe import _
+from frappe.utils.pdf import get_pdf
+import json
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
+
     def on_submit(self):
         self.insert_tax_declaration_list()
-        self.update_employee_promotion()
 
     def on_cancel(self):
         self.cancel_declaration()
@@ -18,86 +20,19 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def validate(self):
         super().validate()
         self.update_min_wages()
-        self.update_perquisite()
-        self.reimbursement_amount()
+
 
     def before_update_after_submit(self):
         self.update_min_wages()
-        self.update_perquisite()
-        self.reimbursement_amount()
-
-
-    def reimbursement_amount(self):
-        total_amount = 0
-        if len(self.custom_employee_reimbursements) > 0:
-            for reimbursement in self.custom_employee_reimbursements:
-                total_amount += reimbursement.monthly_total_amount
-
-        self.custom_total_amount = total_amount
-
-    def update_perquisite(self):
-        if not self.custom_other_perquisite_components:
-            return
-
-        employee = frappe.get_doc("Employee", self.employee)
-
-
-        self_components = {row.component: row.amount for row in self.custom_other_perquisite_components}
-        employee_components = {row.salary_component: row for row in employee.custom_other_perquisite}
-
-
-        for component, amount in self_components.items():
-            if component in employee_components:
-
-                if employee_components[component].amount != amount:
-                    employee_components[component].amount = amount
-            else:
-
-                employee.append("custom_other_perquisite", {
-                    "salary_component": component,
-                    "amount": amount
-                })
-
-
-        to_remove = [
-            row for row in employee.custom_other_perquisite
-            if row.salary_component not in self_components
-        ]
-        for row in to_remove:
-            employee.remove(row)
-
-        employee.save()
-
 
 
 
     def update_min_wages(self):
         if self.custom_minimum_wages_applicable:
-            employee = frappe.get_doc("Employee", self.employee)
 
-            if not employee.custom_zone or not employee.custom_skill_level:
-                frappe.throw(
-                    _("Minimum wages cannot be applied because 'Skill Level' or 'Zone' is not selected in Employee master.")
-                )
-
-            state = frappe.get_doc("State", self.custom_minimum_wages_state)
-            if not state:
-                frappe.throw(_("Selected state does not exist."))
-
-            match_found = False
-            for wages in state.min_wages:
-                if (
-                    wages.zone == employee.custom_zone
-                    and wages.skill_level == employee.custom_skill_level
-                ):
-                    self.custom_basic_value = wages.basic_daily_wage
-                    self.custom_hra_value = wages.vda_daily_wages
-                    match_found = True
-                    break  # Stop once a match is found
-
-            if not match_found:
-                self.custom_basic_value = 0
-                self.custom_hra_value = 0
+            employee=frappe.get_doc("Employee",self.employee)
+            if not employee.custom_skill_level and not employee.custom_zone:
+                frappe.throw(_("Please set Zone and Skill Level in Employee Minimum Wages calculation."))
 
 
 
@@ -125,11 +60,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 frappe.delete_doc('Employee Tax Exemption Declaration', declaration_doc.name)
 
 
-    def update_employee_promotion(self):
-        if self.custom_promotion_id:
-            get_promotion_doc=frappe.get_doc("Employee Promotion",self.custom_promotion_id)
-            get_promotion_doc.custom_status="Payroll Configured"
-            get_promotion_doc.save()
 
 
     def insert_tax_declaration_list(self):
@@ -217,3 +147,125 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         new_declaration.insert()
         new_declaration.submit()
         frappe.db.commit()
+
+
+
+
+
+
+@frappe.whitelist()
+def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_benefits=None):
+    """
+    Generate CTC PDF for a given employee and salary structure.
+    """
+
+    slip = make_salary_slip(
+        source_name=salary_structure,
+        employee=employee,
+        print_format='Salary Slip Standard',
+        posting_date=posting_date,
+        for_preview=1
+    )
+
+    if not slip:
+        frappe.throw("Unable to generate salary breakup. Check Salary Structure or Employee.")
+
+    earnings_list = []
+    total_monthly_earnings = 0
+    total_annual_earnings = 0
+    for e in slip.get("earnings", []):
+        comp_doc = frappe.get_doc("Salary Component", e.salary_component)
+        if comp_doc.custom_is_part_of_ctc:
+            amount = e.amount or 0
+            earnings_list.append({
+                "salary_component": e.salary_component,
+                "monthly_amount": amount,
+                "annual_amount": amount * 12
+            })
+            total_monthly_earnings += amount
+            total_annual_earnings += amount * 12
+
+    deduction_list = []
+    total_monthly_ded = 0
+    total_annual_ded = 0
+    for d in slip.get("deductions", []):
+        comp_doc = frappe.get_doc("Salary Component", d.salary_component)
+        if comp_doc.custom_is_part_of_ctc:
+            amount = d.amount or 0
+            deduction_list.append({
+                "salary_component": d.salary_component,
+                "monthly_amount": amount,
+                "annual_amount": amount * 12
+            })
+            total_monthly_ded += amount
+            total_annual_ded += amount * 12
+
+
+
+    if employee_benefits:
+        if isinstance(employee_benefits, str):
+            try:
+                employee_benefits = json.loads(employee_benefits)
+            except Exception:
+                employee_benefits = []
+
+    reimbursement_list = []
+    total_monthly_reim = 0
+    total_annual_reim = 0
+
+    for r in employee_benefits:
+        comp_name = r.get("salary_component")
+        amount = r.get("amount", 0)
+        if comp_name:
+            reimbursement_list.append({
+                "salary_component": comp_name,
+                "monthly_amount": amount / 12,
+                "annual_amount": amount
+            })
+            total_monthly_reim += amount / 12
+            total_annual_reim += amount
+
+
+
+    total_monthly_ctc = total_monthly_earnings + total_monthly_reim + total_monthly_ded
+    total_annual_ctc = total_annual_earnings + total_annual_reim + total_annual_ded
+
+    context = {
+        "employee": employee,
+        "employee_name": slip.get("employee_name") or "",
+        "department": slip.get("department") or "",
+        "designation": slip.get("designation") or "",
+        "company": slip.get("company") or "",
+        "posting_date": slip.get("posting_date") or "",
+        "salary_structure": slip.get("salary_structure") or "",
+        "earnings": earnings_list,
+        "reimbursements": reimbursement_list,
+        "deductions": deduction_list,
+        "total_monthly_earnings": total_monthly_earnings,
+        "total_annual_earnings": total_annual_earnings,
+        "total_monthly_reim": total_monthly_reim,
+        "total_annual_reim": total_annual_reim,
+        "total_monthly_ded": total_monthly_ded,
+        "total_annual_ded": total_annual_ded,
+        "total_monthly_ctc": total_monthly_ctc,
+        "total_annual_ctc": total_annual_ctc
+    }
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/ctc_breakup_pdf.html",
+        context
+    )
+
+    pdf_bytes = get_pdf(html)
+
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "file_name": f"CTC_Breakup_{employee}.pdf",
+        "attached_to_doctype": "Employee",
+        "attached_to_name": employee,
+        "content": pdf_bytes,
+        "is_private": 0
+    })
+    file_doc.insert(ignore_permissions=True)
+
+    return {"pdf_url": file_doc.file_url}

@@ -1,0 +1,18 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Zone",
+  "modified": "2025-10-09 20:28:34.124457",
+  "name": "Zone 1",
+  "zone_name": "Zone 1"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Zone",
+  "modified": "2025-10-09 20:28:41.025822",
+  "name": "Zone 2",
+  "zone_name": "Zone 2"
+ }
+]

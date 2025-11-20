@@ -1,6 +1,9 @@
 frappe.ui.form.on('Employee', {
     refresh: function(frm) {
 
+        if(!frm.is_new())
+        {
+
         frm.add_custom_button('Details', null, 'Actions');
 
 
@@ -91,6 +94,8 @@ frappe.ui.form.on('Employee', {
                 }
             });
         },'Details');
+
+    }
 
     }
 

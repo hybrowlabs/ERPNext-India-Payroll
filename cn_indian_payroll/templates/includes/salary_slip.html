@@ -1,0 +1,43 @@
+{% extends "templates/print_format/standard.html" %}
+{% block content %}
+<style>
+  body {
+    font-family: "Helvetica", "Arial", sans-serif;
+    color: #333;
+  }
+  .salary-slip {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #f8f9fa;
+  }
+  .table th {
+    background-color: #007bff;
+    color: white;
+    text-align: left;
+    padding: 8px;
+  }
+  .table td {
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+  }
+</style>
+
+<div class="salary-slip">
+  <h2 style="text-align:center;">Salary Slip</h2>
+  <table class="table" width="100%">
+    <tr>
+      <th>Employee</th>
+      <td>{{ doc.employee }}</td>
+    </tr>
+    <tr>
+      <th>Month</th>
+      <td>{{ doc.month }}</td>
+    </tr>
+    <tr>
+      <th>Net Pay</th>
+      <td><b>₹{{ doc.net_pay }}</b></td>
+    </tr>
+  </table>
+</div>
+{% endblock %}

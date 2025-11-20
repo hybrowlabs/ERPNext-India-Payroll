@@ -14,17 +14,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -63,17 +63,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -112,17 +112,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -161,17 +161,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -210,17 +210,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -259,17 +259,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -308,17 +308,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -357,17 +357,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -406,17 +406,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -455,17 +455,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -504,17 +504,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -553,17 +553,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -602,17 +602,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -651,17 +651,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -700,17 +700,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -749,17 +749,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -798,17 +798,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -847,17 +847,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -896,17 +896,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -945,17 +945,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -994,17 +994,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1043,17 +1043,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1092,17 +1092,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1141,17 +1141,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1190,17 +1190,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1239,17 +1239,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1288,17 +1288,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1337,17 +1337,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1386,17 +1386,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1435,17 +1435,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1488,17 +1488,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1537,17 +1537,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1586,17 +1586,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1635,17 +1635,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1684,17 +1684,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1733,17 +1733,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1782,17 +1782,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",
@@ -1831,17 +1831,17 @@ def execute():
         "create_separate_payment_entry_against_benefit_claim": 0,
 
         "custom_component_sub_type": "Fixed",
-        "custom_included_in_f_and_f": 0,
-        "custom_is_accrual": 0,
-        "custom_is_arrear": 0,
-        "custom_is_part_of_appraisal": 0,
+
+
+
+
         "custom_is_part_of_ctc": 0,
-        "custom_is_part_of_gross_pay": 0,
-        "custom_is_reimbursement": 0,
 
 
 
-        "custom_perquisite": 0,
+
+
+
 
         "custom_sequence": "1",
         "custom_sub_category": "",

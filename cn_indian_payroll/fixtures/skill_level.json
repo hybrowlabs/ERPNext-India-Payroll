@@ -1,0 +1,26 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Skill Level",
+  "modified": "2025-10-09 20:30:13.237678",
+  "name": "Unskilled",
+  "skill_level": "Unskilled"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Skill Level",
+  "modified": "2025-10-09 20:30:20.495750",
+  "name": "Semi-Skilled",
+  "skill_level": "Semi-Skilled"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Skill Level",
+  "modified": "2025-10-09 20:30:27.700138",
+  "name": "Skilled",
+  "skill_level": "Skilled"
+ }
+]
