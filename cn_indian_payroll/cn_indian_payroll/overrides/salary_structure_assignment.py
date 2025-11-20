@@ -7,6 +7,8 @@ from datetime import datetime
 from frappe import _
 from frappe.utils.pdf import get_pdf
 import json
+from frappe.utils import flt
+
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
@@ -20,10 +22,12 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def validate(self):
         super().validate()
         self.update_min_wages()
+        self.update_total_reimbursement_amount()
 
 
     def before_update_after_submit(self):
         self.update_min_wages()
+        self.update_total_reimbursement_amount()
 
 
 
@@ -33,6 +37,19 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             employee=frappe.get_doc("Employee",self.employee)
             if not employee.custom_skill_level and not employee.custom_zone:
                 frappe.throw(_("Please set Zone and Skill Level in Employee Minimum Wages calculation."))
+
+
+    def update_total_reimbursement_amount(self):
+        total_sum = 0
+
+        if self.custom_employee_reimbursements:
+            for row in self.custom_employee_reimbursements:
+                total_sum += flt(row.monthly_total_amount)
+
+        self.custom_total_amount = total_sum
+
+
+
 
 
 
