@@ -80,3 +80,49 @@ def generate_salary_slip(employee):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Error in generate_salary_slip")
         return {"error": str(e)}
+
+
+
+@frappe.whitelist()
+def get_eligible_payslips(employee, salary_slip_id):
+    if not employee or not salary_slip_id:
+        return {"error": "Employee or Salary Slip ID not provided"}
+
+    # Initialize flags
+    off_payslip_exists = 0
+    tds_payslip_exists = 0
+    benefit_payslip_exists = 0
+    regular_payslip_exists = 0
+
+    # Fetch salary slip
+    ss = frappe.get_doc("Salary Slip", salary_slip_id)
+
+    # Check for TDS payslip
+    if ss.current_month_income_tax:
+        tds_payslip_exists = 1
+
+    # Check for regular payslip
+    if ss.gross_pay:
+        regular_payslip_exists = 1
+
+    # Loop through earnings
+    for earning in ss.earnings:
+        salary_component = frappe.get_doc("Salary Component", earning.salary_component)
+
+        # Check off-cycle component
+        if salary_component.custom_is_offcycle_component == 1:
+            off_payslip_exists = 1
+
+        # Check reimbursement / benefit component
+        if salary_component.custom_is_reimbursement == 1:
+            benefit_payslip_exists = 1
+
+    # Return results
+    return {
+        # "employee": employee,
+        # "salary_slip_id": salary_slip_id,
+        "off_payslip_exists": off_payslip_exists,
+        "tds_payslip_exists": tds_payslip_exists,
+        "benefit_payslip_exists": benefit_payslip_exists,
+        "regular_payslip_exists": regular_payslip_exists
+    }
