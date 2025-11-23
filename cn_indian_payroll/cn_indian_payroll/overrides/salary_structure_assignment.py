@@ -231,8 +231,8 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
     total_annual_reim = 0
 
     for r in employee_benefits:
-        comp_name = r.get("salary_component")
-        amount = r.get("amount", 0)
+        comp_name = r.get("reimbursements")
+        amount = r.get("monthly_total_amount", 0)
         if comp_name:
             reimbursement_list.append({
                 "salary_component": comp_name,
