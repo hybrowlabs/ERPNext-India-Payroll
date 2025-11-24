@@ -41,27 +41,166 @@ class CustomSalarySlip(SalarySlip):
     def validate(self):
         super().validate()
         self.set_month()
+        self.apply_lop_amount_in_reimbursement_component()
         self.set_sub_period()
         self.update_total_lop()
         self.set_taxale_regime()
         self.insert_lopreversal_days()
 
 
+    def on_submit(self):
+        super().on_submit()
+        self.insert_bonus_accruals()
+        self.insert_benefit_accruals()
+        self.update_benefit_claim_amount()
+
+
+
+    def update_benefit_claim_amount(self):
+        if not self.earnings:
+            return
+
+        for earning in self.earnings:
+            additional_salary_name = earning.get("additional_salary")
+            if not additional_salary_name:
+                continue
+
+            additional_salary = frappe.get_value(
+                "Additional Salary",
+                additional_salary_name,
+                ["ref_doctype", "ref_docname"],
+            )
+
+            if not additional_salary:
+                frappe.log_error(
+                    f"Additional Salary '{additional_salary_name}' not found.",
+                    "update_benefit_claim_amount",
+                )
+                continue
+
+            ref_doctype, ref_docname = additional_salary
+
+            if ref_doctype == "Employee Benefit Claim" and ref_docname:
+                try:
+                    benefit_claim = frappe.get_doc(
+                        "Employee Benefit Claim", ref_docname
+                    )
+                    benefit_claim.custom_is_paid = 1
+                    benefit_claim.custom_paid_amount = earning.amount
+                    benefit_claim.save(ignore_permissions=True)
+                except frappe.DoesNotExistError:
+                    frappe.log_error(
+                        f"Employee Benefit Claim '{ref_docname}' not found.",
+                        "update_benefit_claim_amount",
+                    )
+
+
+
+    def insert_benefit_accruals(self):
+        if not self.custom_salary_structure_assignment:
+            return
+
+        child_doc = frappe.get_doc("Salary Structure Assignment", self.custom_salary_structure_assignment)
+
+        if not child_doc.custom_employee_reimbursements:
+            return
+
+        for row in child_doc.custom_employee_reimbursements:
+
+            component = frappe.get_doc("Salary Component", row.reimbursements)
+
+            # Calculate amount + day values
+            if component.depends_on_payment_days:
+                amount = round((row.monthly_total_amount / self.total_working_days) * self.payment_days)
+                payment_days = self.payment_days
+                absent_days = self.absent_days
+                lop_days = self.leave_without_pay
+
+            else:
+                amount = round(row.monthly_total_amount)
+                payment_days = self.total_working_days
+                absent_days = 0
+                lop_days = 0
+
+
+            # Prepare accrual doc
+            accrual_doc = frappe.get_doc({
+                "doctype": "Employee Benefit Accrual",
+                "employee": self.employee,
+                "payroll_entry": self.payroll_entry,
+                "amount": amount,
+                "salary_component": row.reimbursements,
+                "benefit_accrual_date": self.posting_date,
+                "salary_slip": self.name,
+                "payroll_period": child_doc.custom_payroll_period,
+
+                # Added fields properly
+                "working_days": self.total_working_days,
+                "payment_days": payment_days,
+                "absent_days": absent_days,
+                "lop_days": lop_days,
+            })
+
+            # Save & submit
+            accrual_doc.insert()
+            accrual_doc.submit()
+
+
+
+
+
+
+
+    def insert_bonus_accruals(self):
+        for bonus in self.earnings:
+            bonus_component = frappe.get_doc("Salary Component", bonus.salary_component)
+
+
+            if bonus_component.custom_is_accrual == 1:
+                existing_accruals = frappe.get_list(
+                    'Employee Bonus Accrual',
+                    filters={
+                        'salary_slip': self.name,
+                        'salary_component': bonus_component.name,
+                        'payroll_entry': self.payroll_entry,
+                        'payroll_period': self.custom_payroll_period
+                    },
+                    limit=1
+                )
+
+                if not existing_accruals:
+                    accrual_doc = frappe.new_doc("Employee Bonus Accrual")
+                    accrual_doc.amount = bonus.amount
+                    accrual_doc.employee = self.employee
+                    accrual_doc.accrual_date = self.posting_date
+                    accrual_doc.salary_structure = self.salary_structure
+                    accrual_doc.salary_structure_assignment = self.custom_salary_structure_assignment
+                    accrual_doc.salary_component = bonus.salary_component
+                    accrual_doc.payroll_entry = self.payroll_entry
+                    accrual_doc.salary_slip = self.name
+                    accrual_doc.payroll_period = self.custom_payroll_period
+
+                    accrual_doc.insert()
+                    accrual_doc.submit()
+
+
+
+
     def insert_lopreversal_days(self):
         total_lop_days=0
         arrear_days = frappe.get_list(
-            'Payroll Correction',
+            'LOP Reversal',
             filters={
                 'employee': self.employee,
-                'payroll_date': ['between', [self.start_date, self.end_date]],
+                'additional_salary_date': ['between', [self.start_date, self.end_date]],
                 'docstatus': 1
             },
-            fields=['days_to_reverse']
+            fields=['number_of_days']
         )
 
         if arrear_days:
 
-            total_lop_days = sum(days['days_to_reverse'] for days in arrear_days)
+            total_lop_days = sum(days['number_of_days'] for days in arrear_days)
             self.custom_lop_reversal_days = total_lop_days
         else:
             self.custom_lop_reversal_days = 0
@@ -378,6 +517,62 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+    def add_employee_benefits(self):
+        pass
+
+
+
+    def apply_lop_amount_in_reimbursement_component(self):
+        if not self.custom_salary_structure_assignment:
+            frappe.throw("Salary Structure Assignment not linked.")
+
+        ssa_doc = frappe.get_doc(
+            "Salary Structure Assignment", self.custom_salary_structure_assignment
+        )
+
+        if not self.earnings:
+            return
+
+        if not self.salary_withholding:
+            for earning in self.earnings:
+                if earning.additional_salary:
+                    get_additional_salary=frappe.get_doc("Additional Salary",earning.additional_salary)
+
+                    if get_additional_salary.ref_doctype=="Employee Benefit Claim":
+
+                        component = frappe.get_doc("Salary Component", get_additional_salary.salary_component)
+                        if component.depends_on_payment_days == 1:
+                            for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                                if reimbursement.reimbursements == get_additional_salary.salary_component:
+
+                                    if self.total_working_days and self.payment_days:
+
+                                        prorated_amount = round(
+                                            (reimbursement.monthly_total_amount or 0)
+                                            / self.total_working_days
+                                            * (self.total_working_days - self.payment_days),
+                                            2,
+                                        )
+
+                                        earning.amount  = get_additional_salary.amount - prorated_amount
+
+                    if get_additional_salary.ref_doctype == "LTA Claim":
+                        component = frappe.get_doc("Salary Component", get_additional_salary.salary_component)
+
+                        for reimbursement in ssa_doc.custom_employee_reimbursements or []:
+                            lta_component = frappe.get_doc("Salary Component", reimbursement.reimbursements)
+
+                            if lta_component.component_type == "LTA Reimbursement" and \
+                            component.component_type in ["LTA Taxable", "LTA Non Taxable"]:
+
+                                if self.total_working_days and self.payment_days:
+                                    lop_days = self.total_working_days - self.payment_days
+                                    prorated_amount = round(
+                                        (reimbursement.monthly_total_amount or 0) / self.total_working_days * lop_days,
+                                        2
+                                    )
+                                    earning.amount = get_additional_salary.amount - prorated_amount
+                                break
 
 
 

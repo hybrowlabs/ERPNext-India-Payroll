@@ -21,7 +21,11 @@
   "benefit_accrual_date",
   "allow_claim_across_outside_payroll_period",
   "salary_slip",
-  "amended_from"
+  "working_days",
+  "payment_days",
+  "absent_days",
+  "lop_days",
+  "arrear_days"
  ],
  "fields": [
   {
@@ -117,9 +121,10 @@
   {
    "allow_on_submit": 1,
    "fieldname": "salary_slip",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Salary Slip"
+   "label": "Salary Slip",
+   "options": "Salary Slip"
   },
   {
    "fieldname": "amended_from",
@@ -130,12 +135,38 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days"
+  },
+  {
+   "fieldname": "payment_days",
+   "fieldtype": "Float",
+   "label": "Payment Days"
+  },
+  {
+   "fieldname": "absent_days",
+   "fieldtype": "Float",
+   "label": "Absent Days"
+  },
+  {
+   "fieldname": "lop_days",
+   "fieldtype": "Float",
+   "label": "LOP Days"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "arrear_days",
+   "fieldtype": "Float",
+   "label": "Arrear Days"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 23:43:36.847419",
+ "modified": "2025-11-23 20:41:07.066244",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",
