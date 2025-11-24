@@ -134,6 +134,7 @@
   {
    "fieldname": "payroll_entry",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Payroll Entry",
    "options": "Payroll Entry"
   }
@@ -147,7 +148,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-11-24 12:53:55.509208",
+ "modified": "2025-11-24 13:59:48.911493",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Joining Salary Arrear",

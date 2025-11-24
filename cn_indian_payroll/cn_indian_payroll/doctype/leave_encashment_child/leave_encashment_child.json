@@ -29,24 +29,27 @@
    "fieldname": "amount",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Amount"
+   "label": "Amount",
+   "read_only": 1
   },
   {
    "fieldname": "basic_amount",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Basic Amount"
+   "label": "Basic Amount",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-30 12:02:31.918692",
+ "modified": "2025-11-24 19:38:57.334233",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Leave Encashment Child",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

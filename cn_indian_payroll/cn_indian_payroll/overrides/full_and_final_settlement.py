@@ -6,6 +6,7 @@ from hrms.hr.doctype.full_and_final_statement.full_and_final_statement import (
 )
 
 from datetime import datetime
+from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
 
 class CustomFullAndFinalStatement(FullandFinalStatement):
@@ -142,6 +143,17 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
                 salary_slip.custom_f_and_f_updated = 1
                 salary_slip.save()
 
+    def validate(self):
+        total = 0
+
+        if self.custom_calculated_amount:
+            total = sum(i.amount for i in self.custom_calculated_amount)
+
+        if total > 0:
+            for j in self.payables:
+                if j.custom_reference_component == "Leave Encashment":
+                    j.amount = total
+
 
 @frappe.whitelist()
 def get_accrued_components(employee, company, relieving_date):
@@ -151,7 +163,7 @@ def get_accrued_components(employee, company, relieving_date):
     relieving_date = getdate(relieving_date)
     bonus_list = []
     reimbursement_list = []
-    leave_encashment_list = []
+    # leave_encashment_list = []
 
     tax_list = []
 
@@ -214,23 +226,23 @@ def get_accrued_components(employee, company, relieving_date):
                             }
                         )
 
-    leave_encashment = frappe.get_all(
-        "Leave Encashment",
-        filters={
-            "employee": employee,
-            "docstatus": 1,
-        },
-        fields=["*"],
-    )
-    for encashment in leave_encashment:
-        leave_encashment_list.append(
-            {
-                "leave_type": encashment.leave_type,
-                "encashment_days": encashment.encashment_days,
-                "basic_amount": encashment.custom_basic_amount,
-                "amount": encashment.encashment_amount,
-            }
-        )
+    # leave_encashment = frappe.get_all(
+    #     "Leave Encashment",
+    #     filters={
+    #         "employee": employee,
+    #         "docstatus": 1,
+    #     },
+    #     fields=["*"],
+    # )
+    # for encashment in leave_encashment:
+    #     leave_encashment_list.append(
+    #         {
+    #             "leave_type": encashment.leave_type,
+    #             "encashment_days": encashment.encashment_days,
+    #             "basic_amount": encashment.custom_basic_amount,
+    #             "amount": encashment.encashment_amount,
+    #         }
+    #     )
 
     # Fetch bonus accruals
     bonuses = frappe.get_all(
@@ -381,6 +393,49 @@ def get_accrued_components(employee, company, relieving_date):
         "bonus_list": bonus_list,
         "reimbursement_list": reimbursement_list,
         "final_array": final_array,
-        "leave_encashment": leave_encashment_list,
+        # "leave_encashment": leave_encashment_list,
         "tax_list": tax_list,
     }
+
+
+@frappe.whitelist()
+def get_encashment_amount(company, employee):
+    if not company or not employee:
+        return {"message": "Company or Employee is missing"}
+
+    # Fetch company document
+    company_doc = frappe.get_doc("Company", company)
+
+    # Fetch latest Salary Structure Assignment
+    ssa = frappe.get_list(
+        "Salary Structure Assignment",
+        filters={
+            "employee": employee,
+            "company": company,
+            "docstatus": 1,
+        },
+        fields=["*"],
+        order_by="from_date desc",
+        limit=1,
+    )
+
+    if not ssa:
+        return {"message": "Please assign Salary Structure to this Employee"}
+
+    ssa = ssa[0]
+
+    # Create Salary Slip Preview
+    new_slip = make_salary_slip(
+        source_name=ssa.salary_structure,
+        employee=employee,
+        print_format="Salary Slip Standard",
+        posting_date=ssa.from_date,
+        for_preview=1,
+    )
+
+    # Find basic component amount
+    for earning in new_slip.earnings:
+        if earning.salary_component == company_doc.basic_component:
+            return earning.amount
+
+    return 0
