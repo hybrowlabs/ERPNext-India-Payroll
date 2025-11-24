@@ -282,6 +282,7 @@ override_doctype_class = {
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
     "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
+    "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.PayrollEntryOverride",
 }
 
 doc_events = {

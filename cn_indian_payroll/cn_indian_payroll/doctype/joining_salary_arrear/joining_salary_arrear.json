@@ -17,6 +17,7 @@
   "company",
   "posting_date",
   "additional_salary_date",
+  "payroll_entry",
   "earning_arrear_breakup_section",
   "earning_breakup",
   "deduction_arrear_breakup_section",
@@ -129,6 +130,12 @@
    "fieldtype": "Link",
    "label": "Department",
    "options": "Department"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Link",
+   "label": "Payroll Entry",
+   "options": "Payroll Entry"
   }
  ],
  "grid_page_length": 50,
@@ -140,7 +147,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-11-18 19:46:31.025406",
+ "modified": "2025-11-24 12:53:55.509208",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Joining Salary Arrear",
