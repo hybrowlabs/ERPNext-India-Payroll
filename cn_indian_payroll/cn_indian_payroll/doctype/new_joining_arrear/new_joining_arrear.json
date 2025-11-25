@@ -162,7 +162,8 @@
    "fieldname": "payroll_period",
    "fieldtype": "Link",
    "label": "Payroll Period",
-   "options": "Payroll Period"
+   "options": "Payroll Period",
+   "reqd": 1
   },
   {
    "fieldname": "working_days",
@@ -180,7 +181,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-11-25 16:34:39.703776",
+ "modified": "2025-11-25 17:40:33.111654",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "New Joining Arrear",
