@@ -17,7 +17,7 @@
    "field_name": "condition",
    "idx": 0,
    "is_system_generated": 0,
-   "modified": "2025-04-22 17:18:10.461427",
+   "modified": "2025-11-25 16:14:28.319374",
    "modified_by": "Administrator",
    "module": null,
    "name": "Taxable Salary Slab-condition-allow_on_submit",

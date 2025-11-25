@@ -96,7 +96,7 @@
   {
    "fieldname": "working_days",
    "fieldtype": "Float",
-   "label": "Paid Days",
+   "label": "Working Days",
    "read_only": 1
   },
   {
@@ -157,7 +157,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-11-23 19:50:16.762765",
+ "modified": "2025-11-25 17:28:12.003334",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",

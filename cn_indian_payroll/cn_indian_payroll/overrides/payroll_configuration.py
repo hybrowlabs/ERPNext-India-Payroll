@@ -124,7 +124,7 @@ def get_salary_component(data=None, component=None):
                     get_each_doc.is_tax_applicable=data.get("is_tax_applicable")
                     get_each_doc.do_not_include_in_total=data.get("do_not_include_in_total")
                     get_each_doc.remove_if_zero_valued=data.get("remove_if_zero_valued")
-                    get_each_doc.custom_is_part_of_gross_pay=data.get("is_part_of_gross_pay")
+
                     get_each_doc.disabled=data.get("disabled")
                     get_each_doc.custom_is_part_of_ctc=data.get("is_part_of_ctc")
                     get_each_doc.custom_perquisite=data.get("perquisite")
