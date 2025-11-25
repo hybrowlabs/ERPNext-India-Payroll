@@ -13,6 +13,7 @@
   "department",
   "designation",
   "joining_date",
+  "working_days",
   "number_of_present_days",
   "column_break_txim",
   "company",
@@ -162,6 +163,12 @@
    "fieldtype": "Link",
    "label": "Payroll Period",
    "options": "Payroll Period"
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -173,7 +180,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-10-16 16:36:57.806262",
+ "modified": "2025-11-25 16:34:39.703776",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "New Joining Arrear",
