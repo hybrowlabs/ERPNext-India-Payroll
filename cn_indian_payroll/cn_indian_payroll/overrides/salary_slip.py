@@ -1328,6 +1328,12 @@ class CustomSalarySlip(SalarySlip):
                 component_doc = frappe.get_doc("Salary Component", deduction.salary_component)
                 original_amount = float(deduction.amount or 0)
 
+                if component_doc.component_type == "ESIC":
+                    deduction.amount = math.ceil(original_amount)
+                else:
+                    deduction.amount = round(original_amount)
+
+
         if self.total_deduction or self.total_loan_repayment:
             self.custom_total_deduction_amount = (self.total_deduction or 0) + (self.total_loan_repayment or 0)
         else:
