@@ -1812,6 +1812,8 @@ class CustomSalarySlip(SalarySlip):
                     k.custom_actual_amount = k.amount
 
     def actual_amount_ctc(self):
+        total_deduction = 0
+
         if self.earnings:
             for earning in self.earnings:
                 if earning.depends_on_payment_days == 1:
@@ -1841,19 +1843,20 @@ class CustomSalarySlip(SalarySlip):
                     else:
                         deduction.custom_actual_amount = 0
 
+                    # ESIC → use ROUND UP
                     if component_doc.component_type == "ESIC":
                         deduction.amount = math.ceil(original_amount)
                     else:
                         deduction.amount = round(original_amount)
+
+                    total_deduction += deduction.amount
+
                 else:
                     deduction.custom_actual_amount = original_amount
+                    total_deduction += deduction.amount or 0
 
-        if self.total_deduction or self.total_loan_repayment:
-            self.custom_total_deduction_amount = round(
-                (self.total_deduction or 0) + (self.total_loan_repayment or 0)
-            )
-        else:
-            self.custom_total_deduction_amount = 0
+        loan = self.total_loan_repayment or 0
+        self.custom_total_deduction_amount = round(total_deduction + loan)
 
     def accrual_update(self):
         if self.leave_without_pay > 0:
