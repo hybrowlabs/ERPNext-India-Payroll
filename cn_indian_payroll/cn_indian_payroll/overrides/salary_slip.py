@@ -36,8 +36,8 @@ from datetime import datetime, timedelta
 
 
 class CustomSalarySlip(SalarySlip):
-    def before_update_after_submit(self):
-        self.tax_calculation()
+    # def before_update_after_submit(self):
+    # self.tax_calculation()
 
     def on_submit(self):
         super().on_submit()
@@ -50,41 +50,41 @@ class CustomSalarySlip(SalarySlip):
         self.set_sub_period()
         self.apply_lop_amount_in_reimbursement_component()
 
-        # self.custom_previous_taxable_earnings = (
-        #     self.previous_taxable_earnings_before_exemption
-        #     if self.previous_taxable_earnings_before_exemption
-        #     else 0
-        # )
+        self.custom_previous_taxable_earnings = (
+            self.previous_taxable_earnings_before_exemption
+            if self.previous_taxable_earnings_before_exemption
+            else 0
+        )
 
-        # # Set current taxable earnings
-        # self.custom_current_taxable_earnings = (
-        #     self.current_structured_taxable_earnings_before_exemption
-        #     if self.current_structured_taxable_earnings_before_exemption
-        #     else 0
-        # )
+        # Set current taxable earnings
+        self.custom_current_taxable_earnings = (
+            self.current_structured_taxable_earnings_before_exemption
+            if self.current_structured_taxable_earnings_before_exemption
+            else 0
+        )
 
-        # # Set future taxable earnings
-        # self.custom_future_taxable_earnings = (
-        #     self.future_structured_taxable_earnings_before_exemption
-        #     if self.future_structured_taxable_earnings_before_exemption
-        #     else 0
-        # )
+        # Set future taxable earnings
+        self.custom_future_taxable_earnings = (
+            self.future_structured_taxable_earnings_before_exemption
+            if self.future_structured_taxable_earnings_before_exemption
+            else 0
+        )
 
-        # # Calculate annual taxable earnings
-        # self.custom_annual_taxable_earnings = (
-        #     self.ctc - self.non_taxable_earnings
-        #     if self.ctc and self.non_taxable_earnings
-        #     else 0
-        # )
+        # Calculate annual taxable earnings
+        self.custom_annual_taxable_earnings = (
+            self.ctc - self.non_taxable_earnings
+            if self.ctc and self.non_taxable_earnings
+            else 0
+        )
 
-        # # Calculate total taxable earnings from CTC
-        # self.custom_ctc_taxable_earnings = 0
-        # if self.earnings:
-        #     total_ctc_taxable_amount = 0
-        #     for earning in self.earnings:
-        #         if earning.is_tax_applicable == 1:
-        #             total_ctc_taxable_amount += earning.default_amount or 0
-        #     self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        # Calculate total taxable earnings from CTC
+        self.custom_ctc_taxable_earnings = 0
+        if self.earnings:
+            total_ctc_taxable_amount = 0
+            for earning in self.earnings:
+                if earning.is_tax_applicable == 1:
+                    total_ctc_taxable_amount += earning.default_amount or 0
+            self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
         self.insert_other_perquisites()
 
@@ -99,6 +99,7 @@ class CustomSalarySlip(SalarySlip):
         self.arrear_ytd()
         self.food_coupon()
         self.tax_calculation()
+
         self.calculate_grosspay()
 
     def on_cancel(self):
@@ -710,6 +711,7 @@ class CustomSalarySlip(SalarySlip):
                     accrual_doc.submit()
 
     def calculate_variable_tax(self, tax_component):
+        # print("\n\n\n\n\n\n\n\n\n",tax_component,"tax_component------")
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -947,7 +949,7 @@ class CustomSalarySlip(SalarySlip):
                     if earning.deduct_full_tax_on_selected_payroll_date:
                         additional_income_with_full_tax += additional_amount
 
-        # print(taxable_earnings,"taxable_earnings------")
+        # print("\n\n\n\n\n\n\np\n\n",taxable_earnings,"taxable_earnings------")
 
         if allow_tax_exemption:
             for ded in self.deductions:
@@ -1027,12 +1029,6 @@ class CustomSalarySlip(SalarySlip):
                 is_tax_applicable=1,
                 custom_regime="All",
             )
-
-        print(
-            "\n\n\n\n\n\n\n\n\n\n==================",
-            taxable_earnings,
-            "\n\n\n\n\n\n\n\n\n\n",
-        )
 
         # latest_salary_structure = frappe.get_list(
         #     "Salary Structure Assignment",
@@ -2782,7 +2778,7 @@ class CustomSalarySlip(SalarySlip):
                             percentage.append(tt2)
                             difference.append(tt1)
                             total_value.append(tt3)
-                        self.custom_tax_slab = []
+                        # self.custom_tax_slab = []
                         for i in range(len(from_amount)):
                             self.append(
                                 "custom_tax_slab",
@@ -2827,7 +2823,7 @@ class CustomSalarySlip(SalarySlip):
                             difference.append(tt1)
                             total_value.append(tt3)
 
-                        self.custom_tax_slab = []
+                        # self.custom_tax_slab = []
                         for i in range(len(from_amount)):
                             self.append(
                                 "custom_tax_slab",
@@ -2835,102 +2831,102 @@ class CustomSalarySlip(SalarySlip):
                                     "from_amount": from_amount[i],
                                     "to_amount": to_amount[i],
                                     "percentage": percentage[i],
-                                    "tax_amount": total_value[i],
+                                    "tax_amount": round(total_value[i]),
                                     "amount": difference[i],
                                 },
                             )
 
-                total_sum = sum(total_value)
+                # total_sum = sum(total_value)
 
-                final_value = 0
-                if (
-                    income_doc.custom_marginal_relief_applicable
-                    and income_doc.custom_minmum_value
-                    and income_doc.custom_maximun_value
-                ):
-                    if (
-                        income_doc.custom_minmum_value
-                        < self.custom_taxable_amount
-                        < income_doc.custom_maximun_value
-                    ):
-                        self.custom_rebate_under_section_87a = total_sum - (
-                            self.custom_taxable_amount - income_doc.custom_minmum_value
-                        )
-                        final_value = total_sum - self.custom_rebate_under_section_87a
+                # final_value = 0
+                # if (
+                #     income_doc.custom_marginal_relief_applicable
+                #     and income_doc.custom_minmum_value
+                #     and income_doc.custom_maximun_value
+                # ):
+                #     if (
+                #         income_doc.custom_minmum_value
+                #         < self.custom_taxable_amount
+                #         < income_doc.custom_maximun_value
+                #     ):
+                #         self.custom_rebate_under_section_87a = total_sum - (
+                #             self.custom_taxable_amount - income_doc.custom_minmum_value
+                #         )
+                #         final_value = total_sum - self.custom_rebate_under_section_87a
 
-                        self.custom_education_cess = final_value * 4 / 100
+                #         self.custom_education_cess = final_value * 4 / 100
 
-                        self.custom_total_tax_on_income = final_value
+                #         self.custom_total_tax_on_income = final_value
 
-                    else:
-                        if self.custom_taxable_amount < rebate:
-                            self.custom_tax_on_total_income = total_sum
-                            self.custom_rebate_under_section_87a = total_sum
-                            self.custom_total_tax_on_income = 0
-                        else:
-                            self.custom_total_tax_on_income = total_sum
-                            self.custom_rebate_under_section_87a = 0
-                            self.custom_tax_on_total_income = total_sum - 0
+                #     else:
+                #         if self.custom_taxable_amount < rebate:
+                #             self.custom_tax_on_total_income = total_sum
+                #             self.custom_rebate_under_section_87a = total_sum
+                #             self.custom_total_tax_on_income = 0
+                #         else:
+                #             self.custom_total_tax_on_income = total_sum
+                #             self.custom_rebate_under_section_87a = 0
+                #             self.custom_tax_on_total_income = total_sum - 0
 
-                        if self.custom_taxable_amount > 5000000:
-                            surcharge_m = (self.custom_total_tax_on_income * 10) / 100
+                #         if self.custom_taxable_amount > 5000000:
+                #             surcharge_m = (self.custom_total_tax_on_income * 10) / 100
 
-                            self.custom_surcharge = round(surcharge_m)
-                            self.custom_education_cess = round(
-                                (surcharge_m + self.custom_total_tax_on_income)
-                                * 4
-                                / 100
-                            )
-                        else:
-                            self.custom_surcharge = 0
-                            self.custom_education_cess = (
-                                (
-                                    self.custom_surcharge
-                                    + self.custom_total_tax_on_income
-                                )
-                                * 4
-                                / 100
-                            )
+                #             self.custom_surcharge = round(surcharge_m)
+                #             self.custom_education_cess = round(
+                #                 (surcharge_m + self.custom_total_tax_on_income)
+                #                 * 4
+                #                 / 100
+                #             )
+                #         else:
+                #             self.custom_surcharge = 0
+                #             self.custom_education_cess = (
+                #                 (
+                #                     self.custom_surcharge
+                #                     + self.custom_total_tax_on_income
+                #                 )
+                #                 * 4
+                #                 / 100
+                #             )
 
-                else:
-                    if self.custom_taxable_amount < rebate:
-                        self.custom_tax_on_total_income = total_sum
-                        self.custom_rebate_under_section_87a = total_sum
-                        self.custom_total_tax_on_income = 0
-                    else:
-                        self.custom_total_tax_on_income = total_sum
-                        self.custom_rebate_under_section_87a = 0
-                        self.custom_tax_on_total_income = total_sum - 0
+                # else:
+                #     if self.custom_taxable_amount < rebate:
+                #         self.custom_tax_on_total_income = total_sum
+                #         self.custom_rebate_under_section_87a = total_sum
+                #         self.custom_total_tax_on_income = 0
+                #     else:
+                #         self.custom_total_tax_on_income = total_sum
+                #         self.custom_rebate_under_section_87a = 0
+                #         self.custom_tax_on_total_income = total_sum - 0
 
-                    if self.custom_taxable_amount > 5000000:
-                        surcharge_m = (self.custom_total_tax_on_income * 10) / 100
+                #     if self.custom_taxable_amount > 5000000:
+                #         surcharge_m = (self.custom_total_tax_on_income * 10) / 100
 
-                        self.custom_surcharge = round(surcharge_m)
-                        self.custom_education_cess = round(
-                            (surcharge_m + self.custom_total_tax_on_income) * 4 / 100
-                        )
-                    else:
-                        self.custom_surcharge = 0
-                        self.custom_education_cess = (
-                            (self.custom_surcharge + self.custom_total_tax_on_income)
-                            * 4
-                            / 100
-                        )
+                #         self.custom_surcharge = round(surcharge_m)
+                #         self.custom_education_cess = round(
+                #             (surcharge_m + self.custom_total_tax_on_income) * 4 / 100
+                #         )
+                #     else:
+                #         self.custom_surcharge = 0
+                #         self.custom_education_cess = (
+                #             (self.custom_surcharge + self.custom_total_tax_on_income)
+                #             * 4
+                #             / 100
+                #         )
 
-                    self.custom_total_amount = round(
-                        self.custom_surcharge
-                        + self.custom_education_cess
-                        + self.custom_total_tax_on_income
-                    )
+                #     self.custom_total_amount = round(
+                #         self.custom_surcharge
+                #         + self.custom_education_cess
+                #         + self.custom_total_tax_on_income
+                #     )
 
-            else:
-                self.custom_tax_slab = []
-                self.custom_tax_on_total_income = 0
-                self.custom_rebate_under_section_87a = 0
-                self.custom_total_tax_on_income = 0
-                self.custom_surcharge = 0
-                self.custom_education_cess = 0
-                self.custom_total_amount = 0
+            # else:
+            #     self.custom_tax_slab = []
+            #     self.custom_tax_on_total_income = 0
+            #     self.custom_rebate_under_section_87a = 0
+            #     self.custom_total_tax_on_income = 0
+            #     self.custom_surcharge = 0
+            #     self.custom_education_cess = 0
+            #     self.custom_total_amount = 0
 
 
 def override_calculate_tax_by_tax_slab(
@@ -2941,6 +2937,10 @@ def override_calculate_tax_by_tax_slab(
     rebate = 0
     other_taxes_and_charges = 0
     custom_tds_already_deducted_amount = 0
+    surcharge = 0
+    charge_percent = 0
+    education_cess_amount = 0
+    total_tax_payable = 0
 
     # Step 1: Calculate base tax from slabs
     for slab in tax_slab.slabs:
@@ -2954,7 +2954,25 @@ def override_calculate_tax_by_tax_slab(
 
         if annual_taxable_earning > from_amt:
             taxable_range = min(annual_taxable_earning, to_amt) - from_amt
+
             base_tax += taxable_range * rate
+
+            print("\n\n111", taxable_range)
+
+            print("\n\n2222", base_tax)
+
+            # # print("\n\n\n\2222",to_amt)
+
+            # self.append(
+            #     "custom_tax_slab",
+            #     {
+            #         "from_amount": from_amt,
+            #         "to_amount": to_amt,
+            #         "percentage": slab.percent_deduction,
+            #         "tax_amount": round(base_tax),
+            #         # "amount": taxable_range,
+            #     }
+            # )
 
     # Step 2: Marginal Relief (Rebate Logic)
 
@@ -2973,22 +2991,37 @@ def override_calculate_tax_by_tax_slab(
                 rebate = base_tax - excess_income
                 base_tax -= rebate
 
-    # Step 3: Cess and Other Charges AFTER Rebate
     for d in tax_slab.other_taxes_and_charges:
-        if (
-            flt(d.min_taxable_income)
-            and flt(d.min_taxable_income) > annual_taxable_earning
-        ):
-            continue
-        if (
-            flt(d.max_taxable_income)
-            and flt(d.max_taxable_income) < annual_taxable_earning
-        ):
-            continue
+        if d.custom_is_education_cess == 0:
+            min_value = flt(d.min_taxable_income) or 0
+            max_value = flt(d.max_taxable_income) or None
 
-        charge_percent = flt(d.percent)
-        charge = base_tax * charge_percent / 100.0
-        other_taxes_and_charges += charge
+            if annual_taxable_earning >= min_value and (
+                not max_value or annual_taxable_earning < max_value
+            ):
+                charge_percent = flt(d.percent)
+                surcharge = (base_tax * charge_percent) / 100.0
+
+    for d in tax_slab.other_taxes_and_charges:
+        if d.custom_is_education_cess == 1:
+            total_tax_before_cess = base_tax + surcharge
+            education_cess_amount = (total_tax_before_cess * flt(d.percent)) / 100.0
+
+    total_tax_payable = round(education_cess_amount + surcharge + base_tax)
+
+    self.custom_tax_on_total_income = base_tax
+
+    if annual_taxable_earning <= tax_slab.custom_taxable_income_is_less_than:
+        self.custom_rebate_under_section_87a = base_tax
+    else:
+        self.custom_rebate_under_section_87a = 0
+
+    self.custom_total_tax_on_income = (
+        self.custom_tax_on_total_income + self.custom_rebate_under_section_87a
+    )
+    self.custom_surcharge = surcharge
+    self.custom_education_cess = education_cess_amount
+    self.custom_total_amount = total_tax_payable
 
     declaration = frappe.db.get_value(
         "Employee Tax Exemption Declaration",
@@ -3006,8 +3039,6 @@ def override_calculate_tax_by_tax_slab(
             declaration.custom_tds_already_deducted_amount or 0.0
         )
 
-    final_tax = (
-        base_tax + other_taxes_and_charges
-    ) - custom_tds_already_deducted_amount
+    final_tax = (total_tax_payable) - custom_tds_already_deducted_amount
 
-    return round(final_tax, 2), round(other_taxes_and_charges, 2)
+    return round(final_tax, 2), round(total_tax_payable, 2)
