@@ -1703,51 +1703,95 @@ class CustomSalarySlip(SalarySlip):
                 for k in self.earnings:
                     k.custom_actual_amount = k.amount
 
+    # def actual_amount_ctc(self):
+    #     total_deduction = 0
+
+    #     if self.earnings:
+    #         for earning in self.earnings:
+    #             if earning.depends_on_payment_days == 1:
+    #                 if self.payment_days and self.payment_days > 0:
+    #                     earning.custom_actual_amount = round(
+    #                         (earning.amount * self.total_working_days)
+    #                         / self.payment_days
+    #                     )
+    #                 else:
+    #                     earning.custom_actual_amount = 0
+    #             else:
+    #                 earning.custom_actual_amount = earning.amount
+
+    #     if self.deductions:
+    #         for deduction in self.deductions:
+    #             component_doc = frappe.get_doc(
+    #                 "Salary Component", deduction.salary_component
+    #             )
+    #             original_amount = float(deduction.amount or 0)
+
+    #             if deduction.depends_on_payment_days == 1:
+    #                 if self.payment_days and self.payment_days > 0:
+    #                     deduction.custom_actual_amount = round(
+    #                         (original_amount * self.total_working_days)
+    #                         / self.payment_days
+    #                     )
+    #                 else:
+    #                     deduction.custom_actual_amount = 0
+
+    #                 # ESIC → use ROUND UP
+    #                 if component_doc.component_type == "ESIC":
+    #                     deduction.amount = math.ceil(original_amount)
+    #                 else:
+    #                     deduction.amount = round(original_amount)
+
+    #                 if not component_doc.do_not_include_in_total:
+
+    #                     total_deduction += deduction.amount
+
+    #             else:
+    #                 deduction.custom_actual_amount = original_amount
+    #                 if not component_doc.do_not_include_in_total:
+    #                     total_deduction += deduction.amount or 0
+
+    #     loan = self.total_loan_repayment or 0
+    #     self.custom_total_deduction_amount = round(total_deduction + loan)
+
     def actual_amount_ctc(self):
         total_deduction = 0
-
-        if self.earnings:
-            for earning in self.earnings:
-                if earning.depends_on_payment_days == 1:
-                    if self.payment_days and self.payment_days > 0:
-                        earning.custom_actual_amount = round(
-                            (earning.amount * self.total_working_days)
-                            / self.payment_days
-                        )
-                    else:
-                        earning.custom_actual_amount = 0
+        for earning in self.earnings or []:
+            if earning.depends_on_payment_days == 1:
+                if self.payment_days and self.payment_days > 0:
+                    earning.custom_actual_amount = round(
+                        (earning.amount * self.total_working_days) / self.payment_days
+                    )
                 else:
-                    earning.custom_actual_amount = earning.amount
+                    earning.custom_actual_amount = 0
+            else:
+                earning.custom_actual_amount = earning.amount
 
-        if self.deductions:
-            for deduction in self.deductions:
-                component_doc = frappe.get_doc(
-                    "Salary Component", deduction.salary_component
-                )
-                original_amount = float(deduction.amount or 0)
+        for deduction in self.deductions or []:
+            component_doc = frappe.get_doc(
+                "Salary Component", deduction.salary_component
+            )
+            original_amount = flt(deduction.amount)
 
-                if deduction.depends_on_payment_days == 1:
-                    if self.payment_days and self.payment_days > 0:
-                        deduction.custom_actual_amount = round(
-                            (original_amount * self.total_working_days)
-                            / self.payment_days
-                        )
-                    else:
-                        deduction.custom_actual_amount = 0
-
-                    # ESIC → use ROUND UP
-                    if component_doc.component_type == "ESIC":
-                        deduction.amount = math.ceil(original_amount)
-                    else:
-                        deduction.amount = round(original_amount)
-
-                    total_deduction += deduction.amount
-
+            if deduction.depends_on_payment_days == 1:
+                if self.payment_days and self.payment_days > 0:
+                    deduction.custom_actual_amount = round(
+                        (original_amount * self.total_working_days) / self.payment_days
+                    )
                 else:
-                    deduction.custom_actual_amount = original_amount
-                    total_deduction += deduction.amount or 0
+                    deduction.custom_actual_amount = 0
+            else:
+                deduction.custom_actual_amount = original_amount
+
+            if component_doc.component_type == "ESIC":
+                deduction.amount = math.ceil(original_amount)
+            else:
+                deduction.amount = round(original_amount)
+
+            if not component_doc.do_not_include_in_total:
+                total_deduction += deduction.amount
 
         loan = self.total_loan_repayment or 0
+
         self.custom_total_deduction_amount = round(total_deduction + loan)
 
     def accrual_update(self):
