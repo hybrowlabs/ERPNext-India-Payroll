@@ -668,6 +668,24 @@ class CustomSalarySlip(SalarySlip):
                     accrual_doc.submit()
 
     def calculate_variable_tax(self, tax_component):
+        employee_request_additional_tds = 0
+
+        declaration = frappe.db.get_value(
+            "Employee Tax Exemption Declaration",
+            {
+                "employee": self.employee,
+                "payroll_period": self.payroll_period.name,
+                "docstatus": 1,
+            },
+            "custom_employee_request_additional_tds",
+            as_dict=True,
+            cache=True,
+        )
+        if declaration:
+            employee_request_additional_tds = (
+                declaration.custom_employee_request_additional_tds or 0.0
+            )
+
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -682,8 +700,9 @@ class CustomSalarySlip(SalarySlip):
         )
 
         self.current_structured_tax_amount = (
-            self.total_structured_tax_amount - self.previous_total_paid_taxes
-        ) / self.remaining_sub_periods
+            (self.total_structured_tax_amount - self.previous_total_paid_taxes)
+            / self.remaining_sub_periods
+        ) + employee_request_additional_tds
 
         self.full_tax_on_additional_earnings = 0.0
         if self.current_additional_earnings_with_full_tax:
@@ -2856,5 +2875,7 @@ def override_calculate_tax_by_tax_slab(
         )
 
     final_tax = (total_tax_payable) - custom_tds_already_deducted_amount
+
+    print("\n\n\n\n\final_tax", final_tax)
 
     return round(final_tax, 2), round(total_tax_payable, 2)
