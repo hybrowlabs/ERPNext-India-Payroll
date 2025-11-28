@@ -121,6 +121,24 @@ class CustomSalarySlip(SalarySlip):
         # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
     def calculate_variable_tax(self, tax_component):
+        employee_request_additional_tds = 0
+
+        declaration = frappe.db.get_value(
+            "Employee Tax Exemption Declaration",
+            {
+                "employee": self.employee,
+                "payroll_period": self.payroll_period.name,
+                "docstatus": 1,
+            },
+            "custom_employee_request_additional_tds",
+            as_dict=True,
+            cache=True,
+        )
+        if declaration:
+            employee_request_additional_tds = (
+                declaration.custom_employee_request_additional_tds or 0.0
+            )
+
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -136,8 +154,9 @@ class CustomSalarySlip(SalarySlip):
         )
 
         self.current_structured_tax_amount = (
-            self.total_structured_tax_amount - self.previous_total_paid_taxes
-        ) / self.remaining_sub_periods
+            (self.total_structured_tax_amount - self.previous_total_paid_taxes)
+            / self.remaining_sub_periods
+        ) + employee_request_additional_tds
 
         # Total taxable earnings with additional earnings with full tax
         self.full_tax_on_additional_earnings = 0.0
