@@ -33,6 +33,7 @@ def execute(filters=None):
 	ss_ded_map = get_salary_slip_details(salary_slips, currency, company_currency, "deductions")
 
 	doj_map = get_employee_doj_map()
+	employment_types = get_employment_type()
 
 	data = []
 	for ss in salary_slips:
@@ -44,6 +45,7 @@ def execute(filters=None):
 			"branch": ss.branch,
 			"department": ss.department,
 			"designation": ss.designation,
+			"employment_type": employment_types.get(ss.employment_type),
 			"company": ss.company,
 			"start_date": ss.start_date,
 			"end_date": ss.end_date,
@@ -53,6 +55,7 @@ def execute(filters=None):
 			"payment_days": ss.payment_days,
 			"currency": currency or company_currency,
 			"total_loan_repayment": ss.total_loan_repayment,
+			"employment_type": employment_types.get(ss.employee),
 		}
 
 		update_column_width(ss, columns)
@@ -144,6 +147,14 @@ def get_columns(earning_types, ded_types):
 			"fieldtype": "Link",
 			"options": "Department",
 			"width": 80,
+		},
+		{
+			"label": _("Employment Type"),
+			"fieldname": "employment_type",
+			"fieldtype": "Link",
+			"options": "Employment Type",
+			"width": 120,
+
 		},
 		{
 			"label": _("Designation"),
@@ -284,32 +295,75 @@ def get_salary_component_type(salary_component):
 	return frappe.db.get_value("Salary Component", salary_component, "type", cache=True)
 
 
+
 def get_salary_slips(filters, company_currency):
-	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
+    doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
 
-	query = frappe.qb.from_(salary_slip).select(salary_slip.star)
+    ss = salary_slip
+    emp = frappe.qb.DocType("Employee")
 
-	if filters.get("docstatus"):
-		query = query.where(salary_slip.docstatus == doc_status[filters.get("docstatus")])
+    # JOIN Salary Slip + Employee
+    query = (
+        frappe.qb.from_(ss)
+        .left_join(emp).on(emp.name == ss.employee)
+        .select(ss.star, emp.employment_type)
+    )
 
-	if filters.get("from_date"):
-		query = query.where(salary_slip.start_date >= filters.get("from_date"))
+    # Apply Filters
+    if filters.get("docstatus"):
+        query = query.where(ss.docstatus == doc_status[filters["docstatus"]])
 
-	if filters.get("to_date"):
-		query = query.where(salary_slip.end_date <= filters.get("to_date"))
+    if filters.get("from_date"):
+        query = query.where(ss.start_date >= filters["from_date"])
 
-	if filters.get("company"):
-		query = query.where(salary_slip.company == filters.get("company"))
+    if filters.get("to_date"):
+        query = query.where(ss.end_date <= filters["to_date"])
 
-	if filters.get("employee"):
-		query = query.where(salary_slip.employee == filters.get("employee"))
+    if filters.get("company"):
+        query = query.where(ss.company == filters["company"])
 
-	if filters.get("currency") and filters.get("currency") != company_currency:
-		query = query.where(salary_slip.currency == filters.get("currency"))
+    if filters.get("employee"):
+        query = query.where(ss.employee == filters["employee"])
 
-	salary_slips = query.run(as_dict=1)
+    # Currency filter
+    if filters.get("currency") and filters["currency"] != company_currency:
+        query = query.where(ss.currency == filters["currency"])
 
-	return salary_slips or []
+    # 🔥 Employment Type Filter
+    if filters.get("employment_type"):
+        query = query.where(emp.employment_type == filters["employment_type"])
+
+    return query.run(as_dict=1) or []
+
+# def get_salary_slips(filters, company_currency):
+# 	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
+
+# 	query = frappe.qb.from_(salary_slip).select(salary_slip.star)
+
+# 	if filters.get("docstatus"):
+# 		query = query.where(salary_slip.docstatus == doc_status[filters.get("docstatus")])
+
+# 	if filters.get("from_date"):
+# 		query = query.where(salary_slip.start_date >= filters.get("from_date"))
+
+# 	if filters.get("to_date"):
+# 		query = query.where(salary_slip.end_date <= filters.get("to_date"))
+
+# 	if filters.get("company"):
+# 		query = query.where(salary_slip.company == filters.get("company"))
+
+# 	if filters.get("employee"):
+# 		query = query.where(salary_slip.employee == filters.get("employee"))
+
+# 	if filters.get("currency") and filters.get("currency") != company_currency:
+# 		query = query.where(salary_slip.currency == filters.get("currency"))
+
+# 	if filters.get("employment_type"):
+# 		query = query.where(emp.employment_type == filters["employment_type"])
+
+# 	salary_slips = query.run(as_dict=1)
+
+# 	return salary_slips or []
 
 
 def get_employee_doj_map():
@@ -318,6 +372,18 @@ def get_employee_doj_map():
 	result = (frappe.qb.from_(employee).select(employee.name, employee.date_of_joining)).run()
 
 	return frappe._dict(result)
+
+def get_employment_type():
+    employee = frappe.qb.DocType("Employee")
+
+    result = (
+        frappe.qb.from_(employee)
+        .select(employee.name, employee.employment_type)
+    ).run(as_dict=True)
+
+    return {row.name: row.employment_type for row in result}
+
+
 
 def get_salary_slip_details(salary_slips, currency, company_currency, component_type):
     salary_slips = [ss.name for ss in salary_slips]
