@@ -64,7 +64,7 @@
  "modified": "2025-08-18 15:52:32.191098",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
- "name": "State",
+ "name": "State Master",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

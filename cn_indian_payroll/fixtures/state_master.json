@@ -1,0 +1,516 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.876523",
+  "name": "Arunachal Pradesh",
+  "state_name": "Arunachal Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.858860",
+  "name": "Assam",
+  "state_name": "Assam"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.838626",
+  "name": "Bihar",
+  "state_name": "Bihar"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Goa",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:44:28.383349",
+  "name": "Goa",
+  "state_name": "Goa"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.824577",
+  "name": "Himachal Pradesh",
+  "state_name": "Himachal Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.809066",
+  "name": "Jharkhand",
+  "state_name": "Jharkhand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Karnataka",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:46:53.658742",
+  "name": "Karnataka",
+  "state_name": "Karnataka"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Madhya Pradesh",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:47:20.609807",
+  "name": "Madhya Pradesh",
+  "state_name": "Madhya Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Maharashtra",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:45:21.570371",
+  "name": "Maharashtra",
+  "state_name": "Maharashtra"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.791095",
+  "name": "Manipur",
+  "state_name": "Manipur"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.773753",
+  "name": "Meghalaya",
+  "state_name": "Meghalaya"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.753995",
+  "name": "Mizoram",
+  "state_name": "Mizoram"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.734274",
+  "name": "Nagaland",
+  "state_name": "Nagaland"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Punjab",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:45:44.561764",
+  "name": "Punjab",
+  "state_name": "Punjab"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.688239",
+  "name": "Sikkim",
+  "state_name": "Sikkim"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Tamil Nadu",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:47:45.064533",
+  "name": "Tamil Nadu",
+  "state_name": "Tamil Nadu"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Telangana",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:45:56.009045",
+  "name": "Telangana",
+  "state_name": "Telangana"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.666693",
+  "name": "Tripura",
+  "state_name": "Tripura"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.626156",
+  "name": "Uttarakhand",
+  "state_name": "Uttarakhand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "West Bengal",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [
+   {
+    "basic_daily_wage": 0.0,
+    "parent": "West Bengal",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Semi-skilled",
+    "total_per_day": 0.0,
+    "vda_daily_wages": 0.0,
+    "zone": "Zone 1"
+   }
+  ],
+  "modified": "2025-12-03 21:47:53.692478",
+  "name": "West Bengal",
+  "state_name": "West Bengal"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Chandigarh",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:46:16.919831",
+  "name": "Chandigarh",
+  "state_name": "Chandigarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Chattisgarh",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:44:04.140687",
+  "name": "Chattisgarh",
+  "state_name": "Chattisgarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Haryana",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:44:39.091512",
+  "name": "Haryana",
+  "state_name": "Haryana"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Odisha",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:47:29.476380",
+  "name": "Odisha",
+  "state_name": "Odisha"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.710598",
+  "name": "Rajasthan",
+  "state_name": "Rajasthan"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [],
+  "lwf_applicable": 0,
+  "lwf_designation": null,
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:00.643787",
+  "name": "Uttar Pradesh",
+  "state_name": "Uttar Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Kerala",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:44:59.040882",
+  "name": "Kerala",
+  "state_name": "Kerala"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Gujarat",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [
+   {
+    "basic_daily_wage": 452.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Unskilled",
+    "total_per_day": 497.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 462.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Semi-skilled",
+    "total_per_day": 507.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 474.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Skilled",
+    "total_per_day": 519.0,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 441.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Unskilled",
+    "total_per_day": 486.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   },
+   {
+    "basic_daily_wage": 452.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Semi-skilled",
+    "total_per_day": 497.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   },
+   {
+    "basic_daily_wage": 462.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "State Master",
+    "skill_level": "Skilled",
+    "total_per_day": 507.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   }
+  ],
+  "modified": "2025-12-03 21:46:44.051138",
+  "name": "Gujarat",
+  "state_name": "Gujarat"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Yearly",
+    "parent": "Andhra Pradesh",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:37.707477",
+  "name": "Andhra Pradesh",
+  "state_name": "Andhra Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Delhi",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:46:26.742037",
+  "name": "Delhi",
+  "state_name": "Delhi"
+ }
+]

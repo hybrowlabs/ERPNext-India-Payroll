@@ -288,7 +288,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
             frappe.call({
                 method: "frappe.client.get",
                 args: {
-                    doctype: "State",
+                    doctype: "State Master",
                     name: frm.doc.custom_lwf_state
                 },
                 callback: function(res) {
@@ -362,7 +362,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
             frappe.call({
                 method: "frappe.client.get",
                 args: {
-                    doctype: "State",
+                    doctype: "State Master",
                     name: frm.doc.custom_lwf_state
                 },
                 callback: function(res) {

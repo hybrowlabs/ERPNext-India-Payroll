@@ -233,7 +233,7 @@ fixtures = [
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
     {"dt":"Salary Component Library Item"},
-    {"dt":"State"},
+    {"dt":"State Master"},
     {"dt":"Frequency"},
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},

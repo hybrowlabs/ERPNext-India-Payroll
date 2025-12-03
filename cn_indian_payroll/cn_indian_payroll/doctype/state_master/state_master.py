@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class State(Document):
+class StateMaster(Document):
 	pass
