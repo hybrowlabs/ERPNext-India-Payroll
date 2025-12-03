@@ -137,7 +137,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def update_min_wages(self):
         if self.custom_minimum_wages_applicable:
-            state = frappe.get_doc("State", self.custom_minimum_wages_state)
+            state = frappe.get_doc("State Master", self.custom_minimum_wages_state)
             if not state:
                 frappe.throw(_("Selected state does not exist."))
 

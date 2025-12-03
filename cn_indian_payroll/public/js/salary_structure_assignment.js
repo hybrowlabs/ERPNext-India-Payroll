@@ -243,11 +243,14 @@ frappe.ui.form.on('Salary Structure Assignment', {
     refresh(frm)
     {
 
+
+
         frm.trigger('get_meal_card_amount');
         frm.trigger('get_telecom_amount');
         frm.trigger('get_attire_wallet');
         frm.trigger('get_fuel_wallet');
         frm.trigger('get_gift_wallet');
+        frm.trigger('consultant_gst')
 
         if (frm.doc.custom_promotion_id) {
             frm.add_custom_button(__('View Employee Promotion'), function() {
@@ -321,7 +324,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
             };
         });
 
-        frm.trigger('consultant_gst')
+
 
 
 
@@ -423,41 +426,106 @@ frappe.ui.form.on('Salary Structure Assignment', {
     },
 
 
-    consultant_gst:function(frm)
-    {
+    consultant_gst: function(frm) {
 
-        if (frm.doc.employee && frm.doc.docstatus!=2) {
+        if (frm.doc.employee) {
+
+            let employment_type = [];
+
+            // Fetch Payroll Settings
             frappe.call({
                 method: "frappe.client.get",
                 args: {
-                    doctype: "Employee",
-                    name: frm.doc.employee
+                    doctype: "Payroll Settings",
+                    name: "Payroll Settings"
                 },
-                callback: function (res) {
-                    if (res.message && res.message.employment_type) {
-                        console.log(res.message.employment_type,"11111")
-                        frappe.db.get_value("Employment Type", res.message.employment_type, "employee_type_name")
-                            .then(r => {
-                                if (r.message && r.message.employee_type_name) {
+                callback: function(res) {
 
-                                    console.log(r.message.employee_type_name,"2222222222")
-                                    if (r.message.employee_type_name === "Consultant" || r.message.employee_type_name === "Consultants") {
+                    if (res.message) {
+                        console.log(res.message, "Payroll Settings Loaded");
+
+                        let config = res.message.custom_hide_salary_structure_configuration;
+
+                        if (config && config.length > 0) {
+                            $.each(config, function(i, d) {
+                                if (d.employment_type) {
+                                    employment_type.push(d.employment_type);
+                                }
+                            });
+                        }
+
+                        console.log("Employment Types:", employment_type);
+
+                        // Fetch Employee Doc
+                        frappe.call({
+                            method: "frappe.client.get",
+                            args: {
+                                doctype: "Employee",
+                                name: frm.doc.employee
+                            },
+                            callback: function(emp_res) {
+
+                                if (emp_res.message && emp_res.message.employment_type) {
+
+                                    let emp_type = emp_res.message.employment_type;
+                                    console.log("Employee Type:", emp_type);
+
+                                    if (employment_type.includes(emp_type)) {
+
+                                        console.log("Match found - hiding GST fields");
+
                                         frm.set_df_property("custom_gst_applicable_consultants", "hidden", 0);
                                         frm.set_df_property("custom_gst_eligible", "hidden", 0);
                                         frm.set_df_property("custom_gst_percentage", "hidden", 0);
-                                    } else {
-                                        frm.set_df_property("custom_gst_applicable_consultants", "hidden", 1);
-                                        frm.set_df_property("custom_gst_eligible", "hidden", 1);
-                                        frm.set_df_property("custom_gst_percentage", "hidden", 1);
 
+                                        frm.set_df_property("custom_minimum_wages_applicable", "hidden", 1);
+                                        frm.set_df_property("custom_manual_input_values", "hidden", 1);
+                                        frm.set_df_property("custom_allowance", "hidden", 1);
+
+                                        frm.set_df_property("custom_epf", "hidden", 1);
+                                        frm.set_df_property("custom_nps", "hidden", 1);
+                                        frm.set_df_property("custom_lwf_labour_welfare_fund_", "hidden", 1);
+                                        frm.set_df_property("custom_esic", "hidden", 1);
+                                        frm.set_df_property("custom_perquisite", "hidden", 1);
+                                        frm.set_df_property("custom_reimbursements", "hidden", 1);
+                                        frm.set_df_property("custom_section_break_qbdc8", "hidden", 1);
+
+                                    } else {
+
+                                        console.log("No match - showing GST fields");
+
+                                        frm.set_df_property("custom_gst_applicable_consultants", "hidden", 0);
+                                        frm.set_df_property("custom_gst_eligible", "hidden", 0);
+                                        frm.set_df_property("custom_gst_percentage", "hidden", 0);
+                                        frm.set_df_property("custom_minimum_wages_applicable", "hidden", 0);
+
+                                        frm.set_df_property("custom_minimum_wages_applicable", "hidden", 0);
+                                        frm.set_df_property("custom_manual_input_values", "hidden", 0);
+                                        frm.set_df_property("custom_allowance", "hidden", 0);
+
+                                        frm.set_df_property("custom_epf", "hidden", 0);
+                                        frm.set_df_property("custom_nps", "hidden", 0);
+                                        frm.set_df_property("custom_lwf_labour_welfare_fund_", "hidden", 0);
+                                        frm.set_df_property("custom_esic", "hidden", 0);
+                                        frm.set_df_property("custom_perquisite", "hidden", 0);
+                                        frm.set_df_property("custom_reimbursements", "hidden", 0);
+                                        frm.set_df_property("custom_section_break_qbdc8", "hidden", 0);
                                     }
                                 }
-                            });
+
+                            }
+                        });
                     }
+
                 }
             });
         }
+    },
+    employee:function(frm)
+    {
+        frm.trigger('consultant_gst')
     }
+
 
 
 })
