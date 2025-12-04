@@ -79,7 +79,9 @@ function get_max_amount(frm)
             callback: function(response) {
                 if (response.message) {
 
-                    let amount = response.message;
+                    console.log(response.message,"44444444444444")
+
+                    let amount = response.message[0].value;
                     frm.set_value("custom_max_amount", amount);
                 }
             }
