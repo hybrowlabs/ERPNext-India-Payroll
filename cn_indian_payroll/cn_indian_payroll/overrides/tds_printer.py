@@ -491,23 +491,15 @@ def get_payslip_pdf(id):
 @frappe.whitelist()
 def get_benefit_payslip_pdf(id):
     try:
-        slip = frappe.get_doc("Salary Slip", id)
+        slip = frappe.get_doc("Employee Benefit Claim", id)
 
-        find = False
-
-        if slip.earnings:
-            for earning in slip.earnings:
-                get_component = frappe.get_doc("Salary Component", earning.salary_component)
-                if get_component.custom_is_reimbursement:
-                    find = True
-                    break
 
     except frappe.DoesNotExistError:
-        return {"html": "<p>No salary slip found.</p>"}
+        return {"html": "<p>No Benefit slip found.</p>"}
 
     context = {"doc": slip}
 
-    if find:
+    if slip.name:
         html = frappe.render_template(
             "cn_indian_payroll/templates/includes/benefit_payslip.html",
             context

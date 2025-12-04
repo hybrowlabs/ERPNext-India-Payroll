@@ -26,6 +26,35 @@ frappe.ui.form.on('Employee Benefit Claim', {
 
     },
 
+    refresh: function(frm) {
+       if(frm.doc.docstatus==1)
+       {
+        frm.add_custom_button("Benefit Payslip", function () {
+            if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
+                frappe.msgprint(__('Please set Employee and Payroll Period first.'));
+                return;
+            }
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_benefit_payslip_pdf",
+                args: {
+                    id: frm.doc.name
+                },
+                callback: function (r) {
+                    if (!r.message || !r.message.html) {
+                        frappe.msgprint(__('No HTML generated'));
+                        return;
+                    }
+                    const w = window.open("", "_blank");
+                    w.document.open();
+                    w.document.write(r.message.html);
+                    w.document.close();
+                }
+            });
+        });
+       }
+    },
+
     // claim_date: function(frm) {
     //     if (frm.doc.claim_date < frappe.datetime.now_date()) {
     //         frm.set_value("claim_date", undefined);
