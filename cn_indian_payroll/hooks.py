@@ -255,7 +255,6 @@ fixtures = [
 
 doctype_js = {
     "Payroll Entry": "public/js/payroll.js",
-    # "Employee Benefit Claim": "public/js/employee_benefit_claim.js",
     "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",

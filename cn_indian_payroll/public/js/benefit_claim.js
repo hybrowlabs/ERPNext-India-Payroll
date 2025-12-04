@@ -28,12 +28,12 @@ frappe.ui.form.on('Employee Benefit Claim', {
 
     },
 
-    claim_date: function(frm) {
-        if (frm.doc.claim_date < frappe.datetime.now_date()) {
-            frm.set_value("claim_date", undefined);
-            frappe.msgprint(__('Claim date cannot be in the past.'));
-        }
-    }
+    // claim_date: function(frm) {
+    //     if (frm.doc.claim_date < frappe.datetime.now_date()) {
+    //         frm.set_value("claim_date", undefined);
+    //         frappe.msgprint(__('Claim date cannot be in the past.'));
+    //     }
+    // }
 });
 
 // Define get_employee_details as a global function
@@ -81,9 +81,16 @@ function get_max_amount(frm)
             },
             callback: function(response) {
                 if (response.message) {
+                    console.log(response.message);
 
-                    let amount = response.message;
-                    frm.set_value("custom_max_amount", amount);
+                    let max_amount = response.message.max_amount || 0;
+                    let eligible_amount = response.message.eligible_amount || 0;
+
+
+                    frm.set_value("custom_max_amount", max_amount);
+                    frm.set_value("custom_reimbursement_amount_as_per_ctc", eligible_amount);
+
+
                 }
             }
         });

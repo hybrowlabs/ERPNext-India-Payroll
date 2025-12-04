@@ -105,7 +105,6 @@ def benefit_claim(doc):
 def get_max_amount(doc):
     doc = frappe.get_doc(frappe.parse_json(doc))
 
-    # Get the latest applicable Salary Structure Assignment
     get_ssa = frappe.get_list(
         "Salary Structure Assignment",
         filters={
@@ -160,7 +159,12 @@ def get_max_amount(doc):
 
                 max_amount = round((accrued_total + eligible_amount) - claimed_total)
 
-                return max_amount
+                return {
+                    "max_amount": max_amount,
+                    "eligible_amount": eligible_amount,
+                    "accrued_total": accrued_total,
+                    "claimed_total": claimed_total,
+                }
 
             else:
                 accruals = frappe.get_all(
@@ -194,6 +198,11 @@ def get_max_amount(doc):
                 # Final max amount = accrued + future - claimed
                 max_amount = round((accrued_total + future_eligible) - claimed_total)
 
-                return max_amount
+                return {
+                    "max_amount": max_amount,
+                    "eligible_amount": eligible_amount,
+                    "accrued_total": accrued_total,
+                    "claimed_total": claimed_total,
+                }
 
-    return 0
+    return {"max_amount": 0}
