@@ -36,7 +36,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
             }
 
             frappe.call({
-                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_benefit_payslip_pdf",
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_benefit_payslip_pdf",
                 args: {
                     id: frm.doc.name
                 },
