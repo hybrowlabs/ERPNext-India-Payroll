@@ -434,8 +434,7 @@ class CustomSalarySlip(SalarySlip):
 
                             if (
                                 lta_component.component_type == "LTA Reimbursement"
-                                and component.component_type
-                                in ["LTA Taxable", "LTA Non Taxable"]
+                                and component.component_type in ["LTA Taxable"]
                             ):
                                 if self.total_working_days and self.payment_days:
                                     lop_days = (
