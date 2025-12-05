@@ -21,7 +21,9 @@
   "allow_claim_across_outside_payroll_period",
   "salary_slip",
   "payment_days",
-  "working_days"
+  "working_days",
+  "total_lwp",
+  "arrear_days"
  ],
  "fields": [
   {
@@ -153,12 +155,26 @@
    "fieldtype": "Float",
    "label": "Working Days",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salary_slip.custom_total_leave_without_pay",
+   "fieldname": "total_lwp",
+   "fieldtype": "Float",
+   "label": "Total LWP"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "arrear_days",
+   "fieldtype": "Float",
+   "label": "Arrear Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 22:25:21.838547",
+ "modified": "2025-12-05 14:43:10.153264",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",

@@ -34,6 +34,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
     //         frappe.msgprint(__('Claim date cannot be in the past.'));
     //     }
     // }
+
 });
 
 // Define get_employee_details as a global function

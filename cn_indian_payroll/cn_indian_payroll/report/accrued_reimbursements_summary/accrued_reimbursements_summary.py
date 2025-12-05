@@ -37,6 +37,11 @@ def get_all_accrued_reimbursements(filters=None):
             "salary_component",
             "amount",
             "total_settlement",
+            "arrear_days",
+            "working_days",
+            "payment_days",
+            "total_lwp",
+            "arrear_days",
         ],
     )
 
@@ -53,6 +58,10 @@ def get_all_accrued_reimbursements(filters=None):
                 "salary_component": row.salary_component,
                 "amount": row.amount,
                 "total_settlement": row.total_settlement,
+                "arrear_days": row.arrear_days,
+                "working_days": row.working_days,
+                "payment_days": row.payment_days,
+                "total_lwp": row.total_lwp,
             }
         )
 
@@ -100,6 +109,30 @@ def get_columns():
             "fieldtype": "Link",
             "options": "Salary Component",
             "width": 180,
+        },
+        {
+            "label": "Working Days",
+            "fieldname": "working_days",
+            "fieldtype": "Float",
+            "width": 180,
+        },
+        {
+            "label": "Payment Days",
+            "fieldname": "payment_days",
+            "fieldtype": "Float",
+            "width": 150,
+        },
+        {
+            "label": "LWP",
+            "fieldname": "total_lwp",
+            "fieldtype": "Float",
+            "width": 80,
+        },
+        {
+            "label": "Arrear Days",
+            "fieldname": "arrear_days",
+            "fieldtype": "Float",
+            "width": 100,
         },
         {
             "label": "Accrued Amount",

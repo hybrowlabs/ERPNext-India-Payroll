@@ -345,6 +345,7 @@ def reimbursement_accrual_update(self):
         ) * self.number_of_days
         eligible_amount = each_doc.amount + lop_reversal_amount
         each_doc.amount = round(eligible_amount)
+        each_doc.arrear_days = self.number_of_days
         each_doc.save()
 
 
@@ -367,6 +368,7 @@ def bonus_accrual_update(self):
 
         eligible_amount_bonus = each_doc_bonus.amount + lop_reversal_amount_bonus
         each_doc_bonus.amount = round(eligible_amount_bonus)
+        each_doc_bonus.arrear_days = self.number_of_days
         each_doc_bonus.save()
 
 
