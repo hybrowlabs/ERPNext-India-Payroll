@@ -2653,9 +2653,12 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_total_income = round(total_income)
 
-        self.custom_net_pay_amount = round(
-            (total_income - self.custom_total_deduction_amount) + reimbursement_sum
-        )
+        if not salary_withholding:
+            self.custom_net_pay_amount = round(
+                (total_income - self.custom_total_deduction_amount) + reimbursement_sum
+            )
+        else:
+            self.custom_net_pay_amount = 0
 
         self.custom_in_words = money_in_words(self.custom_net_pay_amount)
 
