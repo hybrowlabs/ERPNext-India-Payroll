@@ -86,6 +86,12 @@ class CustomSalarySlip(SalarySlip):
 
         # self.insert_other_perquisites()
 
+        self.custom_current_additional_earnings = (
+            self.current_additional_earnings if self.current_additional_earnings else 0
+        )
+
+        # self.custom_current_additional_earnings=self.current_additional_earnings
+
     def before_save(self):
         self.new_joinee()
         self.insert_lop_days()
@@ -449,7 +455,7 @@ class CustomSalarySlip(SalarySlip):
                                     earning.amount = (
                                         get_additional_salary.amount - prorated_amount
                                     )
-                                break
+                                    break
 
     def compute_income_tax_breakup(self):
         self.standard_tax_exemption_amount = 0
@@ -878,6 +884,9 @@ class CustomSalarySlip(SalarySlip):
         amount_exempted_from_income_tax = 0
 
         tax_component = None
+        lta_amount = 0
+
+        days_amount = 0
 
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
@@ -893,6 +902,19 @@ class CustomSalarySlip(SalarySlip):
 
         if len(latest_salary_structure) > 0:
             tax_component = latest_salary_structure[0].custom_tax_regime
+            ssa = frappe.get_doc(
+                "Salary Structure Assignment", latest_salary_structure[0].name
+            )
+            if ssa.custom_employee_reimbursements:
+                for reimbursement in ssa.custom_employee_reimbursements:
+                    component = frappe.get_doc(
+                        "Salary Component", reimbursement.reimbursements
+                    )
+                    if component.component_type == "LTA Reimbursement":
+                        lta_amount = reimbursement.monthly_total_amount
+                        days_amount = (lta_amount / self.total_working_days) * (
+                            (self.total_working_days) - (self.payment_days)
+                        )
 
         for earning in self.earnings:
             get_tax = frappe.get_doc("Salary Component", earning.salary_component)
@@ -941,15 +963,19 @@ class CustomSalarySlip(SalarySlip):
                 )
 
             if based_on_payment_days:
+                # Get prorated values
                 amount, additional_amount = self.get_amount_based_on_payment_days(
                     earning
                 )
+
             else:
                 if earning.additional_amount:
                     amount, additional_amount = (
                         earning.amount,
                         earning.additional_amount,
                     )
+                    comp = frappe.get_doc("Salary Component", earning.salary_component)
+
                 else:
                     amount, additional_amount = (
                         earning.default_amount,
@@ -963,7 +989,6 @@ class CustomSalarySlip(SalarySlip):
                     taxable_earnings += amount - additional_amount
                     additional_income += additional_amount
 
-                    # Get additional amount based on future recurring additional salary
                     if additional_amount and earning.is_recurring_additional_salary:
                         additional_income += self.get_future_recurring_additional_amount(
                             earning.additional_salary, earning.additional_amount
@@ -990,6 +1015,12 @@ class CustomSalarySlip(SalarySlip):
                         additional_income -= self.get_future_recurring_additional_amount(
                             ded.additional_salary, ded.additional_amount
                         )  # Used ded.additional_amount to consider the amount for the full month
+
+        for earning in self.earnings:
+            get_tax = frappe.get_doc("Salary Component", earning.salary_component)
+            if get_tax.component_type == "LTA Taxable":
+                additional_income = additional_income - days_amount
+                break
 
         return frappe._dict(
             {
@@ -2653,7 +2684,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_total_income = round(total_income)
 
-        if not salary_withholding:
+        if not self.salary_withholding:
             self.custom_net_pay_amount = round(
                 (total_income - self.custom_total_deduction_amount) + reimbursement_sum
             )
