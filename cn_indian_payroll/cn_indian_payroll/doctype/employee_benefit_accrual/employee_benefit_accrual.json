@@ -22,7 +22,8 @@
   "salary_slip",
   "payment_days",
   "working_days",
-  "lop_reversal_days"
+  "lop_reversal_days",
+  "lwp_days"
  ],
  "fields": [
   {
@@ -135,14 +136,19 @@
    "allow_on_submit": 1,
    "fieldname": "lop_reversal_days",
    "fieldtype": "Float",
-   "label": "LOP Reversal Days",
+   "label": "Arrear Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "lwp_days",
+   "fieldtype": "Float",
+   "label": "LWP Days"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-11 15:26:18.289633",
+ "modified": "2025-12-08 19:50:55.962294",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",

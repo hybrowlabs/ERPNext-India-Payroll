@@ -182,14 +182,14 @@
    "allow_on_submit": 1,
    "fieldname": "lop_reversal_days",
    "fieldtype": "Float",
-   "label": "LOP Reversal Days",
+   "label": "Arrear Days",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-29 07:37:21.789068",
+ "modified": "2025-12-08 19:50:43.704408",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

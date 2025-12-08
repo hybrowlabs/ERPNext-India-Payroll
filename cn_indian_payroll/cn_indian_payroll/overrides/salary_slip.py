@@ -670,90 +670,6 @@ class CustomSalarySlip(SalarySlip):
         self.custom_month_count=sub_period-1
 
 
-    # def compute_income_tax_breakup(self):
-    #     self.standard_tax_exemption_amount = 0
-    #     self.tax_exemption_declaration = 0
-    #     self.deductions_before_tax_calculation = 0
-    #     self.custom_perquisite_amount = 0
-
-    #     self.non_taxable_earnings = self.compute_non_taxable_earnings()
-    #     self.ctc = self.compute_ctc()
-    #     self.income_from_other_sources = self.get_income_form_other_sources()
-    #     self.total_earnings = self.ctc + self.income_from_other_sources
-
-    #     payroll_period = frappe.get_value(
-    #         'Payroll Period',
-    #         {'company': self.company, 'name': self.payroll_period.name},
-    #         ['name', 'start_date', 'end_date'],
-    #         as_dict=True
-    #     )
-
-    #     if not payroll_period:
-    #         return
-
-    #     start_date = frappe.utils.getdate(payroll_period["start_date"])
-    #     end_date = frappe.utils.getdate(payroll_period["end_date"])
-    #     fiscal_year = payroll_period["name"]
-
-    #     loan_repayments = frappe.get_list(
-    #         'Loan Repayment Schedule',
-    #         filters={
-    #             'custom_employee': self.employee,
-    #             'status': 'Active',
-    #             'docstatus': 1
-    #         },
-    #         fields=['name']
-    #     )
-
-    #     total_perq = 0
-    #     for repayment in loan_repayments:
-    #         repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
-    #         for entry in repayment_doc.custom_loan_perquisite:
-    #             if entry.payment_date and start_date <= frappe.utils.getdate(entry.payment_date) <= end_date:
-    #                 total_perq += entry.perquisite_amount
-    #     self.custom_perquisite_amount = total_perq
-
-    #     if hasattr(self, "tax_slab") and self.tax_slab:
-    #         if self.tax_slab.allow_tax_exemption:
-    #             self.standard_tax_exemption_amount = self.tax_slab.standard_tax_exemption_amount
-    #             self.deductions_before_tax_calculation = (
-    #                 self.compute_annual_deductions_before_tax_calculation()
-    #             )
-
-    #         self.tax_exemption_declaration = (
-    #             self.get_total_exemption_amount() - self.standard_tax_exemption_amount
-    #         )
-
-    #     self.annual_taxable_amount = (
-    #         self.total_earnings
-    #         + self.custom_perquisite_amount
-    #         - (
-    #             self.non_taxable_earnings
-    #             + self.deductions_before_tax_calculation
-    #             + self.tax_exemption_declaration
-    #             + self.standard_tax_exemption_amount
-    #         )
-    #     )
-
-    #     self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
-
-    #     if hasattr(self, "total_structured_tax_amount") and hasattr(
-    #         self, "current_structured_tax_amount"
-    #     ):
-    #         self.future_income_tax_deductions = (
-    #             self.total_structured_tax_amount
-    #             + self.get("full_tax_on_additional_earnings", 0)
-    #             - self.income_tax_deducted_till_date
-    #         )
-
-    #         self.current_month_income_tax = (
-    #             self.current_structured_tax_amount
-    #             + self.get("full_tax_on_additional_earnings", 0)
-    #         )
-
-    #         self.total_income_tax = (
-    #             self.income_tax_deducted_till_date + self.future_income_tax_deductions
-    #         )
 
 
     def check_sal_struct(self):
@@ -1799,7 +1715,8 @@ class CustomSalarySlip(SalarySlip):
                             'salary_component': reimbursement.reimbursements,
                             'benefit_accrual_date': self.posting_date,
                             'salary_slip':self.name,
-                            'payroll_period':child_doc.custom_payroll_period
+                            'payroll_period':child_doc.custom_payroll_period,
+                            'lwp':self.custom_total_leave_without_pay
 
                             })
                         accrual_insert.insert()
@@ -1813,7 +1730,8 @@ class CustomSalarySlip(SalarySlip):
                             'salary_component': reimbursement.reimbursements,
                             'benefit_accrual_date': self.posting_date,
                             'salary_slip':self.name,
-                            'payroll_period':child_doc.custom_payroll_period
+                            'payroll_period':child_doc.custom_payroll_period,
+                            'lwp':self.custom_total_leave_without_pay
 
                             })
                         accrual_insert.insert()
