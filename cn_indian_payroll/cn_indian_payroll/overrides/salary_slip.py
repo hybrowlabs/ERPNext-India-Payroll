@@ -2573,39 +2573,6 @@ class CustomSalarySlip(SalarySlip):
                     },
                 )
 
-    # def employee_accrual_insert(self):
-    #     if self.employee:
-    #         ss_assignment = frappe.get_list(
-    #             "Salary Structure Assignment",
-    #             filters={"employee": self.employee, "docstatus": 1},
-    #             fields=["name"],
-    #             order_by="from_date desc",
-    #             limit=1,
-    #         )
-
-    #         if ss_assignment:
-    #             child_doc = frappe.get_doc(
-    #                 "Salary Structure Assignment", ss_assignment[0].name
-    #             )
-
-    #             for i in child_doc.custom_employee_reimbursements:
-    #                 accrual_insert = frappe.get_doc(
-    #                     {
-    #                         "doctype": "Employee Benefit Accrual",
-    #                         "employee": self.employee,
-    #                         "payroll_entry": self.payroll_entry,
-    #                         "amount": round(
-    #                             (i.monthly_total_amount / self.total_working_days)
-    #                             * self.payment_days
-    #                         ),
-    #                         "salary_component": i.reimbursements,
-    #                         "benefit_accrual_date": self.posting_date,
-    #                         "salary_slip": self.name,
-    #                         "payroll_period": child_doc.custom_payroll_period,
-    #                     }
-    #                 )
-    #                 accrual_insert.insert()
-
     def employee_accrual_submit(self):
         if self.employee:
             for i in self.earnings:
