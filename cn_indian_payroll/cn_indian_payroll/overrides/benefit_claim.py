@@ -10,6 +10,27 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
         self.insert_future_benefit()
         self.insert_additional_salary()
 
+
+    def validate(self):
+        super().validate()
+        self.set_taxable_or_non_taxable()
+
+
+    def set_taxable_or_non_taxable(self):
+        if self.earning_component and self.claimed_amount:
+            component=frappe.get_doc("Salary Component",self.earning_component)
+            if component.is_tax_applicable==1:
+                self.custom_is_taxable=1
+                self.custom_taxable_amount=self.claimed_amount
+            else:
+                self.custom_is_non_taxable=1
+                self.custom_non_taxable_amount=self.claimed_amount
+
+
+
+
+
+
     def insert_future_benefit(self):
         if self.custom_max_amount:
             if self.claimed_amount > self.custom_max_amount:
