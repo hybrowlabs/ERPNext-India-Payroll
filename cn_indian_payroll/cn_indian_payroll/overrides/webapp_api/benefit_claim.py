@@ -248,6 +248,8 @@ def get_max_amount(doc=None, employee=None, earning_component=None, claim_date=N
 
 
 
+#listing reimbursement components
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_claim?employee=37001&claim_date=2025-07-4
 
 
 @frappe.whitelist()

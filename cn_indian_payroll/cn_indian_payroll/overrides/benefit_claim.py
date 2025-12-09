@@ -10,7 +10,7 @@ from frappe.utils import add_months
 
 class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
     def on_submit(self):
-        self.insert_future_benefit()
+        # self.insert_future_benefit()
         self.insert_additional_salary()
 
 
