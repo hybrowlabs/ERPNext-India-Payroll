@@ -66,7 +66,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
 function get_employee_details(frm) {
     if (frm.doc.employee) {
         frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.benefit_claim",
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_claim",
             args: {
                 doc: frm.doc
             },
@@ -101,7 +101,7 @@ function get_max_amount(frm)
 {
     if (frm.doc.employee) {
         frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.get_max_amount",
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_max_amount",
             args: {
                 doc: frm.doc
             },
@@ -110,8 +110,27 @@ function get_max_amount(frm)
 
                     console.log(response.message,"44444444444444")
 
-                    let amount = response.message[0].value;
-                    frm.set_value("custom_max_amount", amount);
+                    if (response.message.status === "success") {
+
+                        console.log("SUCCESS");
+
+                        let amount = response.message.data.currently_allowed;
+                        let monthly_amount = response.message.data.monthly_reimbursement;
+
+                        frm.set_value("custom_max_amount", amount);
+                        frm.set_value("custom_reimbursement_amount_as_per_ctc",monthly_amount)
+                    }
+
+                    else if (response.message.status === "failed") {
+
+                        msgprint(response.message.message);
+                        frm.set_value("custom_max_amount", 0);
+                        frm.set_value("claimed_amount", 0);
+                    }
+
+
+
+
                 }
             }
         });
