@@ -1,186 +1,4 @@
-# import frappe
-# from frappe.utils import getdate, add_months, flt
-# from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
-
-# @frappe.whitelist()
-# def get_annual_statement(employee, payroll_period):
-
-#     # -------- Payroll Period -------- #
-#     period = frappe.db.get_value(
-#         "Payroll Period",
-#         payroll_period,
-#         ["start_date", "end_date"],
-#         as_dict=True
-#     )
-
-#     if not period:
-#         return {"status": "failed", "message": "Invalid Payroll Period"}
-
-#     fy_start = getdate(period.start_date)
-#     fy_end = getdate(period.end_date)
-
-#     # -------- Existing Salary Slips -------- #
-#     slips = frappe.get_all(
-#         "Salary Slip",
-#         filters={
-#             "employee": employee,
-#             "custom_payroll_period": payroll_period,
-#             "docstatus": ["in", [0, 1]]
-#         },
-#         fields=["name", "start_date"],
-#         order_by="start_date asc"
-#     )
-
-#     slip_by_month = {}
-#     for s in slips:
-#         m = getdate(s.start_date).strftime("%B-%Y")
-#         slip_by_month[m] = s.name
-
-#     # -------- Month List for FY -------- #
-#     months = []
-#     month_date_map = {}
-#     current = fy_start
-
-#     while current <= fy_end:
-#         m = current.strftime("%B-%Y")
-#         months.append(m)
-#         month_date_map[m] = current
-#         current = add_months(current, 1)
-
-#     # -------- Salary Structure Assignment -------- #
-#     ssa = frappe.get_list(
-#         "Salary Structure Assignment",
-#         filters={"employee": employee, "docstatus": 1},
-#         fields=["*"],
-#         order_by="from_date asc"
-#     )
-
-#     if not ssa:
-#         return {"status": "failed", "message": "No Salary Structure Assignment"}
-
-#     # Determine joining start for this FY
-#     doj = frappe.db.get_value("Employee", employee, "date_of_joining")
-#     doj = getdate(doj) if doj else fy_start
-
-#     # SSA date logic:
-#     # If start_date < FY start → take FY start
-#     # If DOJ > FY start → take DOJ
-#     structure_start = max(fy_start, doj)
-
-#     # -------- Make preview salary slip -------- #
-#     last_ssa = ssa[-1]  # latest
-#     preview_slip = make_salary_slip(
-#         source_name=last_ssa.salary_structure,
-#         employee=employee,
-#         posting_date=last_ssa.from_date,
-#         for_preview=1,
-#     )
-
-#     # Extract preview amounts
-#     preview_amount_map = {}
-#     for e in preview_slip.earnings:
-#         preview_amount_map[e.salary_component] = flt(e.amount)
-#     for d in preview_slip.deductions:
-#         preview_amount_map[d.salary_component] = flt(d.amount)
-
-#     # -------- Get last real slip component amounts -------- #
-#     last_amount_map = {}
-#     if slips:
-#         last_slip = slips[-1]
-#         details = frappe.get_all(
-#             "Salary Detail",
-#             filters={"parent": last_slip.name},
-#             fields=["salary_component", "amount"]
-#         )
-#         last_amount_map = {d.salary_component: d.amount for d in details}
-
-#     # Components (taxable only)
-#     component_names = list(set(list(preview_amount_map.keys()) + list(last_amount_map.keys())))
-#     components = frappe.get_all(
-#         "Salary Component",
-#         filters={"name": ["in", component_names], "is_tax_applicable": 1},
-#         fields=["name", "type", "custom_is_reimbursement", "custom_is_offcycle_component"],
-#         order_by="custom_sequence asc"
-#     )
-
-#     # -------- Output buckets -------- #
-#     earnings = []
-#     deductions = []
-#     reimbursements = []
-#     offcycle = []
-
-#     # -------- MAIN MONTHLY LOOP WITH PARTIAL MONTH LOGIC -------- #
-#     for comp in components:
-#         comp_values = []
-
-#         for m in months:
-#             month_start = month_date_map[m]
-
-#             # 1️⃣ If slip exists → use actual value
-#             if m in slip_by_month:
-#                 amount = frappe.db.get_value(
-#                     "Salary Detail",
-#                     {"parent": slip_by_month[m], "salary_component": comp.name},
-#                     "amount"
-#                 ) or 0
-
-#             else:
-#                 # -------- NO slip (future or partial month) -------- #
-#                 base_amount = preview_amount_map.get(comp.name, 0)
-
-#                 # Partial-month (LOP effect) logic:
-#                 # CASE A — Month < SSA start → ZERO
-#                 if month_start < structure_start:
-#                     amount = 0
-
-#                 # CASE B — FIRST month with partial days
-#                 elif month_start.month == structure_start.month and month_start.year == structure_start.year:
-
-#                     # Total days in this month
-#                     total_days = frappe.utils.get_last_day(month_start).day
-
-#                     # Payable days:
-#                     payable_days = total_days - (structure_start.day - 1)
-
-#                     # prorate salary:
-#                     amount = (base_amount / total_days) * payable_days
-
-#                 # CASE C — Full future month → full preview amount
-#                 else:
-#                     amount = base_amount
-
-#             comp_values.append(round(amount))
-
-#         row = {"name": comp.name, "values": comp_values, "total": sum(comp_values)}
-
-#         # Categorize
-#         if comp.type == "Earning" and comp.custom_is_reimbursement:
-#             reimbursements.append(row)
-#         elif comp.type == "Earning" and comp.custom_is_offcycle_component:
-#             offcycle.append(row)
-#         elif comp.type == "Earning":
-#             earnings.append(row)
-#         elif comp.type == "Deduction":
-#             deductions.append(row)
-
-#     # -------- Monthly net totals -------- #
-#     monthly_totals = []
-#     for i in range(len(months)):
-#         e = sum(x["values"][i] for x in earnings)
-#         d = sum(x["values"][i] for x in deductions)
-#         monthly_totals.append(e - d)
-
-#     return {
-#         "status": "success",
-#         "months": months,
-#         "earnings": earnings,
-#         "deductions": deductions,
-#         "reimbursements": reimbursements,
-#         "offcycle_earnings": offcycle,
-#         "monthly_totals": monthly_totals,
-#         "grand_total": sum(monthly_totals),
-#     }
 
 import frappe
 from frappe.utils import getdate, add_months, flt
@@ -335,7 +153,7 @@ def get_annual_statement(employee, payroll_period):
     # Gross Earnings
     gross_earn_values = [sum(x["values"][i] for x in earnings) for i in range(len(months))]
     earnings.append({
-        "name": "Gross Earnings",
+        "name": "Gross Earnings (A)",
         "values": gross_earn_values,
         "total": sum(gross_earn_values)
     })
@@ -343,7 +161,7 @@ def get_annual_statement(employee, payroll_period):
     # Total Deductions
     deduction_values = [sum(x["values"][i] for x in deductions) for i in range(len(months))]
     deductions.append({
-        "name": "Total Deductions",
+        "name": "Total Deductions (B)",
         "values": deduction_values,
         "total": sum(deduction_values)
     })
@@ -354,7 +172,7 @@ def get_annual_statement(employee, payroll_period):
     ]
 
     net_pay = {
-        "name": "Net Pay",
+        "name": "Net Pay (A-B)",
         "values": net_pay_values,
         "total": sum(net_pay_values)
     }
