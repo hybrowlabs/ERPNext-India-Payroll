@@ -110,8 +110,12 @@ function get_max_amount(frm)
 
                     console.log(response.message,"44444444444444")
 
-                    let amount = response.message[0].value;
+                    let amount = response.message[0].currently_allowed;
+                    let monthly_amount=response.message[0].monthly_reimbursement
+                    let annual_amount=response.message[0].annual_allowed
                     frm.set_value("custom_max_amount", amount);
+                    frm.set_value("custom_reimbursement_amount_as_per_ctc",monthly_amount)
+                    frm.set_value("custom_maximum_allowed_annual",annual_amount)
                 }
             }
         });
