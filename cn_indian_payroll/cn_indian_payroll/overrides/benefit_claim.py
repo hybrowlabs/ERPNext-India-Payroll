@@ -226,46 +226,46 @@ def benefit_claim(doc=None, employee=None, claim_date=None):
 #                 }
 #             ]
 
-            # elif salary_component.custom_claim_based_on == "Yearly":
-            #     accruals = frappe.get_all(
-            #         "Employee Benefit Accrual",
-            #         filters={
-            #             "employee": doc.employee,
-            #             "salary_component": doc.earning_component,
-            #             "docstatus": 1,
-            #             "payroll_period": payroll_period,
-            #         },
-            #         fields=["amount"],
-            #     )
-            #     accrued_total = sum([row.amount for row in accruals])
-            #     accrued_months = len(accruals)
+#             elif salary_component.custom_claim_based_on == "Yearly":
+#                 accruals = frappe.get_all(
+#                     "Employee Benefit Accrual",
+#                     filters={
+#                         "employee": doc.employee,
+#                         "salary_component": doc.earning_component,
+#                         "docstatus": 1,
+#                         "payroll_period": payroll_period,
+#                     },
+#                     fields=["amount"],
+#                 )
+#                 accrued_total = sum([row.amount for row in accruals])
+#                 accrued_months = len(accruals)
 
-            #     payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
-            #     start_date = getdate(payroll_doc.start_date)
-            #     end_date = getdate(payroll_doc.end_date)
-            #     from_date = getdate(ssa_doc.from_date)
+#                 payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
+#                 start_date = getdate(payroll_doc.start_date)
+#                 end_date = getdate(payroll_doc.end_date)
+#                 from_date = getdate(ssa_doc.from_date)
 
-            #     effective_start_date = max(start_date, from_date)
+#                 effective_start_date = max(start_date, from_date)
 
-            #     year_diff = end_date.year - effective_start_date.year
-            #     month_diff = end_date.month - effective_start_date.month
-            #     total_months = (year_diff * 12 + month_diff) + 1
+#                 year_diff = end_date.year - effective_start_date.year
+#                 month_diff = end_date.month - effective_start_date.month
+#                 total_months = (year_diff * 12 + month_diff) + 1
 
-            #     future_eligible = (total_months - accrued_months) * eligible_amount
-            #     result_value = (accrued_total + future_eligible) - claimed_total
-
-
-            #     return [
-            #         {
-            #             "value": result_value,
-            #             "label": str(result_value)
-            #         }
-            #     ]
+#                 future_eligible = (total_months - accrued_months) * eligible_amount
+#                 result_value = (accrued_total + future_eligible) - claimed_total
 
 
-                # return (accrued_total + future_eligible) - claimed_total
+#                 return [
+#                     {
+#                         "value": result_value,
+#                         "label": str(result_value)
+#                     }
+#                 ]
 
-    # return 0
+
+#                 return (accrued_total + future_eligible) - claimed_total
+
+#     return 0
 
 
 @frappe.whitelist()
