@@ -493,7 +493,6 @@ class CustomSalarySlip(SalarySlip):
             'Employee Bonus Accrual',
             filters={
                 'salary_slip': self.name,
-                'payroll_entry': self.payroll_entry,
                 'payroll_period': self.custom_payroll_period,
             },
             fields=['name']
@@ -509,7 +508,6 @@ class CustomSalarySlip(SalarySlip):
             'Employee Benefit Accrual',
             filters={
                 'salary_slip': self.name,
-                'payroll_entry': self.payroll_entry,
                 'payroll_period': self.custom_payroll_period,
             },
             fields=['name']
@@ -1701,6 +1699,7 @@ class CustomSalarySlip(SalarySlip):
 
 
     def employee_accrual_insert(self) :
+
         if self.custom_salary_structure_assignment:
             child_doc = frappe.get_doc('Salary Structure Assignment',self.custom_salary_structure_assignment)
             if child_doc.custom_employee_reimbursements:
@@ -1716,7 +1715,8 @@ class CustomSalarySlip(SalarySlip):
                             'benefit_accrual_date': self.posting_date,
                             'salary_slip':self.name,
                             'payroll_period':child_doc.custom_payroll_period,
-                            'lwp':self.custom_total_leave_without_pay
+                            'lwp_days':self.custom_total_leave_without_pay,
+                            'payment_days':self.payment_days
 
                             })
                         accrual_insert.insert()
@@ -1731,7 +1731,8 @@ class CustomSalarySlip(SalarySlip):
                             'benefit_accrual_date': self.posting_date,
                             'salary_slip':self.name,
                             'payroll_period':child_doc.custom_payroll_period,
-                            'lwp':self.custom_total_leave_without_pay
+                            'lwp_days':0,
+                            'payment_days':self.total_working_days
 
                             })
                         accrual_insert.insert()

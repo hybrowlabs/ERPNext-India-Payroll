@@ -120,10 +120,10 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "salary_slip.payment_days",
    "fieldname": "payment_days",
    "fieldtype": "Float",
-   "label": "Payment Days"
+   "label": "Payment Days",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -140,15 +140,17 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "lwp_days",
    "fieldtype": "Float",
-   "label": "LWP Days"
+   "label": "LWP Days",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 19:50:55.962294",
+ "modified": "2025-12-10 09:57:40.369851",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Benefit Accrual",
