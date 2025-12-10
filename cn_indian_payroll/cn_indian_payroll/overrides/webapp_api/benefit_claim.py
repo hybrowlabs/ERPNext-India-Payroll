@@ -310,19 +310,181 @@ def benefit_claim(doc=None, employee=None, claim_date=None):
 
 
 
+# @frappe.whitelist()
+# def get_all_accrued_reimbursements(filters=None):
+
+#     if not filters:
+#         filters = {}
+
+#     from datetime import datetime
+#     import calendar
+
+#     # ----------------------------------------------------------------------
+#     # 1. Extract Projection Data From Salary Structure Assignment
+#     # ----------------------------------------------------------------------
+#     ssa_map = {}     # key → (employee, component)
+
+#     ssa_filters = {}
+#     if filters.get("employee"):
+#         ssa_filters["employee"] = filters["employee"]
+#     if filters.get("payroll_period"):
+#         ssa_filters["payroll_period"] = filters["payroll_period"]
+
+#     salary_slips = frappe.get_list(
+#         "Salary Slip",
+#         filters=ssa_filters,
+#         fields=["name", "employee", "custom_salary_structure_assignment"]
+#     )
+
+#     for slip in salary_slips:
+#         if not slip.custom_salary_structure_assignment:
+#             continue
+
+#         ssa = frappe.get_doc("Salary Structure Assignment", slip.custom_salary_structure_assignment)
+
+#         for row in ssa.custom_employee_reimbursements:
+
+#             advance_period = frappe.db.get_value(
+#                 "Salary Component",
+#                 row.reimbursements,
+#                 "custom_advance_period"
+#             ) or 0
+
+#             ssa_map[(slip.employee, row.reimbursements)] = {
+#                 "periodic_original_amount": row.monthly_total_amount or 0,
+#                 "advance_period": advance_period,
+#                 "advance_amount": (row.monthly_total_amount or 0) * advance_period
+#             }
+
+#     # ----------------------------------------------------------------------
+#     # 2. Fetch Accrual Records Month-Wise
+#     # ----------------------------------------------------------------------
+#     accrual_filters = {"docstatus": 1}
+
+#     if filters.get("employee"):
+#         accrual_filters["employee"] = filters["employee"]
+#     if filters.get("payroll_period"):
+#         accrual_filters["payroll_period"] = filters["payroll_period"]
+#     if filters.get("company"):
+#         accrual_filters["company"] = filters["company"]
+
+#     accrual_records = frappe.get_list(
+#         "Employee Benefit Accrual",
+#         filters=accrual_filters,
+#         fields=[
+#             "*"
+#         ],
+#         order_by="benefit_accrual_date"
+#     )
+
+#     # ----------------------------------------------------------------------
+#     # 3. Fetch Claim Records
+#     # ----------------------------------------------------------------------
+#     claim_filters = {"docstatus": 1}
+
+#     if filters.get("employee"):
+#         claim_filters["employee"] = filters["employee"]
+#     if filters.get("company"):
+#         claim_filters["company"] = filters["company"]
+
+#     claim_records = frappe.get_list(
+#         "Employee Benefit Claim",
+#         filters=claim_filters,
+#         fields=[
+#             "employee", "company", "custom_payroll_period",
+#             "claim_date", "earning_component", "custom_paid_amount"
+#         ]
+#     )
+
+#     # ----------------------------------------------------------------------
+#     # 4. BUILD GROUPED OUTPUT STRUCTURE
+#     # ----------------------------------------------------------------------
+#     grouped = {}
+
+#     for accrual in accrual_records:
+
+#         # Convert date to "April 2025"
+#         dt = datetime.strptime(str(accrual.benefit_accrual_date), "%Y-%m-%d")
+#         month_label = dt.strftime("%B %Y")  # Example: "April 2025"
+
+#         # Filter matching claim amount for month
+#         paid_amount = 0
+#         for claim in claim_records:
+#             if (
+#                 claim.employee == accrual.employee and
+#                 claim.company == accrual.company and
+#                 claim.custom_payroll_period == accrual.payroll_period and
+#                 claim.earning_component == accrual.salary_component
+#             ):
+#                 if claim.claim_date:
+#                     cdt = datetime.strptime(str(claim.claim_date), "%Y-%m-%d")
+#                     if cdt.month == dt.month and cdt.year == dt.year:
+#                         paid_amount += claim.custom_paid_amount or 0
+
+#         # SSA Projection values
+#         ssa_key = (accrual.employee, accrual.salary_component)
+#         periodic_original_amount = ssa_map.get(ssa_key, {}).get("periodic_original_amount", 0)
+#         advance_period = ssa_map.get(ssa_key, {}).get("advance_period", 0)
+#         advance_amount = ssa_map.get(ssa_key, {}).get("advance_amount", 0)
+
+#         # Initialize component bucket if not exists
+#         if accrual.salary_component not in grouped:
+#             grouped[accrual.salary_component] = {
+#                 "salary_component": accrual.salary_component,
+#                 "carry_forward_amount": 0,   # default
+#                 "total_accrued_amount": 0,
+#                 "periodic_original_amount": periodic_original_amount,
+#                 "advance_period": advance_period,
+#                 "advance_amount": advance_amount,
+#                 "total_claimed_amount": 0,
+#                 "total_balance_amount": 0,
+#                 "details": []  # months go here
+#             }
+
+#         # Add accrued month entry
+#         grouped[accrual.salary_component]["details"].append({
+#             "month": month_label,
+#             "amount": accrual.amount,
+#             "working_days": accrual.working_days,
+#             "payment_days": accrual.payment_days,
+#             "periodic_original_amount"
+#             "lop days"
+#             "arrear_days"
+#             "claimed_amount": paid_amount
+#             "paid_amount"
+#             "balance_bill_amount"
+#             "bill_amount"
+#             closing_balance
+
+#         })
+
+#         # Update summary values
+#         grouped[accrual.salary_component]["total_accrued_amount"] += accrual.amount
+#         grouped[accrual.salary_component]["total_claimed_amount"] += paid_amount
+
+#     # Now compute balance for every component
+#     for comp, row in grouped.items():
+#         row["total_balance_amount"] = (
+#             row["total_accrued_amount"]
+#             - row["total_claimed_amount"]
+#             + row["carry_forward_amount"]
+#         )
+
+#     # Return in expected format
+#     return {"data": list(grouped.values())}
+
+
 @frappe.whitelist()
 def get_all_accrued_reimbursements(filters=None):
-
     if not filters:
         filters = {}
 
     from datetime import datetime
-    import calendar
 
     # ----------------------------------------------------------------------
-    # 1. Extract SSA Projection Data
+    # 1. Extract Projection Data From Salary Structure Assignment
     # ----------------------------------------------------------------------
-    ssa_map = {}
+    ssa_map = {}  # key → (employee, component)
 
     ssa_filters = {}
     if filters.get("employee"):
@@ -340,29 +502,24 @@ def get_all_accrued_reimbursements(filters=None):
         if not slip.custom_salary_structure_assignment:
             continue
 
-        ssa = frappe.get_doc(
-            "Salary Structure Assignment",
-            slip.custom_salary_structure_assignment
-        )
+        ssa = frappe.get_doc("Salary Structure Assignment", slip.custom_salary_structure_assignment)
 
         for row in ssa.custom_employee_reimbursements:
-            advance_period = frappe.db.get_value(
-                "Salary Component",
-                row.reimbursements,
-                "custom_advance_period"
-            ) or 0
+            advance_period = (
+                frappe.db.get_value("Salary Component", row.reimbursements, "custom_advance_period")
+                or 0
+            )
 
             ssa_map[(slip.employee, row.reimbursements)] = {
                 "periodic_original_amount": row.monthly_total_amount or 0,
                 "advance_period": advance_period,
-                "advance_amount": (row.monthly_total_amount or 0) * advance_period
+                "advance_amount": (row.monthly_total_amount or 0) * advance_period,
             }
 
     # ----------------------------------------------------------------------
     # 2. Fetch Accrual Records
     # ----------------------------------------------------------------------
     accrual_filters = {"docstatus": 1}
-
     if filters.get("employee"):
         accrual_filters["employee"] = filters["employee"]
     if filters.get("payroll_period"):
@@ -373,11 +530,7 @@ def get_all_accrued_reimbursements(filters=None):
     accrual_records = frappe.get_list(
         "Employee Benefit Accrual",
         filters=accrual_filters,
-        fields=[
-            "employee", "employee_name", "company", "payroll_period",
-            "benefit_accrual_date", "salary_component",
-            "amount", "working_days", "payment_days"
-        ],
+        fields=["*"],
         order_by="benefit_accrual_date"
     )
 
@@ -385,7 +538,6 @@ def get_all_accrued_reimbursements(filters=None):
     # 3. Fetch Claim Records
     # ----------------------------------------------------------------------
     claim_filters = {"docstatus": 1}
-
     if filters.get("employee"):
         claim_filters["employee"] = filters["employee"]
     if filters.get("company"):
@@ -395,57 +547,97 @@ def get_all_accrued_reimbursements(filters=None):
         "Employee Benefit Claim",
         filters=claim_filters,
         fields=[
-            "employee", "company", "custom_payroll_period",
-            "claim_date", "earning_component", "custom_paid_amount"
+            "employee",
+            "company",
+            "custom_payroll_period",
+            "claim_date",
+            "earning_component",
+            "custom_paid_amount"
         ]
     )
 
     # ----------------------------------------------------------------------
-    # 4. GROUP DATA BY SALARY COMPONENT
+    # 4. BUILD GROUPED OUTPUT
     # ----------------------------------------------------------------------
+
+
     grouped = {}
 
     for accrual in accrual_records:
+        # Convert date → "April 2025"
         dt = datetime.strptime(str(accrual.benefit_accrual_date), "%Y-%m-%d")
-        month_key = dt.strftime("%Y-%m")
+        month_label = dt.strftime("%B %Y")
 
-        # settlement total
-        paid_amount = sum(
-            c.custom_paid_amount or 0
-            for c in claim_records
-            if c.employee == accrual.employee
-            and c.company == accrual.company
-            and c.custom_payroll_period == accrual.payroll_period
-            and c.earning_component == accrual.salary_component
-            and datetime.strptime(str(c.claim_date), "%Y-%m-%d").strftime("%Y-%m") == month_key
-        )
+        # Find matching monthly claim amount
+        paid_amount = 0
+        for claim in claim_records:
+            if (
+                claim.employee == accrual.employee
+                and claim.company == accrual.company
+                and claim.custom_payroll_period == accrual.payroll_period
+                and claim.earning_component == accrual.salary_component
+            ):
+                if claim.claim_date:
+                    cdt = datetime.strptime(str(claim.claim_date), "%Y-%m-%d")
+                    if cdt.month == dt.month and cdt.year == dt.year:
+                        paid_amount += claim.custom_paid_amount or 0
 
+        # SSA values
         ssa_key = (accrual.employee, accrual.salary_component)
-        ssa_info = ssa_map.get(ssa_key, {})
+        periodic_original_amount = ssa_map.get(ssa_key, {}).get("periodic_original_amount", 0)
+        advance_period = ssa_map.get(ssa_key, {}).get("advance_period", 0)
+        advance_amount = ssa_map.get(ssa_key, {}).get("advance_amount", 0)
 
+        # Initialise group per component
         if accrual.salary_component not in grouped:
             grouped[accrual.salary_component] = {
+                "salary_component": accrual.salary_component,
                 "carry_forward_amount": 0,
                 "total_accrued_amount": 0,
-                "periodic_original_amount": ssa_info.get("periodic_original_amount", 0),
+                "periodic_original_amount": periodic_original_amount,
+                "advance_period": advance_period,
+                "advance_amount": advance_amount,
                 "total_claimed_amount": 0,
-                "advance_period": ssa_info.get("advance_period", 0),
+                "total_balance_amount": 0,
                 "details": []
             }
 
+        # Calculate closing balance
+        closing_balance = (accrual.bill_amount or 0) - (paid_amount or 0)
+
+        # ------------------------------------------------------------------
+        # Add month entry (your corrected detail block)
+        # ------------------------------------------------------------------
+        grouped[accrual.salary_component]["details"].append({
+            "month": month_label,
+            "amount": accrual.amount,
+            "working_days": accrual.working_days,
+            "payment_days": accrual.payment_days,
+            "periodic_original_amount": periodic_original_amount,
+            "lop_days": accrual.lwp_days,
+            "arrear_days": accrual.arrear_days,
+            "claimed_amount": paid_amount,
+            "paid_amount": paid_amount,
+            "bill_amount": accrual.bill_amount,
+            "balance_bill_amount": accrual.balance_bill_amount,
+            "closing_balance": closing_balance,
+        })
+
+        # Update summary totals
         grouped[accrual.salary_component]["total_accrued_amount"] += accrual.amount
         grouped[accrual.salary_component]["total_claimed_amount"] += paid_amount
 
-        # add month details
-        grouped[accrual.salary_component]["details"].append({
-            "month": month_key,
-            "amount": accrual.amount
-        })
-
-    # compute final balance
-    for comp, data in grouped.items():
-        data["total_balance_amount"] = (
-            data["total_accrued_amount"] - data["total_claimed_amount"]
+    # ----------------------------------------------------------------------
+    # 5. Update Final Balance
+    # ----------------------------------------------------------------------
+    for comp, row in grouped.items():
+        row["total_balance_amount"] = (
+            row["total_accrued_amount"]
+            - row["total_claimed_amount"]
+            + row["carry_forward_amount"]
         )
 
+    # ----------------------------------------------------------------------
+    # 6. Return response
+    # ----------------------------------------------------------------------
     return {"data": list(grouped.values())}
