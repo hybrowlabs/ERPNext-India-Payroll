@@ -1,9 +1,9 @@
 import frappe
 
 
-def on_cancel(self, method):
-    cancel_additional_salary(self)
-    cancel_appraisal_calculation(self)
+# def on_cancel(self, method):
+#     cancel_additional_salary(self)
+#     cancel_appraisal_calculation(self)
 
 
 def on_submit(self, method):
