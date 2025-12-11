@@ -206,3 +206,45 @@ def get_annual_statement(employee, payroll_period):
         "reimbursements": reimbursements,
         "offcycle_earnings": offcycle,
     }
+
+
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form
+
+@frappe.whitelist()
+def tds_declaration_form():
+    records = frappe.get_all(
+        "Employee Tax Exemption Sub Category",
+        filters={"is_active": 1},
+        fields=[
+            "exemption_category",
+            "max_amount",
+            "name",
+            "is_active",
+            "custom_component_type",
+
+            "custom_description"
+        ],
+        order_by="custom_sequence asc"
+    )
+
+    grouped = {}
+
+    # Group by exemption_category
+    for row in records:
+        category = row.get("exemption_category")
+        if category not in grouped:
+            grouped[category] = []
+        grouped[category].append(row)
+
+    # Convert to required format (list of dicts)
+    final_list = []
+
+    for category, items in grouped.items():
+        final_list.append({
+            "category_name": category,
+            "items": items
+        })
+
+    return final_list
