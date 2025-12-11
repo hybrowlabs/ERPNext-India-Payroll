@@ -801,12 +801,6 @@ class CustomSalarySlip(SalarySlip):
                 declaration.custom_employee_request_additional_tds or 0.0
             )
 
-        # print("\n--- DEBUG VALUES ---")
-        # print("Payroll Period Start Date:", self.payroll_period.start_date)
-        # print("Salary Slip Start Date:", self.start_date)
-        # print("Tax Component:", tax_component)
-        # print("----------------------\n")
-
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -828,11 +822,8 @@ class CustomSalarySlip(SalarySlip):
             / self.remaining_sub_periods
         ) + employee_request_additional_tds
 
-        # print("\n\n\n\n\n\n\nself.current_structured_tax_amount", self.current_structured_tax_amount)
-
         self.full_tax_on_additional_earnings = 0.0
 
-        # print("\n\n\n\n\n\n\nself.current_additional_earnings_with_full_tax", self.current_additional_earnings_with_full_tax)
         if self.current_additional_earnings_with_full_tax:
             self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
                 self,
@@ -1105,108 +1096,71 @@ class CustomSalarySlip(SalarySlip):
             }
         )
 
-    # def get_taxable_earnings_for_prev_period(
-    #     self, start_date, end_date, allow_tax_exemption=False
-    # ):
-    #     exempted_amount = 0
-    #     taxable_earnings = 0
+    def get_taxable_earnings_for_prev_period(
+        self, start_date, end_date, allow_tax_exemption=False
+    ):
+        exempted_amount = 0
+        taxable_earnings = 0
 
-    #     latest_salary_structure = frappe.get_list(
-    #         "Salary Structure Assignment",
-    #         filters={"employee": self.employee, "docstatus": 1},
-    #         fields=["custom_tax_regime"],
-    #         order_by="from_date desc",
-    #         limit=1,
-    #     )
+        latest_salary_structure = frappe.get_list(
+            "Salary Structure Assignment",
+            filters={"employee": self.employee, "docstatus": 1},
+            fields=["custom_tax_regime"],
+            order_by="from_date desc",
+            limit=1,
+        )
 
-    #     custom_tax_regime = latest_salary_structure[0].custom_tax_regime
+        custom_tax_regime = latest_salary_structure[0].custom_tax_regime
 
-    #     # Check if any earnings are assigned with the current regime
-    #     regime_matched = any(
-    #         earning.custom_regime == custom_tax_regime or earning.custom_regime == "All"
-    #         for earning in self.earnings
-    #     )
+        # Check if any earnings are assigned with the current regime
+        regime_matched = any(
+            earning.custom_regime == custom_tax_regime or earning.custom_regime == "All"
+            for earning in self.earnings
+        )
 
-    #     # Build the filters
-    #     if regime_matched:
-    #         # Get both matching regime and "All"
-    #         taxable_earnings = self.get_salary_slip_details(
-    #             start_date,
-    #             end_date,
-    #             parentfield="earnings",
-    #             is_tax_applicable=1,
-    #             custom_tax_exemption_applicable_based_on_regime=1,
-    #             custom_regime=custom_tax_regime,  # match specific regime
-    #         ) + self.get_salary_slip_details(
-    #             start_date,
-    #             end_date,
-    #             parentfield="earnings",
-    #             is_tax_applicable=1,
-    #             custom_tax_exemption_applicable_based_on_regime=1,
-    #             custom_regime="All",  # include "All"
-    #         )
-    #     else:
-    #         # Use only regime "All"
-    #         taxable_earnings = self.get_salary_slip_details(
-    #             start_date,
-    #             end_date,
-    #             parentfield="earnings",
-    #             is_tax_applicable=1,
-    #             custom_regime="All",
-    #         )
+        # Build the filters
+        if regime_matched:
+            # Get both matching regime and "All"
+            taxable_earnings = self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="earnings",
+                is_tax_applicable=1,
+                custom_tax_exemption_applicable_based_on_regime=1,
+                custom_regime=custom_tax_regime,  # match specific regime
+            ) + self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="earnings",
+                is_tax_applicable=1,
+                custom_tax_exemption_applicable_based_on_regime=1,
+                custom_regime="All",  # include "All"
+            )
+        else:
+            # Use only regime "All"
+            taxable_earnings = self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="earnings",
+                is_tax_applicable=1,
+                custom_regime="All",
+            )
 
-    # latest_salary_structure = frappe.get_list(
-    #     "Salary Structure Assignment",
-    #     filters={"employee": self.employee, "docstatus": 1},
-    #     fields=["*"],
-    #     order_by="from_date desc",
-    #     limit=1,
-    # )
+        if allow_tax_exemption:
+            exempted_amount = self.get_salary_slip_details(
+                start_date,
+                end_date,
+                parentfield="deductions",
+                exempted_from_income_tax=1,
+            )
 
-    # custom_tax_regime = latest_salary_structure[0].custom_tax_regime
+        opening_taxable_earning = self.get_opening_for(
+            "taxable_earnings_till_date", start_date, end_date
+        )
 
-    # for earning in self.earnings:
-    #     if custom_tax_regime == earning.custom_regime:
-
-    #         taxable_earnings = self.get_salary_slip_details(
-    #             start_date,
-    #             end_date,
-    #             parentfield="earnings",
-    #             is_tax_applicable=1,
-    #             custom_tax_exemption_applicable_based_on_regime=1,
-    #         )
-
-    #         print("\n\n\n\n\n\n\n\n\n\n==================",taxable_earnings, "\n\n\n\n\n\n\n\n\n\n")
-    #     # else:
-    #     #     print("\n\n\n\n\n\n\n\n\n\n+++++++++++++++++",taxable_earnings, "\n\n\n\n\n\n\n\n\n\n")
-    #     #     taxable_earnings = self.get_salary_slip_details(
-    #     #         start_date,
-    #     #         end_date,
-    #     #         parentfield="earnings",
-    #     #         is_tax_applicable=1,
-    #     #         custom_regime="All",
-    #     #     )
-
-    # print("\n\n\n\n\n\n\n\n\n\ntaxable earning",taxable_earnings, "\n\n\n\n\n\n\n\n\n\n")
-
-    # Check if tax exemption is allowed and get exempted amount
-    # if allow_tax_exemption:
-    #     exempted_amount = self.get_salary_slip_details(
-    #         start_date,
-    #         end_date,
-    #         parentfield="deductions",
-    #         exempted_from_income_tax=1,
-    #     )
-
-    # # Get opening taxable earnings for the period
-    # opening_taxable_earning = self.get_opening_for(
-    #     "taxable_earnings_till_date", start_date, end_date
-    # )
-
-    # # Calculate and return the final taxable earnings
-    # return (
-    #     taxable_earnings + opening_taxable_earning
-    # ) - exempted_amount, exempted_amount
+        return (
+            taxable_earnings + opening_taxable_earning
+        ) - exempted_amount, exempted_amount
 
     def get_salary_slip_details(
         self,
@@ -1875,56 +1829,6 @@ class CustomSalarySlip(SalarySlip):
             if len(self.earnings) > 0:
                 for k in self.earnings:
                     k.custom_actual_amount = k.amount
-
-    # def actual_amount_ctc(self):
-    #     total_deduction = 0
-
-    #     if self.earnings:
-    #         for earning in self.earnings:
-    #             if earning.depends_on_payment_days == 1:
-    #                 if self.payment_days and self.payment_days > 0:
-    #                     earning.custom_actual_amount = round(
-    #                         (earning.amount * self.total_working_days)
-    #                         / self.payment_days
-    #                     )
-    #                 else:
-    #                     earning.custom_actual_amount = 0
-    #             else:
-    #                 earning.custom_actual_amount = earning.amount
-
-    #     if self.deductions:
-    #         for deduction in self.deductions:
-    #             component_doc = frappe.get_doc(
-    #                 "Salary Component", deduction.salary_component
-    #             )
-    #             original_amount = float(deduction.amount or 0)
-
-    #             if deduction.depends_on_payment_days == 1:
-    #                 if self.payment_days and self.payment_days > 0:
-    #                     deduction.custom_actual_amount = round(
-    #                         (original_amount * self.total_working_days)
-    #                         / self.payment_days
-    #                     )
-    #                 else:
-    #                     deduction.custom_actual_amount = 0
-
-    #                 # ESIC → use ROUND UP
-    #                 if component_doc.component_type == "ESIC":
-    #                     deduction.amount = math.ceil(original_amount)
-    #                 else:
-    #                     deduction.amount = round(original_amount)
-
-    #                 if not component_doc.do_not_include_in_total:
-
-    #                     total_deduction += deduction.amount
-
-    #             else:
-    #                 deduction.custom_actual_amount = original_amount
-    #                 if not component_doc.do_not_include_in_total:
-    #                     total_deduction += deduction.amount or 0
-
-    #     loan = self.total_loan_repayment or 0
-    #     self.custom_total_deduction_amount = round(total_deduction + loan)
 
     def actual_amount_ctc(self):
         total_deduction = 0
@@ -2714,13 +2618,7 @@ class CustomSalarySlip(SalarySlip):
         else:
             self.custom_loan_amount = 0
 
-        # self.custom_total_deduction_amount = (
-        #     self.custom_loan_amount + self.total_deduction
-        # )
-
         self.custom_statutory_grosspay = round(gross_pay_sum)
-
-        # self.custom_statutory_year_to_date = round(gross_pay_year_sum)
 
         self.custom_total_income = round(total_income)
 
@@ -2930,14 +2828,8 @@ def override_calculate_tax_by_tax_slab(
         to_amt = slab.to_amount or annual_taxable_earning
         rate = slab.percent_deduction * 0.01
 
-        # print("\n\n\n\n\nbase_tax", from_amt)
-
         if annual_taxable_earning > from_amt:
             taxable_range = min(annual_taxable_earning, to_amt) - from_amt
-
-            # print("\n\n\n\n\ntaxable_range", taxable_range)
-
-            #
 
             base_tax += taxable_range * rate
 
@@ -3013,10 +2905,5 @@ def override_calculate_tax_by_tax_slab(
         )
 
     final_tax = (total_tax_payable) - custom_tds_already_deducted_amount
-
-    # # print("\n\n\n\n\final_tax", final_tax)
-
-    # print("\n\n\n\n\nfinal_tax", final_tax)
-    # print("\n\n\n\n\ntotal_tax_payable", total_tax_payable)
 
     return round(final_tax, 2), round(total_tax_payable, 2)
