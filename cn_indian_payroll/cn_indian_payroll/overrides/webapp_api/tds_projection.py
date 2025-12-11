@@ -209,6 +209,9 @@ def get_annual_statement(employee, payroll_period):
 
 
 
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form
+
 @frappe.whitelist()
 def tds_declaration_form():
     records = frappe.get_all(
