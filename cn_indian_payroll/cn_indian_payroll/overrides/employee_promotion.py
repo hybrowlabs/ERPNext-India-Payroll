@@ -13,7 +13,10 @@ def on_submit(self, method):
 def cancel_additional_salary(self):
     get_appraisal_additional = frappe.get_list(
         "Additional Salary",
-        filters={"custom_employee_promotion_id": self.name},
+        filters={
+            "ref_doctype": "Salary Appraisal Calculation",
+            "ref_docname": self.name,
+        },
         fields=["*"],
     )
     if get_appraisal_additional:
@@ -21,14 +24,13 @@ def cancel_additional_salary(self):
             get_each_doc = frappe.get_doc("Additional Salary", each_appraisal_doc.name)
             get_each_doc.docstatus = 2
             get_each_doc.save()
-
             frappe.delete_doc("Additional Salary", each_appraisal_doc.name)
 
 
 def cancel_appraisal_calculation(self):
     get_appraisal_calculation = frappe.get_list(
         "Salary Appraisal Calculation",
-        filters={"employee_promotion_id": self.name},
+        filters={"promotion_reference": self.name},
         fields=["*"],
     )
     if get_appraisal_calculation:
@@ -38,5 +40,4 @@ def cancel_appraisal_calculation(self):
             )
             get_each_doc.docstatus = 2
             get_each_doc.save()
-
             frappe.delete_doc("Salary Appraisal Calculation", each_appraisal_doc.name)
