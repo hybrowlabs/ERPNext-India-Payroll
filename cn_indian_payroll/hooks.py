@@ -258,7 +258,7 @@ doctype_js = {
     "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
-    "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
+    "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
     "LOP Reversal": "public/js/lop_reversal.js",
     "Loan": "public/js/loan.js",
     "Loan Product": "public/js/loan_product.js",
@@ -277,7 +277,7 @@ override_doctype_class = {
     "Employee Benefit Claim": "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
     "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
     "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
-    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
+    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
     "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
@@ -300,6 +300,7 @@ doc_events = {
     "Salary Appraisal Calculation": {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel",
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.validate",
     },
     "Employee Promotion": {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
