@@ -28,6 +28,7 @@
   "total_declared_amount",
   "column_break_xlfa",
   "total_exemption_amount",
+  "total_80d",
   "section_break_hfwe",
   "hra_breakup",
   "tds_from_previous_employer_section_section",
@@ -170,11 +171,16 @@
    "fieldname": "tax_regime",
    "fieldtype": "Data",
    "label": "Tax Regime"
+  },
+  {
+   "fieldname": "total_80d",
+   "fieldtype": "Float",
+   "label": "Total 80D"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-01 22:46:24.711380",
+ "modified": "2025-12-16 00:05:35.309925",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Tax Declaration History",
@@ -194,6 +200,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

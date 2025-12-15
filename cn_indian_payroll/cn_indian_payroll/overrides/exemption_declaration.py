@@ -309,59 +309,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             data_doc = frappe.get_doc("Tax Declaration History", history_data[0].name)
             frappe.delete_doc("Tax Declaration History", data_doc.name)
 
-    def update_hra_breakup(self):
-        if self.monthly_house_rent:
-            if self.custom_status in ["Approved"]:
-                array = []
-                for t1 in self.custom_hra_breakup:
-                    array.append(
-                        {
-                            "month": t1.month,
-                            "rent_paid": t1.rent_paid,
-                            "basic": t1.earned_basic,
-                            "hra": t1.hra_received,
-                            "basic_excess": t1.exemption_amount,
-                            "exception_amount": t1.exemption_amount,
-                        }
-                    )
-
-                get_latest_history = frappe.get_list(
-                    "Tax Declaration History",
-                    filters={"employee": self.employee},
-                    fields=["*"],
-                    order_by="posting_date desc",
-                    limit=1,
-                )
-
-                if len(get_latest_history) > 0:
-                    each_doc = frappe.get_doc(
-                        "Tax Declaration History", get_latest_history[0].name
-                    )
-
-                    each_doc.monthly_house_rent = self.monthly_house_rent
-                    each_doc.rented_in_metro_city = self.rented_in_metro_city
-                    each_doc.hra_as_per_salary_structure = self.salary_structure_hra
-                    each_doc.annual_hra_exemption = self.annual_hra_exemption
-                    each_doc.monthly_hra_exemption = self.monthly_hra_exemption
-
-                    each_doc.hra_breakup = []
-
-                    for entry in array:
-                        each_doc.append(
-                            "hra_breakup",
-                            {
-                                "month": entry["month"],
-                                "rent_paid": entry["rent_paid"],
-                                "earned_basic": entry["basic"],
-                                "hra_received": entry["hra"],
-                                "excess_of_rent_paid": entry["basic_excess"],
-                                "exemption_amount": entry["exception_amount"],
-                            },
-                        )
-
-                    each_doc.save()
-                    frappe.db.commit()
-
     def update_tax_declaration(self):
         if len(self.declarations) > 0:
             tax_component = []
@@ -407,6 +354,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 each_doc.hra_as_per_salary_structure = self.salary_structure_hra
                 each_doc.annual_hra_exemption = self.annual_hra_exemption
                 each_doc.monthly_hra_exemption = self.monthly_hra_exemption
+                each_doc.total_80d = self.custom_total_80d_exemption
 
                 each_doc.basic_as_per_salary_structure_annual = self.custom_basic
                 each_doc.basic_as_per_salary_structure_10 = (
@@ -466,6 +414,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         "annual_hra_exemption": self.annual_hra_exemption,
                         "monthly_hra_exemption": self.monthly_hra_exemption,
                         "basic_as_per_salary_structure_annual": self.custom_basic,
+                        "total_80d": self.custom_total_80d_exemption,
                         "basic_as_per_salary_structure_10": self.custom_basic_as_per_salary_structure,
                         "declaration_details": [
                             {
