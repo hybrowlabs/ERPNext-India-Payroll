@@ -47,25 +47,46 @@ def get_benefit_payslip_pdf(id):
 
 
 #benefit claim list view
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_payslip_list_view?employee=37001&payroll_period=25-26
-
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_data_list_view?employee=37001&payroll_period=25-26&limit_start=0&limit_page_length=10
 
 
 @frappe.whitelist()
-def benefit_payslip_list_view(employee, company=None, payroll_period=None):
-
+def benefit_data_list_view(
+    employee,
+    company=None,
+    payroll_period=None,
+    limit_start=0,
+    limit_page_length=1
+):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
 
-    filters = {"employee": employee, "docstatus": ("in", [0, 1])}
+    # Ensure integers
+    limit_start = int(limit_start)
+    limit_page_length = int(limit_page_length)
+
+    filters = {
+        "employee": employee,
+        "docstatus": ("in", [0, 1])
+    }
 
     if company:
         filters["company"] = company
 
-
     if payroll_period:
         filters["custom_payroll_period"] = payroll_period
 
+    # -----------------------------
+    # Total count (optional)
+    # -----------------------------
+    total_count = frappe.db.count(
+        "Employee Benefit Claim",
+        filters=filters
+    )
+
+    # -----------------------------
+    # Data with limit
+    # -----------------------------
     claims = frappe.db.get_all(
         "Employee Benefit Claim",
         filters=filters,
@@ -86,14 +107,21 @@ def benefit_payslip_list_view(employee, company=None, payroll_period=None):
             "custom_is_non_taxable",
             "custom_non_taxable_amount",
         ],
-        order_by="claim_date desc"
+        order_by="claim_date desc",
+        limit_start=limit_start,
+        limit_page_length=limit_page_length
     )
 
-
     if not claims:
-        return {"status": "success", "data": []}
+        return {
+            "status": "success",
+            "data": [],
+            "total_records": total_count
+        }
 
-
+    # -----------------------------
+    # Attachments
+    # -----------------------------
     for row in claims:
         row["attachments"] = frappe.db.get_all(
             "File",
@@ -106,8 +134,162 @@ def benefit_payslip_list_view(employee, company=None, payroll_period=None):
 
     return {
         "status": "success",
-        "data": claims
+        "data": claims,
+        "total_records": total_count,
+        "limit_start": limit_start,
+        "limit_page_length": limit_page_length
     }
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_payslip_list_view?employee=37001&payroll_period=25-26&limit_start=0&limit_page_length=10
+
+
+@frappe.whitelist()
+def benefit_payslip_list_view(
+    employee,
+    company=None,
+    payroll_period=None,
+    limit_start=0,
+    limit_page_length=1
+):
+    if not employee:
+        return {"status": "failed", "message": "Employee is required"}
+
+    # Ensure integers
+    limit_start = int(limit_start)
+    limit_page_length = int(limit_page_length)
+
+    filters = {
+        "employee": employee,
+        "docstatus": ("in", [1])
+    }
+
+    if company:
+        filters["company"] = company
+
+    if payroll_period:
+        filters["custom_payroll_period"] = payroll_period
+
+    # -----------------------------
+    # Total count (optional)
+    # -----------------------------
+    total_count = frappe.db.count(
+        "Employee Benefit Claim",
+        filters=filters
+    )
+
+    # -----------------------------
+    # Data with limit
+    # -----------------------------
+    claims = frappe.db.get_all(
+        "Employee Benefit Claim",
+        filters=filters,
+        fields=[
+            "name",
+            "employee",
+            "employee_name",
+            "custom_payroll_period",
+            "claim_date",
+            "company",
+            "custom_status",
+            "earning_component",
+            "claimed_amount",
+            "custom_note_by_employee",
+            "custom_note_by_approver",
+            "custom_is_taxable",
+            "custom_taxable_amount",
+            "custom_is_non_taxable",
+            "custom_non_taxable_amount",
+        ],
+        order_by="claim_date desc",
+        limit_start=limit_start,
+        limit_page_length=limit_page_length
+    )
+
+    if not claims:
+        return {
+            "status": "success",
+            "data": [],
+            "total_records": total_count
+        }
+
+    # -----------------------------
+    # Attachments
+    # -----------------------------
+    for row in claims:
+        row["attachments"] = frappe.db.get_all(
+            "File",
+            filters={
+                "attached_to_doctype": "Employee Benefit Claim",
+                "attached_to_name": row["name"],
+            },
+            fields=["file_url"]
+        )
+
+    return {
+        "status": "success",
+        "data": claims,
+        "total_records": total_count,
+        "limit_start": limit_start,
+        "limit_page_length": limit_page_length
+    }
+# @frappe.whitelist()
+# def benefit_payslip_list_view(employee, company=None, payroll_period=None):
+
+#     if not employee:
+#         return {"status": "failed", "message": "Employee is required"}
+
+#     filters = {"employee": employee, "docstatus": ("in", [0, 1])}
+
+#     if company:
+#         filters["company"] = company
+
+
+#     if payroll_period:
+#         filters["custom_payroll_period"] = payroll_period
+
+#     claims = frappe.db.get_all(
+#         "Employee Benefit Claim",
+#         filters=filters,
+#         fields=[
+#             "name",
+#             "employee",
+#             "employee_name",
+#             "custom_payroll_period",
+#             "claim_date",
+#             "company",
+#             "custom_status",
+#             "earning_component",
+#             "claimed_amount",
+#             "custom_note_by_employee",
+#             "custom_note_by_approver",
+#             "custom_is_taxable",
+#             "custom_taxable_amount",
+#             "custom_is_non_taxable",
+#             "custom_non_taxable_amount",
+#         ],
+#         order_by="claim_date desc"
+#     )
+
+
+#     if not claims:
+#         return {"status": "success", "data": []}
+
+
+#     for row in claims:
+#         row["attachments"] = frappe.db.get_all(
+#             "File",
+#             filters={
+#                 "attached_to_doctype": "Employee Benefit Claim",
+#                 "attached_to_name": row["name"],
+#             },
+#             fields=["file_url"]
+#         )
+
+#     return {
+#         "status": "success",
+#         "data": claims
+#     }
 
 
 
