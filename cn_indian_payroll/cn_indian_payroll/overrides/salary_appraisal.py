@@ -12,9 +12,63 @@ def on_cancel(self, method):
     reverse_benefit_accrual(self)
 
 
+def validate(self, method):
+    insert_arrear_salary(self)
+
+
+def insert_arrear_salary(self):
+    """
+    Populate arrear_summary child table with positive & negative values
+    and calculate total arrear
+    """
+
+    self.set("arrear_summary", [])
+
+    if not self.arrear_breakdown:
+        self.total_arrear_amount = 0
+        return
+
+    aggregated_components = {}
+
+    for row in self.arrear_breakdown:
+        component = row.salary_component
+        amount = frappe.utils.flt(row.difference)  # KEEP negative values
+
+        aggregated_components[component] = (
+            aggregated_components.get(component, 0) + amount
+        )
+
+    total_arrear = 0
+
+    for component, amount in aggregated_components.items():
+        if amount == 0:
+            continue
+
+        salary_component = frappe.db.exists(
+            "Salary Component",
+            {
+                "custom_is_arrear": 1,
+                "custom_component": component,
+            },
+        )
+
+        if not salary_component:
+            continue
+
+        self.append(
+            "arrear_summary",
+            {
+                "salary_component": component,
+                "arrear_amount": amount,
+            },
+        )
+
+        total_arrear += amount
+
+
 def update_bonus_accrual(self):
-    if len(self.bonus_components) > 0:
-        for j in self.bonus_components:
+    if len(self.salary_appraisal_bonus) > 0:
+        for j in self.salary_appraisal_bonus:
             bonus_accrual = frappe.get_list(
                 "Employee Bonus Accrual",
                 filters={"employee": self.employee, "salary_slip": j.salary_slip_id},
@@ -29,8 +83,8 @@ def update_bonus_accrual(self):
 
 
 def update_reimbursement_accruals(self):
-    if len(self.reimbursement_components) > 0:
-        for accrual in self.reimbursement_components:
+    if len(self.salary_appraisal_reimbursement) > 0:
+        for accrual in self.salary_appraisal_reimbursement:
             benefit_accrual = frappe.get_list(
                 "Employee Benefit Accrual",
                 filters={
@@ -142,8 +196,8 @@ def cancel_additional_salary(self):
 
 
 def reverse_bonus_accrual(self):
-    if len(self.bonus_components) > 0:
-        for j in self.bonus_components:
+    if len(self.salary_appraisal_bonus) > 0:
+        for j in self.salary_appraisal_bonus:
             bonus_accrual = frappe.get_list(
                 "Employee Bonus Accrual",
                 filters={"employee": self.employee, "salary_slip": j.salary_slip_id},
@@ -163,8 +217,8 @@ def reverse_bonus_accrual(self):
 
 
 def reverse_benefit_accrual(self):
-    if len(self.reimbursement_components) > 0:
-        for component in self.reimbursement_components:
+    if len(self.salary_appraisal_reimbursement) > 0:
+        for component in self.salary_appraisal_reimbursement:
             benefit_accrual = frappe.get_list(
                 "Employee Benefit Accrual",
                 filters={
