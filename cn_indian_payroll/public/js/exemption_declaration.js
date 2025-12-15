@@ -937,10 +937,6 @@ function tds_projection_html(frm) {
 
                     let tds_already_deducted=frm.doc.custom_tds_already_deducted_amount
 
-                    // console.log(tds_already_deducted,"*****************************************")
-
-                    // console.log(annual_old_taxable_income,"1111111")
-                    // console.log(annual_new_taxable_income,"22222222")
 
 
 
