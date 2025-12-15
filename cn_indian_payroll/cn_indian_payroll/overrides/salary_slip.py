@@ -1457,13 +1457,6 @@ class CustomSalarySlip(SalarySlip):
                 fields=["*"],
             )
             if declaration:
-                form_data = json.loads(
-                    declaration[0].custom_declaration_form_data or "{}"
-                )
-                get_each_doc = frappe.get_doc(
-                    "Employee Tax Exemption Declaration", declaration[0].name
-                )
-
                 get_each_doc = frappe.get_doc(
                     "Employee Tax Exemption Declaration", declaration[0].name
                 )
@@ -1706,6 +1699,10 @@ class CustomSalarySlip(SalarySlip):
             if declaration:
                 get_each_doc = frappe.get_doc(
                     "Employee Tax Exemption Declaration", declaration[0].name
+                )
+
+                form_data = json.loads(
+                    declaration[0].custom_declaration_form_data or "[]"
                 )
 
                 total_nps = round(
