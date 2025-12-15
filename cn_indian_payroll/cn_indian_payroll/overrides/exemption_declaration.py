@@ -24,6 +24,9 @@ from frappe import _
 
 
 class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
+    def before_save(self):
+        self.update_json_data_in_declaration()
+
     def before_update_after_submit(self):
         self.calculate_hra_breakup()
         self.update_tax_declaration()
@@ -38,11 +41,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.cancel_declaration_history()
 
     def set_total_exemption_amount(self):
-        # self.total_exemption_amount = flt(
-        #     get_total_exemption_amount(self.declarations),
-        #     self.precision("total_exemption_amount"),
-        # )
-
         total_exemption_amount, total_80d = get_total_exemption_amount(
             self.declarations
         )
@@ -54,6 +52,65 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             self.total_exemption_amount = (
                 self.total_exemption_amount + self.annual_hra_exemption
             )
+
+    def update_json_data_in_declaration(self):
+        total_nps = 0
+        total_pf = 0
+        total_pt = 0
+
+        for subcategory in self.declarations:
+            check_component = frappe.get_doc(
+                "Employee Tax Exemption Sub Category",
+                subcategory.exemption_sub_category,
+            )
+
+            if check_component.custom_component_type == "NPS":
+                total_nps = subcategory.amount
+
+            elif check_component.custom_component_type == "EPF":
+                total_pf = subcategory.amount
+
+            elif check_component.custom_component_type == "Professional Tax":
+                total_pt = subcategory.amount
+
+        form_data = json.loads(self.custom_declaration_form_data or "[]")
+
+        if not form_data:
+            for subcategory in self.declarations:
+                check_component = frappe.get_doc(
+                    "Employee Tax Exemption Sub Category",
+                    subcategory.exemption_sub_category,
+                )
+
+                form_data.append(
+                    {
+                        "id": subcategory.exemption_sub_category,
+                        "sub_category": subcategory.exemption_sub_category,
+                        "exemption_category": subcategory.exemption_category,
+                        "max_amount": subcategory.max_amount,
+                        "amount": subcategory.amount,
+                        "value": subcategory.amount,
+                    }
+                )
+
+        for entry in form_data:
+            subcat = entry.get("sub_category") or entry.get("id")
+
+            component_type = frappe.db.get_value(
+                "Employee Tax Exemption Sub Category", subcat, "custom_component_type"
+            )
+
+            if component_type == "NPS":
+                entry["amount"] = total_nps
+                entry["value"] = total_nps
+            elif component_type == "EPF":
+                entry["amount"] = total_pf
+                entry["value"] = total_pf
+            elif component_type == "Professional Tax":
+                entry["amount"] = total_pt
+                entry["value"] = total_pt
+
+        self.custom_declaration_form_data = json.dumps(form_data)
 
     def set_max_amount_of_sub_category(self):
         if not self.declarations:

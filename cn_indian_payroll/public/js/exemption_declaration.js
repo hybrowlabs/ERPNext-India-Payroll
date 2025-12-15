@@ -605,6 +605,17 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
             }
         },
 
+    monthly_house_rent(frm) {
+
+    if(frm.doc.monthly_house_rent>0)
+        {
+            frm.set_value("custom_check",0)
+
+        }
+
+    }
+
+
 
 });
 
