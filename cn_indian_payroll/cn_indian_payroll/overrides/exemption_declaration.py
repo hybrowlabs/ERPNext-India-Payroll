@@ -24,13 +24,10 @@ from frappe import _
 
 
 class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
-    # def before_save(self):
-    #     self.update_json_data_in_declaration()
-
     def before_update_after_submit(self):
         self.calculate_hra_breakup()
         self.update_tax_declaration()
-        self.validation_on_section10()
+        # self.validation_on_section10()
 
         self.set_max_amount_of_sub_category()
 
@@ -41,10 +38,18 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.cancel_declaration_history()
 
     def set_total_exemption_amount(self):
-        self.total_exemption_amount = flt(
-            get_total_exemption_amount(self.declarations),
-            self.precision("total_exemption_amount"),
+        # self.total_exemption_amount = flt(
+        #     get_total_exemption_amount(self.declarations),
+        #     self.precision("total_exemption_amount"),
+        # )
+
+        total_exemption_amount, total_80d = get_total_exemption_amount(
+            self.declarations
         )
+
+        self.custom_total_80d_exemption = total_80d if total_80d else 0
+        self.total_exemption_amount = total_exemption_amount
+
         if self.annual_hra_exemption:
             self.total_exemption_amount = (
                 self.total_exemption_amount + self.annual_hra_exemption
@@ -54,173 +59,12 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         if not self.declarations:
             return
 
-        # -------------------------------
-        # STEP 1: Load sub categories once
-        # -------------------------------
-        sub_map = {}
-        for d in self.declarations:
-            if d.exemption_sub_category and d.exemption_sub_category not in sub_map:
-                sub_map[d.exemption_sub_category] = frappe.get_doc(
-                    "Employee Tax Exemption Sub Category", d.exemption_sub_category
-                )
-
-        # -------------------------------
-        # STEP 2: Read claimed amounts
-        # -------------------------------
-        amt = {
-            "SELF_MEDICAL_BELOW": 0,
-            "SELF_MEDICAL_ABOVE": 0,
-            "PARENT_MEDICAL_BELOW": 0,
-            "PARENT_MEDICAL_ABOVE": 0,
-            "SELF_PREVENTIVE": 0,
-            "PARENT_PREVENTIVE": 0,
-        }
-
-        rows = {}
-
-        for row in self.declarations:
-            sub = sub_map.get(row.exemption_sub_category)
-
-            # Always set max_amount from master
-            if sub and sub.max_amount:
-                row.max_amount = sub.max_amount
-
-            if not sub or not sub.custom_80d_type:
-                continue
-
-            ctype = sub.custom_80d_type
-            amt[ctype] += row.amount or 0
-            rows.setdefault(ctype, []).append(row)
-
-        # -------------------------------
-        # STEP 3: Limits
-        # -------------------------------
-        LIMIT = {
-            "SELF_MEDICAL_BELOW": 25000,
-            "SELF_MEDICAL_ABOVE": 50000,
-            "PARENT_MEDICAL_BELOW": 25000,
-            "PARENT_MEDICAL_ABOVE": 50000,
-            "PREVENTIVE_TOTAL": 5000,
-        }
-
-        # -------------------------------
-        # STEP 4: SELF calculation
-        # -------------------------------
-        if amt["SELF_MEDICAL_ABOVE"] > 0:
-            self_med = min(amt["SELF_MEDICAL_ABOVE"], LIMIT["SELF_MEDICAL_ABOVE"])
-            self_limit = LIMIT["SELF_MEDICAL_ABOVE"]
-        else:
-            self_med = min(amt["SELF_MEDICAL_BELOW"], LIMIT["SELF_MEDICAL_BELOW"])
-            self_limit = LIMIT["SELF_MEDICAL_BELOW"]
-
-        self_prev = min(amt["SELF_PREVENTIVE"], max(self_limit - self_med, 0))
-
-        # -------------------------------
-        # STEP 5: PARENT calculation
-        # -------------------------------
-        if amt["PARENT_MEDICAL_ABOVE"] > 0:
-            parent_med = min(amt["PARENT_MEDICAL_ABOVE"], LIMIT["PARENT_MEDICAL_ABOVE"])
-            parent_limit = LIMIT["PARENT_MEDICAL_ABOVE"]
-        else:
-            parent_med = min(amt["PARENT_MEDICAL_BELOW"], LIMIT["PARENT_MEDICAL_BELOW"])
-            parent_limit = LIMIT["PARENT_MEDICAL_BELOW"]
-
-        parent_prev = min(amt["PARENT_PREVENTIVE"], max(parent_limit - parent_med, 0))
-
-        # -------------------------------
-        # STEP 6: Global preventive cap
-        # -------------------------------
-        if self_prev + parent_prev > LIMIT["PREVENTIVE_TOTAL"]:
-            if self_prev >= LIMIT["PREVENTIVE_TOTAL"]:
-                self_prev = LIMIT["PREVENTIVE_TOTAL"]
-                parent_prev = 0
-            else:
-                parent_prev = LIMIT["PREVENTIVE_TOTAL"] - self_prev
-
-        # -------------------------------
-        # STEP 7: Reset all 80D row amounts
-        # -------------------------------
-        for rlist in rows.values():
-            for r in rlist:
-                r.amount = 0
-
-        # -------------------------------
-        # STEP 8: Update final eligible amounts
-        # -------------------------------
-        def apply(rows_key, eligible):
-            if rows_key not in rows:
-                return
-            remaining = eligible
-            for r in rows[rows_key]:
-                r.amount = min(r.max_amount, remaining)
-                remaining -= r.amount
-
-        apply("SELF_MEDICAL_BELOW", self_med)
-        apply("SELF_MEDICAL_ABOVE", self_med)
-        apply("SELF_PREVENTIVE", self_prev)
-
-        apply("PARENT_MEDICAL_BELOW", parent_med)
-        apply("PARENT_MEDICAL_ABOVE", parent_med)
-        apply("PARENT_PREVENTIVE", parent_prev)
-
-    def update_json_data_in_declaration(self):
-        total_nps = 0
-        total_pf = 0
-        total_pt = 0
-
-        for subcategory in self.declarations:
-            check_component = frappe.get_doc(
+        for declaration in self.declarations:
+            sub_category_doc = frappe.get_doc(
                 "Employee Tax Exemption Sub Category",
-                subcategory.exemption_sub_category,
+                declaration.exemption_sub_category,
             )
-
-            if check_component.custom_component_type == "NPS":
-                total_nps = subcategory.amount
-
-            elif check_component.custom_component_type == "EPF":
-                total_pf = subcategory.amount
-
-            elif check_component.custom_component_type == "Professional Tax":
-                total_pt = subcategory.amount
-
-        form_data = json.loads(self.custom_declaration_form_data or "[]")
-
-        if not form_data:
-            for subcategory in self.declarations:
-                check_component = frappe.get_doc(
-                    "Employee Tax Exemption Sub Category",
-                    subcategory.exemption_sub_category,
-                )
-
-                form_data.append(
-                    {
-                        "id": subcategory.exemption_sub_category,
-                        "sub_category": subcategory.exemption_sub_category,
-                        "exemption_category": subcategory.exemption_category,
-                        "max_amount": subcategory.max_amount,
-                        "amount": subcategory.amount,
-                        "value": subcategory.amount,
-                    }
-                )
-
-        for entry in form_data:
-            subcat = entry.get("sub_category") or entry.get("id")
-
-            component_type = frappe.db.get_value(
-                "Employee Tax Exemption Sub Category", subcat, "custom_component_type"
-            )
-
-            if component_type == "NPS":
-                entry["amount"] = total_nps
-                entry["value"] = total_nps
-            elif component_type == "EPF":
-                entry["amount"] = total_pf
-                entry["value"] = total_pf
-            elif component_type == "Professional Tax":
-                entry["amount"] = total_pt
-                entry["value"] = total_pt
-
-        self.custom_declaration_form_data = json.dumps(form_data)
+            declaration.max_amount = sub_category_doc.max_amount
 
     def validation_on_section10(self):
         validation_sub_categories = []

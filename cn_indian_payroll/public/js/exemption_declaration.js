@@ -156,7 +156,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                 </tr>
                                  <tr>
                                     <th>Total 80D Exemption</th>
-                                    <td><b>0</b></td>
+                                    <td><b>${frm.doc.custom_total_80d_exemption||0}</b></td>
                                 </tr>
                                 <tr>
                                     <th>Total Declared Amount</th>
@@ -245,6 +245,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                     const max = parseFloat(row.getAttribute("data-max")) || 0;
                                     const exemption_category = row.getAttribute("data-category");
                                     let value = parseFloat(row.querySelector("input").value || 0);
+
+
+                                    console.log(exemption_category,"value---")
 
 
 
