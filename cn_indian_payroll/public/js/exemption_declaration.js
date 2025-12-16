@@ -87,9 +87,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                         // const stored_value = stored_row ? stored_row.value || stored_row.amount || '' : '';
 
-                        if (row.custom_component_type === "Professional Tax") {
-                            return;
-                        }
+
 
                         let is_readonly = false;
                         if (frm.doc.custom_tax_regime === "New Regime") {
@@ -102,6 +100,8 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 
+
+
                         rows_html += `
                             <tr data-id="${row.name}" data-max="${row.max_amount}" data-category="${row.exemption_category}">
                                 <td>${row.name}</td>
@@ -111,6 +111,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                 <td><input type="number" class="input-field" style="width: 100%" value="${stored_value}" ${readonly_attr} /></td>
                             </tr>
                         `;
+
+
+
                     });
 
                     let info_message = '';
