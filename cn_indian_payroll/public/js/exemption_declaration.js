@@ -87,7 +87,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                         // const stored_value = stored_row ? stored_row.value || stored_row.amount || '' : '';
 
-
+                        if (row.custom_component_type === "Professional Tax") {
+                            return;
+                        }
 
                         let is_readonly = false;
                         if (frm.doc.custom_tax_regime === "New Regime") {
@@ -97,6 +99,8 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                         }
 
                         const readonly_attr = is_readonly ? 'readonly' : '';
+
+
 
                         rows_html += `
                             <tr data-id="${row.name}" data-max="${row.max_amount}" data-category="${row.exemption_category}">
@@ -150,21 +154,38 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                     <th>The Selected Tax Regime</th>
                                     <td><b>${frm.doc.custom_tax_regime}</b></td>
                                 </tr>
+
+                                <tr>
+
+
+                                <tr>
+                                    <th>Standard Deduction</th>
+                                    <td><b>${frm.doc.custom_standard_exemption_amount}</b></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Professional Tax</th>
+                                    <td><b>${frm.doc.custom_pt_amount}</b></td>
+                                </tr>
+
+
                                 <tr>
                                     <th>Annual HRA Exemption</th>
                                     <td><b>${frm.doc.annual_hra_exemption || 0}</b></td>
                                 </tr>
-                                 <tr>
-                                    <th>Total 80D Exemption</th>
-                                    <td><b>${frm.doc.custom_total_80d_exemption||0}</b></td>
-                                </tr>
+
                                 <tr>
                                     <th>Total Declared Amount</th>
-                                    <td><b>${Math.round(frm.doc.total_declared_amount|| 0)}</b></td>
+                                    <td><b>${Math.round(frm.doc.total_declared_amount-frm.doc.custom_pt_amount|| 0)}</b></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Total Eligible Amount</th>
+                                    <td><b>${Math.round(frm.doc.total_exemption_amount - frm.doc.annual_hra_exemption-frm.doc.custom_pt_amount|| 0)}</b></td>
                                 </tr>
                                 <tr>
                                     <th>Total Exemption Eligible Amount</th>
-                                    <td><b>${Math.round(frm.doc.total_exemption_amount || 0)}</b></td>
+                                    <td><b>${Math.round(frm.doc.total_exemption_amount-frm.doc.custom_pt_amount || 0)}</b></td>
                                 </tr>
 
 

@@ -37,8 +37,20 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
 
+        self.update_pt_amount()
+
     def on_cancel(self):
         self.cancel_declaration_history()
+
+    def update_pt_amount(self):
+        for declaration in self.declarations:
+            sub_category_doc = frappe.get_doc(
+                "Employee Tax Exemption Sub Category",
+                declaration.exemption_sub_category,
+            )
+            if sub_category_doc.custom_component_type == "Professional Tax":
+                self.custom_pt_amount = declaration.amount
+                break
 
     def set_total_exemption_amount(self):
         total_exemption_amount, total_80d = get_total_exemption_amount(
