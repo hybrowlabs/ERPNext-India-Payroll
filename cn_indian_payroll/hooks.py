@@ -271,6 +271,7 @@ doctype_js = {
     "Leave Encashment": "public/js/leave_encashment.js",
     "Company": "public/js/company.js",
     "Structure Setting": "public/js/structure_setting.js",
+    "Employee Tax Exemption Proof Submission": "public/js/proof_submission.js",
 }
 
 override_doctype_class = {
@@ -282,6 +283,7 @@ override_doctype_class = {
     "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
     "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
     "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.PayrollEntryOverride",
+    "Employee Tax Exemption Proof Submission": "cn_indian_payroll.cn_indian_payroll.overrides.proof_submission.CNEmployeeTaxExemptionProofSubmission",
 }
 
 doc_events = {
