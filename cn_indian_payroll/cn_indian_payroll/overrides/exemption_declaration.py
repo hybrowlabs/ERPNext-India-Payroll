@@ -49,8 +49,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 declaration.exemption_sub_category,
             )
             if sub_category_doc.custom_component_type == "Professional Tax":
-                self.custom_pt_amount = declaration.amount
+                self.custom_pt_amount = round(declaration.amount)
                 break
+            else:
+                self.custom_pt_amount = 0
 
     def set_total_exemption_amount(self):
         total_exemption_amount, total_80d = get_total_exemption_amount(
