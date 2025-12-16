@@ -1333,6 +1333,8 @@ class CustomSalarySlip(SalarySlip):
 
         current_basic = current_hra = None
 
+        basic_arrear = hra_arrear = None
+
         current_basic_value = (
             current_hra_value
         ) = current_nps_value = current_epf_value = current_pt_value = 0
@@ -1373,7 +1375,7 @@ class CustomSalarySlip(SalarySlip):
                         )
 
                 if earning.salary_component == basic_arrear:
-                    basic_arrear_amount = earning.amount
+                    basic_arrear_amount += earning.amount
 
                 if earning.salary_component == current_hra:
                     current_hra_value += earning.amount
@@ -1383,7 +1385,7 @@ class CustomSalarySlip(SalarySlip):
                         )
 
                 if earning.salary_component == hra_arrear:
-                    hra_arrear_amount = earning.amount
+                    hra_arrear_amount += earning.amount
 
         if self.deductions:
             for deduction in self.deductions:
@@ -1430,10 +1432,10 @@ class CustomSalarySlip(SalarySlip):
                             previous_hra_value += earning.amount
 
                         if earning.salary_component == basic_arrear:
-                            basic_arrear_amount = earning.amount
+                            basic_arrear_amount += earning.amount
 
                         if earning.salary_component == hra_arrear:
-                            hra_arrear_amount = earning.amount
+                            hra_arrear_amount += earning.amount
 
                 if previous_salary_slip.deductions:
                     for deduction in previous_salary_slip.deductions:
