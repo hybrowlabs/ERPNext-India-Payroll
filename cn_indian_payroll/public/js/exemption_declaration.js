@@ -160,7 +160,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                 </tr>
                                 <tr>
                                     <th>Total Declared Amount</th>
-                                    <td><b>${Math.round(frm.doc.total_declared_amount+frm.doc.monthly_house_rent || 0)}</b></td>
+                                    <td><b>${Math.round(frm.doc.total_declared_amount|| 0)}</b></td>
                                 </tr>
                                 <tr>
                                     <th>Total Exemption Eligible Amount</th>
