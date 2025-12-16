@@ -1537,7 +1537,7 @@ class CustomSalarySlip(SalarySlip):
                             entry["amount"] = total_pt
                             entry["value"] = total_pt
 
-                        elif ctype == "Uniform":
+                        elif ctype == "Uniform Allowance":
                             entry["amount"] = total_uniform
                             entry["value"] = total_uniform
 
