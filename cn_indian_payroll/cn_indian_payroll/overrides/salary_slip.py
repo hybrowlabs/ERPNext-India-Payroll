@@ -526,6 +526,8 @@ class CustomSalarySlip(SalarySlip):
                 self.get_total_exemption_amount() - self.standard_tax_exemption_amount
             )
 
+            # frappe.msgprint(str(self.tax_exemption_declaration))
+
         self.annual_taxable_amount = (
             self.total_earnings
             + self.custom_perquisite_amount
@@ -577,11 +579,33 @@ class CustomSalarySlip(SalarySlip):
         self.compute_current_and_future_taxable_earnings()
 
         # Deduct taxes forcefully for unsubmitted tax exemption proof and unclaimed benefits in the last period
-        if self.payroll_period.end_date <= getdate(self.end_date):
-            self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
-            self.deduct_tax_for_unclaimed_employee_benefits = 1
+        # if self.payroll_period.end_date <= getdate(self.end_date):
 
-        # Get taxable unclaimed benefits
+        #     self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
+        #     self.deduct_tax_for_unclaimed_employee_benefits = 1
+
+        if self.employee and self.payroll_period.name:
+            proof_submission = frappe.get_list(
+                "Employee Tax Exemption Proof Submission",
+                filters={
+                    "employee": self.employee,
+                    "payroll_period": self.payroll_period.name,
+                    "docstatus": 1,
+                    "company": self.company,
+                },
+                fields=["*"],
+            )
+
+            # frappe.msgprint(str(proof_submission))
+
+            if proof_submission:
+                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
+                # frappe.msgprint(str(self.deduct_tax_for_unsubmitted_tax_exemption_proof))
+                self.deduct_tax_for_unclaimed_employee_benefits = 1
+            else:
+                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 0
+                self.deduct_tax_for_unclaimed_employee_benefits = 0
+
         self.unclaimed_taxable_benefits = 0
         if self.deduct_tax_for_unclaimed_employee_benefits:
             self.unclaimed_taxable_benefits = (

@@ -78,6 +78,7 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
                 each_doc.total_exemption_amount = self.exemption_amount
                 each_doc.income_tax = self.custom_tax_regime
                 each_doc.monthly_house_rent = self.house_rent_payment_amount
+                each_doc.total_80d = self.custom_total_80d
 
                 each_doc.declaration_details = []
                 for entry in tax_component:
@@ -445,3 +446,7 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.exemption_amount = round(total_exemption_amount or 0) + round(
             self.custom_annual_hra_exemption or 0
         )
+
+        # frappe.msgprint(str(total_80d))
+
+        self.custom_total_80d = total_80d
