@@ -36,6 +36,9 @@ def before_submit(self, method):
 
 @frappe.whitelist()
 def get_advance_dashboard(employee):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     if not employee:
         return []
 
@@ -369,6 +372,9 @@ def validate(self, method):
 
 @frappe.whitelist()
 def get_advance_amount_checking(employee, advance_type, posting_date,company):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     if not (employee and advance_type and posting_date):
         return None
 

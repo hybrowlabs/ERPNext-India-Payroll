@@ -2,6 +2,9 @@ import frappe
 
 @frappe.whitelist()
 def print_loan_dashboard(employee):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     if not employee:
         return []
 

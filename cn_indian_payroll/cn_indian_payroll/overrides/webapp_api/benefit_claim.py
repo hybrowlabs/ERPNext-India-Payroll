@@ -152,6 +152,9 @@ def benefit_payslip_list_view(
     limit_start=0,
     limit_page_length=1
 ):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
 
@@ -319,6 +322,10 @@ def get_max_amount(doc=None, employee=None, earning_component=None, claim_date=N
                 "earning_component": earning_component,
                 "claim_date": claim_date
             })
+        target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+        if target_employee:
+            employee = target_employee
+            doc.employee = target_employee
 
         claim_dt = getdate(doc.claim_date)
 
@@ -447,6 +454,10 @@ def benefit_claim(doc=None, employee=None, claim_date=None):
             "employee": employee,
             "claim_date": claim_date
         })
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+        doc.employee = target_employee
 
     component_array = []
 
@@ -508,6 +519,9 @@ def get_all_accrued_reimbursements(filters=None):
     ssa_map = {}  # key → (employee, component)
 
     ssa_filters = {}
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        filters["employee"] = target_employee
     if filters.get("employee"):
         ssa_filters["employee"] = filters["employee"]
     if filters.get("payroll_period"):

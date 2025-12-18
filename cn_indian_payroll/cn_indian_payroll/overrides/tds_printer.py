@@ -3,7 +3,10 @@ from frappe.utils import getdate, add_months, flt
 
 @frappe.whitelist()
 def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regime,id,income_tax_slab):
-
+    
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
     end_date = getdate(end_date)
 

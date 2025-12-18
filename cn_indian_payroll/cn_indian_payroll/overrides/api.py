@@ -85,6 +85,9 @@ def generate_salary_slip(employee):
 
 @frappe.whitelist()
 def get_eligible_payslips(employee, salary_slip_id):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     if not employee or not salary_slip_id:
         return {"error": "Employee or Salary Slip ID not provided"}
 
