@@ -569,7 +569,8 @@ def get_all_accrued_reimbursements(filters=None):
             "custom_payroll_period",
             "claim_date",
             "earning_component",
-            "custom_paid_amount"
+            "custom_paid_amount",
+            "claimed_amount",
         ]
     )
 
@@ -594,7 +595,7 @@ def get_all_accrued_reimbursements(filters=None):
                 if claim.claim_date:
                     cdt = datetime.strptime(str(claim.claim_date), "%Y-%m-%d")
                     if cdt.month == dt.month and cdt.year == dt.year:
-                        paid_amount += claim.custom_paid_amount or 0
+                        paid_amount += claim.claimed_amount or 0
 
         # SSA values
         ssa_key = (accrual.employee, accrual.salary_component)
