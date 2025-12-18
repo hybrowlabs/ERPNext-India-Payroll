@@ -90,7 +90,8 @@ class CustomSalarySlip(SalarySlip):
             self.current_additional_earnings if self.current_additional_earnings else 0
         )
 
-        # self.custom_current_additional_earnings=self.current_additional_earnings
+        # self.custom_unclaimed_taxable_benefits=self.unclaimed_taxable_benefits
+        # self.custom_current_non_taxable_earnings=self.non_taxable_earnings
 
     def before_save(self):
         self.new_joinee()
@@ -112,6 +113,130 @@ class CustomSalarySlip(SalarySlip):
         super().on_cancel()
         self.delete_bonus_accruals()
         self.delete_benefit_accruals()
+
+    # def update_component_amount_based_on_payment_days(self, component_row, remove_if_zero_valued=None):
+    #     component_row.amount = self.get_amount_based_on_payment_days(component_row)[0]
+
+    #     ssa_name = frappe.db.get_value(
+    #         "Salary Structure Assignment",
+    #         {
+    #             "employee": self.employee,
+    #             "salary_structure": self.salary_structure,
+    #             "from_date": ("<=", self.actual_start_date),
+    #             "docstatus": 1,
+    #         },
+    #         "*",
+    #         order_by="from_date desc",
+    #         as_dict=True,
+    #     )
+
+    #     ssa_doc = frappe.get_doc("Salary Structure Assignment", ssa_name.name) if ssa_name else None
+
+    #     if component_row.additional_salary:
+
+    #         get_additional_salary = frappe.get_doc(
+    #             "Additional Salary", component_row.additional_salary
+    #         )
+    #         if get_additional_salary.ref_doctype == "Employee Benefit Claim":
+    #             component = frappe.get_doc(
+    #                 "Salary Component", get_additional_salary.salary_component
+    #             )
+    #             if component.depends_on_payment_days == 1:
+
+    #                 for reimbursement in (
+    #                     ssa_doc.custom_employee_reimbursements or []
+    #                 ):
+    #                     if (
+    #                         reimbursement.reimbursements
+    #                         == get_additional_salary.salary_component
+    #                     ):
+    #                         if self.total_working_days and self.payment_days:
+    #                             prorated_amount = round(
+    #                                 (reimbursement.monthly_total_amount or 0)
+    #                                 / self.total_working_days
+    #                                 * (
+    #                                     self.total_working_days
+    #                                     - self.payment_days
+    #                                 ),
+    #                                 2,
+    #                             )
+
+    #                             component_row.amount = (
+    #                                 get_additional_salary.amount
+    #                                 - prorated_amount
+    #                             )
+
+    #         elif get_additional_salary.ref_doctype == "LTA Claim":
+    #             component = frappe.get_doc(
+    #                 "Salary Component", get_additional_salary.salary_component
+    #             )
+
+    #             for reimbursement in (
+    #                 ssa_doc.custom_employee_reimbursements or []
+    #             ):
+    #                 lta_component = frappe.get_doc(
+    #                     "Salary Component", reimbursement.reimbursements
+    #                 )
+
+    #                 if (
+    #                     lta_component.component_type == "LTA Reimbursement"
+    #                     and component.component_type in ["LTA Taxable"]
+    #                 ):
+    #                     if self.total_working_days and self.payment_days:
+    #                         lop_days = (
+    #                             self.total_working_days - self.payment_days
+    #                         )
+    #                         prorated_amount = round(
+    #                             (reimbursement.monthly_total_amount or 0)
+    #                             / self.total_working_days
+    #                             * lop_days,
+    #                             2,
+    #                         )
+    #                         component_row.amount = (
+    #                             get_additional_salary.amount - prorated_amount
+    #                         )
+
+    #     if component_row.amount == 0 and remove_if_zero_valued:
+    #         self.remove(component_row)
+
+    # def get_non_taxable_earnings_for_current_period(self):
+    #     current_period_non_taxable_earnings = 0.0
+
+    #     non_taxable_additional_salary = self.get_salary_slip_details(
+    #         self.payroll_period.start_date,
+    #         self.start_date,
+    #         parentfield="earnings",
+    #         is_tax_applicable=0,
+    #         field_to_select="additional_amount",
+    #     )
+
+    #     for earning in self.earnings:
+    #         if earning.is_tax_applicable:
+    #             continue
+
+    #         if earning.additional_amount:
+    #             non_taxable_additional_salary += earning.amount
+
+    #             # Future recurring additional salary
+    #             if earning.additional_salary and earning.is_recurring_additional_salary:
+    #                 non_taxable_additional_salary += self.get_future_recurring_additional_amount(
+    #                     earning.additional_salary, earning.additional_amount
+    #                 )
+    #         else:
+    #             current_period_non_taxable_earnings += earning.amount
+
+    #     return current_period_non_taxable_earnings, non_taxable_additional_salary
+
+    def compute_ctc(self):
+        if hasattr(self, "previous_taxable_earnings"):
+            return (
+                self.previous_taxable_earnings_before_exemption
+                + self.current_structured_taxable_earnings_before_exemption
+                + self.future_structured_taxable_earnings_before_exemption
+                + self.current_additional_earnings
+                + self.other_incomes
+            )
+        return 0
 
     def set_sub_period(self):
         sub_period = get_period_factor(
@@ -428,6 +553,8 @@ class CustomSalarySlip(SalarySlip):
                                             get_additional_salary.amount
                                             - prorated_amount
                                         )
+                                        earning.default_amount = earning.amount
+                                        earning.additional_amount = earning.amount
 
                     if get_additional_salary.ref_doctype == "LTA Claim":
                         component = frappe.get_doc(
@@ -458,6 +585,8 @@ class CustomSalarySlip(SalarySlip):
                                     earning.amount = (
                                         get_additional_salary.amount - prorated_amount
                                     )
+                                    earning.default_amount = earning.amount
+                                    earning.additional_amount = earning.amount
                                     break
 
     def compute_income_tax_breakup(self):
@@ -529,11 +658,10 @@ class CustomSalarySlip(SalarySlip):
             # frappe.msgprint(str(self.tax_exemption_declaration))
 
         self.annual_taxable_amount = (
-            self.total_earnings
+            self.ctc
             + self.custom_perquisite_amount
             - (
-                self.non_taxable_earnings
-                + self.deductions_before_tax_calculation
+                +self.deductions_before_tax_calculation
                 + self.tax_exemption_declaration
                 + self.standard_tax_exemption_amount
             )
@@ -596,11 +724,8 @@ class CustomSalarySlip(SalarySlip):
                 fields=["*"],
             )
 
-            # frappe.msgprint(str(proof_submission))
-
             if proof_submission:
                 self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
-                # frappe.msgprint(str(self.deduct_tax_for_unsubmitted_tax_exemption_proof))
                 self.deduct_tax_for_unclaimed_employee_benefits = 1
             else:
                 self.deduct_tax_for_unsubmitted_tax_exemption_proof = 0
@@ -2308,19 +2433,6 @@ class CustomSalarySlip(SalarySlip):
                 for earnings in self.earnings:
                     if earnings.salary_component == component_data["component"]:
                         earnings.amount = component_data["total_amount"]
-
-    # def compute_ctc(self):
-    #     if hasattr(self, "previous_taxable_earnings"):
-    #         return (
-    #             self.previous_taxable_earnings_before_exemption
-    #             + self.current_structured_taxable_earnings_before_exemption
-    #             + self.future_structured_taxable_earnings_before_exemption
-    #             + self.current_additional_earnings
-    #             + self.other_incomes
-    #             + self.unclaimed_taxable_benefits
-    #             + self.non_taxable_earnings
-    #         )
-    #     return 0
 
     def insert_lop_days(self):
         """Calculate total LOP reversal + arrear present days and store in custom field."""
