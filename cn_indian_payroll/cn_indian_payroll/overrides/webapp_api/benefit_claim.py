@@ -426,7 +426,8 @@ def get_max_amount(doc=None, employee=None, earning_component=None, claim_date=N
                         "data": {
                             "currently_allowed": max_claimable,
 
-                            "monthly_reimbursement": monthly_amount
+                            "monthly_reimbursement": monthly_amount,
+                            "payroll_period":payroll_period,
                         }
                     }
         else:
