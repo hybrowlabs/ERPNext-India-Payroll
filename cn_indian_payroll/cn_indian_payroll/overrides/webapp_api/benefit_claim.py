@@ -6,6 +6,9 @@ import frappe
 from frappe import _
 from datetime import datetime
 
+from frappe.utils import formatdate
+
+
 #view and dowaload benefit payslip
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_benefit_payslip_pdf?id=HR-BEN-CLM-25-12-00001
@@ -236,63 +239,6 @@ def benefit_payslip_list_view(
         "start": start,
         "page_length": page_length
     }
-# @frappe.whitelist()
-# def benefit_payslip_list_view(employee, company=None, payroll_period=None):
-
-#     if not employee:
-#         return {"status": "failed", "message": "Employee is required"}
-
-#     filters = {"employee": employee, "docstatus": ("in", [0, 1])}
-
-#     if company:
-#         filters["company"] = company
-
-
-#     if payroll_period:
-#         filters["custom_payroll_period"] = payroll_period
-
-#     claims = frappe.db.get_all(
-#         "Employee Benefit Claim",
-#         filters=filters,
-#         fields=[
-#             "name",
-#             "employee",
-#             "employee_name",
-#             "custom_payroll_period",
-#             "claim_date",
-#             "company",
-#             "custom_status",
-#             "earning_component",
-#             "claimed_amount",
-#             "custom_note_by_employee",
-#             "custom_note_by_approver",
-#             "custom_is_taxable",
-#             "custom_taxable_amount",
-#             "custom_is_non_taxable",
-#             "custom_non_taxable_amount",
-#         ],
-#         order_by="claim_date desc"
-#     )
-
-
-#     if not claims:
-#         return {"status": "success", "data": []}
-
-
-#     for row in claims:
-#         row["attachments"] = frappe.db.get_all(
-#             "File",
-#             filters={
-#                 "attached_to_doctype": "Employee Benefit Claim",
-#                 "attached_to_name": row["name"],
-#             },
-#             fields=["file_url"]
-#         )
-
-#     return {
-#         "status": "success",
-#         "data": claims
-#     }
 
 
 
@@ -666,3 +612,366 @@ def get_all_accrued_reimbursements(filters=None):
 
 
     return {"data": list(grouped.values())}
+
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_claim_locking_period?employee=37001&payroll_period=25-26&posting_date=2025-12-01&doctype_name=Employee%20Benefit%20Claim
+
+
+@frappe.whitelist()
+def benefit_claim_locking_period(
+    employee,
+    payroll_period,
+    posting_date,
+    doctype_name,
+):
+
+    if not (employee and payroll_period and posting_date and doctype_name):
+        return {
+            "status": "failed",
+            "message": "Missing required details (Employee, Payroll Period, Posting Date, or Doctype).",
+        }
+
+    posting_date = getdate(posting_date)
+
+
+    payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
+    start_date = getdate(payroll_period_doc.start_date)
+    company = payroll_period_doc.company
+
+    employee_doc = frappe.get_doc("Employee", employee)
+    date_of_joining = getdate(employee_doc.date_of_joining)
+
+    if date_of_joining > start_date:
+        release_configs = frappe.get_list(
+            "Release Config",
+            filters={
+                "company": company,
+                "payroll_period": payroll_period,
+                "frequency_type": "New Joinee",
+            },
+            pluck="name",
+        )
+
+        if not release_configs:
+            return {
+                "status": "success",
+                "message": "No release configuration found. Claim allowed.",
+            }
+
+        config_doc = frappe.get_doc("Release Config", release_configs[0])
+
+        if not any(
+            d.declaration_type == doctype_name
+            for d in (config_doc.locking_doctypes or [])
+        ):
+            return {
+                "status": "success",
+                "message": "Doctype not locked in release configuration.",
+            }
+
+        if not config_doc.user_assignment:
+
+            for entry in config_doc.individual_benefit_claim_child or []:
+                if entry.employee == employee:
+                    if (
+                        entry.active
+                        and getdate(entry.start_date)
+                        <= posting_date
+                        <= getdate(entry.end_date)
+                    ):
+                        return {
+                            "status": "success",
+                            "message": "Claim allowed as per individual configuration.",
+                        }
+
+                    return {
+                        "status": "failed",
+                        "message": "Claim date is outside the allowed period for this employee.",
+                    }
+
+            for period in config_doc.locking_period_months_new_joining or []:
+                if (
+                    period.enable
+                    and getdate(period.start_date)
+                    <= posting_date
+                    <= getdate(period.end_date)
+                ):
+                    return {
+                        "status": "success",
+                        "message": "Claim allowed within new joinee claim period.",
+                    }
+
+            return {
+                "status": "failed",
+                "message": "Claim date is outside the allowed new joinee claim period.",
+            }
+
+        for period in config_doc.locking_period_months_new_joining or []:
+            if (
+                period.enable
+                and getdate(period.start_date)
+                <= posting_date
+                <= getdate(period.end_date)
+            ):
+                for assignment in config_doc.user_assignment:
+                    assignment_doc = frappe.get_doc(
+                        "Dynamic User Assignment",
+                        assignment.select_visibility_restriction,
+                    )
+                    for user in assignment_doc.assigned_users or []:
+                        if user.employee_id == employee:
+                            return {
+                                "status": "success",
+                                "message": "Claim allowed based on user assignment (new joinee).",
+                            }
+
+        return {
+            "status": "failed",
+            "message": "Claims are not permitted for the selected date as the declaration period has been closed.",
+        }
+
+
+
+    release_configs = frappe.get_list(
+        "Release Config",
+        filters={
+            "company": company,
+            "payroll_period": payroll_period,
+            "frequency_type": "Monthly",
+        },
+        pluck="name",
+    )
+
+    if not release_configs:
+        return {
+            "status": "success",
+            "message": "No monthly release configuration found. Claim allowed.",
+        }
+
+    config_doc = frappe.get_doc("Release Config", release_configs[0])
+
+    if not any(
+        d.declaration_type == doctype_name
+        for d in (config_doc.locking_doctypes or [])
+    ):
+        return {
+            "status": "success",
+            "message": "Doctype not locked for this payroll period.",
+        }
+
+    if not config_doc.user_assignment:
+
+        for entry in config_doc.individual_benefit_claim_child or []:
+            if entry.employee == employee:
+                if (
+                    entry.active
+                    and getdate(entry.start_date)
+                    <= posting_date
+                    <= getdate(entry.end_date)
+                ):
+                    return {
+                        "status": "success",
+                        "message": "Claim allowed as per individual configuration.",
+                    }
+
+                return {
+                    "status": "failed",
+                    "message": "Claim period is locked for this employee.",
+                }
+
+        for period in config_doc.locking_period_months or []:
+            if (
+                period.enable
+                and getdate(period.start_date)
+                <= posting_date
+                <= getdate(period.end_date)
+            ):
+                return {
+                    "status": "success",
+                    "message": "Claim allowed within common locking period.",
+                }
+
+        return {
+            "status": "failed",
+            "message": "The declaration period is locked. Claim not allowed.",
+        }
+
+
+    for period in config_doc.locking_period_months or []:
+        if (
+            period.enable
+            and getdate(period.start_date)
+            <= posting_date
+            <= getdate(period.end_date)
+        ):
+            for assignment in config_doc.user_assignment:
+                assignment_doc = frappe.get_doc(
+                    "Dynamic User Assignment",
+                    assignment.select_visibility_restriction,
+                )
+                for user in assignment_doc.assigned_users or []:
+                    if user.employee_id == employee:
+                        return {
+                            "status": "success",
+                            "message": "Claim allowed based on user assignment.",
+                        }
+
+    return {
+            "status": "failed",
+            "message": "Claims are not permitted for the selected date as the declaration period has been closed.",
+            }
+
+
+
+
+
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_claim_locking_period_visibility?employee=37001&payroll_period=25-26&posting_date=2025-12-02&doctype=Employee%20Benefit%20Claim
+
+def _claim_window_message(start_date, end_date):
+    return (
+        f"For this month, claims can be submitted between "
+        f"{formatdate(start_date)} and {formatdate(end_date)}. "
+        f"Please submit your claim before the end date."
+    )
+
+
+@frappe.whitelist()
+def benefit_claim_locking_period_visibility(employee, payroll_period, posting_date, doctype):
+    # -----------------------------------
+    # Basic validation
+    # -----------------------------------
+    if not (employee and payroll_period and posting_date and doctype):
+        return {
+            "status": "failed",
+            "message": "Missing required details to validate benefit claim.",
+        }
+
+    if doctype != "Employee Benefit Claim":
+        return {
+            "status": "success",
+            "message": "No locking rules applicable for this document type.",
+        }
+
+    posting_date = getdate(posting_date)
+
+
+    payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
+    period_start_date = getdate(payroll_period_doc.start_date)
+    company = payroll_period_doc.company
+
+    employee_doc = frappe.get_doc("Employee", employee)
+    date_of_joining = getdate(employee_doc.date_of_joining)
+
+
+    frequency_type = "Monthly"
+    if date_of_joining > period_start_date:
+        frequency_type = "New Joinee"
+
+
+    release_configs = frappe.get_list(
+        "Release Config",
+        filters={
+            "company": company,
+            "payroll_period": payroll_period,
+            "frequency_type": frequency_type,
+        },
+        pluck="name",
+    )
+
+    if not release_configs:
+        return {
+            "status": "success",
+            "message": "No claim restrictions configured for this payroll period.",
+        }
+
+    config_doc = frappe.get_doc("Release Config", release_configs[0])
+
+
+    if not any(
+        d.declaration_type == "Employee Benefit Claim"
+        for d in config_doc.locking_doctypes or []
+    ):
+        return {
+            "status": "success",
+            "message": "Benefit claims are not restricted for this payroll period.",
+        }
+
+    # Select correct date range table
+    locking_periods = (
+        config_doc.locking_period_months_new_joining
+        if frequency_type == "New Joinee"
+        else config_doc.locking_period_months
+    )
+
+    if not config_doc.user_assignment:
+
+        # Individual override
+        for entry in config_doc.individual_benefit_claim_child or []:
+            if entry.employee == employee:
+                if (
+                    entry.active
+                    and getdate(entry.start_date) <= posting_date <= getdate(entry.end_date)
+                ):
+                    return {
+                        "status": "success",
+                        "message": _claim_window_message(
+                            entry.start_date, entry.end_date
+                        ),
+                    }
+
+                return {
+                    "status": "failed",
+                    "message": _claim_window_message(
+                        entry.start_date, entry.end_date
+                    ),
+                }
+
+        # Common period
+        for period in locking_periods or []:
+            if period.enable:
+                start = getdate(period.start_date)
+                end = getdate(period.end_date)
+
+                if start <= posting_date <= end:
+                    return {
+                        "status": "success",
+                        "message": _claim_window_message(start, end),
+                    }
+
+                return {
+                    "status": "failed",
+                    "message": _claim_window_message(start, end),
+                }
+
+
+    for period in locking_periods or []:
+        if period.enable:
+            start = getdate(period.start_date)
+            end = getdate(period.end_date)
+
+            if start <= posting_date <= end:
+                for assignment in config_doc.user_assignment:
+                    assignment_doc = frappe.get_doc(
+                        "Dynamic User Assignment",
+                        assignment.select_visibility_restriction,
+                    )
+                    for user in assignment_doc.assigned_users or []:
+                        if user.employee_id == employee:
+                            return {
+                                "status": "success",
+                                "message": _claim_window_message(start, end),
+                            }
+
+                return {
+                    "status": "failed",
+                    "message": "You are not authorized to submit a claim during this period.",
+                }
+
+
+    return {
+        "status": "failed",
+        "message": "The claim submission window is currently closed.",
+    }
