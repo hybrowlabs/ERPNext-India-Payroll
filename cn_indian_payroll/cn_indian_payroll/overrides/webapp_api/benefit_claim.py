@@ -55,15 +55,15 @@ def benefit_data_list_view(
     employee,
     company=None,
     payroll_period=None,
-    limit_start=0,
-    limit_page_length=1
+    start=0,
+    page_length=1
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
 
     # Ensure integers
-    limit_start = int(limit_start)
-    limit_page_length = int(limit_page_length)
+    start = int(start)
+    page_length = int(page_length)
 
     filters = {
         "employee": employee,
@@ -108,8 +108,8 @@ def benefit_data_list_view(
             "custom_non_taxable_amount",
         ],
         order_by="claim_date desc",
-        limit_start=limit_start,
-        limit_page_length=limit_page_length
+        start=start,
+        page_length=page_length
     )
 
     if not claims:
@@ -136,8 +136,8 @@ def benefit_data_list_view(
         "status": "success",
         "data": claims,
         "total_records": total_count,
-        "limit_start": limit_start,
-        "limit_page_length": limit_page_length
+        "start": start,
+        "page_length":page_length
     }
 
 
