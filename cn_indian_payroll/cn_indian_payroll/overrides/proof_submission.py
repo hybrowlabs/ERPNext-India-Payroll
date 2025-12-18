@@ -18,7 +18,7 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.set_total_exemption_amount()
         self.set_total_actual_amount()
 
-        if self.custom_annual_hra_exemption:
+        if self.submission_date:
             self.update_tax_declaration()
 
     def update_tax_declaration(self):
