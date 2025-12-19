@@ -138,7 +138,7 @@ def benefit_data_list_view(
     return {
         "status": "success",
         "data": claims,
-        "total_records": total_count,
+        "total_count": total_count,
         "start": start,
         "page_length":page_length
     }
@@ -235,7 +235,7 @@ def benefit_payslip_list_view(
     return {
         "status": "success",
         "data": claims,
-        "total_records": total_count,
+        "total_count": total_count,
         "start": start,
         "page_length": page_length
     }
