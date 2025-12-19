@@ -24,23 +24,6 @@ def process_components(components, ctc_component_names, comp_type):
 
     return component_list, total
 
-def process_components(components, ctc_component_names, comp_type):
-    component_list = []
-    total = 0
-
-    for comp in components:
-        if comp.salary_component in ctc_component_names:
-            amount = round(comp.amount or 0)
-            total += amount
-            component_list.append({
-                "component": comp.salary_component,
-                "amount": amount,
-                "annual_amount": amount * 12,
-                "type": comp_type
-            })
-
-    return component_list, total
-
 
 @frappe.whitelist()
 def generate_salary_slip(employee=None, payroll_period=None, company=None):
@@ -51,18 +34,14 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
     """
 
     try:
-        # -----------------------------
-        # Validation
-        # -----------------------------
+
         if not employee:
             return {
                 "status": "failed",
                 "message": "Employee is mandatory"
             }
 
-        # -----------------------------
-        # Build Filters Dynamically
-        # -----------------------------
+
         filters = {
             "employee": employee,
             "docstatus": 1
@@ -74,9 +53,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
         if company:
             filters["company"] = company
 
-        # -----------------------------
-        # Fetch ALL Salary Structure Assignments
-        # -----------------------------
         salary_structures = frappe.get_all(
             "Salary Structure Assignment",
             filters=filters,
@@ -92,9 +68,7 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
 
         response_data = []
 
-        # -----------------------------
-        # Process Each Assignment
-        # -----------------------------
+
         for assignment in salary_structures:
 
             component_part_of_ctc = []
@@ -109,9 +83,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 for_preview=1
             )
 
-            # -----------------------------
-            # Collect Salary Components
-            # -----------------------------
             component_names = list(
                 {e.salary_component for e in slip.earnings if e.salary_component}.union(
                     {d.salary_component for d in slip.deductions if d.salary_component}
@@ -130,9 +101,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 )
                 ctc_component_names = {c.name for c in ctc_components}
 
-            # -----------------------------
-            # Earnings
-            # -----------------------------
             earnings_ctc, earnings_total = process_components(
                 slip.earnings, ctc_component_names, "Earning"
             )
@@ -140,9 +108,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
             monthly_ctc += earnings_total
             annual_ctc += earnings_total * 12
 
-            # -----------------------------
-            # Deductions (Part of CTC)
-            # -----------------------------
             deductions_ctc, deductions_total = process_components(
                 slip.deductions, ctc_component_names, "Deduction"
             )
@@ -151,9 +116,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
             annual_ctc += deductions_total * 12
             total_deduction += deductions_total * 12
 
-            # -----------------------------
-            # Reimbursements
-            # -----------------------------
             assignment_doc = frappe.get_doc(
                 "Salary Structure Assignment", assignment.name
             )
@@ -170,9 +132,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                         "type": "Reimbursement"
                     })
 
-            # -----------------------------
-            # Prepare Response per Assignment
-            # -----------------------------
             response_data.append({
                 "assignment_name": assignment.name,
                 "from_date": assignment.from_date,
@@ -185,9 +144,6 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "total_deduction": total_deduction
             })
 
-        # -----------------------------
-        # Final Response
-        # -----------------------------
         return {
             "status": "success",
             "employee": employee,
