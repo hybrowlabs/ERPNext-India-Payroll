@@ -248,3 +248,10 @@ def tds_declaration_form():
         })
 
     return final_list
+
+
+
+@frappe.whitelist()
+def get_employee_declaration_investments(employee=None,company=None,payroll_period=None):
+    if not employee:
+        return {"status": "failed", "message": "Employee is required"}

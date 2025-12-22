@@ -6,6 +6,9 @@ from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_s
 
 @frappe.whitelist(allow_guest=True)
 def generate_salary_slip(employee):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     earning_component_part_of_ctc = []
     deduction_component_part_of_ctc = []
 
@@ -85,6 +88,9 @@ def generate_salary_slip(employee):
 
 @frappe.whitelist()
 def get_eligible_payslips(employee, salary_slip_id):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     if not employee or not salary_slip_id:
         return {"error": "Employee or Salary Slip ID not provided"}
 
