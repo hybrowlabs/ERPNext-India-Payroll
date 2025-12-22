@@ -224,3 +224,47 @@ def get_extra_payment_summary(employee=None, company=None, from_date=None, to_da
 #         "message": "Additional Salary created successfully",
 #         "name": doc.name
 #     }
+
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.extra_payment_api.get_extra_payment_component?custom_is_reimbursement=1
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.extra_payment_api.get_extra_payment_component?custom_is_offcycle_component=1
+
+@frappe.whitelist()
+def get_extra_payment_component(
+    custom_is_offcycle_component=None,
+    custom_is_reimbursement=None
+):
+
+    filters = {
+        "custom_is_extra_payment": 1
+    }
+
+
+    if custom_is_offcycle_component is not None:
+        filters["custom_is_offcycle_component"] = int(custom_is_offcycle_component)
+
+    if custom_is_reimbursement is not None:
+        filters["custom_is_reimbursement"] = int(custom_is_reimbursement)
+
+
+    components = frappe.get_all(
+        "Salary Component",
+        filters=filters,
+        fields=[
+            "name",
+            "type",
+            "description",
+            "is_tax_applicable",
+            "depends_on_payment_days",
+            "custom_is_offcycle_component",
+            "custom_is_reimbursement"
+        ],
+        order_by="name asc"
+    )
+
+    return {
+        "status": "success",
+        "total_records": len(components),
+        "components": components
+    }
