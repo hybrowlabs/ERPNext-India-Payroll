@@ -1032,6 +1032,16 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                 })
 
     # ------------------ Annual Statement ------------------
+
+
+
+    eighty_c_sum = min(
+        sum(r["deductible_amount"] for r in eighty_c),
+        150000
+    )
+    eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
+    other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+
     annual_statement = get_annual_statement(employee, payroll_period)
 
     if annual_statement.get("status") != "success":
@@ -1046,6 +1056,33 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     total_gross_salary_current = round(
         total_gross_earning + total_off_cycle_payment + extra_payment_grand_total, 2
     )
+
+    hra_received_annual=declaration_doc.custom_hra_received_annual if declaration_doc.custom_hra_received_annual else 0
+    rent_paid_of_basic=declaration_doc.custom_rent_paid__10_of_basic_annual if declaration_doc.custom_rent_paid__10_of_basic_annual else 0
+    basic_percentage=declaration_doc.custom_50_of_basic_metro if declaration_doc.custom_50_of_basic_metro else 0
+
+    hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
+
+    salary_after_section_10= round(
+                flt(total_gross_salary_current) - flt(lta_amount)-flt(hra_exemption), 2
+            )
+
+    income_tax_slab=frappe.get_doc("Income Tax Slab",declaration_doc.custom_income_tax)
+    standard_deduction=income_tax_slab.standard_tax_exemption_amount if income_tax_slab.standard_tax_exemption_amount else 0
+
+    gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
+
+    total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+
+    net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+
+
+
+
+
+
+
+
 
     # ------------------ Response ------------------
     return {
@@ -1084,7 +1121,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "less_ctc_reimbursements",
             "name": "Less CTC Reimbursements",
-            "amount": 0
+
         },
         {
             "key": "lta_component",
@@ -1106,67 +1143,69 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "less_exemption_under_section_10",
             "name": "Less exemption under Section 10",
-            "amount": 0
+
         },
         {
             "key": "hra_calculation",
             "name": "HRA Calculation",
-            "amount": 0
+
         },
         {
             "key": "basic_and_dearness_allowance",
             "name": "Basic + Dearness Allowance (40% or 50%)",
-            "amount": 0
+            "amount": basic_percentage
         },
         {
             "key": "rent_paid",
             "name": "Rent Paid - 10% of Basic + Dearness Allowance",
-            "amount": 0
+            "amount": rent_paid_of_basic
         },
         {
             "key": "hra_received",
             "name": "H.R.A received",
-            "amount": 0
+            "amount": hra_received_annual
         },
         {
             "key": "hra_exemption",
             "name": "HRA Exemption",
-            "amount": 0
+            "amount": hra_exemption
         },
         {
             "key": "total_section_10_exemptions",
             "name": "Total Section 10 Exemptions",
-            "amount": 0
+            "amount": hra_exemption
         },
         {
             "key": "salary_after_section_10",
             "name": "Total amount of Salary received after Section 10",
-            "amount": 0
+            "amount": salary_after_section_10
         },
         {
             "key": "less_deduction_under_section_16",
             "name": "Less: Deductions under section 16",
-            "amount": 0
+
         },
         {
             "key": "standard_deduction_section_16",
             "name": "Standard deduction under section 16(ia)",
-            "amount": 0
+            "amount": standard_deduction
         },
         {
             "key": "total_deduction_section_16",
             "name": "Total amount of deductions under section 16",
-            "amount": 0
+            "amount": standard_deduction
         },
         {
             "key": "income_chargeable_salary",
             "name": "Income chargeable under the head Salaries",
-            "amount": 0
+            "amount": round(
+                flt(salary_after_section_10) - flt(standard_deduction), 2
+            )
         },
         {
             "key": "income_loss_house_property",
             "name": "A. Income/Loss from house property",
-            "amount": 0
+
         },
         {
             "key": "total_income_loss_house_property",
@@ -1176,7 +1215,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "other_sources",
             "name": "B. Other Sources",
-            "amount": 0
+
         },
         {
             "key": "total_other_sources",
@@ -1186,7 +1225,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "gross_total_income",
             "name": "Gross Total Income",
-            "amount": 0
+            "amount": round(
+                flt(salary_after_section_10) - flt(standard_deduction), 2
+            )
         }
     ],
 
@@ -1205,7 +1246,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "total_section_80C",
             "name": "Total Section 80C,80CCC,80CCD",
-            "amount": 0
+            "amount": eighty_c_sum
         },
 
         {
@@ -1216,7 +1257,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "total_section_80D",
             "name": "Total Section 80D",
-            "amount": 0
+            "amount": eighty_d_sum
         },
 
         {
@@ -1228,14 +1269,16 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "key": "total_other_investment",
             "name": "Total Other Investment",
 
-            "amount": 0
+            "amount": other_investment_sum
         },
 
         {
             "key": "total_chapter_via_total",
             "name": "Total Chapter-VIA Total",
 
-            "amount": 0
+            "amount": round(
+                eighty_c_sum + eighty_d_sum + other_investment_sum, 2
+            )
         },
 
 
@@ -1245,22 +1288,16 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     [
         {
             "key": "net_taxable_income",
-
             "name":"Net Taxable Income",
-            "amount":0
+            "amount":net_taxable_income
         },
         {
             "key": "net_taxable_income_rounded_to_next_10",
 
             "name":"Net Taxable Income (Rounded to Next 10)",
-            "amount":0
+            "amount":net_taxable_income
         },
-        {
-            "key": "net_taxable_income",
 
-            "name":"Net Taxable Income",
-            "amount":0
-        },
         {
             "key": "income_tax_on_net_taxable_income",
             "name":"Income Tax on Net Taxable Income (Before Rebate U/s 87A)",
