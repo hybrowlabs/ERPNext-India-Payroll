@@ -947,6 +947,9 @@ def tds_declaration_form():
 #         }
 #     }
 
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37001&payroll_period=25-26
+
 @frappe.whitelist()
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
 
@@ -979,6 +982,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         "Employee Tax Exemption Declaration",
         declaration[0].name
     )
+
+    current_tax_regime=declaration_doc.custom_tax_regime
+    declaration_id=declaration[0].name
+
 
     # ------------------ 80C & LTA ------------------
     eighty_c = []
@@ -1087,6 +1094,8 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     # ------------------ Response ------------------
     return {
     "status": "success",
+    "current_tax_regime":current_tax_regime,
+    "declaration_id":declaration_id,
 
     "summary": [
         {
@@ -1371,3 +1380,79 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 }
+
+
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_existing_declaration_form?employee=37001&payroll_period=25-26&company=PW
+
+@frappe.whitelist()
+def get_existing_declaration_form(employee=None, company=None, payroll_period=None):
+
+    # ---------------- Validation ----------------
+    if not employee or not company or not payroll_period:
+        return {
+            "status": "failed",
+            "message": "Employee, Company, and Payroll Period are required"
+        }
+
+    existing_component_part_of_ctc = []
+
+    # ---------------- Fetch Declaration ----------------
+    declaration = frappe.get_all(
+        "Employee Tax Exemption Declaration",
+        filters={
+            "employee": employee,
+            "company": company,
+            "payroll_period": payroll_period
+        },
+        fields=["name"],
+        limit=1
+    )
+
+    if not declaration:
+        return {
+            "status": "failed",
+            "message": "No declaration form created for this payroll period"
+        }
+
+    declaration_doc = frappe.get_doc(
+        "Employee Tax Exemption Declaration",
+        declaration[0].name
+    )
+
+    current_tax_regime = declaration_doc.custom_tax_regime
+    declaration_id = declaration_doc.name
+
+    # ---------------- Components Part of CTC ----------------
+    VALID_COMPONENT_TYPES = {
+        "LTA Reimbursement",
+        "Provident Fund",
+        "Professional Tax"
+    }
+
+    if declaration_doc.declarations:
+        for d in declaration_doc.declarations:
+
+            if not d.exemption_sub_category:
+                continue
+
+            sub_category = frappe.get_cached_doc(
+                "Employee Tax Exemption Sub Category",
+                d.exemption_sub_category
+            )
+
+            if sub_category.custom_component_type in VALID_COMPONENT_TYPES:
+                existing_component_part_of_ctc.append({
+                    "component": d.exemption_sub_category,
+                    "component_type": sub_category.custom_component_type,
+                    "declared_amount": flt(d.amount or 0)
+                })
+
+    # ---------------- Response ----------------
+    return {
+        "status": "success",
+        "current_tax_regime": current_tax_regime,
+        "declaration_id": declaration_id,
+        "existing_component_part_of_ctc": existing_component_part_of_ctc
+    }
