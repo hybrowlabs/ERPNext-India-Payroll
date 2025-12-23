@@ -1386,73 +1386,121 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_existing_declaration_form?employee=37001&payroll_period=25-26&company=PW
 
-@frappe.whitelist()
-def get_existing_declaration_form(employee=None, company=None, payroll_period=None):
+# @frappe.whitelist()
+# def get_existing_declaration_form(employee=None, company=None, payroll_period=None):
 
-    # ---------------- Validation ----------------
-    if not employee or not company or not payroll_period:
-        return {
-            "status": "failed",
-            "message": "Employee, Company, and Payroll Period are required"
-        }
+#     # ---------------- Validation ----------------
+#     if not employee or not company or not payroll_period:
+#         return {
+#             "status": "failed",
+#             "message": "Employee, Company, and Payroll Period are required"
+#         }
 
-    existing_component_part_of_ctc = []
+#     existing_component_part_of_ctc = []
 
-    # ---------------- Fetch Declaration ----------------
-    declaration = frappe.get_all(
-        "Employee Tax Exemption Declaration",
-        filters={
-            "employee": employee,
-            "company": company,
-            "payroll_period": payroll_period
-        },
-        fields=["name"],
-        limit=1
-    )
+#     # ---------------- Fetch Declaration ----------------
+#     declaration = frappe.get_all(
+#         "Employee Tax Exemption Declaration",
+#         filters={
+#             "employee": employee,
+#             "company": company,
+#             "payroll_period": payroll_period
+#         },
+#         fields=["name"],
+#         limit=1
+#     )
 
-    if not declaration:
-        return {
-            "status": "failed",
-            "message": "No declaration form created for this payroll period"
-        }
+#     if not declaration:
+#         return {
+#             "status": "failed",
+#             "message": "No declaration form created for this payroll period"
+#         }
 
-    declaration_doc = frappe.get_doc(
-        "Employee Tax Exemption Declaration",
-        declaration[0].name
-    )
+#     declaration_doc = frappe.get_doc(
+#         "Employee Tax Exemption Declaration",
+#         declaration[0].name
+#     )
 
-    current_tax_regime = declaration_doc.custom_tax_regime
-    declaration_id = declaration_doc.name
+#     current_tax_regime = declaration_doc.custom_tax_regime
+#     declaration_id = declaration_doc.name
 
-    # ---------------- Components Part of CTC ----------------
-    VALID_COMPONENT_TYPES = {
-        "LTA Reimbursement",
-        "Provident Fund",
-        "Professional Tax"
-    }
+#     # ---------------- Components Part of CTC ----------------
+#     VALID_COMPONENT_TYPES = {
+#         "LTA Reimbursement",
+#         "Provident Fund",
+#         "Professional Tax"
+#         "NPS"
+#     }
 
-    if declaration_doc.declarations:
-        for d in declaration_doc.declarations:
+#     if declaration_doc.declarations:
+#         for d in declaration_doc.declarations:
 
-            if not d.exemption_sub_category:
-                continue
+#             if not d.exemption_sub_category:
+#                 continue
 
-            sub_category = frappe.get_cached_doc(
-                "Employee Tax Exemption Sub Category",
-                d.exemption_sub_category
-            )
+#             sub_category = frappe.get_cached_doc(
+#                 "Employee Tax Exemption Sub Category",
+#                 d.exemption_sub_category
+#             )
 
-            if sub_category.custom_component_type in VALID_COMPONENT_TYPES:
-                existing_component_part_of_ctc.append({
-                    "component": d.exemption_sub_category,
-                    "component_type": sub_category.custom_component_type,
-                    "declared_amount": flt(d.amount or 0)
-                })
+#             if sub_category.custom_component_type in VALID_COMPONENT_TYPES:
+#                 existing_component_part_of_ctc.append({
+#                     "component": d.exemption_sub_category,
+#                     "component_type": sub_category.custom_component_type,
+#                     "declared_amount": flt(d.amount or 0)
+#                 })
 
-    # ---------------- Response ----------------
-    return {
-        "status": "success",
-        "current_tax_regime": current_tax_regime,
-        "declaration_id": declaration_id,
-        "existing_component_part_of_ctc": existing_component_part_of_ctc
-    }
+#     # ---------------- Response ----------------
+#     return {
+#         "status": "success",
+#         "current_tax_regime": current_tax_regime,
+#         "declaration_id": declaration_id,
+#         "existing_component_part_of_ctc": existing_component_part_of_ctc
+#     }
+
+
+
+# @frappe.whitelist()
+# def update_declaration_form(declaration_id, data):
+#     import frappe
+
+#     if isinstance(data, str):
+#         data = frappe.parse_json(data)
+
+#     declaration = frappe.get_doc(
+#         "Employee Tax Exemption Declaration",
+#         declaration_id
+#     )
+
+#     # Update parent field
+#     declaration.monthly_house_rent = data.get("monthly_house_rent")
+
+#     if data.get("go_head_with_new_regime")==1:
+#         income_tax_slab=frappe.get_list("Income Tax Slab",filters={"disabled":0,"company":company,"custom_select_regime":"New Regime"},fields=["name","custom_select_regime"])
+#         order_by effective_from desc,
+#     if data.get("go_head_with_new_regime")==0:
+#         income_tax_slab=frappe.get_list("Income Tax Slab",filters={"disabled":0,"company":company,"custom_select_regime":"Old Regime"},fields=["name","custom_select_regime"])
+#         order_by effective_from desc,
+
+#     declaration.custom_income_tax=income_tax_slab[0].name
+#     declaration.custom_tax_regime=income_tax_slab[0].custom_select_regime
+
+
+#     # Reset child table
+#     declaration.set("declarations", [])
+
+#     for row in data.get("declarations", []):
+#         declaration.append("declarations", {
+#             "exemption_category": row.get("exemption_category"),
+#             "exemption_sub_category": row.get("exemption_sub_category"),
+#             "amount": row.get("amount"),
+#             "max_amount": row.get("max_amount")
+#         })
+
+#     declaration.save(ignore_permissions=True)
+#     frappe.db.commit()
+
+#     return {
+#         "status": "success",
+#         "message": "Declaration updated successfully"
+#     }
