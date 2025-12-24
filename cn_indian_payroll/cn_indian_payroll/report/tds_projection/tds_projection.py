@@ -1367,12 +1367,10 @@ def get_salary_slips(filters=None):
             salary_data["tax_paid"] = salary_slip_sum
 
             salary_data["new_regime_tax"] = round(
-                (new_regime_payable - salary_slip_sum)
-                / ((month_count - slip_count) + 1)
+                (new_regime_payable - salary_slip_sum) / ((month_count - slip_count))
             )
             salary_data["old_regime_tax"] = round(
-                (old_regime_payable - salary_slip_sum)
-                / ((month_count - slip_count) + 1)
+                (old_regime_payable - salary_slip_sum) / ((month_count - slip_count))
             )
 
             # frappe.msgprint(str(slip_count))
