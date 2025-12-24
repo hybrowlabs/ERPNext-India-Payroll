@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
+  "employee_name",
   "previous_salary_structure_assignment",
   "promotion_reference",
   "previous_effective_date",
@@ -15,15 +16,18 @@
   "company",
   "revised_salary_structure_assignment",
   "revised_effective_date",
+  "status",
   "section_break_ugei",
   "previous_revised_salary_components",
   "section_break_cwor",
   "arrear_breakdown",
   "section_break_jakm",
-  "reimbursement_components",
+  "salary_appraisal_reimbursement",
   "section_break_ajlu",
-  "bonus_components",
-  "amended_from"
+  "amended_from",
+  "salary_appraisal_bonus",
+  "total_arrear_summary_section",
+  "arrear_summary"
  ],
  "fields": [
   {
@@ -61,22 +65,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "reimbursement_components",
-   "fieldtype": "Table",
-   "label": "Reimbursement Components",
-   "options": "Salary Appraisal Child",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_ajlu",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "bonus_components",
-   "fieldtype": "Table",
-   "label": "Bonus Components",
-   "options": "Salary Appraisal Child",
-   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -143,6 +133,41 @@
    "fieldtype": "Data",
    "label": "Employee Promotion Reference",
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nSubmitted"
+  },
+  {
+   "fieldname": "salary_appraisal_reimbursement",
+   "fieldtype": "Table",
+   "label": "Salary Appraisal Reimbursement",
+   "options": "Salary Appraisal Reimbursement"
+  },
+  {
+   "fieldname": "salary_appraisal_bonus",
+   "fieldtype": "Table",
+   "label": "Salary Appraisal Bonus",
+   "options": "Salary Appraisal Bonus"
+  },
+  {
+   "fieldname": "total_arrear_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Total Arrear Summary"
+  },
+  {
+   "fieldname": "arrear_summary",
+   "fieldtype": "Table",
+   "label": "Arrear Summary",
+   "options": "Arrear Summary"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -153,7 +178,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-06-03 12:04:01.205240",
+ "modified": "2025-12-24 19:58:45.873313",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",
