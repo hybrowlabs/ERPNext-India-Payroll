@@ -533,11 +533,11 @@ class CustomSalarySlip(SalarySlip):
 
         # Final Taxable Income Calculation
         self.annual_taxable_amount = (
-            self.total_earnings
+            self.ctc
             + self.custom_perquisite_amount
             - (
-                self.non_taxable_earnings
-                + self.deductions_before_tax_calculation
+                # self.non_taxable_earnings
+                +self.deductions_before_tax_calculation
                 + self.tax_exemption_declaration
                 + self.standard_tax_exemption_amount
             )
@@ -710,6 +710,24 @@ class CustomSalarySlip(SalarySlip):
                     accrual_doc.submit()
 
     def calculate_variable_tax(self, tax_component):
+        employee_request_additional_tds = 0
+
+        declaration = frappe.db.get_value(
+            "Employee Tax Exemption Declaration",
+            {
+                "employee": self.employee,
+                "payroll_period": self.payroll_period.name,
+                "docstatus": 1,
+            },
+            "custom_employee_request_additional_tds",
+            as_dict=True,
+            cache=True,
+        )
+        if declaration:
+            employee_request_additional_tds = (
+                declaration.custom_employee_request_additional_tds or 0.0
+            )
+
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -724,9 +742,14 @@ class CustomSalarySlip(SalarySlip):
             eval_locals,
         )
 
+        # self.current_structured_tax_amount = (
+        #     self.total_structured_tax_amount - self.previous_total_paid_taxes
+        # ) / self.remaining_sub_periods
+
         self.current_structured_tax_amount = (
-            self.total_structured_tax_amount - self.previous_total_paid_taxes
-        ) / self.remaining_sub_periods
+            (self.total_structured_tax_amount - self.previous_total_paid_taxes)
+            / self.remaining_sub_periods
+        ) + employee_request_additional_tds
 
         # Total taxable earnings with additional earnings with full tax
         self.full_tax_on_additional_earnings = 0.0
@@ -1995,18 +2018,16 @@ class CustomSalarySlip(SalarySlip):
                     if earnings.salary_component == component_data["component"]:
                         earnings.amount = component_data["total_amount"]
 
-    # def compute_ctc(self):
-    #     if hasattr(self, "previous_taxable_earnings"):
-    #         return (
-    #             self.previous_taxable_earnings_before_exemption
-    #             + self.current_structured_taxable_earnings_before_exemption
-    #             + self.future_structured_taxable_earnings_before_exemption
-    #             + self.current_additional_earnings
-    #             + self.other_incomes
-    #             + self.unclaimed_taxable_benefits
-    #             + self.non_taxable_earnings
-    #         )
-    #     return 0
+    def compute_ctc(self):
+        if hasattr(self, "previous_taxable_earnings"):
+            return (
+                self.previous_taxable_earnings_before_exemption
+                + self.current_structured_taxable_earnings_before_exemption
+                + self.future_structured_taxable_earnings_before_exemption
+                + self.current_additional_earnings
+                + self.other_incomes
+            )
+        return 0
 
     def insert_lop_days(self):
         """Calculate total LOP reversal + arrear present days and store in custom field."""
