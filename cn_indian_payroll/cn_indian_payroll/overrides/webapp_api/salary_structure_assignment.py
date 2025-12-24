@@ -27,12 +27,6 @@ def process_components(components, ctc_component_names, comp_type):
 
 @frappe.whitelist()
 def generate_salary_slip(employee=None, payroll_period=None, company=None):
-    """
-    employee        : Mandatory
-    payroll_period  : Optional
-    company         : Optional
-    """
-
     try:
 
         if not employee:

@@ -451,7 +451,224 @@ def benefit_claim(doc=None, employee=None, claim_date=None):
 
 
 
+
+
+#============================================================================
+
+# @frappe.whitelist()
+# def get_all_accrued_reimbursements(filters=None):
+#     if not filters:
+#         filters = {}
+
+#     from datetime import datetime
+#     from dateutil.relativedelta import relativedelta
+#     from frappe.utils import getdate
+
+#     # --------------------------------------------------
+#     # Helper: Month iterator
+#     # --------------------------------------------------
+#     def month_range(start, end):
+#         current = start.replace(day=1)
+#         while current <= end:
+#             yield current
+#             current += relativedelta(months=1)
+
+#     # --------------------------------------------------
+#     # Resolve employee from header
+#     # --------------------------------------------------
+#     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+#     if target_employee:
+#         filters["employee"] = target_employee
+
+#     if not filters.get("employee"):
+#         return {"data": []}
+
+#     # --------------------------------------------------
+#     # Get Employee DOJ
+#     # --------------------------------------------------
+#     employee_doc = frappe.get_doc("Employee", filters["employee"])
+#     doj = getdate(employee_doc.date_of_joining)
+
+#     # --------------------------------------------------
+#     # Get Payroll Period
+#     # --------------------------------------------------
+#     payroll_period = frappe.get_doc("Payroll Period", filters.get("payroll_period"))
+#     pp_start = getdate(payroll_period.start_date)
+#     pp_end = getdate(payroll_period.end_date)
+
+#     # Projection start logic
+#     projection_start = pp_start if doj <= pp_start else doj
+
+
+
+#     # --------------------------------------------------
+#     # Salary Structure Assignment Map
+#     # --------------------------------------------------
+#     ssa_map = {}
+
+#     ssa_filters = {"employee": filters["employee"]}
+#     if filters.get("payroll_period"):
+#         ssa_filters["payroll_period"] = filters["payroll_period"]
+
+#     salary_slips = frappe.get_list(
+#         "Salary Slip",
+#         filters=ssa_filters,
+#         fields=["name", "employee", "custom_salary_structure_assignment"]
+#     )
+
+#     for slip in salary_slips:
+#         if not slip.custom_salary_structure_assignment:
+#             continue
+
+#         ssa = frappe.get_doc(
+#             "Salary Structure Assignment",
+#             slip.custom_salary_structure_assignment
+#         )
+
+#         for row in ssa.custom_employee_reimbursements:
+#             ssa_map[(slip.employee, row.reimbursements)] = {
+#                 "periodic_original_amount": row.monthly_total_amount or 0
+#             }
+
+#     # --------------------------------------------------
+#     # Accrual Records
+#     # --------------------------------------------------
+#     accrual_filters = {"docstatus": 1, "employee": filters["employee"]}
+
+#     if filters.get("payroll_period"):
+#         accrual_filters["payroll_period"] = filters["payroll_period"]
+
+#     if filters.get("company"):
+#         accrual_filters["company"] = filters["company"]
+
+#     accrual_records = frappe.get_list(
+#         "Employee Benefit Accrual",
+#         filters=accrual_filters,
+#         fields=["*"],
+#         order_by="benefit_accrual_date"
+#     )
+
+#     # --------------------------------------------------
+#     # Claim Records
+#     # --------------------------------------------------
+#     claim_filters = {
+#         "docstatus": 1,
+#         "employee": filters["employee"]
+#     }
+
+#     if filters.get("company"):
+#         claim_filters["company"] = filters["company"]
+
+#     claim_records = frappe.get_list(
+#         "Employee Benefit Claim",
+#         filters=claim_filters,
+#         fields=[
+#             "employee",
+#             "company",
+#             "custom_payroll_period",
+#             "claim_date",
+#             "earning_component",
+#             "claimed_amount"
+#         ]
+#     )
+
+#     # --------------------------------------------------
+#     # Grouping
+#     # --------------------------------------------------
+#     grouped = {}
+
+#     for accrual in accrual_records:
+#         dt = getdate(accrual.benefit_accrual_date)
+#         month_label = dt.strftime("%B %Y")
+
+#         # Paid amount for the month
+#         paid_amount = 0
+#         for claim in claim_records:
+#             if (
+#                 claim.employee == accrual.employee
+#                 and claim.company == accrual.company
+#                 and claim.custom_payroll_period == accrual.payroll_period
+#                 and claim.earning_component == accrual.salary_component
+#             ):
+#                 cdt = getdate(claim.claim_date)
+#                 if cdt.month == dt.month and cdt.year == dt.year:
+#                     paid_amount += claim.claimed_amount or 0
+
+#         ssa_key = (accrual.employee, accrual.salary_component)
+#         periodic_amount = ssa_map.get(ssa_key, {}).get("periodic_original_amount", 0)
+
+#         if accrual.salary_component not in grouped:
+#             grouped[accrual.salary_component] = {
+#                 "salary_component": accrual.salary_component,
+#                 "carry_forward_amount": 0,
+#                 "total_accrued_amount": 0,
+#                 "periodic_original_amount": periodic_amount,
+#                 "total_claimed_amount": 0,
+#                 "total_balance_amount": 0,
+#                 "details": []
+#             }
+
+#         closing_balance = (accrual.amount or 0) - paid_amount
+
+#         grouped[accrual.salary_component]["details"].append({
+#             "month": month_label,
+#             "amount": accrual.amount,
+#             "claimed_amount": paid_amount,
+#             "paid_amount": paid_amount,
+#             "closing_balance": closing_balance
+#         })
+
+#         grouped[accrual.salary_component]["total_accrued_amount"] += accrual.amount
+#         grouped[accrual.salary_component]["total_claimed_amount"] += paid_amount
+
+#     # --------------------------------------------------
+#     # FUTURE MONTH PROJECTION (KEY FIX)
+#     # --------------------------------------------------
+#     for comp, row in grouped.items():
+#         existing_months = {d["month"] for d in row["details"]}
+#         monthly_amount = row["periodic_original_amount"]
+
+#         for dt in month_range(projection_start, pp_end):
+#             month_label = dt.strftime("%B %Y")
+
+#             if month_label in existing_months:
+#                 continue
+
+#             row["details"].append({
+#                 "month": month_label,
+#                 "amount": monthly_amount,
+#                 "claimed_amount": 0,
+#                 "paid_amount": 0,
+#                 "closing_balance": monthly_amount
+#             })
+
+#             row["total_accrued_amount"] += monthly_amount
+
+#         row["total_balance_amount"] = (
+#             row["total_accrued_amount"]
+#             - row["total_claimed_amount"]
+#             + row["carry_forward_amount"]
+#         )
+
+#         row["details"].sort(
+#             key=lambda x: datetime.strptime(x["month"], "%B %Y")
+#         )
+
+#     # return {"data": list(grouped.values())}
+
+
+
+
+
+
+#===================================================================================
+
+
+
+
+
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_all_accrued_reimbursements?employee=37004&company=PW
+
 
 @frappe.whitelist()
 def get_all_accrued_reimbursements(filters=None):
@@ -460,9 +677,7 @@ def get_all_accrued_reimbursements(filters=None):
 
     from datetime import datetime
 
-    # ----------------------------------------------------------------------
-    # 1. Extract Projection Data From Salary Structure Assignment
-    # ----------------------------------------------------------------------
+
     ssa_map = {}  # key → (employee, component)
 
     ssa_filters = {}
