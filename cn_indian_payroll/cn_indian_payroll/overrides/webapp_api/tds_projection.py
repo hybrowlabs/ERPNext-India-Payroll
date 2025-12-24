@@ -417,6 +417,32 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
     declaration_id = declaration_doc.name
     current_tax_regime = declaration_doc.custom_tax_regime
 
+    hra_exemption=[]
+
+    if declaration_doc.custom_tax_regime=="Old Regime":
+
+        monthly_hra=declaration_doc.monthly_house_rent if declaration_doc.monthly_house_rent else 0
+        rented_in_metro_city=declaration_doc.rented_in_metro_city if declaration_doc.rented_in_metro_city else 0
+        annual_hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
+        monthly_hra_exemption=declaration_doc.monthly_hra_exemption if declaration_doc.monthly_hra_exemption else 0
+
+        hra_exemption.append({
+            "monthly_hra":monthly_hra,
+            "rented_in_metro_city":rented_in_metro_city,
+            "annual_hra_exemption":annual_hra_exemption,
+            "monthly_hra_exemption":monthly_hra_exemption,
+            "start_date":declaration_doc.custom_start_date,
+            "end_date":declaration_doc.custom_end_date,
+            "pan":declaration_doc.custom_pan,
+            "address_line1":declaration_doc.custom_address_title1,
+            "address_line2":declaration_doc.custom_address_title2,
+
+
+        })
+
+
+
+
     # ------------------ DB → UI Flag ------------------
     current_flag = 1 if current_tax_regime == "New Regime" else 0
 
@@ -488,12 +514,12 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "component_type": row.custom_component_type,
                     "description": row.custom_description,
                     "editable": editable,
-                    "amount": declaration_row["amount"] if declaration_row else 0,
-                    "max_amount": (
+                    "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                    "max_amount": round(
                         declaration_row["max_amount"]
                         if declaration_row and declaration_row.get("max_amount") is not None
                         else row.max_amount
-                    )
+                    ),
                 })
 
             final_list = []
@@ -508,9 +534,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "declaration_id": declaration_id,
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
+                "hra_exemption":hra_exemption,
                 "categories": final_list,
 
             }
+
+
+
         elif current_tax_regime == "New Regime":
 
             records = frappe.get_all(
@@ -551,12 +581,14 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "declaration_id": declaration_id,
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
+
                 "categories": [
                     {
                         "category_name": "NPS",
                         "items": nps_items
                     }
-                ]
+                ],
+
             }
 
         # ------------------ Old → New ------------------
@@ -751,7 +783,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-
+    # ------------------ New  to OLD------------------
 
     if go_head_with_new_regime == 0 and current_flag == 1:
 
@@ -1458,79 +1490,6 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_existing_declaration_form?employee=37001&payroll_period=25-26&company=PW
-
-# @frappe.whitelist()
-# def get_existing_declaration_form(employee=None, company=None, payroll_period=None):
-
-#     # ---------------- Validation ----------------
-#     if not employee or not company or not payroll_period:
-#         return {
-#             "status": "failed",
-#             "message": "Employee, Company, and Payroll Period are required"
-#         }
-
-#     existing_component_part_of_ctc = []
-
-#     # ---------------- Fetch Declaration ----------------
-#     declaration = frappe.get_all(
-#         "Employee Tax Exemption Declaration",
-#         filters={
-#             "employee": employee,
-#             "company": company,
-#             "payroll_period": payroll_period
-#         },
-#         fields=["name"],
-#         limit=1
-#     )
-
-#     if not declaration:
-#         return {
-#             "status": "failed",
-#             "message": "No declaration form created for this payroll period"
-#         }
-
-#     declaration_doc = frappe.get_doc(
-#         "Employee Tax Exemption Declaration",
-#         declaration[0].name
-#     )
-
-#     current_tax_regime = declaration_doc.custom_tax_regime
-#     declaration_id = declaration_doc.name
-
-#     # ---------------- Components Part of CTC ----------------
-#     VALID_COMPONENT_TYPES = {
-#         "LTA Reimbursement",
-#         "Provident Fund",
-#         "Professional Tax"
-#         "NPS"
-#     }
-
-#     if declaration_doc.declarations:
-#         for d in declaration_doc.declarations:
-
-#             if not d.exemption_sub_category:
-#                 continue
-
-#             sub_category = frappe.get_cached_doc(
-#                 "Employee Tax Exemption Sub Category",
-#                 d.exemption_sub_category
-#             )
-
-#             if sub_category.custom_component_type in VALID_COMPONENT_TYPES:
-#                 existing_component_part_of_ctc.append({
-#                     "component": d.exemption_sub_category,
-#                     "component_type": sub_category.custom_component_type,
-#                     "declared_amount": flt(d.amount or 0)
-#                 })
-
-#     # ---------------- Response ----------------
-#     return {
-#         "status": "success",
-#         "current_tax_regime": current_tax_regime,
-#         "declaration_id": declaration_id,
-#         "existing_component_part_of_ctc": existing_component_part_of_ctc
-#     }
 
 
 
