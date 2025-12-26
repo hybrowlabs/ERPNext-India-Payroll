@@ -204,7 +204,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def calculate_variable_tax(self, tax_component):
+    def calculate_variable_tax(self, tax_component,has_additional_salary_tax_component=False):
 
 
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
