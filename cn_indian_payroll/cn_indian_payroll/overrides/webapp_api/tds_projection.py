@@ -5,6 +5,7 @@ from frappe.utils import getdate, add_months, flt
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
 
+from frappe.utils.pdf import get_pdf
 
 
 
@@ -2077,6 +2078,35 @@ def calculate_tds_projection(declaration_id):
 
         advance_tax=declaration.custom_tds_already_deducted_amount
 
+
+        old_regime_total_tax_on_income=(slab_result.get("total_sum")-slab_result.get("old_rebate_value")),
+        new_regime_total_tax_on_income=(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value")),
+
+
+
+        old_tax_balance = (
+            (
+                slab_result.get("old_education_cess") +
+                slab_result.get("old_surcharge_m") +
+                (slab_result.get("total_sum") - slab_result.get("old_rebate_value"))
+            )
+        ) - slab_result.get("tax_already_paid")
+
+        new_tax_balance = (
+            (
+                slab_result.get("new_education_cess") +
+                slab_result.get("new_surcharge_m") +
+                (slab_result.get("total_sum_new") - slab_result.get("new_rebate_value"))
+            ) - advance_tax
+        ) - slab_result.get("tax_already_paid")
+
+        old_regime_tax_payable=slab_result.get("old_education_cess")+slab_result.get("old_surcharge_m")+(slab_result.get("total_sum")-slab_result.get("old_rebate_value"))
+        new_regime_tax_payable=slab_result.get("new_education_cess")+slab_result.get("new_surcharge_m")+(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value"))
+
+        balance_tax_payable_old_regime=old_tax_balance-advance_tax
+        balance_tax_payable_new_regime=new_tax_balance-advance_tax
+
+
         return {
                 "num_months": num_months if num_months else 0,
                 "month_count": month_count if month_count else 0,
@@ -2089,8 +2119,13 @@ def calculate_tds_projection(declaration_id):
                 "total_taxable_earnings_old_regime": round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount),
                 "total_taxable_earnings_new_regime": round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount),
                 "pt_amount":round(pt_amount),
+
                 "old_regime_standard_value": old_regime_standard_value,
                 "new_regime_standard_value": new_regime_standard_value,
+
+                "old_regime_total":old_regime_standard_value+pt_amount,
+                "new_regime_total":new_regime_standard_value,
+
                 "hra_exemptions": hra_exemptions,
 
                 "total_old_regime_deductions": round(total_old_regime_deductions),
@@ -2108,8 +2143,13 @@ def calculate_tds_projection(declaration_id):
                 "old_regime_rebate_limit": slab_result.get("rebate"),
                 "old_regime_max_amount": slab_result.get("max_amount"),
                 "old_regime_rebate_amount": slab_result.get("old_rebate_value"),
+
+                "old_regime_total_tax_on_income":old_regime_total_tax_on_income,
                 "old_regime_surcharge": slab_result.get("old_surcharge_m"),
                 "old_regime_education_cess": slab_result.get("old_education_cess"),
+
+
+
 
                 "new_regime_from_amounts": slab_result.get("from_amount_new"),
                 "new_regime_to_amounts": slab_result.get("to_amount_new"),
@@ -2123,10 +2163,21 @@ def calculate_tds_projection(declaration_id):
                 "old_regime_marginal_relief_min": slab_result.get("old_regime_marginal_relief_min_value"),
                 "old_regime_marginal_relief_max": slab_result.get("old_regime_marginal_relief_max_value"),
                 "new_regime_rebate_amount": slab_result.get("new_rebate_value"),
+                "new_regime_total_tax_on_income":new_regime_total_tax_on_income,
                 "new_regime_surcharge": slab_result.get("new_surcharge_m"),
                 "new_regime_education_cess": slab_result.get("new_education_cess"),
-                "total_tax_already_paid": slab_result.get("tax_already_paid")
 
+                "total_tax_payable_old_regime":old_regime_tax_payable,
+                "total_tax_payable_new_regime":new_regime_tax_payable,
+                "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
+                "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
+
+
+                "total_tax_already_paid": slab_result.get("tax_already_paid"),
+                "old_tax_balance": old_tax_balance,
+                "new_tax_balance":new_tax_balance,
+                "currentax_old_regime_tax":old_tax_balance/month_count,
+                "currentax_new_regime_tax":new_tax_balance/month_count
 
 
                 }
@@ -2534,138 +2585,50 @@ def slab_calculation(
         "new_surcharge_m": new_surcharge_m,
         "new_education_cess": new_education_cess,
         "tax_already_paid": tax_already_paid,
+
+
     }
 
-#     return [
-#     {
-#         "fieldname": "from_amount",
-#         "label": "Old Regime Slab From Amount",
-#         "value": from_amount,
-#     },
-#     {
-#         "fieldname": "to_amount",
-#         "label": "Old Regime Slab To Amount",
-#         "value": to_amount,
-#     },
-#     {
-#         "fieldname": "percentage",
-#         "label": "Old Regime Slab Percentage",
-#         "value": percentage,
-#     },
-#     {
-#         "fieldname": "total_value",
-#         "label": "Old Regime Tax Per Slab",
-#         "value": total_value,
-#     },
-#     {
-#         "fieldname": "total_sum",
-#         "label": "Total Tax (Old Regime)",
-#         "value": total_sum,
-#     },
-#     {
-#         "fieldname": "rebate",
-#         "label": "Old Regime Rebate Limit",
-#         "value": old_rebate,
-#     },
-#     {
-#         "fieldname": "max_amount",
-#         "label": "Old Regime Max Amount",
-#         "value": old_max_amount,
-#     },
-#     {
-#         "fieldname": "old_rebate_value",
-#         "label": "Old Regime Rebate Amount",
-#         "value": old_rebate_value,
-#     },
-#     {
-#         "fieldname": "old_surcharge_m",
-#         "label": "Old Regime Surcharge",
-#         "value": old_surcharge_m,
-#     },
-#     {
-#         "fieldname": "old_education_cess",
-#         "label": "Old Regime Education Cess",
-#         "value": old_education_cess,
-#     },
 
-#     # ---------- NEW REGIME ----------
-#     {
-#         "fieldname": "from_amount_new",
-#         "label": "New Regime Slab From Amount",
-#         "value": from_amount_new,
-#     },
-#     {
-#         "fieldname": "to_amount_new",
-#         "label": "New Regime Slab To Amount",
-#         "value": to_amount_new,
-#     },
-#     {
-#         "fieldname": "percentage_new",
-#         "label": "New Regime Slab Percentage",
-#         "value": percentage_new,
-#     },
-#     {
-#         "fieldname": "total_value_new",
-#         "label": "New Regime Tax Per Slab",
-#         "value": total_value_new,
-#     },
-#     {
-#         "fieldname": "total_sum_new",
-#         "label": "Total Tax (New Regime)",
-#         "value": total_sum_new,
-#     },
-#     {
-#         "fieldname": "rebate_new",
-#         "label": "New Regime Rebate Limit",
-#         "value": new_rebate,
-#     },
-#     {
-#         "fieldname": "max_amount_new",
-#         "label": "New Regime Max Amount",
-#         "value": new_max_amount,
-#     },
-#     {
-#         "fieldname": "new_rebate_value",
-#         "label": "New Regime Rebate Amount",
-#         "value": new_rebate_value,
-#     },
-#     {
-#         "fieldname": "new_surcharge_m",
-#         "label": "New Regime Surcharge",
-#         "value": new_surcharge_m,
-#     },
-#     {
-#         "fieldname": "new_education_cess",
-#         "label": "New Regime Education Cess",
-#         "value": new_education_cess,
-#     },
 
-#     # ---------- MARGINAL RELIEF ----------
-#     {
-#         "fieldname": "old_regime_marginal_relief_min",
-#         "label": "Old Regime Marginal Relief Min",
-#         "value": old_regime_marginal_relief_min_value,
-#     },
-#     {
-#         "fieldname": "old_regime_marginal_relief_max",
-#         "label": "Old Regime Marginal Relief Max",
-#         "value": old_regime_marginal_relief_max_value,
-#     },
-#     {
-#         "fieldname": "new_regime_marginal_relief_min",
-#         "label": "New Regime Marginal Relief Min",
-#         "value": new_regime_marginal_relief_min_value,
-#     },
-#     {
-#         "fieldname": "new_regime_marginal_relief_max",
-#         "label": "New Regime Marginal Relief Max",
-#         "value": new_regime_marginal_relief_max_value,
-#     },
+@frappe.whitelist()
+def download_tds_projection_pdf(declaration_id):
 
-#     # ---------- PAID TAX ----------
-#     {
-#         "fieldname": "tax_already_paid",
-#         "label": "Tax Already Paid",
-#         "value": tax_already_paid,
-#     },
-# ]
+    # 1️⃣ Get calculation data
+    data = calculate_tds_projection(declaration_id)
+
+    if not data:
+        frappe.throw("No TDS projection data found")
+
+    # 2️⃣ Render HTML template
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/tds_projection_print.html",
+        data
+    )
+
+    # 3️⃣ Convert HTML to PDF
+    pdf = get_pdf(html)
+
+    # 4️⃣ Return PDF response
+    frappe.local.response.filename = "TDS_Projection.pdf"
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"
+
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_tds_projection_print_html?declaration_id=HR-TAX-DEC-2025-00009
+
+@frappe.whitelist(allow_guest=True)
+def get_tds_projection_print_html(declaration_id):
+
+    context = calculate_tds_projection(declaration_id)
+
+    if not context:
+        frappe.throw("No TDS projection data found")
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/tds_projection_print.html",
+        context
+    )
+
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
