@@ -933,7 +933,9 @@ class CustomSalarySlip(SalarySlip):
                     accrual_doc.insert()
                     accrual_doc.submit()
 
-    def calculate_variable_tax(self, tax_component):
+    def calculate_variable_tax(
+        self, tax_component, has_additional_salary_tax_component=False
+    ):
         employee_request_additional_tds = 0
 
         declaration = frappe.db.get_value(
