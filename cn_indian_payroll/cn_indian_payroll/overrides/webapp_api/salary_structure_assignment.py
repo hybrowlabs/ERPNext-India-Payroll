@@ -1,4 +1,3 @@
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_structure_assignment.generate_salary_slip?employee=37001
 
 
 import frappe
@@ -23,6 +22,8 @@ def process_components(components, ctc_component_names, comp_type):
             })
 
     return component_list, total
+
+#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_structure_assignment.generate_salary_slip?employee=37001
 
 
 @frappe.whitelist()
@@ -128,14 +129,15 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
 
             response_data.append({
                 "assignment_name": assignment.name,
+                "docstatus":1,
                 "from_date": assignment.from_date,
                 "salary_structure": assignment.salary_structure,
                 "component_part_of_ctc": component_part_of_ctc,
-                "monthly_ctc": monthly_ctc,
-                "annual_ctc": annual_ctc,
-                "gross_pay": slip.gross_pay or 0,
-                "net_pay": slip.rounded_total or 0,
-                "total_deduction": total_deduction
+                "monthly_ctc": round(monthly_ctc),
+                "annual_ctc": round(annual_ctc),
+                "gross_pay": round(slip.gross_pay or 0),
+                "net_pay": round(slip.rounded_total or 0),
+                "total_deduction": round(total_deduction)
             })
 
         return {

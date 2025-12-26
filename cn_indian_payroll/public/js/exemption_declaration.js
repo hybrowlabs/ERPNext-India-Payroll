@@ -6,6 +6,18 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
         frm.trigger("change_tax_regime");
         frm.trigger("display_declaration_form");
         frm.trigger("tds_projection_html");
+
+        if (frm.doc.docstatus === 1) {
+            frm.add_custom_button("Print TDS Projection", () => {
+                window.open(
+                    `/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.download_tds_projection_pdf?declaration_id=${frm.doc.name}`
+                );
+            });
+        }
+
+
+
+
     },
 
     change_tax_regime(frm) {
@@ -339,7 +351,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                 ) - data.total_tax_already_paid;
 
 
-                                let monthBase = data.month_count === 0 ? data.num_months : data.month_count+1;
+                                let monthBase = data.month_count === 0 ? data.num_months : data.month_count ;
 
                                 let currentTax_old_regime = old_tax / monthBase;
                                 let currentTax_new_regime = new_tax / monthBase;
@@ -561,6 +573,12 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                                 <td style="padding: 10px; border: 1px solid #ddd;">Tax Paid</td>
                                                  <td><div style="text-align: right"> ₹ ${data.total_tax_already_paid}</div></td>
                                                 <td><div style="text-align: right"> ₹ ${data.total_tax_already_paid}</div></td>
+                                            </tr>
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Future Month</td>
+                                                 <td><div style="text-align: right"> ₹ ${monthBase}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${monthBase}</div></td>
                                             </tr>
 
 
