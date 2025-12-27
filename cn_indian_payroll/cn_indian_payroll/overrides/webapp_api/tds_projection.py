@@ -3,9 +3,12 @@
 import frappe
 from frappe.utils import getdate, add_months, flt
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-
-
 from frappe.utils.pdf import get_pdf
+from datetime import datetime
+from frappe import _
+import json
+from dateutil.relativedelta import relativedelta
+
 
 
 
@@ -13,7 +16,7 @@ from frappe.utils.pdf import get_pdf
 
 
 @frappe.whitelist()
-def get_annual_statement(employee, payroll_period):
+def get_annual_statement(employee=None, payroll_period=None,company=None):
 
     # -------- Payroll Period -------- #
     period = frappe.db.get_value(
@@ -35,7 +38,8 @@ def get_annual_statement(employee, payroll_period):
         filters={
             "employee": employee,
             "custom_payroll_period": payroll_period,
-            "docstatus": ["in", [0, 1]]
+            "docstatus": ["in", [0, 1]],
+            "company": company,
         },
         fields=["name", "start_date"],
         order_by="start_date asc"
@@ -67,7 +71,7 @@ def get_annual_statement(employee, payroll_period):
     # -------- Preview Slip (Future Months) -------- #
     ssa = frappe.get_list(
         "Salary Structure Assignment",
-        filters={"employee": employee, "docstatus": 1},
+        filters={"employee": employee, "docstatus": 1,"company":company},
         fields=["*"],
         order_by="from_date desc",
         limit=1
@@ -1012,52 +1016,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-# @frappe.whitelist()
-# def tds_declaration_form():
-
-
-
-
-
-#     records = frappe.get_all(
-#         "Employee Tax Exemption Sub Category",
-#         filters={"is_active": 1},
-#         fields=[
-#             "exemption_category",
-#             "max_amount",
-#             "name",
-#             "is_active",
-#             "custom_component_type",
-
-#             "custom_description"
-#         ],
-#         order_by="custom_sequence asc"
-#     )
-
-#     grouped = {}
-
-#     # Group by exemption_category
-#     for row in records:
-#         category = row.get("exemption_category")
-#         if category not in grouped:
-#             grouped[category] = []
-#         grouped[category].append(row)
-
-#     # Convert to required format (list of dicts)
-#     final_list = []
-
-#     for category, items in grouped.items():
-#         final_list.append({
-#             "category_name": category,
-#             "items": items
-#         })
-
-#     return final_list
-
-
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37001&payroll_period=25-26
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=PW
 
 @frappe.whitelist()
+
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
 
     # ------------------ Validation ------------------
@@ -1520,6 +1482,8 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 #   }
 # }
 
+
+
 @frappe.whitelist()
 def update_declaration_form(declaration_id, data):
     import frappe
@@ -1612,14 +1576,6 @@ def update_declaration_form(declaration_id, data):
 
 
 
-
-
-import frappe
-from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from datetime import datetime
-from frappe import _
-import json
-from dateutil.relativedelta import relativedelta
 
 
 
@@ -2632,3 +2588,31 @@ def get_tds_projection_print_html(declaration_id):
 
     frappe.local.response["content_type"] = "text/html"
     frappe.local.response["response"] = html
+
+
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.print_declaration_preview?employee=37001&payroll_period=25-26&company=PW
+
+@frappe.whitelist()
+def print_declaration_preview(employee, payroll_period, company):
+
+    # 1️⃣ Call first function
+    salary_projection = get_annual_statement(
+        employee=employee,
+        payroll_period=payroll_period,
+        company=company
+    )
+
+    # 2️⃣ Call second function
+    existing_declaration = get_employee_declaration_investments(
+        employee=employee,
+        company=company,
+        payroll_period=payroll_period
+    )
+
+    # 3️⃣ Combine both results into ONE response
+    result = {
+        "salary_projection": salary_projection,
+        "existing_declaration": existing_declaration
+    }
+
+    return result
