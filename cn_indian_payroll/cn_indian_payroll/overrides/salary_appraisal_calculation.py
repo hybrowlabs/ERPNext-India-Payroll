@@ -393,7 +393,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
                 "employee": employee_id,
                 "posting_date": date,
                 "company": company,
-                "employee_promotion_id": promotion_id,
+                "promotion_reference": promotion_id,
                 "old_salary_structure_assignment_id": salary_structure_assignment[
                     1
                 ].name,
@@ -434,7 +434,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
 
         for insert_bonus in final_bonus_array:
             insert_appraisal.append(
-                "bonus_components",
+                "salary_appraisal_bonus",
                 {
                     "salary_component": insert_bonus["salary_component"],
                     "salary_slip_id": insert_bonus["salary_slip"],
@@ -450,7 +450,7 @@ def appraisal_calculation(promotion_id, employee_id, company, date, effective_fr
 
         for insert_reimbursement in reimbursement_final_array:
             insert_appraisal.append(
-                "reimbursement_components",
+                "salary_appraisal_reimbursement",
                 {
                     "salary_component": insert_reimbursement["salary_component"],
                     "salary_slip_id": insert_reimbursement["salary_slip"],

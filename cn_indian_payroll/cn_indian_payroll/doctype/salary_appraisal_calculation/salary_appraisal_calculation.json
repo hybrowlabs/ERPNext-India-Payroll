@@ -6,8 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
+  "employee_name",
   "old_salary_structure_assignment_id",
-  "employee_promotion_id",
+  "promotion_reference",
   "old_from_date",
   "column_break_ozck",
   "posting_date",
@@ -19,10 +20,12 @@
   "section_break_cwor",
   "salary_arrear_components",
   "section_break_jakm",
-  "reimbursement_components",
+  "salary_appraisal_reimbursement",
   "section_break_ajlu",
-  "bonus_components",
-  "amended_from"
+  "salary_appraisal_bonus",
+  "amended_from",
+  "section_break_afvl",
+  "arrear_summary"
  ],
  "fields": [
   {
@@ -70,20 +73,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "reimbursement_components",
-   "fieldtype": "Table",
-   "label": "Reimbursement Components",
-   "options": "Salary Appraisal Child"
-  },
-  {
    "fieldname": "section_break_ajlu",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "bonus_components",
-   "fieldtype": "Table",
-   "label": "Bonus Components",
-   "options": "Salary Appraisal Child"
   },
   {
    "fieldname": "amended_from",
@@ -102,11 +93,6 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
-  },
-  {
-   "fieldname": "employee_promotion_id",
-   "fieldtype": "Data",
-   "label": "Employee Promotion ID"
   },
   {
    "fieldname": "old_salary_structure_assignment_id",
@@ -129,12 +115,47 @@
    "fieldname": "new_from_date",
    "fieldtype": "Date",
    "label": "New From date"
+  },
+  {
+   "fieldname": "salary_appraisal_reimbursement",
+   "fieldtype": "Table",
+   "label": "Salary Appraisal Reimbursement",
+   "options": "Salary Appraisal Reimbursement"
+  },
+  {
+   "fieldname": "salary_appraisal_bonus",
+   "fieldtype": "Table",
+   "label": "Bonus Components",
+   "options": "Salary Appraisal Bonus"
+  },
+  {
+   "fieldname": "section_break_afvl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "arrear_summary",
+   "fieldtype": "Table",
+   "label": "Arrear Summary",
+   "options": "Arrear Summary"
+  },
+  {
+   "fieldname": "promotion_reference",
+   "fieldtype": "Link",
+   "label": "promotion_reference",
+   "options": "Employee Promotion"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-30 11:59:49.716412",
+ "modified": "2025-12-27 11:36:05.016528",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",
@@ -153,6 +174,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -1,13 +1,38 @@
 import frappe
 
+from cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal_calculation import (
+    appraisal_calculation,
+)
+
 
 def on_cancel(self, method):
     cancel_additional_salary(self)
     cancel_appraisal_calculation(self)
 
 
+def validate(self, methd):
+    create_salary_appraisal_calculation(self)
+
+
 def on_submit(self, method):
     self.custom_status = "Completed"
+
+
+def create_salary_appraisal_calculation(self):
+    if self.custom_status == "Payroll Configured":
+        get_appraisal_calculation = frappe.get_list(
+            "Salary Appraisal Calculation",
+            filters={"promotion_reference": self.name, "docstatus": 1},
+            fields=["*"],
+        )
+        if not get_appraisal_calculation:
+            result = appraisal_calculation(
+                promotion_id=self.name,
+                employee_id=self.employee,
+                company=self.company,
+                date=self.custom_additional_salary_date,
+                effective_from=self.promotion_date,
+            )
 
 
 def cancel_additional_salary(self):
