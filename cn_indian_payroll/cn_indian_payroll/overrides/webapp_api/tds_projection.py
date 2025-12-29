@@ -1575,11 +1575,6 @@ def update_declaration_form(declaration_id, data):
     }
 
 
-
-
-
-
-
 @frappe.whitelist()
 def calculate_tds_projection(declaration_id):
 

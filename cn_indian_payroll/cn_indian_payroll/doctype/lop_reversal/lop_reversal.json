@@ -85,8 +85,7 @@
    "fieldname": "lop_month_reversal",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "LOP Month Reversal",
-   "reqd": 1
+   "label": "LOP Month Reversal"
   },
   {
    "fieldname": "section_break_apdq",
@@ -125,8 +124,7 @@
   {
    "fieldname": "salary_slip",
    "fieldtype": "Data",
-   "label": "Salary Slip",
-   "read_only": 1
+   "label": "Salary Slip"
   },
   {
    "fieldname": "max_lop_days",
@@ -195,7 +193,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-09-23 17:07:32.242088",
+ "modified": "2025-12-28 12:33:30.604844",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
