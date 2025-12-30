@@ -303,6 +303,8 @@ doc_events = {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.validate",
+        "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_update_after_submit",
+
 
     },
 

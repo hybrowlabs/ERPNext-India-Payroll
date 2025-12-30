@@ -18,6 +18,62 @@ def on_cancel(self, method):
     cancel_benefit_accrual(self)
     cancel_bonus_accrual(self)
 
+def on_update_after_submit(self, method):
+    insert_breakup_table(self)
+    update_additional_salary(self)
+
+
+
+
+
+def update_additional_salary(self):
+
+    if not self.arrear_breakup:
+        return
+
+    for row in self.arrear_breakup:
+
+        additional_salaries = frappe.get_all(
+            "Additional Salary",
+            filters={
+                "ref_docname": self.name,
+                "ref_doctype": "LOP Reversal",
+                "salary_component": row.salary_component
+            },
+            fields=["name", "amount"]
+        )
+
+        for rec in additional_salaries:
+            additional_salary = frappe.get_doc("Additional Salary", rec.name)
+
+            additional_salary.amount = row.amount
+            additional_salary.save(ignore_permissions=True)
+
+
+    if not self.arrear_deduction_breakup:
+        return
+
+    for row in self.arrear_deduction_breakup:
+
+        additional_salaries = frappe.get_all(
+            "Additional Salary",
+            filters={
+                "ref_docname": self.name,
+                "ref_doctype": "LOP Reversal",
+                "salary_component": row.salary_component
+            },
+            fields=["name", "amount"]
+        )
+
+        for rec in additional_salaries:
+            additional_salary = frappe.get_doc("Additional Salary", rec.name)
+
+            additional_salary.amount = row.amount
+            additional_salary.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+
 
 def bonus_accrual_update(self):
     bonus_accruals = frappe.get_all(
@@ -68,7 +124,6 @@ def reimbursement_accrual_update(self):
         component = frappe.get_doc("Salary Component", record.salary_component)
 
         if component.depends_on_payment_days == 1:
-            frappe.msgprint(str(component.name))
             reversal_amount = (record.amount / record.payment_days) * self.number_of_days
             updated_amount = record.amount + reversal_amount
 

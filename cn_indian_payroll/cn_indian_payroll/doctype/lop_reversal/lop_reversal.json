@@ -66,6 +66,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "number_of_days",
    "fieldtype": "Float",
    "label": "Number of Days Planning to Reverse",
@@ -92,6 +93,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "arrear_breakup",
    "fieldtype": "Table",
    "label": "Arrear Breakup",
@@ -108,6 +110,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "arrear_deduction_breakup",
    "fieldtype": "Table",
    "label": "Arrear Deduction BreakUp",
@@ -193,7 +196,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-12-28 12:33:30.604844",
+ "modified": "2025-12-30 10:11:08.958907",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
