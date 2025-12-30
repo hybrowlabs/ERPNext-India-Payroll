@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 
 
-
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37004&company=PW&payroll_period=25-26
 
 @frappe.whitelist()
 def get_annual_statement(employee=None, payroll_period=None,company=None):
@@ -385,7 +385,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
 
 
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form?employee=37001&company=PW&payroll_period=25-26&go_head_with_new_regime=0
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form?employee=37001&company=PW&payroll_period=25-26&go_head_with_new_regime=0
 
 @frappe.whitelist()
 def tds_declaration_form(employee=None, company=None, payroll_period=None, go_head_with_new_regime=None):
@@ -483,7 +483,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
             NON_EDITABLE_COMPONENTS = [
-                "LTA Reimbursement",
+                # "LTA Reimbursement",
                 "Professional Tax",
                 "Provident Fund",
                 "NPS"

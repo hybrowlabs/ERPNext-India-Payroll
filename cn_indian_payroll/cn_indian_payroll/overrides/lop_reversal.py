@@ -22,56 +22,57 @@ def on_update_after_submit(self, method):
     insert_breakup_table(self)
     update_additional_salary(self)
 
+# def on_update_after_submit(self,method):
+#     update_additional_salary(self)
+
 
 
 
 
 def update_additional_salary(self):
 
-    if not self.arrear_breakup:
-        return
 
-    for row in self.arrear_breakup:
+    if self.number_of_days:
 
-        additional_salaries = frappe.get_all(
-            "Additional Salary",
-            filters={
-                "ref_docname": self.name,
-                "ref_doctype": "LOP Reversal",
-                "salary_component": row.salary_component
-            },
-            fields=["name", "amount"]
-        )
+        for row in self.arrear_breakup:
 
-        for rec in additional_salaries:
-            additional_salary = frappe.get_doc("Additional Salary", rec.name)
+            additional_salaries = frappe.get_all(
+                "Additional Salary",
+                filters={
+                    "ref_docname": self.name,
+                    "ref_doctype": "LOP Reversal",
+                    "salary_component": row.salary_component
+                },
+                fields=["name", "amount"]
+            )
 
-            additional_salary.amount = row.amount
-            additional_salary.save(ignore_permissions=True)
+            for rec in additional_salaries:
+                additional_salary = frappe.get_doc("Additional Salary", rec.name)
+
+                additional_salary.amount = row.amount
+                additional_salary.save(ignore_permissions=True)
 
 
-    if not self.arrear_deduction_breakup:
-        return
 
-    for row in self.arrear_deduction_breakup:
+        for row in self.arrear_deduction_breakup:
 
-        additional_salaries = frappe.get_all(
-            "Additional Salary",
-            filters={
-                "ref_docname": self.name,
-                "ref_doctype": "LOP Reversal",
-                "salary_component": row.salary_component
-            },
-            fields=["name", "amount"]
-        )
+            additional_salaries = frappe.get_all(
+                "Additional Salary",
+                filters={
+                    "ref_docname": self.name,
+                    "ref_doctype": "LOP Reversal",
+                    "salary_component": row.salary_component
+                },
+                fields=["name", "amount"]
+            )
 
-        for rec in additional_salaries:
-            additional_salary = frappe.get_doc("Additional Salary", rec.name)
+            for rec in additional_salaries:
+                additional_salary = frappe.get_doc("Additional Salary", rec.name)
 
-            additional_salary.amount = row.amount
-            additional_salary.save(ignore_permissions=True)
+                additional_salary.amount = row.amount
+                additional_salary.save(ignore_permissions=True)
 
-    frappe.db.commit()
+        frappe.db.commit()
 
 
 
