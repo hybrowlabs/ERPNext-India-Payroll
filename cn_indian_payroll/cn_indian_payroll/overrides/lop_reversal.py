@@ -18,7 +18,7 @@ def on_cancel(self, method):
     cancel_benefit_accrual(self)
     cancel_bonus_accrual(self)
 
-def on_update_after_submit(self, method):
+def before_update_after_submit(self, method):
     insert_breakup_table(self)
     update_additional_salary(self)
 
