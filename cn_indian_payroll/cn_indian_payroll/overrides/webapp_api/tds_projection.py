@@ -2132,8 +2132,8 @@ def calculate_tds_projection(declaration_id):
                 "total_tax_already_paid": slab_result.get("tax_already_paid"),
                 # "old_tax_balance": old_tax_balance,
                 # "new_tax_balance":new_tax_balance,
-                "currentax_old_regime_tax":old_tax_balance/month_count,
-                "currentax_new_regime_tax":new_tax_balance/month_count
+                # "currentax_old_regime_tax":old_tax_balance/month_count,
+                # "currentax_new_regime_tax":new_tax_balance/month_count
 
 
                 }
