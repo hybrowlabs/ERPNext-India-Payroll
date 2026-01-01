@@ -2052,6 +2052,10 @@ def calculate_tds_projection(declaration_id):
             ) - advance_tax
         ) - slab_result.get("tax_already_paid")
 
+
+
+
+
         old_regime_tax_payable=slab_result.get("old_education_cess")+slab_result.get("old_surcharge_m")+(slab_result.get("total_sum")-slab_result.get("old_rebate_value"))
         new_regime_tax_payable=slab_result.get("new_education_cess")+slab_result.get("new_surcharge_m")+(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value"))
 
@@ -2126,8 +2130,8 @@ def calculate_tds_projection(declaration_id):
 
 
                 "total_tax_already_paid": slab_result.get("tax_already_paid"),
-                "old_tax_balance": old_tax_balance,
-                "new_tax_balance":new_tax_balance,
+                # "old_tax_balance": old_tax_balance,
+                # "new_tax_balance":new_tax_balance,
                 "currentax_old_regime_tax":old_tax_balance/month_count,
                 "currentax_new_regime_tax":new_tax_balance/month_count
 
