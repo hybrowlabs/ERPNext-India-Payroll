@@ -947,7 +947,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             "NPS": round(nps_amount_ctc, 2),
             "Provident Fund": round(pf_amount_ctc, 2),
             "Professional Tax": round(pt_amount_ctc, 2),
-            "LTA Reimbursement": round(lta_amount_ctc, 2),
+            # "LTA Reimbursement": round(lta_amount_ctc, 2),
         }
 
         NON_EDITABLE_COMPONENTS = set(SYSTEM_COMPONENT_MAP.keys())
