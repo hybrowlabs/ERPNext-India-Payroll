@@ -37,6 +37,7 @@ class CustomSalarySlip(SalarySlip):
         self.update_benefit_claim_amount()
         self.update_employee_advance_amount()
         self.update_loan_deducted_amount()
+        self.insert_attendance_log()
 
 
     def before_save(self):
@@ -90,31 +91,217 @@ class CustomSalarySlip(SalarySlip):
         self.delete_benefit_accruals()
         self.cancel_employee_advance_amount()
         self.uncheck_loan_deducted_amount()
+        self.delete_attendance_log()
 
 
-    # def set_salary_structure_assignment(self):
-    #     self._salary_structure_assignment = frappe.db.get_value(
-    #         "Salary Structure Assignment",
-    #         {
-    #             "employee": self.employee,
-    #             "salary_structure": self.salary_structure,
-    #             "from_date": ("<=", self.actual_end_date),
-    #             "docstatus": 1,
-    #         },
-    #         "*",
-    #         order_by="from_date desc",
-    #         as_dict=True,
+
+
+    # from frappe.utils import getdate
+    # from dateutil.relativedelta import relativedelta
+
+    # def insert_attendance_log(self):
+
+    #     payroll_setting = frappe.get_single("Payroll Settings")
+
+    #     start_day = payroll_setting.custom_attendance_start_date  # 21
+    #     end_day = payroll_setting.custom_attendance_end_date      # 20
+
+    #     posting_date = getdate(self.end_date)
+
+    #     if not start_day or not end_day:
+    #         frappe.throw("Attendance cycle start/end date not set in Payroll Settings")
+
+
+    #     if posting_date.day > end_day:
+    #         # cycle ends in current month
+    #         cycle_end = posting_date.replace(day=end_day)
+    #     else:
+    #         # cycle ends in previous month
+    #         cycle_end = (posting_date - relativedelta(months=1)).replace(day=end_day)
+
+    #     cycle_start = (cycle_end - relativedelta(months=1)).replace(day=start_day)
+
+
+    #     accrual_doc = frappe.new_doc("Attendance Log")
+    #     accrual_doc.month = self.custom_month
+    #     accrual_doc.company = self.company
+    #     accrual_doc.employee = self.employee
+    #     accrual_doc.salary_slip_id = self.name
+    #     accrual_doc.working_days = self.total_working_days
+    #     accrual_doc.payroll_period = self.custom_payroll_period
+
+    #     accrual_doc.from_date = cycle_start
+    #     accrual_doc.to_date = cycle_end
+
+    #     accrual_doc.payment_days = self.payment_days
+    #     accrual_doc.lwp = self.custom_total_leave_without_pay
+    #     accrual_doc.attendance_regularisationlop_reversal = 0
+    #     accrual_doc.additional_salary_date = None
+
+
+    #     attendance = frappe.get_list(
+    #     "Attendance",
+    #     filters={
+    #         "employee": self.employee,
+    #         "attendance_date": [">=", cycle_start],
+    #         "attendance_date<=", cycle_start],
+
+    #         "docstatus": 1,
+    #         "company":self.company,
+    #     },
+    #     fields=["name", "attendance_regularisationlop_reversal"],
+    #     limit=1,
     #     )
 
-    #     if not self._salary_structure_assignment:
-    #         frappe.throw(
-    #             _(
-    #                 "Please assign a Salary Structure for Employee {0} applicable from or before {1} first"
-    #             ).format(
-    #                 frappe.bold(self.employee_name),
-    #                 frappe.bold(formatdate(self.actual_start_date)),
-    #             )
-    #         )
+    #     if attendance:
+    #         for i in attendance:
+    #             attendance_log_child.append("date":i.attendance_date),
+    #             "status":i.status,
+    #             "count": 0.5 if not i.status=="Half-Day" else 1
+
+
+    #     accrual_doc.insert()
+    #     accrual_doc.submit()
+
+
+    import frappe
+    from frappe.utils import getdate
+    from dateutil.relativedelta import relativedelta
+
+
+    def insert_attendance_log(self):
+        payroll_setting = frappe.get_single("Payroll Settings")
+
+        start_day = payroll_setting.custom_attendance_start_date  # e.g. 21
+        end_day = payroll_setting.custom_attendance_end_date      # e.g. 20
+
+        posting_date = getdate(self.end_date)
+
+        if not start_day or not end_day:
+            frappe.throw("Attendance cycle start/end date not set in Payroll Settings")
+
+        # ------------------------------------------------
+        # Calculate attendance cycle
+        # ------------------------------------------------
+        if posting_date.day > end_day:
+            cycle_end = posting_date.replace(day=end_day)
+        else:
+            cycle_end = (posting_date - relativedelta(months=1)).replace(day=end_day)
+
+        cycle_start = (cycle_end - relativedelta(months=1)).replace(day=start_day)
+
+        # ------------------------------------------------
+        # Create Attendance Log
+        # ------------------------------------------------
+        accrual_doc = frappe.new_doc("Attendance Log")
+        accrual_doc.month = self.custom_month
+        accrual_doc.company = self.company
+        accrual_doc.employee = self.employee
+        accrual_doc.salary_slip_id = self.name
+        accrual_doc.working_days = self.total_working_days
+        accrual_doc.payroll_period = self.custom_payroll_period
+
+        accrual_doc.from_date = cycle_start
+        accrual_doc.to_date = cycle_end
+
+        accrual_doc.payment_days = self.payment_days
+        accrual_doc.lwp = self.custom_total_leave_without_pay
+        accrual_doc.attendance_regularisationlop_reversal = 0
+        accrual_doc.additional_salary_date = None
+
+        # ------------------------------------------------
+        # Fetch attendance records within cycle
+        # ------------------------------------------------
+        attendance_records = frappe.get_list(
+            "Attendance",
+            filters={
+                "employee": self.employee,
+                "company": self.company,
+                "attendance_date": ["between", [cycle_start, cycle_end]],
+                "docstatus": 1,
+            },
+            fields=["attendance_date", "status"],
+            order_by="attendance_date",
+        )
+
+        # ------------------------------------------------
+        # Append child rows
+        # ------------------------------------------------
+        for att in attendance_records:
+            accrual_doc.append("attendance_log_child", {
+                "date": att.attendance_date,
+                "status": att.status,
+                "count": (
+                    0.5 if att.status == "Half Day"
+                    else 1 if att.status == "Present"
+                    else 0
+                ),
+            })
+
+        # ------------------------------------------------
+        # Save & submit
+        # ------------------------------------------------
+        accrual_doc.insert(ignore_permissions=True)
+        accrual_doc.submit()
+
+
+
+
+
+    def delete_attendance_log(self):
+        attendance_logs = frappe.get_all(
+            "Attendance Log",
+            filters={
+                "salary_slip_id": self.name
+            },
+            pluck="name"
+        )
+
+        for log_name in attendance_logs:
+            doc = frappe.get_doc("Attendance Log", log_name)
+
+            # 1️⃣ Cancel if submitted
+            if doc.docstatus == 1:
+                doc.cancel()
+
+            # 2️⃣ Delete the document
+            frappe.delete_doc(
+                "Attendance Log",
+                log_name,
+                ignore_permissions=True
+            )
+
+
+
+
+
+
+
+
+
+    def set_salary_structure_assignment(self):
+        self._salary_structure_assignment = frappe.db.get_value(
+            "Salary Structure Assignment",
+            {
+                "employee": self.employee,
+                "salary_structure": self.salary_structure,
+                "from_date": ("<=", self.actual_end_date),
+                "docstatus": 1,
+            },
+            "*",
+            order_by="from_date desc",
+            as_dict=True,
+        )
+
+        if not self._salary_structure_assignment:
+            frappe.throw(
+                _(
+                    "Please assign a Salary Structure for Employee {0} applicable from or before {1} first"
+                ).format(
+                    frappe.bold(self.employee_name),
+                    frappe.bold(formatdate(self.actual_start_date)),
+                )
+            )
 
 
 

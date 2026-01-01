@@ -161,7 +161,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             for component in salary_slip.earnings:
                                 salary_component = frappe.get_doc("Salary Component", component.salary_component)
                                 if salary_component.component_type == "LTA Reimbursement":
-                                    subcategory.max_amount = round(component.amount) * num_months
+                                    subcategory.max_amount = round(component.amount * num_months)
+
 
 
 
