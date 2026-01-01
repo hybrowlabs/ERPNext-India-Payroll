@@ -2062,6 +2062,8 @@ def calculate_tds_projection(declaration_id):
         balance_tax_payable_old_regime=old_tax_balance-advance_tax
         balance_tax_payable_new_regime=new_tax_balance-advance_tax
 
+        safe_month_count = month_count if month_count else 1
+
 
         return {
                 "num_months": num_months if num_months else 0,
@@ -2132,8 +2134,8 @@ def calculate_tds_projection(declaration_id):
                 "total_tax_already_paid": slab_result.get("tax_already_paid"),
                 "old_tax_balance": old_tax_balance,
                 "new_tax_balance":new_tax_balance,
-                "currentax_old_regime_tax":old_tax_balance/month_count,
-                "currentax_new_regime_tax":new_tax_balance/month_count
+                "currentax_old_regime_tax": old_tax_balance / safe_month_count,
+                "currentax_new_regime_tax": new_tax_balance / safe_month_count
 
 
                 }
