@@ -1476,13 +1476,18 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 # {
 #   "declaration_id": "HR-TAX-DEC-2025-00009",
 #   "data": {
-#                 "monthly_house_rent": 20000,
-#                 "rented_in_metro_city":1,
+#   "monthly_house_rent": 20000,
+#   "rented_in_metro_city":1,
+#   "start_date": "2025-01-01,
+#   "end_date": "2025-12-31,
+#   "pan":"12223",
+#   "address_title1":"test",
+#   "address_title2":"test,
 
-#         "company":"PW",
-#         "payroll_period":"25-26",
-#         "employee":"37001",
-#         "go_head_with_new_regime":0,
+#   "company":"PW",
+#   "payroll_period":"25-26",
+#   "employee":"37001",
+#   "go_head_with_new_regime":0,
 #     "declarations": [
 #       {
 #         "exemption_category": "EXEMPT U/S 80C, 80CCC & 80 CCD",
@@ -1522,6 +1527,13 @@ def update_declaration_form(declaration_id, data):
 
     declaration.monthly_house_rent = data.get("monthly_house_rent")
     declaration.rented_in_metro_city = data.get("rented_in_metro_city")
+
+    declaration.custom_start_date = data.get("start_date")
+    declaration.custom_end_date = data.get("end_date")
+    declaration.custom_pan = data.get("pan")
+    declaration.custom_address_title1 = data.get("address_title1")
+    declaration.custom_address_title2 = data.get("address_title2")
+
 
 
     go_head_with_new_regime = data.get("go_head_with_new_regime")
