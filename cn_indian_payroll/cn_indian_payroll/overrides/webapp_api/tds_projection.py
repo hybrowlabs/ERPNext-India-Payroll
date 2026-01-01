@@ -45,6 +45,11 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         order_by="start_date asc"
     )
 
+
+    has_salary_slips = len(slips)
+
+
+
     slip_by_month = {}
     for s in slips:
         month = getdate(s.start_date).strftime("%B-%Y")
@@ -94,6 +99,12 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         list(last_amount_map.keys()) + list(preview_amount_map.keys())
     ))
 
+    # if has_salary_slips:
+    #     component_names = list(set(last_amount_map.keys()))
+    # else:
+    #     component_names = list(set(preview_amount_map.keys()))
+
+
     components = frappe.get_all(
         "Salary Component",
         filters={"name": ["in", component_names]},
@@ -110,6 +121,8 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         order_by="custom_sequence asc"
     )
 
+
+
     earnings, deductions, reimbursements, offcycle = [], [], [], []
 
     allowed_deduction_types = [
@@ -124,6 +137,8 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
            and not comp.custom_is_offcycle_component:
             continue
 
+
+
         if comp.type == "Deduction" and comp.component_type not in allowed_deduction_types:
             continue
 
@@ -137,6 +152,9 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
                 ) or 0
             else:
                 amount = preview_amount_map.get(comp.name, 0)
+
+
+
 
             values.append(flt(amount))
 
@@ -1020,7 +1038,6 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=PW
 
 @frappe.whitelist()
-
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
 
     # ------------------ Validation ------------------
@@ -1119,7 +1136,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
     other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
 
-    annual_statement = get_annual_statement(employee, payroll_period)
+    annual_statement = get_annual_statement(employee, payroll_period,company)
 
     if annual_statement.get("status") != "success":
         return annual_statement
@@ -1576,6 +1593,14 @@ def update_declaration_form(declaration_id, data):
     }
 
 
+
+
+
+
+
+
+
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.calculate_tds_projection?declaration_id=HR-TAX-DEC-2025-00009
 @frappe.whitelist()
 def calculate_tds_projection(declaration_id):
 
@@ -2028,7 +2053,7 @@ def calculate_tds_projection(declaration_id):
             new_annual_slab=new_annual_slab
         )
 
-        advance_tax=declaration.custom_tds_already_deducted_amount
+
 
 
         old_regime_total_tax_on_income=(slab_result.get("total_sum")-slab_result.get("old_rebate_value")),
@@ -2049,7 +2074,7 @@ def calculate_tds_projection(declaration_id):
                 slab_result.get("new_education_cess") +
                 slab_result.get("new_surcharge_m") +
                 (slab_result.get("total_sum_new") - slab_result.get("new_rebate_value"))
-            ) - advance_tax
+            )
         ) - slab_result.get("tax_already_paid")
 
 
@@ -2059,15 +2084,15 @@ def calculate_tds_projection(declaration_id):
         old_regime_tax_payable=slab_result.get("old_education_cess")+slab_result.get("old_surcharge_m")+(slab_result.get("total_sum")-slab_result.get("old_rebate_value"))
         new_regime_tax_payable=slab_result.get("new_education_cess")+slab_result.get("new_surcharge_m")+(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value"))
 
-        balance_tax_payable_old_regime=old_tax_balance-advance_tax
-        balance_tax_payable_new_regime=new_tax_balance-advance_tax
+        # balance_tax_payable_old_regime=old_tax_balance-advance_tax
+        # balance_tax_payable_new_regime=new_tax_balance-advance_tax
 
-        safe_month_count = month_count if month_count else 1
+        safe_month_count = month_count if month_count else num_months
 
 
         return {
                 "num_months": num_months if num_months else 0,
-                "month_count": month_count if month_count else 0,
+                "month_count": month_count if month_count else num_months,
                 "current_taxable_earnings_old_regime":round(current_taxable_earnings_old_regime),
                 "current_taxable_earnings_new_regime":round(current_taxable_earnings_new_regime),
                 "future_taxable_earnings_new_regime":round(future_taxable_earnings_new_regime),
@@ -2091,7 +2116,7 @@ def calculate_tds_projection(declaration_id):
 
                 "old_regime_annual_taxable_income": round(old_regime_annual_taxable_income),
                 "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
-                "advance_tax":advance_tax,
+                "advance_tax":0,
 
                 "old_regime_from_amounts": slab_result.get("from_amount"),
                 "old_regime_to_amounts": slab_result.get("to_amount"),
@@ -2127,8 +2152,10 @@ def calculate_tds_projection(declaration_id):
 
                 "total_tax_payable_old_regime":old_regime_tax_payable,
                 "total_tax_payable_new_regime":new_regime_tax_payable,
-                "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
-                "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
+
+
+                # "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
+                # "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
 
 
                 "total_tax_already_paid": slab_result.get("tax_already_paid"),
@@ -2571,6 +2598,9 @@ def download_tds_projection_pdf(declaration_id):
     frappe.local.response.filename = "TDS_Projection.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
+
+
+
 
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_tds_projection_print_html?declaration_id=HR-TAX-DEC-2025-00009
