@@ -20,7 +20,9 @@
   "lwp",
   "attendance_regularisationlop_reversal",
   "additional_salary_date",
-  "amended_from"
+  "amended_from",
+  "section_break_impf",
+  "attendance_log_child"
  ],
  "fields": [
   {
@@ -107,13 +109,24 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "section_break_impf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "attendance_log_child",
+   "fieldtype": "Table",
+   "label": "Attendance Log Child",
+   "options": "Attendance Log Child"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-30 08:52:53.335033",
+ "modified": "2025-12-31 11:56:20.001576",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Attendance Log",
