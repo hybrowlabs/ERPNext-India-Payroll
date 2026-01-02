@@ -2648,6 +2648,8 @@ def download_tds_projection_pdf(declaration_id):
 
 
 
+
+
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_tds_projection_print_html?declaration_id=HR-TAX-DEC-2025-00009
 
 @frappe.whitelist(allow_guest=True)
@@ -2693,3 +2695,90 @@ def print_declaration_preview(employee, payroll_period, company):
     }
 
     return result
+
+
+
+@frappe.whitelist()
+def print_declaration_preview1(employee, payroll_period, company):
+
+    result = {
+        "employee": employee,
+        "company": company,
+        "payroll_period": payroll_period,
+    }
+
+    # 1️⃣ Salary Projection
+    salary_projection = get_annual_statement(
+        employee=employee,
+        payroll_period=payroll_period,
+        company=company
+    )
+
+    # 2️⃣ Declaration
+    existing_declaration = get_employee_declaration_investments(
+        employee=employee,
+        company=company,
+        payroll_period=payroll_period
+    )
+
+    # 3️⃣ Attach explicitly
+    result["salary_projection"] = salary_projection.get("message", salary_projection)
+    result["existing_declaration"] = existing_declaration.get("message", existing_declaration)
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/annual_statement1.html",
+        result
+    )
+
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
+
+
+
+
+from frappe.utils.pdf import get_pdf
+
+@frappe.whitelist()
+def download_declaration_preview_pdf(employee, payroll_period, company):
+
+    # 1️⃣ Build context (same as print)
+    context = {
+        "employee": employee,
+        "company": company,
+        "payroll_period": payroll_period,
+    }
+
+    # 2️⃣ Salary Projection
+    salary_projection = get_annual_statement(
+        employee=employee,
+        payroll_period=payroll_period,
+        company=company
+    )
+
+    # 3️⃣ Declaration
+    existing_declaration = get_employee_declaration_investments(
+        employee=employee,
+        company=company,
+        payroll_period=payroll_period
+    )
+
+    context["salary_projection"] = salary_projection.get(
+        "message", salary_projection
+    )
+    context["existing_declaration"] = existing_declaration.get(
+        "message", existing_declaration
+    )
+
+    # 4️⃣ Render HTML
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/annual_statement1.html",
+        context
+    )
+
+    # 5️⃣ Convert to PDF
+    pdf = get_pdf(html)
+
+    # 6️⃣ Return download response
+    frappe.local.response.filename = "Annual_Statement.pdf"
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"
