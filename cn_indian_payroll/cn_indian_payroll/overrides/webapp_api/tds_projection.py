@@ -450,7 +450,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
     declaration_id = declaration_doc.name
     current_tax_regime = declaration_doc.custom_tax_regime
 
-    hra_exemption=[]
+    hra_exemption={}
 
     if declaration_doc.custom_tax_regime=="Old Regime":
 
@@ -473,6 +473,17 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
         # })
+        hra_exemption = {
+            "monthly_hra": declaration_doc.monthly_house_rent or 0,
+            "rented_in_metro_city": declaration_doc.rented_in_metro_city or 0,
+            "annual_hra_exemption": declaration_doc.annual_hra_exemption or 0,
+            "monthly_hra_exemption": declaration_doc.monthly_hra_exemption or 0,
+            "start_date": declaration_doc.custom_start_date or "",
+            "end_date": declaration_doc.custom_end_date or "",
+            "pan": declaration_doc.custom_pan or "",
+            "address_line1": declaration_doc.custom_address_title1 or "",
+            "address_line2": declaration_doc.custom_address_title2 or "",
+        }
 
 
 
@@ -568,17 +579,18 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "declaration_id": declaration_id,
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
-                # "hra_exemption":hra_exemption,
+                "hra_exemption":hra_exemption,
 
-                "monthly_hra":monthly_hra if monthly_hra else 0,
-                "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
-                "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
-                "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
-                "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
-                "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
-                "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
-                "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
-                "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
+                # "monthly_hra":monthly_hra if monthly_hra else 0,
+                # "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
+                # "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
+                # "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
+                # "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
+                # "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
+                # "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
+                # "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
+                # "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
+
                 "categories": final_list,
 
             }
