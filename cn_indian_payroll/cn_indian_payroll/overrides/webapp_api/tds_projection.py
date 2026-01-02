@@ -33,7 +33,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     fy_end = getdate(period.end_date)
 
     # -------- Salary Slips -------- #
-    slips = frappe.get_all(
+    slips = frappe.db.get_all(
         "Salary Slip",
         filters={
             "employee": employee,
@@ -47,6 +47,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
 
     has_salary_slips = len(slips)
+
 
 
 
@@ -66,7 +67,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     last_amount_map = {}
     if slips:
         last_slip = slips[-1]
-        last_details = frappe.get_all(
+        last_details = frappe.db.get_all(
             "Salary Detail",
             filters={"parent": last_slip.name},
             fields=["salary_component", "amount"]
@@ -77,13 +78,16 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     ssa = frappe.get_list(
         "Salary Structure Assignment",
         filters={"employee": employee, "docstatus": 1,"company":company},
-        fields=["*"],
+        fields=["name", "salary_structure", "from_date"],
         order_by="from_date desc",
         limit=1
     )
 
+
+
     preview_amount_map = {}
     if ssa:
+
         new_slip = make_salary_slip(
             source_name=ssa[0].salary_structure,
             employee=employee,
@@ -99,13 +103,17 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         list(last_amount_map.keys()) + list(preview_amount_map.keys())
     ))
 
+
+
+
+
     # if has_salary_slips:
     #     component_names = list(set(last_amount_map.keys()))
     # else:
     #     component_names = list(set(preview_amount_map.keys()))
 
 
-    components = frappe.get_all(
+    components = frappe.db.get_all(
         "Salary Component",
         filters={"name": ["in", component_names]},
         fields=[
@@ -291,7 +299,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         total = 0
         if m in slip_by_month:
 
-            details = frappe.get_all(
+            details = frappe.db.get_all(
                 "Salary Detail",
                 filters={"parent": slip_by_month[m], "parentfield": "earnings"},
                 fields=["salary_component", "amount"]
@@ -318,7 +326,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         perquisite_total = 0
         if m in slip_by_month:
 
-            details = frappe.get_all(
+            details = frappe.db.get_all(
                 "Salary Detail",
                 filters={"parent": slip_by_month[m], "parentfield": "earnings"},
                 fields=["salary_component", "amount"]
