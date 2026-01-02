@@ -415,6 +415,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             "message": "Employee, Company and Payroll Period are required"
         }
 
+    month_count=0
+
     declaration = frappe.get_all(
         "Employee Tax Exemption Declaration",
         filters={
@@ -783,6 +785,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "amount": round(nps_amount_ctc),
                 "max_amount": round(nps_amount_ctc),
             })
+
+
+
 
         return {
             "status": "success",
@@ -1652,6 +1657,8 @@ def calculate_tds_projection(declaration_id):
     month_count=0
     num_months=0
 
+    total_new_regime_deductions = 0
+    total_old_regime_deductions = 0
     if employee:
 
         latest_salary_structure = frappe.get_list(
@@ -1775,10 +1782,6 @@ def calculate_tds_projection(declaration_id):
             order_by="end_date desc",
         )
         if len(get_all_salary_slip)==0:
-            current_taxable_earnings_old_regime = 0
-            current_taxable_earnings_new_regime = 0
-
-
 
             salary_slip_preview = make_salary_slip(
                 source_name=assignment.salary_structure,
