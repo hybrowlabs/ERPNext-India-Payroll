@@ -2041,19 +2041,19 @@ def calculate_tds_projection(declaration_id):
 
 
 
-        old_regime_annual_taxable_income = max(
+        old_regime_annual_taxable_income =(
             round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
             - round(pt_amount)
             - old_regime_standard_value
-            - round(total_old_regime_deductions),
-            0
+            - round(total_old_regime_deductions)
+
         )
 
-        new_regime_annual_taxable_income = max(
+        new_regime_annual_taxable_income =(
             round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount)
             - new_regime_standard_value
-            - round(total_new_regime_deductions),
-            0
+            - round(total_new_regime_deductions)
+
         )
 
 
