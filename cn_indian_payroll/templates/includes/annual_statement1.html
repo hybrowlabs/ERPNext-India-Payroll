@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Annual Tax Statement</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, Arial, sans-serif;
+      margin: 24px;
+      color: #111827;
+    }
+    h2 { margin: 0 0 16px; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 6px 8px;
+      text-align: right;
+      word-wrap: break-word;
+    }
+    .particulars-table th:first-child,
+    .particulars-table td:first-child {
+      text-align: left;
+      width: 18%;
+      font-weight: 600;
+    }
+    .particulars-table th:last-child,
+    .particulars-table td:last-child {
+      min-width: 80px;
+    }
+    tfoot td {
+      font-weight: bold;
+      background: #f3f4f6;
+    }
+
+    .print-btn {
+      float: right;
+      margin-bottom: 16px;
+      padding: 6px 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .print-btn:hover { background: #0056b3; }
+
+    @media print {
+      .print-btn { display: none !important; }
+      thead { display: table-row-group !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">Print Statement</button>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+    <tr>
+      <td style="text-align: left;"><b>Employee:</b> {{ employee }}</td>
+      <td style="text-align: left;"><b>Company:</b> {{ company }}</td>
+      <td style="text-align: left;"><b>Payroll Period:</b> {{ payroll_period }}</td>
+      <td style="text-align: left;"><b>Tax Regime:</b> {{ existing_declaration.current_tax_regime }}</td>
+    </tr>
+  </table>
+
+  <br><br>
+
+  <table class="particulars-table">
+    <thead>
+      <tr>
+        <th>Particulars</th>
+        {% for m in salary_projection.months %}
+          <th>{{ m }}</th>
+        {% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Earnings -->
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 2 }}"><strong>Earnings</strong></td>
+      </tr>
+      {% for row in salary_projection.earnings or [] %}
+      <tr>
+        <td>{{ row.get("name") }}</td>
+        {% set vals = row.get("values", []) %}
+        {% for v in vals %}
+          <td>{{ "{:,.0f}".format(v) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(row.get("total", 0)) }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 1 }}"><strong>Total Annual Gross</strong></td>
+        <td>{{ "{:,.0f}".format(salary_projection.total_gross_earning) }}</td>
+      </tr>
+
+      <!-- Deductions -->
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 2 }}"><strong>Deductions</strong></td>
+      </tr>
+      {% for row in salary_projection.deductions or [] %}
+      <tr>
+        <td>{{ row.get("name") }}</td>
+        {% set vals = row.get("values", []) %}
+        {% for v in vals %}
+          <td>{{ "{:,.0f}".format(v) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(row.get("total", 0)) }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 1 }}"><strong>Total Annual Deductions</strong></td>
+        <td>{{ "{:,.0f}".format(salary_projection.total_deduction) }}</td>
+      </tr>
+
+      <!-- Reimbursements -->
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 2 }}"><strong>Reimbursements</strong></td>
+      </tr>
+      {% for row in salary_projection.reimbursements or [] %}
+      <tr>
+        <td>{{ row.get("name") }}</td>
+        {% set vals = row.get("values", []) %}
+        {% for v in vals %}
+          <td>{{ "{:,.0f}".format(v) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(row.get("total", 0)) }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 1 }}"><strong>Total Annual Reimbursements</strong></td>
+        <td>{{ "{:,.0f}".format(salary_projection.total_reimbursements) }}</td>
+      </tr>
+
+      <!-- Offcycle -->
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 2 }}"><strong>Offcycle Components</strong></td>
+      </tr>
+      {% for row in salary_projection.offcycle_earnings or [] %}
+      <tr>
+        <td>{{ row.get("name") }}</td>
+        {% set vals = row.get("values", []) %}
+        {% for v in vals %}
+          <td>{{ "{:,.0f}".format(v) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(row.get("total", 0)) }}</td>
+      </tr>
+      {% endfor %}
+
+      <!-- Net Pay -->
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 2 }}"><strong>Net Pay</strong></td>
+      </tr>
+      {% for row in salary_projection.net_pay or [] %}
+      <tr>
+        <td>{{ row.get("name") }}</td>
+        {% set vals = row.get("values", []) %}
+        {% for v in vals %}
+          <td>{{ "{:,.0f}".format(v) }}</td>
+        {% endfor %}
+        <td>{{ "{:,.0f}".format(row.get("total", 0)) }}</td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="{{ salary_projection.months|length + 1 }}"><strong>Grand Total</strong></td>
+        <td>{{ "{:,.0f}".format(salary_projection.total_gross_earning + salary_projection.total_reimbursements) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <br><br>
+
+  <!-- Declaration Summary -->
+  <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+    <tr>
+      <th>Particular</th>
+      <th>Amount</th>
+    </tr>
+    {% for row in existing_declaration.summary or [] %}
+    <tr>
+      <td style="text-align:left;">{{ row.get("name") }}</td>
+      <td>{{ "{:,.0f}".format(row.get("amount", 0)) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <br>
+
+  <!-- Chapter VIA -->
+  <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+    <tr>
+      <th>Component</th>
+      <th>Declared</th>
+      <th>Deductible</th>
+    </tr>
+    {% for section in existing_declaration.chapter_via or [] %}
+      {% for comp in section.get("components", []) %}
+      <tr>
+        <td style="text-align:left;">{{ comp.get("component") }}</td>
+        <td>{{ "{:,.0f}".format(comp.get("declared_amount", 0)) }}</td>
+        <td>{{ "{:,.0f}".format(comp.get("deductible_amount", 0)) }}</td>
+      </tr>
+      {% endfor %}
+    {% endfor %}
+  </table>
+
+  <br>
+
+  <!-- Net Tax Calculation -->
+  <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+    <tr>
+      <th>Particular</th>
+      <th>Amount</th>
+    </tr>
+    {% for row in existing_declaration.net_taxable_breakup or [] %}
+    <tr>
+      <td style="text-align:left;">{{ row.get("name") }}</td>
+      <td>{{ "{:,.0f}".format(row.get("amount", 0)) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+</body>
+</html>

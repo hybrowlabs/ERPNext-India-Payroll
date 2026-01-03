@@ -100,8 +100,8 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 slip.earnings, ctc_component_names, "Earning"
             )
             component_part_of_ctc.extend(earnings_ctc)
-            monthly_ctc += earnings_total
-            annual_ctc += earnings_total * 12
+            monthly_ctc += round(earnings_total)
+            annual_ctc += round(earnings_total) * 12
 
             deductions_ctc, deductions_total = process_components(
                 slip.deductions, ctc_component_names, "Deduction"

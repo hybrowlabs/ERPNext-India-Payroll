@@ -6,6 +6,10 @@ from frappe.query_builder import Order
 from frappe import _
 import math
 
+import frappe
+from frappe.utils import getdate
+from dateutil.relativedelta import relativedelta
+
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
 	add_days,
@@ -96,77 +100,6 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    # from frappe.utils import getdate
-    # from dateutil.relativedelta import relativedelta
-
-    # def insert_attendance_log(self):
-
-    #     payroll_setting = frappe.get_single("Payroll Settings")
-
-    #     start_day = payroll_setting.custom_attendance_start_date  # 21
-    #     end_day = payroll_setting.custom_attendance_end_date      # 20
-
-    #     posting_date = getdate(self.end_date)
-
-    #     if not start_day or not end_day:
-    #         frappe.throw("Attendance cycle start/end date not set in Payroll Settings")
-
-
-    #     if posting_date.day > end_day:
-    #         # cycle ends in current month
-    #         cycle_end = posting_date.replace(day=end_day)
-    #     else:
-    #         # cycle ends in previous month
-    #         cycle_end = (posting_date - relativedelta(months=1)).replace(day=end_day)
-
-    #     cycle_start = (cycle_end - relativedelta(months=1)).replace(day=start_day)
-
-
-    #     accrual_doc = frappe.new_doc("Attendance Log")
-    #     accrual_doc.month = self.custom_month
-    #     accrual_doc.company = self.company
-    #     accrual_doc.employee = self.employee
-    #     accrual_doc.salary_slip_id = self.name
-    #     accrual_doc.working_days = self.total_working_days
-    #     accrual_doc.payroll_period = self.custom_payroll_period
-
-    #     accrual_doc.from_date = cycle_start
-    #     accrual_doc.to_date = cycle_end
-
-    #     accrual_doc.payment_days = self.payment_days
-    #     accrual_doc.lwp = self.custom_total_leave_without_pay
-    #     accrual_doc.attendance_regularisationlop_reversal = 0
-    #     accrual_doc.additional_salary_date = None
-
-
-    #     attendance = frappe.get_list(
-    #     "Attendance",
-    #     filters={
-    #         "employee": self.employee,
-    #         "attendance_date": [">=", cycle_start],
-    #         "attendance_date<=", cycle_start],
-
-    #         "docstatus": 1,
-    #         "company":self.company,
-    #     },
-    #     fields=["name", "attendance_regularisationlop_reversal"],
-    #     limit=1,
-    #     )
-
-    #     if attendance:
-    #         for i in attendance:
-    #             attendance_log_child.append("date":i.attendance_date),
-    #             "status":i.status,
-    #             "count": 0.5 if not i.status=="Half-Day" else 1
-
-
-    #     accrual_doc.insert()
-    #     accrual_doc.submit()
-
-
-    import frappe
-    from frappe.utils import getdate
-    from dateutil.relativedelta import relativedelta
 
 
     def insert_attendance_log(self):
@@ -249,27 +182,28 @@ class CustomSalarySlip(SalarySlip):
 
 
     def delete_attendance_log(self):
-        attendance_logs = frappe.get_all(
+        attendance_logs = frappe.get_list(
             "Attendance Log",
             filters={
                 "salary_slip_id": self.name
             },
             pluck="name"
         )
+        if attendance_logs:
 
-        for log_name in attendance_logs:
-            doc = frappe.get_doc("Attendance Log", log_name)
+            for log_name in attendance_logs:
+                doc = frappe.get_doc("Attendance Log", log_name)
 
-            # 1️⃣ Cancel if submitted
-            if doc.docstatus == 1:
-                doc.cancel()
+                # 1️⃣ Cancel if submitted
+                if doc.docstatus == 1:
+                    doc.cancel()
 
-            # 2️⃣ Delete the document
-            frappe.delete_doc(
-                "Attendance Log",
-                log_name,
-                ignore_permissions=True
-            )
+                # 2️⃣ Delete the document
+                frappe.delete_doc(
+                    "Attendance Log",
+                    log_name,
+                    ignore_permissions=True
+                )
 
 
 

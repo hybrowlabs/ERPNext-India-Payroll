@@ -33,7 +33,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     fy_end = getdate(period.end_date)
 
     # -------- Salary Slips -------- #
-    slips = frappe.get_all(
+    slips = frappe.db.get_all(
         "Salary Slip",
         filters={
             "employee": employee,
@@ -44,6 +44,12 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         fields=["name", "start_date"],
         order_by="start_date asc"
     )
+
+
+    has_salary_slips = len(slips)
+
+
+
 
     slip_by_month = {}
     for s in slips:
@@ -61,7 +67,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     last_amount_map = {}
     if slips:
         last_slip = slips[-1]
-        last_details = frappe.get_all(
+        last_details = frappe.db.get_all(
             "Salary Detail",
             filters={"parent": last_slip.name},
             fields=["salary_component", "amount"]
@@ -72,13 +78,16 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     ssa = frappe.get_list(
         "Salary Structure Assignment",
         filters={"employee": employee, "docstatus": 1,"company":company},
-        fields=["*"],
+        fields=["name", "salary_structure", "from_date"],
         order_by="from_date desc",
         limit=1
     )
 
+
+
     preview_amount_map = {}
     if ssa:
+
         new_slip = make_salary_slip(
             source_name=ssa[0].salary_structure,
             employee=employee,
@@ -94,7 +103,17 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         list(last_amount_map.keys()) + list(preview_amount_map.keys())
     ))
 
-    components = frappe.get_all(
+
+
+
+
+    # if has_salary_slips:
+    #     component_names = list(set(last_amount_map.keys()))
+    # else:
+    #     component_names = list(set(preview_amount_map.keys()))
+
+
+    components = frappe.db.get_all(
         "Salary Component",
         filters={"name": ["in", component_names]},
         fields=[
@@ -110,6 +129,8 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         order_by="custom_sequence asc"
     )
 
+
+
     earnings, deductions, reimbursements, offcycle = [], [], [], []
 
     allowed_deduction_types = [
@@ -124,6 +145,8 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
            and not comp.custom_is_offcycle_component:
             continue
 
+
+
         if comp.type == "Deduction" and comp.component_type not in allowed_deduction_types:
             continue
 
@@ -137,6 +160,9 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
                 ) or 0
             else:
                 amount = preview_amount_map.get(comp.name, 0)
+
+
+
 
             values.append(flt(amount))
 
@@ -273,7 +299,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         total = 0
         if m in slip_by_month:
 
-            details = frappe.get_all(
+            details = frappe.db.get_all(
                 "Salary Detail",
                 filters={"parent": slip_by_month[m], "parentfield": "earnings"},
                 fields=["salary_component", "amount"]
@@ -300,7 +326,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         perquisite_total = 0
         if m in slip_by_month:
 
-            details = frappe.get_all(
+            details = frappe.db.get_all(
                 "Salary Detail",
                 filters={"parent": slip_by_month[m], "parentfield": "earnings"},
                 fields=["salary_component", "amount"]
@@ -397,6 +423,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             "message": "Employee, Company and Payroll Period are required"
         }
 
+    month_count=0
+
     declaration = frappe.get_all(
         "Employee Tax Exemption Declaration",
         filters={
@@ -422,7 +450,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
     declaration_id = declaration_doc.name
     current_tax_regime = declaration_doc.custom_tax_regime
 
-    hra_exemption=[]
+    hra_exemption={}
 
     if declaration_doc.custom_tax_regime=="Old Regime":
 
@@ -431,20 +459,31 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
         annual_hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
         monthly_hra_exemption=declaration_doc.monthly_hra_exemption if declaration_doc.monthly_hra_exemption else 0
 
-        hra_exemption.append({
-            "monthly_hra":monthly_hra if monthly_hra else 0,
-            "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
-            "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
-            "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
-            "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
-            "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
-            "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
-            "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
-            "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
+        # hra_exemption.append({
+        #     "monthly_hra":monthly_hra if monthly_hra else 0,
+        #     "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
+        #     "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
+        #     "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
+        #     "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
+        #     "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
+        #     "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
+        #     "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
+        #     "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
 
 
 
-        })
+        # })
+        hra_exemption = {
+            "monthly_hra": declaration_doc.monthly_house_rent or 0,
+            "rented_in_metro_city": declaration_doc.rented_in_metro_city or 0,
+            "annual_hra_exemption": declaration_doc.annual_hra_exemption or 0,
+            "monthly_hra_exemption": declaration_doc.monthly_hra_exemption or 0,
+            "start_date": declaration_doc.custom_start_date or "",
+            "end_date": declaration_doc.custom_end_date or "",
+            "pan": declaration_doc.custom_pan or "",
+            "address_line1": declaration_doc.custom_address_title1 or "",
+            "address_line2": declaration_doc.custom_address_title2 or "",
+        }
 
 
 
@@ -541,6 +580,17 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
                 "hra_exemption":hra_exemption,
+
+                # "monthly_hra":monthly_hra if monthly_hra else 0,
+                # "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
+                # "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
+                # "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
+                # "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
+                # "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
+                # "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
+                # "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
+                # "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
+
                 "categories": final_list,
 
             }
@@ -765,6 +815,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "amount": round(nps_amount_ctc),
                 "max_amount": round(nps_amount_ctc),
             })
+
+
+
 
         return {
             "status": "success",
@@ -1020,7 +1073,6 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=PW
 
 @frappe.whitelist()
-
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
 
     # ------------------ Validation ------------------
@@ -1119,7 +1171,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
     other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
 
-    annual_statement = get_annual_statement(employee, payroll_period)
+    annual_statement = get_annual_statement(employee, payroll_period,company)
 
     if annual_statement.get("status") != "success":
         return annual_statement
@@ -1459,13 +1511,18 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 # {
 #   "declaration_id": "HR-TAX-DEC-2025-00009",
 #   "data": {
-#                 "monthly_house_rent": 20000,
-#                 "rented_in_metro_city":1,
+#   "monthly_house_rent": 20000,
+#   "rented_in_metro_city":1,
+#   "start_date": "2025-01-01,
+#   "end_date": "2025-12-31,
+#   "pan":"12223",
+#   "address_title1":"test",
+#   "address_title2":"test,
 
-#         "company":"PW",
-#         "payroll_period":"25-26",
-#         "employee":"37001",
-#         "go_head_with_new_regime":0,
+#   "company":"PW",
+#   "payroll_period":"25-26",
+#   "employee":"37001",
+#   "go_head_with_new_regime":0,
 #     "declarations": [
 #       {
 #         "exemption_category": "EXEMPT U/S 80C, 80CCC & 80 CCD",
@@ -1505,6 +1562,13 @@ def update_declaration_form(declaration_id, data):
 
     declaration.monthly_house_rent = data.get("monthly_house_rent")
     declaration.rented_in_metro_city = data.get("rented_in_metro_city")
+
+    declaration.custom_start_date = data.get("start_date")
+    declaration.custom_end_date = data.get("end_date")
+    declaration.custom_pan = data.get("pan")
+    declaration.custom_address_title1 = data.get("address_title1")
+    declaration.custom_address_title2 = data.get("address_title2")
+
 
 
     go_head_with_new_regime = data.get("go_head_with_new_regime")
@@ -1576,6 +1640,14 @@ def update_declaration_form(declaration_id, data):
     }
 
 
+
+
+
+
+
+
+
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.calculate_tds_projection?declaration_id=HR-TAX-DEC-2025-00009
 @frappe.whitelist()
 def calculate_tds_projection(declaration_id):
 
@@ -1615,6 +1687,8 @@ def calculate_tds_projection(declaration_id):
     month_count=0
     num_months=0
 
+    total_new_regime_deductions = 0
+    total_old_regime_deductions = 0
     if employee:
 
         latest_salary_structure = frappe.get_list(
@@ -1738,10 +1812,6 @@ def calculate_tds_projection(declaration_id):
             order_by="end_date desc",
         )
         if len(get_all_salary_slip)==0:
-            current_taxable_earnings_old_regime = 0
-            current_taxable_earnings_new_regime = 0
-
-
 
             salary_slip_preview = make_salary_slip(
                 source_name=assignment.salary_structure,
@@ -2001,19 +2071,19 @@ def calculate_tds_projection(declaration_id):
 
 
 
-        old_regime_annual_taxable_income = max(
+        old_regime_annual_taxable_income =(
             round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
             - round(pt_amount)
             - old_regime_standard_value
-            - round(total_old_regime_deductions),
-            0
+            - round(total_old_regime_deductions)
+
         )
 
-        new_regime_annual_taxable_income = max(
+        new_regime_annual_taxable_income =(
             round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount)
             - new_regime_standard_value
-            - round(total_new_regime_deductions),
-            0
+            - round(total_new_regime_deductions)
+
         )
 
 
@@ -2028,7 +2098,7 @@ def calculate_tds_projection(declaration_id):
             new_annual_slab=new_annual_slab
         )
 
-        advance_tax=declaration.custom_tds_already_deducted_amount
+
 
 
         old_regime_total_tax_on_income=(slab_result.get("total_sum")-slab_result.get("old_rebate_value")),
@@ -2049,7 +2119,7 @@ def calculate_tds_projection(declaration_id):
                 slab_result.get("new_education_cess") +
                 slab_result.get("new_surcharge_m") +
                 (slab_result.get("total_sum_new") - slab_result.get("new_rebate_value"))
-            ) - advance_tax
+            )
         ) - slab_result.get("tax_already_paid")
 
 
@@ -2059,15 +2129,15 @@ def calculate_tds_projection(declaration_id):
         old_regime_tax_payable=slab_result.get("old_education_cess")+slab_result.get("old_surcharge_m")+(slab_result.get("total_sum")-slab_result.get("old_rebate_value"))
         new_regime_tax_payable=slab_result.get("new_education_cess")+slab_result.get("new_surcharge_m")+(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value"))
 
-        balance_tax_payable_old_regime=old_tax_balance-advance_tax
-        balance_tax_payable_new_regime=new_tax_balance-advance_tax
+        # balance_tax_payable_old_regime=old_tax_balance-advance_tax
+        # balance_tax_payable_new_regime=new_tax_balance-advance_tax
 
-        safe_month_count = month_count if month_count else 1
+        safe_month_count = month_count if month_count else num_months
 
 
         return {
                 "num_months": num_months if num_months else 0,
-                "month_count": month_count if month_count else 0,
+                "month_count": month_count if month_count else num_months,
                 "current_taxable_earnings_old_regime":round(current_taxable_earnings_old_regime),
                 "current_taxable_earnings_new_regime":round(current_taxable_earnings_new_regime),
                 "future_taxable_earnings_new_regime":round(future_taxable_earnings_new_regime),
@@ -2091,7 +2161,7 @@ def calculate_tds_projection(declaration_id):
 
                 "old_regime_annual_taxable_income": round(old_regime_annual_taxable_income),
                 "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
-                "advance_tax":advance_tax,
+                "advance_tax":0,
 
                 "old_regime_from_amounts": slab_result.get("from_amount"),
                 "old_regime_to_amounts": slab_result.get("to_amount"),
@@ -2127,8 +2197,10 @@ def calculate_tds_projection(declaration_id):
 
                 "total_tax_payable_old_regime":old_regime_tax_payable,
                 "total_tax_payable_new_regime":new_regime_tax_payable,
-                "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
-                "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
+
+
+                # "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
+                # "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
 
 
                 "total_tax_already_paid": slab_result.get("tax_already_paid"),
@@ -2573,6 +2645,11 @@ def download_tds_projection_pdf(declaration_id):
     frappe.local.response.type = "download"
 
 
+
+
+
+
+
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_tds_projection_print_html?declaration_id=HR-TAX-DEC-2025-00009
 
 @frappe.whitelist(allow_guest=True)
@@ -2618,3 +2695,90 @@ def print_declaration_preview(employee, payroll_period, company):
     }
 
     return result
+
+
+
+@frappe.whitelist()
+def print_declaration_preview1(employee, payroll_period, company):
+
+    result = {
+        "employee": employee,
+        "company": company,
+        "payroll_period": payroll_period,
+    }
+
+    # 1️⃣ Salary Projection
+    salary_projection = get_annual_statement(
+        employee=employee,
+        payroll_period=payroll_period,
+        company=company
+    )
+
+    # 2️⃣ Declaration
+    existing_declaration = get_employee_declaration_investments(
+        employee=employee,
+        company=company,
+        payroll_period=payroll_period
+    )
+
+    # 3️⃣ Attach explicitly
+    result["salary_projection"] = salary_projection.get("message", salary_projection)
+    result["existing_declaration"] = existing_declaration.get("message", existing_declaration)
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/annual_statement1.html",
+        result
+    )
+
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
+
+
+
+
+from frappe.utils.pdf import get_pdf
+
+@frappe.whitelist()
+def download_declaration_preview_pdf(employee, payroll_period, company):
+
+    # 1️⃣ Build context (same as print)
+    context = {
+        "employee": employee,
+        "company": company,
+        "payroll_period": payroll_period,
+    }
+
+    # 2️⃣ Salary Projection
+    salary_projection = get_annual_statement(
+        employee=employee,
+        payroll_period=payroll_period,
+        company=company
+    )
+
+    # 3️⃣ Declaration
+    existing_declaration = get_employee_declaration_investments(
+        employee=employee,
+        company=company,
+        payroll_period=payroll_period
+    )
+
+    context["salary_projection"] = salary_projection.get(
+        "message", salary_projection
+    )
+    context["existing_declaration"] = existing_declaration.get(
+        "message", existing_declaration
+    )
+
+    # 4️⃣ Render HTML
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/annual_statement1.html",
+        context
+    )
+
+    # 5️⃣ Convert to PDF
+    pdf = get_pdf(html)
+
+    # 6️⃣ Return download response
+    frappe.local.response.filename = "Annual_Statement.pdf"
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"

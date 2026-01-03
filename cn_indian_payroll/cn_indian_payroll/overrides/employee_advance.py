@@ -34,6 +34,8 @@ def before_submit(self, method):
         frappe.throw("Please Select the Status Approved or Rejected")
 
 
+
+
 @frappe.whitelist()
 def get_advance_dashboard(employee):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
@@ -370,11 +372,12 @@ def validate(self, method):
     elif self.employee and self.custom_type=="Reimbursement / Expense Advance":
         self.repay_unclaimed_amount_from_salary=1
 
+
+
+
 @frappe.whitelist()
 def get_advance_amount_checking(employee, advance_type, posting_date,company):
-    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
-    if target_employee:
-        employee = target_employee
+
     if not (employee and advance_type and posting_date):
         return None
 
