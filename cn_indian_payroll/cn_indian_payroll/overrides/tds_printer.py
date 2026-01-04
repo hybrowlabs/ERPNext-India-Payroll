@@ -633,14 +633,18 @@ def get_offcycle_payslip_pdf_html(id):
     try:
         slip = frappe.get_doc("Salary Slip", id)
 
-        # Flag to check Offcycle eligibility
         find = False
         if slip.earnings:
             for earning in slip.earnings:
                 component = frappe.get_cached_doc("Salary Component", earning.salary_component)
+                # if (
+                #     getattr(component, "custom_is_part_of_gross_pay", 0) == 0
+                #     and getattr(component, "do_not_include_in_total", 0) == 1
+                #     and getattr(component, "custom_component_sub_type", "") == "Variable"
+                # ):
+
                 if (
-                    getattr(component, "custom_is_part_of_gross_pay", 0) == 0
-                    and getattr(component, "do_not_include_in_total", 0) == 1
+                    getattr(component, "custom_is_offcycle_component", 0) == 1
                     and getattr(component, "custom_component_sub_type", "") == "Variable"
                 ):
                     find = True
