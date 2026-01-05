@@ -198,14 +198,15 @@
 
   {# -------- FILTER DEDUCTIONS -------- #}
   {% set d_list = [] %}
-  {% for d in doc.deductions %}
-    {% set scd = frappe.get_doc("Salary Component", d.salary_component) %}
-    {% if scd.custom_component_sub_type == "Variable"
-          and scd.custom_is_offcycle_component == 1 %}
-      {% set _ = d_list.append(d) %}
-      {% set ns.total_deductions = ns.total_deductions + (d.amount or 0) %}
-    {% endif %}
-  {% endfor %}
+  {% if doc.custom_additional_tds_deducted_amount%}
+    {% set _ = d_list.append({
+      "salary_component": "Additional TDS",
+      "amount": doc.custom_additional_tds_deducted_amount
+    }) %}
+
+    {%endif%}
+
+
 
   {% set max_len = [e_list|length, d_list|length] | max %}
 
@@ -230,7 +231,8 @@
           {{ "{:,.0f}".format(d_list[i].amount or 0) }}
         </td>
       {% else %}
-        <td></td><td></td>
+        <td></td>
+        <td></td>
       {% endif %}
 
     </tr>
@@ -244,11 +246,11 @@
     </th>
     <th style="text-align:left;"><b>Total Deductions (B)</b></th>
     <th style="text-align:right;">
-      {{ "{:,.0f}".format(ns.total_deductions) }}
+      {{ "{:,.0f}".format(doc.custom_additional_tds_deducted_amount) }}
     </th>
   </tr>
 
-  {% set net_pay = ns.total_earnings - ns.total_deductions %}
+  {% set net_pay = ns.total_earnings - doc.custom_additional_tds_deducted_amount %}
 
   <tr>
     <th style="text-align:left;"><b>Net Pay (A − B)</b></th>

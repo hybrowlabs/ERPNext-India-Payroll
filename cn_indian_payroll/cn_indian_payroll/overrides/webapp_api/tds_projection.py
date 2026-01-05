@@ -450,7 +450,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
     declaration_id = declaration_doc.name
     current_tax_regime = declaration_doc.custom_tax_regime
 
-    hra_exemption={}
+    hra_exemption=[]
+
+    section_10=[]
 
     if declaration_doc.custom_tax_regime=="Old Regime":
 
@@ -459,21 +461,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
         annual_hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
         monthly_hra_exemption=declaration_doc.monthly_hra_exemption if declaration_doc.monthly_hra_exemption else 0
 
-        # hra_exemption.append({
-        #     "monthly_hra":monthly_hra if monthly_hra else 0,
-        #     "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
-        #     "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
-        #     "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
-        #     "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
-        #     "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
-        #     "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
-        #     "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
-        #     "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
 
-
-
-        # })
-        hra_exemption = {
+        hra_exemption.append({
             "monthly_hra": declaration_doc.monthly_house_rent or 0,
             "rented_in_metro_city": declaration_doc.rented_in_metro_city or 0,
             "annual_hra_exemption": declaration_doc.annual_hra_exemption or 0,
@@ -483,7 +472,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             "pan": declaration_doc.custom_pan or "",
             "address_line1": declaration_doc.custom_address_title1 or "",
             "address_line2": declaration_doc.custom_address_title2 or "",
-        }
+        })
 
 
 
@@ -517,12 +506,83 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
     go_head_with_new_regime = int(go_head_with_new_regime)
 
     # ------------------ No Regime Change ------------------
-    if go_head_with_new_regime == current_flag:
-        if current_tax_regime=="Old Regime":
+    # if go_head_with_new_regime == current_flag:
+    #     if current_tax_regime=="Old Regime":
 
+
+    #         NON_EDITABLE_COMPONENTS = [
+    #             # "LTA Reimbursement",
+    #             "Professional Tax",
+    #             "Provident Fund",
+    #             "NPS"
+    #         ]
+
+    #         records = frappe.get_all(
+    #             "Employee Tax Exemption Sub Category",
+    #             filters={"is_active": 1},
+    #             fields=[
+    #                 "exemption_category",
+    #                 "name",
+    #                 "max_amount",
+    #                 "custom_component_type",
+    #                 "custom_description",
+    #                 "custom_sequence",
+    #                 "custom_section_property"
+    #             ],
+    #             order_by="custom_sequence asc"
+    #         )
+
+    #         grouped = {}
+
+    #         for row in records:
+    #             category = row.exemption_category
+
+    #             if category not in grouped:
+    #                 grouped[category] = []
+
+    #             declaration_row = existing_map.get(row.name)
+
+    #             editable = 0 if row.custom_component_type in NON_EDITABLE_COMPONENTS else 1
+
+    #             grouped[category].append({
+    #                 "exemption_sub_category": row.name,
+    #                 "component_type": row.custom_component_type,
+    #                 "description": row.custom_description,
+    #                 "editable": editable,
+    #                 "amount": round(declaration_row["amount"]) if declaration_row else 0,
+    #                 "max_amount": round(
+    #                     declaration_row["max_amount"]
+    #                     if declaration_row and declaration_row.get("max_amount") is not None
+    #                     else row.max_amount
+    #                 ),
+    #             })
+
+    #         final_list = []
+    #         for category, items in grouped.items():
+    #             final_list.append({
+    #                 "category_name": category,
+    #                 "items": items
+    #             })
+
+
+
+    #         return {
+    #             "status": "success",
+    #             "declaration_id": declaration_id,
+    #             "current_tax_regime": current_tax_regime,
+    #             "go_head_with_new_regime": current_flag,
+    #             "hra_exemption":hra_exemption,
+
+
+
+    #             "categories": final_list,
+
+    #         }
+
+    if go_head_with_new_regime == current_flag:
+        if current_tax_regime == "Old Regime":
 
             NON_EDITABLE_COMPONENTS = [
-                # "LTA Reimbursement",
                 "Professional Tax",
                 "Provident Fund",
                 "NPS"
@@ -530,14 +590,94 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
             records = frappe.get_all(
                 "Employee Tax Exemption Sub Category",
-                filters={"is_active": 1},
+                filters={"is_active": 1,"custom_component_type": ["!=", "LTA Reimbursement"]},
                 fields=[
                     "exemption_category",
                     "name",
                     "max_amount",
                     "custom_component_type",
                     "custom_description",
-                    "custom_sequence"
+                    "custom_sequence",
+                    "custom_section_property"
+                ],
+                order_by="custom_sequence asc"
+            )
+
+            # Step 1: Group by exemption_category (existing logic)
+            category_grouped = {}
+
+            for row in records:
+                category = row.exemption_category
+
+                if category not in category_grouped:
+                    category_grouped[category] = {
+                        "category_name": category,
+                        "custom_section_property": row.custom_section_property,
+                        "items": []
+                    }
+
+                declaration_row = existing_map.get(row.name)
+
+                editable = 0 if row.custom_component_type in NON_EDITABLE_COMPONENTS else 1
+
+                category_grouped[category]["items"].append({
+                    "exemption_sub_category": row.name,
+                    "component_type": row.custom_component_type,
+                    "description": row.custom_description,
+                    "editable": editable,
+                    "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                    "max_amount": round(
+                        declaration_row["max_amount"]
+                        if declaration_row and declaration_row.get("max_amount") is not None
+                        else row.max_amount
+                    ),
+                })
+
+            # Step 2: Combine by custom_section_property
+            section_property_grouped = {}
+            normal_categories = []
+
+            for category_data in category_grouped.values():
+                section_property = category_data.get("custom_section_property")
+
+                # Only combine if custom_section_property exists
+                if section_property:
+                    if section_property not in section_property_grouped:
+                        section_property_grouped[section_property] = {
+                            "custom_section_property": section_property,
+                            "exemption_category": []
+                        }
+
+                    section_property_grouped[section_property]["exemption_category"].append({
+                        "category_name": category_data["category_name"],
+                        "items": category_data["items"]
+                    })
+                else:
+                    # Keep normal categories as-is
+                    normal_categories.append(category_data)
+
+            # Step 3: Final categories list
+            final_categories = list(section_property_grouped.values()) + normal_categories
+
+            # Keep only categories where custom_section_property is SET
+            final_categories = [
+                cat for cat in final_categories
+                if cat.get("custom_section_property")
+            ]
+
+
+
+            records = frappe.get_all(
+                "Employee Tax Exemption Sub Category",
+                filters={"is_active": 1,"custom_component_type":"LTA Reimbursement"},
+                fields=[
+                    "exemption_category",
+                    "name",
+                    "max_amount",
+                    "custom_component_type",
+                    "custom_description",
+                    "custom_sequence",
+                    "custom_section_property"
                 ],
                 order_by="custom_sequence asc"
             )
@@ -574,26 +714,70 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "items": items
                 })
 
+            hra_exemption.append({
+                "items":final_list})
+
+
             return {
                 "status": "success",
                 "declaration_id": declaration_id,
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
-                "hra_exemption":hra_exemption,
-
-                # "monthly_hra":monthly_hra if monthly_hra else 0,
-                # "rented_in_metro_city":rented_in_metro_city if rented_in_metro_city else 0,
-                # "annual_hra_exemption":annual_hra_exemption if annual_hra_exemption else 0,
-                # "monthly_hra_exemption":monthly_hra_exemption if monthly_hra_exemption else 0,
-                # "start_date":declaration_doc.custom_start_date if declaration_doc.custom_start_date else "",
-                # "end_date":declaration_doc.custom_end_date if declaration_doc.custom_end_date else "",
-                # "pan":declaration_doc.custom_pan if declaration_doc.custom_pan else "",
-                # "address_line1":declaration_doc.custom_address_title1 if declaration_doc.custom_address_title1 else "",
-                # "address_line2":declaration_doc.custom_address_title2 if declaration_doc.custom_address_title2 else "",
-
-                "categories": final_list,
-
+                "hra_exemption": hra_exemption,
+                "categories": final_categories,
             }
+
+
+
+        # elif current_tax_regime == "New Regime":
+
+        #     records = frappe.get_all(
+        #         "Employee Tax Exemption Sub Category",
+        #         filters={
+        #             "is_active": 1,
+        #             "custom_component_type": "NPS"
+        #         },
+        #         fields=[
+        #             "exemption_category",
+        #             "name",
+        #             "max_amount",
+        #             "custom_component_type",
+        #             "custom_description"
+        #         ]
+        #     )
+
+        #     nps_items = []
+
+        #     for row in records:
+        #         declaration_row = existing_map.get(row.name)
+
+        #         nps_items.append({
+        #             "exemption_sub_category": row.name,
+        #             "component_type": row.custom_component_type,
+        #             "description": row.custom_description,
+        #             "editable": 0,
+        #             "amount": declaration_row["amount"] if declaration_row else 0,
+        #             "max_amount": (
+        #                 declaration_row["max_amount"]
+        #                 if declaration_row and declaration_row.get("max_amount") is not None
+        #                 else row.max_amount
+        #             )
+        #         })
+
+        #     return {
+        #         "status": "success",
+        #         "declaration_id": declaration_id,
+        #         "current_tax_regime": current_tax_regime,
+        #         "go_head_with_new_regime": current_flag,
+
+        #         "categories": [
+        #             {
+        #                 "category_name": "NPS",
+        #                 "items": nps_items
+        #             }
+        #         ],
+
+        #     }
 
 
 
@@ -610,42 +794,70 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "name",
                     "max_amount",
                     "custom_component_type",
-                    "custom_description"
+                    "custom_description",
+                    "custom_section_property"
                 ]
             )
 
-            nps_items = []
+            # Step 1: Group by exemption_category
+            category_grouped = {}
 
             for row in records:
+                category = row.exemption_category
+
+                if category not in category_grouped:
+                    category_grouped[category] = {
+                        "category_name": category,
+                        "custom_section_property": row.custom_section_property,
+                        "items": []
+                    }
+
                 declaration_row = existing_map.get(row.name)
 
-                nps_items.append({
+                category_grouped[category]["items"].append({
                     "exemption_sub_category": row.name,
                     "component_type": row.custom_component_type,
                     "description": row.custom_description,
-                    "editable": 0,
-                    "amount": declaration_row["amount"] if declaration_row else 0,
-                    "max_amount": (
+                    "editable": 0,  # NPS is non-editable
+                    "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                    "max_amount": round(
                         declaration_row["max_amount"]
                         if declaration_row and declaration_row.get("max_amount") is not None
                         else row.max_amount
                     )
                 })
 
+            # Step 2: Combine by custom_section_property (same as Old Regime)
+            section_property_grouped = {}
+
+            for category_data in category_grouped.values():
+                section_property = category_data.get("custom_section_property")
+
+                if section_property:
+                    if section_property not in section_property_grouped:
+                        section_property_grouped[section_property] = {
+                            "custom_section_property": section_property,
+                            "exemption_category": []
+                        }
+
+                    section_property_grouped[section_property]["exemption_category"].append({
+                        "category_name": category_data["category_name"],
+                        "items": category_data["items"]
+                    })
+
+            final_categories = list(section_property_grouped.values())
+
             return {
                 "status": "success",
                 "declaration_id": declaration_id,
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
-
-                "categories": [
-                    {
-                        "category_name": "NPS",
-                        "items": nps_items
-                    }
-                ],
-
+                "categories": final_categories
             }
+
+
+
+
 
         # ------------------ Old → New ------------------
     if go_head_with_new_regime == 1 and current_flag == 0:
@@ -789,53 +1001,125 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
         # ---------------- NPS SUB CATEGORY ----------------
-        records = frappe.get_all(
-            "Employee Tax Exemption Sub Category",
-            filters={
-                "is_active": 1,
-                "custom_component_type": "NPS",
-            },
-            fields=[
-                "exemption_category",
-                "name",
-                "max_amount",
-                "custom_component_type",
-                "custom_description",
-            ],
-        )
+        # records = frappe.get_all(
+        #     "Employee Tax Exemption Sub Category",
+        #     filters={
+        #         "is_active": 1,
+        #         "custom_component_type": "NPS",
+        #     },
+        #     fields=[
+        #         "exemption_category",
+        #         "name",
+        #         "max_amount",
+        #         "custom_component_type",
+        #         "custom_description",
+        #     ],
+        # )
 
-        nps_items = []
+        # nps_items = []
+
+        # for row in records:
+        #     nps_items.append({
+        #         "exemption_sub_category": row.name,
+        #         "component_type": row.custom_component_type,
+        #         "description": row.custom_description,
+        #         "editable": 0,
+        #         "amount": round(nps_amount_ctc),
+        #         "max_amount": round(nps_amount_ctc),
+        #     })
+
+
+
+
+        # return {
+        #     "status": "success",
+
+        #     "month_count":month_count,
+
+        #     "choosed_tax_regime": choosed_tax_regime,
+        #     "latest_tax_slab_new_regime": latest_tax_slab_name,
+        #     "declaration_id": declaration_id,
+        #     "current_tax_regime": current_tax_regime,
+        #     "go_head_with_new_regime": 1,
+        #     "message": "User switched from Old Regime to New Regime",
+        #     "categories": [
+        #         {
+        #             "category_name": "NPS",
+        #             "items": nps_items,
+        #         }
+        #     ],
+        # }
+
+        records = frappe.get_all(
+                "Employee Tax Exemption Sub Category",
+                filters={
+                    "is_active": 1,
+                    "custom_component_type": "NPS"
+                },
+                fields=[
+                    "exemption_category",
+                    "name",
+                    "max_amount",
+                    "custom_component_type",
+                    "custom_description",
+                    "custom_section_property"
+                ]
+            )
+
+        # Step 1: Group by exemption_category
+        category_grouped = {}
 
         for row in records:
-            nps_items.append({
+            category = row.exemption_category
+
+            if category not in category_grouped:
+                category_grouped[category] = {
+                    "category_name": category,
+                    "custom_section_property": row.custom_section_property,
+                    "items": []
+                }
+
+            declaration_row = existing_map.get(row.name)
+
+            category_grouped[category]["items"].append({
                 "exemption_sub_category": row.name,
                 "component_type": row.custom_component_type,
                 "description": row.custom_description,
-                "editable": 0,
-                "amount": round(nps_amount_ctc),
-                "max_amount": round(nps_amount_ctc),
+                "editable": 0,  # NPS is non-editable
+                "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                "max_amount": round(
+                    declaration_row["max_amount"]
+                    if declaration_row and declaration_row.get("max_amount") is not None
+                    else row.max_amount
+                )
             })
 
+        # Step 2: Combine by custom_section_property (same as Old Regime)
+        section_property_grouped = {}
 
+        for category_data in category_grouped.values():
+            section_property = category_data.get("custom_section_property")
 
+            if section_property:
+                if section_property not in section_property_grouped:
+                    section_property_grouped[section_property] = {
+                        "custom_section_property": section_property,
+                        "exemption_category": []
+                    }
+
+                section_property_grouped[section_property]["exemption_category"].append({
+                    "category_name": category_data["category_name"],
+                    "items": category_data["items"]
+                })
+
+        final_categories = list(section_property_grouped.values())
 
         return {
             "status": "success",
-
-            "month_count":month_count,
-
-            "choosed_tax_regime": choosed_tax_regime,
-            "latest_tax_slab_new_regime": latest_tax_slab_name,
             "declaration_id": declaration_id,
             "current_tax_regime": current_tax_regime,
-            "go_head_with_new_regime": 1,
-            "message": "User switched from Old Regime to New Regime",
-            "categories": [
-                {
-                    "category_name": "NPS",
-                    "items": nps_items,
-                }
-            ],
+            "go_head_with_new_regime": current_flag,
+            "categories": final_categories
         }
 
 
@@ -1005,6 +1289,56 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
         NON_EDITABLE_COMPONENTS = set(SYSTEM_COMPONENT_MAP.keys())
 
+        # records = frappe.get_all(
+        #     "Employee Tax Exemption Sub Category",
+        #     filters={"is_active": 1},
+        #     fields=[
+        #         "exemption_category",
+        #         "name",
+        #         "max_amount",
+        #         "custom_component_type",
+        #         "custom_description",
+        #         "custom_sequence",
+        #     ],
+        #     order_by="custom_sequence asc",
+        # )
+
+        # grouped = {}
+
+        # for row in records:
+        #     grouped.setdefault(row.exemption_category, [])
+
+        #     declaration_row = existing_map.get(row.name)
+
+        #     if row.custom_component_type in SYSTEM_COMPONENT_MAP:
+        #         amount = SYSTEM_COMPONENT_MAP[row.custom_component_type]
+        #         max_amount = amount
+        #         editable = 0
+        #     else:
+        #         amount = declaration_row["amount"] if declaration_row else 0
+        #         max_amount = (
+        #             declaration_row.get("max_amount")
+        #             if declaration_row and declaration_row.get("max_amount") is not None
+        #             else row.max_amount
+        #         )
+        #         editable = 1
+
+        #     grouped[row.exemption_category].append({
+        #         "exemption_sub_category": row.name,
+        #         "component_type": row.custom_component_type,
+        #         "description": row.custom_description,
+        #         "editable": editable,
+        #         "amount": round(amount),
+        #         "max_amount": round(max_amount),
+        #     })
+
+        # final_categories = [
+        #     {"category_name": cat, "items": items}
+        #     for cat, items in grouped.items()
+        # ]
+
+
+
         records = frappe.get_all(
             "Employee Tax Exemption Sub Category",
             filters={"is_active": 1},
@@ -1015,17 +1349,31 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "custom_component_type",
                 "custom_description",
                 "custom_sequence",
+                "custom_section_property",
             ],
             order_by="custom_sequence asc",
         )
 
-        grouped = {}
+        # -------------------------------
+        # Step 1: Group by exemption_category
+        # -------------------------------
+        category_grouped = {}
 
         for row in records:
-            grouped.setdefault(row.exemption_category, [])
+            category = row.exemption_category
+
+            if category not in category_grouped:
+                category_grouped[category] = {
+                    "category_name": category,
+                    "custom_section_property": row.custom_section_property,
+                    "items": [],
+                }
 
             declaration_row = existing_map.get(row.name)
 
+            # -------------------------------
+            # SYSTEM vs NON-SYSTEM logic
+            # -------------------------------
             if row.custom_component_type in SYSTEM_COMPONENT_MAP:
                 amount = SYSTEM_COMPONENT_MAP[row.custom_component_type]
                 max_amount = amount
@@ -1039,7 +1387,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 )
                 editable = 1
 
-            grouped[row.exemption_category].append({
+            category_grouped[category]["items"].append({
                 "exemption_sub_category": row.name,
                 "component_type": row.custom_component_type,
                 "description": row.custom_description,
@@ -1048,11 +1396,33 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "max_amount": round(max_amount),
             })
 
-        final_categories = [
-            {"category_name": cat, "items": items}
-            for cat, items in grouped.items()
-        ]
+        # -------------------------------
+        # Step 2: Combine by custom_section_property
+        # -------------------------------
+        section_property_grouped = {}
 
+        for category_data in category_grouped.values():
+            section_property = category_data.get("custom_section_property")
+
+            # Only include categories where section property is SET
+            if not section_property:
+                continue
+
+            if section_property not in section_property_grouped:
+                section_property_grouped[section_property] = {
+                    "custom_section_property": section_property,
+                    "exemption_category": [],
+                }
+
+            section_property_grouped[section_property]["exemption_category"].append({
+                "category_name": category_data["category_name"],
+                "items": category_data["items"],
+            })
+
+        # -------------------------------
+        # Step 3: Final output
+        # -------------------------------
+        final_categories = list(section_property_grouped.values())
 
         return {
             "status": "success",
@@ -1107,6 +1477,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
     current_tax_regime=declaration_doc.custom_tax_regime
     declaration_id=declaration[0].name
+
+    advance_tax=declaration_doc.custom_tds_already_deducted_amount if declaration_doc.custom_tds_already_deducted_amount else 0
+
 
 
     # ------------------ 80C & LTA ------------------
@@ -1181,9 +1554,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))
     total_off_cycle_payment = flt(annual_statement.get("total_off_cycle_payment", 0))
     reimbursements_total = flt(annual_statement.get("reimbursements_total", 0))
+    total_perquisite_total=flt(annual_statement.get("total_perquisite_total", 0))
 
     total_gross_salary_current = round(
-        total_gross_earning + total_off_cycle_payment + extra_payment_grand_total, 2
+        total_gross_earning + total_off_cycle_payment + extra_payment_grand_total+total_perquisite_total, 2
     )
 
     hra_received_annual=declaration_doc.custom_hra_received_annual if declaration_doc.custom_hra_received_annual else 0
@@ -1235,6 +1609,13 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "name": "Total Offcycle Extra Payments",
             "amount": round(flt(total_off_cycle_payment), 2)
         },
+        {
+            "key": "total_perquisite_total",
+            "name": "Total Perquisite Total",
+            "amount": round(flt(total_perquisite_total), 2)
+        },
+
+
         {
             "key": "total_gross_salary_current",
             "name": "Total Gross Salary (Current Employer)",
@@ -1474,7 +1855,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "advance_tax",
             "name":"Outside Tax / Advance Tax (C)",
-            "amount":0
+            "amount":advance_tax
         },
         {
             "key": "tax_deducted_till_date_by_current_employer",
@@ -1655,6 +2036,9 @@ def calculate_tds_projection(declaration_id):
         "Employee Tax Exemption Declaration",
         declaration_id
     )
+
+    advance_tax_deducted=declaration.custom_tds_already_deducted_amount if declaration.custom_tds_already_deducted_amount else 0
+
 
     company = declaration.company
     employee = declaration.employee
@@ -2161,7 +2545,7 @@ def calculate_tds_projection(declaration_id):
 
                 "old_regime_annual_taxable_income": round(old_regime_annual_taxable_income),
                 "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
-                "advance_tax":0,
+                "advance_tax":advance_tax_deducted,
 
                 "old_regime_from_amounts": slab_result.get("from_amount"),
                 "old_regime_to_amounts": slab_result.get("to_amount"),

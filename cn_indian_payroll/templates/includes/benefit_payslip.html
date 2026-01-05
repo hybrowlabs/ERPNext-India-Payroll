@@ -88,8 +88,7 @@
 
   <button class="print-btn" onclick="window.print()">🖨 Print / Download</button>
 
-  <!-- Company Header -->
-  <!-- {% if doc.company %}
+  {% if doc.company %}
     {% set company = frappe.get_doc("Company", doc.company) %}
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
       <tr>
@@ -118,7 +117,7 @@
         </td>
       </tr>
     </table>
-  {% endif %} -->
+  {% endif %}
 
   {% set employee = frappe.get_doc("Employee", doc.employee) %}
 
@@ -163,26 +162,20 @@
     </tr>
     <tr>
       <th>Component</th>
-      <th>Monthly Accrued Amount</th>
-      <th>Amount</th>
-      <th>Taxable Amount</th>
-      <th>Total Approved Amount</th>
+
+      <th>Total Non-Taxable Amount</th>
     </tr>
 
 
         <tr>
           <td>{{doc.earning_component}}</td>
-          <td style="text-align:right;">{{doc.custom_max_amount}}</td>
-          <td style="text-align:right;">{{doc.custom_max_amount}}</td>
-          <td style="text-align:right;">0</td>
+
           <td style="text-align:right;">{{doc.custom_max_amount}}</td>
         </tr>
 
 
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+
       <td><b>Total</b></td>
       <td style="text-align:right;"><b>{{doc.custom_max_amount}}</b></td>
     </tr>
