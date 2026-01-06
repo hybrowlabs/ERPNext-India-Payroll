@@ -1911,8 +1911,8 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    # def add_employee_benefits(self):
-    #     pass
+    def add_employee_benefits(self):
+        pass
 
 
 

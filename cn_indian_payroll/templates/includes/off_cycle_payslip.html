@@ -131,77 +131,158 @@
 
   <table>
     <tr>
-      <td colspan="2">Member Name:{{doc.employee_name}}</td>
-      <td>Member Type:{{employment_type.employee_type_name}}</td>
-      <td>Member Code:{{employee.name}}</td>
+      <td colspan="2">Member Name:<b>{{doc.employee_name}}</b></td>
+      <td>Member Type:<b>{{employment_type.employee_type_name}}</b></td>
+      <td>Member Code:<b>{{employee.name}}</b></td>
     </tr>
     <tr>
-      <td colspan="2">Designation:{{designation.designation_name}}</td>
-      <td colspan="2"></td>
+      <td colspan="2">Designation:<b>{{designation.designation_name}}</b></td>
+      <td colspan="2">Duration:<b>{{doc.start_date}} to {{doc.end_date}}</b></td>
+
+        </b></td>
     </tr>
     <tr>
-      <td colspan="2">Department:{{department}}</td>
-      <td colspan="2">No of Days in the Month:{{doc.total_working_days}}</td>
+      <td colspan="2">Department:<b>{{department}}</b></td>
+      <td colspan="2">Date of Joining:<b>{{employee.date_of_joining}}</b></td>
+
+    </tr>
+
+
+    <tr>
+      <td colspan="4">Current Office Location:<b>{{branch}}</b></td>
+
+    </tr>
+
+    <tr>
+      <td>Bank Name:<b>{{employee.bank_name}}</b></td>
+      <td>Account No.:<b>{{employee.bank_ac_no}}</b></td>
+      <td>IFSC Code:<b>{{employee.ifsc_code}}</b></td>
+      <td>Branch Name:<b>{{employee.bank_name}}</b></td>
     </tr>
     <tr>
-      <td colspan="2">Date of Joining:{{employee.date_of_joining}}</td>
-      <td colspan="2">Working Days:{{doc.payment_days}}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Provident Fund:{{employee.provident_fund_account}}</td>
-      <td colspan="2">ESIC Number:{{employee.custom_esic_number}}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Current Office Location:{{branch}}</td>
-      <td colspan="2">Increment Arrear Days:{{doc.custom_lop_reversal_days  }}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Total Arrear Days:{{doc.custom_lop_reversal_days}}</td>
-      <td colspan="2">LOP:{{doc.custom_total_leave_without_pay}}</td>
-    </tr>
-    <tr>
-      <td>Bank Name:{{employee.bank_name}}</td>
-      <td>Account No.:{{employee.bank_ac_no}}</td>
-      <td>IFSC Code:{{employee.ifsc_code}}</td>
-      <td>Branch Name:{{employee.bank_name}}</td>
-    </tr>
-    <tr>
-      <td colspan="2">UAN No.:{{employee.custom_uan}}</td>
-      <td colspan="2">PAN No.:{{employee.custom_aadhar_no }}</td>
+      <td colspan="2">UAN No.:<b>{{employee.custom_uan}}</b></td>
+      <td colspan="2">PAN No.:<b>{{employee.custom_aadhar_no }}</b></td>
     </tr>
   </table>
 
-  <table>
+
+  {% set ns = namespace(
+    total_earnings=0,
+    total_deductions=0
+) %}
+
+<table style="width:100%; border-collapse: collapse;">
+
+  <tr>
+    <th colspan="2" style="text-align:center;">Earnings</th>
+    <th colspan="2" style="text-align:center;">Deductions</th>
+  </tr>
+
+  <tr>
+    <th style="text-align:left;">Component</th>
+    <th style="text-align:right;">Amount</th>
+    <th style="text-align:left;">Common Deductions</th>
+    <th style="text-align:right;">Amount</th>
+  </tr>
+
+  {# -------- FILTER EARNINGS -------- #}
+  {% set e_list = [] %}
+  {% for e in doc.earnings %}
+    {% set sc = frappe.get_doc("Salary Component", e.salary_component) %}
+    {% if sc.custom_component_sub_type == "Variable"
+          and sc.custom_is_offcycle_component == 1 %}
+      {% set _ = e_list.append(e) %}
+      {% set ns.total_earnings = ns.total_earnings + (e.amount or 0) %}
+    {% endif %}
+  {% endfor %}
+
+  {# -------- FILTER DEDUCTIONS -------- #}
+  {% set d_list = [] %}
+  {% if doc.custom_additional_tds_deducted_amount%}
+    {% set _ = d_list.append({
+      "salary_component": "Additional TDS",
+      "amount": doc.custom_additional_tds_deducted_amount
+    }) %}
+
+    {%endif%}
+
+
+
+  {% set max_len = [e_list|length, d_list|length] | max %}
+
+  {# -------- ROWS -------- #}
+  {% for i in range(max_len) %}
     <tr>
-      <th colspan="5" style="color: black;"><b>Earnings</b></th>
-    </tr>
-    <tr>
-      <th>Component</th>
-      <th>Amount</th>
 
-    </tr>
-
-    {% set ns = namespace(total_reimbursement=0) %}
-
-    {% for e in doc.earnings %}
-      {% set sc = frappe.get_doc("Salary Component", e.salary_component) %}
-      {% if sc.custom_component_sub_type=="Variable" and  sc.custom_is_part_of_gross_pay==0 and sc.custom_is_reimbursement==0%}
-        <tr>
-          <td>{{ e.salary_component }}</td>
-          <td style="text-align:right;">{{ e.amount or '' }}</td>
-
-        </tr>
-        {% set ns.total_reimbursement = ns.total_reimbursement + (e.amount or 0) %}
+      <!-- Earnings -->
+      {% if i < e_list|length %}
+        <td>{{ e_list[i].salary_component }}</td>
+        <td style="text-align:right;">
+          {{ "{:,.0f}".format(e_list[i].amount or 0) }}
+        </td>
+      {% else %}
+        <td></td><td></td>
       {% endif %}
-    {% endfor %}
 
-    <tr>
+      <!-- Deductions -->
+      {% if i < d_list|length %}
+        <td>{{ d_list[i].salary_component }}</td>
+        <td style="text-align:right;">
+          {{ "{:,.0f}".format(d_list[i].amount or 0) }}
+        </td>
+      {% else %}
+        <td></td>
+        <td></td>
+      {% endif %}
 
-      <td><b>Total</b></td>
-      <td style="text-align:right;"><b>{{ ns.total_reimbursement }}</b></td>
     </tr>
+  {% endfor %}
 
-  </table>
+  {# -------- TOTALS -------- #}
+  <tr>
+    <th style="text-align:left;"><b>Gross Earnings (A)</b></th>
+    <th style="text-align:right;">
+      {{ "{:,.0f}".format(ns.total_earnings) }}
+    </th>
+    <th style="text-align:left;"><b>Total Deductions (B)</b></th>
+    <th style="text-align:right;">
+      {{ "{:,.0f}".format(doc.custom_additional_tds_deducted_amount) }}
+    </th>
+  </tr>
+
+  {% set net_pay = ns.total_earnings - doc.custom_additional_tds_deducted_amount %}
+
+  <tr>
+    <th style="text-align:left;"><b>Net Pay (A − B)</b></th>
+    <th style="text-align:right;">
+      {{ "{:,.0f}".format(net_pay) }}
+    </th>
+    <th colspan="2">
+      <b>
+        {{ frappe.utils.money_in_words(net_pay) }}
+      </b>
+    </th>
+  </tr>
+
+
+
+<tr>
+
+  <th colspan="4">
+
+  </th>
+</tr>
+<tr>
+
+  <td colspan="4" style="text-align: center;">
+
+    Note: This is a Computer Generated Slip and does not require signature
+  </td>
+</tr>
+
+</table>
+
+
 
 </div>
 

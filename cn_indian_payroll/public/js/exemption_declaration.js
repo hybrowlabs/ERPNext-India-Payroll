@@ -16,6 +16,37 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
         }
 
 
+        frm.add_custom_button("TDS Sheet", function () {
+
+
+            frappe.call({
+              method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.print_declaration_pdf",
+              args: {
+                employee: frm.doc.employee,
+                payroll_period: frm.doc.payroll_period,
+                company:frm.doc.company,
+              },
+              callback: function (r) {
+                if (!r.message || !r.message.html) {
+                  frappe.msgprint(__('No HTML generated'));
+                  return;
+                }
+                const w = window.open("", "_blank");
+                w.document.open();
+                w.document.write(r.message.html);
+                w.document.close();
+              }
+            });
+          });
+
+
+
+
+
+
+
+
+
 
 
     },
