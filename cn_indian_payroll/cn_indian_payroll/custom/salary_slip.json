@@ -3192,7 +3192,6 @@
    "module": "cn-indian-payroll",
    "name": "Salary Slip-gross_pay-hidden",
    "owner": "Administrator",
-   "property": "hidden",
    "property_type": "Check",
    "row_name": null,
    "value": "1"

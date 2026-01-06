@@ -34,6 +34,18 @@ frappe.query_reports["Salary Book Register"] = {
 			options: "Employee",
 			width: "100px",
 		},
+
+		{
+			fieldname: "employment_type",
+			label: __("Employment Type"),
+			fieldtype: "Link",
+			options: "Employment Type",
+			width: "100px",
+		},
+
+
+
+
 		{
 			fieldname: "company",
 			label: __("Company"),

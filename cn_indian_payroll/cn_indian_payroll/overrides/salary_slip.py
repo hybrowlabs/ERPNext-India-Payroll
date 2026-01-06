@@ -208,7 +208,8 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def calculate_variable_tax(self, tax_component):
+    def calculate_variable_tax(self, tax_component, has_additional_salary_tax_component=False):
+
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
@@ -223,9 +224,9 @@ class CustomSalarySlip(SalarySlip):
             eval_locals,
         )
 
-        self.current_structured_tax_amount = (
+        self.current_structured_tax_amount = ((
             self.total_structured_tax_amount - self.previous_total_paid_taxes
-        ) / self.remaining_sub_periods
+        ) / self.remaining_sub_periods)
 
         # Total taxable earnings with additional earnings with full tax
         self.full_tax_on_additional_earnings = 0.0
@@ -285,6 +286,8 @@ class CustomSalarySlip(SalarySlip):
 
         daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
 
+        employee=frappe.get_doc("Employee",self.employee)
+
         working_days = date_diff(self.end_date, self.start_date) + 1
         if for_preview:
             self.total_working_days = working_days
@@ -336,7 +339,6 @@ class CustomSalarySlip(SalarySlip):
 
         self.leave_without_pay = lwp
         self.total_working_days = working_days
-
         payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
 
         if flt(payment_days) > flt(lwp):
@@ -1327,6 +1329,12 @@ class CustomSalarySlip(SalarySlip):
             for deduction in self.deductions:
                 component_doc = frappe.get_doc("Salary Component", deduction.salary_component)
                 original_amount = float(deduction.amount or 0)
+
+                if component_doc.component_type == "ESIC":
+                    deduction.amount = math.ceil(original_amount)
+                else:
+                    deduction.amount = round(original_amount)
+
 
         if self.total_deduction or self.total_loan_repayment:
             self.custom_total_deduction_amount = (self.total_deduction or 0) + (self.total_loan_repayment or 0)
