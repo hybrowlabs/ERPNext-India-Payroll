@@ -18,6 +18,21 @@ from dateutil.relativedelta import relativedelta
 @frappe.whitelist()
 def get_annual_statement(employee=None, payroll_period=None,company=None):
 
+
+    employee_list=frappe.get_doc("Employee",employee)
+    employee_code=employee_list.name
+    employee_name=employee_list.employee_name
+    employee_department=employee_list.department
+    employee_designation=employee_list.designation
+    employment_type=employee_list.employment_type
+    date_of_joinee=employee_list.date_of_joining
+
+    pan=employee_list.pan_number
+    # tax_regime=employee_list
+    office_location=employee_list.branch
+    pf=employee_list.provident_fund_account
+    esic=employee_list.custom_esic_number
+
     # -------- Payroll Period -------- #
     period = frappe.db.get_value(
         "Payroll Period",
@@ -58,7 +73,15 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
     # -------- FY Months -------- #
     months = []
-    current = fy_start
+
+    doj = getdate(employee_list.date_of_joining)
+
+    # Start month logic corrected
+    if doj < fy_start:
+        current = fy_start
+    else:
+        current = doj
+
     while current <= fy_end:
         months.append(current.strftime("%B-%Y"))
         current = add_months(current, 1)
@@ -138,33 +161,96 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     ]
 
     # -------- Component Month Values -------- #
+    # for comp in components:
+
+    #     if comp.type == "Earning" and not comp.is_tax_applicable \
+    #        and not comp.custom_is_reimbursement \
+    #        and not comp.custom_is_offcycle_component:
+    #         continue
+
+
+
+    #     if comp.type == "Deduction" and comp.component_type not in allowed_deduction_types:
+    #         continue
+
+    #     values = []
+    #     for m in months:
+    #         if m in slip_by_month:
+    #             amount = frappe.db.get_value(
+    #                 "Salary Detail",
+    #                 {"parent": slip_by_month[m], "salary_component": comp.name},
+    #                 "amount"
+    #             ) or 0
+    #         else:
+    #             amount = preview_amount_map.get(comp.name, 0)
+
+
+
+
+    #         values.append(flt(amount))
+
+    #     rounded_values = [round(flt(v), 0) for v in values]
+
+    #     row = {
+    #         "name": comp.name,
+    #         "values": rounded_values,
+    #         "total": sum(rounded_values)
+    #     }
+
+
+    #     # row = {"name": comp.name, "values": values, "total": sum(values)}
+
+    #     if comp.type == "Earning" and comp.custom_is_reimbursement and comp.is_tax_applicable:
+    #         reimbursements.append(row)
+    #     elif comp.type == "Earning" and comp.custom_is_offcycle_component:
+    #         offcycle.append(row)
+    #     elif comp.type == "Earning":
+    #         earnings.append(row)
+    #     elif comp.type == "Deduction":
+    #         deductions.append(row)
+
+
     for comp in components:
 
+        # Skip non-taxable normal earnings
         if comp.type == "Earning" and not comp.is_tax_applicable \
-           and not comp.custom_is_reimbursement \
-           and not comp.custom_is_offcycle_component:
+        and not comp.custom_is_reimbursement \
+        and not comp.custom_is_offcycle_component:
             continue
 
 
-
+        # Filter only allowed deductions
         if comp.type == "Deduction" and comp.component_type not in allowed_deduction_types:
             continue
 
         values = []
+
         for m in months:
+
             if m in slip_by_month:
+                # Month has an actual salary slip
                 amount = frappe.db.get_value(
                     "Salary Detail",
-                    {"parent": slip_by_month[m], "salary_component": comp.name},
+                    {
+                        "parent": slip_by_month[m],
+                        "salary_component": comp.name
+                    },
                     "amount"
                 ) or 0
+
             else:
-                amount = preview_amount_map.get(comp.name, 0)
+                # FUTURE MONTH LOGIC
 
+                # 👉 Offcycle and Reimbursement should NOT be projected to future
+                if comp.custom_is_offcycle_component or comp.custom_is_reimbursement:
+                    amount = 0
 
-
+                else:
+                    # Normal earnings/deductions can use preview values
+                    amount = preview_amount_map.get(comp.name, 0)
 
             values.append(flt(amount))
+
 
         rounded_values = [round(flt(v), 0) for v in values]
 
@@ -175,14 +261,16 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         }
 
 
-        # row = {"name": comp.name, "values": values, "total": sum(values)}
-
-        if comp.type == "Earning" and comp.custom_is_reimbursement and comp.is_tax_applicable:
+        # -------- Proper Routing -------- #
+        if comp.type == "Earning" and comp.custom_is_reimbursement:
             reimbursements.append(row)
+
         elif comp.type == "Earning" and comp.custom_is_offcycle_component:
             offcycle.append(row)
+
         elif comp.type == "Earning":
             earnings.append(row)
+
         elif comp.type == "Deduction":
             deductions.append(row)
 
@@ -393,6 +481,16 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
     return {
         "status": "success",
+        "employee_code": employee_code,
+        "employee_name": employee_name,
+        "employee_department": employee_department,
+        "employee_designation": employee_designation,
+        "employment_type": employment_type,
+        "date_of_joining": date_of_joinee,
+        "pan": pan,
+        "office_location": office_location,
+        "pf": pf,
+        "esic":esic,
         "months": months,
         "earnings": earnings,
         "deductions": deductions,
@@ -1664,35 +1762,60 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "gross_salary",
             "name": "Gross Salary",
-            "amount": round(flt(total_gross_earning), 2)
+            "amount": round(flt(total_gross_earning), 2),
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":round(flt(total_gross_earning), 2),
+
         },
         {
             "key": "total_extra_payment",
             "name": "Total Extra Payment",
-            "amount": round(flt(extra_payment_grand_total), 2)
+            "amount": round(flt(extra_payment_grand_total), 2),
+            "col1":round(flt(extra_payment_grand_total), 2),
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "total_off_cycle_extra_payment",
             "name": "Total Offcycle Extra Payments",
-            "amount": round(flt(total_off_cycle_payment), 2)
+            "amount": round(flt(total_off_cycle_payment), 2),
+            "col1":round(flt(total_off_cycle_payment), 2),
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "total_perquisite_total",
             "name": "Total Perquisite Total",
-            "amount": round(flt(total_perquisite_total), 2)
+            "amount": round(flt(total_perquisite_total), 2),
+            "col1":round(flt(total_perquisite_total), 2),
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
 
 
         {
             "key": "total_gross_salary_current",
             "name": "Total Gross Salary (Current Employer)",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
 
         {
             "key": "total_gross_salary",
             "name": "Total Gross Salary",
-            "amount": round(flt(total_gross_salary_current), 2)
+            "amount": round(flt(total_gross_salary_current), 2),
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":round(flt(total_gross_salary_current), 2)    ,
         },
 
 
@@ -1700,113 +1823,203 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "less_ctc_reimbursements",
             "name": "Less CTC Reimbursements",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
         {
             "key": "lta_component",
             "name": "LTA",
-            "amount": round(flt(lta_amount), 2)
+            "amount": round(flt(lta_amount), 2),
+            "col1":round(flt(lta_amount), 2),
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "total_reimbursements",
             "name": "Total Reimbursements",
-            "amount": round(flt(lta_amount), 2)
+            "amount": round(flt(lta_amount), 2),
+            "col1":"",
+            "col2":round(flt(lta_amount), 2),
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "total_income_after_deduction_and_reimbursements",
             "name": "Gross Income after Deduction and Reimbursements",
             "amount": round(
                 flt(total_gross_salary_current) - flt(lta_amount), 2
-            )
+            ),
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":round(
+                flt(total_gross_salary_current) - flt(lta_amount), 2
+            ),
         },
         {
             "key": "less_exemption_under_section_10",
             "name": "Less exemption under Section 10",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
         {
             "key": "hra_calculation",
             "name": "HRA Calculation",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
         {
             "key": "basic_and_dearness_allowance",
             "name": "Basic + Dearness Allowance (40% or 50%)",
-            "amount": basic_percentage
+            "amount": basic_percentage,
+            "col1":basic_percentage,
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "rent_paid",
             "name": "Rent Paid - 10% of Basic + Dearness Allowance",
-            "amount": rent_paid_of_basic
+            "amount": rent_paid_of_basic,
+            "col1":rent_paid_of_basic,
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "hra_received",
             "name": "H.R.A received",
-            "amount": hra_received_annual
+            "amount": hra_received_annual,
+            "col1":hra_received_annual,
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "hra_exemption",
             "name": "HRA Exemption",
-            "amount": hra_exemption
+            "amount": hra_exemption,
+            "col1":hra_exemption,
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "total_section_10_exemptions",
             "name": "Total Section 10 Exemptions",
-            "amount": hra_exemption
+            "amount": hra_exemption,
+            "col1":"",
+            "col2":hra_exemption,
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "salary_after_section_10",
             "name": "Total amount of Salary received after Section 10",
-            "amount": salary_after_section_10
+            "amount": salary_after_section_10,
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":salary_after_section_10,
         },
         {
             "key": "less_deduction_under_section_16",
             "name": "Less: Deductions under section 16",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
         {
             "key": "standard_deduction_section_16",
             "name": "Standard deduction under section 16(ia)",
-            "amount": standard_deduction
+            "amount": standard_deduction,
+            "col1":standard_deduction,
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "total_deduction_section_16",
             "name": "Total amount of deductions under section 16",
-            "amount": standard_deduction
+            "amount": standard_deduction,
+            "col1":"",
+            "col2":standard_deduction,
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "income_chargeable_salary",
             "name": "Income chargeable under the head Salaries",
             "amount": round(
                 flt(salary_after_section_10) - flt(standard_deduction), 2
-            )
+            ),
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":round(
+                flt(salary_after_section_10) - flt(standard_deduction), 2
+            ),
         },
         {
             "key": "income_loss_house_property",
             "name": "A. Income/Loss from house property",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
         {
             "key": "total_income_loss_house_property",
             "name": "Total for Income/Loss from house property",
-            "amount": 0
+            "amount": 0,
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "other_sources",
             "name": "B. Other Sources",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
 
         },
         {
             "key": "total_other_sources",
             "name": "Total from Other Sources",
-            "amount": 0
+            "amount": 0,
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
         },
         {
             "key": "gross_total_income",
             "name": "Gross Total Income",
             "amount": round(
                 flt(salary_after_section_10) - flt(standard_deduction), 2
-            )
+            ),
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":round(
+                flt(salary_after_section_10) - flt(standard_deduction), 2
+            ),
         }
     ],
 
@@ -3149,87 +3362,46 @@ def print_declaration_preview(employee, payroll_period, company):
 
 
 
+
 @frappe.whitelist()
-def print_declaration_preview1(employee, payroll_period, company):
+def print_declaration_pdf(employee, payroll_period, company):
 
-    result = {
-        "employee": employee,
-        "company": company,
-        "payroll_period": payroll_period,
-    }
-
-    # 1️⃣ Salary Projection
     salary_projection = get_annual_statement(
         employee=employee,
         payroll_period=payroll_period,
         company=company
     )
 
-    # 2️⃣ Declaration
     existing_declaration = get_employee_declaration_investments(
         employee=employee,
         company=company,
         payroll_period=payroll_period
     )
 
-    # 3️⃣ Attach explicitly
-    result["salary_projection"] = salary_projection.get("message", salary_projection)
-    result["existing_declaration"] = existing_declaration.get("message", existing_declaration)
+    salary_data = salary_projection.get("message", salary_projection)
 
-    html = frappe.render_template(
-        "cn_indian_payroll/templates/includes/annual_statement1.html",
-        result
-    )
-
-    frappe.local.response["content_type"] = "text/html"
-    frappe.local.response["response"] = html
-
-
-
-
-from frappe.utils.pdf import get_pdf
-
-@frappe.whitelist()
-def download_declaration_preview_pdf(employee, payroll_period, company):
-
-    # 1️⃣ Build context (same as print)
     context = {
-        "employee": employee,
-        "company": company,
-        "payroll_period": payroll_period,
+        "employee_code": salary_data.get("employee_code"),
+        "employee_name": salary_data.get("employee_name"),
+        "employee_department": salary_data.get("employee_department"),
+        "employee_designation": salary_data.get("employee_designation"),
+        "employment_type": salary_data.get("employment_type"),
+        "date_of_joining": salary_data.get("date_of_joining"),
+        "pan": salary_data.get("pan"),
+        "office_location": salary_data.get("office_location"),
+        "pf": salary_data.get("pf"),
+        "esic": salary_data.get("esic"),
+
+        "salary_projection": salary_data,
+        "existing_declaration": existing_declaration.get("message", existing_declaration),
     }
 
-    # 2️⃣ Salary Projection
-    salary_projection = get_annual_statement(
-        employee=employee,
-        payroll_period=payroll_period,
-        company=company
-    )
-
-    # 3️⃣ Declaration
-    existing_declaration = get_employee_declaration_investments(
-        employee=employee,
-        company=company,
-        payroll_period=payroll_period
-    )
-
-    context["salary_projection"] = salary_projection.get(
-        "message", salary_projection
-    )
-    context["existing_declaration"] = existing_declaration.get(
-        "message", existing_declaration
-    )
-
-    # 4️⃣ Render HTML
     html = frappe.render_template(
         "cn_indian_payroll/templates/includes/annual_statement1.html",
         context
     )
 
-    # 5️⃣ Convert to PDF
-    pdf = get_pdf(html)
-
-    # 6️⃣ Return download response
-    frappe.local.response.filename = "Annual_Statement.pdf"
-    frappe.local.response.filecontent = pdf
-    frappe.local.response.type = "download"
+    # ✅ THIS IS THE FIX
+    return {
+        "html": html
+    }
