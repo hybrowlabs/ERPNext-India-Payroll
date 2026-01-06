@@ -669,7 +669,7 @@ class CustomSalarySlip(SalarySlip):
 
         self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
 
-        self.custom_future = self.future_structured_taxable_earnings
+        # self.custom_future = self.future_structured_taxable_earnings
 
         if hasattr(self, "total_structured_tax_amount") and hasattr(
             self, "current_structured_tax_amount"
