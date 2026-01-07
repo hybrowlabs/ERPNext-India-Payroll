@@ -248,8 +248,8 @@ def benefit_payslip_list_view(
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_payroll_period
 
 @frappe.whitelist()
-def get_payroll_period():
-    payroll_period = frappe.db.get_all("Payroll Period", fields=["name"])
+def get_payroll_period(company):
+    payroll_period = frappe.db.get_all("Payroll Period", fields=["name"],filters={"company": company}, order_by="start_date desc")
     return payroll_period
 
 
