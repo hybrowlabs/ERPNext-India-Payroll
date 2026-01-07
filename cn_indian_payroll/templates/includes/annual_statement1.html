@@ -233,7 +233,7 @@ tfoot td {
 {% for row in existing_declaration.summary %}
 <tr>
 
-    <td colspan="{{ salary_projection.months|length }}" style="width: 40%;">{{ row["name"] }}</td>
+    <td style="width: 40%;">{{ row["name"] }}</td>
     <td style="text-align:right;" style="width: 15%;">{{ row["col1"] }}</td>
     <td style="text-align:right;" style="width: 15%;">{{ row["col2"] }}</td>
     <td style="text-align:right;" style="width: 15%;">{{ row["col3"] }}</td>
@@ -245,16 +245,26 @@ tfoot td {
 
 <table class="particulars-table">
 
+    <tr>
+        <td style="text-align:left;width: 40%;">Total Chapter-VIA</td>
+        <td style="text-align:left;width: 15%;">Declared value</td>
+        <td style="text-align:left;width: 15%;">Qualified Value</td>
+        <td style="text-align:left;width: 15%;">Deductible Value</td>
+        <td style="text-align:left;width: 15%;"></td>
+      </tr>
+
   {% for section in existing_declaration.chapter_via %}
 
   <!-- Section Name Row -->
+
+  <!--
   <tr>
       <td colspan="5" style="text-align:left; background:#f3f4f6;">
           <strong>{{ section["name"] }}</strong>
       </td>
   </tr>
 
-  <!-- Headers Row (Only if headers exist) -->
+
   {% if section.get("headers") %}
   <tr>
       <th style="text-align:left;">Particulars</th>
@@ -262,10 +272,14 @@ tfoot td {
       {% for h in section["headers"] %}
           <th style="text-align:right;">{{ h }}</th>
       {% endfor %}
+
+      <th></th>
   </tr>
   {% endif %}
-
+-->
   <!-- Component Rows -->
+
+
   {% if section.get("components") %}
     {% for comp in section["components"] %}
     <tr>
@@ -285,7 +299,7 @@ tfoot td {
           {{ "{:,.0f}".format(comp.get("deductible_amount", 0)) }}
       </td>
 
-      <td>
+      <td style="text-align:right;">
 
       </td>
 
@@ -317,8 +331,8 @@ tfoot td {
   {% for row in existing_declaration.net_taxable_breakup %}
   <tr>
 
-      <td colspan="{{ salary_projection.months|length }}">{{ row["name"] }}</td>
-      <td  style="text-align:right;">{{ row["amount"] }}</td>
+      <td style="width: 85%;" colspan="{{ salary_projection.months|length }}">{{ row["name"] }}</td>
+      <td  style="text-align:right;width: 15%;">{{ row["amount"] }}</td>
 
   </tr>
   {% endfor %}
