@@ -249,7 +249,7 @@ fixtures = [
     {"dt": "Workspace", "filters": {"module": "cn-indian-payroll"}},
     {"dt": "Workflow State"},
     {"dt": "Salary Component"},
-    {"dt": "Custom DocPerm", "filters": {"role": ["in", ["Payroll manager"]]}},
+    # {"dt": "Custom DocPerm", "filters": {"role": ["in", ["Payroll manager"]]}},
     {"dt": "Custom Field", "filters": {"dt": "Payroll Settings"}},
 ]
 
