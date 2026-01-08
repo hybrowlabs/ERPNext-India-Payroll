@@ -247,7 +247,7 @@ fixtures = [
     {"dt": "Translation", "filters": {"name": "Reimbursement Claim"}},
     {"dt": "Workflow", "filters": {"name": "declaration Approve"}},
     {"dt": "Workspace", "filters": {"module": "cn-indian-payroll"}},
-    {"dt": "Custom DocPerm", "filters": {"role": "Payroll manager"}},
+    # {"dt": "Custom DocPerm", "filters": {"role": "Payroll manager"}},
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
     # {"dt":"Salary Component"},
