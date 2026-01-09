@@ -295,7 +295,7 @@ doc_events = {
 
     "Attendance": {
         "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.attendance_sync.on_update_after_submit",
-
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.attendance_sync.on_submit",
 
     },
 

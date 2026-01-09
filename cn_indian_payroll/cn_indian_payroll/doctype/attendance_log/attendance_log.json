@@ -21,8 +21,16 @@
   "attendance_regularisationlop_reversal",
   "additional_salary_date",
   "amended_from",
+  "section_break_leyb",
+  "regularize_month",
+  "column_break_rraf",
+  "regularize_start_date",
+  "column_break_igdi",
+  "regularize_end_date",
   "section_break_impf",
-  "attendance_log_child"
+  "attendance_log_child",
+  "section_break_dhmv",
+  "attendance_log_working_days"
  ],
  "fields": [
   {
@@ -120,13 +128,50 @@
    "fieldtype": "Table",
    "label": "Attendance Log Child",
    "options": "Attendance Log Child"
+  },
+  {
+   "fieldname": "section_break_leyb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "regularize_month",
+   "fieldtype": "Data",
+   "label": "Regularize Month"
+  },
+  {
+   "fieldname": "column_break_rraf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "regularize_start_date",
+   "fieldtype": "Date",
+   "label": "Regularize Start Date"
+  },
+  {
+   "fieldname": "column_break_igdi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "regularize_end_date",
+   "fieldtype": "Date",
+   "label": "Regularize End Date"
+  },
+  {
+   "fieldname": "section_break_dhmv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attendance_log_working_days",
+   "fieldtype": "Table",
+   "label": "Attendance Log Working Days",
+   "options": "Attendance Log Working Days"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-31 11:56:20.001576",
+ "modified": "2026-01-09 11:12:27.422624",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Attendance Log",

@@ -167,6 +167,9 @@ class CustomSalarySlip(SalarySlip):
                 "count": (
                     0.5 if att.status == "Half Day"
                     else 1 if att.status == "Present"
+                    else 1 if att.status == "Absent"
+                    else 1 if att.status == "On Leave"
+                    else 1 if att.status == "Work From Home"
                     else 0
                 ),
             })
@@ -570,19 +573,10 @@ class CustomSalarySlip(SalarySlip):
                 ):
                     continue
 
-                # skip counting absent on holidays
-                if not consider_marked_attendance_on_holidays and getdate(d.attendance_date) in holidays:
-                    if d.status in ["Absent", "Half Day"] or (
-                        d.leave_type
-                        and d.leave_type in leave_type_map.keys()
-                        and not leave_type_map[d.leave_type]["include_holiday"]
-                    ):
-                        continue
-
-                if d.leave_type:
-                    fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type][
-                        "fraction_of_daily_salary_per_leave"
-                    ]
+                # if d.leave_type:
+                #     fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type][
+                #         "fraction_of_daily_salary_per_leave"
+                #     ]
 
                 if d.status == "Half Day" and d.leave_type and d.leave_type in leave_type_map.keys():
                     equivalent_lwp = 1 - daily_wages_fraction_for_half_day
