@@ -580,7 +580,7 @@ async function processSalaryComponents(frm) {
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
                 total_ctc.push(Math.round(v.amount))
-                total_annual_ctc.push(Math.round(v.amount*12))
+                total_annual_ctc.push(Math.round(v.amount)*12)
                 let newRow = tableBody.insertRow();
 
                 let componentCell = newRow.insertCell();
@@ -592,7 +592,7 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount*12);
+                let annualAmount = Math.round(v.amount)*12;
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -632,7 +632,7 @@ async function processSalaryComponents(frm) {
                 amountCell.textContent = component.monthly_total_amount.toLocaleString();
 
                 total_ctc.push(Math.round(component.monthly_total_amount))
-                total_annual_ctc.push(Math.round(component.monthly_total_amount * 12))
+                total_annual_ctc.push(Math.round(component.monthly_total_amount)* 12)
 
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";
@@ -676,7 +676,7 @@ async function processSalaryComponents(frm) {
             if (res.message && res.message.custom_is_part_of_ctc == 1) {
 
                 total_ctc.push(Math.round(v.amount))
-                total_annual_ctc.push(Math.round(v.amount*12))
+                total_annual_ctc.push(Math.round(v.amount)*12)
                 let newRow = deductionTableBody.insertRow();
 
                 let componentCell = newRow.insertCell();
@@ -688,7 +688,7 @@ async function processSalaryComponents(frm) {
                 amountCell.className = "text-right";
                 amountCell.textContent = formattedAmount;
 
-                let annualAmount = Math.round(v.amount * 12);
+                let annualAmount = Math.round(v.amount) * 12;
                 let formattedAnnualAmount = annualAmount.toLocaleString();
                 let annualAmountCell = newRow.insertCell();
                 annualAmountCell.className = "text-right";

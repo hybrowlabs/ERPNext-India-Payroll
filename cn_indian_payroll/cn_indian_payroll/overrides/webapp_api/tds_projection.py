@@ -1672,30 +1672,40 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
             # Section 80C
             if category.custom_select_section == "80 C":
+                declared = flt(d.amount or 0)
+                qualified = flt(d.max_amount or 0)
+
                 eighty_c.append({
                     "component": d.exemption_sub_category,
-                    "declared_amount": flt(d.amount or 0),
-                    "qualified_amount": flt(d.max_amount or 0),
-                    "deductible_amount": flt(d.max_amount or 0)
+                    "declared_amount": declared,
+                    "qualified_amount": qualified,
+                    "deductible_amount": qualified if declared > qualified else declared
                 })
 
 
             if category.custom_select_section == "80 D":
+
+                declared_80d = flt(d.amount or 0)
+                qualified_80d = flt(d.max_amount or 0)
+
                 eighty_d.append({
                     "component": d.exemption_sub_category,
-                    "declared_amount": flt(d.amount or 0),
-                    "qualified_amount": flt(d.max_amount or 0),
-                    "deductible_amount": flt(d.max_amount or 0)
+                    "declared_amount": declared_80d,
+                    "qualified_amount": qualified_80d,
+                    "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                 })
 
             if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
 
+                declared_other = flt(d.amount or 0)
+                qualified_other = flt(d.max_amount or 0)
+
                 other_investment.append({
 
                     "component": d.exemption_sub_category,
-                    "declared_amount": flt(d.amount or 0),
-                    "qualified_amount": flt(d.max_amount or 0),
-                    "deductible_amount": flt(d.max_amount or 0)
+                    "declared_amount": declared_other,
+                    "qualified_amount": qualified_other,
+                    "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                 })
 
     # ------------------ Annual Statement ------------------

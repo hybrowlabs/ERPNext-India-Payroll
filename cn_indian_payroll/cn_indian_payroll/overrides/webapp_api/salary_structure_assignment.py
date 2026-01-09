@@ -51,7 +51,7 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
         salary_structures = frappe.get_all(
             "Salary Structure Assignment",
             filters=filters,
-            fields=["name", "salary_structure", "from_date","custom_fixed_gross_annual"],
+            fields=["name", "salary_structure", "from_date","custom_fixed_gross_annual","custom_variable_pay"],
             order_by="from_date desc"
         )
 
@@ -140,6 +140,10 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "total_deduction": round(total_deduction),
                 "fixed_gross_annual":round(assignment.custom_fixed_gross_annual),
                 "fixed_gross_monthly":round(assignment.custom_fixed_gross_annual/12),
+                "annual_variable_pay":round(assignment.custom_variable_pay),
+                "total_ctc":round(annual_ctc+assignment.custom_variable_pay)
+
+
             })
 
         return {
