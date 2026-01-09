@@ -32,6 +32,10 @@ from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
+from frappe.utils import getdate
+from dateutil.relativedelta import relativedelta
+
+
 
 class CustomSalarySlip(SalarySlip):
     def on_submit(self):
@@ -41,7 +45,7 @@ class CustomSalarySlip(SalarySlip):
         self.update_benefit_claim_amount()
         self.update_employee_advance_amount()
         self.update_loan_deducted_amount()
-        self.insert_attendance_log()
+        self.insert_attendance_log_list()
 
 
     def before_save(self):
@@ -96,6 +100,121 @@ class CustomSalarySlip(SalarySlip):
         self.cancel_employee_advance_amount()
         self.uncheck_loan_deducted_amount()
         self.delete_attendance_log()
+
+
+    def insert_attendance_log_list(self):
+        payroll_setting = frappe.get_single("Payroll Settings")
+
+        start_day = payroll_setting.custom_attendance_start_date   # 21
+        end_day = payroll_setting.custom_attendance_end_date       # 20
+        regularize_months = int(payroll_setting.custom_attendance_regularize_month or 0)
+
+
+
+        posting_date = getdate(self.end_date)
+
+        if not start_day or not end_day:
+            frappe.throw("Attendance cycle start/end date not set in Payroll Settings")
+
+        # ------------------------------------------------
+        # Calculate CURRENT attendance cycle (21 → 20)
+        # ------------------------------------------------
+        if posting_date.day > end_day:
+            cycle_end = posting_date.replace(day=end_day)
+        else:
+            cycle_end = (posting_date - relativedelta(months=1)).replace(day=end_day)
+
+        cycle_start = (cycle_end - relativedelta(months=1)).replace(day=start_day)
+
+        # ------------------------------------------------
+        # Calculate REGULARIZATION window
+        # ------------------------------------------------
+        regularize_end_date = cycle_end
+        regularize_start_date = (
+            (cycle_end - relativedelta(months=regularize_months))
+            .replace(day=start_day)
+        )
+
+        # ------------------------------------------------
+        # Create Attendance Log
+        # ------------------------------------------------
+        accrual_doc = frappe.new_doc("Attendance Log")
+        accrual_doc.month = self.custom_month
+        accrual_doc.company = self.company
+        accrual_doc.employee = self.employee
+        accrual_doc.salary_slip_id = self.name
+        accrual_doc.working_days = self.total_working_days
+        accrual_doc.payroll_period = self.custom_payroll_period
+        accrual_doc.regularize_month=regularize_months
+
+        accrual_doc.from_date = cycle_start
+        accrual_doc.to_date = cycle_end
+
+        accrual_doc.regularize_start_date = regularize_start_date
+        accrual_doc.regularize_end_date = regularize_end_date
+
+        accrual_doc.payment_days = self.payment_days
+        accrual_doc.lwp = self.custom_total_leave_without_pay
+        accrual_doc.attendance_regularisationlop_reversal = 0
+        accrual_doc.additional_salary_date = None
+
+        # ------------------------------------------------
+        # Fetch Attendance records for CURRENT cycle
+        # ------------------------------------------------
+        attendance_records = frappe.get_list(
+            "Attendance",
+            filters={
+                "employee": self.employee,
+                "company": self.company,
+                "attendance_date": ["between", [regularize_start_date, regularize_end_date]],
+                "docstatus": 1,
+            },
+            fields=["attendance_date", "status"],
+            order_by="attendance_date",
+        )
+
+        # ------------------------------------------------
+        # Append DAILY attendance child rows
+        # ------------------------------------------------
+        for att in attendance_records:
+            accrual_doc.append("attendance_log_child", {
+                "date": att.attendance_date,
+                "status": att.status,
+                "count": (
+                    0.5 if att.status == "Half Day"
+                    else 1 if att.status in ["Present", "Absent", "On Leave", "Work From Home"]
+                    else 0
+                ),
+            })
+
+        # ------------------------------------------------
+        # Append MONTH-WISE working days (21 → 20)
+        # Example:
+        # Mar-2025 | 21-02 → 20-03 | 31
+        # ------------------------------------------------
+        for i in range(regularize_months):
+
+            cycle_end_m = regularize_end_date - relativedelta(months=i)
+            cycle_end_m = cycle_end_m.replace(day=end_day)
+
+            cycle_start_m = (
+                cycle_end_m - relativedelta(months=1)
+            ).replace(day=start_day)
+
+            working_days = (cycle_end_m - cycle_start_m).days + 1
+
+            accrual_doc.append("attendance_log_working_days", {
+                "month": cycle_end_m.strftime("%b-%Y"),
+                "from_date": cycle_start_m,
+                "to_date": cycle_end_m,
+                "working_days": working_days
+            })
+
+        # ------------------------------------------------
+        # Save & Submit
+        # ------------------------------------------------
+        accrual_doc.insert(ignore_permissions=True)
+        accrual_doc.submit()
 
 
 

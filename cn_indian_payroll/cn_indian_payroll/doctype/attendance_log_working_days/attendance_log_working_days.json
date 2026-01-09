@@ -5,17 +5,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "date",
+  "from_date",
+  "to_date",
   "working_days",
   "month"
  ],
  "fields": [
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date"
-  },
   {
    "fieldname": "working_days",
    "fieldtype": "Float",
@@ -27,13 +22,25 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Month"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-09 11:14:49.587475",
+ "modified": "2026-01-09 13:04:26.753585",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Attendance Log Working Days",
