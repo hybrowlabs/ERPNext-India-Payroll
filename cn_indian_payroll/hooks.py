@@ -307,6 +307,7 @@ doc_events = {
     "Employee Promotion": {
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.validate",
     },
     # "Full and Final Statement": {
     #     "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.f_and_f.before_save",
