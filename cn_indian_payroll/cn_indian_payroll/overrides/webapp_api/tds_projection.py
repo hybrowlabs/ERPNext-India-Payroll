@@ -1041,78 +1041,6 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-            # records = frappe.get_all(
-            #         "Employee Tax Exemption Sub Category",
-            #         filters={
-            #             "is_active": 1,
-            #             "custom_component_type": "NPS"
-            #         },
-            #         fields=[
-            #             "exemption_category",
-            #             "name",
-            #             "max_amount",
-            #             "custom_component_type",
-            #             "custom_description",
-            #             "custom_section_property"
-            #         ]
-            #     )
-
-            # # Step 1: Group by exemption_category
-            # category_grouped = {}
-
-            # for row in records:
-            #     category = row.exemption_category
-
-            #     if category not in category_grouped:
-            #         category_grouped[category] = {
-            #             "category_name": category,
-            #             "custom_section_property": row.custom_section_property,
-            #             "items": []
-            #         }
-
-            #     declaration_row = existing_map.get(row.name)
-
-            #     category_grouped[category]["items"].append({
-            #         "exemption_sub_category": row.name,
-            #         "component_type": row.custom_component_type,
-            #         "description": row.custom_description,
-            #         "editable": 0,  # NPS is non-editable
-            #         "amount": round(declaration_row["amount"]) if declaration_row else 0,
-            #         "max_amount": round(
-            #             declaration_row["max_amount"]
-            #             if declaration_row and declaration_row.get("max_amount") is not None
-            #             else row.max_amount
-            #         )
-            #     })
-
-            # # Step 2: Combine by custom_section_property (same as Old Regime)
-            # section_property_grouped = {}
-
-            # for category_data in category_grouped.values():
-            #     section_property = category_data.get("custom_section_property")
-
-            #     if section_property:
-            #         if section_property not in section_property_grouped:
-            #             section_property_grouped[section_property] = {
-            #                 "custom_section_property": section_property,
-            #                 "exemption_category": []
-            #             }
-
-            #         section_property_grouped[section_property]["exemption_category"].append({
-            #             "category_name": category_data["category_name"],
-            #             "items": category_data["items"]
-            #         })
-
-            # final_categories = list(section_property_grouped.values())
-
-            # return {
-            #     "status": "success",
-            #     "declaration_id": declaration_id,
-            #     "current_tax_regime": current_tax_regime,
-            #     "go_head_with_new_regime": current_flag,
-            #     "categories": final_categories
-            # }
-
             section_sequence_map = {
                 d.name: d.sequence_number
                 for d in frappe.get_all(
@@ -1627,6 +1555,969 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
             proof_id = proof_doc.name
 
+            current_tax_regime = proof_doc.custom_tax_regime
+
+            hra_exemption=[]
+
+
+            if proof_doc.custom_tax_regime=="Old Regime":
+
+                monthly_hra=proof_doc.house_rent_payment_amount if proof_doc.house_rent_payment_amount else 0
+                rented_in_metro_city=proof_doc.rented_in_metro_city if proof_doc.rented_in_metro_city else 0
+                annual_hra_exemption=proof_doc.custom_annual_eligible_amount if proof_doc.custom_annual_eligible_amount else 0
+                monthly_hra_exemption=proof_doc.monthly_hra_exemption if proof_doc.monthly_hra_exemption else 0
+
+
+                hra_exemption.append({
+                    "monthly_hra": proof_doc.house_rent_payment_amount or 0,
+                    "rented_in_metro_city": proof_doc.rented_in_metro_city or 0,
+                    "annual_hra_exemption": proof_doc.custom_annual_eligible_amount or 0,
+                    "monthly_hra_exemption": proof_doc.monthly_hra_exemption or 0,
+                    "start_date": proof_doc.rented_from_date or "",
+                    "end_date": proof_doc.rented_to_date or "",
+                    "pan": proof_doc.custom_pan or "",
+                    "address_line1": proof_doc.custom_address_title1 or "",
+                    "address_line2": proof_doc.custom_address_title2 or "",
+                })
+
+
+
+
+            # ------------------ DB → UI Flag ------------------
+            current_flag = 1 if current_tax_regime == "New Regime" else 0
+
+            # ------------------ Existing Declaration Map ------------------
+            existing_declaration = []
+            for d in proof_doc.tax_exemption_proofs:
+                existing_declaration.append({
+                    "exemption_category": d.exemption_category,
+                    "exemption_sub_category": d.exemption_sub_category,
+                    "amount": d.amount,
+                    "max_amount": d.max_amount
+                })
+
+            existing_map = {
+                d["exemption_sub_category"]: d for d in existing_declaration
+            }
+
+            # ------------------ Initial Load (No Toggle) ------------------
+            go_head_with_new_regime = int(go_head_with_new_regime)
+
+
+
+
+            if go_head_with_new_regime == current_flag:
+
+
+
+                if current_tax_regime == "Old Regime":
+
+
+                    NON_EDITABLE_COMPONENTS = [
+                        "Professional Tax",
+                        "Provident Fund",
+                        "NPS"
+                    ]
+
+                    # ------------------ Fetch Section Category sequence ------------------
+                    section_sequence_map = {
+                        d.name: d.sequence_number
+                        for d in frappe.get_all(
+                            "Section Category",
+                            fields=["name", "sequence_number"]
+                        )
+                    }
+
+                    # ------------------ Fetch Exemption Category meta ------------------
+                    category_meta_map = {
+                        d.name: {
+                            "custom_select_type": d.custom_select_type,
+                            "max_amount": d.max_amount
+                        }
+                        for d in frappe.get_all(
+                            "Employee Tax Exemption Category",
+                            fields=["name", "custom_select_type", "max_amount"]
+                        )
+                    }
+
+                    # ------------------ Fetch Sub Categories ------------------
+                    records = frappe.get_all(
+                        "Employee Tax Exemption Sub Category",
+                        filters={
+                            "is_active": 1,
+                            "custom_component_type": ["!=", "LTA Reimbursement"]
+                        },
+                        fields=[
+                            "exemption_category",
+                            "name",
+                            "max_amount",
+                            "custom_component_type",
+                            "custom_description",
+                            "custom_sequence",
+                            "custom_section_property"
+                        ],
+                        order_by="custom_sequence asc"
+                    )
+
+                    # ------------------ Group by Category ------------------
+                    category_grouped = {}
+
+                    for row in records:
+                        category = row.exemption_category
+                        category_meta = category_meta_map.get(category, {})
+
+                        if category not in category_grouped:
+                            category_grouped[category] = {
+                                "category_name": category,
+                                "custom_select_type": category_meta.get("custom_select_type"),
+                                "category_max_amount": category_meta.get("max_amount"),
+                                "custom_section_property": row.custom_section_property,
+                                "items": []
+                            }
+
+                        declaration_row = existing_map.get(row.name)
+                        editable = 0 if row.custom_component_type in NON_EDITABLE_COMPONENTS else 1
+
+                        category_grouped[category]["items"].append({
+                            "exemption_sub_category": row.name,
+                            "component_type": row.custom_component_type,
+                            "description": row.custom_description,
+                            "editable": editable,
+                            "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                            "max_amount": round(
+                                declaration_row["max_amount"]
+                                if declaration_row and declaration_row.get("max_amount") is not None
+                                else row.max_amount
+                            )
+                        })
+
+                    # ------------------ Group by Section Property (FIXED PART) ------------------
+                    section_grouped = {}
+
+                    for category_data in category_grouped.values():
+                        section = category_data.get("custom_section_property")
+                        if not section:
+                            continue
+
+                        if section not in section_grouped:
+                            section_grouped[section] = {
+                                "custom_section_property": section,
+                                "sequence_number": section_sequence_map.get(section, 999),
+                                "exemption_category": []
+                            }
+
+                        category_name = category_data["category_name"]
+                        meta = category_meta_map.get(category_name, {})
+
+                        section_grouped[section]["exemption_category"].append({
+                            "category_name": category_name,
+                            "custom_select_type": meta.get("custom_select_type"),
+                            "max_amount": meta.get("max_amount"),
+                            "items": category_data["items"]
+                        })
+
+                    # ------------------ Sort Sections ------------------
+                    final_categories = sorted(
+                        section_grouped.values(),
+                        key=lambda x: x["sequence_number"]
+                    )
+
+                    # ------------------ LTA Reimbursement Logic (unchanged) ------------------
+                    records = frappe.get_all(
+                        "Employee Tax Exemption Sub Category",
+                        filters={"is_active": 1, "custom_component_type": "LTA Reimbursement"},
+                        fields=[
+                            "exemption_category",
+                            "name",
+                            "max_amount",
+                            "custom_component_type",
+                            "custom_description",
+                            "custom_sequence",
+                            "custom_section_property"
+                        ],
+                        order_by="custom_sequence asc"
+                    )
+
+                    grouped = {}
+
+                    for row in records:
+                        category = row.exemption_category
+                        if category not in grouped:
+                            grouped[category] = []
+
+                        declaration_row = existing_map.get(row.name)
+                        editable = 0 if row.custom_component_type in NON_EDITABLE_COMPONENTS else 1
+
+                        grouped[category].append({
+                            "exemption_sub_category": row.name,
+                            "component_type": row.custom_component_type,
+                            "description": row.custom_description,
+                            "editable": editable,
+                            "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                            "max_amount": round(
+                                declaration_row["max_amount"]
+                                if declaration_row and declaration_row.get("max_amount") is not None
+                                else row.max_amount
+                            ),
+                        })
+
+                    final_list = []
+                    for category, items in grouped.items():
+                        final_list.append({
+                            "category_name": category,
+                            "items": items
+                        })
+
+                    hra_exemption.append({"items": final_list})
+
+                    return {
+                        "status": "success",
+                        "note":"Proof Submission Found, Returning Old Regime Data",
+                        "declaration_id": declaration_id,
+                        "proof_id": proof_id,
+                        "doctype":"Employee Tax Exemption Proof Submission",
+                        "current_tax_regime": current_tax_regime,
+                        "go_head_with_new_regime": current_flag,
+                        "hra_exemption": hra_exemption,
+                        "categories": final_categories
+                    }
+
+
+                elif current_tax_regime == "New Regime":
+
+                    # ------------------ Fetch Section Category sequence ------------------
+                    section_sequence_map = {
+                        d.name: d.sequence_number
+                        for d in frappe.get_all(
+                            "Section Category",
+                            fields=["name", "sequence_number"]
+                        )
+                    }
+
+                    # ------------------ Fetch Exemption Category meta ------------------
+                    category_meta_map = {
+                        d.name: {
+                            "custom_select_type": d.custom_select_type,
+                            "max_amount": d.max_amount
+                        }
+                        for d in frappe.get_all(
+                            "Employee Tax Exemption Category",
+                            fields=["name", "custom_select_type", "max_amount"]
+                        )
+                    }
+
+                    # ------------------ Fetch NPS Sub Categories ------------------
+                    records = frappe.get_all(
+                        "Employee Tax Exemption Sub Category",
+                        filters={
+                            "is_active": 1,
+                            "custom_component_type": "NPS"
+                        },
+                        fields=[
+                            "exemption_category",
+                            "name",
+                            "max_amount",
+                            "custom_component_type",
+                            "custom_description",
+                            "custom_sequence",
+                            "custom_section_property"
+                        ],
+                        order_by="custom_sequence asc"
+                    )
+
+                    # ------------------ Group by Category ------------------
+                    category_grouped = {}
+
+                    for row in records:
+                        category = row.exemption_category
+                        category_meta = category_meta_map.get(category, {})
+
+                        if category not in category_grouped:
+                            category_grouped[category] = {
+                                "category_name": category,
+                                "custom_select_type": category_meta.get("custom_select_type"),
+                                "category_max_amount": category_meta.get("max_amount"),
+                                "custom_section_property": row.custom_section_property,
+                                "items": []
+                            }
+
+                        declaration_row = existing_map.get(row.name)
+
+                        category_grouped[category]["items"].append({
+                            "exemption_sub_category": row.name,
+                            "component_type": row.custom_component_type,
+                            "description": row.custom_description,
+                            "editable": 0,  # NPS is always non-editable
+                            "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                            "max_amount": round(
+                                declaration_row["max_amount"]
+                                if declaration_row and declaration_row.get("max_amount") is not None
+                                else row.max_amount
+                            )
+                        })
+
+                    # ------------------ Group by Section Property ------------------
+                    section_grouped = {}
+
+                    for category_data in category_grouped.values():
+                        section = category_data.get("custom_section_property")
+                        if not section:
+                            continue
+
+                        if section not in section_grouped:
+                            section_grouped[section] = {
+                                "custom_section_property": section,
+                                "sequence_number": section_sequence_map.get(section, 999),
+                                "exemption_category": []
+                            }
+
+                        category_name = category_data["category_name"]
+                        meta = category_meta_map.get(category_name, {})
+
+                        section_grouped[section]["exemption_category"].append({
+                            "category_name": category_name,
+                            "custom_select_type": meta.get("custom_select_type"),
+                            "max_amount": meta.get("max_amount"),
+                            "items": category_data["items"]
+                        })
+
+                    # ------------------ Sort Sections by sequence ------------------
+                    final_categories = sorted(
+                        section_grouped.values(),
+                        key=lambda x: x["sequence_number"]
+                    )
+
+                    return {
+                        "status": "success",
+                        "note":"Proof Submission Found, Returning New Regime Data",
+                        "declaration_id": declaration_id,
+                        "proof_id": proof_id,
+                        "doctype":"Employee Tax Exemption Proof Submission",
+                        "current_tax_regime": current_tax_regime,
+                        "go_head_with_new_regime": current_flag,
+                        "categories": final_categories
+                    }
+
+
+            if go_head_with_new_regime == 1 and current_flag == 0:
+
+                nps_amount_ctc = 0
+                num_months = 0
+                choosed_tax_regime = None
+
+
+
+                # ---------------- Latest Tax Slab (NEW REGIME) ----------------
+                latest_tax_slab = frappe.get_list(
+                    "Income Tax Slab",
+                    filters={
+                        "company": company,
+                        "docstatus": 1,
+                        "disabled": 0,
+                        "custom_select_regime": "New Regime",
+                    },
+                    fields=["name", "custom_select_regime", "standard_tax_exemption_amount"],
+                    order_by="effective_from DESC",
+                    limit=1,
+                )
+
+                latest_tax_slab_name = None
+                if latest_tax_slab:
+                    latest_tax_slab_name = latest_tax_slab[0].name
+                    choosed_tax_regime = "New Regime"
+
+                # ---------------- Salary Structure Assignment ----------------
+                salary_structure_assignments = frappe.get_list(
+                    "Salary Structure Assignment",
+                    filters={
+                        "employee": employee,
+                        "docstatus": 1,
+                        "custom_payroll_period": payroll_period,
+                        "company": company,
+                    },
+                    fields=["*"],
+                    order_by="from_date desc",
+                    limit=1
+                )
+
+                if not salary_structure_assignments:
+                    return {
+                        "status": "success",
+                        "message": "No salary structure assignment found",
+                        "categories": []
+                    }
+
+                assignment = salary_structure_assignments[0]
+
+                employee_doc = frappe.get_doc("Employee", employee)
+                payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
+
+                # ---------------- Date Calculations ----------------
+                start_candidates = [
+                    assignment.from_date,
+                    payroll_period_doc.start_date,
+                    employee_doc.date_of_joining,
+                ]
+
+                start = max(getdate(d) for d in start_candidates if d)
+                end = getdate(payroll_period_doc.end_date)
+
+                num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+
+                # ---------------- Salary Slips ----------------
+                salary_slips = frappe.get_list(
+                    "Salary Slip",
+                    filters={
+                        "employee": employee,
+                        "custom_payroll_period": payroll_period,
+                        "docstatus": ["in", [0, 1]],
+                        "company": company,
+                    },
+                    fields=["name", "custom_month_count"],
+                    order_by="end_date desc",
+                )
+
+                # ---------------- CASE 1: No Salary Slips ----------------
+                if not salary_slips:
+
+                    salary_slip_preview = make_salary_slip(
+                        source_name=assignment.salary_structure,
+                        employee=employee,
+                        posting_date=assignment.from_date,
+                        for_preview=1,
+                    )
+
+                    if salary_slip_preview:
+                        for earning in salary_slip_preview.earnings:
+                            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                            if (
+                                component.is_tax_applicable
+                                and component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.custom_component_sub_type == "Fixed"
+                                and component.component_type == "NPS"
+                            ):
+                                nps_amount_ctc += earning.amount * num_months
+
+                # ---------------- CASE 2: Salary Slips Exist ----------------
+                else:
+                    month_count = salary_slips[0].custom_month_count or 0
+
+                    for slip in salary_slips:
+                        slip_doc = frappe.get_doc("Salary Slip", slip.name)
+
+                        for earning in slip_doc.earnings:
+                            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                            if (
+                                component.is_tax_applicable
+                                and component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.component_type == "NPS"
+                            ):
+                                nps_amount_ctc += earning.amount
+
+                    # Preview remaining months
+                    salary_slip_preview = make_salary_slip(
+                        source_name=assignment.salary_structure,
+                        employee=employee,
+                        posting_date=assignment.from_date,
+                        for_preview=1,
+                    )
+
+                    if salary_slip_preview:
+                        for earning in salary_slip_preview.earnings:
+                            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                            if (
+                                component.is_tax_applicable
+                                and component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.custom_component_sub_type == "Fixed"
+                                and component.component_type == "NPS"
+                            ):
+                                nps_amount_ctc += earning.amount * month_count
+
+
+
+
+                section_sequence_map = {
+                    d.name: d.sequence_number
+                    for d in frappe.get_all(
+                        "Section Category",
+                        fields=["name", "sequence_number"]
+                    )
+                }
+
+                # ------------------ Fetch Exemption Category meta ------------------
+                category_meta_map = {
+                    d.name: {
+                        "custom_select_type": d.custom_select_type,
+                        "max_amount": d.max_amount
+                    }
+                    for d in frappe.get_all(
+                        "Employee Tax Exemption Category",
+                        fields=["name", "custom_select_type", "max_amount"]
+                    )
+                }
+
+                # ------------------ Fetch NPS Sub Categories ------------------
+                records = frappe.get_all(
+                    "Employee Tax Exemption Sub Category",
+                    filters={
+                        "is_active": 1,
+                        "custom_component_type": "NPS"
+                    },
+                    fields=[
+                        "exemption_category",
+                        "name",
+                        "max_amount",
+                        "custom_component_type",
+                        "custom_description",
+                        "custom_sequence",
+                        "custom_section_property"
+                    ],
+                    order_by="custom_sequence asc"
+                )
+
+                # ------------------ Group by Category ------------------
+                category_grouped = {}
+
+                for row in records:
+                    category = row.exemption_category
+                    category_meta = category_meta_map.get(category, {})
+
+                    if category not in category_grouped:
+                        category_grouped[category] = {
+                            "category_name": category,
+                            "custom_select_type": category_meta.get("custom_select_type"),
+                            "category_max_amount": category_meta.get("max_amount"),
+                            "custom_section_property": row.custom_section_property,
+                            "items": []
+                        }
+
+                    declaration_row = existing_map.get(row.name)
+
+                    category_grouped[category]["items"].append({
+                        "exemption_sub_category": row.name,
+                        "component_type": row.custom_component_type,
+                        "description": row.custom_description,
+                        "editable": 0,  # NPS is always non-editable
+                        "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                        "max_amount": round(
+                            declaration_row["max_amount"]
+                            if declaration_row and declaration_row.get("max_amount") is not None
+                            else row.max_amount
+                        )
+                    })
+
+                # ------------------ Group by Section Property ------------------
+                section_grouped = {}
+
+                for category_data in category_grouped.values():
+                    section = category_data.get("custom_section_property")
+                    if not section:
+                        continue
+
+                    if section not in section_grouped:
+                        section_grouped[section] = {
+                            "custom_section_property": section,
+                            "sequence_number": section_sequence_map.get(section, 999),
+                            "exemption_category": []
+                        }
+
+                    category_name = category_data["category_name"]
+                    meta = category_meta_map.get(category_name, {})
+
+                    section_grouped[section]["exemption_category"].append({
+                        "category_name": category_name,
+                        "custom_select_type": meta.get("custom_select_type"),
+                        "max_amount": meta.get("max_amount"),
+                        "items": category_data["items"]
+                    })
+
+                # ------------------ Sort Sections by sequence ------------------
+                final_categories = sorted(
+                    section_grouped.values(),
+                    key=lambda x: x["sequence_number"]
+                )
+
+
+                return {
+                    "status": "success",
+                    "doctype":"Employee Tax Exemption Proof Submission",
+                    "declaration_id": declaration_id,
+                    "proof_id": proof_id,
+                    "current_tax_regime": current_tax_regime,
+                    "go_head_with_new_regime": current_flag,
+                    "categories": final_categories
+                }
+
+
+
+            if go_head_with_new_regime == 0 and current_flag == 1:
+
+                nps_amount_ctc = 0
+                pf_amount_ctc = 0
+                pt_amount_ctc = 0
+                lta_amount_ctc = 0
+
+
+
+
+                hra_exemption.append({
+                    "monthly_hra": None,
+                    "rented_in_metro_city": None,
+                    "annual_hra_exemption": None,
+                    "monthly_hra_exemption": None,
+                    "start_date": None,
+                    "end_date": None,
+                    "pan": None,
+                    "address_line1": None,
+                    "address_line2": None,
+                })
+
+
+                assignment = frappe.get_list(
+                    "Salary Structure Assignment",
+                    filters={
+                        "employee": employee,
+                        "company": company,
+                        "custom_payroll_period": payroll_period,
+                        "docstatus": 1,
+                    },
+                    fields=["salary_structure", "from_date"],
+                    order_by="from_date desc",
+                    limit=1,
+                )
+
+                if not assignment:
+                    return {
+                        "status": "success",
+                        "message": "No salary structure assignment found",
+                        "categories": [],
+                    }
+
+                assignment = assignment[0]
+
+                employee_doc = frappe.get_doc("Employee", employee)
+                payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
+
+
+                start = max(
+                    getdate(d)
+                    for d in [
+                        assignment.from_date,
+                        payroll_doc.start_date,
+                        employee_doc.date_of_joining,
+                    ]
+                    if d
+                )
+                end = getdate(payroll_doc.end_date)
+                total_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+
+
+                salary_slips = frappe.get_list(
+                    "Salary Slip",
+                    filters={
+                        "employee": employee,
+                        "company": company,
+                        "custom_payroll_period": payroll_period,
+                        "docstatus": ["in", [0, 1]],
+                    },
+                    fields=["name", "custom_month_count"],
+                    order_by="end_date desc",
+                )
+
+
+                if not salary_slips:
+
+                    preview = make_salary_slip(
+                        source_name=assignment.salary_structure,
+                        employee=employee,
+                        posting_date=assignment.from_date,
+                        for_preview=1,
+                    )
+
+                    for row in preview.earnings:
+                        component = frappe.get_doc("Salary Component", row.salary_component)
+
+                        if (
+                            component.custom_tax_exemption_applicable_based_on_regime
+                            and component.custom_regime == "All"
+                            and component.custom_component_sub_type == "Fixed"
+                        ):
+                            if component.component_type == "NPS":
+                                nps_amount_ctc += row.amount * total_months
+                            elif component.component_type == "LTA Reimbursement":
+                                lta_amount_ctc += row.amount * total_months
+
+                    for row in preview.deductions:
+                        component = frappe.get_doc("Salary Component", row.salary_component)
+
+                        if component.component_type == "Provident Fund":
+                            pf_amount_ctc += row.amount * total_months
+                        elif component.component_type == "Professional Tax":
+                            pt_amount_ctc += row.amount * total_months
+
+
+                else:
+                    processed_months = salary_slips[0].custom_month_count or 0
+
+                    for slip in salary_slips:
+                        slip_doc = frappe.get_doc("Salary Slip", slip.name)
+
+                        for row in slip_doc.earnings:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+                            if (
+                                component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                            ):
+                                if component.component_type == "NPS":
+                                    nps_amount_ctc += row.amount
+                                elif component.component_type == "LTA Reimbursement":
+                                    lta_amount_ctc += row.amount
+
+                        for row in slip_doc.deductions:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+
+                            if component.component_type == "Provident Fund":
+                                pf_amount_ctc += row.amount
+                            elif component.component_type == "Professional Tax":
+                                pt_amount_ctc += row.amount
+
+
+                    # ---- Remaining months preview (THIS WAS MISSING) ----
+                    if processed_months > 0:
+                        preview = make_salary_slip(
+                            source_name=assignment.salary_structure,
+                            employee=employee,
+                            posting_date=assignment.from_date,
+                            for_preview=1,
+                        )
+
+
+                        for row in preview.earnings:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+                            if (
+                                component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.custom_component_sub_type == "Fixed"
+                            ):
+                                if component.component_type == "NPS":
+                                    nps_amount_ctc += row.amount * processed_months
+                                elif component.component_type == "LTA Reimbursement":
+                                    lta_amount_ctc += row.amount * processed_months
+
+                        for row in preview.deductions:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+                            if component.custom_component_sub_type == "Fixed":
+                                if component.component_type == "Provident Fund":
+                                    pf_amount_ctc += row.amount * processed_months
+                                elif component.component_type == "Professional Tax":
+                                    pt_amount_ctc += row.amount * processed_months
+
+
+
+
+                SYSTEM_COMPONENT_MAP = {
+                    "NPS": round(nps_amount_ctc, 2),
+                    "Provident Fund": round(pf_amount_ctc, 2),
+                    "Professional Tax": round(pt_amount_ctc, 2),
+                }
+
+                NON_EDITABLE_COMPONENTS = set(SYSTEM_COMPONENT_MAP.keys())
+
+                # ------------------ Fetch Section Category sequence ------------------
+                section_sequence_map = {
+                    d.name: d.sequence_number
+                    for d in frappe.get_all(
+                        "Section Category",
+                        fields=["name", "sequence_number"]
+                    )
+                }
+
+                # ------------------ Fetch Exemption Category meta ------------------
+                category_meta_map = {
+                    d.name: {
+                        "custom_select_type": d.custom_select_type,
+                        "max_amount": d.max_amount
+                    }
+                    for d in frappe.get_all(
+                        "Employee Tax Exemption Category",
+                        fields=["name", "custom_select_type", "max_amount"]
+                    )
+                }
+
+                # ------------------ Fetch Sub Categories (NON-LTA) ------------------
+                records = frappe.get_all(
+                    "Employee Tax Exemption Sub Category",
+                    filters={
+                        "is_active": 1,
+                        "custom_component_type": ["!=", "LTA Reimbursement"]
+                    },
+                    fields=[
+                        "exemption_category",
+                        "name",
+                        "max_amount",
+                        "custom_component_type",
+                        "custom_description",
+                        "custom_sequence",
+                        "custom_section_property"
+                    ],
+                    order_by="custom_sequence asc"
+                )
+
+                # ------------------ Group by Category ------------------
+                category_grouped = {}
+
+                for row in records:
+                    category = row.exemption_category
+                    category_meta = category_meta_map.get(category, {})
+
+                    if category not in category_grouped:
+                        category_grouped[category] = {
+                            "category_name": category,
+                            "custom_select_type": category_meta.get("custom_select_type"),
+                            "category_max_amount": category_meta.get("max_amount"),
+                            "custom_section_property": row.custom_section_property,
+                            "items": []
+                        }
+
+                    declaration_row = existing_map.get(row.name)
+
+                    # ------------------ SYSTEM vs USER logic ------------------
+                    if row.custom_component_type in SYSTEM_COMPONENT_MAP:
+                        amount = SYSTEM_COMPONENT_MAP[row.custom_component_type]
+                        max_amount = amount
+                        editable = 0
+                    else:
+                        amount = declaration_row["amount"] if declaration_row else 0
+                        max_amount = (
+                            declaration_row.get("max_amount")
+                            if declaration_row and declaration_row.get("max_amount") is not None
+                            else row.max_amount
+                        )
+                        editable = 1
+
+                    category_grouped[category]["items"].append({
+                        "exemption_sub_category": row.name,
+                        "component_type": row.custom_component_type,
+                        "description": row.custom_description,
+                        "editable": editable,
+                        "amount": round(amount),
+                        "max_amount": round(max_amount),
+                    })
+
+                # ------------------ Group by Section Property ------------------
+                section_grouped = {}
+
+                for category_data in category_grouped.values():
+                    section = category_data.get("custom_section_property")
+                    if not section:
+                        continue
+
+                    if section not in section_grouped:
+                        section_grouped[section] = {
+                            "custom_section_property": section,
+                            "sequence_number": section_sequence_map.get(section, 999),
+                            "exemption_category": []
+                        }
+
+                    category_name = category_data["category_name"]
+                    meta = category_meta_map.get(category_name, {})
+
+                    section_grouped[section]["exemption_category"].append({
+                        "category_name": category_name,
+                        "custom_select_type": meta.get("custom_select_type"),
+                        "max_amount": meta.get("max_amount"),
+                        "items": category_data["items"]
+                    })
+
+                # ------------------ Sort Sections ------------------
+                final_categories = sorted(
+                    section_grouped.values(),
+                    key=lambda x: x["sequence_number"]
+                )
+
+                # ------------------ LTA Reimbursement (UNCHANGED) ------------------
+                records = frappe.get_all(
+                    "Employee Tax Exemption Sub Category",
+                    filters={"is_active": 1, "custom_component_type": "LTA Reimbursement"},
+                    fields=[
+                        "exemption_category",
+                        "name",
+                        "max_amount",
+                        "custom_component_type",
+                        "custom_description",
+                        "custom_sequence",
+                        "custom_section_property"
+                    ],
+                    order_by="custom_sequence asc"
+                )
+
+                grouped = {}
+
+                for row in records:
+                    category = row.exemption_category
+                    if category not in grouped:
+                        grouped[category] = []
+
+                    declaration_row = existing_map.get(row.name)
+
+                    grouped[category].append({
+                        "exemption_sub_category": row.name,
+                        "component_type": row.custom_component_type,
+                        "description": row.custom_description,
+                        "editable": 1,
+                        "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                        "max_amount": round(
+                            declaration_row["max_amount"]
+                            if declaration_row and declaration_row.get("max_amount") is not None
+                            else row.max_amount
+                        ),
+                    })
+
+                hra_exemption.append({
+                    "items": [
+                        {
+                            "category_name": category,
+                            "items": items
+                        }
+                        for category, items in grouped.items()
+                    ]
+                })
+
+                return {
+                    "status": "success",
+                    "declaration_id": declaration_id,
+                    "doctype":"Employee Tax Exemption Proof Submission",
+                    "proof_id": proof_id,
+                    "current_tax_regime": "Old Regime",
+                    "go_head_with_new_regime": 0,
+                    "message": "User switched from New Regime to Old Regime",
+                    "categories": final_categories,
+                    "hra_exemption": hra_exemption,
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1979,25 +2870,614 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     }
 
 
+            if go_head_with_new_regime == 1 and current_flag == 0:
+
+                nps_amount_ctc = 0
+                num_months = 0
+                choosed_tax_regime = None
+
+                # ---------------- Latest Tax Slab (NEW REGIME) ----------------
+                latest_tax_slab = frappe.get_list(
+                    "Income Tax Slab",
+                    filters={
+                        "company": company,
+                        "docstatus": 1,
+                        "disabled": 0,
+                        "custom_select_regime": "New Regime",
+                    },
+                    fields=["name", "custom_select_regime", "standard_tax_exemption_amount"],
+                    order_by="effective_from DESC",
+                    limit=1,
+                )
+
+                latest_tax_slab_name = None
+                if latest_tax_slab:
+                    latest_tax_slab_name = latest_tax_slab[0].name
+                    choosed_tax_regime = "New Regime"
+
+                # ---------------- Salary Structure Assignment ----------------
+                salary_structure_assignments = frappe.get_list(
+                    "Salary Structure Assignment",
+                    filters={
+                        "employee": employee,
+                        "docstatus": 1,
+                        "custom_payroll_period": payroll_period,
+                        "company": company,
+                    },
+                    fields=["*"],
+                    order_by="from_date desc",
+                    limit=1
+                )
+
+                if not salary_structure_assignments:
+                    return {
+                        "status": "success",
+                        "message": "No salary structure assignment found",
+                        "categories": []
+                    }
+
+                assignment = salary_structure_assignments[0]
+
+                employee_doc = frappe.get_doc("Employee", employee)
+                payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
+
+                # ---------------- Date Calculations ----------------
+                start_candidates = [
+                    assignment.from_date,
+                    payroll_period_doc.start_date,
+                    employee_doc.date_of_joining,
+                ]
+
+                start = max(getdate(d) for d in start_candidates if d)
+                end = getdate(payroll_period_doc.end_date)
+
+                num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+
+                # ---------------- Salary Slips ----------------
+                salary_slips = frappe.get_list(
+                    "Salary Slip",
+                    filters={
+                        "employee": employee,
+                        "custom_payroll_period": payroll_period,
+                        "docstatus": ["in", [0, 1]],
+                        "company": company,
+                    },
+                    fields=["name", "custom_month_count"],
+                    order_by="end_date desc",
+                )
+
+                # ---------------- CASE 1: No Salary Slips ----------------
+                if not salary_slips:
+
+                    salary_slip_preview = make_salary_slip(
+                        source_name=assignment.salary_structure,
+                        employee=employee,
+                        posting_date=assignment.from_date,
+                        for_preview=1,
+                    )
+
+                    if salary_slip_preview:
+                        for earning in salary_slip_preview.earnings:
+                            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                            if (
+                                component.is_tax_applicable
+                                and component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.custom_component_sub_type == "Fixed"
+                                and component.component_type == "NPS"
+                            ):
+                                nps_amount_ctc += earning.amount * num_months
+
+                # ---------------- CASE 2: Salary Slips Exist ----------------
+                else:
+                    month_count = salary_slips[0].custom_month_count or 0
+
+                    for slip in salary_slips:
+                        slip_doc = frappe.get_doc("Salary Slip", slip.name)
+
+                        for earning in slip_doc.earnings:
+                            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                            if (
+                                component.is_tax_applicable
+                                and component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.component_type == "NPS"
+                            ):
+                                nps_amount_ctc += earning.amount
+
+                    # Preview remaining months
+                    salary_slip_preview = make_salary_slip(
+                        source_name=assignment.salary_structure,
+                        employee=employee,
+                        posting_date=assignment.from_date,
+                        for_preview=1,
+                    )
+
+                    if salary_slip_preview:
+                        for earning in salary_slip_preview.earnings:
+                            component = frappe.get_doc("Salary Component", earning.salary_component)
+
+                            if (
+                                component.is_tax_applicable
+                                and component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.custom_component_sub_type == "Fixed"
+                                and component.component_type == "NPS"
+                            ):
+                                nps_amount_ctc += earning.amount * month_count
+
+
+
+
+                section_sequence_map = {
+                    d.name: d.sequence_number
+                    for d in frappe.get_all(
+                        "Section Category",
+                        fields=["name", "sequence_number"]
+                    )
+                }
+
+                # ------------------ Fetch Exemption Category meta ------------------
+                category_meta_map = {
+                    d.name: {
+                        "custom_select_type": d.custom_select_type,
+                        "max_amount": d.max_amount
+                    }
+                    for d in frappe.get_all(
+                        "Employee Tax Exemption Category",
+                        fields=["name", "custom_select_type", "max_amount"]
+                    )
+                }
+
+                # ------------------ Fetch NPS Sub Categories ------------------
+                records = frappe.get_all(
+                    "Employee Tax Exemption Sub Category",
+                    filters={
+                        "is_active": 1,
+                        "custom_component_type": "NPS"
+                    },
+                    fields=[
+                        "exemption_category",
+                        "name",
+                        "max_amount",
+                        "custom_component_type",
+                        "custom_description",
+                        "custom_sequence",
+                        "custom_section_property"
+                    ],
+                    order_by="custom_sequence asc"
+                )
+
+                # ------------------ Group by Category ------------------
+                category_grouped = {}
+
+                for row in records:
+                    category = row.exemption_category
+                    category_meta = category_meta_map.get(category, {})
+
+                    if category not in category_grouped:
+                        category_grouped[category] = {
+                            "category_name": category,
+                            "custom_select_type": category_meta.get("custom_select_type"),
+                            "category_max_amount": category_meta.get("max_amount"),
+                            "custom_section_property": row.custom_section_property,
+                            "items": []
+                        }
+
+                    declaration_row = existing_map.get(row.name)
+
+                    category_grouped[category]["items"].append({
+                        "exemption_sub_category": row.name,
+                        "component_type": row.custom_component_type,
+                        "description": row.custom_description,
+                        "editable": 0,  # NPS is always non-editable
+                        "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                        "max_amount": round(
+                            declaration_row["max_amount"]
+                            if declaration_row and declaration_row.get("max_amount") is not None
+                            else row.max_amount
+                        )
+                    })
+
+                # ------------------ Group by Section Property ------------------
+                section_grouped = {}
+
+                for category_data in category_grouped.values():
+                    section = category_data.get("custom_section_property")
+                    if not section:
+                        continue
+
+                    if section not in section_grouped:
+                        section_grouped[section] = {
+                            "custom_section_property": section,
+                            "sequence_number": section_sequence_map.get(section, 999),
+                            "exemption_category": []
+                        }
+
+                    category_name = category_data["category_name"]
+                    meta = category_meta_map.get(category_name, {})
+
+                    section_grouped[section]["exemption_category"].append({
+                        "category_name": category_name,
+                        "custom_select_type": meta.get("custom_select_type"),
+                        "max_amount": meta.get("max_amount"),
+                        "items": category_data["items"]
+                    })
+
+                # ------------------ Sort Sections by sequence ------------------
+                final_categories = sorted(
+                    section_grouped.values(),
+                    key=lambda x: x["sequence_number"]
+                )
+
+
+                return {
+                    "status": "success",
+                    "doctype":"Employee Tax Exemption Proof Submission",
+                    "declaration_id": declaration_id,
+                    "proof_id": "",
+                    "current_tax_regime": current_tax_regime,
+                    "go_head_with_new_regime": current_flag,
+                    "categories": final_categories
+                }
+
+
+            if go_head_with_new_regime == 0 and current_flag == 1:
+
+                nps_amount_ctc = 0
+                pf_amount_ctc = 0
+                pt_amount_ctc = 0
+                lta_amount_ctc = 0
+
+
+
+
+                hra_exemption.append({
+                    "monthly_hra": None,
+                    "rented_in_metro_city": None,
+                    "annual_hra_exemption": None,
+                    "monthly_hra_exemption": None,
+                    "start_date": None,
+                    "end_date": None,
+                    "pan": None,
+                    "address_line1": None,
+                    "address_line2": None,
+                })
+
+
+                assignment = frappe.get_list(
+                    "Salary Structure Assignment",
+                    filters={
+                        "employee": employee,
+                        "company": company,
+                        "custom_payroll_period": payroll_period,
+                        "docstatus": 1,
+                    },
+                    fields=["salary_structure", "from_date"],
+                    order_by="from_date desc",
+                    limit=1,
+                )
+
+                if not assignment:
+                    return {
+                        "status": "success",
+                        "message": "No salary structure assignment found",
+                        "categories": [],
+                    }
+
+                assignment = assignment[0]
+
+                employee_doc = frappe.get_doc("Employee", employee)
+                payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
+
+
+                start = max(
+                    getdate(d)
+                    for d in [
+                        assignment.from_date,
+                        payroll_doc.start_date,
+                        employee_doc.date_of_joining,
+                    ]
+                    if d
+                )
+                end = getdate(payroll_doc.end_date)
+                total_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+
+
+                salary_slips = frappe.get_list(
+                    "Salary Slip",
+                    filters={
+                        "employee": employee,
+                        "company": company,
+                        "custom_payroll_period": payroll_period,
+                        "docstatus": ["in", [0, 1]],
+                    },
+                    fields=["name", "custom_month_count"],
+                    order_by="end_date desc",
+                )
+
+
+                if not salary_slips:
+
+                    preview = make_salary_slip(
+                        source_name=assignment.salary_structure,
+                        employee=employee,
+                        posting_date=assignment.from_date,
+                        for_preview=1,
+                    )
+
+                    for row in preview.earnings:
+                        component = frappe.get_doc("Salary Component", row.salary_component)
+
+                        if (
+                            component.custom_tax_exemption_applicable_based_on_regime
+                            and component.custom_regime == "All"
+                            and component.custom_component_sub_type == "Fixed"
+                        ):
+                            if component.component_type == "NPS":
+                                nps_amount_ctc += row.amount * total_months
+                            elif component.component_type == "LTA Reimbursement":
+                                lta_amount_ctc += row.amount * total_months
+
+                    for row in preview.deductions:
+                        component = frappe.get_doc("Salary Component", row.salary_component)
+
+                        if component.component_type == "Provident Fund":
+                            pf_amount_ctc += row.amount * total_months
+                        elif component.component_type == "Professional Tax":
+                            pt_amount_ctc += row.amount * total_months
+
+
+                else:
+                    processed_months = salary_slips[0].custom_month_count or 0
+
+                    for slip in salary_slips:
+                        slip_doc = frappe.get_doc("Salary Slip", slip.name)
+
+                        for row in slip_doc.earnings:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+                            if (
+                                component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                            ):
+                                if component.component_type == "NPS":
+                                    nps_amount_ctc += row.amount
+                                elif component.component_type == "LTA Reimbursement":
+                                    lta_amount_ctc += row.amount
+
+                        for row in slip_doc.deductions:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+
+                            if component.component_type == "Provident Fund":
+                                pf_amount_ctc += row.amount
+                            elif component.component_type == "Professional Tax":
+                                pt_amount_ctc += row.amount
+
+
+                    # ---- Remaining months preview (THIS WAS MISSING) ----
+                    if processed_months > 0:
+                        preview = make_salary_slip(
+                            source_name=assignment.salary_structure,
+                            employee=employee,
+                            posting_date=assignment.from_date,
+                            for_preview=1,
+                        )
+
+
+                        for row in preview.earnings:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+                            if (
+                                component.custom_tax_exemption_applicable_based_on_regime
+                                and component.custom_regime == "All"
+                                and component.custom_component_sub_type == "Fixed"
+                            ):
+                                if component.component_type == "NPS":
+                                    nps_amount_ctc += row.amount * processed_months
+                                elif component.component_type == "LTA Reimbursement":
+                                    lta_amount_ctc += row.amount * processed_months
+
+                        for row in preview.deductions:
+                            component = frappe.get_doc("Salary Component", row.salary_component)
+
+                            if component.custom_component_sub_type == "Fixed":
+                                if component.component_type == "Provident Fund":
+                                    pf_amount_ctc += row.amount * processed_months
+                                elif component.component_type == "Professional Tax":
+                                    pt_amount_ctc += row.amount * processed_months
+
+
+
+
+                SYSTEM_COMPONENT_MAP = {
+                    "NPS": round(nps_amount_ctc, 2),
+                    "Provident Fund": round(pf_amount_ctc, 2),
+                    "Professional Tax": round(pt_amount_ctc, 2),
+                }
+
+                NON_EDITABLE_COMPONENTS = set(SYSTEM_COMPONENT_MAP.keys())
+
+                # ------------------ Fetch Section Category sequence ------------------
+                section_sequence_map = {
+                    d.name: d.sequence_number
+                    for d in frappe.get_all(
+                        "Section Category",
+                        fields=["name", "sequence_number"]
+                    )
+                }
+
+                # ------------------ Fetch Exemption Category meta ------------------
+                category_meta_map = {
+                    d.name: {
+                        "custom_select_type": d.custom_select_type,
+                        "max_amount": d.max_amount
+                    }
+                    for d in frappe.get_all(
+                        "Employee Tax Exemption Category",
+                        fields=["name", "custom_select_type", "max_amount"]
+                    )
+                }
+
+                # ------------------ Fetch Sub Categories (NON-LTA) ------------------
+                records = frappe.get_all(
+                    "Employee Tax Exemption Sub Category",
+                    filters={
+                        "is_active": 1,
+                        "custom_component_type": ["!=", "LTA Reimbursement"]
+                    },
+                    fields=[
+                        "exemption_category",
+                        "name",
+                        "max_amount",
+                        "custom_component_type",
+                        "custom_description",
+                        "custom_sequence",
+                        "custom_section_property"
+                    ],
+                    order_by="custom_sequence asc"
+                )
+
+                # ------------------ Group by Category ------------------
+                category_grouped = {}
+
+                for row in records:
+                    category = row.exemption_category
+                    category_meta = category_meta_map.get(category, {})
+
+                    if category not in category_grouped:
+                        category_grouped[category] = {
+                            "category_name": category,
+                            "custom_select_type": category_meta.get("custom_select_type"),
+                            "category_max_amount": category_meta.get("max_amount"),
+                            "custom_section_property": row.custom_section_property,
+                            "items": []
+                        }
+
+                    declaration_row = existing_map.get(row.name)
+
+                    # ------------------ SYSTEM vs USER logic ------------------
+                    if row.custom_component_type in SYSTEM_COMPONENT_MAP:
+                        amount = SYSTEM_COMPONENT_MAP[row.custom_component_type]
+                        max_amount = amount
+                        editable = 0
+                    else:
+                        amount = declaration_row["amount"] if declaration_row else 0
+                        max_amount = (
+                            declaration_row.get("max_amount")
+                            if declaration_row and declaration_row.get("max_amount") is not None
+                            else row.max_amount
+                        )
+                        editable = 1
+
+                    category_grouped[category]["items"].append({
+                        "exemption_sub_category": row.name,
+                        "component_type": row.custom_component_type,
+                        "description": row.custom_description,
+                        "editable": editable,
+                        "amount": round(amount),
+                        "max_amount": round(max_amount),
+                    })
+
+                # ------------------ Group by Section Property ------------------
+                section_grouped = {}
+
+                for category_data in category_grouped.values():
+                    section = category_data.get("custom_section_property")
+                    if not section:
+                        continue
+
+                    if section not in section_grouped:
+                        section_grouped[section] = {
+                            "custom_section_property": section,
+                            "sequence_number": section_sequence_map.get(section, 999),
+                            "exemption_category": []
+                        }
+
+                    category_name = category_data["category_name"]
+                    meta = category_meta_map.get(category_name, {})
+
+                    section_grouped[section]["exemption_category"].append({
+                        "category_name": category_name,
+                        "custom_select_type": meta.get("custom_select_type"),
+                        "max_amount": meta.get("max_amount"),
+                        "items": category_data["items"]
+                    })
+
+                # ------------------ Sort Sections ------------------
+                final_categories = sorted(
+                    section_grouped.values(),
+                    key=lambda x: x["sequence_number"]
+                )
+
+                # ------------------ LTA Reimbursement (UNCHANGED) ------------------
+                records = frappe.get_all(
+                    "Employee Tax Exemption Sub Category",
+                    filters={"is_active": 1, "custom_component_type": "LTA Reimbursement"},
+                    fields=[
+                        "exemption_category",
+                        "name",
+                        "max_amount",
+                        "custom_component_type",
+                        "custom_description",
+                        "custom_sequence",
+                        "custom_section_property"
+                    ],
+                    order_by="custom_sequence asc"
+                )
+
+                grouped = {}
+
+                for row in records:
+                    category = row.exemption_category
+                    if category not in grouped:
+                        grouped[category] = []
+
+                    declaration_row = existing_map.get(row.name)
+
+                    grouped[category].append({
+                        "exemption_sub_category": row.name,
+                        "component_type": row.custom_component_type,
+                        "description": row.custom_description,
+                        "editable": 1,
+                        "amount": round(declaration_row["amount"]) if declaration_row else 0,
+                        "max_amount": round(
+                            declaration_row["max_amount"]
+                            if declaration_row and declaration_row.get("max_amount") is not None
+                            else row.max_amount
+                        ),
+                    })
+
+                hra_exemption.append({
+                    "items": [
+                        {
+                            "category_name": category,
+                            "items": items
+                        }
+                        for category, items in grouped.items()
+                    ]
+                })
+
+                return {
+                    "status": "success",
+                    "declaration_id": declaration_id,
+                    "doctype":"Employee Tax Exemption Proof Submission",
+                    "proof_id": "",
+                    "current_tax_regime": "Old Regime",
+                    "go_head_with_new_regime": 0,
+                    "message": "User switched from New Regime to Old Regime",
+                    "categories": final_categories,
+                    "hra_exemption": hra_exemption,
+                }
 
 
 
 
 
 
-
-
-        # return {
-        #         "status": "success",
-        #         # "declaration_id": declaration_id,
-        #         # "proof_id": proof_id,
-        #         "doctype":"Employee Tax Exemption Proof Submission",
-        #         "current_tax_regime": "Old Regime",
-        #         "go_head_with_new_regime": 0,
-        #         "message": "User switched from New Regime to Old Regime",
-        #         # "categories": final_categories,
-        #         # "hra_exemption": hra_exemption,
-        #     }
 
 
 
