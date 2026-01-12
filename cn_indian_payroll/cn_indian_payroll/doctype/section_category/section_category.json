@@ -6,7 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_name"
+  "is_active",
+  "section_name",
+  "sequence_number"
  ],
  "fields": [
   {
@@ -14,12 +16,23 @@
    "fieldtype": "Data",
    "label": "Section Name",
    "unique": 1
+  },
+  {
+   "fieldname": "sequence_number",
+   "fieldtype": "Int",
+   "label": "Sequence Number"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-05 12:15:19.642119",
+ "modified": "2026-01-12 08:29:32.169029",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Section Category",

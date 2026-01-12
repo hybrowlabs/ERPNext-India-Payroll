@@ -1,0 +1,74 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 1,
+  "modified": "2026-01-12 08:29:45.779422",
+  "name": "Mediclaim (U/S 80D)",
+  "section_name": "Mediclaim (U/S 80D)",
+  "sequence_number": 4
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 1,
+  "modified": "2026-01-12 08:29:45.756842",
+  "name": "Donation (U/S 80G)",
+  "section_name": "Donation (U/S 80G)",
+  "sequence_number": 5
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 1,
+  "modified": "2026-01-12 08:29:45.731460",
+  "name": "Others",
+  "section_name": "Others",
+  "sequence_number": 7
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 0,
+  "modified": "2026-01-05 12:52:18.825487",
+  "name": "NPS",
+  "section_name": "NPS",
+  "sequence_number": 0
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 0,
+  "modified": "2026-01-05 13:05:21.042448",
+  "name": "Section 16",
+  "section_name": "Section 16",
+  "sequence_number": 0
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 1,
+  "modified": "2026-01-12 08:29:45.828373",
+  "name": "HRA & Others (U/S 10)",
+  "section_name": "HRA & Others (U/S 10)",
+  "sequence_number": 1
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 1,
+  "modified": "2026-01-12 08:29:45.797644",
+  "name": "Investment Declaration (U/S 80C) & Others",
+  "section_name": "Investment Declaration (U/S 80C) & Others",
+  "sequence_number": 3
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Section Category",
+  "is_active": 1,
+  "modified": "2026-01-12 08:29:45.816836",
+  "name": "House Property (U/S 24)",
+  "section_name": "House Property (U/S 24)",
+  "sequence_number": 2
+ }
+]
