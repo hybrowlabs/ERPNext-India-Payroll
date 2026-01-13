@@ -4575,6 +4575,7 @@ def update_declaration_form(
                 "amount": row.get("amount"),
                 "max_amount": row.get("max_amount"),
                 "attach_proof": row.get("attach_proof"),
+                "custom_note": row.get("custom_note"),
             })
 
         proof_doc.insert()
@@ -4652,6 +4653,7 @@ def update_declaration_form(
                 "amount": row.get("amount"),
                 "max_amount": row.get("max_amount"),
                 "attach_proof": row.get("attach_proof"),
+                "custom_note": row.get("custom_note"),
             })
 
         # ------------------ Save ------------------
