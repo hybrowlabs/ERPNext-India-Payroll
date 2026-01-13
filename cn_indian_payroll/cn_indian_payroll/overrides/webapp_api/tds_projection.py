@@ -2929,7 +2929,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 declaration_row["max_amount"]
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
-                            )
+                            ),
                             "attach_reqd": 0,
                             "attach_proof": ""
                         })
@@ -3185,7 +3185,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             declaration_row["max_amount"]
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
-                        )
+                        ),
                         "attach_reqd": 0,
                         "attach_proof": ""
                     })
