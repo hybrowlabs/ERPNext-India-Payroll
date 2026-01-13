@@ -260,6 +260,7 @@ doctype_js = {
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
     "Employee Benefit Claim": "public/js/benefit_claim.js",
+    "Employee Promotion": "public/js/employee_promotion.js",
     # "Full and Final Statement": "public/js/f_and_f.js",
     # "Leave Encashment": "public/js/leave_encashment.js",
 
@@ -288,8 +289,11 @@ doc_events = {
         "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_update_after_submit",
 
     },
-
-
+    "Salary Appraisal Calculation": {
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_submit",
+        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.on_cancel",
+        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.validate",
+    },
 
     "Employee Tax Exemption Sub Category": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_sub_category.validate",

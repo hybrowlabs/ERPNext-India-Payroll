@@ -15,6 +15,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def on_submit(self):
         self.insert_tax_declaration_list()
+        self.update_employee_promotion()
 
     def on_cancel(self):
         self.cancel_declaration()
@@ -23,11 +24,39 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         super().validate()
         self.update_min_wages()
         self.update_total_reimbursement_amount()
+        self.update_employee_promotion_from_date()
 
 
     def before_update_after_submit(self):
         self.update_min_wages()
         self.update_total_reimbursement_amount()
+        self.update_employee_promotion_from_date()
+
+    def update_employee_promotion(self):
+        if self.custom_promotion_id:
+            get_promotion_doc = frappe.get_doc(
+                "Employee Promotion", self.custom_promotion_id
+            )
+
+            get_promotion_doc.current_ctc = self.base
+            get_promotion_doc.custom_status = "Payroll Configured"
+            get_promotion_doc.save()
+
+    def update_employee_promotion_from_date(self):
+        if self.custom_is_increment:
+            promotions = frappe.get_all(
+                "Employee Promotion",
+                filters={
+                    "employee": self.employee,
+                    "company": self.company,
+                    "promotion_date": self.from_date,
+                    "docstatus": 0,
+                },
+                fields=["name"],
+            )
+
+            if promotions:
+                self.custom_promotion_id = promotions[0].name
 
 
 
