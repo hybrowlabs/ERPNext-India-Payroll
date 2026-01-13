@@ -1530,7 +1530,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-    else:
+    elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
+        month_count=0
 
         declaration = frappe.get_all(
             "Employee Tax Exemption Declaration",
@@ -1623,8 +1624,20 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 d["exemption_sub_category"]: d for d in existing_declaration
             }
 
+
+            if go_head_with_new_regime is None:
+                return {
+                    "status": "success",
+                    "declaration_id": declaration_id,
+                    "current_tax_regime": current_tax_regime,
+                    "go_head_with_new_regime": current_flag
+                }
+
             # ------------------ Initial Load (No Toggle) ------------------
             go_head_with_new_regime = int(go_head_with_new_regime)
+
+
+
 
 
 
