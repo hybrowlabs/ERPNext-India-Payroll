@@ -64,12 +64,14 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
         response_data = []
 
 
-        for assignment in salary_structures:
+        # for assignment in salary_structures:
+        for idx, assignment in enumerate(salary_structures):
 
             component_part_of_ctc = []
             monthly_ctc = 0
             annual_ctc = 0
             total_deduction = 0
+            active = 1 if idx == 0 else 0
 
             slip = make_salary_slip(
                 source_name=assignment.salary_structure,
@@ -130,6 +132,7 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
             response_data.append({
                 "assignment_name": assignment.name,
                 "docstatus":1,
+                "active": active,
                 "from_date": assignment.from_date,
                 "salary_structure": assignment.salary_structure,
                 "component_part_of_ctc": component_part_of_ctc,

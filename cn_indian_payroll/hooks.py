@@ -238,7 +238,8 @@ fixtures = [
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
     {"dt": "Custom DocPerm", "filters": {"parent": "Employee Advance","role": "Payroll Manager"}},
-    {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}}
+    {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
+    {"dt":"Section Category"},
 
 
 
@@ -295,7 +296,7 @@ doc_events = {
 
     "Attendance": {
         "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.attendance_sync.on_update_after_submit",
-
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.attendance_sync.on_submit",
 
     },
 

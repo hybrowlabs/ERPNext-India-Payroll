@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "lop_reversal_details_section",
+  "attendance_log",
   "employee",
   "employee_name",
   "department",
@@ -186,6 +187,12 @@
    "fieldtype": "Link",
    "label": "Designation",
    "options": "Designation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "attendance_log",
+   "fieldtype": "Data",
+   "label": "Attendance Log"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -196,7 +203,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-12-30 10:11:08.958907",
+ "modified": "2026-01-08 20:58:36.021562",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
