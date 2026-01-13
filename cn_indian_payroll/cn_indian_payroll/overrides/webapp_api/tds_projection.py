@@ -771,6 +771,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "status": "success",
                     "declaration_id": declaration_id,
                     "doctype":"Employee Tax Exemption Declaration",
+                    "proof_id":"",
                     "current_tax_regime": current_tax_regime,
                     "go_head_with_new_regime": current_flag,
                     "hra_exemption": hra_exemption,
@@ -886,6 +887,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "status": "success",
                     "declaration_id": declaration_id,
                     "doctype":"Employee Tax Exemption Declaration",
+                    "proof_id":"",
                     "current_tax_regime": current_tax_regime,
                     "go_head_with_new_regime": current_flag,
                     "categories": final_categories
@@ -1146,6 +1148,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             return {
                 "status": "success",
                 "doctype":"Employee Tax Exemption Declaration",
+                "proof_id":"",
                 "declaration_id": declaration_id,
                 "current_tax_regime": current_tax_regime,
                 "go_head_with_new_regime": current_flag,
@@ -1498,6 +1501,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             return {
                 "status": "success",
                 "declaration_id": declaration_id,
+                "proof_id":"",
                 "doctype":"Employee Tax Exemption Declaration",
                 "current_tax_regime": "Old Regime",
                 "go_head_with_new_regime": 0,
@@ -4093,101 +4097,174 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 @frappe.whitelist()
-def update_declaration_form(declaration_id, data):
+def update_declaration_form(declaration_id=None, data=None, doctype=None,proof_id=None,employee=None,company=None,payroll_period=None):
     import frappe
 
     if isinstance(data, str):
         data = frappe.parse_json(data)
 
+    if doctype=="Employee Tax Exemption Declaration" and declaration_id:
 
-    declaration = frappe.get_doc(
-        "Employee Tax Exemption Declaration",
-        declaration_id
-    )
-
-    company = declaration.company
-    employee = declaration.employee
-    payroll_period = declaration.payroll_period
-
-
-    declaration.monthly_house_rent = data.get("monthly_house_rent")
-    declaration.rented_in_metro_city = data.get("rented_in_metro_city")
-
-    declaration.custom_start_date = data.get("start_date")
-    declaration.custom_end_date = data.get("end_date")
-    declaration.custom_pan = data.get("pan")
-    declaration.custom_address_title1 = data.get("address_title1")
-    declaration.custom_address_title2 = data.get("address_title2")
-
-
-
-    go_head_with_new_regime = data.get("go_head_with_new_regime")
-
-    selected_regime = "New Regime" if go_head_with_new_regime == 1 else "Old Regime"
-
-
-    income_tax_slab = frappe.get_list(
-        "Income Tax Slab",
-        filters={
-            "disabled": 0,
-            "company": company,
-            "custom_select_regime": selected_regime,
-            "docstatus": 1,
-        },
-        fields=["name", "custom_select_regime"],
-        order_by="effective_from desc",
-        limit=1,
-    )
-
-    if not income_tax_slab:
-        frappe.throw(f"No active Income Tax Slab found for {selected_regime}")
-
-    declaration.custom_income_tax = income_tax_slab[0].name
-    declaration.custom_tax_regime = income_tax_slab[0].custom_select_regime
-
-    declaration.set("declarations", [])
-
-    for row in data.get("declarations", []):
-        declaration.append("declarations", {
-            "exemption_category": row.get("exemption_category"),
-            "exemption_sub_category": row.get("exemption_sub_category"),
-            "amount": row.get("amount"),
-            "max_amount": row.get("max_amount"),
-        })
-
-    declaration.save(ignore_permissions=True)
-
-    latest_assignment = frappe.get_list(
-        "Salary Structure Assignment",
-        filters={
-            "employee": employee,
-            "company": company,
-            "custom_payroll_period": payroll_period,
-            "docstatus": 1,
-        },
-        fields=["name"],
-        order_by="from_date desc",
-        limit=1,
-    )
-
-    if latest_assignment:
-        assignment_doc = frappe.get_doc(
-            "Salary Structure Assignment",
-            latest_assignment[0].name
+        declaration = frappe.get_doc(
+            "Employee Tax Exemption Declaration",
+            declaration_id
         )
 
-        assignment_doc.income_tax_slab = income_tax_slab[0].name
-        assignment_doc.custom_tax_regime = selected_regime
-        assignment_doc.save(ignore_permissions=True)
+        company = declaration.company
+        employee = declaration.employee
+        payroll_period = declaration.payroll_period
 
-    frappe.db.commit()
 
-    return {
-        "status": "success",
-        "message": "Declaration updated successfully",
-        "tax_regime": selected_regime,
-        "income_tax_slab": income_tax_slab[0].name,
-    }
+        declaration.monthly_house_rent = data.get("monthly_house_rent")
+        declaration.rented_in_metro_city = data.get("rented_in_metro_city")
+
+        declaration.custom_start_date = data.get("start_date")
+        declaration.custom_end_date = data.get("end_date")
+        declaration.custom_pan = data.get("pan")
+        declaration.custom_address_title1 = data.get("address_title1")
+        declaration.custom_address_title2 = data.get("address_title2")
+
+
+
+        go_head_with_new_regime = data.get("go_head_with_new_regime")
+
+        selected_regime = "New Regime" if go_head_with_new_regime == 1 else "Old Regime"
+
+
+        income_tax_slab = frappe.get_list(
+            "Income Tax Slab",
+            filters={
+                "disabled": 0,
+                "company": company,
+                "custom_select_regime": selected_regime,
+                "docstatus": 1,
+            },
+            fields=["name", "custom_select_regime"],
+            order_by="effective_from desc",
+            limit=1,
+        )
+
+        if not income_tax_slab:
+            frappe.throw(f"No active Income Tax Slab found for {selected_regime}")
+
+        declaration.custom_income_tax = income_tax_slab[0].name
+        declaration.custom_tax_regime = income_tax_slab[0].custom_select_regime
+
+        declaration.set("declarations", [])
+
+        for row in data.get("declarations", []):
+            declaration.append("declarations", {
+                "exemption_category": row.get("exemption_category"),
+                "exemption_sub_category": row.get("exemption_sub_category"),
+                "amount": row.get("amount"),
+                "max_amount": row.get("max_amount"),
+            })
+
+        declaration.save(ignore_permissions=True)
+
+        latest_assignment = frappe.get_list(
+            "Salary Structure Assignment",
+            filters={
+                "employee": employee,
+                "company": company,
+                "custom_payroll_period": payroll_period,
+                "docstatus": 1,
+            },
+            fields=["name"],
+            order_by="from_date desc",
+            limit=1,
+        )
+
+        if latest_assignment:
+            assignment_doc = frappe.get_doc(
+                "Salary Structure Assignment",
+                latest_assignment[0].name
+            )
+
+            assignment_doc.income_tax_slab = income_tax_slab[0].name
+            assignment_doc.custom_tax_regime = selected_regime
+            assignment_doc.save(ignore_permissions=True)
+
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "message": "Declaration updated successfully",
+            "tax_regime": selected_regime,
+            "income_tax_slab": income_tax_slab[0].name,
+        }
+
+    elif (
+            doctype == "Employee Tax Exemption Proof Submission"
+            and declaration_id
+            and not proof_id
+        ):
+
+            company = company
+            employee = employee
+            payroll_period = payroll_period
+
+            go_head_with_new_regime = data.get("go_head_with_new_regime")
+            selected_regime = "New Regime" if go_head_with_new_regime == 1 else "Old Regime"
+
+            income_tax_slab = frappe.get_list(
+                "Income Tax Slab",
+                filters={
+                    "disabled": 0,
+                    "company": company,
+                    "custom_select_regime": selected_regime,
+                    "docstatus": 1,
+                },
+                fields=["name", "custom_select_regime"],
+                order_by="effective_from desc",
+                limit=1,
+            )
+
+            if not income_tax_slab:
+                frappe.throw(f"No active Income Tax Slab found for {selected_regime}")
+
+            # -------- CREATE NEW PROOF SUBMISSION --------
+            proof_doc = frappe.new_doc("Employee Tax Exemption Proof Submission")
+            proof_doc.custom_declaration_id = declaration_id
+            proof_doc.company = company
+            proof_doc.employee = employee
+            proof_doc.payroll_period = payroll_period
+            proof_doc.custom_income_tax = income_tax_slab[0].name
+            proof_doc.custom_tax_regime = selected_regime
+            proof_doc.submission_date = frappe.utils.nowdate()
+
+            proof_doc.house_rent_payment_amount=data.get("monthly_house_rent")
+            proof_doc.rented_in_metro_city=data.get("rented_in_metro_city")
+            proof_doc.custom_start_date=data.get("start_date")
+            proof_doc.custom_end_date=data.get("end_date")
+            proof_doc.custom_pan=data.get("pan")
+
+            proof_doc.custom_address_title1=data.get("address_title1")
+            proof_doc.custom_address_title2=data.get("address_title2")
+
+
+
+            proof_doc.set("tax_exemption_proofs", [])
+
+            for row in data.get("declarations", []):
+                proof_doc.append("tax_exemption_proofs", {
+                    "exemption_category": row.get("exemption_category"),
+                    "exemption_sub_category": row.get("exemption_sub_category"),
+                    "amount": row.get("amount"),
+                    "max_amount": row.get("max_amount"),
+                })
+
+            proof_doc.insert(ignore_permissions=True)
+            proof_doc.submit(ignore_permissions=True)
+            frappe.db.commit()
+
+            return {
+                "status": "success",
+                "message": "Proof Submission created successfully",
+                "proof_id": proof_doc.name,
+            }
+
+
 
 
 

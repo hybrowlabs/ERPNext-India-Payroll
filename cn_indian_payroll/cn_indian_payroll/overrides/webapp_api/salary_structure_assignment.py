@@ -63,6 +63,8 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
 
         response_data = []
 
+        version=[]
+
 
         # for assignment in salary_structures:
         for idx, assignment in enumerate(salary_structures):
@@ -144,7 +146,8 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "fixed_gross_annual":round(assignment.custom_fixed_gross_annual),
                 "fixed_gross_monthly":round(assignment.custom_fixed_gross_annual/12),
                 "annual_variable_pay":round(assignment.custom_variable_pay),
-                "total_ctc":round(annual_ctc+assignment.custom_variable_pay)
+                "total_ctc":round(annual_ctc+assignment.custom_variable_pay),
+                "version":version
 
 
             })
