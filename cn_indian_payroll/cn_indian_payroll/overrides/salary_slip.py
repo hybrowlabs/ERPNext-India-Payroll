@@ -336,13 +336,15 @@ class CustomSalarySlip(SalarySlip):
 
 
     def set_salary_structure_assignment(self):
+
         self._salary_structure_assignment = frappe.db.get_value(
             "Salary Structure Assignment",
             {
                 "employee": self.employee,
-                "salary_structure": self.salary_structure,
-                "from_date": ("<=", self.actual_end_date),
-                "docstatus": 1,
+				# "salary_structure": self.salary_structure,
+				"from_date": ("<=", self.actual_start_date),
+				"docstatus": ["!=", 1],
+				# "docstatus": 1,
             },
             "*",
             order_by="from_date desc",
