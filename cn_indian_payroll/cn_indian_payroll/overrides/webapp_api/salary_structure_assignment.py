@@ -36,6 +36,10 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "message": "Employee is mandatory"
             }
 
+        target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+        if target_employee:
+            employee = target_employee
+
 
         filters = {
             "employee": employee,

@@ -18,6 +18,9 @@ from dateutil.relativedelta import relativedelta
 @frappe.whitelist()
 def get_annual_statement(employee=None, payroll_period=None,company=None):
 
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
     employee_list=frappe.get_doc("Employee",employee)
     employee_code=employee_list.name
@@ -520,6 +523,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             "status": "failed",
             "message": "Employee, Company and Payroll Period are required"
         }
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
 
     payroll_setting=frappe.get_doc("Payroll Settings")
@@ -3619,6 +3626,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "message": "Employee and Company are required"
         }
 
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
     # ------------------ Get Declaration ------------------
     declaration = frappe.get_all(
         "Employee Tax Exemption Declaration",
@@ -5713,6 +5724,11 @@ def get_tds_projection_print_html(declaration_id):
 @frappe.whitelist()
 def print_declaration_preview(employee, payroll_period, company):
 
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
     # 1️⃣ Call first function
     salary_projection = get_annual_statement(
         employee=employee,
@@ -5740,6 +5756,10 @@ def print_declaration_preview(employee, payroll_period, company):
 
 @frappe.whitelist()
 def print_declaration_pdf(employee, payroll_period, company):
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
     salary_projection = get_annual_statement(
         employee=employee,

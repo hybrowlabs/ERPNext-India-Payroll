@@ -94,6 +94,13 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None):
 
 @frappe.whitelist()
 def get_extra_payment_summary(employee=None, company=None, from_date=None, to_date=None):
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
+
+
     # Validate inputs
     if not employee:
         return {"error": "Please select an employee."}

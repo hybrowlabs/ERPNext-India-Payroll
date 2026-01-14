@@ -634,6 +634,10 @@ def benefit_claim(doc=None, employee=None, claim_date=None):
 @frappe.whitelist()
 def get_all_accrued_reimbursements(employee=None, company=None, payroll_period=None):
 
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
 
     filters = {}
     if employee:
