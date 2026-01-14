@@ -1728,6 +1728,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 else row.max_amount
                             ),
                             "attach_reqd": 0,
+                            "attach_proof": "",
                         }
 
 
@@ -1838,7 +1839,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "current_tax_regime": current_tax_regime,
                         "go_head_with_new_regime": current_flag,
                         "hra_exemption": hra_exemption,
-                        "categories": final_categories
+                        "categories": final_categories,
+
                     }
 
 
