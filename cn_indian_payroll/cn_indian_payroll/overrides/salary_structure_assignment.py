@@ -6,6 +6,9 @@ from frappe.utils import getdate
 from datetime import datetime
 from frappe import _
 
+from cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation import get_state_from_branch
+
+
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def on_submit(self):
@@ -21,10 +24,20 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_min_wages()
         # self.update_perquisite()
         self.reimbursement_amount()
+        self.set_state_from_branch()
 
 
 
 
+
+
+    def set_state_from_branch(self):
+        branch_state = get_state_from_branch(self.employee,self.company)
+        if branch_state:
+
+            self.custom_state = branch_state
+            if self.custom_lwf:
+                self.custom_lwf_state = branch_state
 
 
     def before_update_after_submit(self):

@@ -5,6 +5,67 @@ from frappe import _
 import json
 from dateutil.relativedelta import relativedelta
 
+import calendar
+from datetime import date
+from frappe.utils import getdate
+
+
+@frappe.whitelist()
+def get_state_from_branch(employee, company):
+
+
+    emp_doc = frappe.get_doc("Employee", employee)
+    branch = emp_doc.branch
+
+    if not branch:
+        frappe.throw("Branch not found for the employee")
+
+    branch_doc = frappe.get_doc("Branch", branch)
+    state = branch_doc.custom_state
+
+    if not state:
+        frappe.throw("State not found for the branch")
+
+
+    return state
+
+
+
+
+
+@frappe.whitelist()
+def get_payroll_period_dates_on_month(month, posting_date):
+
+
+    if not month:
+        frappe.throw("Month is required")
+
+    if not posting_date:
+        frappe.throw("Posting Date is required")
+
+    posting_date = getdate(posting_date)
+    year = posting_date.year  # ✅ Correct year from posting_date
+
+    # Convert month name → month number
+    month_number = list(calendar.month_name).index(month)
+    if month_number == 0:
+        frappe.throw("Invalid month")
+
+    start_date = date(year, month_number, 1)
+    end_date = date(
+        year,
+        month_number,
+        calendar.monthrange(year, month_number)[1]
+    )
+
+    return {
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
+    }
+
+
+
+
 
 
 
