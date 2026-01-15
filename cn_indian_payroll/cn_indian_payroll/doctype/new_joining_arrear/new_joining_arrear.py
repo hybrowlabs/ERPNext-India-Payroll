@@ -46,6 +46,25 @@ class NewJoiningArrear(Document):
             additional_salary.insert()
             additional_salary.submit()
 
+
+
+        if self.benefit_arrear:
+            for row in self.benefit_arrear:
+                additional_salary = frappe.new_doc("Employee Benefit Accrual")
+                additional_salary.employee = self.employee
+                additional_salary.salary_component = row.salary_component
+                additional_salary.amount = row.amount
+                additional_salary.company = self.company
+                additional_salary.payroll_entry = self.payroll_entry
+                additional_salary.payroll_period=self.payroll_period
+                additional_salary.benefit_accrual_date=self.posting_date
+
+                additional_salary.payment_days = self.number_of_present_days
+                additional_salary.working_days = self.working_days
+                additional_salary.insert()
+                additional_salary.submit()
+
+
     def insert_breakup_table(self):
         if not self.employee:
             return
@@ -68,6 +87,7 @@ class NewJoiningArrear(Document):
             return
 
         salary_structure = salary_structure_assignment[0].salary_structure
+        ssa = salary_structure_assignment[0].name
         from_date = salary_structure_assignment[0].from_date
 
         # Generate salary slip for preview
@@ -138,12 +158,39 @@ class NewJoiningArrear(Document):
                 )
                 processed_components.append(component_doc.name)
 
-        # Assign results to document child tables
+
+
+
+        self.working_days=new_salary_slip.total_working_days
+
         self.set("earning_component", [])
         self.set("deduction_component", [])
+        self.set("benefit_arrear", [])
 
         for row in earning_component:
             self.append("earning_component", row)
 
         for row in deduction_component:
             self.append("deduction_component", row)
+
+
+
+        salary_structure_doc = frappe.get_doc(
+            "Salary Structure Assignment",
+            ssa
+        )
+
+        if salary_structure_doc.custom_employee_reimbursements:
+            for benefit in salary_structure_doc.custom_employee_reimbursements:
+                per_day_amount = (
+                    (benefit.monthly_total_amount or 0)
+                    / new_salary_slip.total_working_days
+                )
+
+                calculated_amount = per_day_amount * self.number_of_present_days
+
+                self.append("benefit_arrear", {
+                    "salary_component": benefit.reimbursements,
+                    "amount": round(calculated_amount),
+                    "actual_amount": round(benefit.monthly_total_amount or 0),
+                })

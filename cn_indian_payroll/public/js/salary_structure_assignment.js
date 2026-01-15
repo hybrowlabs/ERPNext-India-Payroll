@@ -3,6 +3,10 @@
 frappe.ui.form.on('Salary Structure Assignment', {
 
 
+
+
+
+
     custom_meal_card:function(frm)
     {
         if(frm.doc.custom_meal_card)
@@ -524,6 +528,34 @@ frappe.ui.form.on('Salary Structure Assignment', {
     employee:function(frm)
     {
         frm.trigger('consultant_gst')
+
+        console.log("Employee field changed - triggering state fetch");
+
+
+        if (frm.doc.employee) {
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.get_state_from_branch",
+                args: {
+
+                        employee: frm.doc.employee,
+                        company: frm.doc.company
+                },
+                callback: function (r) {
+                    if (r.message) {
+
+
+                        frm.set_value("custom_state", r.message);
+                        frm.set_value("custom_lwf_state", r.message);
+
+
+
+
+                    }
+                }
+            });
+
+
+    }
     }
 
 

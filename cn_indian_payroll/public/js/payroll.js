@@ -140,4 +140,28 @@ frappe.ui.form.on('Payroll Entry', {
 		frm.clear_table("employees");
 		frm.refresh();
 	},
+    custom_month(frm) {
+        if (frm.doc.custom_month) {
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.get_payroll_period_dates_on_month",
+                args: {
+
+                    month: frm.doc.custom_month,
+                    posting_date: frm.doc.posting_date
+                },
+                callback: function (r) {
+                    if (r.message) {
+
+                    frm.set_value("payroll_frequency","Monthly")
+
+                    frm.set_value("start_date", r.message.start_date);
+                    frm.set_value("end_date", r.message.end_date);
+
+
+                    }
+                }
+            });
+        }
+
+    }
 });

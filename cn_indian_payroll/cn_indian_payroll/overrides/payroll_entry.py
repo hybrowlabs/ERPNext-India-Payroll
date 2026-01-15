@@ -16,19 +16,19 @@ class PayrollEntryOverride(PayrollEntry):
         self.cancel_new_joinee_arrear()
 
     def cancel_new_joinee_arrear(self):
-        joinee_arrear=frappe.get_all("New Joining Arrear",filters={"payroll_entry":self.name,"docstatus":1},pluck="name")
+        joinee_arrear=frappe.get_all("New Joining Arrear",filters={"payroll_entry":self.name,"docstatus":1})
         if joinee_arrear:
             for doc in joinee_arrear:
-                doc=frappe.get_doc("New Joining Arrear",doc)
+                doc=frappe.get_doc("New Joining Arrear",doc.name)
                 doc.cancel()
                 frappe.db.commit()
 
 
     def submit_new_joinee_arrear(self):
-        joinee_arrear=frappe.get_all("New Joining Arrear",filters={"payroll_entry":self.name,"docstatus":0},pluck="name")
+        joinee_arrear=frappe.get_all("New Joining Arrear",filters={"payroll_entry":self.name,"docstatus":0})
         if joinee_arrear:
             for doc in joinee_arrear:
-                doc=frappe.get_doc("New Joining Arrear",doc)
+                doc=frappe.get_doc("New Joining Arrear",doc.name)
                 doc.submit()
                 frappe.db.commit()
 
@@ -87,6 +87,8 @@ class PayrollEntryOverride(PayrollEntry):
             payroll_setting = frappe.get_doc("Payroll Settings")
             start_date = getdate(self.start_date)
             end_date = getdate(self.end_date)
+
+            salary_structure_assignment=ssa[0].name
 
             if payroll_setting.custom_configure_attendance_cycle:
                 attendance_end_day = int(payroll_setting.custom_attendance_end_date)
@@ -156,7 +158,8 @@ class PayrollEntryOverride(PayrollEntry):
                                     "number_of_present_days": total_payment_days,
                                     "posting_date": today(),
                                     "payout_date": get_last_day(add_months(end_date, 1)),
-                                    "payroll_entry": self.name
+                                    "payroll_entry": self.name,
+                                    "salary_structure_assignment":salary_structure_assignment
                                 })
                                 arrear_doc.insert(ignore_permissions=True)
                                 frappe.db.commit()
@@ -175,7 +178,8 @@ class PayrollEntryOverride(PayrollEntry):
                                 "number_of_present_days": diff_days,
                                 "posting_date": today(),
                                 "payout_date": get_last_day(add_months(end_date, 1)),
-                                "payroll_entry": self.name
+                                "payroll_entry": self.name,
+                                "salary_structure_assignment":salary_structure_assignment
                             })
                             arrear_doc.insert(ignore_permissions=True)
                             frappe.db.commit()

@@ -16,13 +16,19 @@
   "number_of_present_days",
   "column_break_txim",
   "company",
+  "payroll_period",
   "posting_date",
   "payout_date",
+  "payroll_entry",
+  "salary_structure_assignment",
+  "working_days",
   "earning_arrear_component_section",
   "earning_component",
   "deduction_arrear_component_section",
   "deduction_component",
-  "amended_from"
+  "amended_from",
+  "benefits_arrear_section",
+  "benefit_arrear"
  ],
  "fields": [
   {
@@ -134,6 +140,40 @@
   {
    "fieldname": "section_break_upmn",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Data",
+   "label": "Payroll Entry"
+  },
+  {
+   "fieldname": "benefits_arrear_section",
+   "fieldtype": "Section Break",
+   "label": "Benefits Arrear"
+  },
+  {
+   "fieldname": "salary_structure_assignment",
+   "fieldtype": "Link",
+   "label": "Salary Structure Assignment",
+   "options": "Salary Structure Assignment"
+  },
+  {
+   "fieldname": "benefit_arrear",
+   "fieldtype": "Table",
+   "label": "Benefit Arrear",
+   "options": "Benefit Arrear Child"
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days"
+  },
+  {
+   "fetch_from": "salary_structure_assignment.custom_payroll_period",
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period"
   }
  ],
  "grid_page_length": 50,
@@ -145,7 +185,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-08-08 11:15:15.224578",
+ "modified": "2026-01-14 17:27:26.738056",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "New Joining Arrear",

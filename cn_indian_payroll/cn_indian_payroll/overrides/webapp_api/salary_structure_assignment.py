@@ -26,6 +26,49 @@ def process_components(components, ctc_component_names, comp_type):
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_structure_assignment.generate_salary_slip?employee=37001
 
 
+def format_version_data(version_data, modified, modified_by):
+    import json
+
+    if not version_data:
+        return {}
+
+    data = json.loads(version_data)
+
+    result = {
+        "doc_changes": [],
+        "row_changes": []
+    }
+
+    # ------------------ Document field changes ------------------
+    for change in data.get("changed", []):
+        result["doc_changes"].append({
+            "property": change[0],
+            "old_value": change[1],
+            "new_value": change[2],
+            "modified": modified,
+            "modified_by": modified_by
+        })
+
+    # ------------------ Child table row changes ------------------
+    for row_change in data.get("row_changed", []):
+        table_field = row_change[0]
+        row_index = row_change[1]
+        field_changes = row_change[3]
+
+        for field in field_changes:
+            result["row_changes"].append({
+                "table_field": table_field,
+                "row_no": row_index,
+                "property": field[0],
+                "old_value": field[1],
+                "new_value": field[2],
+                "modified": modified,
+                "modified_by": modified_by
+            })
+
+    return result
+
+
 @frappe.whitelist()
 def generate_salary_slip(employee=None, payroll_period=None, company=None):
     try:
@@ -35,6 +78,10 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "status": "failed",
                 "message": "Employee is mandatory"
             }
+
+        target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+        if target_employee:
+            employee = target_employee
 
 
         filters = {
@@ -130,6 +177,32 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                         "annual_amount": amount * 12,
                         "type": "Reimbursement"
                     })
+
+            version_list = frappe.get_all(
+                "Version",
+                filters={
+                    "docname": assignment.name,
+                    "ref_doctype": "Salary Structure Assignment"
+                },
+                order_by="creation desc",
+                fields=["name", "data", "modified", "modified_by"]
+            )
+
+
+            for v in version_list:
+                formatted = format_version_data(
+                    v.data,
+                    v.modified,
+                    v.modified_by
+                )
+
+                version.append({
+                    "version_name": v.name,
+                    "values_changed": formatted.get("doc_changes", []),
+                    "row_values_changed": formatted.get("row_changes", [])
+                })
+
+
 
             response_data.append({
                 "assignment_name": assignment.name,

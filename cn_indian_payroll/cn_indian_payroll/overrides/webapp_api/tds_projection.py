@@ -18,6 +18,9 @@ from dateutil.relativedelta import relativedelta
 @frappe.whitelist()
 def get_annual_statement(employee=None, payroll_period=None,company=None):
 
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
     employee_list=frappe.get_doc("Employee",employee)
     employee_code=employee_list.name
@@ -521,6 +524,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             "message": "Employee, Company and Payroll Period are required"
         }
 
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
 
     payroll_setting=frappe.get_doc("Payroll Settings")
     if payroll_setting.custom_tax_calculation_based_on=="Use IT Declaration Values in Payroll Processing":
@@ -571,6 +578,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "pan": declaration_doc.custom_pan or "",
                 "address_line1": declaration_doc.custom_address_title1 or "",
                 "address_line2": declaration_doc.custom_address_title2 or "",
+                "attach_reqd": 0,
+                "attach_proof": ""
             })
 
 
@@ -685,7 +694,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             declaration_row["max_amount"]
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
-                        )
+                        ),
+                        "attach_reqd": 0,
+                        "attach_proof": ""
                     })
 
                 # ------------------ Group by Section Property (FIXED PART) ------------------
@@ -756,6 +767,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
                         ),
+                        "attach_reqd": 0,
+                        "attach_proof": ""
                     })
 
                 final_list = []
@@ -849,7 +862,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             declaration_row["max_amount"]
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
-                        )
+                        ),
+                        "attach_reqd": 0,
+                        "attach_proof": ""
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -1110,7 +1125,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         declaration_row["max_amount"]
                         if declaration_row and declaration_row.get("max_amount") is not None
                         else row.max_amount
-                    )
+                    ),
+                    "attach_reqd": 0,
+                    "attach_proof": ""
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1181,6 +1198,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "pan": None,
                 "address_line1": None,
                 "address_line2": None,
+                "attach_reqd": 0,
+                "attach_proof": ""
             })
 
 
@@ -1417,6 +1436,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "editable": editable,
                     "amount": round(amount),
                     "max_amount": round(max_amount),
+                    "attach_reqd": 0,
+                    "attach_proof": ""
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1486,6 +1507,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         if declaration_row and declaration_row.get("max_amount") is not None
                         else row.max_amount
                     ),
+                    "attach_reqd": 0,
+                    "attach_proof": ""
                 })
 
             hra_exemption.append({
@@ -1514,7 +1537,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-    else:
+    elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
+        month_count=0
 
         declaration = frappe.get_all(
             "Employee Tax Exemption Declaration",
@@ -1582,7 +1606,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "pan": proof_doc.custom_pan or "",
                     "address_line1": proof_doc.custom_address_title1 or "",
                     "address_line2": proof_doc.custom_address_title2 or "",
-                    "hra_attached_proof": proof_doc.custom_hra_proof_attach or "",
+                    "attach_proof": proof_doc.custom_hra_proof_attach or "",
+                    "attach_reqd": 1,
                 })
 
 
@@ -1598,15 +1623,28 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "exemption_category": d.exemption_category,
                     "exemption_sub_category": d.exemption_sub_category,
                     "amount": d.amount,
-                    "max_amount": d.max_amount
+                    "max_amount": d.max_amount,
+                    "attach_proof": d.attach_proof
                 })
 
             existing_map = {
                 d["exemption_sub_category"]: d for d in existing_declaration
             }
 
+
+            if go_head_with_new_regime is None:
+                return {
+                    "status": "success",
+                    "declaration_id": declaration_id,
+                    "current_tax_regime": current_tax_regime,
+                    "go_head_with_new_regime": current_flag
+                }
+
             # ------------------ Initial Load (No Toggle) ------------------
             go_head_with_new_regime = int(go_head_with_new_regime)
+
+
+
 
 
 
@@ -1683,24 +1721,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         declaration_row = existing_map.get(row.name)
                         editable = 0 if row.custom_component_type in NON_EDITABLE_COMPONENTS else 1
 
-                        # category_grouped[category]["items"].append({
-                        #     "exemption_sub_category": row.name,
-                        #     "component_type": row.custom_component_type,
-                        #     "description": row.custom_description,
-                        #     "editable": editable,
-                        #     "amount": round(declaration_row["amount"]) if declaration_row else 0,
-                        #     "max_amount": round(
-                        #         declaration_row["max_amount"]
-                        #         if declaration_row and declaration_row.get("max_amount") is not None
-                        #         else row.max_amount
-                        #     ),
 
-                        #     "attach_proof": (
-                        #         row.attach_proof
-                        #         if row.custom_component_type not in NON_EDITABLE_COMPONENTS
-                        #         else ""
-                        #     ),
-                        # })
 
                         item = {
                             "exemption_sub_category": row.name,
@@ -1713,11 +1734,20 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
                             ),
+                            "attach_reqd": 0,
+                            "attach_proof": "",
                         }
 
-                        # ✅ Add attach_proof ONLY when allowed
+
                         if row.custom_component_type not in NON_EDITABLE_COMPONENTS:
-                            item["attach_proof"] = row.attach_proof
+
+                            item["attach_reqd"] = 1
+                            item["attach_proof"] = (
+                                declaration_row.get("attach_proof")
+                                if declaration_row and declaration_row.get("attach_proof")
+                                else ""
+                            )
+
 
                         category_grouped[category]["items"].append(item)
 
@@ -1789,7 +1819,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
                             ),
-                            "attachable_proof": row.attach_proof,
+                            "attach_reqd": 1,
+                            "attach_proof": declaration_row.get("attach_proof")
+                                if declaration_row and declaration_row.get("attach_proof")
+                                else ""
+
+
+
                         })
 
                     final_list = []
@@ -1810,7 +1846,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "current_tax_regime": current_tax_regime,
                         "go_head_with_new_regime": current_flag,
                         "hra_exemption": hra_exemption,
-                        "categories": final_categories
+                        "categories": final_categories,
+
                     }
 
 
@@ -1884,7 +1921,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 declaration_row["max_amount"]
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
-                            )
+                            ),
+                            "attach_reqd": 0,
+                            "attach_proof": "" ,
                         })
 
                     # ------------------ Group by Section Property ------------------
@@ -2140,7 +2179,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             declaration_row["max_amount"]
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
-                        )
+                        ),
+                        "attach_reqd": 0,
+                        "attach_proof": "" ,
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -2206,7 +2247,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "pan": None,
                     "address_line1": None,
                     "address_line2": None,
-                    "attachable_proof": "",
+                    "attach_reqd": 1,
+                    "attach_proof": "" ,
                 })
 
 
@@ -2452,11 +2494,14 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "editable": editable,
                         "amount": round(amount),
                         "max_amount": round(max_amount),
+                        "attach_reqd": 0,
+                        "attach_proof": "",
                     }
 
                     # ✅ Attach proof ONLY for editable (non-system) components
                     if row.custom_component_type not in NON_EDITABLE_COMPONENTS:
-                        item["attach_proof"] = row.attach_proof
+                        # item["attach_proof"] = row.attach_proof
+                        item["attach_reqd"] = 1
 
                     category_grouped[category]["items"].append(item)
 
@@ -2529,7 +2574,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
                         ),
-                        "attachable_proof": row.attach_proof,
+                        "attach_reqd": 1,
+                        "attach_proof": "",
                     })
 
                 hra_exemption.append({
@@ -2553,20 +2599,6 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "categories": final_categories,
                     "hra_exemption": hra_exemption,
                 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2594,7 +2626,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "pan": declaration_doc.custom_pan or "",
                     "address_line1": declaration_doc.custom_address_title1 or "",
                     "address_line2": declaration_doc.custom_address_title2 or "",
-                    "attach_proof": "",
+                    "attach_reqd": 1,
+                    "attach_proof": "" ,
                 })
 
 
@@ -2723,11 +2756,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
                             ),
+                            "attach_reqd": 0,
+                            "attach_proof": "",
                         }
 
                         # ✅ Add attach_proof ONLY when allowed
                         if row.custom_component_type not in NON_EDITABLE_COMPONENTS:
-                            item["attach_proof"] = ""
+                            item["attach_reqd"] = 1
 
                         category_grouped[category]["items"].append(item)
 
@@ -2799,7 +2834,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
                             ),
-                            "attach_proof": "",
+                            "attach_reqd": 1,
+                            "attach_proof": "" ,
                         })
 
                     final_list = []
@@ -2894,7 +2930,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 declaration_row["max_amount"]
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
-                            )
+                            ),
+                            "attach_reqd": 0,
+                            "attach_proof": ""
                         })
 
                     # ------------------ Group by Section Property ------------------
@@ -3148,7 +3186,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             declaration_row["max_amount"]
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
-                        )
+                        ),
+                        "attach_reqd": 0,
+                        "attach_proof": ""
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -3460,11 +3500,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "editable": editable,
                         "amount": round(amount),
                         "max_amount": round(max_amount),
+                        "attach_reqd": 0,
+                        "attach_proof": "",
                     }
 
                     # ✅ Attach proof ONLY for editable (non-system) components
                     if row.custom_component_type not in NON_EDITABLE_COMPONENTS:
-                        item["attach_proof"] = ""
+                        item["attach_reqd"] = 1
 
                     category_grouped[category]["items"].append(item)
 
@@ -3535,7 +3577,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             if declaration_row and declaration_row.get("max_amount") is not None
                             else row.max_amount
                         ),
-                        "attach_proof": row.attach_proof,
+                        "attach_reqd": 1,
+                        "attach_proof": "",
                     })
 
                 hra_exemption.append({
@@ -3582,6 +3625,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "status": "failed",
             "message": "Employee and Company are required"
         }
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
     # ------------------ Get Declaration ------------------
     declaration = frappe.get_all(
@@ -4529,6 +4576,7 @@ def update_declaration_form(
         proof_doc.custom_pan = data.get("pan")
         proof_doc.custom_address_title1 = data.get("address_title1")
         proof_doc.custom_address_title2 = data.get("address_title2")
+        proof_doc.custom_hra_proof_attach = data.get("attach_proof")
 
         # -------- Child table --------
         proof_doc.set("tax_exemption_proofs", [])
@@ -4539,6 +4587,8 @@ def update_declaration_form(
                 "exemption_sub_category": row.get("exemption_sub_category"),
                 "amount": row.get("amount"),
                 "max_amount": row.get("max_amount"),
+                "attach_proof": row.get("attach_proof"),
+                "custom_note": row.get("custom_note"),
             })
 
         proof_doc.insert()
@@ -4615,6 +4665,8 @@ def update_declaration_form(
                 "exemption_sub_category": row.get("exemption_sub_category"),
                 "amount": row.get("amount"),
                 "max_amount": row.get("max_amount"),
+                "attach_proof": row.get("attach_proof"),
+                "custom_note": row.get("custom_note"),
             })
 
         # ------------------ Save ------------------
@@ -5672,6 +5724,11 @@ def get_tds_projection_print_html(declaration_id):
 @frappe.whitelist()
 def print_declaration_preview(employee, payroll_period, company):
 
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
     # 1️⃣ Call first function
     salary_projection = get_annual_statement(
         employee=employee,
@@ -5699,6 +5756,10 @@ def print_declaration_preview(employee, payroll_period, company):
 
 @frappe.whitelist()
 def print_declaration_pdf(employee, payroll_period, company):
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
 
     salary_projection = get_annual_statement(
         employee=employee,
