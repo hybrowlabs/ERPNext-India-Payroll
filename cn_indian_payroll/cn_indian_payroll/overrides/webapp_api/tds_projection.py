@@ -3631,141 +3631,435 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         employee = target_employee
 
     # ------------------ Get Declaration ------------------
-    declaration = frappe.get_all(
-        "Employee Tax Exemption Declaration",
-        filters={
-            "employee": employee,
-            "company": company,
-            "payroll_period": payroll_period
-        },
-        fields=["name"],
-        limit=1
-    )
-
-    if not declaration:
-        return {
-            "status": "failed",
-            "message": "No declaration form created for this payroll period"
-        }
-
-    declaration_doc = frappe.get_doc(
-        "Employee Tax Exemption Declaration",
-        declaration[0].name
-    )
-
-    current_tax_regime=declaration_doc.custom_tax_regime
-    declaration_id=declaration[0].name
-
-    advance_tax=declaration_doc.custom_tds_already_deducted_amount if declaration_doc.custom_tds_already_deducted_amount else 0
 
 
+    payroll_setting=frappe.get_doc("Payroll Settings")
+    if payroll_setting.custom_tax_calculation_based_on=="Use IT Declaration Values in Payroll Processing":
 
-    # ------------------ 80C & LTA ------------------
-    eighty_c = []
-    lta_amount = 0
-    eighty_d=[]
-    other_investment=[]
+        declaration = frappe.get_all(
+            "Employee Tax Exemption Declaration",
+            filters={
+                "employee": employee,
+                "company": company,
+                "payroll_period": payroll_period
+            },
+            fields=["name"],
+            limit=1
+        )
 
-    if declaration_doc.declarations:
-        for d in declaration_doc.declarations:
+        if not declaration:
+            return {
+                "status": "failed",
+                "message": "No declaration form created for this payroll period"
+            }
 
-            sub_category = frappe.get_doc(
-                "Employee Tax Exemption Sub Category",
-                d.exemption_sub_category
+        declaration_doc = frappe.get_doc(
+            "Employee Tax Exemption Declaration",
+            declaration[0].name
+        )
+
+        current_tax_regime=declaration_doc.custom_tax_regime
+        declaration_id=declaration[0].name
+
+        advance_tax=declaration_doc.custom_tds_already_deducted_amount if declaration_doc.custom_tds_already_deducted_amount else 0
+
+
+
+        # ------------------ 80C & LTA ------------------
+        eighty_c = []
+        lta_amount = 0
+        eighty_d=[]
+        other_investment=[]
+
+        if declaration_doc.declarations:
+            for d in declaration_doc.declarations:
+
+                sub_category = frappe.get_doc(
+                    "Employee Tax Exemption Sub Category",
+                    d.exemption_sub_category
+                )
+
+                # LTA
+                if sub_category.custom_component_type == "LTA Reimbursement":
+                    lta_amount = flt(d.max_amount or 0)
+
+                category = frappe.get_doc(
+                    "Employee Tax Exemption Category",
+                    d.exemption_category
+                )
+
+                # Section 80C
+                if category.custom_select_section == "80 C":
+                    declared = flt(d.amount or 0)
+                    qualified = flt(d.max_amount or 0)
+
+                    eighty_c.append({
+                        "component": d.exemption_sub_category,
+                        "declared_amount": declared,
+                        "qualified_amount": qualified,
+                        "deductible_amount": qualified if declared > qualified else declared
+                    })
+
+
+                if category.custom_select_section == "80 D":
+
+                    declared_80d = flt(d.amount or 0)
+                    qualified_80d = flt(d.max_amount or 0)
+
+                    eighty_d.append({
+                        "component": d.exemption_sub_category,
+                        "declared_amount": declared_80d,
+                        "qualified_amount": qualified_80d,
+                        "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
+                    })
+
+                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+
+                    declared_other = flt(d.amount or 0)
+                    qualified_other = flt(d.max_amount or 0)
+
+                    other_investment.append({
+
+                        "component": d.exemption_sub_category,
+                        "declared_amount": declared_other,
+                        "qualified_amount": qualified_other,
+                        "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
+                    })
+
+        # ------------------ Annual Statement ------------------
+
+
+
+        eighty_c_sum = min(
+            sum(r["deductible_amount"] for r in eighty_c),
+            150000
+        )
+        eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
+        other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+
+        annual_statement = get_annual_statement(employee, payroll_period,company)
+
+        if annual_statement.get("status") != "success":
+            return annual_statement
+
+        extra_payment_grand_total = flt(annual_statement.get("extra_payment_grand_total", 0))
+        total_perquisite_total = flt(annual_statement.get("total_perquisite_total", 0))
+        total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))
+        total_off_cycle_payment = flt(annual_statement.get("total_off_cycle_payment", 0))
+        reimbursements_total = flt(annual_statement.get("reimbursements_total", 0))
+        total_perquisite_total=flt(annual_statement.get("total_perquisite_total", 0))
+
+        total_gross_salary_current = round(
+            total_gross_earning + total_off_cycle_payment + extra_payment_grand_total+total_perquisite_total, 2
+        )
+
+        hra_received_annual=declaration_doc.custom_hra_received_annual if declaration_doc.custom_hra_received_annual else 0
+        rent_paid_of_basic=declaration_doc.custom_rent_paid__10_of_basic_annual if declaration_doc.custom_rent_paid__10_of_basic_annual else 0
+        basic_percentage=declaration_doc.custom_50_of_basic_metro if declaration_doc.custom_50_of_basic_metro else 0
+
+        hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
+
+        salary_after_section_10= round(
+                    flt(total_gross_salary_current) - flt(lta_amount)-flt(hra_exemption), 2
+                )
+
+        income_tax_slab=frappe.get_doc("Income Tax Slab",declaration_doc.custom_income_tax)
+        standard_deduction=income_tax_slab.standard_tax_exemption_amount if income_tax_slab.standard_tax_exemption_amount else 0
+
+        gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
+
+        total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+
+        net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+
+
+    elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
+
+        proof_submission = frappe.get_all(
+            "Employee Tax Exemption Proof Submission",
+            filters={
+                "employee": employee,
+                "company": company,
+                "payroll_period": payroll_period
+            },
+            fields=["name"],
+            limit=1
+        )
+        if not proof_submission:
+            declaration = frappe.get_all(
+                "Employee Tax Exemption Declaration",
+                filters={
+                    "employee": employee,
+                    "company": company,
+                    "payroll_period": payroll_period
+                },
+                fields=["name"],
+                limit=1
             )
 
-            # LTA
-            if sub_category.custom_component_type == "LTA Reimbursement":
-                lta_amount = flt(d.max_amount or 0)
+            if not declaration:
+                return {
+                    "status": "failed",
+                    "message": "No declaration form created for this payroll period"
+                }
 
-            category = frappe.get_doc(
-                "Employee Tax Exemption Category",
-                d.exemption_category
+            declaration_doc = frappe.get_doc(
+                "Employee Tax Exemption Declaration",
+                declaration[0].name
             )
 
-            # Section 80C
-            if category.custom_select_section == "80 C":
-                declared = flt(d.amount or 0)
-                qualified = flt(d.max_amount or 0)
+            current_tax_regime=declaration_doc.custom_tax_regime
+            declaration_id=declaration[0].name
 
-                eighty_c.append({
-                    "component": d.exemption_sub_category,
-                    "declared_amount": declared,
-                    "qualified_amount": qualified,
-                    "deductible_amount": qualified if declared > qualified else declared
-                })
-
-
-            if category.custom_select_section == "80 D":
-
-                declared_80d = flt(d.amount or 0)
-                qualified_80d = flt(d.max_amount or 0)
-
-                eighty_d.append({
-                    "component": d.exemption_sub_category,
-                    "declared_amount": declared_80d,
-                    "qualified_amount": qualified_80d,
-                    "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
-                })
-
-            if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
-
-                declared_other = flt(d.amount or 0)
-                qualified_other = flt(d.max_amount or 0)
-
-                other_investment.append({
-
-                    "component": d.exemption_sub_category,
-                    "declared_amount": declared_other,
-                    "qualified_amount": qualified_other,
-                    "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
-                })
-
-    # ------------------ Annual Statement ------------------
+            advance_tax=declaration_doc.custom_tds_already_deducted_amount if declaration_doc.custom_tds_already_deducted_amount else 0
 
 
 
-    eighty_c_sum = min(
-        sum(r["deductible_amount"] for r in eighty_c),
-        150000
-    )
-    eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
-    other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+            # ------------------ 80C & LTA ------------------
+            eighty_c = []
+            lta_amount = 0
+            eighty_d=[]
+            other_investment=[]
 
-    annual_statement = get_annual_statement(employee, payroll_period,company)
+            if declaration_doc.declarations:
+                for d in declaration_doc.declarations:
 
-    if annual_statement.get("status") != "success":
-        return annual_statement
+                    sub_category = frappe.get_doc(
+                        "Employee Tax Exemption Sub Category",
+                        d.exemption_sub_category
+                    )
 
-    extra_payment_grand_total = flt(annual_statement.get("extra_payment_grand_total", 0))
-    total_perquisite_total = flt(annual_statement.get("total_perquisite_total", 0))
-    total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))
-    total_off_cycle_payment = flt(annual_statement.get("total_off_cycle_payment", 0))
-    reimbursements_total = flt(annual_statement.get("reimbursements_total", 0))
-    total_perquisite_total=flt(annual_statement.get("total_perquisite_total", 0))
+                    # LTA
+                    if sub_category.custom_component_type == "LTA Reimbursement":
+                        lta_amount = flt(d.max_amount or 0)
 
-    total_gross_salary_current = round(
-        total_gross_earning + total_off_cycle_payment + extra_payment_grand_total+total_perquisite_total, 2
-    )
+                    category = frappe.get_doc(
+                        "Employee Tax Exemption Category",
+                        d.exemption_category
+                    )
 
-    hra_received_annual=declaration_doc.custom_hra_received_annual if declaration_doc.custom_hra_received_annual else 0
-    rent_paid_of_basic=declaration_doc.custom_rent_paid__10_of_basic_annual if declaration_doc.custom_rent_paid__10_of_basic_annual else 0
-    basic_percentage=declaration_doc.custom_50_of_basic_metro if declaration_doc.custom_50_of_basic_metro else 0
+                    # Section 80C
+                    if category.custom_select_section == "80 C":
+                        declared = flt(d.amount or 0)
+                        qualified = flt(d.max_amount or 0)
 
-    hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
+                        eighty_c.append({
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared,
+                            "qualified_amount": qualified,
+                            "deductible_amount": qualified if declared > qualified else declared
+                        })
 
-    salary_after_section_10= round(
-                flt(total_gross_salary_current) - flt(lta_amount)-flt(hra_exemption), 2
+
+                    if category.custom_select_section == "80 D":
+
+                        declared_80d = flt(d.amount or 0)
+                        qualified_80d = flt(d.max_amount or 0)
+
+                        eighty_d.append({
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_80d,
+                            "qualified_amount": qualified_80d,
+                            "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
+                        })
+
+                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+
+                        declared_other = flt(d.amount or 0)
+                        qualified_other = flt(d.max_amount or 0)
+
+                        other_investment.append({
+
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_other,
+                            "qualified_amount": qualified_other,
+                            "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
+                        })
+
+            # ------------------ Annual Statement ------------------
+
+
+
+            eighty_c_sum = min(
+                sum(r["deductible_amount"] for r in eighty_c),
+                150000
+            )
+            eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
+            other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+
+            annual_statement = get_annual_statement(employee, payroll_period,company)
+
+            if annual_statement.get("status") != "success":
+                return annual_statement
+
+            extra_payment_grand_total = flt(annual_statement.get("extra_payment_grand_total", 0))
+            total_perquisite_total = flt(annual_statement.get("total_perquisite_total", 0))
+            total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))
+            total_off_cycle_payment = flt(annual_statement.get("total_off_cycle_payment", 0))
+            reimbursements_total = flt(annual_statement.get("reimbursements_total", 0))
+            total_perquisite_total=flt(annual_statement.get("total_perquisite_total", 0))
+
+            total_gross_salary_current = round(
+                total_gross_earning + total_off_cycle_payment + extra_payment_grand_total+total_perquisite_total, 2
             )
 
-    income_tax_slab=frappe.get_doc("Income Tax Slab",declaration_doc.custom_income_tax)
-    standard_deduction=income_tax_slab.standard_tax_exemption_amount if income_tax_slab.standard_tax_exemption_amount else 0
+            hra_received_annual=declaration_doc.custom_hra_received_annual if declaration_doc.custom_hra_received_annual else 0
+            rent_paid_of_basic=declaration_doc.custom_rent_paid__10_of_basic_annual if declaration_doc.custom_rent_paid__10_of_basic_annual else 0
+            basic_percentage=declaration_doc.custom_50_of_basic_metro if declaration_doc.custom_50_of_basic_metro else 0
 
-    gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
+            hra_exemption=declaration_doc.annual_hra_exemption if declaration_doc.annual_hra_exemption else 0
 
-    total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+            salary_after_section_10= round(
+                        flt(total_gross_salary_current) - flt(lta_amount)-flt(hra_exemption), 2
+                    )
 
-    net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+            income_tax_slab=frappe.get_doc("Income Tax Slab",declaration_doc.custom_income_tax)
+            standard_deduction=income_tax_slab.standard_tax_exemption_amount if income_tax_slab.standard_tax_exemption_amount else 0
+
+            gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
+
+            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+
+            net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+
+
+        else:
+
+            proof_submission = frappe.get_all(
+                "Employee Tax Exemption Proof Submission",
+                filters={
+                    "employee": employee,
+                    "company": company,
+                    "payroll_period": payroll_period
+                },
+                fields=["name"],
+                limit=1
+            )
+
+            if not proof_submission:
+                return {
+                    "status": "failed",
+                    "message": "No declaration form created for this payroll period"
+                }
+
+            proof_submission_doc = frappe.get_doc(
+                "Employee Tax Exemption Proof Submission",
+                proof_submission[0].name
+            )
+
+            current_tax_regime=proof_submission_doc.custom_tax_regime
+            declaration_id=proof_submission_doc.name
+
+            advance_tax=proof_submission_doc.custom_tds_already_deducted_amount if proof_submission_doc.custom_tds_already_deducted_amount else 0
+
+
+
+            # ------------------ 80C & LTA ------------------
+            eighty_c = []
+            lta_amount = 0
+            eighty_d=[]
+            other_investment=[]
+
+            if proof_submission_doc.tax_exemption_proofs:
+                for d in proof_submission_doc.tax_exemption_proofs:
+
+                    sub_category = frappe.get_doc(
+                        "Employee Tax Exemption Sub Category",
+                        d.exemption_sub_category
+                    )
+
+                    # LTA
+                    if sub_category.custom_component_type == "LTA Reimbursement":
+                        lta_amount = flt(d.max_amount or 0)
+
+                    category = frappe.get_doc(
+                        "Employee Tax Exemption Category",
+                        d.exemption_category
+                    )
+
+                    # Section 80C
+                    if category.custom_select_section == "80 C":
+                        declared = flt(d.amount or 0)
+                        qualified = flt(d.max_amount or 0)
+
+                        eighty_c.append({
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared,
+                            "qualified_amount": qualified,
+                            "deductible_amount": qualified if declared > qualified else declared
+                        })
+
+
+                    if category.custom_select_section == "80 D":
+
+                        declared_80d = flt(d.amount or 0)
+                        qualified_80d = flt(d.max_amount or 0)
+
+                        eighty_d.append({
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_80d,
+                            "qualified_amount": qualified_80d,
+                            "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
+                        })
+
+                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+
+                        declared_other = flt(d.amount or 0)
+                        qualified_other = flt(d.max_amount or 0)
+
+                        other_investment.append({
+
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_other,
+                            "qualified_amount": qualified_other,
+                            "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
+                        })
+
+            # ------------------ Annual Statement ------------------
+
+
+
+            eighty_c_sum = min(
+                sum(r["deductible_amount"] for r in eighty_c),
+                150000
+            )
+            eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
+            other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+
+            annual_statement = get_annual_statement(employee, payroll_period,company)
+
+            if annual_statement.get("status") != "success":
+                return annual_statement
+
+            extra_payment_grand_total = flt(annual_statement.get("extra_payment_grand_total", 0))
+            total_perquisite_total = flt(annual_statement.get("total_perquisite_total", 0))
+            total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))
+            total_off_cycle_payment = flt(annual_statement.get("total_off_cycle_payment", 0))
+            reimbursements_total = flt(annual_statement.get("reimbursements_total", 0))
+            total_perquisite_total=flt(annual_statement.get("total_perquisite_total", 0))
+
+            total_gross_salary_current = round(
+                total_gross_earning + total_off_cycle_payment + extra_payment_grand_total+total_perquisite_total, 2
+            )
+
+            hra_received_annual=proof_submission_doc.custom_hra_received_annual if proof_submission_doc.custom_hra_received_annual else 0
+            rent_paid_of_basic=proof_submission_doc.custom_rent_paid__10_of_basic_annual if proof_submission_doc.custom_rent_paid__10_of_basic_annual else 0
+            basic_percentage=proof_submission_doc.custom_50_of_basic_metro if proof_submission_doc.custom_50_of_basic_metro else 0
+
+            hra_exemption=proof_submission_doc.custom_annual_eligible_amount if proof_submission_doc.custom_annual_eligible_amount else 0
+            salary_after_section_10= round(
+                        flt(total_gross_salary_current) - flt(lta_amount)-flt(hra_exemption), 2
+                    )
+
+            income_tax_slab=frappe.get_doc("Income Tax Slab",proof_submission_doc.custom_income_tax)
+            standard_deduction=income_tax_slab.standard_tax_exemption_amount if income_tax_slab.standard_tax_exemption_amount else 0
+
+            gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
+
+            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+
+            net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+
 
 
 
@@ -5261,6 +5555,12 @@ def calculate_tds_projection(declaration_id):
 
 
                 }
+
+
+
+
+
+
 
 @frappe.whitelist()
 def slab_calculation(
