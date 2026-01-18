@@ -327,16 +327,18 @@ def get_salary_slips(filters=None):
             fields=["amount"],
         )
 
-        total_bonus = 0
-        for b in bonuses:
-            total_bonus += b.amount
+        bonus = 0
+        for bonus in bonuses:
+            bonus += bonus.amount
+
+        salary_data["bonus"] = bonus
 
         salary_data["loan_perquisite"] = loan_perquisite_total
         salary_data["new_total_income"] = (
-            new_total_income + loan_perquisite_total + total_bonus
+            new_total_income + loan_perquisite_total + bonus
         )
         salary_data["old_total_income"] = (
-            old_total_income + loan_perquisite_total + total_bonus
+            old_total_income + loan_perquisite_total + bonus
         )
 
         # Fetch Tax Exemption Declaration
@@ -1532,7 +1534,7 @@ def execute(filters=None):
             },
             {
                 "label": "Bonus",
-                "fieldname": "total_bonus",
+                "fieldname": "bonus",
                 "fieldtype": "Currency",
                 "width": 150,
             },
