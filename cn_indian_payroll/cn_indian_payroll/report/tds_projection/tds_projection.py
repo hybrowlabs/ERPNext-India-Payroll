@@ -127,6 +127,7 @@ def get_salary_slips(filters=None):
                         and get_each_component.custom_tax_exemption_applicable_based_on_regime
                         == 1
                         and (get_each_component.custom_regime == "All")
+                        and get_each_component.custom_is_accrual == 0
                     ):
                         salary_component = earning.salary_component
                         salary_components[salary_component] = component_sequence
@@ -244,6 +245,7 @@ def get_salary_slips(filters=None):
                     and get_tax_component.custom_tax_exemption_applicable_based_on_regime
                     == 1
                     and (get_tax_component.custom_regime == "All")
+                    and get_tax_component.custom_is_accrual == 0
                 ):
                     salary_component = projection_earning.salary_component
                     projected_income = projection_earning.amount * (
@@ -310,9 +312,32 @@ def get_salary_slips(filters=None):
                     if start_date <= payment_date <= end_date:
                         loan_perquisite_total += date.perquisite_amount
 
+        company = frappe.get_doc("Company", conditions.get("company"))
+        start_month_name = company.custom_start_date
+        end_month_name = company.custom_end_date
+
+        bonuses = frappe.get_all(
+            "Employee Bonus Accrual",
+            filters={
+                "company": conditions.get("company"),
+                "employee": structure["employee"],
+                "docstatus": 1,
+                "accrual_date": ["between", [start_month_name, end_month_name]],
+            },
+            fields=["amount"],
+        )
+
+        bonus = 0
+        for bonus in bonuses:
+            bonus += bonus.amount
+
         salary_data["loan_perquisite"] = loan_perquisite_total
-        salary_data["new_total_income"] = new_total_income + loan_perquisite_total
-        salary_data["old_total_income"] = old_total_income + loan_perquisite_total
+        salary_data["new_total_income"] = (
+            new_total_income + loan_perquisite_total + bonus
+        )
+        salary_data["old_total_income"] = (
+            old_total_income + loan_perquisite_total + bonus
+        )
 
         # Fetch Tax Exemption Declaration
         declaration = frappe.get_all(
@@ -1502,6 +1527,12 @@ def execute(filters=None):
             {
                 "label": "Loan Perquisite",
                 "fieldname": "loan_perquisite",
+                "fieldtype": "Currency",
+                "width": 150,
+            },
+            {
+                "label": "Bonus",
+                "fieldname": "bonus",
                 "fieldtype": "Currency",
                 "width": 150,
             },
