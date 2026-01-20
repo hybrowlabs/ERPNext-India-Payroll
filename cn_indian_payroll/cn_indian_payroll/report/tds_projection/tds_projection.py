@@ -328,8 +328,8 @@ def get_salary_slips(filters=None):
         )
 
         bonus = 0
-        for bonus in bonuses:
-            bonus += bonus.amount
+        for b in bonuses:
+            bonus += b.amount
 
         salary_data["bonus"] = bonus
 
