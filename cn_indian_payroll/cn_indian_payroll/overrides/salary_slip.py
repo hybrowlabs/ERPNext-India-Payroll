@@ -1549,6 +1549,7 @@ class CustomSalarySlip(SalarySlip):
 
 
         if self.custom_tax_regime == "Old Regime":
+
             declaration = frappe.get_list(
                 'Employee Tax Exemption Declaration',
                 filters={
@@ -1563,174 +1564,186 @@ class CustomSalarySlip(SalarySlip):
             if declaration:
                 get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
 
-                form_data = json.loads(declaration[0].custom_declaration_form_data or '[]')
+                proof_submission = frappe.get_list(
+                'Employee Tax Exemption Proof Submission',
+                filters={
+                    'employee': self.employee,
+                    'payroll_period': self.custom_payroll_period,
+                    'docstatus': 1,
+                    'company': self.company,
+                    'custom_declaration_id': declaration[0].name
+                },
+                fields=['*']
+                )
 
-                total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
-                total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
-                total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
-                total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
+                if not proof_submission:
 
+                    form_data = json.loads(declaration[0].custom_declaration_form_data or '[]')
 
+                    total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
+                    total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
+                    total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
+                    total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
 
+                    for subcategory in get_each_doc.declarations:
+                        check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
 
+                        if check_component.custom_component_type == "NPS":
+                            subcategory.amount = total_nps
 
-                for subcategory in get_each_doc.declarations:
-                    check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
+                        elif check_component.custom_component_type == "Provident Fund":
+                            subcategory.amount = total_pf
 
-                    if check_component.custom_component_type == "NPS":
-                        subcategory.amount = total_nps
+                        elif check_component.custom_component_type == "Professional Tax":
+                            subcategory.amount = total_pt
 
-                    elif check_component.custom_component_type == "Provident Fund":
-                        subcategory.amount = total_pf
-
-                    elif check_component.custom_component_type == "Professional Tax":
-                        subcategory.amount = total_pt
-
-                    elif check_component.custom_component_type == "LTA Reimbursement":
-                        if subcategory.amount>total_lta:
-                            subcategory.max_amount = total_lta
-                        else:
-                            subcategory.max_amount = subcategory.amount
-
-                for entry in form_data:
-                    subcat = entry.get("sub_category") or entry.get("id")
-                    component = frappe.get_all(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"name": subcat},
-                        fields=["custom_component_type"],
-                        limit=1
-                    )
-                    if component:
-                        ctype = component[0].custom_component_type
-                        if ctype == "NPS":
-                            entry["amount"] = total_nps
-                            entry["value"] = total_nps
-                        elif ctype == "Provident Fund":
-                            entry["amount"] = total_pf
-                            entry["value"] = total_pf
-                        elif ctype == "Professional Tax":
-                            entry["amount"] = total_pt
-                            entry["value"] = total_pt
-                        elif ctype == "LTA Reimbursement":
-                            allowed_lta = min(entry.get("amount", 0), total_lta)
-                            entry["amount"] = allowed_lta
-                            entry["value"] = allowed_lta
-
-                get_each_doc.custom_posting_date = self.posting_date
-                get_each_doc.custom_declaration_form_data = json.dumps(form_data)
-
-
-
-                if get_each_doc.monthly_house_rent>0:
-                    ss_assignment = frappe.get_list(
-                    "Salary Structure Assignment",
-                    filters={
-                        "employee": self.employee,
-                        "docstatus": 1,
-                        "company": self.company,
-                        "custom_payroll_period": self.custom_payroll_period,
-                        "from_date": ("<=", self.end_date),
-                    },
-                    fields=[
-                        "name",
-                        "from_date",
-                        "custom_payroll_period",
-                        "salary_structure",
-                    ],
-                    order_by="from_date desc",
-                    )
-
-                    if ss_assignment:
-                        first_assignment = next(iter(ss_assignment))
-                        first_assignment_date = first_assignment.get("from_date")
-                        first_assignment_structure = first_assignment.get("salary_structure")
-
-                        start_date = ss_assignment[-1].from_date
-                        if ss_assignment[-1].custom_payroll_period:
-                            payroll_period = frappe.get_doc(
-                                "Payroll Period", ss_assignment[-1].custom_payroll_period
-                            )
-                            end_date = payroll_period.end_date
-                            month_count = (
-                                (end_date.year - start_date.year) * 12
-                                + end_date.month
-                                - start_date.month
-                                + 1
-                            )
-
-                            percentage=(previous_basic_value+future_basic_value+current_basic_value)*10/100
-                            get_each_doc.custom_check=1
-                            get_each_doc.custom_basic_as_per_salary_structure=round(percentage)
-                            get_each_doc.salary_structure_hra=round(previous_hra_value+future_hra_value+current_hra_value)
-                            get_each_doc.custom_basic=round(previous_basic_value+future_basic_value+current_basic_value)
-
-                            total_basic_amount= round(previous_basic_value + future_basic_value + current_basic_value)
-                            total_hra_amount = round(previous_hra_value + future_hra_value + current_hra_value)
-
-                            annual_hra_amount = get_each_doc.monthly_house_rent * month_count
-
-                            basic_rule2 = round(annual_hra_amount - percentage)
-                            if get_each_doc.rented_in_metro_city == 0:
-                                non_metro_or_metro = (total_basic_amount * 40) / 100
-                            elif get_each_doc.rented_in_metro_city == 1:
-                                non_metro_or_metro = (total_basic_amount * 50) / 100
-
-                            final_hra_exemption = round(
-                                min(basic_rule2, annual_hra_amount, non_metro_or_metro)
-                            )
-
-
-                            get_each_doc.annual_hra_exemption = round(final_hra_exemption)
-                            get_each_doc.monthly_hra_exemption = round(
-                                final_hra_exemption / month_count
-                            )
-
-
-                            months = []
-                            current_date = start_date
-
-                            while current_date <= end_date:
-                                month_name = current_date.strftime("%B")
-                                if month_name not in months:
-                                    months.append(month_name)
-                                current_date = (
-                                    current_date.replace(day=28) + timedelta(days=4)
-                                ).replace(day=1)
-
-                            earned_basic = 0
-                            if get_each_doc.rented_in_metro_city == 1:
-                                earned_basic = (
-                                    (get_each_doc.custom_basic_as_per_salary_structure * 10) * 50 / 100
-                                )
+                        elif check_component.custom_component_type == "LTA Reimbursement":
+                            if subcategory.amount>total_lta:
+                                subcategory.max_amount = total_lta
                             else:
-                                earned_basic = (
-                                    (get_each_doc.custom_basic_as_per_salary_structure * 10) * 40 / 100
+                                subcategory.max_amount = subcategory.amount
+
+                    for entry in form_data:
+                        subcat = entry.get("sub_category") or entry.get("id")
+                        component = frappe.get_all(
+                            "Employee Tax Exemption Sub Category",
+                            filters={"name": subcat},
+                            fields=["custom_component_type"],
+                            limit=1
+                        )
+                        if component:
+                            ctype = component[0].custom_component_type
+                            if ctype == "NPS":
+                                entry["amount"] = total_nps
+                                entry["value"] = total_nps
+                            elif ctype == "Provident Fund":
+                                entry["amount"] = total_pf
+                                entry["value"] = total_pf
+                            elif ctype == "Professional Tax":
+                                entry["amount"] = total_pt
+                                entry["value"] = total_pt
+                            elif ctype == "LTA Reimbursement":
+                                allowed_lta = min(entry.get("amount", 0), total_lta)
+                                entry["amount"] = allowed_lta
+                                entry["value"] = allowed_lta
+
+                    get_each_doc.custom_posting_date = self.posting_date
+                    get_each_doc.custom_declaration_form_data = json.dumps(form_data)
+
+
+
+                    if get_each_doc.monthly_house_rent>0:
+                        ss_assignment = frappe.get_list(
+                        "Salary Structure Assignment",
+                        filters={
+                            "employee": self.employee,
+                            "docstatus": 1,
+                            "company": self.company,
+                            "custom_payroll_period": self.custom_payroll_period,
+                            "from_date": ("<=", self.end_date),
+                        },
+                        fields=[
+                            "name",
+                            "from_date",
+                            "custom_payroll_period",
+                            "salary_structure",
+                        ],
+                        order_by="from_date desc",
+                        )
+
+                        if ss_assignment:
+                            first_assignment = next(iter(ss_assignment))
+                            first_assignment_date = first_assignment.get("from_date")
+                            first_assignment_structure = first_assignment.get("salary_structure")
+
+                            start_date = ss_assignment[-1].from_date
+                            if ss_assignment[-1].custom_payroll_period:
+                                payroll_period = frappe.get_doc(
+                                    "Payroll Period", ss_assignment[-1].custom_payroll_period
+                                )
+                                end_date = payroll_period.end_date
+                                month_count = (
+                                    (end_date.year - start_date.year) * 12
+                                    + end_date.month
+                                    - start_date.month
+                                    + 1
+                                )
+
+                                percentage=(previous_basic_value+future_basic_value+current_basic_value)*10/100
+                                get_each_doc.custom_check=1
+                                get_each_doc.custom_basic_as_per_salary_structure=round(percentage)
+                                get_each_doc.salary_structure_hra=round(previous_hra_value+future_hra_value+current_hra_value)
+                                get_each_doc.custom_basic=round(previous_basic_value+future_basic_value+current_basic_value)
+
+                                total_basic_amount= round(previous_basic_value + future_basic_value + current_basic_value)
+                                total_hra_amount = round(previous_hra_value + future_hra_value + current_hra_value)
+
+                                annual_hra_amount = get_each_doc.monthly_house_rent * month_count
+
+                                basic_rule2 = round(annual_hra_amount - percentage)
+                                if get_each_doc.rented_in_metro_city == 0:
+                                    non_metro_or_metro = (total_basic_amount * 40) / 100
+                                elif get_each_doc.rented_in_metro_city == 1:
+                                    non_metro_or_metro = (total_basic_amount * 50) / 100
+
+                                final_hra_exemption = round(
+                                    min(basic_rule2, annual_hra_amount, non_metro_or_metro)
                                 )
 
 
-                            get_each_doc.custom_hra_breakup = []
-                            for i in range(len(months)):
-                                get_each_doc.append(
-                                    "custom_hra_breakup",
-                                    {
-                                        "month": months[i],
-                                        "rent_paid": round(annual_hra_amount),
-                                        "hra_received": round(total_hra_amount),
-                                        "earned_basic": round(earned_basic),
-                                        "excess_of_rent_paid": round(basic_rule2),
-                                        "exemption_amount": final_hra_exemption,
-                                    },
+                                get_each_doc.annual_hra_exemption = round(final_hra_exemption)
+                                get_each_doc.monthly_hra_exemption = round(
+                                    final_hra_exemption / month_count
                                 )
 
 
-                get_each_doc.custom_status="Approved"
+                                months = []
+                                current_date = start_date
 
-                get_each_doc.save()
-                frappe.db.commit()
-                self.tax_exemption_declaration=get_each_doc.total_exemption_amount
+                                while current_date <= end_date:
+                                    month_name = current_date.strftime("%B")
+                                    if month_name not in months:
+                                        months.append(month_name)
+                                    current_date = (
+                                        current_date.replace(day=28) + timedelta(days=4)
+                                    ).replace(day=1)
+
+                                earned_basic = 0
+                                if get_each_doc.rented_in_metro_city == 1:
+                                    earned_basic = (
+                                        (get_each_doc.custom_basic_as_per_salary_structure * 10) * 50 / 100
+                                    )
+                                else:
+                                    earned_basic = (
+                                        (get_each_doc.custom_basic_as_per_salary_structure * 10) * 40 / 100
+                                    )
+
+
+                                get_each_doc.custom_hra_breakup = []
+                                for i in range(len(months)):
+                                    get_each_doc.append(
+                                        "custom_hra_breakup",
+                                        {
+                                            "month": months[i],
+                                            "rent_paid": round(annual_hra_amount),
+                                            "hra_received": round(total_hra_amount),
+                                            "earned_basic": round(earned_basic),
+                                            "excess_of_rent_paid": round(basic_rule2),
+                                            "exemption_amount": final_hra_exemption,
+                                        },
+                                    )
+
+
+                    get_each_doc.custom_status="Approved"
+
+                    get_each_doc.save()
+                    frappe.db.commit()
+                    self.tax_exemption_declaration=get_each_doc.total_exemption_amount
+
 
 
         if self.custom_tax_regime=="New Regime":
+
             declaration = frappe.get_list(
                 'Employee Tax Exemption Declaration',
                 filters={
@@ -1745,39 +1758,53 @@ class CustomSalarySlip(SalarySlip):
             if declaration:
                 get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
 
-                form_data = json.loads(declaration[0].custom_declaration_form_data or '[]')
-
-                total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
-
-                for subcategory in get_each_doc.declarations:
-                    check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
-
-                    if check_component.custom_component_type == "NPS":
-                        subcategory.amount = total_nps
-
-
-                for entry in form_data:
-                    subcat = entry.get("sub_category") or entry.get("id")
-                    component = frappe.get_all(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"name": subcat},
-                        fields=["custom_component_type"],
-                        limit=1
+                proof_submission = frappe.get_list(
+                    'Employee Tax Exemption Proof Submission',
+                    filters={
+                        'employee': self.employee,
+                        'payroll_period': self.custom_payroll_period,
+                        'docstatus': 1,
+                        'company': self.company,
+                        'custom_declaration_id': declaration[0].name
+                    },
+                    fields=['*']
                     )
-                    if component:
-                        ctype = component[0].custom_component_type
-                        if ctype == "NPS":
-                            entry["amount"] = total_nps
-                            entry["value"] = total_nps
 
-                get_each_doc.custom_posting_date = self.posting_date
-                get_each_doc.custom_declaration_form_data = json.dumps(form_data)
+                if not proof_submission:
 
-                get_each_doc.custom_status="Approved"
+                    form_data = json.loads(declaration[0].custom_declaration_form_data or '[]')
 
-                get_each_doc.save()
-                frappe.db.commit()
-                self.tax_exemption_declaration=get_each_doc.total_exemption_amount
+                    total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
+
+                    for subcategory in get_each_doc.declarations:
+                        check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
+
+                        if check_component.custom_component_type == "NPS":
+                            subcategory.amount = total_nps
+
+
+                    for entry in form_data:
+                        subcat = entry.get("sub_category") or entry.get("id")
+                        component = frappe.get_all(
+                            "Employee Tax Exemption Sub Category",
+                            filters={"name": subcat},
+                            fields=["custom_component_type"],
+                            limit=1
+                        )
+                        if component:
+                            ctype = component[0].custom_component_type
+                            if ctype == "NPS":
+                                entry["amount"] = total_nps
+                                entry["value"] = total_nps
+
+                    get_each_doc.custom_posting_date = self.posting_date
+                    get_each_doc.custom_declaration_form_data = json.dumps(form_data)
+
+                    get_each_doc.custom_status="Approved"
+
+                    get_each_doc.save()
+                    frappe.db.commit()
+                    self.tax_exemption_declaration=get_each_doc.total_exemption_amount
 
 
 

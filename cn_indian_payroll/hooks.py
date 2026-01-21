@@ -353,6 +353,10 @@ doc_events = {
     #     "validate":"cn_indian_payroll.cn_indian_payroll.overrides.attendance_request.validate"
     # },
 
+    "Employee": {
+        "after_insert":"cn_indian_payroll.cn_indian_payroll.overrides.employee.after_insert",
+    },
+
 
 
 }

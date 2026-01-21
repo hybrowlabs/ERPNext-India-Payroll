@@ -40,8 +40,19 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
 
+        self.set_approved_status()
+
     def on_cancel(self):
         self.cancel_declaration_history()
+
+
+    def set_approved_status(self):
+        if self.declarations:
+            for subcategory in self.declarations:
+                subcategory_doc = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
+                if subcategory_doc.custom_approval_needed == "No":
+                    subcategory.custom_status = "Not Needed"
+
 
 
 
@@ -543,15 +554,33 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     def set_total_exemption_amount(self):
 
+
+
+        # self.total_exemption_amount = flt(
+        #     get_total_exemption_amount(self.declarations),
+        #     self.precision("total_exemption_amount"),
+        # )
+        # # frappe.msgprint(str(self.total_exemption_amount))
+        # if self.annual_hra_exemption:
+        #     self.total_exemption_amount = (
+        #         self.total_exemption_amount + self.annual_hra_exemption
+        #     )
+
+        approved_declarations = [
+            d for d in self.declarations
+            if d.custom_status  in  ["Approved","Not Needed"]
+        ]
+
         self.total_exemption_amount = flt(
-            get_total_exemption_amount(self.declarations),
+            get_total_exemption_amount(approved_declarations),
             self.precision("total_exemption_amount"),
         )
-        # frappe.msgprint(str(self.total_exemption_amount))
+
         if self.annual_hra_exemption:
-            self.total_exemption_amount = (
-                self.total_exemption_amount + self.annual_hra_exemption
-            )
+            self.total_exemption_amount += flt(self.annual_hra_exemption)
+
+
+
 
 
 
