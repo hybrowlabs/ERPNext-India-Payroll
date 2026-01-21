@@ -823,6 +823,7 @@ def get_all_accrued_reimbursements(employee=None, company=None, payroll_period=N
 
 
 
+
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_claim_locking_period?employee=37001&payroll_period=25-26&posting_date=2025-12-01&doctype_name=Employee%20Benefit%20Claim
 
 
@@ -1022,7 +1023,7 @@ def benefit_claim_locking_period(
                     if user.employee_id == employee:
                         return {
                             "status": "success",
-                            "message": doctype_name+" allowed based on user assignment " + formatdate(entry.start_date) + " to " + formatdate(entry.end_date),
+                            "message": doctype_name+" allowed based on user assignment " + formatdate(period.start_date) + " to " + formatdate(period.end_date),
                         }
 
     return {
