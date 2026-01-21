@@ -15,8 +15,8 @@ class NewJoiningArrear(Document):
     def on_submit(self):
         self.insert_additional_salary()
 
-    def after_insert(self):
-        self.insert_breakup_table_on_payrollentry()
+    # def after_insert(self):
+    #     self.insert_breakup_table_on_payrollentry()
 
 
     # def insert_breakup_table_on_payrollentry(self):
@@ -38,24 +38,24 @@ class NewJoiningArrear(Document):
 
     #     payroll_entry_doc.save()
 
-    def insert_breakup_table_on_payrollentry(self):
+    # def insert_breakup_table_on_payrollentry(self):
 
-        if not self.payroll_entry:
-            return
+    #     if not self.payroll_entry:
+    #         return
 
-        payroll_entry_doc = frappe.get_doc("Payroll Entry", self.payroll_entry)
+    #     payroll_entry_doc = frappe.get_doc("Payroll Entry", self.payroll_entry)
 
-        payroll_entry_doc.append("custom_new_joinee_arrear_child", {
-            "employee": self.employee,
-            "working_days": self.working_days,
-            "arrear_days": self.number_of_present_days,
-            "date_of_joining": self.joining_date,
-            "total_earning_arrear": self.total_earning,
-            "total_deduction_arrear": self.total_deductions,
-            "total_benefit": self.total_benefits,
-        })
+    #     payroll_entry_doc.append("custom_new_joinee_arrear_child", {
+    #         "employee": self.employee,
+    #         "working_days": self.working_days,
+    #         "arrear_days": self.number_of_present_days,
+    #         "date_of_joining": self.joining_date,
+    #         "total_earning_arrear": self.total_earning,
+    #         "total_deduction_arrear": self.total_deductions,
+    #         "total_benefit": self.total_benefits,
+    #     })
 
-        payroll_entry_doc.db_update_all()
+    #     payroll_entry_doc.db_update_all()
 
 
 

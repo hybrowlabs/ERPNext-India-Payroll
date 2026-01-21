@@ -192,6 +192,23 @@ frappe.ui.form.on('Payroll Entry', {
             }
         }
     });
+},
+
+custom_process_regularize(frm){
+    console.log("Processing Attendance Regularization");
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_attendance_regularization",
+        args: {
+            payroll_entry: frm.doc.name
+        },
+        callback(r) {
+            if (r.message) {
+                frappe.msgprint(
+                    `Processed Attendance Regularization `
+                );
+            }
+        }
+    });
 }
 
 

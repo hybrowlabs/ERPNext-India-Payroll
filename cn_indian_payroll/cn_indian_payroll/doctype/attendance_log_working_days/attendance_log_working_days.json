@@ -8,7 +8,12 @@
   "from_date",
   "to_date",
   "working_days",
-  "month"
+  "month",
+  "arrear_days",
+  "month_and_year",
+  "month_start_date",
+  "month_end_date",
+  "salary_slip"
  ],
  "fields": [
   {
@@ -34,13 +39,40 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "To Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "arrear_days",
+   "fieldtype": "Float",
+   "label": "Arrear Days"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "month_and_year",
+   "fieldtype": "Data",
+   "label": "Month and Year"
+  },
+  {
+   "fieldname": "month_start_date",
+   "fieldtype": "Date",
+   "label": "Month Start date"
+  },
+  {
+   "fieldname": "month_end_date",
+   "fieldtype": "Date",
+   "label": "Month End Date"
+  },
+  {
+   "fieldname": "salary_slip",
+   "fieldtype": "Data",
+   "label": "Salary Slip"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-09 13:04:26.753585",
+ "modified": "2026-01-21 23:38:45.808707",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Attendance Log Working Days",

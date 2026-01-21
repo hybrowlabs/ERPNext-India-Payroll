@@ -92,92 +92,6 @@ def process_uploaded_excel(payroll_entry):
         "errors": errors
     }
 
-# def create_additional_salary(row, payroll_doc):
-#     if not row.get("employee"):
-#         frappe.throw("Employee is mandatory")
-
-#     if not row.get("salary_component"):
-#         frappe.throw("Salary Component is mandatory")
-
-#     if not row.get("payroll_date"):
-#         frappe.throw("Payroll Date is mandatory")
-
-#     # ---- DUPLICATE CHECK (BEFORE INSERT) ----
-#     if frappe.db.exists(
-#         "Additional Salary",
-#         {
-#             "employee": row.get("employee"),
-#             "salary_component": row.get("salary_component"),
-#             "payroll_date": row.get("payroll_date"),
-#             "docstatus": ["!=", 2],  # exclude cancelled
-#         },
-#     ):
-#         frappe.throw(
-#             f"Duplicate Additional Salary found for Employee {row.get('employee')} "
-#             f"and Component {row.get('salary_component')}"
-#         )
-
-#     # ---- CREATE ADDITIONAL SALARY ----
-#     doc = frappe.new_doc("Additional Salary")
-#     doc.employee = row.get("employee")
-#     doc.salary_component = row.get("salary_component")
-#     doc.amount = row.get("amount")
-#     doc.payroll_date = row.get("payroll_date")
-#     doc.company = payroll_doc.company
-#     doc.currency = "INR"
-#     # doc.remarks = row.get("remarks") or ""
-
-#     doc.insert(ignore_permissions=True)
-#     doc.submit()
-
-
-
-
-# def create_additional_salary(row, payroll_doc):
-#     # ---- BASIC VALIDATIONS ----
-#     if not row.get("employee"):
-#         frappe.throw("Employee is mandatory")
-
-#     if not row.get("salary_component"):
-#         frappe.throw("Salary Component is mandatory")
-
-#     if not row.get("payroll_date"):
-#         frappe.throw("Payroll Date is mandatory")
-
-#     # ---- SALARY COMPONENT EXISTENCE CHECK ----
-#     if not frappe.db.exists("Salary Component", row.get("salary_component")):
-#         frappe.throw(
-#             f"Salary Component '{row.get('salary_component')}' does not exist"
-#         )
-
-#     # ---- DUPLICATE CHECK ----
-#     if frappe.db.exists(
-#         "Additional Salary",
-#         {
-#             "employee": row.get("employee"),
-#             "salary_component": row.get("salary_component"),
-#             "payroll_date": row.get("payroll_date"),
-#             "docstatus": ["!=", 2],
-#         }
-#     ):
-#         frappe.throw(
-#             f"Duplicate Additional Salary found for Employee {row.get('employee')} "
-#             f"and Component {row.get('salary_component')}"
-#         )
-
-#     # ---- CREATE ADDITIONAL SALARY ----
-#     doc = frappe.new_doc("Additional Salary")
-#     doc.employee = row.get("employee")
-#     doc.salary_component = row.get("salary_component")
-#     doc.amount = row.get("amount")
-#     doc.payroll_date = row.get("payroll_date")
-#     doc.company = payroll_doc.company
-#     doc.currency = "INR"
-
-#     doc.insert(ignore_permissions=True)
-#     doc.submit()
-
-
 
 def create_additional_salary(row, payroll_doc):
     # ---- BASIC VALIDATIONS ----
@@ -231,3 +145,44 @@ def create_additional_salary(row, payroll_doc):
             "amount": row.get("amount")
         })
         payroll_doc.save(ignore_permissions=True)
+
+
+
+@frappe.whitelist()
+def process_attendance_regularization(payroll_entry):
+    payroll_doc = frappe.get_doc("Payroll Entry", payroll_entry)
+
+    for row in payroll_doc.custom_attendance_regularize_child:
+
+        # ✅ Check if LOP Reversal already exists
+        existing_lop = frappe.get_list(
+            "LOP Reversal",
+            filters={
+                "employee": row.employee,
+                "salary_slip": row.salary_slip,
+                "payroll_period": row.payroll_period,
+                "docstatus": ["!=", 2],  # not cancelled
+            },
+            pluck="name",
+        )
+
+        # ⏭ Skip if already created
+        if existing_lop:
+            continue
+
+        # ✅ Create new LOP Reversal
+        lop_doc = frappe.new_doc("LOP Reversal")
+        lop_doc.employee = row.employee
+        lop_doc.salary_slip = row.salary_slip
+        lop_doc.attendance_log = row.attendance_log
+        lop_doc.lop_month_reversal = row.month
+        lop_doc.payroll_period = row.payroll_period
+        lop_doc.company = payroll_doc.company
+        lop_doc.additional_salary_date = row.additional_salary_date
+        lop_doc.working_days = row.working_days
+        lop_doc.number_of_days = row.arrear_days
+
+        lop_doc.insert(ignore_permissions=True)
+        lop_doc.submit()
+
+    frappe.msgprint("Attendance Regularization processed successfully.")

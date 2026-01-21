@@ -35,6 +35,8 @@ from dateutil.relativedelta import relativedelta
 from frappe.utils import getdate
 from dateutil.relativedelta import relativedelta
 
+from calendar import monthrange
+from dateutil.relativedelta import relativedelta
 
 
 class CustomSalarySlip(SalarySlip):
@@ -49,6 +51,7 @@ class CustomSalarySlip(SalarySlip):
 
 
     def before_save(self):
+
 
         self.actual_amount_ctc()
         self.update_declaration_component()
@@ -187,28 +190,66 @@ class CustomSalarySlip(SalarySlip):
                 ),
             })
 
-        # ------------------------------------------------
-        # Append MONTH-WISE working days (21 → 20)
-        # Example:
-        # Mar-2025 | 21-02 → 20-03 | 31
-        # ------------------------------------------------
+        # # ------------------------------------------------
+        # # Append MONTH-WISE working days (21 → 20)
+        # # Example:
+        # # Mar-2025 | 21-02 → 20-03 | 31
+        # # ------------------------------------------------
+        # for i in range(regularize_months):
+
+        #     cycle_end_m = regularize_end_date - relativedelta(months=i)
+        #     cycle_end_m = cycle_end_m.replace(day=end_day)
+
+        #     cycle_start_m = (
+        #         cycle_end_m - relativedelta(months=1)
+        #     ).replace(day=start_day)
+
+        #     working_days = (cycle_end_m - cycle_start_m).days + 1
+
+        #     accrual_doc.append("attendance_log_working_days", {
+        #         "month_and_year": cycle_end_m.strftime("%b-%Y"),
+        #         "month": cycle_end_m.strftime("%B"),
+
+        #         "from_date": cycle_start_m,
+        #         "to_date": cycle_end_m,
+        #         "working_days": working_days
+        #     })
+
+
         for i in range(regularize_months):
 
             cycle_end_m = regularize_end_date - relativedelta(months=i)
-            cycle_end_m = cycle_end_m.replace(day=end_day)
 
-            cycle_start_m = (
-                cycle_end_m - relativedelta(months=1)
-            ).replace(day=start_day)
+            # Clamp end_day safely
+            last_day = monthrange(cycle_end_m.year, cycle_end_m.month)[1]
+            cycle_end_m = cycle_end_m.replace(day=min(end_day, last_day))
 
-            working_days = (cycle_end_m - cycle_start_m).days + 1
+            cycle_start_m = cycle_end_m - relativedelta(months=1)
+
+            prev_last_day = monthrange(cycle_start_m.year, cycle_start_m.month)[1]
+            cycle_start_m = cycle_start_m.replace(day=min(start_day, prev_last_day))
+
+            # ✅ Working days = calendar days of the MONTH
+            working_days = monthrange(
+                cycle_end_m.year, cycle_end_m.month
+            )[1]
+
+            month_start_date = cycle_end_m.replace(day=1)
+            month_end_date = cycle_end_m.replace(day=last_day)
+
+            salary_slip=frappe.get_list("Salary Slip",filters={"start_date":month_start_date,"end_date":month_end_date,"employee":self.employee},pluck="name")
 
             accrual_doc.append("attendance_log_working_days", {
-                "month": cycle_end_m.strftime("%b-%Y"),
+                "month_and_year": cycle_end_m.strftime("%b-%Y"),
+                "month": cycle_end_m.strftime("%B"),
                 "from_date": cycle_start_m,
                 "to_date": cycle_end_m,
-                "working_days": working_days
+                "working_days": working_days,
+                "month_start_date":month_start_date,
+                "month_end_date":month_end_date,
+                "salary_slip":salary_slip[0] if salary_slip else None
             })
+
 
         # ------------------------------------------------
         # Save & Submit
