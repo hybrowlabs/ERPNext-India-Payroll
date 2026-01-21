@@ -1028,7 +1028,7 @@ def benefit_claim_locking_period(
 
     return {
             "status": "failed",
-            "message": doctype_name+" are not permitted for the selected date as the declaration period has been closed on"+ formatdate(period.end_date),
+            "message": doctype_name+" are not permitted for the selected date as the period has been closed.",
             }
 
 
