@@ -163,5 +163,36 @@ frappe.ui.form.on('Payroll Entry', {
             });
         }
 
-    }
+    },
+
+
+    custom_download_template(frm) {
+        console.log("Downloading Template");
+        frappe.call({
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_additional_salary_template",
+            callback(r) {
+                if (r.message) {
+                    window.open(r.message);
+                }
+            }
+        });
+    },
+
+    custom_process(frm) {
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_uploaded_excel",
+        args: {
+            payroll_entry: frm.doc.name
+        },
+        callback(r) {
+            if (r.message) {
+                frappe.msgprint(
+                    `Created: ${r.message.success}<br>Errors: ${r.message.errors.length}`
+                );
+            }
+        }
+    });
+}
+
+
 });

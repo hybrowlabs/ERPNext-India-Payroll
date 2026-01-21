@@ -15,6 +15,51 @@ class NewJoiningArrear(Document):
     def on_submit(self):
         self.insert_additional_salary()
 
+    def after_insert(self):
+        self.insert_breakup_table_on_payrollentry()
+
+
+    # def insert_breakup_table_on_payrollentry(self):
+
+    #     if not self.payroll_entry:
+    #         return
+
+    #     payroll_entry_doc = frappe.get_doc("Payroll Entry", self.payroll_entry)
+
+    #     payroll_entry_doc.append("custom_new_joinee_arrear_child", {
+    #         "employee": self.employee,
+    #         "working_days": self.working_days,
+    #         "arrear_days": self.number_of_present_days,
+    #         "date_of_joining": self.joining_date,
+    #         "total_earning_arrear": self.total_earning,
+    #         "total_deduction_arrear": self.total_deductions,
+    #         "total_benefit": self.total_benefits,
+    #     })
+
+    #     payroll_entry_doc.save()
+
+    def insert_breakup_table_on_payrollentry(self):
+
+        if not self.payroll_entry:
+            return
+
+        payroll_entry_doc = frappe.get_doc("Payroll Entry", self.payroll_entry)
+
+        payroll_entry_doc.append("custom_new_joinee_arrear_child", {
+            "employee": self.employee,
+            "working_days": self.working_days,
+            "arrear_days": self.number_of_present_days,
+            "date_of_joining": self.joining_date,
+            "total_earning_arrear": self.total_earning,
+            "total_deduction_arrear": self.total_deductions,
+            "total_benefit": self.total_benefits,
+        })
+
+        payroll_entry_doc.db_update_all()
+
+
+
+
 
     def insert_additional_salary(self):
         if not (self.earning_component or self.deduction_component):
@@ -103,6 +148,11 @@ class NewJoiningArrear(Document):
         earning_component = []
         deduction_component = []
 
+
+        total_earning = 0
+        total_deduction = 0
+        total_benefit = 0
+
         for new_earning in new_salary_slip.earnings:
             component_doc = frappe.get_value(
                 "Salary Component",
@@ -128,6 +178,7 @@ class NewJoiningArrear(Document):
                         "actual_amount":round(new_earning.amount)
                     }
                 )
+                total_earning += round((new_earning.amount / new_salary_slip.total_working_days)* self.number_of_present_days)
                 processed_components.append(component_doc.name)
 
         # Process deductions
@@ -156,6 +207,7 @@ class NewJoiningArrear(Document):
                         "actual_amount":round(new_deduction.amount)
                     }
                 )
+                total_deduction += round((new_deduction.amount / new_salary_slip.total_working_days)* self.number_of_present_days)
                 processed_components.append(component_doc.name)
 
 
@@ -194,3 +246,8 @@ class NewJoiningArrear(Document):
                     "amount": round(calculated_amount),
                     "actual_amount": round(benefit.monthly_total_amount or 0),
                 })
+                total_benefit += round(calculated_amount)
+
+        self.total_earning= total_earning
+        self.total_deductions= total_deduction
+        self.total_benefits= total_benefit

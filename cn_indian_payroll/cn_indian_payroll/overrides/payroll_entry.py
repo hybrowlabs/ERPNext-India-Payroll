@@ -99,7 +99,9 @@ class PayrollEntryOverride(PayrollEntry):
                 next_month_attendance_end_date = datetime.date(next_month_end_date.year, next_month_end_date.month, attendance_start_day)
                 diff_days = (next_month_end_date - next_month_attendance_end_date).days + 1
 
+
                 if attendance_final_end_date < date_of_joinee <= end_date:
+
 
                     if payroll_setting.payroll_based_on == "Attendance":
                         days_diff = (end_date - date_of_joinee).days + 1
@@ -168,7 +170,8 @@ class PayrollEntryOverride(PayrollEntry):
                         existing_doc=frappe.db.exists("New Joining Arrear", {
                                 "employee": emp.employee,
                                 "company": self.company,
-                                "payroll_entry": self.name
+                                "payroll_entry": self.name,
+
                             })
                         if not existing_doc:
                             arrear_doc = frappe.get_doc({

@@ -197,6 +197,7 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 )
 
                 version.append({
+                    "salary_structure_assignment": assignment.name,
                     "version_name": v.name,
                     "values_changed": formatted.get("doc_changes", []),
                     "row_values_changed": formatted.get("row_changes", [])

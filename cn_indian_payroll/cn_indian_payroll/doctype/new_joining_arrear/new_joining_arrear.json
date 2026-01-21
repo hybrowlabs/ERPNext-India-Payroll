@@ -23,11 +23,14 @@
   "salary_structure_assignment",
   "working_days",
   "earning_arrear_component_section",
+  "total_earning",
   "earning_component",
   "deduction_arrear_component_section",
+  "total_deductions",
   "deduction_component",
   "amended_from",
   "benefits_arrear_section",
+  "total_benefits",
   "benefit_arrear"
  ],
  "fields": [
@@ -174,6 +177,21 @@
    "fieldtype": "Link",
    "label": "Payroll Period",
    "options": "Payroll Period"
+  },
+  {
+   "fieldname": "total_earning",
+   "fieldtype": "Float",
+   "label": "Total Earning"
+  },
+  {
+   "fieldname": "total_deductions",
+   "fieldtype": "Float",
+   "label": "Total Deductions"
+  },
+  {
+   "fieldname": "total_benefits",
+   "fieldtype": "Float",
+   "label": "Total Benefits"
   }
  ],
  "grid_page_length": 50,
@@ -185,7 +203,7 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2026-01-14 17:27:26.738056",
+ "modified": "2026-01-19 12:43:15.720719",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "New Joining Arrear",
