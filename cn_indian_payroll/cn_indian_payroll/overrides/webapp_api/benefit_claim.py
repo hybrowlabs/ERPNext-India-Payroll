@@ -954,7 +954,7 @@ def benefit_claim_locking_period(
     if not release_configs:
         return {
             "status": "success",
-            "message": "No monthly release configuration found. Claim allowed.",
+            "message": "No monthly release configuration found for " + doctype_name + ".allowed.",
         }
 
     config_doc = frappe.get_doc("Release Config", release_configs[0])
@@ -980,12 +980,12 @@ def benefit_claim_locking_period(
                 ):
                     return {
                         "status": "success",
-                        "message": "Claim allowed as per individual configuration.",
+                        "message": doctype_name+" allowed as per individual configuration." + formatdate(entry.start_date) + " to " + formatdate(entry.end_date),
                     }
 
                 return {
                     "status": "failed",
-                    "message": "Claim period is locked for this employee.",
+                    "message": doctype_name+" period is locked for this employee From " + formatdate(entry.start_date) + " to " + formatdate(entry.end_date),
                 }
 
         for period in config_doc.locking_period_months or []:
@@ -997,12 +997,12 @@ def benefit_claim_locking_period(
             ):
                 return {
                     "status": "success",
-                    "message": "Claim allowed within common locking period.",
+                    "message": doctype_name+" allowed within common locking period " + formatdate(period.start_date) + " to " + formatdate(period.end_date),
                 }
 
         return {
             "status": "failed",
-            "message": "The declaration period is locked. Claim not allowed.",
+            "message": "The " + doctype_name + " period is locked." + formatdate(period.end_date),
         }
 
 
@@ -1022,13 +1022,19 @@ def benefit_claim_locking_period(
                     if user.employee_id == employee:
                         return {
                             "status": "success",
-                            "message": "Claim allowed based on user assignment.",
+                            "message": doctype_name+" allowed based on user assignment " + formatdate(entry.start_date) + " to " + formatdate(entry.end_date),
                         }
 
     return {
             "status": "failed",
-            "message": "Claims are not permitted for the selected date as the declaration period has been closed.",
+            "message": doctype_name+" are not permitted for the selected date as the declaration period has been closed on"+ formatdate(period.end_date),
             }
+
+
+
+
+
+
 
 
 
