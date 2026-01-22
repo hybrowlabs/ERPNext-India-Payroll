@@ -682,3 +682,21 @@ def get_offcycle_payslip_pdf_html(id):
     # Final Frappe HTTP Response
     frappe.local.response["content_type"] = "text/html"
     frappe.local.response["response"] = html
+
+
+
+# @frappe.whitelist()
+# def get_consultant_payslip_pdf(slip_id):
+#     try:
+#         slip = frappe.get_doc("Salary Slip", slip_id)
+#     except frappe.DoesNotExistError:
+#         return {"html": "<p>No salary slip found.</p>"}
+
+#     context = {"doc": slip}
+
+#     html = frappe.render_template(
+#         "cn_indian_payroll/templates/includes/invoice.html",
+#         context
+#     )
+
+#     return {"html": html}
