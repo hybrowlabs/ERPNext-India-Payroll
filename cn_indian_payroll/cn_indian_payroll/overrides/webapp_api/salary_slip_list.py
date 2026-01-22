@@ -25,3 +25,21 @@ def get_salary_slip_list(employee=None, company=None):
         order_by="end_date desc",
     )
     return salary_slips
+
+
+
+@frappe.whitelist()
+def get_consultant_payslip_pdf(slip_id):
+    try:
+        slip = frappe.get_doc("Salary Slip", slip_id)
+    except frappe.DoesNotExistError:
+        return {"html": "<p>No salary slip found.</p>"}
+
+    context = {"doc": slip}
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/invoice.html",
+        context
+    )
+
+    return {"html": html}

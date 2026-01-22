@@ -2,6 +2,31 @@ frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
 
 
+        // if (frm.doc.docstatus === 1) {
+        //     frm.add_custom_button(
+        //         __("View Consultant Invoice"),
+        //         function () {
+        //             frappe.call({
+        //                 method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_slip_list.get_consultant_payslip_pdf",
+        //                 args: {
+        //                     slip_id: frm.doc.name,
+        //                 },
+        //                 callback: function (r) {
+        //                     if (r.message && r.message.html) {
+        //                         let win = window.open("", "_blank");
+        //                         win.document.write(r.message.html);
+        //                         win.document.close();
+        //                     } else {
+        //                         frappe.msgprint("No invoice data found");
+        //                     }
+        //                 },
+        //             });
+        //         },
+        //         __("Print")
+        //     );
+        // }
+
+
 
     //   frm.add_custom_button(__('View Payslip PDF'), function() {
     //     const slip_id = encodeURIComponent(frm.doc.name);
