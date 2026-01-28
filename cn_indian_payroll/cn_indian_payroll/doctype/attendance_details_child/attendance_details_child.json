@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-27 09:25:43.298451",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "working_days",
+  "absent_days",
+  "lwp_days",
+  "half_days",
+  "on_leave",
+  "work_from_home",
+  "payment_days",
+  "total_lwf_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Working Days"
+  },
+  {
+   "fieldname": "absent_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Absent Days"
+  },
+  {
+   "fieldname": "lwp_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "LWP Days"
+  },
+  {
+   "fieldname": "half_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Half Days"
+  },
+  {
+   "fieldname": "on_leave",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "On Leave"
+  },
+  {
+   "fieldname": "work_from_home",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Work From Home"
+  },
+  {
+   "fieldname": "payment_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Payment Days"
+  },
+  {
+   "fieldname": "total_lwf_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total LWF Days"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-27 09:28:51.373109",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Attendance Details Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

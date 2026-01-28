@@ -2,6 +2,21 @@ frappe.ui.form.on('Payroll Entry', {
     refresh(frm) {
 
 
+        if (frm.is_new()) {
+            frm.fields_dict.custom_attach_options.wrapper.innerHTML = "";
+            return;
+        }
+
+        // Render buttons HTML
+        frm.fields_dict.custom_attach_options.wrapper.innerHTML =
+            get_action_buttons_html();
+
+        // Bind click events
+        bind_action_buttons(frm);
+
+
+
+
 
         if (
             frm.doc.custom_bank_sheet_generated == 0 &&
@@ -213,3 +228,145 @@ custom_process_regularize(frm){
 
 
 });
+function get_action_buttons_html() {
+    return `
+        <div style="
+            display: flex;
+            gap: 14px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        ">
+
+            ${make_action_btn("📥", "Download Template", "download-template", "#2563eb")}
+
+            ${make_action_btn("📎", "Attach Template", "attach-template", "#7c3aed")}
+
+            ${make_action_btn("⬆️", "Upload Data", "upload-data", "#16a34a")}
+
+        </div>
+    `;
+}
+function make_action_btn(icon, label, id, color) {
+    return `
+        <button id="${id}"
+            style="
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 0;
+                font-size: 14px;
+                border-radius: 10px;
+                border: 1px solid ${color};
+                background: ${color};
+                color: #fff;
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            ">
+            <span style="font-size: 18px;">${icon}</span>
+            <span class="btn-label">${label}</span>
+        </button>
+    `;
+}
+
+function bind_action_buttons(frm) {
+
+    // DOWNLOAD TEMPLATE
+    $("#download-template").off("click").on("click", function () {
+        download_excel_template();
+    });
+
+    // ATTACH TEMPLATE
+    $("#attach-template").off("click").on("click", function () {
+        open_file_uploader(frm);
+    });
+
+    // UPLOAD DATA
+    $("#upload-data").off("click").on("click", function () {
+        frappe.msgprint({
+            title: "Upload Data",
+            message: "Excel upload & processing logic will be added here.",
+            indicator: "blue"
+        });
+    });
+}
+
+
+/* ---------------------------------------------
+   File Attach Dialog with URL & Clear
+----------------------------------------------*/
+function open_file_uploader(frm) {
+
+    new frappe.ui.FileUploader({
+        doctype: frm.doctype,
+        docname: frm.docname,
+        allow_multiple: false,
+        on_success(file) {
+            // Update button with file name and clear option
+            const btn = $("#attach-template");
+            btn.html(`
+                <span style="font-size:18px;">📎</span>
+                <span class="btn-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">${file.file_name}</span>
+                <span id="clear-attach" style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
+            `);
+
+            // Clear file logic
+            $("#clear-attach").off("click").on("click", function (e) {
+                e.stopPropagation();
+                // Reset button to original state
+                btn.html(make_action_btn("📎", "Attach Template", "attach-template", "#7c3aed"));
+                bind_action_buttons(frm); // Rebind the click
+            });
+
+            frappe.msgprint({
+                title: "File Attached",
+                message: `File <b>${file.file_name}</b> attached successfully.`,
+                indicator: "green"
+            });
+        }
+    });
+}
+
+
+/* ---------------------------------------------
+   Download Excel Template
+----------------------------------------------*/
+function download_excel_template() {
+
+    // Dummy CSV content (Excel compatible)
+    let csvContent =
+        "Employee,Month,Working Days,LOP Days,Remarks\n" +
+        "EMP-001,April-2025,30,1,Sample\n" +
+        "EMP-002,April-2025,30,0,Sample\n";
+
+    let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    let url = URL.createObjectURL(blob);
+
+    let link = document.createElement("a");
+    link.href = url;
+    link.download = "Payroll_Attendance_Template.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+/* ---------------------------------------------
+   File Attach Dialog
+----------------------------------------------*/
+// function open_file_uploader(frm) {
+
+//     new frappe.ui.FileUploader({
+//         doctype: frm.doctype,
+//         docname: frm.docname,
+//         allow_multiple: false,
+//         on_success(file) {
+//             frappe.msgprint({
+//                 title: "File Attached",
+//                 message: `File <b>${file.file_name}</b> attached successfully.`,
+//                 indicator: "green"
+//             });
+//         }
+//     });
+// }

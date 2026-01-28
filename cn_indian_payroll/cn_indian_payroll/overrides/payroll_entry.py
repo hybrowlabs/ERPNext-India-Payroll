@@ -101,6 +101,8 @@ class PayrollEntryOverride(PayrollEntry):
                 diff_days = (next_month_end_date - next_month_attendance_end_date).days + 1
 
 
+                print(attendance_final_end_date, date_of_joinee, end_date)
+
                 if attendance_final_end_date < date_of_joinee <= end_date:
 
 
@@ -201,6 +203,17 @@ class PayrollEntryOverride(PayrollEntry):
 
 
         if valid_employees:
+
+
+            # for employee in valid_employees:
+            #     attendance=frappe.get_all("Attendance",filters={"employee":employee["employee"],
+            #     "company":self.company,"attenadance_date": ["between", [self.start_date, self.end_date]],
+            #     "docstatus":1},
+            #     fields=["name","status","attendance_date"])
+            #     if attendance:
+
+
+
 
 
             employee_list = [e["employee"] for e in valid_employees]

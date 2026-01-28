@@ -2,6 +2,29 @@ frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
 
 
+
+        if (frm.doc.custom_e_sign_status === "Not Send") {
+            frm.add_custom_button("Send for e-Sign", () => {
+                frappe.call({
+                    method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.send_salary_slip_for_esign",
+                    args: { salary_slip: frm.doc.name },
+                    freeze: true,
+                    callback(r) {
+                        if (!r.exc) {
+                            frappe.msgprint("Sent to Leegality successfully");
+                            frm.reload_doc();
+                        }
+                    }
+                });
+            });
+        }
+
+
+
+
+
+
+
         // if (frm.doc.docstatus === 1) {
         //     frm.add_custom_button(
         //         __("View Consultant Invoice"),

@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-27 11:20:19.817423",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "api_base_url",
+  "api_key",
+  "api_secret",
+  "profile_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "api_base_url",
+   "fieldtype": "Data",
+   "label": "api_base_url"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "api_key"
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Data",
+   "label": "api_secret"
+  },
+  {
+   "fieldname": "profile_id",
+   "fieldtype": "Data",
+   "label": "Profile ID"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-01-28 11:18:29.064303",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Leegality Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
