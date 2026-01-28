@@ -1,108 +1,3 @@
-# import frappe
-# import base64
-# import requests
-# from frappe.utils.pdf import get_pdf
-
-
-# @frappe.whitelist()
-# def send_salary_slip_for_esign(salary_slip):
-#     """
-#     Button click entry point
-#     Generates PDF dynamically and sends to Leegality
-#     """
-
-#     # 1️⃣ Get Salary Slip
-#     slip = frappe.get_doc("Salary Slip", salary_slip)
-
-#     employee = frappe.get_doc("Employee", slip.employee)
-#     if not employee.personal_email and not employee.cell_number:
-#         frappe.throw("please fill these")
-
-#     else:
-#         email=employee.personal_email
-#         phone=employee.cell_number
-
-#     # 2️⃣ Render Salary Slip → PDF
-#     html = frappe.get_print(
-#         doctype="Salary Slip",
-#         name=salary_slip,
-#         print_format="Consultant",
-#         doc=slip,
-#         as_pdf=False
-#     )
-
-#     pdf_bytes = get_pdf(html)
-
-#     # 3️⃣ Convert PDF → base64 (DYNAMIC)
-#     pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
-
-#     # 4️⃣ Send to Leegality
-#     return _push_to_leegality(pdf_base64, slip)
-
-
-# def _push_to_leegality(pdf_base64, slip):
-#     """
-#     Internal helper
-#     """
-
-
-#     leegality_setting=frappe.get_doc("Leegality Settings")
-
-#     API_URL = leegality_setting.api_base_url+"sign/request"
-#     X_AUTH_TOKEN = leegality_setting.api_key
-#     PROFILE_ID = leegality_setting.profile_id
-
-#     # API_URL = "https://app1.leegality.com/api/v3.0/sign/request"
-#     # X_AUTH_TOKEN = "iwzXO8JH8pTaP4AdFM7nRan502vWaLv0"
-#     # PROFILE_ID = "mSqwYQ6"
-
-#     headers = {
-#         "Content-Type": "application/json",
-#         "X-Auth-Token": X_AUTH_TOKEN
-#     }
-
-#     payload = {
-#         "profileId": PROFILE_ID,
-#         "file": {
-#             "name": f"{slip.name}.pdf",
-#             "file": pdf_base64
-#         },
-#         "invitees": [
-#             {
-#                 "name": slip.employee_name,
-#                 "email": email,
-#                 "phone": phone
-#             }
-#         ],
-#         "requestSignOrder": True
-#     }
-
-#     response = requests.post(
-#         API_URL,
-#         headers=headers,
-#         json=payload,
-#         timeout=60
-#     )
-
-#     # 🔍 Log full response (VERY helpful while testing)
-#     frappe.log_error(
-#         f"STATUS: {response.status_code}\nRESPONSE: {response.text}",
-#         "Leegality v3.0 Test"
-#     )
-
-#     response.raise_for_status()
-#     result = response.json()
-
-#     # 5️⃣ Save details in Salary Slip
-#     slip.db_set("custom_document_id", result["data"]["documentId"])
-#     slip.db_set("custom_e_sign_status", "Send")
-
-#     return {
-#         "result":result
-#         "documentId": result["data"]["documentId"],
-#         "signUrl": result["data"]["invitees"][0]["signUrl"]
-#     }
-
 
 
 
@@ -119,10 +14,10 @@ def send_salary_slip_for_esign(salary_slip):
     Generates PDF dynamically and sends to Leegality
     """
 
-    # 1️⃣ Get Salary Slip
+
     slip = frappe.get_doc("Salary Slip", salary_slip)
 
-    # 2️⃣ Get Employee contact details
+
     employee = frappe.get_doc("Employee", slip.employee)
 
     if not employee.personal_email or not employee.cell_number:
@@ -133,7 +28,6 @@ def send_salary_slip_for_esign(salary_slip):
     email = employee.personal_email
     phone = employee.cell_number
 
-    # 3️⃣ Render Salary Slip → PDF
     html = frappe.get_print(
         doctype="Salary Slip",
         name=salary_slip,
@@ -144,10 +38,9 @@ def send_salary_slip_for_esign(salary_slip):
 
     pdf_bytes = get_pdf(html)
 
-    # 4️⃣ Convert PDF → base64
+
     pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
 
-    # 5️⃣ Send to Leegality
     return _push_to_leegality(pdf_base64, slip, email, phone)
 
 
@@ -191,7 +84,7 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
         timeout=60
     )
 
-    # 🔍 Log for debugging
+
     frappe.log_error(
         f"STATUS: {response.status_code}\nRESPONSE: {response.text}",
         "Leegality v3.0 Test"
@@ -200,7 +93,7 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
     response.raise_for_status()
     result = response.json()
 
-    # 6️⃣ Save details in Salary Slip
+
     slip.db_set("custom_document_id", result["data"]["documentId"])
     slip.db_set("custom_e_sign_status", "Send")
 
@@ -209,3 +102,123 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
         "documentId": result["data"]["documentId"],
         "signUrl": result["data"]["invitees"][0]["signUrl"]
     }
+
+
+
+
+import frappe
+import requests
+
+
+@frappe.whitelist()
+def view_signed_payslip(salary_slip):
+
+    slip = frappe.get_doc("Salary Slip", salary_slip)
+
+    documentId=slip.custom_document_id
+
+    leegality_setting = frappe.get_single("Leegality Settings")
+    X_AUTH_TOKEN = leegality_setting.api_key
+
+
+    url = leegality_setting.post_url
+
+    headers = {
+        "X-Auth-Token": X_AUTH_TOKEN
+    }
+
+    params = {
+        "documentId": documentId,
+        "documentDownloadType": "DOCUMENT"
+    }
+
+    r = requests.get(url, headers=headers, params=params, timeout=60)
+
+    if r.status_code != 200 or not r.content:
+        frappe.throw("Unable to fetch signed document from Leegality")
+
+    frappe.local.response.filename = f"{slip.name}_Signed.pdf"
+    frappe.local.response.filecontent = r.content
+    frappe.local.response.type = "pdf"
+
+    return
+
+
+
+
+# import frappe
+# import requests
+# import base64
+# from io import BytesIO
+# from pypdf import PdfReader, PdfWriter
+
+
+# @frappe.whitelist()
+# def view_signed_payslip(salary_slip):
+
+#     slip = frappe.get_doc("Salary Slip", salary_slip)
+
+#     # -----------------------------
+#     # 1️⃣ Fetch PDF from Leegality
+#     # -----------------------------
+#     resp = requests.get(
+#         "https://app1.leegality.com/api/v3.1/document/fetchDocument",
+#         headers={"X-Auth-Token": "iwzXO8JH8pTaP4AdFM7nRan502vWaLv0"},
+#         params={
+#             "documentId": "01KG1XYRAMCGY14RPRY2PRMWZ7",
+#             "documentDownloadType": "DOCUMENT"
+#         },
+#         timeout=60
+#     )
+
+#     if resp.status_code != 200:
+#         frappe.throw("Leegality API failed")
+
+#     content_type = resp.headers.get("Content-Type", "").lower()
+
+#     if "application/pdf" in content_type:
+#         pdf_bytes = resp.content
+
+#     elif "application/json" in content_type:
+#         data = resp.json()
+#         pdf_bytes = base64.b64decode(data["data"]["fileContent"])
+
+#     else:
+#         frappe.throw(f"Unexpected Leegality response: {content_type}")
+
+#     # -----------------------------
+#     # 2️⃣ Normalize PDF (important)
+#     # -----------------------------
+#     reader = PdfReader(BytesIO(pdf_bytes))
+#     writer = PdfWriter()
+
+#     for page in reader.pages:
+#         writer.add_page(page)
+
+#     final_pdf = BytesIO()
+#     writer.write(final_pdf)
+#     final_pdf.seek(0)
+
+#     # -----------------------------
+#     # 3️⃣ SAVE FILE (ERPNext)
+#     # -----------------------------
+#     file_doc = frappe.get_doc({
+#         "doctype": "File",
+#         "file_name": f"{slip.name}_Signed.pdf",
+#         "attached_to_doctype": "Salary Slip",
+#         "attached_to_name": slip.name,
+#         "is_private": 1,
+#         "content": final_pdf.getvalue()
+#     })
+
+#     file_doc.save(ignore_permissions=True)
+
+#     # 🔥 THIS IS THE MISSING PIECE
+#     frappe.db.commit()
+
+#     # -----------------------------
+#     # 4️⃣ Stream to browser
+#     # -----------------------------
+#     frappe.local.response.filename = file_doc.file_name
+#     frappe.local.response.filecontent = final_pdf.getvalue()
+#     frappe.local.response.type = "pdf"

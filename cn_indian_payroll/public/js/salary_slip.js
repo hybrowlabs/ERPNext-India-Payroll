@@ -20,6 +20,19 @@ frappe.ui.form.on("Salary Slip", {
         }
 
 
+        if (frm.doc.custom_e_sign_status === "Send") {
+
+                   frm.add_custom_button("⬇️ View Signed PDF", () => {
+
+                        const url =
+                            "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip"
+                            + "?salary_slip=" + encodeURIComponent(frm.doc.name);
+
+                        window.open(url, "_blank");
+                    });
+                }
+
+
 
 
 
