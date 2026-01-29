@@ -222,3 +222,35 @@ def view_signed_payslip(salary_slip):
 #     frappe.local.response.filename = file_doc.file_name
 #     frappe.local.response.filecontent = final_pdf.getvalue()
 #     frappe.local.response.type = "pdf"
+
+
+
+import requests
+
+@frappe.whitelist()
+def get_supplier_by_tax_id():
+    """
+    Fetch ALL Suppliers from another ERPNext (no filters)
+    """
+
+    url = "https://dev.pwhr.in/api/resource/Supplier"
+
+    headers = {
+        "Authorization": "token 4d0f9631f8700fb:fc75b3184a35f74",
+        "Accept": "application/json"
+    }
+
+    # OPTIONAL: limit fields / rows
+    params = {
+        "limit_page_length": 20
+        # "fields": '["name","supplier_name","tax_id"]'
+    }
+
+    resp = requests.get(url, headers=headers, params=params, timeout=20)
+
+    if resp.status_code != 200:
+        frappe.throw(f"Supplier API failed: {resp.text}")
+
+    data = resp.json().get("data", [])
+
+    return data

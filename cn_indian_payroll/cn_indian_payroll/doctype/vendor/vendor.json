@@ -16,6 +16,7 @@
   "trade_name",
   "pan",
   "gst_number",
+  "test",
   "section_break_ebwh",
   "business_segment",
   "locationbranch",
@@ -114,12 +115,17 @@
    "fieldname": "payment_terms_template",
    "fieldtype": "Data",
    "label": "Payment Terms Template"
+  },
+  {
+   "fieldname": "test",
+   "fieldtype": "Select",
+   "label": "TEST"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-21 14:05:15.653725",
+ "modified": "2026-01-29 10:00:35.267027",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Vendor",

@@ -38,6 +38,9 @@ from dateutil.relativedelta import relativedelta
 from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 
+import frappe
+import requests
+import json
 
 class CustomSalarySlip(SalarySlip):
     def on_submit(self):
@@ -81,6 +84,66 @@ class CustomSalarySlip(SalarySlip):
         #         if earning.is_tax_applicable == 1:
         #             total_ctc_taxable_amount += earning.default_amount
         # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+
+
+        # payroll_setting = frappe.get_single("Payroll Settings")
+
+        # if not payroll_setting.custom_hide_salary_structure_configuration or not self.employee:
+        #     return
+
+        # employee = frappe.get_doc("Employee", self.employee)
+        # supplier_id = employee.custom_trade_name
+
+        # if not supplier_id:
+        #     return
+
+        # for row in payroll_setting.custom_hide_salary_structure_configuration:
+        #     if employee.employment_type != row.employment_type:
+        #         continue
+
+        #     headers = {
+        #         "Authorization": "token 4d0f9631f8700fb:fc75b3184a35f74",
+        #         "Accept": "application/json"
+        #     }
+
+        #     # 1️⃣ Get Bank Account name
+        #     list_url = "https://dev.pwhr.in/api/resource/Bank Account"
+        #     params = {
+        #         "filters": json.dumps([
+        #             ["party_type", "=", "Supplier"],
+        #             ["party", "=", supplier_id]
+        #         ]),
+        #         "fields": json.dumps(["name"])
+        #     }
+
+        #     resp = requests.get(list_url, headers=headers, params=params, timeout=20)
+
+        #     if resp.status_code != 200:
+        #         frappe.throw(resp.text)
+
+        #     data = resp.json().get("data", [])
+        #     if not data:
+        #         return
+
+        #     # 2️⃣ Get full Bank Account doc
+        #     bank_name = data[0]["name"]
+        #     detail_url = f"{list_url}/{bank_name}"
+
+        #     detail_resp = requests.get(detail_url, headers=headers, timeout=20)
+        #     if detail_resp.status_code != 200:
+        #         frappe.throw(detail_resp.text)
+
+        #     bank = detail_resp.json()["data"]
+
+        #     frappe.msgprint(str(bank))
+
+        #     # ✅ FIX HERE
+        #     self.custom_bank_details = bank.get("name")
+
+        #     break
+
+
+
 
 
 
