@@ -166,6 +166,7 @@ def validate_days(self):
 
 
 def insert_breakup_table(self):
+
     if self.salary_slip :
         salary_slip = frappe.get_doc("Salary Slip", self.salary_slip)
         if not salary_slip:

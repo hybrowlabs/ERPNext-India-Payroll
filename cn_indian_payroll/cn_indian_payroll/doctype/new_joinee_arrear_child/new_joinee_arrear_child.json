@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
+  "employee_name",
   "working_days",
   "arrear_days",
   "date_of_joining",
@@ -57,13 +58,19 @@
    "fieldtype": "Link",
    "label": "New Joining Arrear ID",
    "options": "New Joining Arrear"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-16 11:27:04.852573",
+ "modified": "2026-02-01 21:28:56.532149",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "New Joinee Arrear Child",

@@ -783,10 +783,14 @@ class CustomSalarySlip(SalarySlip):
             attendance_end_date = end_date.replace(day=attendance_end_day)
             attendance_start_date = (attendance_end_date - relativedelta(months=1)).replace(day=attendance_start_day)
 
+
             leave_type_map = self.get_leave_type_map()
             attendance_details = self.get_employee_attendance(
                 start_date=attendance_start_date, end_date=attendance_end_date
             )
+
+            # frappe.msgprint(str(attendance_details))
+
 
 
 
@@ -822,6 +826,7 @@ class CustomSalarySlip(SalarySlip):
 
                 elif d.status == "Absent":
                     absent += 1
+
 
         return lwp, absent
 

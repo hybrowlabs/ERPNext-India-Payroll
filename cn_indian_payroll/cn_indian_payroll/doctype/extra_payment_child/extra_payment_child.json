@@ -10,6 +10,7 @@
   "employee_name",
   "salary_component",
   "amount",
+  "payout_date",
   "is_recurring",
   "from_date",
   "to_date",
@@ -66,13 +67,18 @@
    "fieldname": "clockback_date",
    "fieldtype": "Date",
    "label": "ClockBack Date"
+  },
+  {
+   "fieldname": "payout_date",
+   "fieldtype": "Date",
+   "label": "Payout Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-19 12:50:20.585009",
+ "modified": "2026-02-01 17:14:02.961948",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Extra Payment Child",

@@ -2,17 +2,182 @@ frappe.ui.form.on('Payroll Entry', {
     refresh(frm) {
 
 
+        frm.fields_dict.custom_download_new_joinee_arrear.wrapper.innerHTML =
+            new_joinee_buttons_html();
+
+            window.download_new_joinee_data = function () {
+
+            if (!frm.doc.custom_new_joinee_arrear_child ||
+                !frm.doc.custom_new_joinee_arrear_child.length) {
+                frappe.msgprint("No New Joinee data to download");
+                return;
+            }
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_new_joinee_excel",
+                args: {
+                    docname: frm.doc.name
+                },
+                freeze: true,
+                callback: function (r) {
+                    if (r.message) {
+                        window.open(r.message);
+                    }
+                }
+            });
+        };
+
+
+
+
+
+
+        frm.fields_dict.custom_download_attendance_data.wrapper.innerHTML =
+            get_attendance_action_buttons_html();
+
+        // expose function globally (important)
+        window.download_attendance_data = function () {
+
+            if (!frm.doc.custom_employee_attendance_details_list ||
+                !frm.doc.custom_employee_attendance_details_list.length) {
+                frappe.msgprint("No attendance data to download");
+                return;
+            }
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_attendance_excel",
+                args: {
+                    docname: frm.doc.name
+                },
+                freeze: true,
+                callback: function (r) {
+                    if (r.message) {
+                        window.open(r.message);
+                    }
+                }
+            });
+        };
+
+
+
+
+        frm.fields_dict.custom_process_regularize_data.wrapper.innerHTML =
+        get_action_buttons_html_attendance_regularise();
+
+
+        $(document).on("click", "#download-attendance", function () {
+            const frm = cur_frm;
+            if (!frm || frm.is_new()) return;
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_attendance_regularise_excel",
+                args: {
+                    docname: frm.doc.name
+                },
+                freeze: true,
+                callback(r) {
+                    if (r.message) {
+                        window.open(r.message);
+                    }
+                }
+            });
+        });
+
+
+        $(document).on("click", "#process-attendance", function () {
+    const frm = cur_frm;
+    if (!frm || frm.is_new()) return;
+
+    frappe.confirm(
+        "Are you sure you want to process attendance data?",
+        () => {
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_attendance_regularization",
+                args: {
+                    payroll_entry: frm.doc.name
+                },
+                freeze: true,
+                callback(r) {
+                    if (r.message) {
+                        frappe.msgprint(`
+                            ✅ Processed: ${r.message.processed || 0}<br>
+                            ⚠ Errors: ${r.message.errors?.length ? r.message.errors.join("<br>") : "None"}
+                        `);
+                        frm.reload_doc();
+                    }
+                }
+            });
+        }
+    );
+});
+
+
+
+
+//------------------------------------------------------------------------------------------------------
+
+
+        frm.fields_dict.custom_create_extra_payment.wrapper.innerHTML =
+            custom_create_extra_payment();
+
+
+            window.create_extrapayment = function () {
+
+            if (!frm.doc.custom_additional_extra_payments_details ||
+                !frm.doc.custom_additional_extra_payments_details.length) {
+                frappe.msgprint("No Extrapayment data to Create");
+                return;
+            }
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.create_extra_payment",
+                args: {
+                    docname: frm.doc.name
+                },
+                freeze: true,
+                callback(r) {
+                    if (r.message) {
+                        frappe.msgprint({
+                            title: "Additional Salary Creation",
+                            message: `
+                                ✅ Created: ${r.message.created}<br>
+                                ⏭ Skipped (already exists): ${r.message.skipped}
+                            `,
+                            indicator: "green"
+                        });
+                    }
+                }
+            });
+
+        };
+
+
+
+//----------------------------------------------------------------------------------------
+
+
+
+
+
         if (frm.is_new()) {
             frm.fields_dict.custom_attach_options.wrapper.innerHTML = "";
             return;
         }
 
-        // Render buttons HTML
+
+
         frm.fields_dict.custom_attach_options.wrapper.innerHTML =
             get_action_buttons_html();
 
-        // Bind click events
         bind_action_buttons(frm);
+
+        // ✅ Restore attached file UI after refresh
+        render_attach_button(frm);
+
+
+
+
+
 
 
 
@@ -181,50 +346,53 @@ frappe.ui.form.on('Payroll Entry', {
     },
 
 
-    custom_download_template(frm) {
-        console.log("Downloading Template");
-        frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_additional_salary_template",
-            callback(r) {
-                if (r.message) {
-                    window.open(r.message);
-                }
-            }
-        });
-    },
+    // custom_download_template(frm) {
+    //     console.log("Downloading Template");
+    //     frappe.call({
+    //         method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_additional_salary_template",
+    //         callback(r) {
+    //             if (r.message) {
+    //                 window.open(r.message);
+    //             }
+    //         }
+    //     });
+    // },
 
-    custom_process(frm) {
-    frappe.call({
-        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_uploaded_excel",
-        args: {
-            payroll_entry: frm.doc.name
-        },
-        callback(r) {
-            if (r.message) {
-                frappe.msgprint(
-                    `Created: ${r.message.success}<br>Errors: ${r.message.errors.length}`
-                );
-            }
-        }
-    });
-},
+//     custom_process(frm) {
+//     frappe.call({
+//         method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_uploaded_excel",
+//         args: {
+//             payroll_entry: frm.doc.name
+//         },
+//         callback(r) {
+//             if (r.message) {
+//                 frappe.msgprint(
+//                     `Created: ${r.message.success}<br>Errors: ${r.message.errors.length}`
+//                 );
+//             }
+//         }
+//     });
+// },
 
-custom_process_regularize(frm){
-    console.log("Processing Attendance Regularization");
-    frappe.call({
-        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_attendance_regularization",
-        args: {
-            payroll_entry: frm.doc.name
-        },
-        callback(r) {
-            if (r.message) {
-                frappe.msgprint(
-                    `Processed Attendance Regularization `
-                );
-            }
-        }
-    });
-}
+
+
+
+// custom_process_regularize(frm){
+//     console.log("Processing Attendance Regularization");
+//     frappe.call({
+//         method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_attendance_regularization",
+//         args: {
+//             payroll_entry: frm.doc.name
+//         },
+//         callback(r) {
+//             if (r.message) {
+//                 frappe.msgprint(
+//                     `Processed Attendance Regularization `
+//                 );
+//             }
+//         }
+//     });
+// }
 
 
 });
@@ -246,6 +414,26 @@ function get_action_buttons_html() {
         </div>
     `;
 }
+
+function get_action_buttons_html_attendance_regularise() {
+    return `
+        <div style="
+            display: flex;
+            gap: 14px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        ">
+            ${make_action_btn("📥", "Download Data", "download-attendance", "#2563eb")}
+            ${make_action_btn("⬆️", "Process Data", "process-attendance", "#16a34a")}
+        </div>
+    `;
+}
+
+
+
+
+
+
 function make_action_btn(icon, label, id, color) {
     return `
         <button id="${id}"
@@ -264,11 +452,12 @@ function make_action_btn(icon, label, id, color) {
                 cursor: pointer;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             ">
-            <span style="font-size: 18px;">${icon}</span>
+            <span style="font-size:18px;">${icon}</span>
             <span class="btn-label">${label}</span>
         </button>
     `;
 }
+
 
 function bind_action_buttons(frm) {
 
@@ -284,89 +473,247 @@ function bind_action_buttons(frm) {
 
     // UPLOAD DATA
     $("#upload-data").off("click").on("click", function () {
-        frappe.msgprint({
-            title: "Upload Data",
-            message: "Excel upload & processing logic will be added here.",
-            indicator: "blue"
-        });
+        upload_excel_data(frm);
     });
 }
 
 
-/* ---------------------------------------------
-   File Attach Dialog with URL & Clear
-----------------------------------------------*/
 function open_file_uploader(frm) {
 
     new frappe.ui.FileUploader({
         doctype: frm.doctype,
         docname: frm.docname,
         allow_multiple: false,
+
         on_success(file) {
-            // Update button with file name and clear option
-            const btn = $("#attach-template");
-            btn.html(`
-                <span style="font-size:18px;">📎</span>
-                <span class="btn-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">${file.file_name}</span>
-                <span id="clear-attach" style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
-            `);
+            frm.set_value("custom_upload_file", file.file_url)
+                .then(() => {
+                    frm.save();
+                    render_attach_button(frm);
 
-            // Clear file logic
-            $("#clear-attach").off("click").on("click", function (e) {
-                e.stopPropagation();
-                // Reset button to original state
-                btn.html(make_action_btn("📎", "Attach Template", "attach-template", "#7c3aed"));
-                bind_action_buttons(frm); // Rebind the click
-            });
-
-            frappe.msgprint({
-                title: "File Attached",
-                message: `File <b>${file.file_name}</b> attached successfully.`,
-                indicator: "green"
-            });
+                    frappe.msgprint({
+                        title: "File Attached",
+                        message: `File <b>${file.file_name}</b> attached successfully.`,
+                        indicator: "green"
+                    });
+                });
         }
     });
 }
 
 
-/* ---------------------------------------------
-   Download Excel Template
-----------------------------------------------*/
-function download_excel_template() {
 
-    // Dummy CSV content (Excel compatible)
-    let csvContent =
-        "Employee,Month,Working Days,LOP Days,Remarks\n" +
-        "EMP-001,April-2025,30,1,Sample\n" +
-        "EMP-002,April-2025,30,0,Sample\n";
+// function render_attach_button(frm) {
+//     const btn = $("#attach-template");
 
-    let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    let url = URL.createObjectURL(blob);
+//     if (frm.doc.custom_upload_file) {
+//         const file_name = frm.doc.custom_upload_file.split("/").pop();
 
-    let link = document.createElement("a");
-    link.href = url;
-    link.download = "Payroll_Attendance_Template.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+//         btn.html(`
+//             <span style="font-size:18px;">📎</span>
+//             <span class="btn-label"
+//                   style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
+//                   ${file_name}
+//             </span>
+//             <span id="clear-attach"
+//                   style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
+//         `);
+
+//         // clear handler
+//         $("#clear-attach").off("click").on("click", function (e) {
+//             e.stopPropagation();
+
+//             frm.set_value("custom_upload_file", null).then(() => {
+//                 frm.save();
+//             });
+
+//             btn.html(make_action_btn(
+//                 "📎",
+//                 "Attach Template",
+//                 "attach-template",
+//                 "#7c3aed"
+//             ));
+
+//             bind_action_buttons(frm);
+//         });
+
+//     } else {
+//         btn.html(make_action_btn(
+//             "📎",
+//             "Attach Template",
+//             "attach-template",
+//             "#7c3aed"
+//         ));
+//     }
+// }
+
+
+
+
+
+// function render_attach_button_deduction(frm) {
+//     const btn = $("#attach-template-deduction");
+
+//     if (frm.doc.custom_upload_deduction_file) {
+//         const file_name = frm.doc.custom_upload_deduction_file.split("/").pop();
+
+//         btn.html(`
+//             <span style="font-size:18px;">📎</span>
+//             <span class="btn-label"
+//                   style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
+//                   ${file_name}
+//             </span>
+//             <span id="clear-attach-deduction"
+//                   style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
+//         `);
+
+//         // clear handler
+//         $("#clear-attach-deduction").off("click").on("click", function (e) {
+//             e.stopPropagation();
+
+//             frm.set_value("custom_upload_deduction_file", null).then(() => {
+//                 frm.save();
+//             });
+
+//             btn.html(make_action_btn(
+//                 "📎",
+//                 "Attach Template",
+//                 "attach-template-deduction",
+//                 "#7c3aed"
+//             ));
+
+//             bind_action_buttons(frm);
+//         });
+
+//     } else {
+//         btn.html(make_action_btn(
+//             "📎",
+//             "Attach Template",
+//             "attach-template-deduction",
+//             "#7c3aed"
+//         ));
+//     }
+// }
+
+
+
+
+function render_attach_button(frm) {
+    const btn = $("#attach-template");
+
+    if (frm.doc.custom_upload_file) {
+        const file_name = frm.doc.custom_upload_file.split("/").pop();
+
+        btn.html(`
+            <span style="font-size:18px;">📎</span>
+            <span class="btn-label"
+                  style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
+                ${file_name}
+            </span>
+            <span class="clear-attach-main"
+                  style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
+        `);
+
+    } else {
+        btn.html(make_action_btn(
+            "📎",
+            "Attach Template",
+            "attach-template",
+            "#7c3aed"
+        ));
+    }
 }
 
 
-/* ---------------------------------------------
-   File Attach Dialog
-----------------------------------------------*/
-// function open_file_uploader(frm) {
 
-//     new frappe.ui.FileUploader({
-//         doctype: frm.doctype,
-//         docname: frm.docname,
-//         allow_multiple: false,
-//         on_success(file) {
-//             frappe.msgprint({
-//                 title: "File Attached",
-//                 message: `File <b>${file.file_name}</b> attached successfully.`,
-//                 indicator: "green"
-//             });
-//         }
-//     });
-// }
+
+function download_excel_template() {
+    window.open(
+        "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_extrapayment_template"
+    );
+}
+
+
+function new_joinee_buttons_html() {
+    return `
+        <div style="display:flex; gap:12px; margin-top:10px;">
+            <button
+                onclick="download_new_joinee_data()"
+                style="
+                    background-color:#16a34a;
+                    color:white;
+                    border:none;
+                    padding:6px 12px;
+                    border-radius:6px;
+                    cursor:pointer;
+                ">
+                ⬇️ Download New Joinee Data
+            </button>
+        </div>
+    `;
+}
+
+
+
+function get_attendance_action_buttons_html() {
+    return `
+        <div style="display:flex; gap:12px; margin-top:10px;">
+            <button
+                onclick="download_attendance_data()"
+                style="
+                    background-color:#16a34a;
+                    color:white;
+                    border:none;
+                    padding:6px 12px;
+                    border-radius:6px;
+                    cursor:pointer;
+                ">
+                ⬇️ Download Attendance Data
+            </button>
+        </div>
+    `;
+}
+
+function custom_create_extra_payment() {
+    return `
+        <div style="display:flex; gap:12px; margin-top:10px;">
+            <button
+                onclick="create_extrapayment()"
+                style="
+                    background-color:#16a34a;
+                    color:white;
+                    border:none;
+                    padding:6px 12px;
+                    border-radius:6px;
+                    cursor:pointer;
+                ">
+                ⬇️ Create ExtraPayment/Extra Deduction Data
+            </button>
+        </div>
+    `;
+}
+
+
+
+function upload_excel_data(frm) {
+    if (!frm.doc.custom_upload_file) {
+        frappe.msgprint("Please attach a file first");
+        return;
+    }
+
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_uploaded_excel",
+        args: {
+            payroll_entry: frm.doc.name
+        },
+        callback(r) {
+            if (r.message) {
+                frappe.msgprint(`
+                    ✅ Rows added: ${r.message.success}<br>
+                    ⚠ Errors: ${r.message.errors.length ? r.message.errors.join("<br>") : "None"}
+                `);
+                frm.reload_doc();
+            }
+        }
+    });
+}

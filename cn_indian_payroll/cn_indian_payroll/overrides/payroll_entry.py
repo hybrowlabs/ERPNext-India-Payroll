@@ -5,6 +5,9 @@ import frappe
 from frappe import _
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry
 # from datetime import datetime
+import datetime
+from frappe.utils import getdate, add_months
+
 
 class PayrollEntryOverride(PayrollEntry):
 
@@ -205,18 +208,114 @@ class PayrollEntryOverride(PayrollEntry):
         if valid_employees:
 
 
-            # for employee in valid_employees:
-            #     attendance=frappe.get_all("Attendance",filters={"employee":employee["employee"],
-            #     "company":self.company,"attenadance_date": ["between", [self.start_date, self.end_date]],
-            #     "docstatus":1},
-            #     fields=["name","status","attendance_date"])
-            #     if attendance:
+            self.set("custom_employee_attendance_details_list", [])
+
+
+            payroll_setting = frappe.get_doc("Payroll Settings")
+
+            start_date = getdate(self.start_date)   # 2026-01-01
+            end_date = getdate(self.end_date)       # 2026-01-31
+
+            total_days = (end_date - start_date).days + 1
+
+            attendance_start_day = int(payroll_setting.custom_attendance_start_date)  # 21
+            attendance_end_day = int(payroll_setting.custom_attendance_end_date)      # 20
+
+
+            attendance_start_date = datetime.date(
+                start_date.year,
+                start_date.month,
+                attendance_start_day
+            )
+            attendance_start_date = add_months(attendance_start_date, -1)
+
+
+            attendance_end_date = datetime.date(
+                end_date.year,
+                end_date.month,
+                attendance_end_day
+            )
+
+            self.custom_attendance_from_date=attendance_start_date
+            self.custom_attendance_to_date=attendance_end_date
+
+            for emp in valid_employees:
+
+                present_days = 0
+                absent_days = 0
+                lwp_days = 0
+                half_days = 0
+                on_leave=0
+
+                attendance_records = frappe.get_all(
+                    "Attendance",
+                    filters={
+                        "employee": emp["employee"],
+                        "company": self.company,
+                        "attendance_date": ["between", [attendance_start_date, attendance_end_date]],
+                        "docstatus": 1
+                    },
+                    fields=["status", "leave_type"]
+                )
+
+                for att in attendance_records:
+                    status = att.status
+                    leave_type = att.leave_type
+
+                    if status == "Present":
+                        present_days += 1
+
+                    elif status == "Absent":
+                        absent_days += 1
+
+                    elif status == "Half Day":
+                        half_days += 0.5
+                        if leave_type:
+                            leave = frappe.get_doc("Leave Type", leave_type)
+                            if leave.is_lwp:
+                                lwp_days += 0.5
+
+                    elif status == "On Leave" and leave_type:
+                        leave = frappe.get_doc("Leave Type", leave_type)
+                        if leave.is_lwp:
+                            lwp_days += 1
+                        else:
+                            on_leave += 1
+
+                    elif status == "Work From Home":
+                        present_days += 1
+
+
+
+
+
+
+                self.append("custom_employee_attendance_details_list", {
+                "employee": emp["employee"],
+                "working_days":total_days,
+                "attendance_from_date": attendance_start_date,
+                "attendance_to_date": attendance_end_date,
+                "present_days": present_days,
+                "absent_days": absent_days,
+                "lwp_days": lwp_days,
+                "half_days": half_days,
+                "on_leave":on_leave,
+                "total_lwf_days":lwp_days + absent_days,
+                "payment_days":total_days-(lwp_days + absent_days)
+                })
+
 
 
 
 
 
             employee_list = [e["employee"] for e in valid_employees]
+
+
+
+
+
+
             self.set("custom_attendance_regularize_child", [])
             self.set("custom_new_joinee_arrear_child", [])
 
