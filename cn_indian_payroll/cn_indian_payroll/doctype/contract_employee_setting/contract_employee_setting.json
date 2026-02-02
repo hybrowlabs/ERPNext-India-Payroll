@@ -6,15 +6,18 @@
  "engine": "InnoDB",
  "field_order": [
   "table_peep",
+  "section_break_evwm",
+  "map_the_department",
+  "section_break_vnqu",
+  "map_the_work_location",
+  "section_break_byjy",
+  "map_the_company",
   "section_break_mrud",
-  "company",
   "business_segment",
-  "branch",
   "item_tax_template",
   "column_break_omev",
   "workflow_policy",
   "business_category",
-  "department",
   "payment_terms_template"
  ],
  "fields": [
@@ -26,11 +29,6 @@
   {
    "fieldname": "section_break_mrud",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Select",
-   "label": "Company"
   },
   {
    "fieldname": "column_break_omev",
@@ -52,16 +50,6 @@
    "label": "Business Category"
   },
   {
-   "fieldname": "branch",
-   "fieldtype": "Select",
-   "label": "Branch"
-  },
-  {
-   "fieldname": "department",
-   "fieldtype": "Select",
-   "label": "Department"
-  },
-  {
    "fieldname": "item_tax_template",
    "fieldtype": "Select",
    "label": "Item Tax Template"
@@ -70,13 +58,43 @@
    "fieldname": "payment_terms_template",
    "fieldtype": "Select",
    "label": "Payment Terms Template"
+  },
+  {
+   "fieldname": "section_break_evwm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_the_department",
+   "fieldtype": "Table",
+   "label": "Map The Department",
+   "options": "Department Map"
+  },
+  {
+   "fieldname": "section_break_vnqu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_the_work_location",
+   "fieldtype": "Table",
+   "label": "Map The Work Location",
+   "options": "Work Location Map"
+  },
+  {
+   "fieldname": "section_break_byjy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_the_company",
+   "fieldtype": "Table",
+   "label": "Map The Company",
+   "options": "Company Map"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-30 10:52:21.496399",
+ "modified": "2026-02-02 09:49:04.381276",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Contract Employee Setting",
