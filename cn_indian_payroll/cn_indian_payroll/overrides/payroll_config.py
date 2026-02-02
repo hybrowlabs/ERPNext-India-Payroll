@@ -285,6 +285,36 @@ def download_extrapayment_template():
 
 
 
+@frappe.whitelist()
+def download_offcycle_template():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Extra Payments"
+
+    headers = [
+        "employee",
+        "employee_name",
+        "salary_component",
+        "amount",
+        "payout_date",
+        "is_recurring",
+        "from_date",
+        "to_date",
+        "clockback_date",
+        "is_tax_auto_calculate",
+        "is_tax_manual_calculate",
+        "tds_value",
+    ]
+
+    ws.append(headers)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    frappe.local.response.filename = "Payroll_offcycle_Template.xlsx"
+    frappe.local.response.filecontent = output.read()
+    frappe.local.response.type = "binary"
 
 
 
@@ -363,6 +393,80 @@ def process_uploaded_excel(payroll_entry):
     }
 
 
+@frappe.whitelist()
+def process_uploaded_excel_offcycle(payroll_entry):
+    payroll_doc = frappe.get_doc("Payroll Entry", payroll_entry)
+
+    if not payroll_doc.custom_offcycle_attach:
+        frappe.throw("Please upload an Excel file")
+
+    file_doc = frappe.get_doc("File", {"file_url": payroll_doc.custom_offcycle_attach})
+
+    content = file_doc.get_content()
+    if isinstance(content, str):
+        content = content.encode()
+
+    wb = load_workbook(filename=BytesIO(content), data_only=True)
+    ws = wb.active
+
+    headers = [cell.value for cell in ws[1]]
+
+    required_headers = {
+        "employee",
+        "employee_name",
+        "salary_component",
+        "amount"
+    }
+
+    if not required_headers.issubset(set(headers)):
+        frappe.throw(
+            "Invalid template. Required columns: "
+            + ", ".join(required_headers)
+        )
+
+    # Clear existing rows (same as CSV version)
+    payroll_doc.set("custom_offcycle_data", [])
+
+    success = 0
+    errors = []
+
+    for idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        if not any(row):
+            continue
+
+        row_data = dict(zip(headers, row))
+
+        try:
+            payroll_doc.append(
+                "custom_offcycle_data",
+                {
+                    "employee": row_data.get("employee"),
+                    "employee_name": row_data.get("employee_name"),
+                    "salary_component": row_data.get("salary_component"),
+                    "amount": row_data.get("amount"),
+                    "payout_date": row_data.get("payout_date"),
+
+                    "is_recurring": int(row_data.get("is_recurring") or 0),
+                    "from_date": row_data.get("from_date"),
+                    "to_date": row_data.get("to_date"),
+                    "clockback_date": row_data.get("clockback_date"),
+                    "is_tax_auto_calculate":row_data.get("is_tax_auto_calculate"),
+                    "is_tax_manual_calculate":row_data.get("is_tax_manual_calculate"),
+                    "tds_value":row_data.get("tds_value")
+                }
+            )
+            success += 1
+        except Exception as e:
+            errors.append(f"Row {idx}: {str(e)}")
+
+    payroll_doc.save(ignore_permissions=True)
+
+    return {
+        "success": success,
+        "errors": errors
+    }
+
+
 
 
 
@@ -427,6 +531,79 @@ def create_extra_payment(docname):
         additional_salary.submit()
 
         # 4️⃣ Mark row as processed
+        row.payout_date = payroll_date
+
+        created += 1
+
+    payroll_entry.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "created": created,
+        "skipped": skipped
+    }
+
+
+
+
+@frappe.whitelist()
+def create_offcycle_payment(docname):
+    payroll_entry = frappe.get_doc("Payroll Entry", docname)
+
+    if not payroll_entry.custom_offcycle_data:
+        frappe.throw("No extra payment rows found")
+
+    created = 0
+    skipped = 0
+
+    for row in payroll_entry.custom_offcycle_data:
+
+        if not row.employee or not row.salary_component or not row.amount:
+            continue
+
+        payroll_date = row.payout_date or row.from_date
+
+
+        exists = frappe.db.exists(
+            "Additional Salary",
+            {
+                "employee": row.employee,
+                "salary_component": row.salary_component,
+                "payroll_date": payroll_date,
+                "docstatus": ["!=", 2],  # ignore cancelled
+            }
+        )
+
+        if exists:
+            skipped += 1
+
+            # mark as processed (optional but recommended)
+            if not row.payout_date:
+                row.payout_date = payroll_date
+
+            continue
+
+        additional_salary = frappe.new_doc("Additional Salary")
+        additional_salary.employee = row.employee
+        additional_salary.salary_component = row.salary_component
+        additional_salary.amount = row.amount
+
+        additional_salary.ref_doctype = "Payroll Entry"
+        additional_salary.ref_docname = payroll_entry.name
+
+        additional_salary.payroll_date = payroll_date
+        additional_salary.is_recurring = row.is_recurring or 0
+        additional_salary.from_date = row.from_date
+        additional_salary.to_date = row.to_date
+
+        additional_salary.deduct_full_tax_on_selected_payroll_date = row.is_tax_auto_calculate
+        additional_salary.custom_is_tax_manual_calculate = row.is_tax_manual_calculate
+        additional_salary.custom_tds_value = row.tds_value
+
+
+        additional_salary.insert(ignore_permissions=True)
+        additional_salary.submit()
+
         row.payout_date = payroll_date
 
         created += 1

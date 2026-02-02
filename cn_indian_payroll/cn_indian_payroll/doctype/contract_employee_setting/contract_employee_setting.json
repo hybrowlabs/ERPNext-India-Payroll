@@ -13,11 +13,12 @@
   "section_break_byjy",
   "map_the_company",
   "section_break_mrud",
+  "business_category",
   "business_segment",
-  "item_tax_template",
+  "tax_with_holding_category",
   "column_break_omev",
   "workflow_policy",
-  "business_category",
+  "item_tax_template",
   "payment_terms_template"
  ],
  "fields": [
@@ -88,13 +89,18 @@
    "fieldtype": "Table",
    "label": "Map The Company",
    "options": "Company Map"
+  },
+  {
+   "fieldname": "tax_with_holding_category",
+   "fieldtype": "Select",
+   "label": "Tax With Holding Category"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-02 09:49:04.381276",
+ "modified": "2026-02-02 13:01:11.681177",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Contract Employee Setting",

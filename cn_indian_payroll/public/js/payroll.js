@@ -117,6 +117,11 @@ frappe.ui.form.on('Payroll Entry', {
 //------------------------------------------------------------------------------------------------------
 
 
+if(frm.doc.custom_upload_file)
+{
+
+
+
         frm.fields_dict.custom_create_extra_payment.wrapper.innerHTML =
             custom_create_extra_payment();
 
@@ -151,9 +156,72 @@ frappe.ui.form.on('Payroll Entry', {
 
         };
 
+}
 
+else{
+    frm.fields_dict.custom_create_extra_payment.wrapper.innerHTML =""
+}
+
+//------------------------------------------------------------------------------------
+
+
+
+if(frm.doc.custom_offcycle_attach)
+{
+
+
+
+        frm.fields_dict.custom_create_offcycle_payment.wrapper.innerHTML =
+            custom_create_offcycle_payment();
+
+
+            window.create_offcyclepayment = function () {
+
+            if (!frm.doc.custom_offcycle_data ||
+                !frm.doc.custom_offcycle_data.length) {
+                frappe.msgprint("No Offcycle data to Create");
+                return;
+            }
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.create_offcycle_payment",
+                args: {
+                    docname: frm.doc.name
+                },
+                freeze: true,
+                callback(r) {
+                    if (r.message) {
+                        frappe.msgprint({
+                            title: "Additional Salary Creation",
+                            message: `
+                                ✅ Created: ${r.message.created}<br>
+                                ⏭ Skipped (already exists): ${r.message.skipped}
+                            `,
+                            indicator: "green"
+                        });
+                    }
+                }
+            });
+
+        };
+
+}
+
+else{
+    frm.fields_dict.custom_create_offcycle_payment.wrapper.innerHTML =""
+}
 
 //----------------------------------------------------------------------------------------
+
+
+
+            frm.fields_dict.custom_off_cycle_download.wrapper.innerHTML =
+            custom_offcycle_payment();
+            bind_offcycle_buttons(frm);
+
+            render_attach_button_offcycle(frm);
+
+
 
 
 
@@ -169,10 +237,10 @@ frappe.ui.form.on('Payroll Entry', {
         frm.fields_dict.custom_attach_options.wrapper.innerHTML =
             get_action_buttons_html();
 
-        bind_action_buttons(frm);
+            bind_action_buttons(frm);
 
-        // ✅ Restore attached file UI after refresh
-        render_attach_button(frm);
+
+            render_attach_button(frm);
 
 
 
@@ -415,6 +483,30 @@ function get_action_buttons_html() {
     `;
 }
 
+
+function custom_offcycle_payment() {
+    return `
+        <div style="
+            display: flex;
+            gap: 14px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        ">
+
+            ${make_action_btn("📥", "Download Template", "download-offcycle-template", "#2563eb")}
+
+            ${make_action_btn("📎", "Attach Template", "attach-offcycle-template", "#7c3aed")}
+
+            ${make_action_btn("⬆️", "Upload Data", "upload-offcycle-data", "#16a34a")}
+
+        </div>
+    `;
+}
+
+
+
+
+
 function get_action_buttons_html_attendance_regularise() {
     return `
         <div style="
@@ -478,6 +570,26 @@ function bind_action_buttons(frm) {
 }
 
 
+
+function bind_offcycle_buttons(frm) {
+
+    // DOWNLOAD TEMPLATE
+    $("#download-offcycle-template").off("click").on("click", function () {
+        download_excel_template_offcycle();
+    });
+
+    // ATTACH TEMPLATE
+    $("#attach-offcycle-template").off("click").on("click", function () {
+        open_file_uploader_offcycle(frm);
+    });
+
+    // UPLOAD DATA
+    $("#upload-offcycle-data").off("click").on("click", function () {
+        upload_excel_data_offcycle(frm);
+    });
+}
+
+
 function open_file_uploader(frm) {
 
     new frappe.ui.FileUploader({
@@ -501,99 +613,29 @@ function open_file_uploader(frm) {
     });
 }
 
+function open_file_uploader_offcycle(frm) {
 
+    new frappe.ui.FileUploader({
+        doctype: frm.doctype,
+        docname: frm.docname,
+        allow_multiple: false,
 
-// function render_attach_button(frm) {
-//     const btn = $("#attach-template");
+        on_success(file) {
+            frm.set_value("custom_offcycle_attach", file.file_url)
+                .then(() => {
+                    frm.save();
+                    render_attach_button_offcycle(frm);
 
-//     if (frm.doc.custom_upload_file) {
-//         const file_name = frm.doc.custom_upload_file.split("/").pop();
+                    frappe.msgprint({
+                        title: "File Attached",
+                        message: `File <b>${file.file_name}</b> attached successfully.`,
+                        indicator: "green"
+                    });
+                });
+        }
+    });
+}
 
-//         btn.html(`
-//             <span style="font-size:18px;">📎</span>
-//             <span class="btn-label"
-//                   style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
-//                   ${file_name}
-//             </span>
-//             <span id="clear-attach"
-//                   style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
-//         `);
-
-//         // clear handler
-//         $("#clear-attach").off("click").on("click", function (e) {
-//             e.stopPropagation();
-
-//             frm.set_value("custom_upload_file", null).then(() => {
-//                 frm.save();
-//             });
-
-//             btn.html(make_action_btn(
-//                 "📎",
-//                 "Attach Template",
-//                 "attach-template",
-//                 "#7c3aed"
-//             ));
-
-//             bind_action_buttons(frm);
-//         });
-
-//     } else {
-//         btn.html(make_action_btn(
-//             "📎",
-//             "Attach Template",
-//             "attach-template",
-//             "#7c3aed"
-//         ));
-//     }
-// }
-
-
-
-
-
-// function render_attach_button_deduction(frm) {
-//     const btn = $("#attach-template-deduction");
-
-//     if (frm.doc.custom_upload_deduction_file) {
-//         const file_name = frm.doc.custom_upload_deduction_file.split("/").pop();
-
-//         btn.html(`
-//             <span style="font-size:18px;">📎</span>
-//             <span class="btn-label"
-//                   style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
-//                   ${file_name}
-//             </span>
-//             <span id="clear-attach-deduction"
-//                   style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
-//         `);
-
-//         // clear handler
-//         $("#clear-attach-deduction").off("click").on("click", function (e) {
-//             e.stopPropagation();
-
-//             frm.set_value("custom_upload_deduction_file", null).then(() => {
-//                 frm.save();
-//             });
-
-//             btn.html(make_action_btn(
-//                 "📎",
-//                 "Attach Template",
-//                 "attach-template-deduction",
-//                 "#7c3aed"
-//             ));
-
-//             bind_action_buttons(frm);
-//         });
-
-//     } else {
-//         btn.html(make_action_btn(
-//             "📎",
-//             "Attach Template",
-//             "attach-template-deduction",
-//             "#7c3aed"
-//         ));
-//     }
-// }
 
 
 
@@ -626,10 +668,44 @@ function render_attach_button(frm) {
 
 
 
+function render_attach_button_offcycle(frm) {
+    const btn = $("#attach-offcycle-template");
+
+    if (frm.doc.custom_offcycle_attach) {
+        const file_name = frm.doc.custom_offcycle_attach.split("/").pop();
+
+        btn.html(`
+            <span style="font-size:18px;">📎</span>
+            <span class="btn-label"
+                  style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
+                ${file_name}
+            </span>
+            <span class="clear-attach-main"
+                  style="margin-left:8px; cursor:pointer; font-weight:bold;">❌</span>
+        `);
+
+    } else {
+        btn.html(make_action_btn(
+            "📎",
+            "Attach Template",
+            "attach-template",
+            "#7c3aed"
+        ));
+    }
+}
+
+
+
 
 function download_excel_template() {
     window.open(
         "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_extrapayment_template"
+    );
+}
+
+function download_excel_template_offcycle() {
+    window.open(
+        "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.download_offcycle_template"
     );
 }
 
@@ -693,6 +769,25 @@ function custom_create_extra_payment() {
     `;
 }
 
+function custom_create_offcycle_payment() {
+    return `
+        <div style="display:flex; gap:12px; margin-top:10px;">
+            <button
+                onclick="create_offcyclepayment()"
+                style="
+                    background-color:#16a34a;
+                    color:white;
+                    border:none;
+                    padding:6px 12px;
+                    border-radius:6px;
+                    cursor:pointer;
+                ">
+                ⬇️ Create Off Cycle Payment
+            </button>
+        </div>
+    `;
+}
+
 
 
 function upload_excel_data(frm) {
@@ -703,6 +798,30 @@ function upload_excel_data(frm) {
 
     frappe.call({
         method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_uploaded_excel",
+        args: {
+            payroll_entry: frm.doc.name
+        },
+        callback(r) {
+            if (r.message) {
+                frappe.msgprint(`
+                    ✅ Rows added: ${r.message.success}<br>
+                    ⚠ Errors: ${r.message.errors.length ? r.message.errors.join("<br>") : "None"}
+                `);
+                frm.reload_doc();
+            }
+        }
+    });
+}
+
+
+function upload_excel_data_offcycle(frm) {
+    if (!frm.doc.custom_offcycle_attach) {
+        frappe.msgprint("Please attach a file first");
+        return;
+    }
+
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_config.process_uploaded_excel_offcycle",
         args: {
             payroll_entry: frm.doc.name
         },
