@@ -4821,7 +4821,7 @@ def update_declaration_form(
         and not proof_id
     ):
 
-        # 🔑 MUST load declaration
+
         declaration = frappe.get_doc(
             "Employee Tax Exemption Declaration",
             declaration_id
@@ -4884,6 +4884,7 @@ def update_declaration_form(
                 "attach_proof": row.get("attach_proof"),
                 "custom_note": row.get("custom_note"),
             })
+
 
         proof_doc.insert()
         proof_doc.submit()
