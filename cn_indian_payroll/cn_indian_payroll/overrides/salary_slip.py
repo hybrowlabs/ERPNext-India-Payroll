@@ -35,7 +35,12 @@ from dateutil.relativedelta import relativedelta
 from frappe.utils import getdate
 from dateutil.relativedelta import relativedelta
 
+from calendar import monthrange
+from dateutil.relativedelta import relativedelta
 
+import frappe
+import requests
+import json
 
 class CustomSalarySlip(SalarySlip):
     def on_submit(self):
@@ -49,6 +54,7 @@ class CustomSalarySlip(SalarySlip):
 
 
     def before_save(self):
+
 
         self.actual_amount_ctc()
         self.update_declaration_component()
@@ -78,6 +84,66 @@ class CustomSalarySlip(SalarySlip):
         #         if earning.is_tax_applicable == 1:
         #             total_ctc_taxable_amount += earning.default_amount
         # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+
+
+        # payroll_setting = frappe.get_single("Payroll Settings")
+
+        # if not payroll_setting.custom_hide_salary_structure_configuration or not self.employee:
+        #     return
+
+        # employee = frappe.get_doc("Employee", self.employee)
+        # supplier_id = employee.custom_trade_name
+
+        # if not supplier_id:
+        #     return
+
+        # for row in payroll_setting.custom_hide_salary_structure_configuration:
+        #     if employee.employment_type != row.employment_type:
+        #         continue
+
+        #     headers = {
+        #         "Authorization": "token 4d0f9631f8700fb:fc75b3184a35f74",
+        #         "Accept": "application/json"
+        #     }
+
+        #     # 1️⃣ Get Bank Account name
+        #     list_url = "https://dev.pwhr.in/api/resource/Bank Account"
+        #     params = {
+        #         "filters": json.dumps([
+        #             ["party_type", "=", "Supplier"],
+        #             ["party", "=", supplier_id]
+        #         ]),
+        #         "fields": json.dumps(["name"])
+        #     }
+
+        #     resp = requests.get(list_url, headers=headers, params=params, timeout=20)
+
+        #     if resp.status_code != 200:
+        #         frappe.throw(resp.text)
+
+        #     data = resp.json().get("data", [])
+        #     if not data:
+        #         return
+
+        #     # 2️⃣ Get full Bank Account doc
+        #     bank_name = data[0]["name"]
+        #     detail_url = f"{list_url}/{bank_name}"
+
+        #     detail_resp = requests.get(detail_url, headers=headers, timeout=20)
+        #     if detail_resp.status_code != 200:
+        #         frappe.throw(detail_resp.text)
+
+        #     bank = detail_resp.json()["data"]
+
+        #     frappe.msgprint(str(bank))
+
+        #     # ✅ FIX HERE
+        #     self.custom_bank_details = bank.get("name")
+
+        #     break
+
+
+
 
 
 
@@ -187,28 +253,66 @@ class CustomSalarySlip(SalarySlip):
                 ),
             })
 
-        # ------------------------------------------------
-        # Append MONTH-WISE working days (21 → 20)
-        # Example:
-        # Mar-2025 | 21-02 → 20-03 | 31
-        # ------------------------------------------------
+        # # ------------------------------------------------
+        # # Append MONTH-WISE working days (21 → 20)
+        # # Example:
+        # # Mar-2025 | 21-02 → 20-03 | 31
+        # # ------------------------------------------------
+        # for i in range(regularize_months):
+
+        #     cycle_end_m = regularize_end_date - relativedelta(months=i)
+        #     cycle_end_m = cycle_end_m.replace(day=end_day)
+
+        #     cycle_start_m = (
+        #         cycle_end_m - relativedelta(months=1)
+        #     ).replace(day=start_day)
+
+        #     working_days = (cycle_end_m - cycle_start_m).days + 1
+
+        #     accrual_doc.append("attendance_log_working_days", {
+        #         "month_and_year": cycle_end_m.strftime("%b-%Y"),
+        #         "month": cycle_end_m.strftime("%B"),
+
+        #         "from_date": cycle_start_m,
+        #         "to_date": cycle_end_m,
+        #         "working_days": working_days
+        #     })
+
+
         for i in range(regularize_months):
 
             cycle_end_m = regularize_end_date - relativedelta(months=i)
-            cycle_end_m = cycle_end_m.replace(day=end_day)
 
-            cycle_start_m = (
-                cycle_end_m - relativedelta(months=1)
-            ).replace(day=start_day)
+            # Clamp end_day safely
+            last_day = monthrange(cycle_end_m.year, cycle_end_m.month)[1]
+            cycle_end_m = cycle_end_m.replace(day=min(end_day, last_day))
 
-            working_days = (cycle_end_m - cycle_start_m).days + 1
+            cycle_start_m = cycle_end_m - relativedelta(months=1)
+
+            prev_last_day = monthrange(cycle_start_m.year, cycle_start_m.month)[1]
+            cycle_start_m = cycle_start_m.replace(day=min(start_day, prev_last_day))
+
+            # ✅ Working days = calendar days of the MONTH
+            working_days = monthrange(
+                cycle_end_m.year, cycle_end_m.month
+            )[1]
+
+            month_start_date = cycle_end_m.replace(day=1)
+            month_end_date = cycle_end_m.replace(day=last_day)
+
+            salary_slip=frappe.get_list("Salary Slip",filters={"start_date":month_start_date,"end_date":month_end_date,"employee":self.employee},pluck="name")
 
             accrual_doc.append("attendance_log_working_days", {
-                "month": cycle_end_m.strftime("%b-%Y"),
+                "month_and_year": cycle_end_m.strftime("%b-%Y"),
+                "month": cycle_end_m.strftime("%B"),
                 "from_date": cycle_start_m,
                 "to_date": cycle_end_m,
-                "working_days": working_days
+                "working_days": working_days,
+                "month_start_date":month_start_date,
+                "month_end_date":month_end_date,
+                "salary_slip":salary_slip[0] if salary_slip else None
             })
+
 
         # ------------------------------------------------
         # Save & Submit
@@ -679,10 +783,14 @@ class CustomSalarySlip(SalarySlip):
             attendance_end_date = end_date.replace(day=attendance_end_day)
             attendance_start_date = (attendance_end_date - relativedelta(months=1)).replace(day=attendance_start_day)
 
+
             leave_type_map = self.get_leave_type_map()
             attendance_details = self.get_employee_attendance(
                 start_date=attendance_start_date, end_date=attendance_end_date
             )
+
+            # frappe.msgprint(str(attendance_details))
+
 
 
 
@@ -718,6 +826,7 @@ class CustomSalarySlip(SalarySlip):
 
                 elif d.status == "Absent":
                     absent += 1
+
 
         return lwp, absent
 

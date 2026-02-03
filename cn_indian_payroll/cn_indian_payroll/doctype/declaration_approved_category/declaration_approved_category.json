@@ -13,8 +13,16 @@
   "company",
   "date",
   "payroll_period",
-  "section_break_nnll",
-  "table_haww"
+  "section_break_fnzr",
+  "exemption_category",
+  "column_break_wdie",
+  "exemption_sub_category",
+  "column_break_kviq",
+  "max_amount",
+  "column_break_gfoc",
+  "declared_amount",
+  "column_break_hzhu",
+  "attach"
  ],
  "fields": [
   {
@@ -26,6 +34,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Employee Name"
@@ -50,15 +59,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_nnll",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "table_haww",
-   "fieldtype": "Table",
-   "options": "Employee Tax Exemption Declaration Category"
-  },
-  {
    "fieldname": "payroll_period",
    "fieldtype": "Link",
    "label": "Payroll Period",
@@ -69,12 +69,59 @@
    "fieldtype": "Link",
    "label": "Declaration ID",
    "options": "Employee Tax Exemption Declaration"
+  },
+  {
+   "fieldname": "section_break_fnzr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "exemption_category",
+   "fieldtype": "Link",
+   "label": "Exemption Category",
+   "options": "Employee Tax Exemption Category"
+  },
+  {
+   "fieldname": "column_break_wdie",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "exemption_sub_category",
+   "fieldtype": "Link",
+   "label": "Exemption Sub Category",
+   "options": "Employee Tax Exemption Sub Category"
+  },
+  {
+   "fieldname": "column_break_kviq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "max_amount",
+   "fieldtype": "Float",
+   "label": "Max Amount"
+  },
+  {
+   "fieldname": "column_break_gfoc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "declared_amount",
+   "fieldtype": "Float",
+   "label": "Declared Amount"
+  },
+  {
+   "fieldname": "column_break_hzhu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attach",
+   "fieldtype": "Attach",
+   "label": "attach"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-21 12:46:34.743287",
+ "modified": "2026-02-02 16:10:36.484383",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Declaration Approved Category",

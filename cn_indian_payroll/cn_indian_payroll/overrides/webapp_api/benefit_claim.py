@@ -1190,3 +1190,126 @@ def benefit_claim_locking_period_visibility(employee, payroll_period, posting_da
         "status": "failed",
         "message": "The claim submission window is currently closed.",
     }
+
+
+
+
+def _declaration_window_message(start_date, end_date, doctype):
+    return (
+        f"For this month, {doctype} can be submitted between "
+        f"{formatdate(start_date)} and {formatdate(end_date)}. "
+        f"Please submit your {doctype} before the end date."
+    )
+
+
+@frappe.whitelist()
+def declaration_locking_period_visibility(employee, payroll_period, posting_date, doctype):
+
+    if not (employee and payroll_period and posting_date and doctype):
+        return {
+            "status": "failed",
+            "message": "Missing required details to validate submission.",
+        }
+
+    posting_date = getdate(posting_date)
+
+    payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
+    period_start_date = getdate(payroll_period_doc.start_date)
+    company = payroll_period_doc.company
+
+    employee_doc = frappe.get_doc("Employee", employee)
+    date_of_joining = getdate(employee_doc.date_of_joining)
+
+    frequency_type = (
+        "New Joinee"
+        if date_of_joining and date_of_joining > period_start_date
+        else "Monthly"
+    )
+
+    release_configs = frappe.get_list(
+        "Release Config",
+        filters={
+            "company": company,
+            "payroll_period": payroll_period,
+            "frequency_type": frequency_type,
+        },
+        pluck="name",
+    )
+
+    if not release_configs:
+        return {
+            "status": "failed",
+            "message": f"No {doctype} restrictions configured for Current Release Config.",
+        }
+
+    config_doc = frappe.get_doc("Release Config", release_configs[0])
+
+    locking_periods = (
+        config_doc.locking_period_months_new_joining
+        if frequency_type == "New Joinee"
+        else config_doc.locking_period_months
+    )
+
+
+    if not config_doc.user_assignment:
+
+        for entry in config_doc.individual_benefit_claim_child or []:
+            if entry.employee == employee:
+                start = getdate(entry.start_date)
+                end = getdate(entry.end_date)
+
+                if entry.active and start <= posting_date <= end:
+                    return {
+                        "status": "success",
+                        "message": _declaration_window_message(start, end, doctype),
+                    }
+
+                return {
+                    "status": "failed",
+                    "message": _declaration_window_message(start, end, doctype),
+                }
+
+        # Common locking period
+        for period in locking_periods or []:
+            if period.enable:
+                start = getdate(period.start_date)
+                end = getdate(period.end_date)
+
+                if start <= posting_date <= end:
+                    return {
+                        "status": "success",
+                        "message": _declaration_window_message(start, end, doctype),
+                    }
+
+        return {
+            "status": "failed",
+            "message": f"The {doctype} submission window is currently closed.",
+        }
+
+    for period in locking_periods or []:
+        if period.enable:
+            start = getdate(period.start_date)
+            end = getdate(period.end_date)
+
+            if start <= posting_date <= end:
+                for assignment in config_doc.user_assignment:
+                    assignment_doc = frappe.get_doc(
+                        "Dynamic User Assignment",
+                        assignment.select_visibility_restriction,
+                    )
+                    for user in assignment_doc.assigned_users or []:
+                        if user.employee_id == employee:
+                            return {
+                                "status": "success",
+                                "message": _declaration_window_message(start, end, doctype),
+                            }
+
+                return {
+                    "status": "failed",
+                    "message": f"You are not authorized to submit {doctype} during this period.",
+                }
+
+    return {
+        "status": "failed",
+        "message": f"The {doctype} submission window is currently closed.",
+    }

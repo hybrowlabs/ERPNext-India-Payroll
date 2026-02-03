@@ -2,6 +2,128 @@ frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
 
 
+        frappe.call({
+            method: "frappe.client.get",
+            args: {
+                doctype: "Payroll Settings",
+                name: "Payroll Settings"
+            },
+            callback: function (res) {
+                if (!res.message) return;
+
+                let payroll_setting = res.message;
+                console.log("Payroll Settings:", payroll_setting);
+
+                if (payroll_setting.custom_hide_salary_structure_configuration) {
+                    $.each(
+                        payroll_setting.custom_hide_salary_structure_configuration,
+                        function (i, v) {
+
+                            // Check employment type
+                            if (
+                                v.employment_type &&
+                                v.employment_type.includes(frm.doc.custom_employment_type)
+                            ) {
+
+                                // Send for e-Sign button
+                                if (frm.doc.custom_e_sign_status === "Not Send") {
+                                    frm.add_custom_button("Send for e-Sign", () => {
+                                        frappe.call({
+                                            method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.send_salary_slip_for_esign",
+                                            args: {
+                                                salary_slip: frm.doc.name
+                                            },
+                                            freeze: true,
+                                            callback: function (r) {
+                                                if (!r.exc) {
+                                                    frappe.msgprint("Sent to Leegality successfully");
+                                                    frm.reload_doc();
+                                                }
+                                            }
+                                        });
+                                    });
+                                }
+
+                                // View signed PDF button
+                                if (frm.doc.custom_e_sign_status === "Send") {
+                                    frm.add_custom_button("⬇️ View Signed PDF", () => {
+                                        const url =
+                                            "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip"
+                                            + "?salary_slip=" + encodeURIComponent(frm.doc.name);
+
+                                        window.open(url, "_blank");
+                                    });
+                                }
+                            }
+                        }
+                    );
+                }
+            }
+        });
+
+
+
+
+        // if (frm.doc.custom_e_sign_status === "Not Send") {
+        //     frm.add_custom_button("Send for e-Sign", () => {
+        //         frappe.call({
+        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.send_salary_slip_for_esign",
+        //             args: { salary_slip: frm.doc.name },
+        //             freeze: true,
+        //             callback(r) {
+        //                 if (!r.exc) {
+        //                     frappe.msgprint("Sent to Leegality successfully");
+        //                     frm.reload_doc();
+        //                 }
+        //             }
+        //         });
+        //     });
+        // }
+
+
+        // if (frm.doc.custom_e_sign_status === "Send") {
+
+        //            frm.add_custom_button("⬇️ View Signed PDF", () => {
+
+        //                 const url =
+        //                     "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip"
+        //                     + "?salary_slip=" + encodeURIComponent(frm.doc.name);
+
+        //                 window.open(url, "_blank");
+        //             });
+        //         }
+
+
+
+
+
+
+
+        // if (frm.doc.docstatus === 1) {
+        //     frm.add_custom_button(
+        //         __("View Consultant Invoice"),
+        //         function () {
+        //             frappe.call({
+        //                 method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_slip_list.get_consultant_payslip_pdf",
+        //                 args: {
+        //                     slip_id: frm.doc.name,
+        //                 },
+        //                 callback: function (r) {
+        //                     if (r.message && r.message.html) {
+        //                         let win = window.open("", "_blank");
+        //                         win.document.write(r.message.html);
+        //                         win.document.close();
+        //                     } else {
+        //                         frappe.msgprint("No invoice data found");
+        //                     }
+        //                 },
+        //             });
+        //         },
+        //         __("Print")
+        //     );
+        // }
+
+
 
     //   frm.add_custom_button(__('View Payslip PDF'), function() {
     //     const slip_id = encodeURIComponent(frm.doc.name);

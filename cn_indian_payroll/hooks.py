@@ -251,6 +251,7 @@ doctype_list_js = {
     "Employee Bonus Accrual": "public/js/employee_bonus_accrual_list.js",
     "Employee Benefit Accrual": "public/js/employee_benefit_accrual_list.js",
     "Payroll Entry": "public/js/payroll_entry_list.js",
+    "Salary Slip": "public/js/salary_slip_list.js",
 }
 
 doctype_js = {

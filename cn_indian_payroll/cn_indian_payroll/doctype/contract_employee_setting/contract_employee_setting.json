@@ -1,0 +1,124 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-29 12:29:35.469637",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "table_peep",
+  "section_break_evwm",
+  "map_the_department",
+  "section_break_vnqu",
+  "map_the_work_location",
+  "section_break_byjy",
+  "map_the_company",
+  "section_break_mrud",
+  "business_category",
+  "business_segment",
+  "tax_with_holding_category",
+  "column_break_omev",
+  "workflow_policy",
+  "item_tax_template",
+  "payment_terms_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "table_peep",
+   "fieldtype": "Table",
+   "options": "Salary Component Config"
+  },
+  {
+   "fieldname": "section_break_mrud",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_omev",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workflow_policy",
+   "fieldtype": "Select",
+   "label": "Workflow Policy"
+  },
+  {
+   "fieldname": "business_segment",
+   "fieldtype": "Select",
+   "label": "Business Segment"
+  },
+  {
+   "fieldname": "business_category",
+   "fieldtype": "Select",
+   "label": "Business Category"
+  },
+  {
+   "fieldname": "item_tax_template",
+   "fieldtype": "Select",
+   "label": "Item Tax Template"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Select",
+   "label": "Payment Terms Template"
+  },
+  {
+   "fieldname": "section_break_evwm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_the_department",
+   "fieldtype": "Table",
+   "label": "Map The Department",
+   "options": "Department Map"
+  },
+  {
+   "fieldname": "section_break_vnqu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_the_work_location",
+   "fieldtype": "Table",
+   "label": "Map The Work Location",
+   "options": "Work Location Map"
+  },
+  {
+   "fieldname": "section_break_byjy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_the_company",
+   "fieldtype": "Table",
+   "label": "Map The Company",
+   "options": "Company Map"
+  },
+  {
+   "fieldname": "tax_with_holding_category",
+   "fieldtype": "Select",
+   "label": "Tax With Holding Category"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-02 13:01:11.681177",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Contract Employee Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
