@@ -6101,3 +6101,67 @@ def print_declaration_pdf(employee, payroll_period, company):
     return {
         "html": html
     }
+
+
+
+#http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_form12b_pdf?doctype=Employee%20Tax%20Exemption%20Declaration&docname=HR-TAX-DEC-2026-00001
+@frappe.whitelist(allow_guest=True)
+def get_form12b_pdf(doctype, docname):
+
+    try:
+        if not doctype or not docname:
+            return {
+                "html": "<p>Missing parameters.</p>"
+            }
+
+        # Allowed doctypes
+        allowed_doctypes = [
+            "Employee Tax Exemption Declaration",
+            "Employee Tax Exemption Proof Submission"
+        ]
+
+        if doctype not in allowed_doctypes:
+            return {
+                "html": "<p>Invalid Doctype.</p>"
+            }
+
+        # Get document
+        doc = frappe.get_doc(doctype, docname)
+
+        # Choose template based on doctype
+        if doctype == "Employee Tax Exemption Declaration":
+            template = "cn_indian_payroll/templates/includes/form12b_declaration.html"
+
+        elif doctype == "Employee Tax Exemption Proof Submission":
+            template = "cn_indian_payroll/templates/includes/form12b_proof.html"
+
+        # Render template
+        context = {
+            "doc": doc
+        }
+
+        html = frappe.render_template(template, context)
+
+        return {
+            "html": html
+        }
+
+    except frappe.DoesNotExistError:
+        return {
+            "html": "<p>Document not found.</p>"
+        }
+
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            "Form12B Print Error"
+        )
+
+        return {
+            "html": "<p>Error while generating print.</p>"
+        }
+
+    
+
+
+    
