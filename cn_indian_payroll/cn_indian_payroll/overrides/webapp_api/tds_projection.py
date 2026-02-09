@@ -579,7 +579,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "address_line1": declaration_doc.custom_address_title1 or "",
                 "address_line2": declaration_doc.custom_address_title2 or "",
                 "attach_reqd": 0,
-                "attach_proof": ""
+                "attach_proof": "",
+                "approval_needed":"No",
+                "attach_link": ""
             })
 
 
@@ -595,7 +597,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "exemption_category": d.exemption_category,
                 "exemption_sub_category": d.exemption_sub_category,
                 "amount": d.amount,
-                "max_amount": d.max_amount
+                "max_amount": d.max_amount,
+                "custom_attach": d.custom_attach
             })
 
         existing_map = {
@@ -638,11 +641,12 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 category_meta_map = {
                     d.name: {
                         "custom_select_type": d.custom_select_type,
-                        "max_amount": d.max_amount
+                        "max_amount": d.max_amount,
+                        "custom_80d_variable": d.custom_80d_variable
                     }
                     for d in frappe.get_all(
                         "Employee Tax Exemption Category",
-                        fields=["name", "custom_select_type", "max_amount"]
+                        fields=["name", "custom_select_type", "max_amount","custom_80d_variable"]
                     )
                 }
 
@@ -660,7 +664,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "custom_component_type",
                         "custom_description",
                         "custom_sequence",
-                        "custom_section_property"
+                        "custom_section_property",
+                        "custom_approval_needed"
                     ],
                     order_by="custom_sequence asc"
                 )
@@ -676,8 +681,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         category_grouped[category] = {
                             "category_name": category,
                             "custom_select_type": category_meta.get("custom_select_type"),
+                            "custom_80d_variable": category_meta.get("custom_80d_variable"),
                             "category_max_amount": category_meta.get("max_amount"),
                             "custom_section_property": row.custom_section_property,
+                            
                             "items": []
                         }
 
@@ -696,7 +703,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             else row.max_amount
                         ),
                         "attach_reqd": 0,
-                        "attach_proof": ""
+                        "attach_proof": "",
+                        "approval_needed": row.custom_approval_needed,
+                        "attach_link": declaration_row["custom_attach"] if declaration_row else ""
                     })
 
                 # ------------------ Group by Section Property (FIXED PART) ------------------
@@ -721,6 +730,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "category_name": category_name,
                         "custom_select_type": meta.get("custom_select_type"),
                         "max_amount": meta.get("max_amount"),
+                        "custom_80d_variable": meta.get("custom_80d_variable"),
                         "items": category_data["items"]
                     })
 
@@ -741,7 +751,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "custom_component_type",
                         "custom_description",
                         "custom_sequence",
-                        "custom_section_property"
+                        "custom_section_property",
+                        "custom_approval_needed"
                     ],
                     order_by="custom_sequence asc"
                 )
@@ -768,7 +779,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             else row.max_amount
                         ),
                         "attach_reqd": 0,
-                        "attach_proof": ""
+                        "attach_proof": "",
+                        "approval_needed":row.custom_approval_needed,
+                        "attach_link": declaration_row["custom_attach"] if declaration_row else ""
                     })
 
                 final_list = []
@@ -1370,11 +1383,12 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             category_meta_map = {
                 d.name: {
                     "custom_select_type": d.custom_select_type,
-                    "max_amount": d.max_amount
+                    "max_amount": d.max_amount,
+                    "custom_80d_variable": d.custom_80d_variable
                 }
                 for d in frappe.get_all(
                     "Employee Tax Exemption Category",
-                    fields=["name", "custom_select_type", "max_amount"]
+                    fields=["name", "custom_select_type", "max_amount","custom_80d_variable"]
                 )
             }
 
@@ -1392,7 +1406,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "custom_component_type",
                     "custom_description",
                     "custom_sequence",
-                    "custom_section_property"
+                    "custom_section_property",
+                    "custom_approval_needed"
                 ],
                 order_by="custom_sequence asc"
             )
@@ -1408,6 +1423,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     category_grouped[category] = {
                         "category_name": category,
                         "custom_select_type": category_meta.get("custom_select_type"),
+                        "custom_80d_variable": category_meta.get("custom_80d_variable"),
                         "category_max_amount": category_meta.get("max_amount"),
                         "custom_section_property": row.custom_section_property,
                         "items": []
@@ -1437,7 +1453,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "amount": round(amount),
                     "max_amount": round(max_amount),
                     "attach_reqd": 0,
-                    "attach_proof": ""
+                    "attach_proof": "",
+                    "approval_needed":row.custom_approval_needed,
+                    "attach_link": declaration_row["custom_attach"] if declaration_row else ""
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1461,6 +1479,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 section_grouped[section]["exemption_category"].append({
                     "category_name": category_name,
                     "custom_select_type": meta.get("custom_select_type"),
+                    "custom_80d_variable": meta.get("custom_80d_variable"),
                     "max_amount": meta.get("max_amount"),
                     "items": category_data["items"]
                 })
@@ -1482,7 +1501,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "custom_component_type",
                     "custom_description",
                     "custom_sequence",
-                    "custom_section_property"
+                    "custom_section_property",
+                    "custom_approval_needed"
                 ],
                 order_by="custom_sequence asc"
             )
@@ -1508,7 +1528,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         else row.max_amount
                     ),
                     "attach_reqd": 0,
-                    "attach_proof": ""
+                    "attach_proof": "",
+                    "approval_needed":row.custom_approval_needed,
+                    "attach_link": declaration_row["custom_attach"] if declaration_row else ""
                 })
 
             hra_exemption.append({
