@@ -14,6 +14,8 @@ frappe.ui.form.on("Contract Employee Setting", {
                 let options = r.message.map(d => d.name);
                 options.unshift("");
 
+                console.log(options,"optionsoptionsoptions")
+
                 // ✅ SAFE way to set child select options
                 frm.fields_dict.table_peep.grid.update_docfield_property(
                     "item",
