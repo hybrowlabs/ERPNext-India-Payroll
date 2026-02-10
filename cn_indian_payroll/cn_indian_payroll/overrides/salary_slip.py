@@ -9,6 +9,7 @@ import math
 import frappe
 from frappe.utils import getdate
 from dateutil.relativedelta import relativedelta
+# from cn_indian_payroll.cn_indian_payroll.overrides.leegality import create_purchase_invoice
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
@@ -51,6 +52,9 @@ class CustomSalarySlip(SalarySlip):
         self.update_employee_advance_amount()
         self.update_loan_deducted_amount()
         self.insert_attendance_log_list()
+
+        # send_invoice=create_purchase_invoice(self.name)
+
 
 
     def before_save(self):
@@ -719,6 +723,15 @@ class CustomSalarySlip(SalarySlip):
         if payroll_settings.payroll_based_on == "Leave":
             if payroll_settings.custom_configure_attendance_cycle:
                 actual_lwp = 0
+
+                if self.payroll_entry:
+                    payroll_entry_doc = frappe.get_doc("Payroll Entry", self.payroll_entry)
+                    if payroll_entry_doc.employees:
+                        for i in payroll_entry_doc.employees:
+                            if i.employee == self.employee:
+                                actual_lwp = i.custom_lop_days
+                                break
+                
             else:
                 actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
                     holidays, working_days_list, daily_wages_fraction_for_half_day

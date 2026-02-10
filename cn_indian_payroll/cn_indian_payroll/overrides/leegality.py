@@ -5,6 +5,10 @@ import frappe
 import base64
 import requests
 from frappe.utils.pdf import get_pdf
+   
+import json
+from frappe.utils import add_days, formatdate
+from frappe.utils.file_manager import get_file_path
 
 
 @frappe.whitelist()
@@ -103,6 +107,86 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
         "signUrl": result["data"]["invitees"][0]["signUrl"]
     }
 
+
+
+
+# import frappe
+# import json
+
+
+# @frappe.whitelist(allow_guest=True)
+# def leegality_webhook():
+
+#     try:
+
+#         data = frappe.local.form_dict
+
+#         # Raw JSON (important)
+#         payload = frappe.request.get_data(as_text=True)
+
+#         if not payload:
+#             frappe.throw("Empty Payload")
+
+#         event_data = json.loads(payload)
+
+#         frappe.log_error(
+#             json.dumps(event_data, indent=2),
+#             "Leegality Webhook Received"
+#         )
+
+#         # -----------------------------
+#         # Extract Values
+#         # -----------------------------
+
+#         document_id = event_data.get("documentId")
+
+#         status = event_data.get("status")  # COMPLETED / SIGNED / etc
+
+#         if not document_id:
+#             return {"status": "ignored"}
+
+#         # -----------------------------
+#         # Find Salary Slip
+#         # -----------------------------
+
+#         slip_name = frappe.db.get_value(
+#             "Salary Slip",
+#             {"custom_document_id": document_id},
+#             "name"
+#         )
+
+#         if not slip_name:
+#             frappe.log_error(
+#                 f"Doc ID Not Found: {document_id}",
+#                 "Leegality Webhook Error"
+#             )
+
+#             return {"status": "not_found"}
+
+#         slip = frappe.get_doc("Salary Slip", slip_name)
+
+#         # -----------------------------
+#         # Update Status
+#         # -----------------------------
+
+#         if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
+
+#             slip.db_set("custom_e_sign_status", "Signed")
+
+#         elif status in ["REJECTED", "CANCELLED"]:
+
+#             slip.db_set("custom_e_sign_status", "Rejected")
+
+#         return {"status": "ok"}
+
+#     except Exception:
+
+#         frappe.log_error(
+#             frappe.get_traceback(),
+#             "Leegality Webhook Failed"
+#         )
+
+#         return {"status": "error"}
 
 
 
@@ -402,3 +486,195 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
         "document_id": result["data"]["documentId"],
         "sign_url": result["data"]["invitees"][0]["signUrl"]
     }
+
+
+
+
+
+
+
+def get_integration_settings():
+    """
+    Fetch Integration Settings
+    """
+
+    settings = frappe.get_single("Integration Settings")
+
+    if not settings.url or not settings.api_key or not settings.api_secret:
+        frappe.throw("Please configure Integration Settings")
+
+    return {
+        "url": settings.url,
+        "api_key": settings.api_key,
+        "api_secret": settings.api_secret
+    }
+
+
+@frappe.whitelist()
+def create_purchase_invoice(salary_slip):
+
+    try:
+
+        slip = frappe.get_doc("Salary Slip", salary_slip)
+
+        config = get_integration_settings()
+
+        base_url = config["url"]
+        api_key = config["api_key"]
+        api_secret = config["api_secret"]
+
+        token = f"token {api_key}:{api_secret}"
+
+        headers = {
+            "Authorization": token
+        }
+
+
+        file_url = None
+
+        if slip.custom_attach:
+
+            file_path = get_file_path(slip.custom_attach)
+
+            if not file_path:
+                frappe.throw("File not found")
+
+            file_url = upload_file_to_target(
+                base_url,
+                headers,
+                file_path
+            )
+
+
+        employee = frappe.get_doc("Employee", slip.employee)
+
+        supplier_id = employee.custom_supplier_id
+
+        posting_date = frappe.utils.formatdate(
+            slip.posting_date, "yyyy-mm-dd"
+        )
+
+        due_date = frappe.utils.add_days(posting_date, 10)
+
+        employee_setting = frappe.get_single("Contract Employee Setting")
+
+        # Company Mapping
+        company_name = None
+
+        for row in employee_setting.map_the_company:
+            if row.company_in_oxygen == slip.company:
+                company_name = row.company_in_erp
+                break
+
+        if not company_name:
+            frappe.throw("Company mapping not found")
+
+        # Component Mapping
+        item_code = None
+        amount = 0
+
+        for m in employee_setting.table_peep:
+            for e in slip.earnings:
+
+                if m.salary_component == e.salary_component:
+                    item_code = m.item
+                    amount = e.amount
+                    break
+
+            if item_code:
+                break
+
+        if not item_code:
+            frappe.throw("Item mapping not found")
+
+
+        payload = {
+            "data": {
+                "supplier": supplier_id,
+                "company": company_name,
+                "posting_date": posting_date,
+                "due_date": due_date,
+                "bill_no": slip.name,
+                "bill_date": posting_date,
+
+                # "custom_attach": file_url,   
+
+                "items": [
+                    {
+                        "item_code": item_code,
+                        "qty": 1,
+                        "rate": amount
+                    }
+                ]
+            }
+        }
+
+
+        pi_url = f"{base_url}/api/resource/Purchase Invoice"
+
+        response = requests.post(
+            pi_url,
+            headers={
+                **headers,
+                "Content-Type": "application/json"
+            },
+            json=payload,
+            timeout=30
+        )
+
+        if response.status_code not in (200, 201):
+
+            frappe.log_error(response.text, "PI Create Error")
+
+            return {
+                "status": "failed",
+                "error": response.text
+            }
+
+        result = response.json()
+
+        return {
+            "status": "success",
+            "pi_name": result["data"]["name"],
+            "file_url": file_url
+        }
+
+    except Exception as e:
+
+        frappe.log_error(frappe.get_traceback(), "Create PI Error")
+
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+
+def upload_file_to_target(base_url, headers, file_path):
+
+    upload_url = f"{base_url}/api/method/upload_file"
+
+    with open(file_path, "rb") as f:
+
+        files = {
+            "file": f
+        }
+
+        data = {
+            "is_private": 1
+        }
+
+        response = requests.post(
+            upload_url,
+            headers=headers,
+            files=files,
+            data=data,
+            timeout=30
+        )
+
+    if response.status_code not in (200, 201):
+        frappe.throw("File upload failed: " + response.text)
+
+    result = response.json()
+
+    return result["message"]["file_url"]

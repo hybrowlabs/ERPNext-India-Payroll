@@ -28,7 +28,7 @@ def get_supplier_by_tax_id():
     if not settings.url or not settings.api_key or not settings.api_secret:
         frappe.throw("Integration Settings is incomplete")
 
-    url = urljoin(settings.url, "/api/resource/Supplier")
+    url = urljoin(settings.url, "/api/resource/Item")
 
 
     headers = {

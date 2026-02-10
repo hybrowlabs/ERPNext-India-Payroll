@@ -12,7 +12,6 @@ frappe.ui.form.on("Salary Slip", {
                 if (!res.message) return;
 
                 let payroll_setting = res.message;
-                console.log("Payroll Settings:", payroll_setting);
 
                 if (payroll_setting.custom_hide_salary_structure_configuration) {
                     $.each(
@@ -60,6 +59,28 @@ frappe.ui.form.on("Salary Slip", {
                 }
             }
         });
+
+
+
+        // frm.add_custom_button("Create Purchase Invoice", function () {
+
+        //         frappe.call({
+        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.create_purchase_invoice",
+        //             args: {
+        //                 salary_slip: frm.doc.name
+        //             },
+        //             freeze: true,
+        //             callback: function (r) {
+
+        //                 if (r.message && r.message.status === "success") {
+        //                     frappe.msgprint("Purchase Invoice Created Successfully");
+        //                 } else {
+        //                     frappe.msgprint("Error while creating Purchase Invoice");
+        //                 }
+        //             }
+        //         });
+
+        //     });
 
 
 

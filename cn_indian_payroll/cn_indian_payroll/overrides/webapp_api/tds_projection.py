@@ -6772,7 +6772,7 @@ def get_form12b_pdf(doctype, docname):
 
     
 
-
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_approved_poi_category?proof_id=HR-TAX-PRF-2026-00003
 
 @frappe.whitelist()
 def get_approved_poi_category(proof_id):

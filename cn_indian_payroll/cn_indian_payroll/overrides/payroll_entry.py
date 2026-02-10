@@ -64,6 +64,7 @@ class PayrollEntryOverride(PayrollEntry):
     def fill_employee_details(self):
         filters = self.make_filters()
         self.set("employees", [])
+        
 
         employees = get_filtered_employees_with_employment_type(filters)
         valid_employees = []
@@ -398,6 +399,7 @@ class PayrollEntryOverride(PayrollEntry):
 
         for emp in valid_employees:
             self.append("employees", emp)
+            
 
         self.number_of_employees = len(valid_employees)
         self.update_employees_with_withheld_salaries()
