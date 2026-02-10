@@ -31,5 +31,14 @@
             });
         });
        }
+
+
+       if (frm.doc.docstatus === 1) {
+            frm.add_custom_button("Print TDS Projection", () => {
+                window.open(
+                    `/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.download_tds_poi_projection_pdf?proof_id=${frm.doc.name}`
+                );
+            });
+        }
 	}
 })
