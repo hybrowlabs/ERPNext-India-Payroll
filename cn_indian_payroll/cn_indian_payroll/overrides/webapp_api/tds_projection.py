@@ -1697,11 +1697,12 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     category_meta_map = {
                         d.name: {
                             "custom_select_type": d.custom_select_type,
-                            "max_amount": d.max_amount
+                            "max_amount": d.max_amount,
+                            "custom_80d_variable": d.custom_80d_variable
                         }
                         for d in frappe.get_all(
                             "Employee Tax Exemption Category",
-                            fields=["name", "custom_select_type", "max_amount"]
+                            fields=["name", "custom_select_type", "max_amount","custom_80d_variable"]
                         )
                     }
 
@@ -1735,6 +1736,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             category_grouped[category] = {
                                 "category_name": category,
                                 "custom_select_type": category_meta.get("custom_select_type"),
+                                "custom_80d_variable": category_meta.get("custom_80d_variable"),
                                 "category_max_amount": category_meta.get("max_amount"),
                                 "custom_section_property": row.custom_section_property,
                                 "items": []
@@ -1794,6 +1796,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         section_grouped[section]["exemption_category"].append({
                             "category_name": category_name,
                             "custom_select_type": meta.get("custom_select_type"),
+                            "custom_80d_variable": meta.get("custom_80d_variable"),
                             "max_amount": meta.get("max_amount"),
                             "items": category_data["items"]
                         })
@@ -2441,11 +2444,12 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 category_meta_map = {
                     d.name: {
                         "custom_select_type": d.custom_select_type,
-                        "max_amount": d.max_amount
+                        "max_amount": d.max_amount,
+                        "custom_80d_variable": d.custom_80d_variable
                     }
                     for d in frappe.get_all(
                         "Employee Tax Exemption Category",
-                        fields=["name", "custom_select_type", "max_amount"]
+                        fields=["name", "custom_select_type", "max_amount", "custom_80d_variable"]
                     )
                 }
 
@@ -2479,6 +2483,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         category_grouped[category] = {
                             "category_name": category,
                             "custom_select_type": category_meta.get("custom_select_type"),
+                            "custom_80d_variable": category_meta.get("custom_80d_variable"),
                             "category_max_amount": category_meta.get("max_amount"),
                             "custom_section_property": row.custom_section_property,
                             "items": []
@@ -2550,6 +2555,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     section_grouped[section]["exemption_category"].append({
                         "category_name": category_name,
                         "custom_select_type": meta.get("custom_select_type"),
+                        "custom_80d_variable": meta.get("custom_80d_variable"),
                         "max_amount": meta.get("max_amount"),
                         "items": category_data["items"]
                     })
@@ -2754,18 +2760,6 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         declaration_row = existing_map.get(row.name)
                         editable = 0 if row.custom_component_type in NON_EDITABLE_COMPONENTS else 1
 
-                        # category_grouped[category]["items"].append({
-                        #     "exemption_sub_category": row.name,
-                        #     "component_type": row.custom_component_type,
-                        #     "description": row.custom_description,
-                        #     "editable": editable,
-                        #     "amount": round(declaration_row["amount"]) if declaration_row else 0,
-                        #     "max_amount": round(
-                        #         declaration_row["max_amount"]
-                        #         if declaration_row and declaration_row.get("max_amount") is not None
-                        #         else row.max_amount
-                        #     )
-                        # })
 
                         item = {
                             "exemption_sub_category": row.name,
@@ -3447,11 +3441,12 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 category_meta_map = {
                     d.name: {
                         "custom_select_type": d.custom_select_type,
-                        "max_amount": d.max_amount
+                        "max_amount": d.max_amount,
+                        "custom_80d_variable": d.custom_80d_variable
                     }
                     for d in frappe.get_all(
                         "Employee Tax Exemption Category",
-                        fields=["name", "custom_select_type", "max_amount"]
+                        fields=["name", "custom_select_type", "max_amount", "custom_80d_variable"]
                     )
                 }
 
@@ -3485,6 +3480,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         category_grouped[category] = {
                             "category_name": category,
                             "custom_select_type": category_meta.get("custom_select_type"),
+                            "custom_80d_variable": category_meta.get("custom_80d_variable"),
                             "category_max_amount": category_meta.get("max_amount"),
                             "custom_section_property": row.custom_section_property,
                             "items": []
@@ -3506,15 +3502,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         )
                         editable = 1
 
-                    # category_grouped[category]["items"].append({
-                    #     "exemption_sub_category": row.name,
-                    #     "component_type": row.custom_component_type,
-                    #     "description": row.custom_description,
-                    #     "editable": editable,
-                    #     "amount": round(amount),
-                    #     "max_amount": round(max_amount),
-                    # })
-
+                   
                     item = {
                         "exemption_sub_category": row.name,
                         "component_type": row.custom_component_type,
@@ -3553,6 +3541,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     section_grouped[section]["exemption_category"].append({
                         "category_name": category_name,
                         "custom_select_type": meta.get("custom_select_type"),
+                        "custom_80d_variable": meta.get("custom_80d_variable"),
                         "max_amount": meta.get("max_amount"),
                         "items": category_data["items"]
                     })
@@ -6784,4 +6773,22 @@ def get_form12b_pdf(doctype, docname):
     
 
 
+
+# @frappe.whitelist()
+# def get_approved_poi_category(proof_id):
+#     proof = frappe.get_list("POI Approved Category", filters={"proof_id": proof_id}, fields=["*"])
+#     if not proof.category:
+#         return {
+#             "exemption_category":proof.category,
+#             "exemption_sub_category":proof.sub_category,
+#             "max_amount":proof.max_amount,
+#             "declared_amount":
+#             "attach"
+#             "status"
+#             "proof_id": proof_id,
+#             "employee": proof.employee if proof else None,
+#             "employee_name": proof.employee_name if proof else None
+#         }
+    
+#     return approved_categories
     
