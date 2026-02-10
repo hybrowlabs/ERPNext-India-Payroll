@@ -374,7 +374,7 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.get_total_exemption_amount()
         self.insert_approved_proof_in_history()
         self.calculate_hra_exemption()
-        self.set_total_exemption_amount()
+        # self.set_total_exemption_amount()
 
 
     def insert_approved_proof_in_history(self):
@@ -515,10 +515,12 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
             flt(d.total_exemption_amount) for d in exemptions.values()
         )
 
+
+
         return total_exemption_amount
 
 
-    def set_total_exemption_amount(self):
-        other_exemption_total=self.get_total_exemption_amount()
-        hra_exemption_total=self.custom_annual_hra_exemption
-        self.exemption_amount = round(other_exemption_total + hra_exemption_total)
+    # def set_total_exemption_amount(self):
+    #     other_exemption_total=self.get_total_exemption_amount()
+    #     hra_exemption_total=self.custom_annual_hra_exemption
+    #     self.exemption_amount = round(other_exemption_total + hra_exemption_total)
