@@ -433,7 +433,11 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
                     "payroll_period": self.payroll_period,
                     "date":self.submission_date,
                     "proof_id": self.name,
-                    "hra_attach":self.custom_hra_proof_attach
+                    "hra_attach":self.custom_hra_proof_attach,
+                    "hra_paid": self.house_rent_payment_amount,
+                    "holder_name": self.custom_name,
+                    "pan": self.custom_pan,
+                    "address_line1": self.custom_address_title1
                 })
                 approved_doc.insert()
                 frappe.db.commit()

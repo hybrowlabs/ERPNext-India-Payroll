@@ -27,12 +27,16 @@
   "attach",
   "hra_section",
   "category",
+  "hra_paid",
   "column_break_clbk",
   "annual_hra_exemption",
+  "holder_name",
   "column_break_tdia",
   "monthly_hra_exemption",
+  "pan",
   "column_break_xuyy",
-  "hra_attach"
+  "hra_attach",
+  "address_line1"
  ],
  "fields": [
   {
@@ -171,12 +175,32 @@
   {
    "fieldname": "column_break_clbk",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hra_paid",
+   "fieldtype": "Float",
+   "label": "HRA Paid"
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "label": "PAN"
+  },
+  {
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line1"
+  },
+  {
+   "fieldname": "holder_name",
+   "fieldtype": "Data",
+   "label": "Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-09 23:20:21.287860",
+ "modified": "2026-02-10 16:38:41.411927",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "POI Approved Category",

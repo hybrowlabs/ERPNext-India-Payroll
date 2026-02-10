@@ -6774,21 +6774,59 @@ def get_form12b_pdf(doctype, docname):
 
 
 
-# @frappe.whitelist()
-# def get_approved_poi_category(proof_id):
-#     proof = frappe.get_list("POI Approved Category", filters={"proof_id": proof_id}, fields=["*"])
-#     if not proof.category:
-#         return {
-#             "exemption_category":proof.category,
-#             "exemption_sub_category":proof.sub_category,
-#             "max_amount":proof.max_amount,
-#             "declared_amount":
-#             "attach"
-#             "status"
-#             "proof_id": proof_id,
-#             "employee": proof.employee if proof else None,
-#             "employee_name": proof.employee_name if proof else None
-#         }
-    
-#     return approved_categories
+@frappe.whitelist()
+def get_approved_poi_category(proof_id):
+
+    proofs = frappe.get_list(
+        "POI Approved Category",
+        filters={"proof_id": proof_id},
+        fields=["*"]
+    )
+
+    # If no records
+    if not proofs:
+        return []
+
+    result = []
+
+    for proof in proofs:
+
+        # If category is HRA
+        if proof.get("category") == "HRA":
+
+            result.append({
+                "category": "HRA",
+                "annual_hra_exemption": proof.get("custom_annual_eligible_amount"),
+                "monthly_hra_exemption": proof.get("monthly_hra_exemption"),
+                "payroll_period": proof.get("payroll_period"),
+                "date": proof.get("submission_date"),
+                "proof_id": proof_id,
+                "hra_attach": proof.get("custom_hra_proof_attach"),
+                "hra_paid": proof.get("house_rent_payment_amount"),
+                "holder_name": proof.get("custom_name"),
+                "pan": proof.get("custom_pan"),
+                "address_line1": proof.get("custom_address_title1"),
+                "employee": proof.get("employee"),
+                "employee_name": proof.get("employee_name"),
+                "status": proof.get("status"),
+                "doc_name": proof.get("name"),
+            })
+
+        else:
+
+            result.append({
+                "category": proof.get("exemption_category"),
+                "exemption_sub_category": proof.get("exemption_sub_category"),
+                "declared_amount": proof.get("declared_amount"),
+                "max_amount": proof.get("max_amount"),
+                "proof_id": proof_id,
+                "status": proof.get("status"),
+                "employee": proof.get("employee"),
+                "employee_name": proof.get("employee_name"),
+                "attach": proof.get("attach"),
+                "doc_name": proof.get("name"),
+            })
+
+    return result
+
     
