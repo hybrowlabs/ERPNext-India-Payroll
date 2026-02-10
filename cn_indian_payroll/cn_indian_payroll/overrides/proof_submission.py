@@ -16,7 +16,7 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.get_total_exemption_amount()
         
         self.calculate_hra_exemption()
-        self.set_total_exemption_amount()
+        # self.set_total_exemption_amount()
         self.set_total_actual_amount()
 
     def after_insert(self):
