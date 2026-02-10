@@ -4740,8 +4740,6 @@ def update_declaration_form(
     if isinstance(data, str):
         data = frappe.parse_json(data)
 
-    if doctype != "Employee Tax Exemption Declaration" and not data:
-        frappe.throw("Data payload is required")
 
     # ============================================================
     # 1️⃣ UPDATE DECLARATION
