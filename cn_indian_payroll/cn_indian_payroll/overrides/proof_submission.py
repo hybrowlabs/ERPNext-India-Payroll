@@ -285,6 +285,8 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
                     self.custom_hra_received_monthly = round(
                         future_hra_amount / month_count
                     )
+
+                    
                     self.custom_basic_received_annual = round(future_basic_amount)
                     self.custom_basic_received_monthly = round(
                         future_basic_amount / month_count
@@ -487,7 +489,6 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
 
         for d in self.tax_exemption_proofs:
 
-            # ✅ Only consider Approved proofs
             if d.custom_proof_status != "Approved":
                 continue
 
@@ -533,6 +534,7 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         )
 
         self.exemption_amount = round(total_exemption_amount + self.custom_annual_hra_exemption)
+
 
 
         # return total_exemption_amount
