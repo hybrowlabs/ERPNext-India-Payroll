@@ -6629,6 +6629,27 @@ def get_tds_projection_print_html(declaration_id):
     frappe.local.response["response"] = html
 
 
+
+
+#http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_tds_projection_poi_print_html?proof_id=HR-TAX-PRF-2026-00010
+
+@frappe.whitelist(allow_guest=True)
+def get_tds_projection_poi_print_html(proof_id):
+
+    context = calculate_tds_projection_poi(proof_id)
+
+    if not context:
+        frappe.throw("No TDS projection data found")
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/tds_projection_poi_print.html",
+        context
+    )
+
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
+
+
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.print_declaration_preview?employee=37001&payroll_period=25-26&company=PW
 
 @frappe.whitelist()
