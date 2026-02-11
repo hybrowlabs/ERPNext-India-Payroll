@@ -4896,7 +4896,7 @@ def update_declaration_form(
 
 
         proof_doc.insert()
-        proof_doc.submit()
+        # proof_doc.submit()
         frappe.db.commit()
 
         return {
