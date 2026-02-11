@@ -36,7 +36,9 @@
   "pan",
   "column_break_xuyy",
   "hra_attach",
-  "address_line1"
+  "address_line1",
+  "section_break_smix",
+  "command"
  ],
  "fields": [
   {
@@ -164,7 +166,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Approved\nPending\nRejected"
+   "options": "Approved\nPending\nRejected\nSend Back"
   },
   {
    "fieldname": "category",
@@ -195,12 +197,21 @@
    "fieldname": "holder_name",
    "fieldtype": "Data",
    "label": "Name"
+  },
+  {
+   "fieldname": "section_break_smix",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "command",
+   "fieldtype": "Long Text",
+   "label": "Command"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-10 16:38:41.411927",
+ "modified": "2026-02-11 12:48:21.940909",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "POI Approved Category",

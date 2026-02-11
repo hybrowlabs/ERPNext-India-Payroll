@@ -397,8 +397,51 @@ class PayrollEntryOverride(PayrollEntry):
 
             frappe.throw(error_msg, title=_("No Employees Found"))
 
+
+
+        config_array = []
+
+        payroll_setting = frappe.get_single("Payroll Settings")
+
+        for config in payroll_setting.custom_field_config:
+            if config.missing_field_config:
+                config_array.append(config.missing_field_config)
+        self.set("custom_missing_data_in_employee", [])
+
+
         for emp in valid_employees:
+            employee_doc = frappe.get_doc("Employee", emp["employee"])
+
+            missing_fields = []
+
+            # Check configured fields
+            for field in config_array:
+
+                value = employee_doc.get(field)
+
+                if not value:
+                    missing_fields.append(
+                        field.replace("_", " ").title()
+                    )
+
+
+            # Prepare message
+            if missing_fields:
+                missing_data = "Following values are missing: " + ", ".join(missing_fields)
+            else:
+                missing_data = "All required fields are filled"
+
+
+            self.append("custom_missing_data_in_employee", {
+                "employee": emp["employee"],
+                "employee_name": employee_doc.employee_name,
+                "missing_data": missing_data
+            })
+
+
+
             self.append("employees", emp)
+            
             
 
         self.number_of_employees = len(valid_employees)
