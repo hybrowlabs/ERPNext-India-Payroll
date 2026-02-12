@@ -47,7 +47,7 @@ frappe.ui.form.on("Salary Slip", {
                                 if (frm.doc.custom_e_sign_status === "Send") {
                                     frm.add_custom_button("⬇️ View Signed PDF", () => {
                                         const url =
-                                            "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip"
+                                            "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip_employee"
                                             + "?salary_slip=" + encodeURIComponent(frm.doc.name);
 
                                         window.open(url, "_blank");
@@ -65,7 +65,7 @@ frappe.ui.form.on("Salary Slip", {
         // frm.add_custom_button("Create Purchase Invoice", function () {
 
         //         frappe.call({
-        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.create_purchase_invoice",
+        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
         //             args: {
         //                 salary_slip: frm.doc.name
         //             },
@@ -85,35 +85,7 @@ frappe.ui.form.on("Salary Slip", {
 
 
 
-        // if (frm.doc.custom_e_sign_status === "Not Send") {
-        //     frm.add_custom_button("Send for e-Sign", () => {
-        //         frappe.call({
-        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.send_salary_slip_for_esign",
-        //             args: { salary_slip: frm.doc.name },
-        //             freeze: true,
-        //             callback(r) {
-        //                 if (!r.exc) {
-        //                     frappe.msgprint("Sent to Leegality successfully");
-        //                     frm.reload_doc();
-        //                 }
-        //             }
-        //         });
-        //     });
-        // }
-
-
-        // if (frm.doc.custom_e_sign_status === "Send") {
-
-        //            frm.add_custom_button("⬇️ View Signed PDF", () => {
-
-        //                 const url =
-        //                     "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip"
-        //                     + "?salary_slip=" + encodeURIComponent(frm.doc.name);
-
-        //                 window.open(url, "_blank");
-        //             });
-        //         }
-
+        
 
 
 

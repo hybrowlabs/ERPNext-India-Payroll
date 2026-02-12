@@ -9,7 +9,7 @@ import math
 import frappe
 from frappe.utils import getdate
 from dateutil.relativedelta import relativedelta
-# from cn_indian_payroll.cn_indian_payroll.overrides.leegality import create_purchase_invoice
+from cn_indian_payroll.cn_indian_payroll.overrides.leegality import view_signed_payslip
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
@@ -53,7 +53,7 @@ class CustomSalarySlip(SalarySlip):
         self.update_loan_deducted_amount()
         self.insert_attendance_log_list()
 
-        # send_invoice=create_purchase_invoice(self.name)
+        # send_invoice=view_signed_payslip(self.name)
 
 
 

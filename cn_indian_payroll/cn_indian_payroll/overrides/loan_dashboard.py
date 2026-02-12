@@ -28,6 +28,7 @@ def print_loan_dashboard(employee):
     total_interest_payable=0
     total_principal_paid=0
 
+
     for loan in loan_details:
 
         loan_product = None
@@ -42,18 +43,17 @@ def print_loan_dashboard(employee):
         )
         loan_doc = loan_docs[0] if loan_docs else None
 
-        if loan_doc:
-
-            total_payment = round(loan_doc.total_payment, 2)
-            total_interest_payable = round(loan_doc.total_interest_payable, 2)
-            total_principal_paid = round(loan_doc.total_principal_paid, 2)
-
 
         repayment_schedule = []
         paid_months=[]
         unpaid_months=[]
 
         if loan_doc:
+
+            total_payment = round(loan_doc.total_payment, 2)
+            total_interest_payable = round(loan_doc.total_interest_payable, 2)
+            total_principal_paid = round(loan_doc.total_principal_paid, 2)
+
             repayment_entries = frappe.get_list(
                 "Loan Repayment Schedule",
                 filters={"loan": loan_doc.name},
@@ -68,6 +68,10 @@ def print_loan_dashboard(employee):
                 loan_tenure=get_doc.repayment_periods
                 monthly_repayment=get_doc.monthly_repayment_amount
                 total_loan_amount=get_doc.loan_amount
+                loan_end_date = None
+
+                if get_doc.repayment_schedule:
+                    loan_end_date = get_doc.repayment_schedule[-1].payment_date
                 for entry in get_doc.repayment_schedule:
                     repayment_schedule.append({
                         "payment_date": entry.payment_date,
@@ -99,6 +103,7 @@ def print_loan_dashboard(employee):
             "rate_of_interest": loan_doc.rate_of_interest if loan_doc else None,
             "standard_interest": loan_product.rate_of_interest if loan_product else None,
             "loan_start_date": loan_doc.repayment_start_date if loan_doc else None,
+            "loan_end_date": loan_end_date,
             "loan_tenure": loan_tenure,
             "status": loan.status,
             "monthly_repayment_amount": monthly_repayment,
