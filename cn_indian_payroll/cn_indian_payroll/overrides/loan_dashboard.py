@@ -118,7 +118,8 @@ def print_loan_dashboard(employee):
             "total_payment":total_payment,
             "total_interest_payable":total_interest_payable,
             "total_principal_paid":total_principal_paid,
-            "can_edit":loan.can_edit
+            "can_edit":loan.can_edit,
+            "name":loan.name
         })
 
     return results

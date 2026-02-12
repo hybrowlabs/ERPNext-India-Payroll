@@ -173,6 +173,7 @@ def get_advance_dashboard(employee):
         final_balance = flt(advance.advance_amount) - total_paid_amount
 
         results.append({
+            "name": advance.name,
             "advance_type": advance.custom_advance_type,
             "status": advance.status,
             "total_advance_amount": advance.advance_amount,
