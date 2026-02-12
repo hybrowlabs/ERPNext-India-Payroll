@@ -16,17 +16,17 @@
   {
    "fieldname": "api_base_url",
    "fieldtype": "Data",
-   "label": "api_base_url"
+   "label": "API Base URL"
   },
   {
    "fieldname": "api_key",
    "fieldtype": "Data",
-   "label": "api_key"
+   "label": "API Key"
   },
   {
    "fieldname": "api_secret",
    "fieldtype": "Data",
-   "label": "api_secret"
+   "label": "API Secret"
   },
   {
    "fieldname": "profile_id",
@@ -36,7 +36,7 @@
   {
    "fieldname": "post_url",
    "fieldtype": "Data",
-   "label": "Post url"
+   "label": "GET url (PDF)"
   },
   {
    "fieldname": "print_format",
@@ -49,7 +49,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-28 21:09:20.534713",
+ "modified": "2026-02-12 10:51:06.879298",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Leegality Settings",

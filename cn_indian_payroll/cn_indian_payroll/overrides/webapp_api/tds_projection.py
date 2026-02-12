@@ -6665,3 +6665,41 @@ def get_approved_poi_category(proof_id):
     return result
 
     
+
+
+@frappe.whitelist()
+def approved_poi_components(proof_id, sub_category, status):
+
+    proof = frappe.get_doc(
+        "Employee Tax Exemption Proof Submission",
+        proof_id
+    )
+
+    updated = False
+    updated_status = None
+
+    for row in proof.tax_exemption_proofs:
+
+        if row.exemption_sub_category == sub_category:
+
+            row.custom_proof_status = status
+            updated = True
+            updated_status = status
+
+            break   
+
+    if not updated:
+        frappe.throw("Sub category not found in Proof")
+
+
+    proof.save(ignore_permissions=True)
+
+
+    frappe.db.commit()
+
+    return {
+        "message": "Status updated successfully",
+        "proof_id": proof_id,
+        "sub_category": sub_category,
+        "status": updated_status
+    }

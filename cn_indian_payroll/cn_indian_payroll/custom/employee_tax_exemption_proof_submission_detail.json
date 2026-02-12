@@ -109,7 +109,7 @@
    "name": "Employee Tax Exemption Proof Submission Detail-custom_proof_status",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "\nApproved\nPending\nRejected",
+   "options": "\nApproved\nPending\nRejected\nSend Back",
    "owner": "Administrator",
    "permlevel": 0,
    "placeholder": null,
