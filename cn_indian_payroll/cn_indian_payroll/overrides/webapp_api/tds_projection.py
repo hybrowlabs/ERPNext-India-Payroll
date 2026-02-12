@@ -1650,7 +1650,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "amount": d.amount,
                     "max_amount": d.max_amount,
                     "attach_proof": d.attach_proof,
-                    "custom_proof_status": d.custom_proof_status,
+                    # "custom_proof_status": d.custom_proof_status,
                 })
 
             existing_map = {
@@ -1758,7 +1758,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "",
-                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         }
 
 
@@ -1843,7 +1843,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
                             ),
-                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else "",
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else "",
                             "attach_reqd": 1,
                             "attach_proof": declaration_row.get("attach_proof")
                                 if declaration_row and declaration_row.get("attach_proof")
@@ -1949,7 +1949,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "" ,
-                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         })
 
                     # ------------------ Group by Section Property ------------------
@@ -2208,7 +2208,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 0,
                         "attach_proof": "" ,
-                        "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                        # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -2607,7 +2607,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 1,
                         "attach_proof": "",
-                        "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                        # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
                 hra_exemption.append({
@@ -2677,7 +2677,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "exemption_sub_category": d.exemption_sub_category,
                     "amount": d.amount,
                     "max_amount": d.max_amount,
-                    "custom_proof_status": d.custom_proof_status
+                    # "custom_proof_status":d.custom_proof_status
                 })
 
             existing_map = {
@@ -2780,7 +2780,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "",
-                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         }
 
                         # ✅ Add attach_proof ONLY when allowed
@@ -2859,7 +2859,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 1,
                             "attach_proof": "" ,
-                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         })
 
                     final_list = []
@@ -2957,7 +2957,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "",
-                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         })
 
                     # ------------------ Group by Section Property ------------------
@@ -3214,7 +3214,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 0,
                         "attach_proof": "",
-                        "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                        # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -3601,7 +3601,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 1,
                         "attach_proof": "",
-                        "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
+                        # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
                 hra_exemption.append({
