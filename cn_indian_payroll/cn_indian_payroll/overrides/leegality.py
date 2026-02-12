@@ -971,6 +971,8 @@ def create_purchase_invoice(salary_slip):
         # Item Mapping
         item_code = None
         amount = 0
+        gst=None
+        gst_template=None
 
         for m in employee_setting.table_peep:
 
@@ -982,16 +984,21 @@ def create_purchase_invoice(salary_slip):
                     amount = e.amount
                     break
 
+                component=frappe.get_doc("Salary Component", e.salary_component)
+                if component.component_type=="GST":
+                    gst=component.name
+                    break
+
             if item_code:
                 break
 
         if not item_code:
             frappe.throw("Item mapping missing")
 
+        
+        if gst:
+            gst_template=employee_setting.item_tax_template
 
-        # ----------------------------------------
-        # Payload (Correct Attach Mapping)
-        # ----------------------------------------
 
         payload = {
             "data": {
@@ -1002,7 +1009,6 @@ def create_purchase_invoice(salary_slip):
                 "bill_no": slip.name,
                 "bill_date": posting_date,
 
-                # ✅ Correct fields
                 "custom_attach": file_attach_url,
                 "custom_challan": file_challan_url,
 
@@ -1010,16 +1016,14 @@ def create_purchase_invoice(salary_slip):
                     {
                         "item_code": item_code,
                         "qty": 1,
-                        "rate": amount
+                        "rate": amount,
+                        "item_tax_template": gst_template,
                     }
                 ]
             }
         }
 
 
-        # ----------------------------------------
-        # API Call
-        # ----------------------------------------
 
         pi_url = f"{base_url}/api/resource/Purchase Invoice"
 
