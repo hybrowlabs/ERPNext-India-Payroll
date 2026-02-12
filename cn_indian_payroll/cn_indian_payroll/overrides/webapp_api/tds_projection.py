@@ -6668,7 +6668,7 @@ def get_approved_poi_category(proof_id):
 
 
 @frappe.whitelist()
-def approved_poi_components(proof_id, sub_category, status):
+def approved_poi_components(proof_id=None, sub_category=None, status=None,note=None):
 
     proof = frappe.get_doc(
         "Employee Tax Exemption Proof Submission",
@@ -6685,6 +6685,7 @@ def approved_poi_components(proof_id, sub_category, status):
             row.custom_proof_status = status
             updated = True
             updated_status = status
+            row.custom_note = note
 
             break   
 

@@ -182,7 +182,8 @@ def get_advance_dashboard(employee):
             "total_paid_amount": total_paid_amount,
             "balance_amount": final_balance,
             "employee":advance.employee,
-            "employee_name":advance.employee_name
+            "employee_name":advance.employee_name,
+            "can_edit":advance.can_edit
         })
 
     return results

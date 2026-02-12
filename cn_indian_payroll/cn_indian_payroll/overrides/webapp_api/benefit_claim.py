@@ -111,6 +111,7 @@ def benefit_data_list_view(
             "custom_taxable_amount",
             "custom_is_non_taxable",
             "custom_non_taxable_amount",
+            "can_edit"
         ],
         order_by="claim_date desc",
         start=start,
