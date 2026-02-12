@@ -70,8 +70,8 @@ def print_loan_dashboard(employee):
                 total_loan_amount=get_doc.loan_amount
                 loan_end_date = None
 
-                if get_doc.repayment_schedule:
-                    loan_end_date = get_doc.repayment_schedule[-1].payment_date
+                # if get_doc.repayment_schedule:
+                #     loan_end_date = get_doc.repayment_schedule[-1].payment_date
                 for entry in get_doc.repayment_schedule:
                     repayment_schedule.append({
                         "payment_date": entry.payment_date,
@@ -103,7 +103,7 @@ def print_loan_dashboard(employee):
             "rate_of_interest": loan_doc.rate_of_interest if loan_doc else None,
             "standard_interest": loan_product.rate_of_interest if loan_product else None,
             "loan_start_date": loan_doc.repayment_start_date if loan_doc else None,
-            "loan_end_date": loan_end_date,
+            "loan_end_date": "",
             "loan_tenure": loan_tenure,
             "status": loan.status,
             "monthly_repayment_amount": monthly_repayment,
