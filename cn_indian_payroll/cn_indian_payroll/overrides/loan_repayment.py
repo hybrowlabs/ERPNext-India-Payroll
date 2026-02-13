@@ -5,7 +5,6 @@ import frappe
 def before_save(self, method):
     if self.loan:
         loan = frappe.get_doc('Loan', self.loan)
-
         if loan.applicant_type == "Employee":
             self.custom_employee = loan.applicant
             self.custom_loan_perquisite_interest_rate = loan.custom_loan_perquisite_rate_of_interest
@@ -41,7 +40,3 @@ def before_save(self, method):
                     })
 
 
-
-def before_update_after_submit(self,method):
-    if self.repayment_schedule:
-        self.repayment_periods=len(self.repayment_schedule)

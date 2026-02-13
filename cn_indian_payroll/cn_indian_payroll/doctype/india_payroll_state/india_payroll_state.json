@@ -56,7 +56,7 @@
  "modified": "2025-10-13 10:44:30.574969",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
- "name": "State",
+ "name": "India Payroll State",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

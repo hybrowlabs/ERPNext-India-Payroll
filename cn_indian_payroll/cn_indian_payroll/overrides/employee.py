@@ -19,7 +19,7 @@ def validate(self, method):
             ssa = salary_structure_assignments[0]
 
             if ssa.custom_minimum_wages_state:
-                state = frappe.get_doc("State", ssa.custom_minimum_wages_state)
+                state = frappe.get_doc("India Payroll State", ssa.custom_minimum_wages_state)
 
                 if state.min_wages:
                     for row in state.min_wages:

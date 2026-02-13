@@ -4,20 +4,6 @@ frappe.ui.form.on('Employee', {
         if(!frm.is_new())
         {
 
-        frm.add_custom_button('Details', null, 'Actions');
-
-
-        if (frappe.user.has_role("HR Manager") || frappe.user.has_role("Payroll Manager")) {
-            frm.add_custom_button('Assign New CTC', function() {
-
-            frappe.route_options = {"employee": frm.doc.name};
-
-            frappe.set_route("Form", "Salary Structure Assignment", 'new-salary-structure-assignment');
-
-
-            }, 'Details');
-        }
-
         frm.add_custom_button('View Latest CTC', function() {
 
 

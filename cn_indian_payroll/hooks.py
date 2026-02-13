@@ -232,7 +232,7 @@ fixtures = [
     {"dt":"Income Tax Regime"},
     {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
     {"dt":"Salary Component Library Item"},
-    {"dt":"State"},
+    {"dt":"India Payroll State"},
     {"dt":"Frequency"},
     {"dt":"Zone"},
     {"dt":"Skill Level"},
@@ -253,14 +253,11 @@ doctype_js = {
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
     "Salary Slip": "public/js/salary_slip.js",
-    "Employee Tax Exemption Proof Submission": "public/js/proof_submission.js",
 
-    "Loan": "public/js/loan.js",
     "Loan Product": "public/js/loan_product.js",
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
-    # "Full and Final Statement": "public/js/f_and_f.js",
-    # "Leave Encashment": "public/js/leave_encashment.js",
+
 
 
 
@@ -298,9 +295,9 @@ doc_events = {
     "Employee": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee.validate",
     },
-    "Employee Tax Exemption Proof Submission": {
-        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_proof.on_submit",
-    },
+    # "Employee Tax Exemption Proof Submission": {
+    #     "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_proof.on_submit",
+    # },
 
 
 
