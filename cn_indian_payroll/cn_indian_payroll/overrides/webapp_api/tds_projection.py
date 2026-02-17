@@ -3686,6 +3686,8 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         lta_amount = 0
         eighty_d=[]
         other_investment=[]
+        lta_declared_amount=0
+        lta_exempted_amount=0
 
         if declaration_doc.declarations:
             for d in declaration_doc.declarations:
@@ -3697,7 +3699,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
                 # LTA
                 if sub_category.custom_component_type == "LTA Reimbursement":
-                    lta_amount = flt(d.max_amount or 0)
+                    lta_declared_amount = flt(d.amount or 0)
+                    lta_exempted_amount = flt(d.max_amount or 0)
+                    lta_amount = flt(d.max_amount or 0) if d.amount and d.max_amount and d.amount > d.max_amount else flt(d.amount or 0)
+
 
                 category = frappe.get_doc(
                     "Employee Tax Exemption Category",
@@ -3712,7 +3717,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                     eighty_c.append({
                         "component": d.exemption_sub_category,
                         "declared_amount": declared,
-                        "qualified_amount": qualified,
+                        "qualified_amount": 0,
                         "deductible_amount": qualified if declared > qualified else declared
                     })
 
@@ -4100,6 +4105,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":round(flt(total_gross_earning), 2),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(total_gross_earning), 2),
 
         },
         {
@@ -4110,6 +4118,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":round(flt(extra_payment_grand_total), 2),
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "total_off_cycle_extra_payment",
@@ -4119,6 +4130,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":round(flt(total_off_cycle_payment), 2),
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "total_perquisite_total",
@@ -4128,6 +4142,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":round(flt(total_perquisite_total), 2),
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
 
 
@@ -4138,6 +4155,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(total_gross_salary_current), 2),
 
         },
 
@@ -4148,7 +4168,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col1":"",
             "col2":"",
             "col3":"",
-            "col4":round(flt(total_gross_salary_current), 2)    ,
+            "col4":round(flt(total_gross_salary_current), 2),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(total_gross_salary_current), 2),
         },
 
 
@@ -4160,6 +4183,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4170,6 +4196,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":lta_declared_amount,
+            "exemption_amount":round(flt(lta_amount), 2),
+            "taxable_amount":"",
         },
         {
             "key": "total_reimbursements",
@@ -4179,6 +4208,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":round(flt(lta_amount), 2),
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":round(flt(lta_amount), 2),
+            "taxable_amount":"",
         },
         {
             "key": "total_income_after_deduction_and_reimbursements",
@@ -4192,6 +4224,11 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col4":round(
                 flt(total_gross_salary_current) - flt(lta_amount), 2
             ),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(
+                flt(total_gross_salary_current) - flt(lta_amount), 2
+            ),
         },
         {
             "key": "less_exemption_under_section_10",
@@ -4200,6 +4237,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4209,6 +4249,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4219,6 +4262,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":basic_percentage,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "rent_paid",
@@ -4228,6 +4275,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":rent_paid_of_basic,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "hra_received",
@@ -4237,6 +4288,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":hra_received_annual,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "hra_exemption",
@@ -4246,6 +4301,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":hra_exemption,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "total_section_10_exemptions",
@@ -4255,6 +4314,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":hra_exemption,
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":hra_exemption,
+            "taxable_amount":"",
+
         },
         {
             "key": "salary_after_section_10",
@@ -4264,6 +4327,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":salary_after_section_10,
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":salary_after_section_10,
+
         },
         {
             "key": "less_deduction_under_section_16",
@@ -4272,6 +4339,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4282,6 +4352,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":standard_deduction,
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "total_deduction_section_16",
@@ -4291,6 +4364,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":standard_deduction,
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":standard_deduction,
+            "taxable_amount":"",
         },
         {
             "key": "income_chargeable_salary",
@@ -4304,6 +4380,11 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col4":round(
                 flt(salary_after_section_10) - flt(standard_deduction), 2
             ),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(
+                flt(salary_after_section_10) - flt(standard_deduction), 2
+            ),
         },
         {
             "key": "income_loss_house_property",
@@ -4312,6 +4393,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4322,6 +4406,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "other_sources",
@@ -4330,6 +4417,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4340,6 +4430,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "gross_total_income",
@@ -4353,6 +4446,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col4":round(
                 flt(salary_after_section_10) - flt(standard_deduction), 2
             ),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
         }
     ],
 
