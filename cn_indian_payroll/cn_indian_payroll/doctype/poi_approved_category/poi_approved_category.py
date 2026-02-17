@@ -16,6 +16,7 @@ class POIApprovedCategory(Document):
 				for category in existing_approved_category.tax_exemption_proofs:
 					if category.exemption_sub_category == self.exemption_sub_category:
 						category.custom_proof_status = "Approved"
+						category.custom_note=self.command
 			existing_approved_category.save()
 
 		if self.proof_id and self.status == "Rejected":
@@ -27,5 +28,6 @@ class POIApprovedCategory(Document):
 				for category in existing_approved_category.tax_exemption_proofs:
 					if category.exemption_sub_category == self.exemption_sub_category:
 						category.custom_proof_status = "Rejected"
+						category.custom_note=self.command
 			existing_approved_category.save()
 						

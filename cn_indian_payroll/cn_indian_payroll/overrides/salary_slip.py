@@ -53,7 +53,16 @@ class CustomSalarySlip(SalarySlip):
         self.update_loan_deducted_amount()
         self.insert_attendance_log_list()
 
-        # send_invoice=view_signed_payslip(self.name)
+        employee=frappe.get_doc("Employee",self.employee)
+        payroll_setting = frappe.get_single("Payroll Settings")
+
+        if any(
+            row.employment_type == employee.employment_type
+            for row in payroll_setting.custom_hide_salary_structure_configuration
+        ):
+            view_signed_payslip(self.name)
+            
+            # send_invoice=view_signed_payslip(self.name)
 
 
 

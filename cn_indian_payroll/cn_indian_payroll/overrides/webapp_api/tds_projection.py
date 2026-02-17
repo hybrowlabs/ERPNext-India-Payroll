@@ -10,9 +10,6 @@ import json
 from dateutil.relativedelta import relativedelta
 
 
-
-
-
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37004&company=PW&payroll_period=25-26
 
 @frappe.whitelist()
@@ -6679,40 +6676,80 @@ def get_approved_poi_category(proof_id):
     
 
 
-@frappe.whitelist()
-def approved_poi_components(proof_id=None, sub_category=None, status=None,note=None):
+# @frappe.whitelist()
+# def approved_poi_components(proof_id=None, sub_category=None, status=None,note=None):
 
-    proof = frappe.get_doc(
-        "Employee Tax Exemption Proof Submission",
-        proof_id
+#     proof = frappe.get_doc(
+#         "Employee Tax Exemption Proof Submission",
+#         proof_id
+#     )
+
+#     updated = False
+#     updated_status = None
+
+#     for row in proof.tax_exemption_proofs:
+
+#         if row.exemption_sub_category == sub_category:
+
+#             row.custom_proof_status = status
+#             updated = True
+#             updated_status = status
+#             row.custom_note = note
+
+#             break   
+
+#     if not updated:
+#         frappe.throw("Sub category not found in Proof")
+
+
+#     proof.save(ignore_permissions=True)
+
+
+#     frappe.db.commit()
+
+#     return {
+#         "message": "Status updated successfully",
+#         "proof_id": proof_id,
+#         "sub_category": sub_category,
+#         "status": updated_status
+#     }
+
+
+import frappe
+
+
+@frappe.whitelist()
+def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None):
+
+    # Validate required fields
+    if not proof_id or not sub_category or not status:
+        frappe.throw("proof_id, sub_category, and status are required")
+
+    # Get matching records
+    approved_proofs = frappe.get_all(
+        "POI Approved Category",
+        filters={"proof_id": proof_id},
+        fields=["name", "exemption_sub_category"]
     )
 
     updated = False
-    updated_status = None
 
-    for row in proof.tax_exemption_proofs:
-
+    for row in approved_proofs:
         if row.exemption_sub_category == sub_category:
+            doc = frappe.get_doc("POI Approved Category", row.name)
 
-            row.custom_proof_status = status
+            doc.status = status
+            doc.command = note
+            doc.save(ignore_permissions=True)
+
             updated = True
-            updated_status = status
-            row.custom_note = note
 
-            break   
-
-    if not updated:
-        frappe.throw("Sub category not found in Proof")
-
-
-    proof.save(ignore_permissions=True)
-
-
-    frappe.db.commit()
+    if updated:
+        frappe.db.commit()
 
     return {
         "message": "Status updated successfully",
         "proof_id": proof_id,
         "sub_category": sub_category,
-        "status": updated_status
+        "status": status
     }

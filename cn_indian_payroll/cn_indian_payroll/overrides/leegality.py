@@ -60,8 +60,11 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
     Internal helper
     """
 
-    # ✅ Single DocType
     leegality_setting = frappe.get_single("Leegality Settings")
+    # base_url = leegality_setting.api_base_url.rstrip("/")
+
+        # Final API endpoint
+    # API_URL = f"{base_url}/api/v3.0/sign/request"
 
     API_URL = leegality_setting.api_base_url
     X_AUTH_TOKEN = leegality_setting.api_key
@@ -212,6 +215,11 @@ def view_signed_payslip_employee(salary_slip):
 
     leegality_setting = frappe.get_single("Leegality Settings")
     X_AUTH_TOKEN = leegality_setting.api_key
+
+
+    # base_url = leegality_setting.api_base_url.rstrip("/")
+
+    # url = f"{base_url}/api/v3.1/document/fetchDocument"
 
 
     url = leegality_setting.post_url
@@ -941,6 +949,10 @@ def create_purchase_invoice(salary_slip):
         employee = frappe.get_doc("Employee", slip.employee)
 
         supplier_id = employee.custom_supplier_id
+        business_category=employee.custom_business_category
+        business_segment=employee.custom_business_segment
+        bank_acc=employee.custom_bank_account_in_erp
+        work_flow_policy=employee.custom_work_flow_policy
 
         posting_date = frappe.utils.formatdate(
             slip.posting_date, "yyyy-mm-dd"
@@ -962,17 +974,14 @@ def create_purchase_invoice(salary_slip):
 
             if row.company_in_oxygen == slip.company:
                 company_name = row.company_in_erp
-                break
+                break      
 
         if not company_name:
             frappe.throw("Company mapping missing")
 
 
-        # Item Mapping
         item_code = None
         amount = 0
-        gst=None
-        gst_template=None
 
         for m in employee_setting.table_peep:
 
@@ -982,23 +991,35 @@ def create_purchase_invoice(salary_slip):
 
                     item_code = m.item
                     amount = e.amount
-                    break
-
-                component=frappe.get_doc("Salary Component", e.salary_component)
-                if component.component_type=="GST":
-                    gst=component.name
-                    break
+                    break                
 
             if item_code:
                 break
+                
 
         if not item_code:
             frappe.throw("Item mapping missing")
 
-        
-        if gst:
-            gst_template=employee_setting.item_tax_template
 
+
+        gst = None
+        for e in slip.earnings:
+            component = frappe.get_cached_doc(
+                "Salary Component",
+                e.salary_component
+            )
+
+            if component.component_type == "GST":
+                gst = component.name
+                break
+
+        item_tax_template = None
+        if gst:
+            for row in employee_setting.map_the_company:
+                if row.company_in_oxygen == slip.company:
+                    item_tax_template = row.item_tax_template
+                    break
+  
 
         payload = {
             "data": {
@@ -1006,24 +1027,33 @@ def create_purchase_invoice(salary_slip):
                 "company": company_name,
                 "posting_date": posting_date,
                 "due_date": due_date,
-                "bill_no": slip.name,
+                "bill_no": "SAL-20260213-031",
                 "bill_date": posting_date,
+                "bank_account": bank_acc,
+                "workflow_policy":work_flow_policy ,
+                "business_category": business_category,
+                "business_segment": business_segment,
+                "apply_tds":1,
 
-                "custom_attach": file_attach_url,
-                "custom_challan": file_challan_url,
+                "supplier_bill_attachment": file_attach_url,
+                # "custom_challan": file_challan_url,
 
                 "items": [
                     {
                         "item_code": item_code,
                         "qty": 1,
                         "rate": amount,
-                        "item_tax_template": gst_template,
+                        "item_tax_template":item_tax_template if gst else None
                     }
-                ]
+
+                
+                ],
+                "attachment_details":[{
+                        "title":"Challan",
+                        "attachment":file_challan_url
+                    }]
             }
         }
-
-
 
         pi_url = f"{base_url}/api/resource/Purchase Invoice"
 

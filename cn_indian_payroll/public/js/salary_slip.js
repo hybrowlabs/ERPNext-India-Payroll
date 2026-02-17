@@ -62,25 +62,25 @@ frappe.ui.form.on("Salary Slip", {
 
 
 
-        // frm.add_custom_button("Create Purchase Invoice", function () {
+        frm.add_custom_button("Create Purchase Invoice", function () {
 
-        //         frappe.call({
-        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
-        //             args: {
-        //                 salary_slip: frm.doc.name
-        //             },
-        //             freeze: true,
-        //             callback: function (r) {
+                frappe.call({
+                    method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
+                    args: {
+                        salary_slip: frm.doc.name
+                    },
+                    freeze: true,
+                    callback: function (r) {
 
-        //                 if (r.message && r.message.status === "success") {
-        //                     frappe.msgprint("Purchase Invoice Created Successfully");
-        //                 } else {
-        //                     frappe.msgprint("Error while creating Purchase Invoice");
-        //                 }
-        //             }
-        //         });
+                        if (r.message && r.message.status === "success") {
+                            frappe.msgprint("Purchase Invoice Created Successfully");
+                        } else {
+                            frappe.msgprint("Error while creating Purchase Invoice");
+                        }
+                    }
+                });
 
-        //     });
+            });
 
 
 
@@ -281,8 +281,12 @@ frappe.ui.form.on("Salary Slip", {
 
 
 
-    }
+    },
+
+     
+
   });
+
 
 
 
