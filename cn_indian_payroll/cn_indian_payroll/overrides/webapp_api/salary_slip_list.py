@@ -1,12 +1,15 @@
+
 import frappe
+
+from cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting import get_invoice_status
 
 
 @frappe.whitelist()
 def get_salary_slip_list(employee=None, company=None):
+
     salary_slips = frappe.get_all(
         "Salary Slip",
         filters={
-
             "employee": employee,
             "company": company,
             "docstatus": ["in", [0, 1]],
@@ -24,7 +27,21 @@ def get_salary_slip_list(employee=None, company=None):
         ],
         order_by="end_date desc",
     )
-    return salary_slips
+
+    result = []
+
+    for slip in salary_slips:
+
+        # Call imported function
+        invoice_status = get_invoice_status(slip["name"])
+
+        # Add status to response
+        slip["invoice_status"] = invoice_status
+
+        result.append(slip)
+
+    return result
+
 
 
 
