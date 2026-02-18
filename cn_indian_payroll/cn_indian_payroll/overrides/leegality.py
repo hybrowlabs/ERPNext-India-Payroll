@@ -63,7 +63,6 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
     leegality_setting = frappe.get_single("Leegality Settings")
     # base_url = leegality_setting.api_base_url.rstrip("/")
 
-        # Final API endpoint
     # API_URL = f"{base_url}/api/v3.0/sign/request"
 
     API_URL = leegality_setting.api_base_url
@@ -279,9 +278,10 @@ def get_salary_slip_for_esign(month, company, employment_type):
         ]
     )
 
-
-
     return salary_slips
+
+
+
 
 @frappe.whitelist()
 def send_bulk_salary_slip_for_esign(month, company, employment_type):
@@ -957,6 +957,7 @@ def create_purchase_invoice(salary_slip):
         posting_date = frappe.utils.formatdate(
             slip.posting_date, "yyyy-mm-dd"
         )
+        doc_name=slip.name
 
         due_date = frappe.utils.add_days(posting_date, 10)
 
@@ -1027,16 +1028,16 @@ def create_purchase_invoice(salary_slip):
                 "company": company_name,
                 "posting_date": posting_date,
                 # "due_date": due_date,
-                "bill_no": "SAL-20260213-032",
+                # "bill_no": "SAL-20260213-33",
+                "bill_no": doc_name,
                 "bill_date": posting_date,
                 "bank_account": bank_acc,
                 "workflow_policy":work_flow_policy ,
                 "business_category": business_category,
                 "business_segment": business_segment,
                 "apply_tds":1,
+                "supplier_bill_attachment":file_challan_url,
 
-                "supplier_bill_attachment": file_attach_url,
-                # "custom_challan": file_challan_url,
 
                 "items": [
                     {
@@ -1050,7 +1051,7 @@ def create_purchase_invoice(salary_slip):
                 ],
                 "attachment_details":[{
                         "title":"Challan",
-                        "attachment":file_challan_url
+                        "attachment":file_attach_url,
                     }]
             }
         }
@@ -1128,3 +1129,5 @@ def upload_file_to_target(base_url, headers, file_path):
     result = response.json()
 
     return result["message"]["file_url"]
+
+

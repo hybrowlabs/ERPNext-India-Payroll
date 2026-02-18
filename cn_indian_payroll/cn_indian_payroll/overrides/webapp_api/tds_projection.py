@@ -3688,6 +3688,12 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         other_investment=[]
         lta_declared_amount=0
         lta_exempted_amount=0
+        home_loan_investment=[]
+        home_loan_investment_sum=0
+
+        declared_home_loan = 0
+        qualified_home_loan = 0
+        taxable_home_loan=0
 
         if declaration_doc.declarations:
             for d in declaration_doc.declarations:
@@ -3734,7 +3740,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                         "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                     })
 
-                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
 
                     declared_other = flt(d.amount or 0)
                     qualified_other = flt(d.max_amount or 0)
@@ -3747,6 +3753,20 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                         "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                     })
 
+                if sub_category.custom_component_type=="Home Loan":
+
+                    declared_home_loan = flt(d.amount or 0)
+                    qualified_home_loan = flt(d.max_amount or 0)
+                    taxable_home_loan = declared_home_loan if declared_home_loan < qualified_home_loan else qualified_home_loan
+
+                    home_loan_investment.append({
+
+                        "component": d.exemption_sub_category,
+                        "declared_amount": declared_home_loan,
+                        "qualified_amount": qualified_home_loan,
+                        "deductible_amount": qualified_home_loan if declared_home_loan > qualified_home_loan else declared_home_loan
+                    })
+
         # ------------------ Annual Statement ------------------
 
 
@@ -3757,6 +3777,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         )
         eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
         other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+        home_loan_investment_sum = sum(r["deductible_amount"] for r in home_loan_investment)
 
         annual_statement = get_annual_statement(employee, payroll_period,company)
 
@@ -3789,9 +3810,17 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
         gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
 
-        total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+        total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum)
 
         net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+
+
+
+        
+
+
+
+
 
 
     elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
@@ -3842,6 +3871,15 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             eighty_d=[]
             other_investment=[]
 
+            lta_declared_amount=0
+            lta_exempted_amount=0
+            home_loan_investment=[]
+            home_loan_investment_sum=0
+
+            declared_home_loan = 0
+            qualified_home_loan = 0
+            taxable_home_loan=0
+
             if declaration_doc.declarations:
                 for d in declaration_doc.declarations:
 
@@ -3852,7 +3890,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
                     # LTA
                     if sub_category.custom_component_type == "LTA Reimbursement":
-                        lta_amount = flt(d.max_amount or 0)
+                        lta_declared_amount = flt(d.amount or 0)
+                        lta_exempted_amount = flt(d.max_amount or 0)
+                        lta_amount = flt(d.max_amount or 0) if d.amount and d.max_amount and d.amount > d.max_amount else flt(d.amount or 0)
 
                     category = frappe.get_doc(
                         "Employee Tax Exemption Category",
@@ -3884,7 +3924,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                         })
 
-                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
 
                         declared_other = flt(d.amount or 0)
                         qualified_other = flt(d.max_amount or 0)
@@ -3897,6 +3937,22 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                         })
 
+                    if sub_category.custom_component_type=="Home Loan":
+
+                        declared_home_loan = flt(d.amount or 0)
+                        qualified_home_loan = flt(d.max_amount or 0)
+                        taxable_home_loan = declared_home_loan if declared_home_loan < qualified_home_loan else qualified_home_loan
+
+                        home_loan_investment.append({
+
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_home_loan,
+                            "qualified_amount": qualified_home_loan,
+                            "deductible_amount": qualified_home_loan if declared_home_loan > qualified_home_loan else declared_home_loan
+                        })
+
+                    
+
             # ------------------ Annual Statement ------------------
 
 
@@ -3907,6 +3963,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             )
             eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
             other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+            home_loan_investment_sum = sum(r["deductible_amount"] for r in home_loan_investment)
 
             annual_statement = get_annual_statement(employee, payroll_period,company)
 
@@ -3939,7 +3996,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
             gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
 
-            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum, 2)
 
             net_taxable_income=round(gross_total_income-total_declaration_sum,2)
 
@@ -3981,6 +4038,17 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             eighty_d=[]
             other_investment=[]
 
+            lta_declared_amount=0
+            lta_exempted_amount=0
+            home_loan_investment=[]
+            home_loan_investment_sum=0
+
+            declared_home_loan = 0
+            qualified_home_loan = 0
+            taxable_home_loan=0
+
+
+
             if proof_submission_doc.tax_exemption_proofs:
                 for d in proof_submission_doc.tax_exemption_proofs:
 
@@ -3991,7 +4059,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
                     # LTA
                     if sub_category.custom_component_type == "LTA Reimbursement":
-                        lta_amount = flt(d.max_amount or 0)
+                        lta_declared_amount = flt(d.amount or 0)
+                        lta_exempted_amount = flt(d.max_amount or 0)
+                        lta_amount = flt(d.max_amount or 0) if d.amount and d.max_amount and d.amount > d.max_amount else flt(d.amount or 0)
+
 
                     category = frappe.get_doc(
                         "Employee Tax Exemption Category",
@@ -4023,7 +4094,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                         })
 
-                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
 
                         declared_other = flt(d.amount or 0)
                         qualified_other = flt(d.max_amount or 0)
@@ -4036,6 +4107,20 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                         })
 
+                    if sub_category.custom_component_type=="Home Loan":
+
+                        declared_home_loan = flt(d.amount or 0)
+                        qualified_home_loan = flt(d.max_amount or 0)
+                        taxable_home_loan = declared_home_loan if declared_home_loan < qualified_home_loan else qualified_home_loan
+
+                        home_loan_investment.append({
+
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_home_loan,
+                            "qualified_amount": qualified_home_loan,
+                            "deductible_amount": qualified_home_loan if declared_home_loan > qualified_home_loan else declared_home_loan
+                        })
+
             # ------------------ Annual Statement ------------------
 
 
@@ -4046,6 +4131,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             )
             eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
             other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+            home_loan_investment_sum = sum(r["deductible_amount"] for r in home_loan_investment)
 
             annual_statement = get_annual_statement(employee, payroll_period,company)
 
@@ -4077,14 +4163,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
             gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
 
-            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum, 2)
 
             net_taxable_income=round(gross_total_income-total_declaration_sum,2)
-
-
-
-
-
 
 
 
@@ -4398,6 +4479,23 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "taxable_amount":"",
 
         },
+
+
+        {
+            "key": "home_loan_interest_paid",
+            "name": "Home Loan Interest Paid for Self-occupied Property",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
+            "declared_amount":declared_home_loan,
+            "exemption_amount":taxable_home_loan,
+            "taxable_amount":"",
+
+        },
+
+
+
         {
             "key": "total_income_loss_house_property",
             "name": "Total for Income/Loss from house property",
@@ -4407,7 +4505,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col3":"",
             "col4":"",
             "declared_amount":"",
-            "exemption_amount":"",
+            "exemption_amount":taxable_home_loan,
             "taxable_amount":"",
         },
         {

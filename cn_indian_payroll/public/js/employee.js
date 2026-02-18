@@ -75,6 +75,8 @@ function toggle_custom_fields(frm, show) {
 
     fields.forEach(field => {
         frm.set_df_property(field, "hidden", !show);
+        frm.set_df_property(field, "reqd", show);
+
     });
 
     frm.refresh_fields(fields);

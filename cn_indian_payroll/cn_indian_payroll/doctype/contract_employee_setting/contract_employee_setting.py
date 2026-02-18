@@ -3,11 +3,11 @@
 
 import frappe
 from frappe.model.document import Document
-
 import requests
-
-
 from urllib.parse import urljoin
+
+
+
 
 
 class ContractEmployeeSetting(Document):
@@ -169,3 +169,61 @@ def get_bank_accounts_by_supplier(supplier_id):
         bank_accounts.append(d.get("name"))
 
     return bank_accounts
+
+
+
+@frappe.whitelist()
+def get_invoice_status(salary_slip):
+
+    filters = [
+        ["bill_no", "=", salary_slip],
+        ["docstatus", "=", 1]
+    ]
+
+    fields = ["name", "workflow_state"]
+
+    settings = frappe.get_single("Integration Settings")
+
+    if not settings.url or not settings.api_key or not settings.api_secret:
+        frappe.throw("Integration Settings is incomplete")
+
+    url = urljoin(
+        settings.url,
+        "/api/resource/Purchase Invoice"
+    )
+
+    headers = {
+        "Authorization": f"token {settings.api_key}:{settings.api_secret}",
+        "Accept": "application/json"
+    }
+
+    params = {
+        "limit_page_length": 1,
+        "fields": frappe.as_json(fields)
+    }
+
+    # Apply filters
+    if filters:
+        params["filters"] = frappe.as_json(filters)
+
+    try:
+        resp = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            timeout=30
+        )
+
+    except Exception as e:
+        frappe.throw(f"Connection failed: {str(e)}")
+
+    if resp.status_code != 200:
+        frappe.throw(f"Purchase Invoice API failed: {resp.text}")
+
+    data = resp.json().get("data", [])
+
+    if not data:
+        return "Draft"
+
+    return data[0].get("workflow_state", "Draft")
+

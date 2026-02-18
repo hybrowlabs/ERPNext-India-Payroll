@@ -43,7 +43,30 @@ import frappe
 import requests
 import json
 
+
+
+import frappe
+from frappe.model.naming import make_autoname
+from datetime import datetime
+
 class CustomSalarySlip(SalarySlip):
+
+
+
+    def autoname(self):
+
+        if not self.employee:
+            return
+
+        emp_code = self.employee[-4:]
+
+        yymm = datetime.now().strftime("%y%m")
+
+        self.name = make_autoname(
+            f"SS-{emp_code}-{yymm}-.##"
+        )
+
+
     def on_submit(self):
         super().on_submit()
         self.insert_bonus_accruals()
