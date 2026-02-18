@@ -29,7 +29,8 @@
   },
   {
    "fieldname": "section_break_mrud",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "column_break_omev",
@@ -100,7 +101,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-10 21:50:00.775738",
+ "modified": "2026-02-18 10:03:39.977187",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Contract Employee Setting",

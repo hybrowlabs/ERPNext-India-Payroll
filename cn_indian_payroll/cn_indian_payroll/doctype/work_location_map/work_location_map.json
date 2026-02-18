@@ -20,7 +20,8 @@
   {
    "fieldname": "location_in_erp",
    "fieldtype": "Select",
-   "label": "Work Location in ERP"
+   "label": "Work Location in ERP",
+   "options": ""
   }
  ],
  "grid_page_length": 50,

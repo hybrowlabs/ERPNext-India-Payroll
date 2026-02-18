@@ -23,22 +23,26 @@
   {
    "fieldname": "company_in_erp",
    "fieldtype": "Select",
-   "label": "Company in ERP"
+   "label": "Company in ERP",
+   "options": ""
   },
   {
    "fieldname": "item_tax_template",
    "fieldtype": "Select",
-   "label": "Item Tax Template"
+   "label": "Item Tax Template",
+   "options": ""
   },
   {
    "fieldname": "purchase_tax_template",
    "fieldtype": "Select",
-   "label": "Purchase Tax Template"
+   "label": "Purchase Tax Template",
+   "options": ""
   },
   {
    "fieldname": "tax_with_holding_category",
    "fieldtype": "Select",
-   "label": "Tax With Holding Category"
+   "label": "Tax With Holding Category",
+   "options": ""
   }
  ],
  "grid_page_length": 50,

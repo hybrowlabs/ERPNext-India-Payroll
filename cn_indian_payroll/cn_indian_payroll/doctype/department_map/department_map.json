@@ -19,7 +19,8 @@
   {
    "fieldname": "department_in_erp",
    "fieldtype": "Select",
-   "label": "Department in ERP"
+   "label": "Department in ERP",
+   "options": ""
   }
  ],
  "grid_page_length": 50,
