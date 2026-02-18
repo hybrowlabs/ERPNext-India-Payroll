@@ -8,7 +8,10 @@
  "engine": "InnoDB",
  "field_order": [
   "company_in_oxygen",
-  "company_in_erp"
+  "company_in_erp",
+  "item_tax_template",
+  "purchase_tax_template",
+  "tax_with_holding_category"
  ],
  "fields": [
   {
@@ -20,14 +23,33 @@
   {
    "fieldname": "company_in_erp",
    "fieldtype": "Select",
-   "label": "Company in ERP"
+   "label": "Company in ERP",
+   "options": ""
+  },
+  {
+   "fieldname": "item_tax_template",
+   "fieldtype": "Select",
+   "label": "Item Tax Template",
+   "options": ""
+  },
+  {
+   "fieldname": "purchase_tax_template",
+   "fieldtype": "Select",
+   "label": "Purchase Tax Template",
+   "options": ""
+  },
+  {
+   "fieldname": "tax_with_holding_category",
+   "fieldtype": "Select",
+   "label": "Tax With Holding Category",
+   "options": ""
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-06 10:25:15.516965",
+ "modified": "2026-02-13 23:04:49.773819",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Company Map",

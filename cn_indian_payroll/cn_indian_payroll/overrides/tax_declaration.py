@@ -204,6 +204,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
                         num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
 
+
+
                         salary_slip = make_salary_slip(
                             source_name=get_latest_structure[0].salary_structure,
                             employee=self.employee,
@@ -217,6 +219,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                                 salary_component = frappe.get_doc("Salary Component", component.salary_component)
                                 if salary_component.component_type == "LTA Reimbursement":
                                     subcategory.max_amount = round(component.amount * num_months)
+
 
 
 
@@ -995,6 +998,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         final_hra_exemption / month_count
                     )
 
+
+
                     months = []
                     current_date = start_date
 
@@ -1029,6 +1034,10 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                                 "exemption_amount": final_hra_exemption,
                             },
                         )
+
+                    self.custom_hra_received_annual=self.salary_structure_hra
+                    self.custom_rent_paid__10_of_basic_annual=(self.monthly_house_rent * month_count)-self.custom_basic_as_per_salary_structure
+                    self.custom_50_of_basic_metro=earned_basic
 
         elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 0:
             self.custom_basic_as_per_salary_structure = None

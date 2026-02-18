@@ -10,9 +10,6 @@ import json
 from dateutil.relativedelta import relativedelta
 
 
-
-
-
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37004&company=PW&payroll_period=25-26
 
 @frappe.whitelist()
@@ -512,7 +509,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
 
 
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form?employee=37001&company=PW&payroll_period=25-26&go_head_with_new_regime=0
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form?employee=HR-EMP-00001&company=Pen Pencil&payroll_period=25-26&go_head_with_new_regime=0
 
 @frappe.whitelist()
 def tds_declaration_form(employee=None, company=None, payroll_period=None, go_head_with_new_regime=None):
@@ -581,7 +578,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "attach_reqd": 0,
                 "attach_proof": "",
                 "approval_needed":"No",
-                "attach_link": ""
+                "attach_link": "",
+                "custom_name": declaration_doc.custom_name or "",
+
             })
 
 
@@ -1212,7 +1211,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "address_line1": None,
                 "address_line2": None,
                 "attach_reqd": 0,
-                "attach_proof": ""
+                "attach_proof": "",
+                "custom_name": None
             })
 
 
@@ -1591,7 +1591,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             filters={
                 "employee": employee,
                 "company": company,
-                "payroll_period": payroll_period
+                "payroll_period": payroll_period,
+                "docstatus": ["in", [0, 1]]
             },
             fields=["name"],
             limit=1
@@ -1630,6 +1631,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "address_line2": proof_doc.custom_address_title2 or "",
                     "attach_proof": proof_doc.custom_hra_proof_attach or "",
                     "attach_reqd": 1,
+                    "custom_name": proof_doc.custom_name or "",
+                    "custom_proof_status": proof_doc.custom_hra_approval_status or "",
+                    "custom_note": proof_doc.custom_note or "",
+                    
                 })
 
 
@@ -1646,7 +1651,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "exemption_sub_category": d.exemption_sub_category,
                     "amount": d.amount,
                     "max_amount": d.max_amount,
-                    "attach_proof": d.attach_proof
+                    "attach_proof": d.attach_proof,
+                    "custom_proof_status": d.custom_proof_status,
+                    "custom_note": d.custom_note
                 })
 
             existing_map = {
@@ -1666,13 +1673,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             go_head_with_new_regime = int(go_head_with_new_regime)
 
 
-
-
-
-
-
             if go_head_with_new_regime == current_flag:
-
 
 
                 if current_tax_regime == "Old Regime":
@@ -1760,6 +1761,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "",
+                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else "",
+                            "custom_note": declaration_row.get("custom_note") if declaration_row else "",
                         }
 
 
@@ -1844,6 +1847,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 if declaration_row and declaration_row.get("max_amount") is not None
                                 else row.max_amount
                             ),
+                            "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else "",
+                            "custom_note": declaration_row.get("custom_note") if declaration_row else "",
                             "attach_reqd": 1,
                             "attach_proof": declaration_row.get("attach_proof")
                                 if declaration_row and declaration_row.get("attach_proof")
@@ -1949,6 +1954,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "" ,
+                            "custom_proof_status": "",
+                            "custom_note": "",
                         })
 
                     # ------------------ Group by Section Property ------------------
@@ -2207,6 +2214,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 0,
                         "attach_proof": "" ,
+                        "custom_proof_status": "",
+                        "custom_note": "",
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -2274,6 +2283,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "address_line2": None,
                     "attach_reqd": 1,
                     "attach_proof": "" ,
+                    "custom_name": "",
+                    "custom_proof_status": "",
+                    "custom_note": ""
                 })
 
 
@@ -2505,14 +2517,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         )
                         editable = 1
 
-                    # category_grouped[category]["items"].append({
-                    #     "exemption_sub_category": row.name,
-                    #     "component_type": row.custom_component_type,
-                    #     "description": row.custom_description,
-                    #     "editable": editable,
-                    #     "amount": round(amount),
-                    #     "max_amount": round(max_amount),
-                    # })
+                  
 
                     item = {
                         "exemption_sub_category": row.name,
@@ -2523,11 +2528,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "max_amount": round(max_amount),
                         "attach_reqd": 0,
                         "attach_proof": "",
+                        "custom_proof_status":"",
+                        "custom_note": "",
                     }
 
-                    # ✅ Attach proof ONLY for editable (non-system) components
+                    
                     if row.custom_component_type not in NON_EDITABLE_COMPONENTS:
-                        # item["attach_proof"] = row.attach_proof
+                        
                         item["attach_reqd"] = 1
 
                     category_grouped[category]["items"].append(item)
@@ -2604,6 +2611,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 1,
                         "attach_proof": "",
+                        "custom_proof_status": "",
+                        "custom_note": "",
                     })
 
                 hra_exemption.append({
@@ -2656,6 +2665,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "address_line2": declaration_doc.custom_address_title2 or "",
                     "attach_reqd": 1,
                     "attach_proof": "" ,
+                    "custom_name": declaration_doc.custom_name or "",
+                    
                 })
 
 
@@ -2671,7 +2682,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "exemption_category": d.exemption_category,
                     "exemption_sub_category": d.exemption_sub_category,
                     "amount": d.amount,
-                    "max_amount": d.max_amount
+                    "max_amount": d.max_amount,
+                    # "custom_proof_status":d.custom_proof_status
                 })
 
             existing_map = {
@@ -2774,6 +2786,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 0,
                             "attach_proof": "",
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         }
 
                         # ✅ Add attach_proof ONLY when allowed
@@ -2852,6 +2865,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             ),
                             "attach_reqd": 1,
                             "attach_proof": "" ,
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         })
 
                     final_list = []
@@ -2948,7 +2962,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                                 else row.max_amount
                             ),
                             "attach_reqd": 0,
-                            "attach_proof": ""
+                            "attach_proof": "",
+                            # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         })
 
                     # ------------------ Group by Section Property ------------------
@@ -3204,7 +3219,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             else row.max_amount
                         ),
                         "attach_reqd": 0,
-                        "attach_proof": ""
+                        "attach_proof": "",
+                        # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -3271,6 +3287,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "address_line1": None,
                     "address_line2": None,
                     "attach_proof": "",
+                    "custom_name": "",
                 })
 
 
@@ -3590,6 +3607,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         ),
                         "attach_reqd": 1,
                         "attach_proof": "",
+                        # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
                 hra_exemption.append({
@@ -3681,6 +3699,14 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         lta_amount = 0
         eighty_d=[]
         other_investment=[]
+        lta_declared_amount=0
+        lta_exempted_amount=0
+        home_loan_investment=[]
+        home_loan_investment_sum=0
+
+        declared_home_loan = 0
+        qualified_home_loan = 0
+        taxable_home_loan=0
 
         if declaration_doc.declarations:
             for d in declaration_doc.declarations:
@@ -3692,7 +3718,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
                 # LTA
                 if sub_category.custom_component_type == "LTA Reimbursement":
-                    lta_amount = flt(d.max_amount or 0)
+                    lta_declared_amount = flt(d.amount or 0)
+                    lta_exempted_amount = flt(d.max_amount or 0)
+                    lta_amount = flt(d.max_amount or 0) if d.amount and d.max_amount and d.amount > d.max_amount else flt(d.amount or 0)
+
 
                 category = frappe.get_doc(
                     "Employee Tax Exemption Category",
@@ -3707,7 +3736,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                     eighty_c.append({
                         "component": d.exemption_sub_category,
                         "declared_amount": declared,
-                        "qualified_amount": qualified,
+                        "qualified_amount": 0,
                         "deductible_amount": qualified if declared > qualified else declared
                     })
 
@@ -3724,7 +3753,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                         "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                     })
 
-                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
 
                     declared_other = flt(d.amount or 0)
                     qualified_other = flt(d.max_amount or 0)
@@ -3737,6 +3766,20 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                         "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                     })
 
+                if sub_category.custom_component_type=="Home Loan":
+
+                    declared_home_loan = flt(d.amount or 0)
+                    qualified_home_loan = flt(d.max_amount or 0)
+                    taxable_home_loan = declared_home_loan if declared_home_loan < qualified_home_loan else qualified_home_loan
+
+                    home_loan_investment.append({
+
+                        "component": d.exemption_sub_category,
+                        "declared_amount": declared_home_loan,
+                        "qualified_amount": qualified_home_loan,
+                        "deductible_amount": qualified_home_loan if declared_home_loan > qualified_home_loan else declared_home_loan
+                    })
+
         # ------------------ Annual Statement ------------------
 
 
@@ -3747,6 +3790,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         )
         eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
         other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+        home_loan_investment_sum = sum(r["deductible_amount"] for r in home_loan_investment)
 
         annual_statement = get_annual_statement(employee, payroll_period,company)
 
@@ -3779,9 +3823,17 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
         gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
 
-        total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+        total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum)
 
         net_taxable_income=round(gross_total_income-total_declaration_sum,2)
+
+
+
+
+
+
+
+
 
 
     elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
@@ -3832,6 +3884,15 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             eighty_d=[]
             other_investment=[]
 
+            lta_declared_amount=0
+            lta_exempted_amount=0
+            home_loan_investment=[]
+            home_loan_investment_sum=0
+
+            declared_home_loan = 0
+            qualified_home_loan = 0
+            taxable_home_loan=0
+
             if declaration_doc.declarations:
                 for d in declaration_doc.declarations:
 
@@ -3842,7 +3903,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
                     # LTA
                     if sub_category.custom_component_type == "LTA Reimbursement":
-                        lta_amount = flt(d.max_amount or 0)
+                        lta_declared_amount = flt(d.amount or 0)
+                        lta_exempted_amount = flt(d.max_amount or 0)
+                        lta_amount = flt(d.max_amount or 0) if d.amount and d.max_amount and d.amount > d.max_amount else flt(d.amount or 0)
 
                     category = frappe.get_doc(
                         "Employee Tax Exemption Category",
@@ -3874,7 +3937,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                         })
 
-                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
 
                         declared_other = flt(d.amount or 0)
                         qualified_other = flt(d.max_amount or 0)
@@ -3887,6 +3950,22 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                         })
 
+                    if sub_category.custom_component_type=="Home Loan":
+
+                        declared_home_loan = flt(d.amount or 0)
+                        qualified_home_loan = flt(d.max_amount or 0)
+                        taxable_home_loan = declared_home_loan if declared_home_loan < qualified_home_loan else qualified_home_loan
+
+                        home_loan_investment.append({
+
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_home_loan,
+                            "qualified_amount": qualified_home_loan,
+                            "deductible_amount": qualified_home_loan if declared_home_loan > qualified_home_loan else declared_home_loan
+                        })
+
+                    
+
             # ------------------ Annual Statement ------------------
 
 
@@ -3897,6 +3976,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             )
             eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
             other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+            home_loan_investment_sum = sum(r["deductible_amount"] for r in home_loan_investment)
 
             annual_statement = get_annual_statement(employee, payroll_period,company)
 
@@ -3929,7 +4009,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
             gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
 
-            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum, 2)
 
             net_taxable_income=round(gross_total_income-total_declaration_sum,2)
 
@@ -3971,6 +4051,17 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             eighty_d=[]
             other_investment=[]
 
+            lta_declared_amount=0
+            lta_exempted_amount=0
+            home_loan_investment=[]
+            home_loan_investment_sum=0
+
+            declared_home_loan = 0
+            qualified_home_loan = 0
+            taxable_home_loan=0
+
+
+
             if proof_submission_doc.tax_exemption_proofs:
                 for d in proof_submission_doc.tax_exemption_proofs:
 
@@ -3981,7 +4072,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
                     # LTA
                     if sub_category.custom_component_type == "LTA Reimbursement":
-                        lta_amount = flt(d.max_amount or 0)
+                        lta_declared_amount = flt(d.amount or 0)
+                        lta_exempted_amount = flt(d.max_amount or 0)
+                        lta_amount = flt(d.max_amount or 0) if d.amount and d.max_amount and d.amount > d.max_amount else flt(d.amount or 0)
+
 
                     category = frappe.get_doc(
                         "Employee Tax Exemption Category",
@@ -4013,7 +4107,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                         })
 
-                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement":
+                    if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
 
                         declared_other = flt(d.amount or 0)
                         qualified_other = flt(d.max_amount or 0)
@@ -4026,6 +4120,20 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                             "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
                         })
 
+                    if sub_category.custom_component_type=="Home Loan":
+
+                        declared_home_loan = flt(d.amount or 0)
+                        qualified_home_loan = flt(d.max_amount or 0)
+                        taxable_home_loan = declared_home_loan if declared_home_loan < qualified_home_loan else qualified_home_loan
+
+                        home_loan_investment.append({
+
+                            "component": d.exemption_sub_category,
+                            "declared_amount": declared_home_loan,
+                            "qualified_amount": qualified_home_loan,
+                            "deductible_amount": qualified_home_loan if declared_home_loan > qualified_home_loan else declared_home_loan
+                        })
+
             # ------------------ Annual Statement ------------------
 
 
@@ -4036,6 +4144,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             )
             eighty_d_sum = sum(r["deductible_amount"] for r in eighty_d)
             other_investment_sum = sum(r["deductible_amount"] for r in other_investment)
+            home_loan_investment_sum = sum(r["deductible_amount"] for r in home_loan_investment)
 
             annual_statement = get_annual_statement(employee, payroll_period,company)
 
@@ -4067,14 +4176,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
             gross_total_income=round(flt(salary_after_section_10) - flt(standard_deduction), 2)
 
-            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum)
+            total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum, 2)
 
             net_taxable_income=round(gross_total_income-total_declaration_sum,2)
-
-
-
-
-
 
 
 
@@ -4095,6 +4199,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":round(flt(total_gross_earning), 2),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(total_gross_earning), 2),
 
         },
         {
@@ -4105,6 +4212,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":round(flt(extra_payment_grand_total), 2),
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "total_off_cycle_extra_payment",
@@ -4114,6 +4224,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":round(flt(total_off_cycle_payment), 2),
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "total_perquisite_total",
@@ -4123,6 +4236,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":round(flt(total_perquisite_total), 2),
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
 
 
@@ -4133,6 +4249,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(total_gross_salary_current), 2),
 
         },
 
@@ -4143,7 +4262,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col1":"",
             "col2":"",
             "col3":"",
-            "col4":round(flt(total_gross_salary_current), 2)    ,
+            "col4":round(flt(total_gross_salary_current), 2),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(total_gross_salary_current), 2),
         },
 
 
@@ -4155,6 +4277,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4165,6 +4290,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":lta_declared_amount,
+            "exemption_amount":round(flt(lta_amount), 2),
+            "taxable_amount":"",
         },
         {
             "key": "total_reimbursements",
@@ -4174,6 +4302,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":round(flt(lta_amount), 2),
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":round(flt(lta_amount), 2),
+            "taxable_amount":"",
         },
         {
             "key": "total_income_after_deduction_and_reimbursements",
@@ -4187,6 +4318,11 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col4":round(
                 flt(total_gross_salary_current) - flt(lta_amount), 2
             ),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(
+                flt(total_gross_salary_current) - flt(lta_amount), 2
+            ),
         },
         {
             "key": "less_exemption_under_section_10",
@@ -4195,6 +4331,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4204,6 +4343,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4214,6 +4356,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":basic_percentage,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "rent_paid",
@@ -4223,6 +4369,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":rent_paid_of_basic,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "hra_received",
@@ -4232,6 +4382,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":hra_received_annual,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "hra_exemption",
@@ -4241,6 +4395,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":hra_exemption,
+            "exemption_amount":"",
+            "taxable_amount":"",
+
         },
         {
             "key": "total_section_10_exemptions",
@@ -4250,6 +4408,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":hra_exemption,
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":hra_exemption,
+            "taxable_amount":"",
+
         },
         {
             "key": "salary_after_section_10",
@@ -4259,6 +4421,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":salary_after_section_10,
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":salary_after_section_10,
+
         },
         {
             "key": "less_deduction_under_section_16",
@@ -4267,6 +4433,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4277,6 +4446,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":standard_deduction,
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "total_deduction_section_16",
@@ -4286,6 +4458,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":standard_deduction,
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":standard_deduction,
+            "taxable_amount":"",
         },
         {
             "key": "income_chargeable_salary",
@@ -4299,6 +4474,11 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col4":round(
                 flt(salary_after_section_10) - flt(standard_deduction), 2
             ),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(
+                flt(salary_after_section_10) - flt(standard_deduction), 2
+            ),
         },
         {
             "key": "income_loss_house_property",
@@ -4307,8 +4487,28 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
+
+
+        {
+            "key": "home_loan_interest_paid",
+            "name": "Home Loan Interest Paid for Self-occupied Property",
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":"",
+            "declared_amount":declared_home_loan,
+            "exemption_amount":taxable_home_loan,
+            "taxable_amount":"",
+
+        },
+
+
+
         {
             "key": "total_income_loss_house_property",
             "name": "Total for Income/Loss from house property",
@@ -4317,6 +4517,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":taxable_home_loan,
+            "taxable_amount":"",
         },
         {
             "key": "other_sources",
@@ -4325,6 +4528,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
 
         },
         {
@@ -4335,6 +4541,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col2":"",
             "col3":"",
             "col4":"",
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
         },
         {
             "key": "gross_total_income",
@@ -4348,6 +4557,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "col4":round(
                 flt(salary_after_section_10) - flt(standard_deduction), 2
             ),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":"",
         }
     ],
 
@@ -4531,184 +4743,6 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 
-# @frappe.whitelist()
-# def update_declaration_form(declaration_id=None, data=None, doctype=None,proof_id=None,employee=None,company=None,payroll_period=None):
-#     import frappe
-
-#     if isinstance(data, str):
-#         data = frappe.parse_json(data)
-
-#     if doctype=="Employee Tax Exemption Declaration" and declaration_id:
-
-#         declaration = frappe.get_doc(
-#             "Employee Tax Exemption Declaration",
-#             declaration_id
-#         )
-
-#         company = declaration.company
-#         employee = declaration.employee
-#         payroll_period = declaration.payroll_period
-
-
-#         declaration.monthly_house_rent = data.get("monthly_house_rent")
-#         declaration.rented_in_metro_city = data.get("rented_in_metro_city")
-
-#         declaration.custom_start_date = data.get("start_date")
-#         declaration.custom_end_date = data.get("end_date")
-#         declaration.custom_pan = data.get("pan")
-#         declaration.custom_address_title1 = data.get("address_title1")
-#         declaration.custom_address_title2 = data.get("address_title2")
-
-
-
-#         go_head_with_new_regime = data.get("go_head_with_new_regime")
-
-#         selected_regime = "New Regime" if go_head_with_new_regime == 1 else "Old Regime"
-
-
-#         income_tax_slab = frappe.get_list(
-#             "Income Tax Slab",
-#             filters={
-#                 "disabled": 0,
-#                 "company": company,
-#                 "custom_select_regime": selected_regime,
-#                 "docstatus": 1,
-#             },
-#             fields=["name", "custom_select_regime"],
-#             order_by="effective_from desc",
-#             limit=1,
-#         )
-
-#         if not income_tax_slab:
-#             frappe.throw(f"No active Income Tax Slab found for {selected_regime}")
-
-#         declaration.custom_income_tax = income_tax_slab[0].name
-#         declaration.custom_tax_regime = income_tax_slab[0].custom_select_regime
-
-#         declaration.set("declarations", [])
-
-#         for row in data.get("declarations", []):
-#             declaration.append("declarations", {
-#                 "exemption_category": row.get("exemption_category"),
-#                 "exemption_sub_category": row.get("exemption_sub_category"),
-#                 "amount": row.get("amount"),
-#                 "max_amount": row.get("max_amount"),
-#             })
-
-#         declaration.save(ignore_permissions=True)
-
-#         latest_assignment = frappe.get_list(
-#             "Salary Structure Assignment",
-#             filters={
-#                 "employee": employee,
-#                 "company": company,
-#                 "custom_payroll_period": payroll_period,
-#                 "docstatus": 1,
-#             },
-#             fields=["name"],
-#             order_by="from_date desc",
-#             limit=1,
-#         )
-
-#         if latest_assignment:
-#             assignment_doc = frappe.get_doc(
-#                 "Salary Structure Assignment",
-#                 latest_assignment[0].name
-#             )
-
-#             assignment_doc.income_tax_slab = income_tax_slab[0].name
-#             assignment_doc.custom_tax_regime = selected_regime
-#             assignment_doc.save(ignore_permissions=True)
-
-#         frappe.db.commit()
-
-#         return {
-#             "status": "success",
-#             "message": "Declaration updated successfully",
-#             "tax_regime": selected_regime,
-#             "income_tax_slab": income_tax_slab[0].name,
-#         }
-
-#     elif (
-#             doctype == "Employee Tax Exemption Proof Submission"
-#             and declaration_id
-#             and not proof_id
-#         ):
-
-#             # ------------------ Parse & Validate data ------------------
-#             # ------------------ Resolve data payload safely ------------------
-#             if not data:
-#                 data = frappe.form_dict.get("data")
-
-#             if isinstance(data, str):
-#                 data = frappe.parse_json(data)
-
-#             if not data or not isinstance(data, dict):
-#                 frappe.throw("Data payload is required to create Proof Submission")
-
-
-#             # ------------------ Tax Regime ------------------
-#             go_head_with_new_regime = data.get("go_head_with_new_regime", 0)
-#             selected_regime = "New Regime" if go_head_with_new_regime == 1 else "Old Regime"
-
-#             # ------------------ Income Tax Slab ------------------
-#             income_tax_slab = frappe.get_list(
-#                 "Income Tax Slab",
-#                 filters={
-#                     "disabled": 0,
-#                     "company": company,
-#                     "custom_select_regime": selected_regime,
-#                     "docstatus": 1,
-#                 },
-#                 fields=["name", "custom_select_regime"],
-#                 order_by="effective_from desc",
-#                 limit=1,
-#             )
-
-#             if not income_tax_slab:
-#                 frappe.throw(f"No active Income Tax Slab found for {selected_regime}")
-
-#             # ------------------ Create Proof Submission ------------------
-#             proof_doc = frappe.new_doc("Employee Tax Exemption Proof Submission")
-#             proof_doc.custom_declaration_id = declaration_id
-#             proof_doc.company = company
-#             proof_doc.employee = employee
-#             proof_doc.payroll_period = payroll_period
-#             proof_doc.custom_income_tax = income_tax_slab[0].name
-#             proof_doc.custom_tax_regime = selected_regime
-#             proof_doc.submission_date = frappe.utils.nowdate()
-
-#             # ------------------ HRA Fields ------------------
-#             proof_doc.house_rent_payment_amount = data.get("monthly_house_rent")
-#             proof_doc.rented_in_metro_city = data.get("rented_in_metro_city")
-#             proof_doc.custom_start_date = data.get("start_date")
-#             proof_doc.custom_end_date = data.get("end_date")
-#             proof_doc.custom_pan = data.get("pan")
-#             proof_doc.custom_address_title1 = data.get("address_title1")
-#             proof_doc.custom_address_title2 = data.get("address_title2")
-
-#             # ------------------ Child Table ------------------
-#             proof_doc.set("tax_exemption_proofs", [])
-
-#             for row in data.get("declarations", []):
-#                 proof_doc.append("tax_exemption_proofs", {
-#                     "exemption_category": row.get("exemption_category"),
-#                     "exemption_sub_category": row.get("exemption_sub_category"),
-#                     "amount": row.get("amount"),
-#                     "max_amount": row.get("max_amount"),
-#                 })
-
-#             proof_doc.insert(ignore_permissions=True)
-#             proof_doc.submit(ignore_permissions=True)
-#             frappe.db.commit()
-
-#             return {
-#                 "status": "success",
-#                 "message": "Proof Submission created successfully",
-#                 "proof_id": proof_doc.name,
-#             }
-
-
 
 @frappe.whitelist()
 def update_declaration_form(
@@ -4730,9 +4764,7 @@ def update_declaration_form(
         data = frappe.parse_json(data)
 
 
-    # ============================================================
-    # 1️⃣ UPDATE DECLARATION
-    # ============================================================
+
     if doctype == "Employee Tax Exemption Declaration" and declaration_id:
 
         declaration = frappe.get_doc(
@@ -4752,6 +4784,7 @@ def update_declaration_form(
         declaration.custom_pan = data.get("pan")
         declaration.custom_address_title1 = data.get("address_title1")
         declaration.custom_address_title2 = data.get("address_title2")
+        declaration.custom_name=data.get("custom_name")
 
         # -------- Regime --------
         go_head_with_new_regime = data.get("go_head_with_new_regime", 0)
@@ -4821,14 +4854,8 @@ def update_declaration_form(
             "income_tax_slab": income_tax_slab[0].name,
         }
 
-    # ============================================================
-    # 2️⃣ CREATE PROOF SUBMISSION
-    # ============================================================
-    elif (
-        doctype == "Employee Tax Exemption Proof Submission"
-        and declaration_id
-        and not proof_id
-    ):
+
+    elif doctype == "Employee Tax Exemption Proof Submission" and declaration_id and not proof_id:
 
 
         declaration = frappe.get_doc(
@@ -4880,6 +4907,7 @@ def update_declaration_form(
         proof_doc.custom_address_title1 = data.get("address_title1")
         proof_doc.custom_address_title2 = data.get("address_title2")
         proof_doc.custom_hra_proof_attach = data.get("attach_proof")
+        proof_doc.custom_name=data.get("custom_name")
 
         # -------- Child table --------
         proof_doc.set("tax_exemption_proofs", [])
@@ -4896,7 +4924,7 @@ def update_declaration_form(
 
 
         proof_doc.insert()
-        proof_doc.submit()
+        # proof_doc.submit()
         frappe.db.commit()
 
         return {
@@ -4959,6 +4987,8 @@ def update_declaration_form(
         proof_doc.custom_pan = data.get("pan")
         proof_doc.custom_address_title1 = data.get("address_title1")
         proof_doc.custom_address_title2 = data.get("address_title2")
+        proof_doc.custom_hra_proof_attach = data.get("attach_proof")
+        proof_doc.custom_name=data.get("custom_name")
 
         # ------------------ Child Table ------------------
         proof_doc.set("tax_exemption_proofs", [])
@@ -6629,6 +6659,27 @@ def get_tds_projection_print_html(declaration_id):
     frappe.local.response["response"] = html
 
 
+
+
+#http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_tds_projection_poi_print_html?proof_id=HR-TAX-PRF-2026-00010
+
+@frappe.whitelist(allow_guest=True)
+def get_tds_projection_poi_print_html(proof_id):
+
+    context = calculate_tds_projection_poi(proof_id)
+
+    if not context:
+        frappe.throw("No TDS projection data found")
+
+    html = frappe.render_template(
+        "cn_indian_payroll/templates/includes/tds_projection_poi_print.html",
+        context
+    )
+
+    frappe.local.response["content_type"] = "text/html"
+    frappe.local.response["response"] = html
+
+
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.print_declaration_preview?employee=37001&payroll_period=25-26&company=PW
 
 @frappe.whitelist()
@@ -6772,7 +6823,7 @@ def get_form12b_pdf(doctype, docname):
 
     
 
-
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_approved_poi_category?proof_id=HR-TAX-PRF-2026-00003
 
 @frappe.whitelist()
 def get_approved_poi_category(proof_id):
@@ -6830,3 +6881,47 @@ def get_approved_poi_category(proof_id):
     return result
 
     
+
+
+@frappe.whitelist()
+def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None,amount=None):
+
+    # Validate required fields
+    if not proof_id or not sub_category or not status:
+        frappe.throw("proof_id, sub_category, and status are required")
+
+    # Get matching records
+    approved_proofs = frappe.get_all(
+        "POI Approved Category",
+        filters={"proof_id": proof_id},
+        fields=["name", "exemption_sub_category"]
+    )
+
+    updated = False
+
+    for row in approved_proofs:
+        if row.exemption_sub_category == sub_category:
+            doc = frappe.get_doc("POI Approved Category", row.name)
+
+            doc.status = status
+            doc.command = note
+            if amount:
+                doc.declared_amount = amount
+            
+
+            doc.save(ignore_permissions=True)
+
+            updated = True
+
+    if updated:
+        frappe.db.commit()
+
+    return {
+        "message": "Status updated successfully",
+        "proof_id": proof_id,
+        "sub_category": sub_category,
+        "amount": amount,
+        "status": status
+    }
+
+

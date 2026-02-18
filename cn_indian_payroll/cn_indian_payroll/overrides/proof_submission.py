@@ -12,18 +12,30 @@ from datetime import date
 class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission):
     def validate(self):
         super().validate()
-        self.set_approved_status_for_auto_component()
-        self.get_total_exemption_amount()
-        
+        self.set_approved_status_for_auto_component()        
         self.calculate_hra_exemption()
-        # self.set_total_exemption_amount()
         self.set_total_actual_amount()
+        self.get_total_exemption_amount()
 
     def after_insert(self):
         self.insert_approved_proof_in_history()
     
         # if self.submission_date:
         #     self.update_tax_declaration()
+
+    def on_cancel(self):
+
+        approved_categories = frappe.get_list(
+            "POI Approved Category",
+            filters={"proof_id": self.name},
+            fields=["name"]
+        )
+
+        for category in approved_categories:
+            frappe.delete_doc("POI Approved Category", category.name, force=1)
+
+        frappe.db.commit()
+
 
     def update_tax_declaration(self):
         if len(self.tax_exemption_proofs) > 0:
@@ -273,6 +285,8 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
                     self.custom_hra_received_monthly = round(
                         future_hra_amount / month_count
                     )
+
+                    
                     self.custom_basic_received_annual = round(future_basic_amount)
                     self.custom_basic_received_monthly = round(
                         future_basic_amount / month_count
@@ -380,39 +394,40 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
     def insert_approved_proof_in_history(self):
         if self.tax_exemption_proofs:
             for d in self.tax_exemption_proofs:
-                get_approved_proof = frappe.get_list("POI Approved Category",
-                    filters={
-                        "employee": self.employee,
-                        "exemption_category": d.exemption_category,
-                        "exemption_sub_category": d.exemption_sub_category,
-                        "payroll_period": self.payroll_period,
-                    },
-                    fields=["name"]
-                )
-                if not get_approved_proof:
-                    approved_doc = frappe.get_doc({
-                        "doctype": "POI Approved Category",
-                        "employee": self.employee,
-                        "exemption_category": d.exemption_category,
-                        "exemption_sub_category": d.exemption_sub_category,
-                        "declared_amount": d.amount,
-                        "max_amount": d.max_amount,
-                        "payroll_period": self.payroll_period,
-                        "date":self.submission_date,
-                        "proof_id": self.name,
-                        "attach":d.attach_proof
-                    })
-                    approved_doc.insert()
-                    frappe.db.commit()
-                else:
-                    approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
-                    approved_doc.declared_amount = d.amount
-                    approved_doc.max_amount = d.max_amount
-                    approved_doc.date = self.submission_date
-                    approved_doc.proof_id = self.name
-                    approved_doc.attach = d.attach_proof
-                    approved_doc.save()
-                    frappe.db.commit()
+                if d.custom_proof_status == "Pending":
+                    get_approved_proof = frappe.get_list("POI Approved Category",
+                        filters={
+                            "employee": self.employee,
+                            "exemption_category": d.exemption_category,
+                            "exemption_sub_category": d.exemption_sub_category,
+                            "payroll_period": self.payroll_period,
+                        },
+                        fields=["name"]
+                    )
+                    if not get_approved_proof:
+                        approved_doc = frappe.get_doc({
+                            "doctype": "POI Approved Category",
+                            "employee": self.employee,
+                            "exemption_category": d.exemption_category,
+                            "exemption_sub_category": d.exemption_sub_category,
+                            "declared_amount": d.amount,
+                            "max_amount": d.max_amount,
+                            "payroll_period": self.payroll_period,
+                            "date":self.submission_date,
+                            "proof_id": self.name,
+                            "attach":d.attach_proof
+                        })
+                        approved_doc.insert()
+                        frappe.db.commit()
+                    else:
+                        approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
+                        approved_doc.declared_amount = d.amount
+                        approved_doc.max_amount = d.max_amount
+                        approved_doc.date = self.submission_date
+                        approved_doc.proof_id = self.name
+                        approved_doc.attach = d.attach_proof
+                        approved_doc.save()
+                        frappe.db.commit()
 
         if self.house_rent_payment_amount:
             get_approved_proof = frappe.get_list("POI Approved Category",
@@ -474,7 +489,6 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
 
         for d in self.tax_exemption_proofs:
 
-            # ✅ Only consider Approved proofs
             if d.custom_proof_status != "Approved":
                 continue
 
@@ -519,12 +533,10 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
             flt(d.total_exemption_amount) for d in exemptions.values()
         )
 
+        self.exemption_amount = round(total_exemption_amount + self.custom_annual_hra_exemption)
 
 
-        return total_exemption_amount
+
+        # return total_exemption_amount
 
 
-    # def set_total_exemption_amount(self):
-    #     other_exemption_total=self.get_total_exemption_amount()
-    #     hra_exemption_total=self.custom_annual_hra_exemption
-    #     self.exemption_amount = round(other_exemption_total + hra_exemption_total)

@@ -385,6 +385,60 @@
   "doctype": "State Master",
   "frequency": [
    {
+    "frequency": "Yearly",
+    "parent": "Andhra Pradesh",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:43:37.707477",
+  "name": "Andhra Pradesh",
+  "state_name": "Andhra Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Half-Yearly",
+    "parent": "Delhi",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:46:26.742037",
+  "name": "Delhi",
+  "state_name": "Delhi"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
+    "frequency": "Monthly",
+    "parent": "Kerala",
+    "parentfield": "frequency",
+    "parenttype": "State Master"
+   }
+  ],
+  "lwf_applicable": 1,
+  "lwf_designation": "ALL EMPLOYEES",
+  "min_wages": [],
+  "modified": "2025-12-03 21:44:59.040882",
+  "name": "Kerala",
+  "state_name": "Kerala"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State Master",
+  "frequency": [
+   {
     "frequency": "Half-Yearly",
     "parent": "Gujarat",
     "parentfield": "frequency",
@@ -458,59 +512,5 @@
   "modified": "2025-12-03 21:46:44.051138",
   "name": "Gujarat",
   "state_name": "Gujarat"
- },
- {
-  "docstatus": 0,
-  "doctype": "State Master",
-  "frequency": [
-   {
-    "frequency": "Yearly",
-    "parent": "Andhra Pradesh",
-    "parentfield": "frequency",
-    "parenttype": "State Master"
-   }
-  ],
-  "lwf_applicable": 1,
-  "lwf_designation": "ALL EMPLOYEES",
-  "min_wages": [],
-  "modified": "2025-12-03 21:43:37.707477",
-  "name": "Andhra Pradesh",
-  "state_name": "Andhra Pradesh"
- },
- {
-  "docstatus": 0,
-  "doctype": "State Master",
-  "frequency": [
-   {
-    "frequency": "Half-Yearly",
-    "parent": "Delhi",
-    "parentfield": "frequency",
-    "parenttype": "State Master"
-   }
-  ],
-  "lwf_applicable": 1,
-  "lwf_designation": "ALL EMPLOYEES",
-  "min_wages": [],
-  "modified": "2025-12-03 21:46:26.742037",
-  "name": "Delhi",
-  "state_name": "Delhi"
- },
- {
-  "docstatus": 0,
-  "doctype": "State Master",
-  "frequency": [
-   {
-    "frequency": "Monthly",
-    "parent": "Kerala",
-    "parentfield": "frequency",
-    "parenttype": "State Master"
-   }
-  ],
-  "lwf_applicable": 1,
-  "lwf_designation": "ALL EMPLOYEES",
-  "min_wages": [],
-  "modified": "2025-12-03 21:44:59.040882",
-  "name": "Kerala",
-  "state_name": "Kerala"
  }
 ]

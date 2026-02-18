@@ -52,6 +52,14 @@ frappe.listview_settings['Salary Slip'] = {
                                     options: 'Company',
                                     reqd: 1
                                 },
+
+                                {
+                                    fieldname: 'payroll_period',
+                                    label: __('Payroll Period'),
+                                    fieldtype: 'Link',
+                                    options: 'Payroll Period',
+                                    reqd: 1
+                                },
                                 {
                                     fieldname: 'employment_type',
                                     label: __('Employment Type'),
@@ -75,7 +83,8 @@ frappe.listview_settings['Salary Slip'] = {
                                     args: {
                                         month: values.month,
                                         company: values.company,
-                                        employment_type: values.employment_type
+                                        employment_type: values.employment_type,
+                                        payroll_period: values.payroll_period
                                     },
                                     freeze: true,
                                     callback: function (r) {
