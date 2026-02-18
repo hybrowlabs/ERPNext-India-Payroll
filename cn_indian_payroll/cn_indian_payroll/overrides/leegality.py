@@ -250,7 +250,7 @@ def view_signed_payslip_employee(salary_slip):
 
 
 @frappe.whitelist()
-def get_salary_slip_for_esign(month, company, employment_type):
+def get_salary_slip_for_esign(month, company, employment_type,payroll_period):
     """
     Fetch salary slips based on month, company, and employment type
     """
@@ -261,7 +261,9 @@ def get_salary_slip_for_esign(month, company, employment_type):
         "company": company,
         "custom_employment_type": employment_type,
         "docstatus": 0  ,
-        "custom_month":month
+        "custom_month":month,
+        "custom_payroll_period":payroll_period,
+        "custom_e_sign_status":"Not Send"
     }
 
     salary_slips = frappe.get_all(
@@ -284,7 +286,7 @@ def get_salary_slip_for_esign(month, company, employment_type):
 
 
 @frappe.whitelist()
-def send_bulk_salary_slip_for_esign(month, company, employment_type):
+def send_bulk_salary_slip_for_esign(month, company, employment_type,payroll_period):
     """
     Send multiple salary slips for e-sign
     """
@@ -292,7 +294,8 @@ def send_bulk_salary_slip_for_esign(month, company, employment_type):
     salary_slips = get_salary_slip_for_esign(
         month=month,
         company=company,
-        employment_type=employment_type
+        employment_type=employment_type,
+        payroll_period=payroll_period
     )
 
     if not salary_slips:
@@ -396,14 +399,11 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
     response.raise_for_status()
     result = response.json()
 
-    # Update Salary Slip
+
 
     document_id = result["data"]["documentId"]
     sign_url = result["data"]["invitees"][0].get("signUrl")
 
-
-    # slip.db_set("custom_document_id", result["data"]["documentId"])
-    # slip.db_set("custom_e_sign_status", "Send")
 
 
     slip.db_set("custom_document_id", document_id)
