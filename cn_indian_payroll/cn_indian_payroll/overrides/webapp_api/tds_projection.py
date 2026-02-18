@@ -3816,7 +3816,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 
-        
+
 
 
 
@@ -6870,50 +6870,8 @@ def get_approved_poi_category(proof_id):
     
 
 
-# @frappe.whitelist()
-# def approved_poi_components(proof_id=None, sub_category=None, status=None,note=None):
-
-#     proof = frappe.get_doc(
-#         "Employee Tax Exemption Proof Submission",
-#         proof_id
-#     )
-
-#     updated = False
-#     updated_status = None
-
-#     for row in proof.tax_exemption_proofs:
-
-#         if row.exemption_sub_category == sub_category:
-
-#             row.custom_proof_status = status
-#             updated = True
-#             updated_status = status
-#             row.custom_note = note
-
-#             break   
-
-#     if not updated:
-#         frappe.throw("Sub category not found in Proof")
-
-
-#     proof.save(ignore_permissions=True)
-
-
-#     frappe.db.commit()
-
-#     return {
-#         "message": "Status updated successfully",
-#         "proof_id": proof_id,
-#         "sub_category": sub_category,
-#         "status": updated_status
-#     }
-
-
-import frappe
-
-
 @frappe.whitelist()
-def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None):
+def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None,amount=None):
 
     # Validate required fields
     if not proof_id or not sub_category or not status:
@@ -6934,6 +6892,10 @@ def approved_poi_components(proof_id=None, sub_category=None, status=None, note=
 
             doc.status = status
             doc.command = note
+            if amount:
+                doc.declared_amount = amount
+            
+
             doc.save(ignore_permissions=True)
 
             updated = True
@@ -6945,5 +6907,8 @@ def approved_poi_components(proof_id=None, sub_category=None, status=None, note=
         "message": "Status updated successfully",
         "proof_id": proof_id,
         "sub_category": sub_category,
+        "amount": amount,
         "status": status
     }
+
+
