@@ -406,9 +406,21 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
 
 
 
-    slip.db_set("custom_document_id", document_id)
-    slip.db_set("custom_e_sign_url", sign_url)
-    slip.db_set("custom_e_sign_status", "Send")
+    # slip.db_set("custom_document_id", document_id)
+    # slip.db_set("custom_e_sign_url", sign_url)
+    # slip.db_set("custom_e_sign_status", "Send")
+    
+    frappe.db.set_value(
+        "Salary Slip",
+        slip.name,
+        {
+            "custom_document_id": document_id,
+            "custom_e_sign_url": sign_url,
+            "custom_e_sign_status": "Send"
+        },
+        
+    )
+
 
     frappe.db.commit()
 
