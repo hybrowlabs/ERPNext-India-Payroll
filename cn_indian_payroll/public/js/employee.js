@@ -28,19 +28,25 @@ frappe.ui.form.on("Employee", {
 
                 let is_match = false;
 
-                // ✅ Check employment type
+               
                 config.forEach(row => {
                     if (row.employment_type === frm.doc.employment_type) {
                         is_match = true;
+                        frm.set_df_property("cell_number","reqd", 1);
+                        frm.set_df_property("personal_email","reqd", 1);
+                    }
+                    else{
+                        frm.set_df_property("cell_number","reqd", 0);
+                        frm.set_df_property("personal_email","reqd", 0);
                     }
                 });
 
 
-                // ✅ Show / Hide Fields
+               
                 toggle_custom_fields(frm, is_match);
 
 
-                // ✅ Run APIs ONLY if matched
+               
                 if (is_match) {
 
                     load_select_options(frm);
@@ -56,11 +62,6 @@ frappe.ui.form.on("Employee", {
 });
 
 
-// ============================
-// Helpers
-// ============================
-
-// Show / Hide Fields
 function toggle_custom_fields(frm, show) {
 
     let fields = [
@@ -82,9 +83,6 @@ function toggle_custom_fields(frm, show) {
     frm.refresh_fields(fields);
 }
 
-
-
-// Load All Select Options
 function load_select_options(frm) {
 
     fetch_options(
@@ -104,8 +102,6 @@ function load_select_options(frm) {
 }
 
 
-
-// Common Fetch Function
 function fetch_options(method, callback) {
 
     frappe.call({
@@ -132,7 +128,7 @@ function fetch_options(method, callback) {
 
 
 
-// Set Options
+
 function set_options(frm, fieldname, options) {
 
     frm.set_df_property(fieldname, "options", options);
@@ -141,7 +137,7 @@ function set_options(frm, fieldname, options) {
 
 
 
-// Fetch Bank Accounts
+
 function fetch_bank_accounts(frm) {
 
     frappe.call({
