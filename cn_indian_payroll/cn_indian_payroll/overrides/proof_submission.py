@@ -17,10 +17,10 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.set_total_actual_amount()
         self.get_total_exemption_amount()
 
-        self.insert_approved_proof_in_history()
+        # self.insert_approved_proof_in_history()
 
-    # def after_insert(self):
-    #     self.insert_approved_proof_in_history()
+    def after_insert(self):
+        self.insert_approved_proof_in_history()
     
         # if self.submission_date:
         #     self.update_tax_declaration()
