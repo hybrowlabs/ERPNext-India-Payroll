@@ -4942,6 +4942,7 @@ def update_declaration_form(
 
         frappe.db.commit()
 
+
         return {
             "status": "success",
             "message": message,
@@ -6809,6 +6810,8 @@ def get_approved_poi_category(proof_id):
             })
 
     return result
+
+
 
     
 
