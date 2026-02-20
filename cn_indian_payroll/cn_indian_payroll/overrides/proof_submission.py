@@ -17,8 +17,8 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.set_total_actual_amount()
         self.get_total_exemption_amount()
 
-        if not self.is_new():
-            self.insert_approved_proof_in_history()
+        # if not self.is_new():
+        #     self.insert_approved_proof_in_history()
 
 
     def after_insert(self):
