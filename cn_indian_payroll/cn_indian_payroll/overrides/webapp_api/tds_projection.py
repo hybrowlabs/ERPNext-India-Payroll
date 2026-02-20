@@ -130,11 +130,6 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
 
 
-    # if has_salary_slips:
-    #     component_names = list(set(last_amount_map.keys()))
-    # else:
-    #     component_names = list(set(preview_amount_map.keys()))
-
 
     components = frappe.db.get_all(
         "Salary Component",
@@ -160,54 +155,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "Provident Fund", "ESIC", "Professional Tax", "LWF", "Income Tax"
     ]
 
-    # -------- Component Month Values -------- #
-    # for comp in components:
-
-    #     if comp.type == "Earning" and not comp.is_tax_applicable \
-    #        and not comp.custom_is_reimbursement \
-    #        and not comp.custom_is_offcycle_component:
-    #         continue
-
-
-
-    #     if comp.type == "Deduction" and comp.component_type not in allowed_deduction_types:
-    #         continue
-
-    #     values = []
-    #     for m in months:
-    #         if m in slip_by_month:
-    #             amount = frappe.db.get_value(
-    #                 "Salary Detail",
-    #                 {"parent": slip_by_month[m], "salary_component": comp.name},
-    #                 "amount"
-    #             ) or 0
-    #         else:
-    #             amount = preview_amount_map.get(comp.name, 0)
-
-
-
-
-    #         values.append(flt(amount))
-
-    #     rounded_values = [round(flt(v), 0) for v in values]
-
-    #     row = {
-    #         "name": comp.name,
-    #         "values": rounded_values,
-    #         "total": sum(rounded_values)
-    #     }
-
-
-    #     # row = {"name": comp.name, "values": values, "total": sum(values)}
-
-    #     if comp.type == "Earning" and comp.custom_is_reimbursement and comp.is_tax_applicable:
-    #         reimbursements.append(row)
-    #     elif comp.type == "Earning" and comp.custom_is_offcycle_component:
-    #         offcycle.append(row)
-    #     elif comp.type == "Earning":
-    #         earnings.append(row)
-    #     elif comp.type == "Deduction":
-    #         deductions.append(row)
+   
 
 
     for comp in components:
@@ -239,9 +187,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
                 ) or 0
 
             else:
-                # FUTURE MONTH LOGIC
-
-                # 👉 Offcycle and Reimbursement should NOT be projected to future
+                
                 if comp.custom_is_offcycle_component or comp.custom_is_reimbursement:
                     amount = 0
 
@@ -3637,13 +3583,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-
-
-
-
-
-
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=PW
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=Pen Pencil
 
 @frappe.whitelist()
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
@@ -3826,14 +3766,6 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum)
 
         net_taxable_income=round(gross_total_income-total_declaration_sum,2)
-
-
-
-
-
-
-
-
 
 
     elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
@@ -6589,22 +6521,22 @@ def slab_calculation(
 @frappe.whitelist()
 def download_tds_projection_pdf(declaration_id):
 
-    # 1️⃣ Get calculation data
+    
     data = calculate_tds_projection(declaration_id)
 
     if not data:
         frappe.throw("No TDS projection data found")
 
-    # 2️⃣ Render HTML template
+    
     html = frappe.render_template(
         "cn_indian_payroll/templates/includes/tds_projection_print.html",
         data
     )
 
-    # 3️⃣ Convert HTML to PDF
+    
     pdf = get_pdf(html)
 
-    # 4️⃣ Return PDF response
+    
     frappe.local.response.filename = "TDS_Projection.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
@@ -6614,22 +6546,22 @@ def download_tds_projection_pdf(declaration_id):
 @frappe.whitelist()
 def download_tds_poi_projection_pdf(proof_id):
 
-    # 1️⃣ Get calculation data
+    
     data = calculate_tds_projection_poi(proof_id)
 
     if not data:
         frappe.throw("No TDS projection data found")
 
-    # 2️⃣ Render HTML template
+   
     html = frappe.render_template(
         "cn_indian_payroll/templates/includes/tds_projection_poi_print.html",
         data
     )
 
-    # 3️⃣ Convert HTML to PDF
+    
     pdf = get_pdf(html)
 
-    # 4️⃣ Return PDF response
+
     frappe.local.response.filename = "TDS_Projection.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
@@ -6690,21 +6622,19 @@ def print_declaration_preview(employee, payroll_period, company):
     if target_employee:
         employee = target_employee
 
-    # 1️⃣ Call first function
     salary_projection = get_annual_statement(
         employee=employee,
         payroll_period=payroll_period,
         company=company
     )
 
-    # 2️⃣ Call second function
+
     existing_declaration = get_employee_declaration_investments(
         employee=employee,
         company=company,
         payroll_period=payroll_period
     )
 
-    # 3️⃣ Combine both results into ONE response
     result = {
         "salary_projection": salary_projection,
         "existing_declaration": existing_declaration

@@ -84,8 +84,7 @@ class CustomSalarySlip(SalarySlip):
             for row in payroll_setting.custom_hide_salary_structure_configuration
         ):
             view_signed_payslip(self.name)
-            
-            # send_invoice=view_signed_payslip(self.name)
+
 
 
 
@@ -102,81 +101,27 @@ class CustomSalarySlip(SalarySlip):
         self.net_pay_calculation()
 
 
-        # self.custom_previous_taxable_earnings = (
-        #     self.previous_taxable_earnings_before_exemption
+        self.custom_previous_taxable_earnings = (
+            self.previous_taxable_earnings_before_exemption
 
-        # )
-        # self.custom_current_taxable_earnings = (
-        #     self.current_structured_taxable_earnings_before_exemption
-        # )
+        )
+        self.custom_current_taxable_earnings = (
+            self.current_structured_taxable_earnings_before_exemption
+        )
 
-        # self.custom_future_taxable_earnings = (
-        #     self.future_structured_taxable_earnings_before_exemption
-        # )
-        # self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
-        # if self.earnings:
-        #     total_ctc_taxable_amount = 0
-        #     for earning in self.earnings:
-        #         if earning.is_tax_applicable == 1:
-        #             total_ctc_taxable_amount += earning.default_amount
-        # self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
+        self.custom_future_taxable_earnings = (
+            self.future_structured_taxable_earnings_before_exemption
+        )
+        self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
+        if self.earnings:
+            total_ctc_taxable_amount = 0
+            for earning in self.earnings:
+                if earning.is_tax_applicable == 1:
+                    total_ctc_taxable_amount += earning.default_amount
+        self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
 
-        # payroll_setting = frappe.get_single("Payroll Settings")
-
-        # if not payroll_setting.custom_hide_salary_structure_configuration or not self.employee:
-        #     return
-
-        # employee = frappe.get_doc("Employee", self.employee)
-        # supplier_id = employee.custom_trade_name
-
-        # if not supplier_id:
-        #     return
-
-        # for row in payroll_setting.custom_hide_salary_structure_configuration:
-        #     if employee.employment_type != row.employment_type:
-        #         continue
-
-        #     headers = {
-        #         "Authorization": "token 4d0f9631f8700fb:fc75b3184a35f74",
-        #         "Accept": "application/json"
-        #     }
-
-        #     # 1️⃣ Get Bank Account name
-        #     list_url = "https://dev.pwhr.in/api/resource/Bank Account"
-        #     params = {
-        #         "filters": json.dumps([
-        #             ["party_type", "=", "Supplier"],
-        #             ["party", "=", supplier_id]
-        #         ]),
-        #         "fields": json.dumps(["name"])
-        #     }
-
-        #     resp = requests.get(list_url, headers=headers, params=params, timeout=20)
-
-        #     if resp.status_code != 200:
-        #         frappe.throw(resp.text)
-
-        #     data = resp.json().get("data", [])
-        #     if not data:
-        #         return
-
-        #     # 2️⃣ Get full Bank Account doc
-        #     bank_name = data[0]["name"]
-        #     detail_url = f"{list_url}/{bank_name}"
-
-        #     detail_resp = requests.get(detail_url, headers=headers, timeout=20)
-        #     if detail_resp.status_code != 200:
-        #         frappe.throw(detail_resp.text)
-
-        #     bank = detail_resp.json()["data"]
-
-        #     frappe.msgprint(str(bank))
-
-        #     # ✅ FIX HERE
-        #     self.custom_bank_details = bank.get("name")
-
-        #     break
+        
 
 
 
@@ -218,9 +163,7 @@ class CustomSalarySlip(SalarySlip):
         if not start_day or not end_day:
             frappe.throw("Attendance cycle start/end date not set in Payroll Settings")
 
-        # ------------------------------------------------
-        # Calculate CURRENT attendance cycle (21 → 20)
-        # ------------------------------------------------
+
         if posting_date.day > end_day:
             cycle_end = posting_date.replace(day=end_day)
         else:
@@ -228,18 +171,13 @@ class CustomSalarySlip(SalarySlip):
 
         cycle_start = (cycle_end - relativedelta(months=1)).replace(day=start_day)
 
-        # ------------------------------------------------
-        # Calculate REGULARIZATION window
-        # ------------------------------------------------
+
         regularize_end_date = cycle_end
         regularize_start_date = (
             (cycle_end - relativedelta(months=regularize_months))
             .replace(day=start_day)
         )
 
-        # ------------------------------------------------
-        # Create Attendance Log
-        # ------------------------------------------------
         accrual_doc = frappe.new_doc("Attendance Log")
         accrual_doc.month = self.custom_month
         accrual_doc.company = self.company
@@ -260,9 +198,7 @@ class CustomSalarySlip(SalarySlip):
         accrual_doc.attendance_regularisationlop_reversal = 0
         accrual_doc.additional_salary_date = None
 
-        # ------------------------------------------------
-        # Fetch Attendance records for CURRENT cycle
-        # ------------------------------------------------
+
         attendance_records = frappe.get_list(
             "Attendance",
             filters={
@@ -275,9 +211,7 @@ class CustomSalarySlip(SalarySlip):
             order_by="attendance_date",
         )
 
-        # ------------------------------------------------
-        # Append DAILY attendance child rows
-        # ------------------------------------------------
+
         for att in attendance_records:
             accrual_doc.append("attendance_log_child", {
                 "date": att.attendance_date,
@@ -289,37 +223,13 @@ class CustomSalarySlip(SalarySlip):
                 ),
             })
 
-        # # ------------------------------------------------
-        # # Append MONTH-WISE working days (21 → 20)
-        # # Example:
-        # # Mar-2025 | 21-02 → 20-03 | 31
-        # # ------------------------------------------------
-        # for i in range(regularize_months):
-
-        #     cycle_end_m = regularize_end_date - relativedelta(months=i)
-        #     cycle_end_m = cycle_end_m.replace(day=end_day)
-
-        #     cycle_start_m = (
-        #         cycle_end_m - relativedelta(months=1)
-        #     ).replace(day=start_day)
-
-        #     working_days = (cycle_end_m - cycle_start_m).days + 1
-
-        #     accrual_doc.append("attendance_log_working_days", {
-        #         "month_and_year": cycle_end_m.strftime("%b-%Y"),
-        #         "month": cycle_end_m.strftime("%B"),
-
-        #         "from_date": cycle_start_m,
-        #         "to_date": cycle_end_m,
-        #         "working_days": working_days
-        #     })
-
+       
 
         for i in range(regularize_months):
 
             cycle_end_m = regularize_end_date - relativedelta(months=i)
 
-            # Clamp end_day safely
+
             last_day = monthrange(cycle_end_m.year, cycle_end_m.month)[1]
             cycle_end_m = cycle_end_m.replace(day=min(end_day, last_day))
 
@@ -328,7 +238,7 @@ class CustomSalarySlip(SalarySlip):
             prev_last_day = monthrange(cycle_start_m.year, cycle_start_m.month)[1]
             cycle_start_m = cycle_start_m.replace(day=min(start_day, prev_last_day))
 
-            # ✅ Working days = calendar days of the MONTH
+
             working_days = monthrange(
                 cycle_end_m.year, cycle_end_m.month
             )[1]
@@ -350,9 +260,6 @@ class CustomSalarySlip(SalarySlip):
             })
 
 
-        # ------------------------------------------------
-        # Save & Submit
-        # ------------------------------------------------
         accrual_doc.insert(ignore_permissions=True)
         accrual_doc.submit()
 
@@ -372,9 +279,7 @@ class CustomSalarySlip(SalarySlip):
         if not start_day or not end_day:
             frappe.throw("Attendance cycle start/end date not set in Payroll Settings")
 
-        # ------------------------------------------------
-        # Calculate attendance cycle
-        # ------------------------------------------------
+
         if posting_date.day > end_day:
             cycle_end = posting_date.replace(day=end_day)
         else:
@@ -382,9 +287,6 @@ class CustomSalarySlip(SalarySlip):
 
         cycle_start = (cycle_end - relativedelta(months=1)).replace(day=start_day)
 
-        # ------------------------------------------------
-        # Create Attendance Log
-        # ------------------------------------------------
         accrual_doc = frappe.new_doc("Attendance Log")
         accrual_doc.month = self.custom_month
         accrual_doc.company = self.company
@@ -401,9 +303,7 @@ class CustomSalarySlip(SalarySlip):
         accrual_doc.attendance_regularisationlop_reversal = 0
         accrual_doc.additional_salary_date = None
 
-        # ------------------------------------------------
-        # Fetch attendance records within cycle
-        # ------------------------------------------------
+
         attendance_records = frappe.get_list(
             "Attendance",
             filters={
@@ -416,9 +316,7 @@ class CustomSalarySlip(SalarySlip):
             order_by="attendance_date",
         )
 
-        # ------------------------------------------------
-        # Append child rows
-        # ------------------------------------------------
+
         for att in attendance_records:
             accrual_doc.append("attendance_log_child", {
                 "date": att.attendance_date,
@@ -433,9 +331,7 @@ class CustomSalarySlip(SalarySlip):
                 ),
             })
 
-        # ------------------------------------------------
-        # Save & submit
-        # ------------------------------------------------
+
         accrual_doc.insert(ignore_permissions=True)
         accrual_doc.submit()
 
@@ -468,10 +364,104 @@ class CustomSalarySlip(SalarySlip):
                 )
 
 
+    def compute_income_tax_breakup(self):
+        self.standard_tax_exemption_amount = 0
+        self.tax_exemption_declaration = 0
+        self.deductions_before_tax_calculation = 0
+        self.custom_perquisite_amount = 0
+
+        self.non_taxable_earnings = self.compute_non_taxable_earnings()
+        self.ctc = self.compute_ctc()
+        self.income_from_other_sources = self.get_income_form_other_sources()
+        self.total_earnings = self.ctc + self.income_from_other_sources
+
+        # Fetch payroll period once
+        payroll_period = frappe.get_value(
+            "Payroll Period",
+            {"company": self.company, "name": self.payroll_period.name},
+            ["name", "start_date", "end_date"],
+            as_dict=True,
+        )
+
+        # If payroll period is not found, return without further processing
+        if not payroll_period:
+            return
+
+        # If payroll period is found, process further
+        start_date = frappe.utils.getdate(payroll_period["start_date"])
+        end_date = frappe.utils.getdate(payroll_period["end_date"])
+        fiscal_year = payroll_period["name"]
+
+        # Calculate loan perquisites within the fiscal year
+        loan_repayments = frappe.get_list(
+            "Loan Repayment Schedule",
+            filters={
+                "custom_employee": self.employee,
+                "status": "Active",
+                "docstatus": 1,
+            },
+            fields=["name"],
+        )
+
+        total_perq = 0
+        for repayment in loan_repayments:
+            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
+            for entry in repayment_doc.custom_loan_perquisite:
+                if (
+                    entry.payment_date
+                    and start_date
+                    <= frappe.utils.getdate(entry.payment_date)
+                    <= end_date
+                ):
+                    total_perq += entry.perquisite_amount
+        self.custom_perquisite_amount = total_perq
+
+        # Tax slab logic
+        if hasattr(self, "tax_slab") and self.tax_slab:
+            if self.tax_slab.allow_tax_exemption:
+                self.standard_tax_exemption_amount = (
+                    self.tax_slab.standard_tax_exemption_amount
+                )
+                self.deductions_before_tax_calculation = (
+                    self.compute_annual_deductions_before_tax_calculation()
+                )
+
+            self.tax_exemption_declaration = (
+                self.get_total_exemption_amount() - self.standard_tax_exemption_amount
+            )
+
+
+        self.annual_taxable_amount = (
+            self.ctc
+            + self.custom_perquisite_amount
+            - (
+                +self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
+            )
+        )
+
+        self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
 
 
 
+        if hasattr(self, "total_structured_tax_amount") and hasattr(
+            self, "current_structured_tax_amount"
+        ):
+            self.future_income_tax_deductions = (
+                self.total_structured_tax_amount
+                + self.get("full_tax_on_additional_earnings", 0)
+                - self.income_tax_deducted_till_date
+            )
 
+            self.current_month_income_tax = (
+                self.current_structured_tax_amount
+                + self.get("full_tax_on_additional_earnings", 0)
+            )
+
+            self.total_income_tax = (
+                self.income_tax_deducted_till_date + self.future_income_tax_deductions
+            )
 
 
 
@@ -507,7 +497,6 @@ class CustomSalarySlip(SalarySlip):
     def update_loan_deducted_amount(self):
         if self.loans:
             for loan in self.loans:
-                # Fetch repayment schedule document
                 loan_schedule_name = frappe.db.get_value(
                     "Loan Repayment Schedule", {"loan": loan.loan}, "name"
                 )
@@ -529,7 +518,7 @@ class CustomSalarySlip(SalarySlip):
     def uncheck_loan_deducted_amount(self):
         if self.loans:
             for loan in self.loans:
-                # Fetch repayment schedule document
+           
                 loan_schedule_name = frappe.db.get_value(
                     "Loan Repayment Schedule", {"loan": loan.loan}, "name"
                 )
@@ -564,7 +553,7 @@ class CustomSalarySlip(SalarySlip):
                 if get_additional_salary.ref_doctype == "Employee Advance" and get_additional_salary.ref_docname:
                     component = frappe.get_doc("Employee Advance", get_additional_salary.ref_docname)
 
-                    # Update paid and balance amounts safely
+                    
                     component.custom_total_paid_amount = (component.custom_total_paid_amount or 0) + (deduction.amount or 0)
                     component.custom_total_balance_amount = (component.advance_amount or 0) - component.custom_total_paid_amount
 
@@ -581,7 +570,7 @@ class CustomSalarySlip(SalarySlip):
                 if get_additional_salary.ref_doctype == "Employee Advance" and get_additional_salary.ref_docname:
                     component = frappe.get_doc("Employee Advance", get_additional_salary.ref_docname)
 
-                    # Revert paid and balance amounts safely
+                  
                     component.custom_total_paid_amount = (component.custom_total_paid_amount or 0) - (deduction.amount or 0)
                     component.custom_total_balance_amount = (component.advance_amount or 0) - component.custom_total_paid_amount
 
@@ -591,12 +580,11 @@ class CustomSalarySlip(SalarySlip):
 
     def calculate_variable_tax(self, tax_component,has_additional_salary_tax_component=False):
 
-
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(
             self.payroll_period.start_date, self.start_date, tax_component
         )
 
-        # Structured tax amount
+       
         eval_locals, default_data = self.get_data_for_eval()
         self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
             self,
@@ -614,7 +602,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-        # Total taxable earnings with additional earnings with full tax
+    
         self.full_tax_on_additional_earnings = 0.0
         if self.current_additional_earnings_with_full_tax:
 
@@ -636,7 +624,6 @@ class CustomSalarySlip(SalarySlip):
             self.current_structured_tax_amount + self.full_tax_on_additional_earnings
         )
 
-        # print("\n\n\n\n\n\n\n\n\n33333333333", current_tax_amount, "\n\n\n\n\n\n\n\n")
 
         if flt(current_tax_amount) < 0:
             current_tax_amount = 0
@@ -1115,50 +1102,6 @@ class CustomSalarySlip(SalarySlip):
                 title=_("Salary Structure Missing"),
             )
 
-
-
-
-
-    def insert_loan_perquisite(self):
-        if self.custom_payroll_period:
-
-            get_payroll_period = frappe.get_list(
-            'Payroll Period',
-            filters={
-                'company': self.company,
-                'name': self.custom_payroll_period
-            },
-            fields=['*']
-            )
-
-
-            if get_payroll_period:
-                start_date = frappe.utils.getdate(get_payroll_period[0].start_date)
-                end_date = frappe.utils.getdate(get_payroll_period[0].end_date)
-
-
-
-                loan_repayments = frappe.get_list(
-                    'Loan Repayment Schedule',
-                    filters={
-                        'custom_employee': self.employee,
-                        'status': 'Active',
-                        'docstatus':1
-                    },
-                    fields=['*']
-                )
-                if loan_repayments:
-                    sum=0
-                    for repayment in loan_repayments:
-                        get_each_perquisite=frappe.get_doc("Loan Repayment Schedule",repayment.name)
-                        if len(get_each_perquisite.custom_loan_perquisite)>0:
-                            for date in get_each_perquisite.custom_loan_perquisite:
-
-                                payment_date = frappe.utils.getdate(date.payment_date)
-                                if start_date <= payment_date <= end_date:
-                                    sum=sum+date.perquisite_amount
-
-                    self.custom_perquisite_amount=sum
 
 
 
@@ -2227,48 +2170,7 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def loan_perquisite(self):
-        loan_perquisite_component = frappe.get_value(
-            'Salary Component',
-            filters={'component_type': 'Loan Perquisite'},
-            fieldname='name'
-        )
-
-        if not loan_perquisite_component:
-            return
-
-        loan_repayments = frappe.get_list(
-            'Loan Repayment Schedule',
-            filters={
-                'custom_employee': self.employee,
-                'status': 'Active',
-                'docstatus':1
-            },
-            fields=['name']
-        )
-
-        if not loan_repayments:
-            return
-
-        self.start_date = frappe.utils.getdate(self.start_date)
-        self.end_date = frappe.utils.getdate(self.end_date)
-
-        perquisite_amount_array = []
-        for repayment in loan_repayments:
-            loan_repayment_doc = frappe.get_doc('Loan Repayment Schedule', repayment.name)
-            for perquisite in loan_repayment_doc.custom_loan_perquisite:
-                payment_date = frappe.utils.getdate(perquisite.payment_date)
-                if self.start_date <= payment_date <= self.end_date:
-                    perquisite_amount_array.append(perquisite.perquisite_amount)
-
-        if perquisite_amount_array:
-            existing_components = {earning.salary_component for earning in self.earnings}
-
-            if loan_perquisite_component not in existing_components:
-                self.append("earnings", {
-                    "salary_component": loan_perquisite_component,
-                    "amount": sum(perquisite_amount_array)
-                })
+    
 
 
 
@@ -2376,126 +2278,137 @@ class CustomSalarySlip(SalarySlip):
 
     def tax_calculation(self):
         latest_salary_structure = frappe.get_list(
-            'Salary Structure Assignment',
-            filters={'employee': self.employee, 'docstatus': 1,"from_date": ("<=", self.end_date)},
+            "Salary Structure Assignment",
+            filters={"employee": self.employee, "docstatus": 1},
             fields=["*"],
-            order_by='from_date desc',
-            limit=1
+            order_by="from_date desc",
+            limit=1,
         )
 
-        # Set taxable amount and total income with taxable components
         if self.annual_taxable_amount:
             self.custom_taxable_amount = round(self.annual_taxable_amount)
+        else:
+            self.custom_taxable_amount = 0
 
         if self.ctc and self.non_taxable_earnings:
-            self.custom_total_income_with_taxable_component = round(self.ctc - self.non_taxable_earnings)
+            self.custom_total_income_with_taxable_component = round(
+                self.ctc - self.non_taxable_earnings
+            )
 
-        # Proceed only if Income Tax Slab is defined
-        if latest_salary_structure and latest_salary_structure[0].income_tax_slab:
-            income_doc = frappe.get_doc('Income Tax Slab', latest_salary_structure[0].income_tax_slab)
+        if latest_salary_structure[0].income_tax_slab:
+            payroll_period = latest_salary_structure[0].custom_payroll_period
+            income_doc = frappe.get_doc(
+                "Income Tax Slab", latest_salary_structure[0].income_tax_slab
+            )
+
+            total_value = []
+            from_amount = []
+            to_amount = []
+            percentage = []
+
             total_array = []
-            from_amount, to_amount, percentage, difference, total_value = [], [], [], [], []
+            difference = []
 
             rebate = income_doc.custom_taxable_income_is_less_than
             max_amount = income_doc.custom_maximum_amount
 
-            # Prepare slab ranges
+            if (
+                income_doc.custom_marginal_relief_applicable
+                and income_doc.custom_minmum_value
+                and income_doc.custom_maximun_value
+            ):
+                marginal_relief_min_value = income_doc.custom_minmum_value
+                marginal_relief_max_value = income_doc.custom_maximun_value
+
+            # if self.annual_taxable_amount > rebate:
             for i in income_doc.slabs:
-                total_array.append({
-                    'from': i.from_amount,
-                    'to': i.to_amount,
-                    'percent': i.percent_deduction
-                })
+                array_list = {
+                    "from": i.from_amount,
+                    "to": i.to_amount,
+                    "percent": i.percent_deduction,
+                }
 
-            self.custom_tax_slab = []  # Clear any existing entries
-
+                total_array.append(array_list)
             for slab in total_array:
-                taxable = round(self.annual_taxable_amount)
+                if slab["to"] == 0.0:
+                    if round(self.annual_taxable_amount) >= slab["from"]:
+                        tt1 = round(self.annual_taxable_amount) - slab["from"]
+                        tt2 = slab["percent"]
+                        tt3 = round((tt1 * tt2) / 100)
 
-                if slab['to'] == 0.0:
-                    # For open-ended upper slab
-                    if taxable >= slab['from']:
-                        taxable_diff = taxable - slab['from']
-                        tax_percent = slab['percent']
-                        tax_amount = round((taxable_diff * tax_percent) / 100)
+                        tt4 = slab["from"]
+                        tt5 = slab["to"]
 
-                        # Add previous slabs
-                        remaining_slabs = [s for s in total_array if s['from'] < slab['from']]
-                        for s in remaining_slabs:
-                            from_amount.append(s['from'])
-                            to_amount.append(s['to'])
-                            percentage.append(s["percent"])
-                            difference.append(s['to'] - s['from'])
-                            total_value.append((s['to'] - s['from']) * s["percent"] / 100)
-
-                        # Current slab
-                        from_amount.append(slab['from'])
-                        to_amount.append(slab['to'])
-                        percentage.append(tax_percent)
-                        difference.append(taxable_diff)
-                        total_value.append(tax_amount)
-                        break  # Since it covers the remaining amount
+                        remaining_slabs = [
+                            s
+                            for s in total_array
+                            if s["from"] != slab["from"] and s["from"] < slab["from"]
+                        ]
+                        for slab in remaining_slabs:
+                            from_amount.append(slab["from"])
+                            to_amount.append(slab["to"])
+                            percentage.append(slab["percent"])
+                            difference.append(slab["to"] - slab["from"])
+                            total_value.append(
+                                (slab["to"] - slab["from"]) * slab["percent"] / 100
+                            )
+                        from_amount.append(tt4)
+                        to_amount.append(tt5)
+                        percentage.append(tt2)
+                        difference.append(tt1)
+                        total_value.append(tt3)
+                    self.custom_tax_slab = []
+                    for i in range(len(from_amount)):
+                        self.append(
+                            "custom_tax_slab",
+                            {
+                                "from_amount": from_amount[i],
+                                "to_amount": to_amount[i],
+                                "percentage": percentage[i],
+                                "tax_amount": total_value[i],
+                                "amount": difference[i],
+                            },
+                        )
 
                 else:
-                    # Slab with upper limit
-                    if slab['from'] <= taxable <= slab['to']:
-                        taxable_diff = taxable - slab['from']
-                        tax_percent = slab['percent']
-                        tax_amount = (taxable_diff * tax_percent) / 100
+                    if slab["from"] <= round(self.annual_taxable_amount) <= slab["to"]:
+                        tt1 = round(self.annual_taxable_amount) - slab["from"]
+                        tt2 = slab["percent"]
+                        tt3 = (tt1 * tt2) / 100
+                        tt4 = slab["from"]
+                        tt5 = slab["to"]
+                        remaining_slabs = [
+                            s
+                            for s in total_array
+                            if s["from"] != slab["from"] and s["from"] < slab["from"]
+                        ]
 
-                        # Add previous slabs
-                        remaining_slabs = [s for s in total_array if s['from'] < slab['from']]
-                        for s in remaining_slabs:
-                            from_amount.append(s['from'])
-                            to_amount.append(s['to'])
-                            percentage.append(s["percent"])
-                            difference.append(s['to'] - s['from'])
-                            total_value.append((s['to'] - s['from']) * s["percent"] / 100)
+                        for slab in remaining_slabs:
+                            from_amount.append(slab["from"])
+                            to_amount.append(slab["to"])
+                            percentage.append(slab["percent"])
+                            difference.append(slab["to"] - slab["from"])
+                            total_value.append(
+                                (slab["to"] - slab["from"]) * slab["percent"] / 100
+                            )
+                        from_amount.append(tt4)
+                        to_amount.append(tt5)
+                        percentage.append(tt2)
+                        difference.append(tt1)
+                        total_value.append(tt3)
 
-                        # Current slab
-                        from_amount.append(slab['from'])
-                        to_amount.append(slab['to'])
-                        percentage.append(tax_percent)
-                        difference.append(taxable_diff)
-                        total_value.append(tax_amount)
-                        break
-
-            # Populate tax slab child table
-            for i in range(len(from_amount)):
-                self.append("custom_tax_slab", {
-                    "from_amount": from_amount[i],
-                    "to_amount": to_amount[i],
-                    "percentage": percentage[i],
-                    "tax_amount": total_value[i],
-                    "amount": difference[i]
-                })
-
-            # Total tax amount
-            total_sum = sum(total_value)
-
-            # Section 87A rebate logic
-            if self.custom_taxable_amount < rebate:
-                self.custom_tax_on_total_income = total_sum
-                self.custom_rebate_under_section_87a = total_sum
-                self.custom_total_tax_on_income = 0
-            else:
-                self.custom_rebate_under_section_87a = 0
-                self.custom_tax_on_total_income = total_sum
-                self.custom_total_tax_on_income = total_sum
-
-            # Surcharge and cess logic
-            if self.custom_taxable_amount > 5000000:
-                surcharge = (self.custom_total_tax_on_income * 10) / 100
-                self.custom_surcharge = round(surcharge)
-            else:
-                self.custom_surcharge = 0
-
-            self.custom_education_cess = round((self.custom_total_tax_on_income + self.custom_surcharge) * 4 / 100)
-
-            # Final total tax payable
-            self.custom_total_amount = round(
-                self.custom_total_tax_on_income + self.custom_surcharge + self.custom_education_cess
-            )
+                    self.custom_tax_slab = []
+                    for i in range(len(from_amount)):
+                        self.append(
+                            "custom_tax_slab",
+                            {
+                                "from_amount": from_amount[i],
+                                "to_amount": to_amount[i],
+                                "percentage": percentage[i],
+                                "tax_amount": round(total_value[i]),
+                                "amount": difference[i],
+                            },
+                        )
 
 
 def _safe_eval(code: str, eval_globals: dict | None = None, eval_locals: dict | None = None):
@@ -2574,8 +2487,13 @@ def override_calculate_tax_by_tax_slab(
     rebate = 0
     other_taxes_and_charges = 0
     custom_tds_already_deducted_amount = 0
+    surcharge = 0
+    charge_percent = 0
+    education_cess_amount = 0
+    total_tax_payable = 0
 
-    # Step 1: Calculate base tax from slabs
+    
+
     for slab in tax_slab.slabs:
         cond = cstr(slab.condition).strip()
         if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
@@ -2587,9 +2505,9 @@ def override_calculate_tax_by_tax_slab(
 
         if annual_taxable_earning > from_amt:
             taxable_range = min(annual_taxable_earning, to_amt) - from_amt
-            base_tax += taxable_range * rate
 
-    # Step 2: Marginal Relief (Rebate Logic)
+            base_tax += taxable_range * rate
+          
 
     if (
         tax_slab.custom_marginal_relief_applicable
@@ -2602,26 +2520,41 @@ def override_calculate_tax_by_tax_slab(
             < tax_slab.custom_maximun_value
         ):
             excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+
             if base_tax > excess_income:
                 rebate = base_tax - excess_income
                 base_tax -= rebate
 
-    # Step 3: Cess and Other Charges AFTER Rebate
-    for d in tax_slab.other_taxes_and_charges:
-        if (
-            flt(d.min_taxable_income)
-            and flt(d.min_taxable_income) > annual_taxable_earning
-        ):
-            continue
-        if (
-            flt(d.max_taxable_income)
-            and flt(d.max_taxable_income) < annual_taxable_earning
-        ):
-            continue
 
-        charge_percent = flt(d.percent)
-        charge = base_tax * charge_percent / 100.0
-        other_taxes_and_charges += charge
+
+    for d in tax_slab.other_taxes_and_charges:
+        if d.custom_is_education_cess == 0:
+            min_value = flt(d.min_taxable_income) or 0
+            max_value = flt(d.max_taxable_income) or None
+
+            if annual_taxable_earning >= min_value and (
+                not max_value or annual_taxable_earning < max_value
+            ):
+                charge_percent = flt(d.percent)
+                surcharge = (base_tax * charge_percent) / 100.0
+
+    for d in tax_slab.other_taxes_and_charges:
+        if d.custom_is_education_cess == 1:
+            total_tax_before_cess = base_tax + surcharge
+
+            education_cess_amount = (total_tax_before_cess * flt(d.percent)) / 100.0
+
+
+
+    total_tax_payable = round(education_cess_amount + surcharge + base_tax)
+
+    self.custom_tax_on_total_income=round(base_tax, 2)
+    self.custom_rebate_under_section_87a=round(rebate, 2)
+    self.custom_total_tax_on_income=self.custom_tax_on_total_income+self.custom_rebate_under_section_87a
+
+    self.custom_surcharge=round(surcharge, 2)
+    self.custom_education_cess=round(education_cess_amount, 2)
+    self.custom_total_amount=round(total_tax_payable, 2)
 
     declaration = frappe.db.get_value(
         "Employee Tax Exemption Declaration",
@@ -2639,8 +2572,12 @@ def override_calculate_tax_by_tax_slab(
             declaration.custom_tds_already_deducted_amount or 0.0
         )
 
-    final_tax = (
-        base_tax + other_taxes_and_charges
-    ) - custom_tds_already_deducted_amount
+    final_tax = (total_tax_payable) - custom_tds_already_deducted_amount
 
-    return round(final_tax, 2), round(other_taxes_and_charges, 2)
+    return round(final_tax, 2), round(total_tax_payable, 2)
+    
+    
+
+    # return round(total_tax_payable, 2), round(other_taxes_and_charges, 2)
+
+   
