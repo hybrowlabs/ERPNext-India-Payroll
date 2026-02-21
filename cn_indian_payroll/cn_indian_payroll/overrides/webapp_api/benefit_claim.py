@@ -1210,7 +1210,7 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
     if not (employee and payroll_period and posting_date and doctype):
         return {
             "status": "failed",
-            "message": "Missing required details to validate submission.",
+            "message": "The declaration form is not valid because no Salary Structure Assignment is assigned to the employee.",
         }
 
     posting_date = getdate(posting_date)
