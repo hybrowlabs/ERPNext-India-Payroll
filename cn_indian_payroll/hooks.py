@@ -249,12 +249,10 @@ fixtures = [
 doctype_js = {
 
     "Payroll Entry": "public/js/payroll.js",
-    "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
     "Salary Slip": "public/js/salary_slip.js",
-
-    "Loan Product": "public/js/loan_product.js",
+    "Loan": "public/js/loan.js",
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
 
@@ -269,9 +267,7 @@ override_doctype_class = {
     "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
-    # "Leave Encashment": "cn_indian_payroll.cn_indian_payroll.overrides.leave_encashment.CustomLeaveEncashment",
-    # "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
-
+    
 }
 
 doc_events = {
@@ -282,8 +278,6 @@ doc_events = {
         "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_update_after_submit",
 
     },
-
-
 
     "Employee Tax Exemption Sub Category": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_sub_category.validate",

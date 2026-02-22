@@ -188,11 +188,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                     const exemption_category = row.getAttribute("data-category");
                                     let value = parseFloat(row.querySelector("input").value || 0);
 
-                                    // if (max > 0 && value > max) {
-                                    //     frappe.msgprint(`Amount for "${id}" exceeds the max (${max}). Resetting to 0.`);
-                                    //     value = 0;
-                                    //     row.querySelector("input").value = 0;
-                                    // }
+                                   
 
                                     if (value > 0) {
                                         formData.push({
