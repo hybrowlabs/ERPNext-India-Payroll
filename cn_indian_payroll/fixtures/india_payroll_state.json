@@ -1,0 +1,486 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Yearly",
+    "parent": "Andhra Pradesh",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.309743",
+  "name": "Andhra Pradesh",
+  "state_name": "Andhra Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:50:12.468443",
+  "name": "Arunachal Pradesh",
+  "state_name": "Arunachal Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:50:12.478750",
+  "name": "Assam",
+  "state_name": "Assam"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:50:12.488948",
+  "name": "Bihar",
+  "state_name": "Bihar"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Delhi",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.269944",
+  "name": "Delhi",
+  "state_name": "Delhi"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Goa",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.251049",
+  "name": "Goa",
+  "state_name": "Goa"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:50:12.497585",
+  "name": "Himachal Pradesh",
+  "state_name": "Himachal Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:50:01.764423",
+  "name": "Jharkhand",
+  "state_name": "Jharkhand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Yearly",
+    "parent": "Karnataka",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.223764",
+  "name": "Karnataka",
+  "state_name": "Karnataka"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Madhya Pradesh",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.211614",
+  "name": "Madhya Pradesh",
+  "state_name": "Madhya Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Maharashtra",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.199828",
+  "name": "Maharashtra",
+  "state_name": "Maharashtra"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:57.595171",
+  "name": "Manipur",
+  "state_name": "Manipur"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:49.543079",
+  "name": "Meghalaya",
+  "state_name": "Meghalaya"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:53.883448",
+  "name": "Mizoram",
+  "state_name": "Mizoram"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:45.527449",
+  "name": "Nagaland",
+  "state_name": "Nagaland"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Monthly",
+    "parent": "Punjab",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.163500",
+  "name": "Punjab",
+  "state_name": "Punjab"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:34.348188",
+  "name": "Sikkim",
+  "state_name": "Sikkim"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Yearly",
+    "parent": "Tamil Nadu",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.142607",
+  "name": "Tamil Nadu",
+  "state_name": "Tamil Nadu"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Yearly",
+    "parent": "Telangana",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.130160",
+  "name": "Telangana",
+  "state_name": "Telangana"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:37.981779",
+  "name": "Tripura",
+  "state_name": "Tripura"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:27.335452",
+  "name": "Uttarakhand",
+  "state_name": "Uttarakhand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "West Bengal",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [
+   {
+    "basic_daily_wage": 0.0,
+    "parent": "West Bengal",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Semi-Skilled",
+    "total_per_day": 0.0,
+    "vda_daily_wages": 0.0,
+    "zone": "Zone 1"
+   }
+  ],
+  "modified": "2025-10-13 10:44:16.106935",
+  "name": "West Bengal",
+  "state_name": "West Bengal"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Monthly",
+    "parent": "Chandigarh",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.087924",
+  "name": "Chandigarh",
+  "state_name": "Chandigarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Chattisgarh",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.071834",
+  "name": "Chattisgarh",
+  "state_name": "Chattisgarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Monthly",
+    "parent": "Haryana",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.060366",
+  "name": "Haryana",
+  "state_name": "Haryana"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Odisha",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:44:16.046287",
+  "name": "Odisha",
+  "state_name": "Odisha"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:41.619824",
+  "name": "Rajasthan",
+  "state_name": "Rajasthan"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-10-13 10:49:19.397660",
+  "name": "Uttar Pradesh",
+  "state_name": "Uttar Pradesh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Monthly",
+    "parent": "Kerala",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [],
+  "modified": "2025-10-13 10:48:40.905447",
+  "name": "Kerala",
+  "state_name": "Kerala"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "India Payroll State",
+  "lwf_frequency": 1,
+  "lwf_frequency_list": [
+   {
+    "frequency_type": "Half-Yearly",
+    "parent": "Gujarat",
+    "parentfield": "lwf_frequency_list",
+    "parenttype": "India Payroll State"
+   }
+  ],
+  "min_wages": [
+   {
+    "basic_daily_wage": 452.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Unskilled",
+    "total_per_day": 497.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 462.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Semi-Skilled",
+    "total_per_day": 507.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 474.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Skilled",
+    "total_per_day": 519.0,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 1"
+   },
+   {
+    "basic_daily_wage": 441.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Unskilled",
+    "total_per_day": 486.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   },
+   {
+    "basic_daily_wage": 452.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Semi-Skilled",
+    "total_per_day": 497.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   },
+   {
+    "basic_daily_wage": 462.0,
+    "parent": "Gujarat",
+    "parentfield": "min_wages",
+    "parenttype": "India Payroll State",
+    "skill_level": "Skilled",
+    "total_per_day": 507.5,
+    "vda_daily_wages": 45.5,
+    "zone": "Zone 2"
+   }
+  ],
+  "modified": "2025-10-13 10:44:16.000521",
+  "name": "Gujarat",
+  "state_name": "Gujarat"
+ }
+]

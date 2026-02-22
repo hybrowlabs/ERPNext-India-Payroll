@@ -2,52 +2,11 @@
 
 frappe.ui.form.on('Employee Tax Exemption Declaration', {
     refresh(frm) {
-        frm.trigger("change_tax_regime");
         frm.trigger("display_declaration_form");
         frm.trigger("tds_projection_html");
     },
 
-    change_tax_regime(frm) {
-        if (!frm.is_new()) {
-            frm.add_custom_button("Choose Regime", function () {
-                let d = new frappe.ui.Dialog({
-                    title: 'Choose Tax Regime',
-                    fields: [
-                        {
-                            label: 'Select Regime',
-                            fieldname: 'select_regime',
-                            fieldtype: 'Select',
-                            options: ['Old Regime', 'New Regime'],
-                            reqd: 1,
-                            default: frm.doc.custom_tax_regime,
-                            description: `Your current tax regime is <strong>${frm.doc.custom_tax_regime}</strong>`
-                        }
-                    ],
-                    size: 'small',
-                    primary_action_label: 'Submit',
-                    primary_action(values) {
-                        frappe.call({
-                            method: "cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
-                            args: {
-                                doc_id: frm.doc.name,
-                                employee: frm.doc.employee,
-                                company: frm.doc.company,
-                                payroll_period: frm.doc.payroll_period,
-                                regime: values.select_regime
-                            },
-                            callback: function (res) {
-                                frm.reload_doc();
-                            }
-                        });
-                        d.hide();
-                    }
-                });
-                d.show();
-            });
 
-            frm.change_custom_button_type('Choose Regime', null, 'primary');
-        }
-    },
 
     display_declaration_form(frm) {
 

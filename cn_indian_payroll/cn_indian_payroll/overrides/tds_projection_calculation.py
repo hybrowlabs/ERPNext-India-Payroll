@@ -47,6 +47,7 @@ def calculate_tds_projection(doc):
         new_regime_annual_taxable_income = 0
 
         num_months = 0
+        slip_count=0
         pf_max_amount=0
 
         new_tax_slab=None

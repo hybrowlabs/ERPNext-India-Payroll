@@ -20,7 +20,7 @@ def execute():
         "custom_minmum_value": 1200000.0,
         "other_taxes_and_charges": [
         {
-            "custom_is_education_cess": 0,
+            "custom_is_education_cess": 1,
             "custom_is_surcharge": 0,
             "description": "Education Cess",
             "max_taxable_income": 5000000.0,
@@ -33,13 +33,35 @@ def execute():
         {
             "custom_is_education_cess": 0,
             "custom_is_surcharge": 0,
-            "description": "Education Cess+surcharge",
+            "description": "Surcharge 10%",
             "max_taxable_income": 10000000.0,
             "min_taxable_income": 5000000.0,
             "parent": "New Regime 25-26",
             "parentfield": "other_taxes_and_charges",
             "parenttype": "Income Tax Slab",
-            "percent": 14.4
+            "percent": 10
+        },
+        {
+            "custom_is_education_cess": 0,
+            "custom_is_surcharge": 0,
+            "description": "Surcharge 15%",
+            "max_taxable_income": 20000000.0,
+            "min_taxable_income": 10000000.0,
+            "parent": "New Regime 25-26",
+            "parentfield": "other_taxes_and_charges",
+            "parenttype": "Income Tax Slab",
+            "percent": 15
+        },
+        {
+            "custom_is_education_cess": 0,
+            "custom_is_surcharge": 0,
+            "description": "Surcharge 55%",
+            "max_taxable_income": 50000000.0,
+            "min_taxable_income": 20000000.0,
+            "parent": "New Regime 25-26",
+            "parentfield": "other_taxes_and_charges",
+            "parenttype": "Income Tax Slab",
+            "percent": 25
         }
         ],
         "slabs": [
@@ -110,7 +132,7 @@ def execute():
         "name": "Old Regime 25-26",
         "other_taxes_and_charges": [
         {
-            "custom_is_education_cess": 0,
+            "custom_is_education_cess": 1,
             "custom_is_surcharge": 0,
             "description": "Education Cess",
             "max_taxable_income": 5000000.0,
@@ -123,13 +145,35 @@ def execute():
         {
             "custom_is_education_cess": 0,
             "custom_is_surcharge": 0,
-            "description": "Education Cess + Surcharge",
+            "description": "Education 10%",
             "max_taxable_income": 10000000.0,
             "min_taxable_income": 5000000.0,
             "parent": "Old Regime 25-26",
             "parentfield": "other_taxes_and_charges",
             "parenttype": "Income Tax Slab",
-            "percent": 14.4
+            "percent": 10
+        },
+        {
+            "custom_is_education_cess": 0,
+            "custom_is_surcharge": 0,
+            "description": "Surcharge 15%",
+            "max_taxable_income": 20000000.0,
+            "min_taxable_income": 10000000.0,
+            "parent": "Old Regime 25-26",
+            "parentfield": "other_taxes_and_charges",
+            "parenttype": "Income Tax Slab",
+            "percent": 15
+        },
+        {
+            "custom_is_education_cess": 0,
+            "custom_is_surcharge": 0,
+            "description": "Surcharge 55%",
+            "max_taxable_income": 50000000.0,
+            "min_taxable_income": 20000000.0,
+            "parent": "Old Regime 25-26",
+            "parentfield": "other_taxes_and_charges",
+            "parenttype": "Income Tax Slab",
+            "percent": 25
         }
         ],
         "slabs": [
