@@ -4,571 +4,464 @@ from datetime import datetime
 from frappe import _
 import json
 from dateutil.relativedelta import relativedelta
-
-
-
+from frappe.utils import getdate
 
 @frappe.whitelist()
 def calculate_tds_projection(doc):
+
     if isinstance(doc, str):
+        
         doc = frappe._dict(json.loads(doc))
 
-    current_taxable_earnings_old_regime = 0
-    current_taxable_earnings_new_regime = 0
-    future_taxable_earnings_old_regime = 0
-    future_taxable_earnings_new_regime = 0
-    loan_perquisite_component=None
-    loan_perquisite_amount=0
-    pt_amount=0
-    pf_amount=0
-    nps_amount=0
+        if not doc.get("employee"):
+            frappe.throw("Employee is required to calculate TDS projection.")
 
-    old_regime_standard_value = 0
-    new_regime_standard_value = 0
+    
+        current_taxable_earnings_old_regime = 0
+        current_taxable_earnings_new_regime = 0
+        future_taxable_earnings_old_regime = 0
+        future_taxable_earnings_new_regime = 0
 
-    hra_exemptions = 0
+        tds_from_previous_employer = 0
+        loan_perquisite_component = "Loan Perquisite"
+        loan_perquisite_amount = 0
 
-    eighty_c_maximum_limit = 0
+        pt_amount = 0
+        pf_amount = 0
+        nps_amount = 0
 
-    old_regime_annual_taxable_income=0
-    new_regime_annual_taxable_income=0
+        old_regime_standard_value = 0
+        new_regime_standard_value = 0
 
-    month_count=0
-    num_months=0
+        hra_exemptions = 0
+        eighty_c_maximum_limit = 0
 
-    if doc.get('employee'):
-        latest_salary_structure = frappe.get_list(
+        old_regime_annual_taxable_income = 0
+        new_regime_annual_taxable_income = 0
+
+        num_months = 0
+
+    
+        salary_assignment = frappe.get_list(
             "Salary Structure Assignment",
             filters={
-                "employee": doc.get('employee'),
+                "employee": doc.employee,
                 "docstatus": 1,
-                "custom_payroll_period": doc.get('payroll_period'),
+                "custom_payroll_period": doc.get("payroll_period"),
+                "company": doc.get("company"),
             },
             fields=["*"],
-            order_by="from_date desc",
-        )
-
-        if latest_salary_structure:
-            assignment = latest_salary_structure[0]
-            employee=frappe.get_doc("Employee", assignment.employee)
-            get_payroll_period = frappe.get_doc("Payroll Period", assignment.custom_payroll_period)
-
-            effective_start_date = assignment.from_date
-            payroll_end_date = get_payroll_period.end_date
-            payroll_start_date = get_payroll_period.start_date
-            doj = employee.date_of_joining
-
-            start_candidates = [d for d in [effective_start_date, payroll_start_date, doj] if d]
-            start = max(datetime.strptime(str(d), "%Y-%m-%d").date() if isinstance(d, str) else d for d in start_candidates)
-            end = datetime.strptime(str(payroll_end_date), "%Y-%m-%d").date() if isinstance(payroll_end_date, str) else payroll_end_date
-
-            num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-
-
-            loan_repayments = frappe.db.get_list(
-                "Loan Repayment Schedule",
-                filters={
-                    "custom_employee": doc.get('employee'),
-                    "status": "Active",
-                    "docstatus": 1,
-                },
-                fields=["*"],
-            )
-
-            if loan_repayments:
-                loan_perquisite_component="Loan Perquisite"
-                for repayment in loan_repayments:
-                    get_each_perquisite = frappe.get_doc(
-                        "Loan Repayment Schedule", repayment.name
-                    )
-                    if len(get_each_perquisite.custom_loan_perquisite) > 0:
-                        for date in get_each_perquisite.custom_loan_perquisite:
-                            payment_date = frappe.utils.getdate(
-                                date.payment_date
-                            )
-                            if payroll_start_date <= payment_date <= payroll_end_date:
-                                loan_perquisite_amount += date.perquisite_amount
-
-            else:
-                loan_perquisite_component="Loan Perquisite"
-                loan_perquisite_amount=0
-
-        get_exemption_category = frappe.get_list(
-            "Employee Tax Exemption Category",
-            filters={
-                "custom_select_section": "80 C",
-
-                "is_active": 1,
-            },
-            fields=["*"],
-        )
-        if get_exemption_category:
-            eighty_c_maximum_limit = get_exemption_category[0].max_amount
-
-
-
-        if doc.get('custom_tax_regime') == "Old Regime" and doc.get('monthly_house_rent'):
-            hra_exemptions = doc.get('annual_hra_exemption')
-
-
-        latest_tax_slab_old_regime = frappe.get_list(
-            "Income Tax Slab",
-            filters={
-                "company": doc.get('company'),
-                "docstatus": 1,
-                "disabled": 0,
-                "custom_select_regime": "Old Regime",
-            },
-            fields=["name", "custom_select_regime", "standard_tax_exemption_amount"],
-            order_by="effective_from DESC",
+            order_by="from_date asc",
             limit=1,
         )
 
-        if latest_tax_slab_old_regime:
-            old_regime_standard_value = latest_tax_slab_old_regime[0].standard_tax_exemption_amount
+        if not salary_assignment:
+            frappe.throw("No active Salary Structure Assignment found.")
 
-        latest_tax_slab_new_regime = frappe.get_list(
-            "Income Tax Slab",
-            filters={
-                "company": doc.get('company'),
-                "docstatus": 1,
-                "disabled": 0,
-                "custom_select_regime": "New Regime",
-            },
-            fields=["name", "custom_select_regime", "standard_tax_exemption_amount"],
-            order_by="effective_from DESC",
-            limit=1,
+        assignment = frappe.get_doc(
+            "Salary Structure Assignment", salary_assignment[0].name
         )
 
-        if latest_tax_slab_new_regime:
-            new_regime_standard_value = latest_tax_slab_new_regime[0].standard_tax_exemption_amount
+        employee = frappe.get_doc("Employee", assignment.employee)
+        payroll_period = frappe.get_doc("Payroll Period", assignment.custom_payroll_period)
+
+        
+        effective_start_date = getdate(assignment.from_date)
+        payroll_start_date = getdate(payroll_period.start_date)
+        payroll_end_date = getdate(payroll_period.end_date)
+        date_of_joining = getdate(employee.date_of_joining)
+
+        tds_from_previous_employer = assignment.taxable_earnings_till_date or 0
+
+    
+        start_date = max(
+            filter(None, [effective_start_date, payroll_start_date, date_of_joining])
+        )
+
+    
+        num_months = (
+            (payroll_end_date.year - start_date.year) * 12
+            + (payroll_end_date.month - start_date.month)
+            + 1
+        )
+
+
+        loan_repayments = frappe.get_all(
+            "Loan Repayment Schedule",
+            filters={
+                "custom_employee": doc.employee,
+                "status": "Active",
+                "docstatus": 1,
+            },
+            fields=["name"],
+        )
+
+        for repayment in loan_repayments:
+            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
+
+            for perquisite in repayment_doc.custom_loan_perquisite or []:
+                payment_date = getdate(perquisite.payment_date)
+
+                if payroll_start_date <= payment_date <= payroll_end_date:
+                    loan_perquisite_amount += perquisite.perquisite_amount or 0
 
 
 
+        # latest_tax_slab_old_regime = frappe.get_list(
+        #     "Income Tax Slab",
+        #     filters={
+        #         "company": doc.get('company'),
+        #         "docstatus": 1,
+        #         "disabled": 0,
+        #         "custom_select_regime": "Old Regime",
+        #     },
+        #     fields=["name", "custom_select_regime", "standard_tax_exemption_amount"],
+        #     order_by="effective_from DESC",
+        #     limit=1,
+        # )
 
-        get_all_salary_slip = frappe.get_list(
+        # if latest_tax_slab_old_regime:
+        #     old_regime_standard_value = latest_tax_slab_old_regime[0].standard_tax_exemption_amount
+
+        # latest_tax_slab_new_regime = frappe.get_list(
+        #     "Income Tax Slab",
+        #     filters={
+        #         "company": doc.get('company'),
+        #         "docstatus": 1,
+        #         "disabled": 0,
+        #         "custom_select_regime": "New Regime",
+        #     },
+        #     fields=["name", "custom_select_regime", "standard_tax_exemption_amount"],
+        #     order_by="effective_from DESC",
+        #     limit=1,
+        # )
+
+        # if latest_tax_slab_new_regime:
+        #     new_regime_standard_value = latest_tax_slab_new_regime[0].standard_tax_exemption_amount
+
+        salary_slips = frappe.get_all(
             "Salary Slip",
             filters={
-                "employee": doc.get('employee'),
-                "custom_payroll_period": doc.get('payroll_period'),
-                "docstatus": ["in", [0,1]],
+                "employee": doc.get("employee"),
+                "custom_payroll_period": doc.get("payroll_period"),
+                "docstatus": ["in", [0, 1]],
             },
-            fields=["*"],
+            fields=["name"],
             order_by="end_date desc",
         )
-        if len(get_all_salary_slip)==0:
-            current_taxable_earnings_old_regime = 0
-            current_taxable_earnings_new_regime = 0
 
+
+        if not salary_slips:
 
             salary_slip_preview = make_salary_slip(
                 source_name=assignment.salary_structure,
-                employee=doc.get('employee'),
+                employee=doc.get("employee"),
                 print_format="Salary Slip Standard",
                 posting_date=assignment.from_date,
                 for_preview=1,
-                )
+            )
+
             if salary_slip_preview:
+
                 for earning in salary_slip_preview.earnings:
-                    if not earning.additional_salary:
 
-                        earning_component_data = frappe.get_doc(
-                            "Salary Component", earning.salary_component
-                        )
-
-                        if (
-                            earning_component_data.is_tax_applicable == 1
-                            and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                            and earning_component_data.custom_regime == "All"
-                            and earning_component_data.custom_component_sub_type== "Fixed"
-
-                        ):
-
-                            future_taxable_earnings_old_regime += earning.amount * (
-                                num_months
-                            )
-                            future_taxable_earnings_new_regime += earning.amount * (
-                                num_months
-                            )
-
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "Old Regime"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-                                future_taxable_earnings_old_regime += earning.amount * (
-                                num_months
-                            )
-
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "New Regime"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-
-                                future_taxable_earnings_new_regime += earning.amount * (
-                                    num_months
-                                )
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "All"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-                                and earning_component_data.component_type =="NPS"
-
-
-                            ):
-                            nps_amount+=earning.amount*(num_months)
-
-                    else:
-
-                        earning_component_data = frappe.get_doc(
-                            "Salary Component", earning.salary_component
-                        )
-
-                        if (
-                            earning_component_data.is_tax_applicable == 1
-                            and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                            and earning_component_data.custom_regime == "All"
-                            and earning_component_data.custom_component_sub_type== "Fixed"
-
-                        ):
-
-                            future_taxable_earnings_old_regime += earning.amount
-                            future_taxable_earnings_new_regime += earning.amount
-
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "Old Regime"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-                                future_taxable_earnings_old_regime += earning.amount
-
-
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "New Regime"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-
-                                future_taxable_earnings_new_regime += earning.amount
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "All"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-                                and earning_component_data.component_type =="NPS"
-
-
-                            ):
-                            nps_amount+=earning.amount
-
-
-                for deduction in salary_slip_preview.deductions:
-                    if not deduction.additional_salary:
-                        deduction_component_data = frappe.get_doc(
-                            "Salary Component", deduction.salary_component
-                        )
-                        if (
-                                deduction_component_data.component_type =="Professional Tax"
-                                and deduction_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-                            pt_amount+=deduction.amount*(num_months)
-
-                        if (
-                                deduction_component_data.component_type =="Provident Fund"
-                                and deduction_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-
-                            pf_amount+=deduction.amount*(num_months)
-                    else:
-                        deduction_component_data = frappe.get_doc(
-                        "Salary Component", deduction.salary_component
-                        )
-                        if (
-                                deduction_component_data.component_type =="Professional Tax"
-                                and deduction_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-                            pt_amount+=deduction.amount
-
-                        if (
-                                deduction_component_data.component_type =="Provident Fund"
-                                and deduction_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-
-                            pf_amount+=deduction.amount
-
-
-        else:
-
-            month_count=get_all_salary_slip[0].custom_month_count
-            for slip in get_all_salary_slip:
-                get_each_sslip= frappe.get_doc("Salary Slip", slip.name)
-                for earning in get_each_sslip.earnings:
-                    earning_component_data = frappe.get_doc(
+                    component = frappe.get_cached_doc(
                         "Salary Component", earning.salary_component
                     )
 
-                    if (
-                        earning_component_data.is_tax_applicable == 1
-                        and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                        and earning_component_data.custom_regime == "All"
-
-
+                    if not (
+                        component.is_tax_applicable
+                        and component.custom_tax_exemption_applicable_based_on_regime
+                        and component.custom_component_sub_type == "Fixed"
                     ):
-                        current_taxable_earnings_old_regime += earning.amount
-                        current_taxable_earnings_new_regime += earning.amount
+                        continue
 
 
+                    if component.custom_regime == "All":
+                        future_taxable_earnings_old_regime += earning.amount * num_months
+                        future_taxable_earnings_new_regime += earning.amount * num_months
 
+                    elif component.custom_regime == "Old Regime":
+                        future_taxable_earnings_old_regime += earning.amount * num_months
 
-                    if (
-                            earning_component_data.is_tax_applicable == 1
-                            and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                            and earning_component_data.custom_regime == "Old Regime"
-
-
-                        ):
-                            current_taxable_earnings_old_regime += earning.amount
-
-
-
-                    if (
-                            earning_component_data.is_tax_applicable == 1
-                            and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                            and earning_component_data.custom_regime == "New Regime"
-
-
-                        ):
-
-                            current_taxable_earnings_new_regime += earning.amount
-
-
-
-                    if (
-                            earning_component_data.is_tax_applicable == 1
-                            and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                            and earning_component_data.custom_regime == "All"
-
-                            and earning_component_data.component_type =="NPS"
-
-
-                        ):
-                        nps_amount+=earning.amount
-
-                for deduction in get_each_sslip.deductions:
-                    deduction_component_data = frappe.get_doc(
-                        "Salary Component", deduction.salary_component
-                    )
-                    if (
-                            deduction_component_data.component_type =="Professional Tax"
-
-
-                        ):
-                        pt_amount+=deduction.amount
-
-                    if (
-                            deduction_component_data.component_type =="Provident Fund"
-
-
-                        ):
-
-                        pf_amount+=deduction.amount
-
-            salary_slip_preview = make_salary_slip(
-                source_name=assignment.salary_structure,
-                employee=doc.get('employee'),
-                print_format="Salary Slip Standard",
-                posting_date=assignment.from_date,
-                for_preview=1,
-                )
-            if salary_slip_preview:
-                for earning in salary_slip_preview.earnings:
-                    if not earning.additional_salary:
-
-                        earning_component_data = frappe.get_doc(
-                            "Salary Component", earning.salary_component
-                        )
-
-                        if (
-                            earning_component_data.is_tax_applicable == 1
-                            and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                            and earning_component_data.custom_regime == "All"
-                            and earning_component_data.custom_component_sub_type== "Fixed"
-
-                        ):
-
-                            future_taxable_earnings_old_regime += earning.amount * (
-                                month_count
-                            )
-                            future_taxable_earnings_new_regime += earning.amount * (
-                                month_count
-                            )
-
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "Old Regime"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-                                future_taxable_earnings_old_regime += earning.amount * (
-                                month_count
-                            )
-
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "New Regime"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-
-                                future_taxable_earnings_new_regime += earning.amount * (
-                                    month_count
-                                )
-
-                        if (
-                                earning_component_data.is_tax_applicable == 1
-                                and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
-                                and earning_component_data.custom_regime == "All"
-                                and earning_component_data.custom_component_sub_type== "Fixed"
-                                and earning_component_data.component_type =="NPS"
-
-
-                            ):
-                            nps_amount+=earning.amount*(month_count)
+                    elif component.custom_regime == "New Regime":
+                        future_taxable_earnings_new_regime += earning.amount * num_months
 
 
                 for deduction in salary_slip_preview.deductions:
-                    if not deduction.additional_salary:
-                        deduction_component_data = frappe.get_doc(
-                            "Salary Component", deduction.salary_component
-                        )
-                        if (
-                                deduction_component_data.component_type =="Professional Tax"
-                                and deduction_component_data.custom_component_sub_type== "Fixed"
 
-                            ):
-                            pt_amount+=deduction.amount*(month_count)
+                    component = frappe.get_cached_doc(
+                        "Salary Component", deduction.salary_component
+                    )
 
-                        if (
-                                deduction_component_data.component_type =="Provident Fund"
-                                and deduction_component_data.custom_component_sub_type== "Fixed"
-
-                            ):
-
-                            pf_amount+=deduction.amount*(month_count)
+                    if component.custom_component_sub_type != "Fixed":
+                        continue
 
 
-        pf_max_amount=min(eighty_c_maximum_limit, pf_amount)
+                    if component.component_type == "Professional Tax":
+                        pt_amount += deduction.amount * num_months
+
+                    elif component.component_type == "Provident Fund":
+                        pf_amount += deduction.amount * num_months
 
 
 
-        if doc.get('custom_tax_regime') == "Old Regime" :
-            total_new_regime_deductions = nps_amount
-            total_old_regime_deductions = (doc.get('total_exemption_amount')-(pt_amount))
-        if doc.get('custom_tax_regime') == "New Regime" :
-            total_new_regime_deductions = doc.get('total_exemption_amount')
-            total_old_regime_deductions = pf_max_amount + pt_amount + nps_amount
+        
+        # else:
+
+        #     month_count=get_all_salary_slip[0].custom_month_count
+        #     for slip in get_all_salary_slip:
+        #         get_each_sslip= frappe.get_doc("Salary Slip", slip.name)
+        #         for earning in get_each_sslip.earnings:
+        #             earning_component_data = frappe.get_doc(
+        #                 "Salary Component", earning.salary_component
+        #             )
+
+        #             if (
+        #                 earning_component_data.is_tax_applicable == 1
+        #                 and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                 and earning_component_data.custom_regime == "All"
+
+
+        #             ):
+        #                 current_taxable_earnings_old_regime += earning.amount
+        #                 current_taxable_earnings_new_regime += earning.amount
 
 
 
-        old_regime_annual_taxable_income = max(
-            round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
-            - round(pt_amount)
-            - old_regime_standard_value
-            - round(total_old_regime_deductions),
-            0
-        )
 
-        new_regime_annual_taxable_income = max(
-            round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount)
-            - new_regime_standard_value
-            - round(total_new_regime_deductions),
-            0
-        )
+        #             if (
+        #                     earning_component_data.is_tax_applicable == 1
+        #                     and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                     and earning_component_data.custom_regime == "Old Regime"
 
-        employee = doc.get("employee")
-        company = doc.get("company")
-        payroll_period = doc.get("payroll_period")
-        old_annual_slab = old_regime_annual_taxable_income or 0
-        new_annual_slab = new_regime_annual_taxable_income or 0
 
-        slab_result = slab_calculation(
-            employee=employee,
-            company=company,
-            payroll_period=payroll_period,
-            old_annual_slab=old_annual_slab,
-            new_annual_slab=new_annual_slab
-        )
+        #                 ):
+        #                     current_taxable_earnings_old_regime += earning.amount
+
+
+
+        #             if (
+        #                     earning_component_data.is_tax_applicable == 1
+        #                     and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                     and earning_component_data.custom_regime == "New Regime"
+
+
+        #                 ):
+
+        #                     current_taxable_earnings_new_regime += earning.amount
+
+
+
+        #             if (
+        #                     earning_component_data.is_tax_applicable == 1
+        #                     and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                     and earning_component_data.custom_regime == "All"
+
+        #                     and earning_component_data.component_type =="NPS"
+
+
+        #                 ):
+        #                 nps_amount+=earning.amount
+
+        #         for deduction in get_each_sslip.deductions:
+        #             deduction_component_data = frappe.get_doc(
+        #                 "Salary Component", deduction.salary_component
+        #             )
+        #             if (
+        #                     deduction_component_data.component_type =="Professional Tax"
+
+
+        #                 ):
+        #                 pt_amount+=deduction.amount
+
+        #             if (
+        #                     deduction_component_data.component_type =="Provident Fund"
+
+
+        #                 ):
+
+        #                 pf_amount+=deduction.amount
+
+        #     salary_slip_preview = make_salary_slip(
+        #         source_name=assignment.salary_structure,
+        #         employee=doc.get('employee'),
+        #         print_format="Salary Slip Standard",
+        #         posting_date=assignment.from_date,
+        #         for_preview=1,
+        #         )
+        #     if salary_slip_preview:
+        #         for earning in salary_slip_preview.earnings:
+        #             if not earning.additional_salary:
+
+        #                 earning_component_data = frappe.get_doc(
+        #                     "Salary Component", earning.salary_component
+        #                 )
+
+        #                 if (
+        #                     earning_component_data.is_tax_applicable == 1
+        #                     and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                     and earning_component_data.custom_regime == "All"
+        #                     and earning_component_data.custom_component_sub_type== "Fixed"
+
+        #                 ):
+
+        #                     future_taxable_earnings_old_regime += earning.amount * (
+        #                         month_count
+        #                     )
+        #                     future_taxable_earnings_new_regime += earning.amount * (
+        #                         month_count
+        #                     )
+
+
+        #                 if (
+        #                         earning_component_data.is_tax_applicable == 1
+        #                         and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                         and earning_component_data.custom_regime == "Old Regime"
+        #                         and earning_component_data.custom_component_sub_type== "Fixed"
+
+        #                     ):
+        #                         future_taxable_earnings_old_regime += earning.amount * (
+        #                         month_count
+        #                     )
+
+
+        #                 if (
+        #                         earning_component_data.is_tax_applicable == 1
+        #                         and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                         and earning_component_data.custom_regime == "New Regime"
+        #                         and earning_component_data.custom_component_sub_type== "Fixed"
+
+        #                     ):
+
+        #                         future_taxable_earnings_new_regime += earning.amount * (
+        #                             month_count
+        #                         )
+
+        #                 if (
+        #                         earning_component_data.is_tax_applicable == 1
+        #                         and earning_component_data.custom_tax_exemption_applicable_based_on_regime== 1
+        #                         and earning_component_data.custom_regime == "All"
+        #                         and earning_component_data.custom_component_sub_type== "Fixed"
+        #                         and earning_component_data.component_type =="NPS"
+
+
+        #                     ):
+        #                     nps_amount+=earning.amount*(month_count)
+
+
+        #         for deduction in salary_slip_preview.deductions:
+        #             if not deduction.additional_salary:
+        #                 deduction_component_data = frappe.get_doc(
+        #                     "Salary Component", deduction.salary_component
+        #                 )
+        #                 if (
+        #                         deduction_component_data.component_type =="Professional Tax"
+        #                         and deduction_component_data.custom_component_sub_type== "Fixed"
+
+        #                     ):
+        #                     pt_amount+=deduction.amount*(month_count)
+
+        #                 if (
+        #                         deduction_component_data.component_type =="Provident Fund"
+        #                         and deduction_component_data.custom_component_sub_type== "Fixed"
+
+        #                     ):
+
+        #                     pf_amount+=deduction.amount*(month_count)
+
+
+        # pf_max_amount=min(eighty_c_maximum_limit, pf_amount)
+
+
+
+        # if doc.get('custom_tax_regime') == "Old Regime" :
+        #     total_new_regime_deductions = nps_amount
+        #     total_old_regime_deductions = (doc.get('total_exemption_amount')-(pt_amount))
+        # if doc.get('custom_tax_regime') == "New Regime" :
+        #     total_new_regime_deductions = doc.get('total_exemption_amount')
+        #     total_old_regime_deductions = pf_max_amount + pt_amount + nps_amount
+
+
+
+        # old_regime_annual_taxable_income = max(
+        #     round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
+        #     - round(pt_amount)
+        #     - old_regime_standard_value
+        #     - round(total_old_regime_deductions),
+        #     0
+        # )
+
+        # new_regime_annual_taxable_income = max(
+        #     round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount)
+        #     - new_regime_standard_value
+        #     - round(total_new_regime_deductions),
+        #     0
+        # )
+
+        # employee = doc.get("employee")
+        # company = doc.get("company")
+        # payroll_period = doc.get("payroll_period")
+        # old_annual_slab = old_regime_annual_taxable_income or 0
+        # new_annual_slab = new_regime_annual_taxable_income or 0
+
+        # slab_result = slab_calculation(
+        #     employee=employee,
+        #     company=company,
+        #     payroll_period=payroll_period,
+        #     old_annual_slab=old_annual_slab,
+        #     new_annual_slab=new_annual_slab
+        # )
 
 
 
         return {
-                "num_months": num_months if num_months else 0,
-                "month_count": month_count if month_count else 0,
+                "tds_from_previous_employer":round(tds_from_previous_employer),
+                "future_taxable_earnings_old_regime":round(future_taxable_earnings_old_regime),
+                "future_taxable_earnings_new_regime":round(future_taxable_earnings_new_regime),
+                # "num_months": num_months if num_months else 0,
+                # "month_count": month_count if month_count else 0,
                 "current_taxable_earnings_old_regime":round(current_taxable_earnings_old_regime),
                 "current_taxable_earnings_new_regime":round(current_taxable_earnings_new_regime),
-                "future_taxable_earnings_new_regime":round(future_taxable_earnings_new_regime),
-                "future_taxable_earnings_old_regime":round(future_taxable_earnings_old_regime),
-                "loan_perquisite_component":loan_perquisite_component,
-                "loan_perquisite_amount":round(loan_perquisite_amount),
-                "total_taxable_earnings_old_regime": round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount),
-                "total_taxable_earnings_new_regime": round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount),
-                "pt_amount":round(pt_amount),
-                "old_regime_standard_value": old_regime_standard_value,
-                "new_regime_standard_value": new_regime_standard_value,
-                "hra_exemptions": hra_exemptions,
-                "total_old_regime_deductions": round(total_old_regime_deductions),
-                "total_new_regime_deductions": round(total_new_regime_deductions),
-                "old_regime_annual_taxable_income": round(old_regime_annual_taxable_income),
-                "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
-                "old_regime_from_amounts": slab_result.get("from_amount"),
-                "old_regime_to_amounts": slab_result.get("to_amount"),
-                "old_regime_percentages": slab_result.get("percentage"),
-                "old_regime_tax_per_slab": slab_result.get("total_value"),
-                "old_regime_total_tax": slab_result.get("total_sum"),
-                "old_regime_rebate_limit": slab_result.get("rebate"),
-                "old_regime_max_amount": slab_result.get("max_amount"),
-                "old_regime_rebate_amount": slab_result.get("old_rebate_value"),
-                "old_regime_surcharge": slab_result.get("old_surcharge_m"),
-                "old_regime_education_cess": slab_result.get("old_education_cess"),
-                "new_regime_from_amounts": slab_result.get("from_amount_new"),
-                "new_regime_to_amounts": slab_result.get("to_amount_new"),
-                "new_regime_percentages": slab_result.get("percentage_new"),
-                "new_regime_tax_per_slab": slab_result.get("total_value_new"),
-                "new_regime_total_tax": slab_result.get("total_sum_new"),
-                "new_regime_rebate_limit": slab_result.get("rebate_new"),
-                "new_regime_max_amount": slab_result.get("max_amount_new"),
-                "new_regime_marginal_relief_min": slab_result.get("new_regime_marginal_relief_min_value"),
-                "new_regime_marginal_relief_max": slab_result.get("new_regime_marginal_relief_max_value"),
-                "old_regime_marginal_relief_min": slab_result.get("old_regime_marginal_relief_min_value"),
-                "old_regime_marginal_relief_max": slab_result.get("old_regime_marginal_relief_max_value"),
-                "new_regime_rebate_amount": slab_result.get("new_rebate_value"),
-                "new_regime_surcharge": slab_result.get("new_surcharge_m"),
-                "new_regime_education_cess": slab_result.get("new_education_cess"),
-                "total_tax_already_paid": slab_result.get("tax_already_paid")
+                # "future_taxable_earnings_new_regime":round(future_taxable_earnings_new_regime),
+                # "future_taxable_earnings_old_regime":round(future_taxable_earnings_old_regime),
+                # "loan_perquisite_component":loan_perquisite_component,
+                # "loan_perquisite_amount":round(loan_perquisite_amount),
+                # "total_taxable_earnings_old_regime": round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount),
+                # "total_taxable_earnings_new_regime": round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount),
+                # "pt_amount":round(pt_amount),
+                # "old_regime_standard_value": old_regime_standard_value,
+                # "new_regime_standard_value": new_regime_standard_value,
+                # "hra_exemptions": hra_exemptions,
+                # "total_old_regime_deductions": round(total_old_regime_deductions),
+                # "total_new_regime_deductions": round(total_new_regime_deductions),
+                # "old_regime_annual_taxable_income": round(old_regime_annual_taxable_income),
+                # "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
+                # "old_regime_from_amounts": slab_result.get("from_amount"),
+                # "old_regime_to_amounts": slab_result.get("to_amount"),
+                # "old_regime_percentages": slab_result.get("percentage"),
+                # "old_regime_tax_per_slab": slab_result.get("total_value"),
+                # "old_regime_total_tax": slab_result.get("total_sum"),
+                # "old_regime_rebate_limit": slab_result.get("rebate"),
+                # "old_regime_max_amount": slab_result.get("max_amount"),
+                # "old_regime_rebate_amount": slab_result.get("old_rebate_value"),
+                # "old_regime_surcharge": slab_result.get("old_surcharge_m"),
+                # "old_regime_education_cess": slab_result.get("old_education_cess"),
+                # "new_regime_from_amounts": slab_result.get("from_amount_new"),
+                # "new_regime_to_amounts": slab_result.get("to_amount_new"),
+                # "new_regime_percentages": slab_result.get("percentage_new"),
+                # "new_regime_tax_per_slab": slab_result.get("total_value_new"),
+                # "new_regime_total_tax": slab_result.get("total_sum_new"),
+                # "new_regime_rebate_limit": slab_result.get("rebate_new"),
+                # "new_regime_max_amount": slab_result.get("max_amount_new"),
+                # "new_regime_marginal_relief_min": slab_result.get("new_regime_marginal_relief_min_value"),
+                # "new_regime_marginal_relief_max": slab_result.get("new_regime_marginal_relief_max_value"),
+                # "old_regime_marginal_relief_min": slab_result.get("old_regime_marginal_relief_min_value"),
+                # "old_regime_marginal_relief_max": slab_result.get("old_regime_marginal_relief_max_value"),
+                # "new_regime_rebate_amount": slab_result.get("new_rebate_value"),
+                # "new_regime_surcharge": slab_result.get("new_surcharge_m"),
+                # "new_regime_education_cess": slab_result.get("new_education_cess"),
+                # "total_tax_already_paid": slab_result.get("tax_already_paid")
 
 
 

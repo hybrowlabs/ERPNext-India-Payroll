@@ -38,13 +38,13 @@ class CustomSalarySlip(SalarySlip):
         self.tax_calculation()
 
 
-    def validate(self):
-        super().validate()
-        self.set_month()
-        self.set_sub_period()
-        self.update_total_lop()
-        self.set_taxale_regime()
-        self.insert_lopreversal_days()
+    # def validate(self):
+    #     super().validate()
+    #     self.set_month()
+    #     self.set_sub_period()
+    #     self.update_total_lop()
+    #     self.set_taxale_regime()
+    #     self.insert_lopreversal_days()
 
 
     def insert_lopreversal_days(self):
