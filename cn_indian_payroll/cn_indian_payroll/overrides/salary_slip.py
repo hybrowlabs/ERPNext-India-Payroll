@@ -38,13 +38,13 @@ class CustomSalarySlip(SalarySlip):
         self.tax_calculation()
 
 
-    # def validate(self):
-    #     super().validate()
-    #     self.set_month()
-    #     self.set_sub_period()
-    #     self.update_total_lop()
-    #     self.set_taxale_regime()
-    #     self.insert_lopreversal_days()
+    def validate(self):
+        super().validate()
+        self.set_month()
+        self.set_sub_period()
+        self.update_total_lop()
+        self.set_taxale_regime()
+        self.insert_lopreversal_days()
 
 
     def insert_lopreversal_days(self):
@@ -1141,19 +1141,21 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def compute_ctc(self):
-        if hasattr(self, "previous_taxable_earnings"):
-            return (
-				self.previous_taxable_earnings_before_exemption
-				+ self.current_structured_taxable_earnings_before_exemption
-				+ self.future_structured_taxable_earnings_before_exemption
-				+ self.current_additional_earnings
-				+ self.other_incomes
-				+ self.unclaimed_taxable_benefits
-				+ self.non_taxable_earnings
-			)
-        return 0
+    # def compute_ctc(self):
+    #     if hasattr(self, "previous_taxable_earnings"):
+    #         return (
+	# 			self.previous_taxable_earnings_before_exemption
+	# 			+ self.current_structured_taxable_earnings_before_exemption
+	# 			+ self.future_structured_taxable_earnings_before_exemption
+	# 			+ self.current_additional_earnings
+	# 			+ self.other_incomes
+	# 			+ self.unclaimed_taxable_benefits
+	# 			+ self.non_taxable_earnings
+	# 		)
+    #     return 0
 
+    #     print("\n\n\n\n\n\n\n,self.current_structured_taxable_earnings_before_exemption,\n\n\n\n\n\n\n")
+   
 
 
 
@@ -1433,3 +1435,5 @@ def override_calculate_tax_by_tax_slab(
     )
 
     return round(final_tax, 2), round(other_taxes_and_charges, 2)
+
+

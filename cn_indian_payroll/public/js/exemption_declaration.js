@@ -232,70 +232,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
                             console.log(data);
 
-                        //     let oldSlabRows = "";
-                        //         for (let i = 0; i < data.old_regime_from_amounts.length; i++) {
-                        //             oldSlabRows += `
-                        //                 <tr>
-                        //                     <td style="padding: 6px;">₹ ${data.old_regime_from_amounts[i]}</td>
-                        //                     <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_to_amounts[i]}</td>
-                        //                     <td style="padding: 6px; text-align: right;">${data.old_regime_percentages[i]}%</td>
-                        //                     <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_tax_per_slab[i]}</td>
-                        //                 </tr>
-                        //             `;
-                        //         }
-
-                        //         // Build HTML rows for New Regime Slab
-                        //         let newSlabRows = "";
-                        //         for (let i = 0; i < data.new_regime_from_amounts.length; i++) {
-                        //             newSlabRows += `
-                        //                 <tr>
-                        //                     <td style="padding: 6px;">₹ ${data.new_regime_from_amounts[i]}</td>
-                        //                     <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_to_amounts[i]}</td>
-                        //                     <td style="padding: 6px; text-align: right;">${data.new_regime_percentages[i]}%</td>
-                        //                     <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_tax_per_slab[i]}</td>
-                        //                 </tr>
-                        //             `;
-                        //         }
-
-                        //         let old_tax = (
-                        //             (data.old_regime_education_cess + data.old_regime_surcharge +
-                        //             (data.old_regime_total_tax - data.old_regime_rebate_amount)) -
-                        //             data.total_tax_already_paid
-                        //         );
-
-                        //         let new_tax = (
-                        //             (data.new_regime_education_cess+data.new_regime_surcharge+
-                        //             (data.new_regime_total_tax-data.new_regime_rebate_amount)) -
-                        //             data.total_tax_already_paid
-                        //         );
-
-                        //         let old_tax_balance = (
-                        //             (
-                        //                 data.old_regime_education_cess +
-                        //                 data.old_regime_surcharge +
-                        //                 (data.old_regime_total_tax - data.old_regime_rebate_amount)
-                        //             ) - data.advance_tax
-                        //         ) - data.total_tax_already_paid;
-
-
-                        //         let new_tax_balance = (
-                        //             (
-                        //                 data.new_regime_education_cess +
-                        //                 data.new_regime_surcharge +
-                        //                 (data.new_regime_total_tax - data.new_regime_rebate_amount)
-                        //             ) - data.advance_tax
-                        //         ) - data.total_tax_already_paid;
-
-
-                        //         let monthBase = data.month_count === 0 ? data.num_months : data.month_count+1;
-
-                        //         let currentTax_old_regime = old_tax / monthBase;
-                        //         let currentTax_new_regime = new_tax / monthBase;
-
-                        //         let currentTax_old_regime_tax = (old_tax_balance / monthBase) || 0;
-                        //         let currentTax_new_regime_tax = (new_tax_balance / monthBase) || 0;
-
-
 
                         const html = `
                                     <table class="table table-bordered" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -324,14 +260,150 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                             </tr>
                                             <tr>
                                                 <td style="padding: 10px; border: 1px solid #ddd;">Loan Perquisite</td>
-                                                <td><div style="text-align: right"> ₹ </div></td>
-                                                <td><div style="text-align: right"> ₹ </div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.loan_perquisite_amount}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.loan_perquisite_amount}</div></td>
                                             </tr>
                                             <tr style="font-weight: bold; background-color: #e9ecef;">
                                                 <td>Total Taxable Earnings (Current+Future+Loan)</td>
-                                                <td><div style="text-align: right"> ₹ </div></td>
-                                                <td><div style="text-align: right"> ₹ </div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.total_annual_taxable_earning_old_regime} </div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.total_annual_taxable_earning_new_regime}</div></td>
                                             </tr>
+
+                                                                                        <tr>
+                                                <!-- First column with nested table -->
+                                                <td>
+                                                    <b>Less: Allowances Exempted U/s 16</b>
+                                                    <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
+                                                        <thead style="background-color: #f0f0f0;">
+                                                            <tr>
+                                                                <th style="padding: 6px;">Title</th>
+                                                                <th style="padding: 6px; text-align: right;">Old Regime</th>
+                                                                <th style="padding: 6px; text-align: right;">New Regime</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="padding: 6px;">Standard Deduction</td>
+                                                                <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_standard_value}</td>
+                                                                <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_standard_value}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding: 6px;">Professional Tax</td>
+                                                                <td style="padding: 6px; text-align: right;">₹ ${data.pt_amount}</td>
+                                                                <td style="padding: 6px; text-align: right;">₹ 0</td>
+                                                            </tr>
+
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+
+                                                <!-- Second column: Old Regime Total -->
+                                                <td><div style="text-align: right;">₹ ${data.old_regime_standard_value+data.pt_amount}</div></td>
+
+                                                <!-- Third column: New Regime Total -->
+                                                <td><div style="text-align: right;">₹ ${data.new_regime_standard_value}</div></td>
+                                            </tr>
+
+
+                                            <tr>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">NPS</td>
+                                                <td><div style="text-align: right"> ₹ ${data.nps_amount}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.nps_amount}</div></td>
+                                            </tr>
+
+                                             <tr>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">HRA Exemptions</td>
+                                                <td><div style="text-align: right"> ₹ ${data.hra_exemptions} </div></td>
+                                                <td><div style="text-align: right"> ₹ 0</div></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Total Declared Exemption/Deductions</td>
+                                                <td><div style="text-align: right"> ₹ ${data.total_old_regime_deductions}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.total_new_regime_deductions}</div></td>
+                                            </tr>
+
+                                             <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Annual Taxable Income</td>
+                                                <td><div style="text-align: right"> ₹ ${data.old_regime_annual_taxable_income}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_annual_taxable_income}</div></td>
+                                            </tr>
+
+
+
+
+                                             <tr>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Total Tax on Income</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_total_tax_on_income}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_total_tax_on_income}</div></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Surcharge</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_surcharge}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_surcharge}</div></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Education Cess</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_education_cess}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_education_cess}</div></td>
+                                            </tr>
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Tax Payable</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_total_tax_payable}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_total_tax_payable}</div></td>
+                                            </tr>
+
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Tax Paid From Previous Employer</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.already_paid_previous_employer}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.already_paid_previous_employer}</div></td>
+                                            </tr>
+
+
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Balance TDS Payable</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_balance_tds_payable}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_balance_tds_payable}</div></td>
+                                            </tr>
+
+
+
+
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Tax Paid</td>
+                                                 <td><div style="text-align: right"> ₹ ${data.paid_tax}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.paid_tax}</div></td>
+                                            </tr>
+
+
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Current Tax</td>
+                                                <td><div style="text-align: right"> ₹ ${data.old_regime_current_month_tax}</div></td>
+                                                <td><div style="text-align: right"> ₹ ${data.new_regime_current_month_tax}</div></td>
+                                            </tr>
+
+                                            <tr style="font-weight: bold; background-color: #e9ecef;">
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Selected Regime</td>
+                                                <td colspan="2"><div style="text-align: right"><center>${data.selected_regime}</div></td>
+                                                
+                                            </tr>
+
+                                            <tr>
+                                            <td> <button class="btn btn-xs btn-primary mt-1" onclick="open_regime_dialog()">
+                                                Change Regime
+                                            </button></td>
+                                            </tr>
+
+                                            
+
+
 
 
 
@@ -354,7 +426,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                     }
                 });
             }
-        }
+        },
+
+    
 
 
 
@@ -362,3 +436,50 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
 
 });
+
+window.open_regime_dialog = function(docname) {
+
+    let dialog = new frappe.ui.Dialog({
+        title: "Select Tax Regime",
+        fields: [
+            {
+                label: "Tax Regime",
+                fieldname: "tax_regime",
+                fieldtype: "Select",
+                options: ["Old Regime", "New Regime"],
+                reqd: 1,
+                default:cur_frm.doc.custom_tax_regime
+            }
+        ],
+        primary_action_label: "Submit",
+        primary_action(values) {
+
+            
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
+                args: {
+
+                    doc_id: cur_frm.doc.name,
+                    employee: cur_frm.doc.employee,
+                    company: cur_frm.doc.company,
+                    payroll_period: cur_frm.doc.payroll_period,
+                    regime: values.tax_regime
+                },
+                callback: function(r) {
+                    if (!r.exc) {
+
+                        frappe.msgprint("Regime updated successfully");
+
+                        dialog.hide();
+
+                        // reload form properly
+                        cur_frm.reload_doc();
+                    }
+                }
+            });
+        }
+    });
+
+    dialog.show();
+};
