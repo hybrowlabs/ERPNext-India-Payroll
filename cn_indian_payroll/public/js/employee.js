@@ -29,17 +29,17 @@ frappe.ui.form.on("Employee", {
                 let is_match = false;
 
                
-                config.forEach(row => {
-                    if (row.employment_type === frm.doc.employment_type) {
-                        is_match = true;
-                        frm.set_df_property("cell_number","reqd", 1);
-                        frm.set_df_property("personal_email","reqd", 1);
-                    }
-                    else{
-                        frm.set_df_property("cell_number","reqd", 0);
-                        frm.set_df_property("personal_email","reqd", 0);
-                    }
-                });
+                // config.forEach(row => {
+                //     if (row.employment_type === frm.doc.employment_type) {
+                //         is_match = true;
+                //         frm.set_df_property("cell_number","reqd", 1);
+                //         frm.set_df_property("personal_email","reqd", 1);
+                //     }
+                //     else{
+                //         frm.set_df_property("cell_number","reqd", 0);
+                //         frm.set_df_property("personal_email","reqd", 0);
+                //     }
+                // });
 
 
                
