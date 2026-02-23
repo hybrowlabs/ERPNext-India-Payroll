@@ -4255,6 +4255,14 @@ function tds_projection_html(frm) {
           },
           callback: function (res) {
               if (res.message) {
+
+                  let previous_employer_tds=cur_frm.doc.custom_tds_from_previous_employer_amount
+
+
+
+
+
+
                   const from_month = res.message.from_month;
                   const to_month = res.message.to_month;
                   const oldValue = Math.round(res.message.current_old_value);
@@ -4524,15 +4532,11 @@ function tds_projection_html(frm) {
 
 
 
-                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
-                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
+                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
+                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)
 
                   let tds_already_deducted=frm.doc.custom_tds_already_deducted_amount
 
-                  // console.log(tds_already_deducted,"*****************************************")
-
-                  // console.log(annual_old_taxable_income,"1111111")
-                  // console.log(annual_new_taxable_income,"22222222")
 
 
 
@@ -4700,6 +4704,11 @@ function tds_projection_html(frm) {
                       </thead>
                       <tbody>
                           <tr>
+                              <td>TDS From Previous Employer</td>
+                              <td>₹ ${previous_employer_tds}</td>
+                              <td>₹ ${previous_employer_tds}</td>
+                          </tr>
+                          <tr>
                               <td>Current Taxable Earnings(${periodText})</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
@@ -4758,20 +4767,11 @@ function tds_projection_html(frm) {
                           </tr>
 
 
-
-
-
-
-
-
                            <tr>
                               <td>Total Taxable Income</td>
-                              <td>₹ ${oldValue+old_future_amount+total_per_sum}</td>
-                              <td>₹ ${newValue+new_future_amount+total_per_sum}</td>
+                              <td>₹ ${oldValue+old_future_amount+total_per_sum+previous_employer_tds}</td>
+                              <td>₹ ${newValue+new_future_amount+total_per_sum+previous_employer_tds}</td>
                           </tr>
-
-
-
 
 
                           <tr>
@@ -4936,8 +4936,8 @@ function tds_projection_html(frm) {
                           </tr>
                           <tr>
                               <td>Annual Taxable Income</td>
-                              <td>₹ ${(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
-                              <td>₹ ${(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)}</td>
+                              <td>₹ ${(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
+                              <td>₹ ${(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)}</td>
                           </tr>
 
 
@@ -5067,6 +5067,12 @@ function tds_projection_html(frm) {
                               <td>TDS already deducted</td>
                               <td>₹ ${Math.round(tds_already_deducted)}</td>
                               <td>₹ ${Math.round(tds_already_deducted)}</td>
+
+                          </tr>
+                          <tr>
+                              <td>TDS Deducted From Previous Employer</td>
+                              <td>₹ </td>
+                              <td>₹ </td>
 
                           </tr>
 
