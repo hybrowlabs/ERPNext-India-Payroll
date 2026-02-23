@@ -30,7 +30,6 @@ def get_salary_slips(filters=None):
 
     for structure in salary_structure_assignments:
         employee_id = structure["employee"]
-        # frappe.msgprint(str(structure.name))
 
         if (
             employee_id not in latest_salary_structure
@@ -48,9 +47,6 @@ def get_salary_slips(filters=None):
     unique_salary_structures = list(latest_salary_structure.values())
     first_unique_salary_structures = list(first_salary_structure.values())
 
-    # frappe.msgprint(str(unique_salary_structures))
-    # frappe.msgprint(str(first_unique_salary_structures))
-
     first_employee_details = [
         {
             "employee": item["employee"],
@@ -64,6 +60,8 @@ def get_salary_slips(filters=None):
 
     salary_components = {}
     final_data = []
+    tds_from_previous_employer = 0
+    tds_deducted_from_previous_employer = 0
 
     for structure in unique_salary_structures:
         epf_amount = 0
@@ -169,10 +167,6 @@ def get_salary_slips(filters=None):
             ),
             None,
         )
-
-        # frappe.msgprint(str(last_employee_detail))
-
-        # frappe.msgprint(str(first_employee))
 
         if last_employee_detail:
             payroll_period_doc = frappe.get_doc(
@@ -334,12 +328,6 @@ def get_salary_slips(filters=None):
         salary_data["bonus"] = bonus
 
         salary_data["loan_perquisite"] = loan_perquisite_total
-        salary_data["new_total_income"] = (
-            new_total_income + loan_perquisite_total + bonus
-        )
-        salary_data["old_total_income"] = (
-            old_total_income + loan_perquisite_total + bonus
-        )
 
         # Fetch Tax Exemption Declaration
         declaration = frappe.get_all(
@@ -356,6 +344,29 @@ def get_salary_slips(filters=None):
             get_doc = frappe.get_doc(
                 "Employee Tax Exemption Declaration", declaration[0].name
             )
+
+            tds_from_previous_employer = (
+                get_doc.custom_tds_from_previous_employer_amount
+            )
+            tds_deducted_from_previous_employer = get_doc.custom_tds_deducted_amount
+
+            salary_data["new_total_income"] = (
+                new_total_income
+                + loan_perquisite_total
+                + bonus
+                + tds_from_previous_employer
+            )
+            salary_data["old_total_income"] = (
+                old_total_income
+                + loan_perquisite_total
+                + bonus
+                + tds_from_previous_employer
+            )
+
+            salary_data["tds_from_previous_employer"] = tds_from_previous_employer
+            salary_data[
+                "tds_deducted_from_previous_employer"
+            ] = tds_deducted_from_previous_employer
 
             if get_doc.custom_tax_regime == "New Regime":
                 get_tax_slab = frappe.get_doc(
@@ -384,16 +395,20 @@ def get_salary_slips(filters=None):
                 )
 
                 salary_data["new_annual_taxable_income"] = max(
-                    new_total_income - total, 0
+                    (new_total_income + tds_from_previous_employer) - total, 0
                 )
                 salary_data["old_annual_taxable_income"] = max(
-                    old_total_income - (50000 + epf_amount + pt_amount + nps_deduction),
+                    (old_total_income + tds_from_previous_employer)
+                    - (50000 + epf_amount + pt_amount + nps_deduction),
                     0,
                 )
 
-                new_annual_taxable_income_value = max(new_total_income - total, 0)
+                new_annual_taxable_income_value = max(
+                    (new_total_income + tds_from_previous_employer) - total, 0
+                )
                 old_annual_taxable_income_value = max(
-                    old_total_income - (50000 + epf_amount + pt_amount + nps_deduction),
+                    (old_total_income + tds_from_previous_employer)
+                    - (50000 + epf_amount + pt_amount + nps_deduction),
                     0,
                 )
 
@@ -1352,14 +1367,16 @@ def get_salary_slips(filters=None):
             # Safely compute new regime payable
             new_regime_payable = max(
                 (new_regime_tax_payable or 0)
-                - (get_doc.custom_tds_already_deducted_amount or 0),
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer),
                 0,
             )
 
             # Safely compute old regime payable
             old_regime_payable = max(
                 ((total_sum or 0) + (old_surcharge_m or 0) + (old_education_cess or 0))
-                - (get_doc.custom_tds_already_deducted_amount or 0),
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer),
                 0,
             )
 
@@ -1383,13 +1400,17 @@ def get_salary_slips(filters=None):
             )
 
             # Assign balance TDS values safely
-            salary_data["balance_tds_new_regime"] = (new_regime_tax_payable or 0) - (
-                get_doc.custom_tds_already_deducted_amount or 0
+            salary_data["balance_tds_new_regime"] = (
+                (new_regime_tax_payable or 0)
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer)
             )
 
             salary_data["balance_tds_old_regime"] = (
-                (total_sum or 0) + (old_surcharge_m or 0) + (old_education_cess or 0)
-            ) - (get_doc.custom_tds_already_deducted_amount or 0)
+                ((total_sum or 0) + (old_surcharge_m or 0) + (old_education_cess or 0))
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer)
+            )
 
             salary_data["tax_paid"] = salary_slip_sum
 
@@ -1399,11 +1420,6 @@ def get_salary_slips(filters=None):
             salary_data["old_regime_tax"] = round(
                 (old_regime_payable - salary_slip_sum) / ((month_count - slip_count))
             )
-
-            # frappe.msgprint(str(slip_count))
-
-            # new_regime_tax_amount = new_regime_payable / month_count
-            # old_regime_tax_amount = old_regime_payable / month_count
 
             new_regime_tax_amount = round(
                 (new_regime_payable - salary_slip_sum) / (month_count - slip_count)
@@ -1535,6 +1551,12 @@ def execute(filters=None):
             {
                 "label": "Bonus",
                 "fieldname": "bonus",
+                "fieldtype": "Currency",
+                "width": 150,
+            },
+            {
+                "label": "TDS From Previous Employer",
+                "fieldname": "tds_from_previous_employer",
                 "fieldtype": "Currency",
                 "width": 150,
             },
@@ -1900,6 +1922,12 @@ def execute(filters=None):
             {
                 "fieldname": "tds_already_deducted",
                 "label": "TDS Already Deducted",
+                "fieldtype": "Currency",
+                "width": 250,
+            },
+            {
+                "fieldname": "tds_deducted_from_previous_employer",
+                "label": "TDS Already Deducted From Previous Employer",
                 "fieldtype": "Currency",
                 "width": 250,
             },
