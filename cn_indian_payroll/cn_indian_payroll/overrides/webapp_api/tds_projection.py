@@ -4188,10 +4188,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         salary_assignment = frappe.get_list(
                 "Salary Structure Assignment",
                 filters={
-                    "employee": doc.employee,
+                    "employee": employee,
                     "docstatus": 1,
-                    "custom_payroll_period": doc.get("payroll_period"),
-                    "company": doc.get("company"),
+                    "custom_payroll_period":payroll_period,
+                    "company":company,
                 },
                 fields=["*"],
                 order_by="from_date asc",
@@ -4249,10 +4249,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     "net_taxable_income":net_taxable_income,
     "tax_slab_id":tax_slab_id,
 
-    "new_regime_total_tax_on_income":round(slab_result.get("base_tax")),
-    "new_regime_surcharge": round(slab_result.get("surcharge")),
-    "new_regime_education_cess": round(slab_result.get("education_cess_amount")),
-    "new_regime_total_tax_payable":round(slab_result.get("total_tax_payable")),
+    
 
     "summary": [
         {
@@ -4733,7 +4730,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "marginal_relief",
             "name":"Marginal Relief",
-            "amount":0
+            "amount":marginal_relief
         },
         {
             "key": "cess_fee",
