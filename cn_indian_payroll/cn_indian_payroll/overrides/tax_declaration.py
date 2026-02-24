@@ -70,6 +70,55 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.set_total_declared_amount()
         self.set_total_exemption_amount()
 
+        self.update_tds_from_previous_employer()
+
+    def update_tds_from_previous_employer(self):
+        if (
+            self.custom_tds_from_previous_employer_amount
+            and self.custom_tds_deducted_amount
+        ):
+            ssa = frappe.get_list(
+                "Salary Structure Assignment",
+                filters={
+                    "docstatus": 1,
+                    "employee": self.employee,
+                    "company": self.company,
+                    "custom_payroll_period": self.payroll_period,
+                },
+                fields=["name"],
+                order_by="from_date desc",
+                limit=1,
+            )
+
+            if ssa:
+                ssa_doc = frappe.get_doc("Salary Structure Assignment", ssa[0]["name"])
+                ssa_doc.taxable_earnings_till_date = (
+                    self.custom_tds_from_previous_employer_amount
+                )
+                ssa_doc.tax_deducted_till_date = self.custom_tds_deducted_amount
+                ssa_doc.save(ignore_permissions=True)
+        else:
+            ssa = frappe.get_list(
+                "Salary Structure Assignment",
+                filters={
+                    "docstatus": 1,
+                    "employee": self.employee,
+                    "company": self.company,
+                    "custom_payroll_period": self.payroll_period,
+                },
+                fields=["name"],
+                order_by="from_date desc",
+                limit=1,
+            )
+
+            if ssa:
+                ssa_doc = frappe.get_doc("Salary Structure Assignment", ssa[0]["name"])
+                ssa_doc.taxable_earnings_till_date = (
+                    self.custom_tds_from_previous_employer_amount
+                )
+                ssa_doc.tax_deducted_till_date = self.custom_tds_deducted_amount
+                ssa_doc.save(ignore_permissions=True)
+
     def mediclaim_condition(self):
         if self.custom_tax_regime == "Old Regime":
             form_data = json.loads(self.custom_declaration_form_data or "{}")

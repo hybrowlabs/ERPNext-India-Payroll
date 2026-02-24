@@ -4255,6 +4255,15 @@ function tds_projection_html(frm) {
           },
           callback: function (res) {
               if (res.message) {
+
+
+
+                let previous_employer_tds=cur_frm.doc.custom_tds_from_previous_employer_amount
+                let previous_employer_deducted_tds=cur_frm.doc.custom_tds_deducted_amount
+
+
+
+
                   const from_month = res.message.from_month;
                   const to_month = res.message.to_month;
                   const oldValue = Math.round(res.message.current_old_value);
@@ -4524,8 +4533,8 @@ function tds_projection_html(frm) {
 
 
 
-                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
-                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
+                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
+                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)
 
                   let tds_already_deducted=frm.doc.custom_tds_already_deducted_amount
 
@@ -4699,8 +4708,14 @@ function tds_projection_html(frm) {
                           </tr>
                       </thead>
                       <tbody>
+
+                      <tr>
+                              <td>TDS From Previous Employer</td>
+                              <td>₹ ${previous_employer_tds}</td>
+                              <td>₹ ${previous_employer_tds}</td>
+                          </tr>
                           <tr>
-                              <td>Current Taxable Earnings(${periodText})</td>
+                              <td>Current Taxable Earnings</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
@@ -4766,8 +4781,8 @@ function tds_projection_html(frm) {
 
                            <tr>
                               <td>Total Taxable Income</td>
-                              <td>₹ ${oldValue+old_future_amount+total_per_sum}</td>
-                              <td>₹ ${newValue+new_future_amount+total_per_sum}</td>
+                              <td>₹ ${oldValue+old_future_amount+total_per_sum+previous_employer_tds}</td>
+                              <td>₹ ${newValue+new_future_amount+total_per_sum+previous_employer_tds}</td>
                           </tr>
 
 
@@ -4936,8 +4951,8 @@ function tds_projection_html(frm) {
                           </tr>
                           <tr>
                               <td>Annual Taxable Income</td>
-                              <td>₹ ${(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
-                              <td>₹ ${(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)}</td>
+                              <td>₹ ${(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
+                              <td>₹ ${(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)}</td>
                           </tr>
 
 
@@ -5071,9 +5086,16 @@ function tds_projection_html(frm) {
                           </tr>
 
                           <tr>
+                              <td>TDS already deducted from previous employer</td>
+                              <td>₹ ${previous_employer_deducted_tds}</td>
+                              <td>₹ ${previous_employer_deducted_tds}</td>
+
+                          </tr>
+
+                          <tr>
                               <td>Balance TDS payable</td>
-                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-tds_already_deducted)}</td>
-                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-tds_already_deducted)}</td>
+                              <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-tds_already_deducted-previous_employer_deducted_tds)}</td>
+                              <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-tds_already_deducted-previous_employer_deducted_tds)}</td>
                           </tr>
 
 
@@ -5091,13 +5113,13 @@ function tds_projection_html(frm) {
                           <td>Current Tax</td>
                           <td>
                             ₹ ${Math.round(
-                              (old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted - salary_slip_sum) /
+                              (old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted-previous_employer_deducted_tds - salary_slip_sum) /
                               ((num_months - salary_slip_count)+1)
                             )}
                           </td>
                           <td>
                             ₹ ${Math.round(
-                              (new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted - salary_slip_sum) /
+                              (new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted-previous_employer_deducted_tds - salary_slip_sum) /
                               ((num_months - salary_slip_count)+1)
                             )}
                           </td>

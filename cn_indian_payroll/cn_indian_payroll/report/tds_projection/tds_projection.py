@@ -64,6 +64,8 @@ def get_salary_slips(filters=None):
 
     salary_components = {}
     final_data = []
+    tds_deducted_from_previous_employer = 0
+    bonus = 0
 
     for structure in unique_salary_structures:
         epf_amount = 0
@@ -319,8 +321,6 @@ def get_salary_slips(filters=None):
                         loan_perquisite_total += date.perquisite_amount
 
         salary_data["loan_perquisite"] = loan_perquisite_total
-        salary_data["new_total_income"] = new_total_income + loan_perquisite_total
-        salary_data["old_total_income"] = old_total_income + loan_perquisite_total
 
         # Fetch Tax Exemption Declaration
         declaration = frappe.get_all(
@@ -337,6 +337,32 @@ def get_salary_slips(filters=None):
             get_doc = frappe.get_doc(
                 "Employee Tax Exemption Declaration", declaration[0].name
             )
+
+            tds_from_previous_employer = (
+                get_doc.custom_tds_from_previous_employer_amount
+            )
+            tds_from_previous_employer = (
+                get_doc.custom_tds_from_previous_employer_amount
+            )
+            tds_deducted_from_previous_employer = get_doc.custom_tds_deducted_amount
+
+            salary_data["new_total_income"] = (
+                new_total_income
+                + loan_perquisite_total
+                + bonus
+                + tds_from_previous_employer
+            )
+            salary_data["old_total_income"] = (
+                old_total_income
+                + loan_perquisite_total
+                + bonus
+                + tds_from_previous_employer
+            )
+
+            salary_data["tds_from_previous_employer"] = tds_from_previous_employer
+            salary_data[
+                "tds_deducted_from_previous_employer"
+            ] = tds_deducted_from_previous_employer
 
             if get_doc.custom_tax_regime == "New Regime":
                 get_tax_slab = frappe.get_doc(
@@ -365,19 +391,39 @@ def get_salary_slips(filters=None):
                 )
 
                 salary_data["new_annual_taxable_income"] = max(
-                    (new_total_income + loan_perquisite_total) - total, 0
+                    (
+                        new_total_income
+                        + loan_perquisite_total
+                        + tds_from_previous_employer
+                    )
+                    - total,
+                    0,
                 )
                 salary_data["old_annual_taxable_income"] = max(
-                    (old_total_income + loan_perquisite_total)
+                    (
+                        old_total_income
+                        + loan_perquisite_total
+                        + tds_from_previous_employer
+                    )
                     - (50000 + epf_amount + pt_amount + nps_deduction),
                     0,
                 )
 
                 new_annual_taxable_income_value = max(
-                    (new_total_income + loan_perquisite_total) - total, 0
+                    (
+                        new_total_income
+                        + loan_perquisite_total
+                        + tds_from_previous_employer
+                    )
+                    - total,
+                    0,
                 )
                 old_annual_taxable_income_value = max(
-                    (old_total_income + loan_perquisite_total)
+                    (
+                        old_total_income
+                        + loan_perquisite_total
+                        + tds_from_previous_employer
+                    )
                     - (50000 + epf_amount + pt_amount + nps_deduction),
                     0,
                 )
@@ -1341,14 +1387,16 @@ def get_salary_slips(filters=None):
             # Safely compute new regime payable
             new_regime_payable = max(
                 (new_regime_tax_payable or 0)
-                - (get_doc.custom_tds_already_deducted_amount or 0),
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer),
                 0,
             )
 
             # Safely compute old regime payable
             old_regime_payable = max(
                 ((total_sum or 0) + (old_surcharge_m or 0) + (old_education_cess or 0))
-                - (get_doc.custom_tds_already_deducted_amount or 0),
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer),
                 0,
             )
 
@@ -1373,12 +1421,15 @@ def get_salary_slips(filters=None):
 
             # Assign balance TDS values safely
             salary_data["balance_tds_new_regime"] = (new_regime_tax_payable or 0) - (
-                get_doc.custom_tds_already_deducted_amount or 0
+                get_doc.custom_tds_already_deducted_amount
+                or 0 - (tds_deducted_from_previous_employer)
             )
 
             salary_data["balance_tds_old_regime"] = (
-                (total_sum or 0) + (old_surcharge_m or 0) + (old_education_cess or 0)
-            ) - (get_doc.custom_tds_already_deducted_amount or 0)
+                ((total_sum or 0) + (old_surcharge_m or 0) + (old_education_cess or 0))
+                - (get_doc.custom_tds_already_deducted_amount or 0)
+                - (tds_deducted_from_previous_employer)
+            )
 
             salary_data["tax_paid"] = salary_slip_sum
 
@@ -1520,6 +1571,12 @@ def execute(filters=None):
             {
                 "label": "Loan Perquisite",
                 "fieldname": "loan_perquisite",
+                "fieldtype": "Currency",
+                "width": 150,
+            },
+            {
+                "label": "TDS From Previous Employer",
+                "fieldname": "tds_from_previous_employer",
                 "fieldtype": "Currency",
                 "width": 150,
             },
@@ -1885,6 +1942,12 @@ def execute(filters=None):
             {
                 "fieldname": "tds_already_deducted",
                 "label": "TDS Already Deducted",
+                "fieldtype": "Currency",
+                "width": 250,
+            },
+            {
+                "fieldname": "tds_deducted_from_previous_employer",
+                "label": "TDS Already Deducted From Previous Employer",
                 "fieldtype": "Currency",
                 "width": 250,
             },
