@@ -7,6 +7,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
         frm.trigger("display_declaration_form");
         tds_projection_html(frm)
 
+
     },
 
     change_tax_regime(frm) {
@@ -304,330 +305,330 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 
     },
 
-    tds_projection_html(frm) {
-        if (frm.doc.docstatus === 1) {
-                frappe.call({
-                    method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.calculate_tds_projection",
-                    args: {
-                        doc: frm.doc
-                    },
-                    callback: function (res) {
-                        if (res.message) {
-                            let data = res.message;
-
-                            console.log(data);
-
-                            let oldSlabRows = "";
-                                for (let i = 0; i < data.old_regime_from_amounts.length; i++) {
-                                    oldSlabRows += `
-                                        <tr>
-                                            <td style="padding: 6px;">₹ ${data.old_regime_from_amounts[i]}</td>
-                                            <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_to_amounts[i]}</td>
-                                            <td style="padding: 6px; text-align: right;">${data.old_regime_percentages[i]}%</td>
-                                            <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_tax_per_slab[i]}</td>
-                                        </tr>
-                                    `;
-                                }
-
-                                // Build HTML rows for New Regime Slab
-                                let newSlabRows = "";
-                                for (let i = 0; i < data.new_regime_from_amounts.length; i++) {
-                                    newSlabRows += `
-                                        <tr>
-                                            <td style="padding: 6px;">₹ ${data.new_regime_from_amounts[i]}</td>
-                                            <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_to_amounts[i]}</td>
-                                            <td style="padding: 6px; text-align: right;">${data.new_regime_percentages[i]}%</td>
-                                            <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_tax_per_slab[i]}</td>
-                                        </tr>
-                                    `;
-                                }
-
-                                let old_tax = (
-                                    (data.old_regime_education_cess + data.old_regime_surcharge +
-                                    (data.old_regime_total_tax - data.old_regime_rebate_amount)) -
-                                    data.total_tax_already_paid
-                                );
-
-                                let new_tax = (
-                                    (data.new_regime_education_cess+data.new_regime_surcharge+
-                                    (data.new_regime_total_tax-data.new_regime_rebate_amount)) -
-                                    data.total_tax_already_paid
-                                );
-
-                                let old_tax_balance = (
-                                    (
-                                        data.old_regime_education_cess +
-                                        data.old_regime_surcharge +
-                                        (data.old_regime_total_tax - data.old_regime_rebate_amount)
-                                    ) - data.advance_tax
-                                ) - data.total_tax_already_paid;
-
-
-                                let new_tax_balance = (
-                                    (
-                                        data.new_regime_education_cess +
-                                        data.new_regime_surcharge +
-                                        (data.new_regime_total_tax - data.new_regime_rebate_amount)
-                                    ) - data.advance_tax
-                                ) - data.total_tax_already_paid;
-
-
-                                let monthBase = data.month_count === 0 ? data.num_months : data.month_count+1;
-
-                                let currentTax_old_regime = old_tax / monthBase;
-                                let currentTax_new_regime = new_tax / monthBase;
-
-                                let currentTax_old_regime_tax = old_tax_balance / monthBase;
-                                let currentTax_new_regime_tax = new_tax_balance / monthBase;
-
-
-                        const html = `
-                                    <table class="table table-bordered" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                                        <thead style="background-color: #f0f0f0;">
-                                            <tr style="background-color:rgba(3, 9, 15, 0.68); color: white;">
-                                                <th style="padding: 10px; border: 1px solid #ddd;">Title</th>
-                                                <th style="padding: 10px; border: 1px solid #ddd;">Old Regime</th>
-                                                <th style="padding: 10px; border: 1px solid #ddd;">New Regime</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Taxable Earnings (Current)</td>
-                                                <td><div style="text-align: right"> ₹ ${data.current_taxable_earnings_old_regime}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.current_taxable_earnings_new_regime}</div></td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Taxable Earnings (Future)</td>
-                                                <td><div style="text-align: right"> ₹ ${data.future_taxable_earnings_old_regime}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.future_taxable_earnings_new_regime}</div></td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Loan Perquisite</td>
-                                                <td><div style="text-align: right"> ₹ ${data.loan_perquisite_amount}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.loan_perquisite_amount}</div></td>
-                                            </tr>
-                                            <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td>Total Taxable Earnings (Current+Future+Loan)</td>
-                                                <td><div style="text-align: right"> ₹ ${data.total_taxable_earnings_old_regime}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.total_taxable_earnings_new_regime}</div></td>
-                                            </tr>
-
-                                            <tr>
-                                                <!-- First column with nested table -->
-                                                <td>
-                                                    <b>Less: Allowances Exempted U/s 16</b>
-                                                    <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
-                                                        <thead style="background-color: #f0f0f0;">
-                                                            <tr>
-                                                                <th style="padding: 6px;">Title</th>
-                                                                <th style="padding: 6px; text-align: right;">Old Regime</th>
-                                                                <th style="padding: 6px; text-align: right;">New Regime</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style="padding: 6px;">Standard Deduction</td>
-                                                                <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_standard_value}</td>
-                                                                <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_standard_value}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td style="padding: 6px;">Professional Tax</td>
-                                                                <td style="padding: 6px; text-align: right;">₹ ${data.pt_amount}</td>
-                                                                <td style="padding: 6px; text-align: right;">₹ 0</td>
-                                                            </tr>
-
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-
-                                                <!-- Second column: Old Regime Total -->
-                                                <td><div style="text-align: right;">₹ ${data.old_regime_standard_value+data.pt_amount}</div></td>
-
-                                                <!-- Third column: New Regime Total -->
-                                                <td><div style="text-align: right;">₹ ${data.new_regime_standard_value}</div></td>
-                                            </tr>
-
-                                             <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">HRA Exemptions</td>
-                                                <td><div style="text-align: right"> ₹ ${data.hra_exemptions}</div></td>
-                                                <td><div style="text-align: right"> ₹ 0</div></td>
-                                            </tr>
-
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Total Exemption/Deductions</td>
-                                                <td><div style="text-align: right"> ₹ ${data.total_old_regime_deductions}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.total_new_regime_deductions}</div></td>
-                                            </tr>
-
-                                             <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Annual Taxable Income</td>
-                                                <td><div style="text-align: right"> ₹ ${data.old_regime_annual_taxable_income}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.new_regime_annual_taxable_income}</div></td>
-                                            </tr>
-
-
-
-                                            <tr>
-                                                <!-- First column with nested table -->
-                                                <td>
-                                                    <b>Old Regime Tax Slab</b>
-                                                            <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
-                                                                <thead style="background-color: #f0f0f0;">
-                                                                    <tr>
-                                                                        <th style="padding: 6px;">From Amount</th>
-                                                                        <th style="padding: 6px; text-align: right;">To Amount</th>
-                                                                        <th style="padding: 6px; text-align: right;">Percentage</th>
-                                                                        <th style="padding: 6px; text-align: right;">Amount</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    ${oldSlabRows}
-                                                                </tbody>
-                                                            </table>
-
-                                                            <br>
-
-                                                            <b>New Regime Tax Slab</b>
-                                                            <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
-                                                                <thead style="background-color: #f0f0f0;">
-                                                                    <tr>
-                                                                        <th style="padding: 6px;">From Amount</th>
-                                                                        <th style="padding: 6px; text-align: right;">To Amount</th>
-                                                                        <th style="padding: 6px; text-align: right;">Percentage</th>
-                                                                        <th style="padding: 6px; text-align: right;">Amount</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    ${newSlabRows}
-                                                                </tbody>
-                                                            </table>
-
-                                                </td>
-
-                                                <!-- Second column: Old Regime Total -->
-                                                <td><div style="text-align: right;">₹ ${data.old_regime_total_tax}</div></td>
-
-                                                <!-- Third column: New Regime Total -->
-                                                <td><div style="text-align: right;">₹ ${data.new_regime_total_tax}</div></td>
-                                            </tr>
-
-
-
-                                             <tr>
-                                                <td>
-                                                    <b>Rebate</b>
-                                                            <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
-                                                                <thead style="background-color: #f0f0f0;">
-                                                                    <tr>
-                                                                        <th style="padding: 6px;">Regime</th>
-                                                                        <th style="padding: 6px; text-align: right;">Annual Taxable Lessthan</th>
-                                                                        <th style="padding: 6px; text-align: right;">Max Amount</th>
-                                                                        <th style="padding: 6px; text-align: right;">Marginal Relief</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-
-
-                                                                    <tr>
-                                                                        <th style="padding: 6px;">Old Regime</th>
-                                                                        <th style="padding: 6px; text-align: right;">${data.old_regime_rebate_limit}</th>
-                                                                        <th style="padding: 6px; text-align: right;">${data.old_regime_max_amount}</th>
-                                                                        <th style="padding: 6px; text-align: right;">${data.old_regime_marginal_relief_min}-${data.old_regime_marginal_relief_max}</th>
-                                                                    </tr>
-
-                                                                     <tr>
-                                                                        <th style="padding: 6px;">New Regime</th>
-                                                                        <th style="padding: 6px; text-align: right;">${data.new_regime_rebate_limit}</th>
-                                                                        <th style="padding: 6px; text-align: right;">${data.new_regime_max_amount}</th>
-                                                                        <th style="padding: 6px; text-align: right;">${data.new_regime_marginal_relief_min}-${data.new_regime_marginal_relief_max}</th>
-                                                                    </tr>
-
-                                                                </tbody>
-                                                            </table>
-
-
-                                                </td>
-
-                                                <td><div style="text-align: right;">₹ ${data.old_regime_rebate_amount}</div></td>
-
-                                                <td><div style="text-align: right;">₹ ${data.new_regime_rebate_amount}</div></td>
-                                            </tr>
-
-
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Total Tax on Income</td>
-                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_total_tax-data.old_regime_rebate_amount}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.new_regime_total_tax-data.new_regime_rebate_amount}</div></td>
-                                            </tr>
-
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Surcharge</td>
-                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_surcharge}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.new_regime_surcharge}</div></td>
-                                            </tr>
-
-                                            <tr>
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Education Cess</td>
-                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_education_cess}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.new_regime_education_cess}</div></td>
-                                            </tr>
-
-                                            <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Tax Payable</td>
-                                                 <td><div style="text-align: right"> ₹ ${data.old_regime_education_cess+data.old_regime_surcharge+(data.old_regime_total_tax-data.old_regime_rebate_amount)}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.new_regime_education_cess+data.new_regime_surcharge+(data.new_regime_total_tax-data.new_regime_rebate_amount)}</div></td>
-                                            </tr>
-
-                                            <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Advance Tax Deducted Amount</td>
-                                                 <td><div style="text-align: right"> ₹ ${data.advance_tax}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.advance_tax}</div></td>
-                                            </tr>
-
-                                            <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Balance Tax Payable</td>
-                                                 <td><div style="text-align: right"> ₹ ${(data.old_regime_education_cess+data.old_regime_surcharge+(data.old_regime_total_tax-data.old_regime_rebate_amount))-(data.advance_tax)}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${(data.new_regime_education_cess+data.new_regime_surcharge+(data.new_regime_total_tax-data.new_regime_rebate_amount))-(data.advance_tax)}</div></td>
-                                            </tr>
-
-                                            <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Tax Paid</td>
-                                                 <td><div style="text-align: right"> ₹ ${data.total_tax_already_paid}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${data.total_tax_already_paid}</div></td>
-                                            </tr>
-
-
-
-                                            <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Current Tax</td>
-                                                <td><div style="text-align: right"> ₹ ${Math.round(currentTax_old_regime_tax)}</div></td>
-                                                <td><div style="text-align: right"> ₹ ${Math.round(currentTax_new_regime_tax)}</div></td>
-                                            </tr>
-
-
-
-
-
-
-
-
-
-
-                                        </tbody>
-                                    </table>
-                                `;
-
-                            frm.set_df_property("custom_employee_tax_projection", "options", html);
-                            frm.refresh_field("custom_employee_tax_projection");
-
-
-
-
-                        }
-                    }
-                });
-            }
-        },
+    // tds_projection_html(frm) {
+    //     if (frm.doc.docstatus === 1) {
+    //             frappe.call({
+    //                 method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.calculate_tds_projection",
+    //                 args: {
+    //                     doc: frm.doc
+    //                 },
+    //                 callback: function (res) {
+    //                     if (res.message) {
+    //                         let data = res.message;
+
+    //                         console.log(data);
+
+    //                         let oldSlabRows = "";
+    //                             for (let i = 0; i < data.old_regime_from_amounts.length; i++) {
+    //                                 oldSlabRows += `
+    //                                     <tr>
+    //                                         <td style="padding: 6px;">₹ ${data.old_regime_from_amounts[i]}</td>
+    //                                         <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_to_amounts[i]}</td>
+    //                                         <td style="padding: 6px; text-align: right;">${data.old_regime_percentages[i]}%</td>
+    //                                         <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_tax_per_slab[i]}</td>
+    //                                     </tr>
+    //                                 `;
+    //                             }
+
+    //                             // Build HTML rows for New Regime Slab
+    //                             let newSlabRows = "";
+    //                             for (let i = 0; i < data.new_regime_from_amounts.length; i++) {
+    //                                 newSlabRows += `
+    //                                     <tr>
+    //                                         <td style="padding: 6px;">₹ ${data.new_regime_from_amounts[i]}</td>
+    //                                         <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_to_amounts[i]}</td>
+    //                                         <td style="padding: 6px; text-align: right;">${data.new_regime_percentages[i]}%</td>
+    //                                         <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_tax_per_slab[i]}</td>
+    //                                     </tr>
+    //                                 `;
+    //                             }
+
+    //                             let old_tax = (
+    //                                 (data.old_regime_education_cess + data.old_regime_surcharge +
+    //                                 (data.old_regime_total_tax - data.old_regime_rebate_amount)) -
+    //                                 data.total_tax_already_paid
+    //                             );
+
+    //                             let new_tax = (
+    //                                 (data.new_regime_education_cess+data.new_regime_surcharge+
+    //                                 (data.new_regime_total_tax-data.new_regime_rebate_amount)) -
+    //                                 data.total_tax_already_paid
+    //                             );
+
+    //                             let old_tax_balance = (
+    //                                 (
+    //                                     data.old_regime_education_cess +
+    //                                     data.old_regime_surcharge +
+    //                                     (data.old_regime_total_tax - data.old_regime_rebate_amount)
+    //                                 ) - data.advance_tax
+    //                             ) - data.total_tax_already_paid;
+
+
+    //                             let new_tax_balance = (
+    //                                 (
+    //                                     data.new_regime_education_cess +
+    //                                     data.new_regime_surcharge +
+    //                                     (data.new_regime_total_tax - data.new_regime_rebate_amount)
+    //                                 ) - data.advance_tax
+    //                             ) - data.total_tax_already_paid;
+
+
+    //                             let monthBase = data.month_count === 0 ? data.num_months : data.month_count+1;
+
+    //                             let currentTax_old_regime = old_tax / monthBase;
+    //                             let currentTax_new_regime = new_tax / monthBase;
+
+    //                             let currentTax_old_regime_tax = old_tax_balance / monthBase;
+    //                             let currentTax_new_regime_tax = new_tax_balance / monthBase;
+
+
+    //                     const html = `
+    //                                 <table class="table table-bordered" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+    //                                     <thead style="background-color: #f0f0f0;">
+    //                                         <tr style="background-color:rgba(3, 9, 15, 0.68); color: white;">
+    //                                             <th style="padding: 10px; border: 1px solid #ddd;">Title</th>
+    //                                             <th style="padding: 10px; border: 1px solid #ddd;">Old Regime</th>
+    //                                             <th style="padding: 10px; border: 1px solid #ddd;">New Regime</th>
+    //                                         </tr>
+    //                                     </thead>
+    //                                     <tbody>
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Taxable Earnings (Current)</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.current_taxable_earnings_old_regime}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.current_taxable_earnings_new_regime}</div></td>
+    //                                         </tr>
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Taxable Earnings (Future)</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.future_taxable_earnings_old_regime}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.future_taxable_earnings_new_regime}</div></td>
+    //                                         </tr>
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Loan Perquisite</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.loan_perquisite_amount}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.loan_perquisite_amount}</div></td>
+    //                                         </tr>
+    //                                         <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td>Total Taxable Earnings (Current+Future+Loan)</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.total_taxable_earnings_old_regime}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.total_taxable_earnings_new_regime}</div></td>
+    //                                         </tr>
+
+    //                                         <tr>
+    //                                             <!-- First column with nested table -->
+    //                                             <td>
+    //                                                 <b>Less: Allowances Exempted U/s 16</b>
+    //                                                 <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
+    //                                                     <thead style="background-color: #f0f0f0;">
+    //                                                         <tr>
+    //                                                             <th style="padding: 6px;">Title</th>
+    //                                                             <th style="padding: 6px; text-align: right;">Old Regime</th>
+    //                                                             <th style="padding: 6px; text-align: right;">New Regime</th>
+    //                                                         </tr>
+    //                                                     </thead>
+    //                                                     <tbody>
+    //                                                         <tr>
+    //                                                             <td style="padding: 6px;">Standard Deduction</td>
+    //                                                             <td style="padding: 6px; text-align: right;">₹ ${data.old_regime_standard_value}</td>
+    //                                                             <td style="padding: 6px; text-align: right;">₹ ${data.new_regime_standard_value}</td>
+    //                                                         </tr>
+    //                                                         <tr>
+    //                                                             <td style="padding: 6px;">Professional Tax</td>
+    //                                                             <td style="padding: 6px; text-align: right;">₹ ${data.pt_amount}</td>
+    //                                                             <td style="padding: 6px; text-align: right;">₹ 0</td>
+    //                                                         </tr>
+
+    //                                                     </tbody>
+    //                                                 </table>
+    //                                             </td>
+
+    //                                             <!-- Second column: Old Regime Total -->
+    //                                             <td><div style="text-align: right;">₹ ${data.old_regime_standard_value+data.pt_amount}</div></td>
+
+    //                                             <!-- Third column: New Regime Total -->
+    //                                             <td><div style="text-align: right;">₹ ${data.new_regime_standard_value}</div></td>
+    //                                         </tr>
+
+    //                                          <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">HRA Exemptions</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.hra_exemptions}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ 0</div></td>
+    //                                         </tr>
+
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Total Exemption/Deductions</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.total_old_regime_deductions}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.total_new_regime_deductions}</div></td>
+    //                                         </tr>
+
+    //                                          <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Annual Taxable Income</td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.old_regime_annual_taxable_income}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.new_regime_annual_taxable_income}</div></td>
+    //                                         </tr>
+
+
+
+    //                                         <tr>
+    //                                             <!-- First column with nested table -->
+    //                                             <td>
+    //                                                 <b>Old Regime Tax Slab</b>
+    //                                                         <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
+    //                                                             <thead style="background-color: #f0f0f0;">
+    //                                                                 <tr>
+    //                                                                     <th style="padding: 6px;">From Amount</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">To Amount</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Percentage</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Amount</th>
+    //                                                                 </tr>
+    //                                                             </thead>
+    //                                                             <tbody>
+    //                                                                 ${oldSlabRows}
+    //                                                             </tbody>
+    //                                                         </table>
+
+    //                                                         <br>
+
+    //                                                         <b>New Regime Tax Slab</b>
+    //                                                         <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
+    //                                                             <thead style="background-color: #f0f0f0;">
+    //                                                                 <tr>
+    //                                                                     <th style="padding: 6px;">From Amount</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">To Amount</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Percentage</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Amount</th>
+    //                                                                 </tr>
+    //                                                             </thead>
+    //                                                             <tbody>
+    //                                                                 ${newSlabRows}
+    //                                                             </tbody>
+    //                                                         </table>
+
+    //                                             </td>
+
+    //                                             <!-- Second column: Old Regime Total -->
+    //                                             <td><div style="text-align: right;">₹ ${data.old_regime_total_tax}</div></td>
+
+    //                                             <!-- Third column: New Regime Total -->
+    //                                             <td><div style="text-align: right;">₹ ${data.new_regime_total_tax}</div></td>
+    //                                         </tr>
+
+
+
+    //                                          <tr>
+    //                                             <td>
+    //                                                 <b>Rebate</b>
+    //                                                         <table style="width: 100%; border-collapse: collapse; margin-top: 5px;" border="1">
+    //                                                             <thead style="background-color: #f0f0f0;">
+    //                                                                 <tr>
+    //                                                                     <th style="padding: 6px;">Regime</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Annual Taxable Lessthan</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Max Amount</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">Marginal Relief</th>
+    //                                                                 </tr>
+    //                                                             </thead>
+    //                                                             <tbody>
+
+
+    //                                                                 <tr>
+    //                                                                     <th style="padding: 6px;">Old Regime</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">${data.old_regime_rebate_limit}</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">${data.old_regime_max_amount}</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">${data.old_regime_marginal_relief_min}-${data.old_regime_marginal_relief_max}</th>
+    //                                                                 </tr>
+
+    //                                                                  <tr>
+    //                                                                     <th style="padding: 6px;">New Regime</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">${data.new_regime_rebate_limit}</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">${data.new_regime_max_amount}</th>
+    //                                                                     <th style="padding: 6px; text-align: right;">${data.new_regime_marginal_relief_min}-${data.new_regime_marginal_relief_max}</th>
+    //                                                                 </tr>
+
+    //                                                             </tbody>
+    //                                                         </table>
+
+
+    //                                             </td>
+
+    //                                             <td><div style="text-align: right;">₹ ${data.old_regime_rebate_amount}</div></td>
+
+    //                                             <td><div style="text-align: right;">₹ ${data.new_regime_rebate_amount}</div></td>
+    //                                         </tr>
+
+
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Total Tax on Income</td>
+    //                                              <td><div style="text-align: right"> ₹ ${data.old_regime_total_tax-data.old_regime_rebate_amount}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.new_regime_total_tax-data.new_regime_rebate_amount}</div></td>
+    //                                         </tr>
+
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Surcharge</td>
+    //                                              <td><div style="text-align: right"> ₹ ${data.old_regime_surcharge}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.new_regime_surcharge}</div></td>
+    //                                         </tr>
+
+    //                                         <tr>
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Education Cess</td>
+    //                                              <td><div style="text-align: right"> ₹ ${data.old_regime_education_cess}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.new_regime_education_cess}</div></td>
+    //                                         </tr>
+
+    //                                         <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Tax Payable</td>
+    //                                              <td><div style="text-align: right"> ₹ ${data.old_regime_education_cess+data.old_regime_surcharge+(data.old_regime_total_tax-data.old_regime_rebate_amount)}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.new_regime_education_cess+data.new_regime_surcharge+(data.new_regime_total_tax-data.new_regime_rebate_amount)}</div></td>
+    //                                         </tr>
+
+    //                                         <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Advance Tax Deducted Amount</td>
+    //                                              <td><div style="text-align: right"> ₹ ${data.advance_tax}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.advance_tax}</div></td>
+    //                                         </tr>
+
+    //                                         <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Balance Tax Payable</td>
+    //                                              <td><div style="text-align: right"> ₹ ${(data.old_regime_education_cess+data.old_regime_surcharge+(data.old_regime_total_tax-data.old_regime_rebate_amount))-(data.advance_tax)}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${(data.new_regime_education_cess+data.new_regime_surcharge+(data.new_regime_total_tax-data.new_regime_rebate_amount))-(data.advance_tax)}</div></td>
+    //                                         </tr>
+
+    //                                         <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Tax Paid</td>
+    //                                              <td><div style="text-align: right"> ₹ ${data.total_tax_already_paid}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${data.total_tax_already_paid}</div></td>
+    //                                         </tr>
+
+
+
+    //                                         <tr style="font-weight: bold; background-color: #e9ecef;">
+    //                                             <td style="padding: 10px; border: 1px solid #ddd;">Current Tax</td>
+    //                                             <td><div style="text-align: right"> ₹ ${Math.round(currentTax_old_regime_tax)}</div></td>
+    //                                             <td><div style="text-align: right"> ₹ ${Math.round(currentTax_new_regime_tax)}</div></td>
+    //                                         </tr>
+
+
+
+
+
+
+
+
+
+
+    //                                     </tbody>
+    //                                 </table>
+    //                             `;
+
+    //                         frm.set_df_property("custom_employee_tax_projection", "options", html);
+    //                         frm.refresh_field("custom_employee_tax_projection");
+
+
+
+
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //     },
 
     monthly_house_rent(frm) {
 
@@ -687,6 +688,12 @@ function tds_projection_html(frm) {
             },
             callback: function (res) {
                 if (res.message) {
+
+
+                    let previous_employer_tds=cur_frm.doc.custom_tds_from_previous_employer_amount
+                    let previous_employer_deducted_tds=cur_frm.doc.custom_tds_deducted_amount
+
+
                     const from_month = res.message.from_month;
                     const to_month = res.message.to_month;
                     const oldValue = Math.round(res.message.current_old_value);
@@ -956,8 +963,8 @@ function tds_projection_html(frm) {
 
 
 
-                    let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
-                    let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
+                    let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
+                    let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)
 
                     let tds_already_deducted=frm.doc.custom_tds_already_deducted_amount
 
@@ -1127,8 +1134,13 @@ function tds_projection_html(frm) {
                             </tr>
                         </thead>
                         <tbody>
+                        <tr>
+                                <td>TDS From Previous Employer</td>
+                                <td>₹${previous_employer_tds}</td>
+                                <td>₹ ${previous_employer_tds}</td>
+                            </tr>
                             <tr>
-                                <td>Current Taxable Earnings(${periodText})</td>
+                                <td>Current Taxable Earnings</td>
                                 <td>₹ ${oldValue}</td>
                                 <td>₹ ${newValue}</td>
                             </tr>
@@ -1194,8 +1206,8 @@ function tds_projection_html(frm) {
 
                              <tr>
                                 <td>Total Taxable Income</td>
-                                <td>₹ ${oldValue+old_future_amount+total_per_sum}</td>
-                                <td>₹ ${newValue+new_future_amount+total_per_sum}</td>
+                                <td>₹ ${oldValue+old_future_amount+total_per_sum+previous_employer_tds}</td>
+                                <td>₹ ${newValue+new_future_amount+total_per_sum+previous_employer_tds}</td>
                             </tr>
 
 
@@ -1364,8 +1376,8 @@ function tds_projection_html(frm) {
                             </tr>
                             <tr>
                                 <td>Annual Taxable Income</td>
-                                <td>₹ ${(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
-                                <td>₹ ${(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)}</td>
+                                <td>₹ ${(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)}</td>
+                                <td>₹ ${(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)}</td>
                             </tr>
 
 
@@ -1499,9 +1511,17 @@ function tds_projection_html(frm) {
                             </tr>
 
                             <tr>
+                              <td>TDS Deducted From Previous Employer</td>
+
+                              <td>₹ ${previous_employer_deducted_tds}</td>
+                              <td>₹ ${previous_employer_deducted_tds}</td>
+
+                          </tr>
+
+                            <tr>
                                 <td>Balance TDS payable</td>
-                                <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-tds_already_deducted)}</td>
-                                <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-tds_already_deducted)}</td>
+                                <td>₹ ${Math.round((old_education_cess+old_surcharge_m+(total_sum-old_rebate_value))-tds_already_deducted-previous_employer_deducted_tds)}</td>
+                                <td>₹ ${Math.round((new_education_cess+new_surcharge_m+(total_sum_new-new_rebate_value))-tds_already_deducted-previous_employer_deducted_tds)}</td>
                             </tr>
 
 
@@ -1519,13 +1539,13 @@ function tds_projection_html(frm) {
                             <td>Current Tax</td>
                             <td>
                               ₹ ${Math.round(
-                                (old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted - salary_slip_sum) /
+                                (old_education_cess + old_surcharge_m + (total_sum - old_rebate_value) - tds_already_deducted - previous_employer_deducted_tds-salary_slip_sum) /
                                 ((num_months - salary_slip_count)+1)
                               )}
                             </td>
                             <td>
                               ₹ ${Math.round(
-                                (new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted - salary_slip_sum) /
+                                (new_education_cess + new_surcharge_m + (total_sum_new - new_rebate_value) - tds_already_deducted - previous_employer_deducted_tds-salary_slip_sum) /
                                 ((num_months - salary_slip_count)+1)
                               )}
                             </td>

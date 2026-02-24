@@ -4255,6 +4255,13 @@ function tds_projection_html(frm) {
           },
           callback: function (res) {
               if (res.message) {
+
+
+                let previous_employer_tds=cur_frm.doc.custom_tds_from_previous_employer_amount
+                let previous_employer_deducted_tds=cur_frm.doc.custom_tds_deducted_amount
+
+
+
                   const from_month = res.message.from_month;
                   const to_month = res.message.to_month;
                   const oldValue = Math.round(res.message.current_old_value);
@@ -4524,8 +4531,8 @@ function tds_projection_html(frm) {
 
 
 
-                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
-                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum)-(nps_value+new_std)
+                  let annual_old_taxable_income=(oldValue+old_future_amount+total_per_sum+previous_employer_tds)-(total_section10_sum+old_std+pt_value+total_section80C_sum+total_section80d_sum+total_other_sum+nps_value+annual_hra_exemption)
+                  let annual_new_taxable_income=(newValue+new_future_amount+total_per_sum+previous_employer_tds)-(nps_value+new_std)
 
                   let tds_already_deducted=frm.doc.custom_tds_already_deducted_amount
 
@@ -4700,7 +4707,12 @@ function tds_projection_html(frm) {
                       </thead>
                       <tbody>
                           <tr>
-                              <td>Current Taxable Earnings(${periodText})</td>
+                              <td>TDS From Previous Employer</td>
+                              <td>₹ ${previous_employer_tds}</td>
+                              <td>₹ ${previous_employer_tds}</td>
+                          </tr>
+                          <tr>
+                              <td>Current Taxable Earnings</td>
                               <td>₹ ${oldValue}</td>
                               <td>₹ ${newValue}</td>
                           </tr>
