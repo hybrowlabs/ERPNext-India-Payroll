@@ -17,8 +17,8 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         self.set_total_actual_amount()
         self.get_total_exemption_amount()
 
-        # if not self.is_new():
-        #     self.insert_approved_proof_in_history()
+        if not self.is_new():
+            self.insert_approved_proof_in_history()
 
 
     def after_insert(self):
@@ -395,112 +395,214 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         # self.set_total_exemption_amount()
 
 
-    def insert_approved_proof_in_history(self):
-        if self.tax_exemption_proofs:
-            for d in self.tax_exemption_proofs:
-                if d.custom_proof_status == "Pending":
-                    get_approved_proof = frappe.get_list("POI Approved Category",
-                        filters={
-                            "employee": self.employee,
-                            "exemption_category": d.exemption_category,
-                            "exemption_sub_category": d.exemption_sub_category,
-                            "payroll_period": self.payroll_period,
-                        },
-                        fields=["name"]
-                    )
-                    if not get_approved_proof:
-                        approved_doc = frappe.get_doc({
-                            "doctype": "POI Approved Category",
-                            "employee": self.employee,
-                            "exemption_category": d.exemption_category,
-                            "exemption_sub_category": d.exemption_sub_category,
-                            "declared_amount": d.amount,
-                            "max_amount": d.max_amount,
-                            "payroll_period": self.payroll_period,
-                            "date":self.submission_date,
-                            "proof_id": self.name,
-                            "attach":d.attach_proof
-                        })
-                        approved_doc.insert()
-                        frappe.db.commit()
-                elif d.custom_proof_status == "Rejected":
-                    get_approved_proof = frappe.get_list("POI Approved Category",
-                        filters={
-                            "employee": self.employee,
-                            "exemption_category": d.exemption_category,
-                            "exemption_sub_category": d.exemption_sub_category,
-                            "payroll_period": self.payroll_period,
-                        },
-                        fields=["name"]
-                    )
-                    approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
-                    if approved_doc.declared_amount != d.amount:
-                        approved_doc.declared_amount = d.amount
-                        approved_doc.max_amount = d.max_amount
-                        approved_doc.date = self.submission_date
-                        approved_doc.proof_id = self.name
-                        approved_doc.attach = d.attach_proof
-                        approved_doc.status = "Pending"
-                        approved_doc.save()
-                        frappe.db.commit()
-                # elif d.custom_proof_status == "Approved":
-                #     get_approved_proof = frappe.get_list("POI Approved Category",
-                #         filters={
-                #             "employee": self.employee,
-                #             "exemption_category": d.exemption_category,
-                #             "exemption_sub_category": d.exemption_sub_category,
-                #             "payroll_period": self.payroll_period,
-                #         },
-                #         fields=["name"]
-                #     )
-                #     approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
-                #     if approved_doc.custom_proof_status != d.amount:
+    # def insert_approved_proof_in_history(self):
+    #     if self.tax_exemption_proofs:
+    #         for d in self.tax_exemption_proofs:
+    #             if d.custom_proof_status == "Pending":
+    #                 get_approved_proof = frappe.get_list("POI Approved Category",
+    #                     filters={
+    #                         "employee": self.employee,
+    #                         "exemption_category": d.exemption_category,
+    #                         "exemption_sub_category": d.exemption_sub_category,
+    #                         "payroll_period": self.payroll_period,
+    #                     },
+    #                     fields=["name"]
+    #                 )
+    #                 if not get_approved_proof:
+    #                     approved_doc = frappe.get_doc({
+    #                         "doctype": "POI Approved Category",
+    #                         "employee": self.employee,
+    #                         "exemption_category": d.exemption_category,
+    #                         "exemption_sub_category": d.exemption_sub_category,
+    #                         "declared_amount": d.amount,
+    #                         "max_amount": d.max_amount,
+    #                         "payroll_period": self.payroll_period,
+    #                         "date":self.submission_date,
+    #                         "proof_id": self.name,
+    #                         "attach":d.attach_proof
+    #                     })
+    #                     approved_doc.insert()
+    #                     frappe.db.commit()
+    #             elif d.custom_proof_status == "Rejected":
+    #                 get_approved_proof = frappe.get_list("POI Approved Category",
+    #                     filters={
+    #                         "employee": self.employee,
+    #                         "exemption_category": d.exemption_category,
+    #                         "exemption_sub_category": d.exemption_sub_category,
+    #                         "payroll_period": self.payroll_period,
+    #                     },
+    #                     fields=["name"]
+    #                 )
+    #                 approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
+    #                 if approved_doc.declared_amount != d.amount:
+    #                     approved_doc.declared_amount = d.amount
+    #                     approved_doc.max_amount = d.max_amount
+    #                     approved_doc.date = self.submission_date
+    #                     approved_doc.proof_id = self.name
+    #                     approved_doc.attach = d.attach_proof
+    #                     approved_doc.status = "Pending"
+    #                     approved_doc.save()
+    #                     frappe.db.commit()
+    #             # elif d.custom_proof_status == "Approved":
+    #             #     get_approved_proof = frappe.get_list("POI Approved Category",
+    #             #         filters={
+    #             #             "employee": self.employee,
+    #             #             "exemption_category": d.exemption_category,
+    #             #             "exemption_sub_category": d.exemption_sub_category,
+    #             #             "payroll_period": self.payroll_period,
+    #             #         },
+    #             #         fields=["name"]
+    #             #     )
+    #             #     approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
+    #             #     if approved_doc.custom_proof_status != d.amount:
                         
-                #         approved_doc.declared_amount = d.amount
-                #         approved_doc.max_amount = d.max_amount
-                #         approved_doc.date = self.submission_date
-                #         approved_doc.proof_id = self.name
-                #         approved_doc.attach = d.attach_proof
-                #         approved_doc.status = "Pending"
-                #         approved_doc.save()
-                #         frappe.db.commit()
+    #             #         approved_doc.declared_amount = d.amount
+    #             #         approved_doc.max_amount = d.max_amount
+    #             #         approved_doc.date = self.submission_date
+    #             #         approved_doc.proof_id = self.name
+    #             #         approved_doc.attach = d.attach_proof
+    #             #         approved_doc.status = "Pending"
+    #             #         approved_doc.save()
+    #             #         frappe.db.commit()
+
+    #     if self.house_rent_payment_amount:
+    #         get_approved_proof = frappe.get_list("POI Approved Category",
+    #                 filters={
+    #                     "employee": self.employee,
+    #                     "category": "HRA",
+    #                     "payroll_period": self.payroll_period,
+    #                 },
+    #                 fields=["name"]
+    #             )
+    #         if not get_approved_proof:
+    #             approved_doc = frappe.get_doc({
+    #                 "doctype": "POI Approved Category",
+    #                 "employee": self.employee,
+    #                 "category": "HRA",
+    #                 "annual_hra_exemption": self.custom_annual_eligible_amount,
+    #                 "monthly_hra_exemption": self.monthly_hra_exemption,
+    #                 "payroll_period": self.payroll_period,
+    #                 "date":self.submission_date,
+    #                 "proof_id": self.name,
+    #                 "hra_attach":self.custom_hra_proof_attach,
+    #                 "hra_paid": self.house_rent_payment_amount,
+    #                 "holder_name": self.custom_name,
+    #                 "pan": self.custom_pan,
+    #                 "address_line1": self.custom_address_title1
+    #             })
+    #             approved_doc.insert()
+    #             frappe.db.commit()
+    #         else:
+    #             approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
+    #             approved_doc.annual_hra_exemption = self.custom_annual_eligible_amount
+    #             approved_doc.monthly_hra_exemption = self.monthly_hra_exemption
+    #             approved_doc.date = self.submission_date
+    #             approved_doc.proof_id = self.name
+    #             approved_doc.hra_attach = self.custom_hra_proof_attach
+    #             approved_doc.save()
+    #             frappe.db.commit()
+
+
+    def insert_approved_proof_in_history(self):
+
+        if not self.tax_exemption_proofs:
+            return
+
+        for d in self.tax_exemption_proofs:
+
+            component = frappe.get_doc(
+                "Employee Tax Exemption Sub Category",
+                d.exemption_sub_category
+            )
+
+            if component.custom_component_type not in [
+                "NPS",
+                "Professional Tax",
+                "Provident Fund"
+            ]:
+
+                filters = {
+                    "employee": self.employee,
+                    "exemption_category": d.exemption_category,
+                    "exemption_sub_category": d.exemption_sub_category,
+                    "payroll_period": self.payroll_period,
+                }
+
+                existing_name = frappe.db.get_value(
+                    "POI Approved Category",
+                    filters,
+                    "name"
+                )
+
+
+
+                values = {
+                    "declared_amount": d.amount,
+                    "max_amount": d.max_amount,
+                    "date": self.submission_date,
+                    "proof_id": self.name,
+                    "attach": d.attach_proof,
+                    "status": "Pending"
+                }
+
+                if not existing_name:
+                    frappe.get_doc({
+                        "doctype": "POI Approved Category",
+                        "employee": self.employee,
+                        "exemption_category": d.exemption_category,
+                        "exemption_sub_category": d.exemption_sub_category,
+                        "payroll_period": self.payroll_period,
+                        **values
+                    }).insert(ignore_permissions=True)
+
+                else:
+                    frappe.db.set_value(
+                        "POI Approved Category",
+                        existing_name,
+                        values
+                    )
+
 
         if self.house_rent_payment_amount:
-            get_approved_proof = frappe.get_list("POI Approved Category",
-                    filters={
-                        "employee": self.employee,
-                        "category": "HRA",
-                        "payroll_period": self.payroll_period,
-                    },
-                    fields=["name"]
-                )
-            if not get_approved_proof:
-                approved_doc = frappe.get_doc({
+
+            hra_name = frappe.db.get_value(
+                "POI Approved Category",
+                {
+                    "employee": self.employee,
+                    "category": "HRA",
+                    "payroll_period": self.payroll_period,
+                },
+                "name"
+            )
+
+            hra_values = {
+                "annual_hra_exemption": self.custom_annual_eligible_amount,
+                "monthly_hra_exemption": self.monthly_hra_exemption,
+                "date": self.submission_date,
+                "proof_id": self.name,
+                "hra_attach": self.custom_hra_proof_attach,
+                "hra_paid": self.house_rent_payment_amount,
+                "holder_name": self.custom_name,
+                "pan": self.custom_pan,
+                "address_line1": self.custom_address_title1,
+                "status": "Pending"
+            }
+
+            if not hra_name:
+                frappe.get_doc({
                     "doctype": "POI Approved Category",
                     "employee": self.employee,
                     "category": "HRA",
-                    "annual_hra_exemption": self.custom_annual_eligible_amount,
-                    "monthly_hra_exemption": self.monthly_hra_exemption,
                     "payroll_period": self.payroll_period,
-                    "date":self.submission_date,
-                    "proof_id": self.name,
-                    "hra_attach":self.custom_hra_proof_attach,
-                    "hra_paid": self.house_rent_payment_amount,
-                    "holder_name": self.custom_name,
-                    "pan": self.custom_pan,
-                    "address_line1": self.custom_address_title1
-                })
-                approved_doc.insert()
-                frappe.db.commit()
+                    **hra_values
+                }).insert(ignore_permissions=True)
+
             else:
-                approved_doc = frappe.get_doc("POI Approved Category", get_approved_proof[0].name)
-                approved_doc.annual_hra_exemption = self.custom_annual_eligible_amount
-                approved_doc.monthly_hra_exemption = self.monthly_hra_exemption
-                approved_doc.date = self.submission_date
-                approved_doc.proof_id = self.name
-                approved_doc.hra_attach = self.custom_hra_proof_attach
-                approved_doc.save()
-                frappe.db.commit()
+                frappe.db.set_value(
+                    "POI Approved Category",
+                    hra_name,
+                    hra_values
+                )
 
 
     def set_approved_status_for_auto_component(self):

@@ -6816,35 +6816,86 @@ def get_approved_poi_category(proof_id):
     
 
 
-@frappe.whitelist()
-def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None,amount=None):
 
-    # Validate required fields
+
+# @frappe.whitelist()
+# def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None,amount=None):
+
+#     # Validate required fields
+#     if not proof_id or not sub_category or not status:
+#         frappe.throw("proof_id, sub_category, and status are required")
+
+#     # Get matching records
+#     approved_proofs = frappe.get_all(
+#         "POI Approved Category",
+#         filters={"proof_id": proof_id},
+#         fields=["name", "exemption_sub_category"]
+#     )
+
+#     updated = False
+
+#     for row in approved_proofs:
+#         if row.exemption_sub_category == sub_category:
+#             doc = frappe.get_doc("POI Approved Category", row.name)
+
+#             if doc.declared_amount!=amount:
+#                 doc.status = "Pending"
+#                 doc.command = note
+#                 if amount:
+#                     doc.declared_amount = amount
+            
+
+#             doc.save(ignore_permissions=True)
+
+#             updated = True
+
+#     if updated:
+#         frappe.db.commit()
+
+#     return {
+#         "message": "Status updated successfully",
+#         "proof_id": proof_id,
+#         "sub_category": sub_category,
+#         # "amount": amount,
+#         "status": status,
+#         "amount":doc.declared_amount
+#     }
+@frappe.whitelist()
+def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None, amount=None):
+
     if not proof_id or not sub_category or not status:
         frappe.throw("proof_id, sub_category, and status are required")
 
-    # Get matching records
     approved_proofs = frappe.get_all(
         "POI Approved Category",
-        filters={"proof_id": proof_id},
-        fields=["name", "exemption_sub_category"]
+        filters={
+            "proof_id": proof_id,
+            "exemption_sub_category": sub_category
+        },
+        fields=["name"]
     )
 
     updated = False
+    final_amount = None
 
     for row in approved_proofs:
-        if row.exemption_sub_category == sub_category:
-            doc = frappe.get_doc("POI Approved Category", row.name)
+        doc = frappe.get_doc("POI Approved Category", row.name)
 
-            doc.status = status
-            doc.command = note
-            if amount:
-                doc.declared_amount = amount
-            
+        current_amount = float(doc.declared_amount or 0)
+        new_amount = float(amount or 0)
 
-            doc.save(ignore_permissions=True)
+        if current_amount != new_amount:
+            doc.status = "Pending"
+            doc.declared_amount = new_amount
 
-            updated = True
+        else:
+            doc.status = status  
+
+        doc.command = note
+        doc.save(ignore_permissions=True)
+
+        final_amount = doc.declared_amount
+        updated = True
 
     if updated:
         frappe.db.commit()
@@ -6853,8 +6904,6 @@ def approved_poi_components(proof_id=None, sub_category=None, status=None, note=
         "message": "Status updated successfully",
         "proof_id": proof_id,
         "sub_category": sub_category,
-        "amount": amount,
-        "status": status
+        "status": status,
+        "amount": final_amount
     }
-
-
