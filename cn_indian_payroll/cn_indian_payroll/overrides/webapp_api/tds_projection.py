@@ -4168,7 +4168,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         rebate=0
 
     tds_sum = 0
-    salary_slips = frappe.get_all(
+    salary_slips = frappe.db.get_all(
         "Salary Slip",
         filters={
             "employee": employee,
@@ -4233,14 +4233,6 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 
-
-
-
-    
-
-
-
-
     # ------------------ Response ------------------
     return {
     "status": "success",
@@ -4248,6 +4240,11 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     "declaration_id":declaration_id,
     "net_taxable_income":net_taxable_income,
     "tax_slab_id":tax_slab_id,
+    "income_tax_on_net_taxable_income": round((slab_result.get("base_tax") or 0), 0),
+    "surcharge": round((slab_result.get("surcharge") or 0), 0),
+    "education_cess" :round((slab_result.get("education_cess_amount") or 0), 0),
+    "total_tax_payable" : round((slab_result.get("total_tax_payable") or 0), 0),
+    "marginal_relief" :round((slab_result.get("marginal_relief") or 0), 0),
 
     
 
