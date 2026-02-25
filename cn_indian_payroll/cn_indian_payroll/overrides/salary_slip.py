@@ -2139,10 +2139,78 @@ class CustomSalarySlip(SalarySlip):
 				+ self.future_structured_taxable_earnings_before_exemption
 				+ self.current_additional_earnings
 				+ self.other_incomes
-				+ self.unclaimed_taxable_benefits
-				+ self.non_taxable_earnings
 			)
         return 0
+
+
+    def compute_taxable_earnings_for_year(self):
+        # get taxable_earnings, opening_taxable_earning, paid_taxes for previous period
+        (
+            self.previous_taxable_earnings,
+            exempted_amount,
+        ) = self.get_taxable_earnings_for_prev_period(
+            self.payroll_period.start_date,
+            self.start_date,
+            self.tax_slab.allow_tax_exemption,
+        )
+
+        self.previous_taxable_earnings_before_exemption = (
+            self.previous_taxable_earnings + exempted_amount
+        )
+
+        self.compute_current_and_future_taxable_earnings()
+
+        
+
+        if self.employee and self.payroll_period.name:
+            proof_submission = frappe.get_list(
+                "Employee Tax Exemption Proof Submission",
+                filters={
+                    "employee": self.employee,
+                    "payroll_period": self.payroll_period.name,
+                    "docstatus": 1,
+                    "company": self.company,
+                },
+                fields=["*"],
+            )
+
+            if proof_submission:
+                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
+                self.deduct_tax_for_unclaimed_employee_benefits = 1
+            else:
+                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 0
+                self.deduct_tax_for_unclaimed_employee_benefits = 0
+
+        self.unclaimed_taxable_benefits = 0
+        if self.deduct_tax_for_unclaimed_employee_benefits:
+            self.unclaimed_taxable_benefits = (
+                self.calculate_unclaimed_taxable_benefits()
+            )
+
+        # Total exemption amount based on tax exemption declaration
+        self.total_exemption_amount = self.get_total_exemption_amount()
+
+        # Employee Other Incomes
+        self.other_incomes = self.get_income_form_other_sources() or 0.0
+
+        # Total taxable earnings including additional and other incomes
+        self.total_taxable_earnings = (
+            self.previous_taxable_earnings
+            + self.current_structured_taxable_earnings
+            + self.future_structured_taxable_earnings
+            + self.current_additional_earnings
+            + self.other_incomes
+            + self.unclaimed_taxable_benefits
+            - self.total_exemption_amount
+        )
+
+
+
+        self.custom_taxable_amount__annual_taxable_income = self.annual_taxable_amount
+
+        self.total_taxable_earnings_without_full_tax_addl_components = (
+            self.custom_taxable_amount__annual_taxable_income or 0
+        )
 
 
     @frappe.whitelist()
@@ -2492,6 +2560,7 @@ def override_calculate_tax_by_tax_slab(
     education_cess_amount = 0
     total_tax_payable = 0
 
+    self.custom_annual_taxable_income_other = annual_taxable_earning
     
 
     for slab in tax_slab.slabs:
