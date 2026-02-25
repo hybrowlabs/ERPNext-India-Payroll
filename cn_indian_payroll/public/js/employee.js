@@ -43,7 +43,7 @@ frappe.ui.form.on("Employee", {
 
 
                
-                toggle_custom_fields(frm, is_match);
+                // toggle_custom_fields(frm, is_match);
 
 
                
@@ -62,26 +62,26 @@ frappe.ui.form.on("Employee", {
 });
 
 
-function toggle_custom_fields(frm, show) {
+// function toggle_custom_fields(frm, show) {
 
-    let fields = [
-        "custom_gst_number",
-        "custom_trade_name",
-        "custom_supplier_id",
-        "custom_business_category",
-        "custom_business_segment",
-        "custom_work_flow_policy",
-        "custom_bank_account_in_erp"
-    ];
+//     let fields = [
+//         "custom_gst_number",
+//         "custom_trade_name",
+//         "custom_supplier_id",
+//         "custom_business_category",
+//         "custom_business_segment",
+//         "custom_work_flow_policy",
+//         "custom_bank_account_in_erp"
+//     ];
 
-    fields.forEach(field => {
-        frm.set_df_property(field, "hidden", !show);
-        // frm.set_df_property(field, "reqd", show);
+//     fields.forEach(field => {
+//         frm.set_df_property(field, "hidden", !show);
+//         // frm.set_df_property(field, "reqd", show);
 
-    });
+//     });
 
-    frm.refresh_fields(fields);
-}
+//     frm.refresh_fields(fields);
+// }
 
 function load_select_options(frm) {
 
