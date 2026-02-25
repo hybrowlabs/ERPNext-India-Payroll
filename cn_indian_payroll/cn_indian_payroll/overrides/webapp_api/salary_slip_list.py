@@ -7,6 +7,10 @@ from cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contr
 @frappe.whitelist()
 def get_salary_slip_list(employee=None, company=None):
 
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
     salary_slips = frappe.get_all(
         "Salary Slip",
         filters={

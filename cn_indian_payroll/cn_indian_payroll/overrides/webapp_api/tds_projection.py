@@ -8,6 +8,11 @@ from datetime import datetime
 from frappe import _
 import json
 from dateutil.relativedelta import relativedelta
+from frappe.utils import flt
+from frappe.utils import cint
+from frappe.utils import cstr
+from frappe.utils import getdate
+from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 
 
 # http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37004&company=PW&payroll_period=25-26
@@ -130,11 +135,6 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
 
 
-    # if has_salary_slips:
-    #     component_names = list(set(last_amount_map.keys()))
-    # else:
-    #     component_names = list(set(preview_amount_map.keys()))
-
 
     components = frappe.db.get_all(
         "Salary Component",
@@ -160,54 +160,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "Provident Fund", "ESIC", "Professional Tax", "LWF", "Income Tax"
     ]
 
-    # -------- Component Month Values -------- #
-    # for comp in components:
-
-    #     if comp.type == "Earning" and not comp.is_tax_applicable \
-    #        and not comp.custom_is_reimbursement \
-    #        and not comp.custom_is_offcycle_component:
-    #         continue
-
-
-
-    #     if comp.type == "Deduction" and comp.component_type not in allowed_deduction_types:
-    #         continue
-
-    #     values = []
-    #     for m in months:
-    #         if m in slip_by_month:
-    #             amount = frappe.db.get_value(
-    #                 "Salary Detail",
-    #                 {"parent": slip_by_month[m], "salary_component": comp.name},
-    #                 "amount"
-    #             ) or 0
-    #         else:
-    #             amount = preview_amount_map.get(comp.name, 0)
-
-
-
-
-    #         values.append(flt(amount))
-
-    #     rounded_values = [round(flt(v), 0) for v in values]
-
-    #     row = {
-    #         "name": comp.name,
-    #         "values": rounded_values,
-    #         "total": sum(rounded_values)
-    #     }
-
-
-    #     # row = {"name": comp.name, "values": values, "total": sum(values)}
-
-    #     if comp.type == "Earning" and comp.custom_is_reimbursement and comp.is_tax_applicable:
-    #         reimbursements.append(row)
-    #     elif comp.type == "Earning" and comp.custom_is_offcycle_component:
-    #         offcycle.append(row)
-    #     elif comp.type == "Earning":
-    #         earnings.append(row)
-    #     elif comp.type == "Deduction":
-    #         deductions.append(row)
+   
 
 
     for comp in components:
@@ -239,9 +192,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
                 ) or 0
 
             else:
-                # FUTURE MONTH LOGIC
-
-                # 👉 Offcycle and Reimbursement should NOT be projected to future
+                
                 if comp.custom_is_offcycle_component or comp.custom_is_reimbursement:
                     amount = 0
 
@@ -3637,13 +3588,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-
-
-
-
-
-
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=PW
+# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=Pen Pencil
 
 @frappe.whitelist()
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
@@ -3660,7 +3605,12 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         employee = target_employee
 
     # ------------------ Get Declaration ------------------
-
+    tax_slab_id=None
+    net_taxable_income=0
+    previous_tds_income= 0
+    previous_tds_deducted_value= 0
+    num_months=0
+    
 
     payroll_setting=frappe.get_doc("Payroll Settings")
     if payroll_setting.custom_tax_calculation_based_on=="Use IT Declaration Values in Payroll Processing":
@@ -3687,8 +3637,13 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             declaration[0].name
         )
 
+        
+        previous_tds_income=declaration_doc.custom_total_taxable_income or 0
+        previous_tds_deducted_value=declaration_doc.custom_total_tds_deducted_value or 0
         current_tax_regime=declaration_doc.custom_tax_regime
+
         declaration_id=declaration[0].name
+        tax_slab_id=declaration_doc.custom_income_tax
 
         advance_tax=declaration_doc.custom_tds_already_deducted_amount if declaration_doc.custom_tds_already_deducted_amount else 0
 
@@ -3707,6 +3662,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         declared_home_loan = 0
         qualified_home_loan = 0
         taxable_home_loan=0
+
 
         if declaration_doc.declarations:
             for d in declaration_doc.declarations:
@@ -3799,7 +3755,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
         extra_payment_grand_total = flt(annual_statement.get("extra_payment_grand_total", 0))
         total_perquisite_total = flt(annual_statement.get("total_perquisite_total", 0))
-        total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))
+        total_gross_earning = flt(annual_statement.get("total_gross_earning", 0))+(previous_tds_income)
         total_off_cycle_payment = flt(annual_statement.get("total_off_cycle_payment", 0))
         reimbursements_total = flt(annual_statement.get("reimbursements_total", 0))
         total_perquisite_total=flt(annual_statement.get("total_perquisite_total", 0))
@@ -3826,14 +3782,6 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         total_declaration_sum=round(eighty_c_sum + eighty_d_sum + other_investment_sum+home_loan_investment_sum)
 
         net_taxable_income=round(gross_total_income-total_declaration_sum,2)
-
-
-
-
-
-
-
-
 
 
     elif payroll_setting.custom_tax_calculation_based_on=="Use POI Approved Values in Payroll Processing":
@@ -3871,8 +3819,12 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                 declaration[0].name
             )
 
+            previous_tds_income=declaration_doc.custom_total_taxable_income or 0
+            previous_tds_deducted_value=declaration_doc.custom_total_tds_deducted_value or 0
+
             current_tax_regime=declaration_doc.custom_tax_regime
             declaration_id=declaration[0].name
+            tax_slab_id=declaration_doc.custom_income_tax
 
             advance_tax=declaration_doc.custom_tds_already_deducted_amount if declaration_doc.custom_tds_already_deducted_amount else 0
 
@@ -4040,6 +3992,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
             current_tax_regime=proof_submission_doc.custom_tax_regime
             declaration_id=proof_submission_doc.name
+            tax_slab_id=proof_submission_doc.custom_income_tax
 
             advance_tax=proof_submission_doc.custom_tds_already_deducted_amount if proof_submission_doc.custom_tds_already_deducted_amount else 0
 
@@ -4184,11 +4137,116 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 
+
+
+    eval_globals = frappe._dict()
+    eval_locals = frappe._dict()
+
+    rebate=0
+    tax_slab_doc = frappe.get_doc("Income Tax Slab", tax_slab_id)
+
+
+
+    slab_result = calculate_tax_by_tax_slab(
+        net_taxable_income,
+        tax_slab_id,
+        eval_globals,
+        eval_locals,
+    )
+
+    income_tax_on_net_taxable_income = round((slab_result.get("base_tax") or 0), 0)
+    surcharge = round((slab_result.get("surcharge") or 0), 0)
+    education_cess = round((slab_result.get("education_cess_amount") or 0), 0)
+    total_tax_payable = round((slab_result.get("total_tax_payable") or 0), 0)
+    marginal_relief = round((slab_result.get("marginal_relief") or 0), 0)
+        
+        
+
+    if tax_slab_doc.custom_taxable_income_is_less_than>=income_tax_on_net_taxable_income:
+        rebate=income_tax_on_net_taxable_income
+    else:
+        rebate=0
+
+    tds_sum = 0
+    salary_slips = frappe.db.get_all(
+        "Salary Slip",
+        filters={
+            "employee": employee,
+            "custom_payroll_period": payroll_period,
+            "company": company,
+            "docstatus": ["in", [0, 1]]
+        },
+        fields=["current_month_income_tax","custom_month_count"],
+        order_by="end_date desc",
+    )
+
+    if salary_slips:
+        num_months = salary_slips[0].custom_month_count or 0
+        for slip in salary_slips:
+            tds_sum += slip.get("current_month_income_tax") or 0
+    else:   
+        salary_assignment = frappe.get_list(
+                "Salary Structure Assignment",
+                filters={
+                    "employee": employee,
+                    "docstatus": 1,
+                    "custom_payroll_period":payroll_period,
+                    "company":company,
+                },
+                fields=["*"],
+                order_by="from_date asc",
+                limit=1,
+            )
+
+        if not salary_assignment:
+            frappe.throw("No active Salary Structure Assignment found.")
+
+        assignment = frappe.get_doc(
+            "Salary Structure Assignment", salary_assignment[0].name
+        )
+
+        employee = frappe.get_doc("Employee", assignment.employee)
+        payroll_period = frappe.get_doc("Payroll Period", assignment.custom_payroll_period)
+
+        
+        effective_start_date = getdate(assignment.from_date)
+        payroll_start_date = getdate(payroll_period.start_date)
+        payroll_end_date = getdate(payroll_period.end_date)
+        date_of_joining = getdate(employee.date_of_joining)
+
+        tds_from_previous_employer = assignment.taxable_earnings_till_date or 0
+        already_paid_previous_employer=assignment.tax_deducted_till_date or 0
+
+
+        start_date = max(
+            filter(None, [effective_start_date, payroll_start_date, date_of_joining])
+        )
+
+
+        num_months = (
+            (payroll_end_date.year - start_date.year) * 12
+            + (payroll_end_date.month - start_date.month)
+            + 1
+        )
+
+    remaining_tax=(total_tax_payable-previous_tds_deducted_value-advance_tax-tds_sum)or 0
+
+
+
     # ------------------ Response ------------------
     return {
     "status": "success",
     "current_tax_regime":current_tax_regime,
     "declaration_id":declaration_id,
+    "net_taxable_income":net_taxable_income,
+    "tax_slab_id":tax_slab_id,
+    "income_tax_on_net_taxable_income": round((slab_result.get("base_tax") or 0), 0),
+    "surcharge": round((slab_result.get("surcharge") or 0), 0),
+    "education_cess" :round((slab_result.get("education_cess_amount") or 0), 0),
+    "total_tax_payable" : round((slab_result.get("total_tax_payable") or 0), 0),
+    "marginal_relief" :round((slab_result.get("marginal_relief") or 0), 0),
+
+    
 
     "summary": [
         {
@@ -4204,6 +4262,20 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             "taxable_amount":round(flt(total_gross_earning), 2),
 
         },
+        {
+            "key": "previous_tds_income",
+            "name": "Previous TDS Income",
+            "amount": round(flt(previous_tds_income), 2),
+            "col1":"",
+            "col2":"",
+            "col3":"",
+            "col4":round(flt(previous_tds_income), 2),
+            "declared_amount":"",
+            "exemption_amount":"",
+            "taxable_amount":round(flt(previous_tds_income), 2),
+
+        },
+        
         {
             "key": "total_extra_payment",
             "name": "Total Extra Payment",
@@ -4633,13 +4705,13 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "income_tax_on_net_taxable_income",
             "name":"Income Tax on Net Taxable Income (Before Rebate U/s 87A)",
-            "amount":0
+            "amount":income_tax_on_net_taxable_income
         },
 
         {
             "key": "rebate",
             "name":"Rebate (U/s 87A)",
-            "amount":0
+            "amount":rebate
         },
 
         {
@@ -4650,27 +4722,27 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "surcharge",
             "name":"Raw Surcharge",
-            "amount":0
+            "amount":surcharge
         },
         {
             "key": "marginal_relief",
             "name":"Marginal Relief",
-            "amount":0
+            "amount":marginal_relief
         },
         {
             "key": "cess_fee",
             "name":"Add Edn Cess + Health Cess @ 4%",
-            "amount":0
+            "amount":education_cess
         },
         {
             "key": "net_tax_payable",
             "name":"Net Tax Payable (A)",
-            "amount":0
+            "amount":total_tax_payable
         },
         {
             "key": "previous_employer_tds",
             "name":"Previous Employer TDS (B)",
-            "amount":0
+            "amount":previous_tds_deducted_value
         },
         {
             "key": "advance_tax",
@@ -4680,23 +4752,23 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "tax_deducted_till_date_by_current_employer",
             "name":"Tax Deducted till Date by Current Employer (D)",
-            "amount":0
+            "amount":tds_sum
         },
         {
             "key": "remaining_tax",
             "name":"Remaining Tax (A - B - C - D)",
-            "amount":0
+            "amount":remaining_tax
         },
 
         {
             "key": "remaining_months",
             "name":"Remaining Months",
-            "amount":0
+            "amount":num_months
         },
         {
             "key": "monthly_tds",
             "name":"Monthly TDS",
-            "amount":0
+            "amount":remaining_tax/num_months
         },
 
     ]
@@ -4704,6 +4776,95 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 }
 
+
+
+def calculate_tax_by_tax_slab(
+    annual_taxable_earning,
+    tax_slab,
+    eval_globals=None,
+    eval_locals=None,
+):
+    eval_globals = eval_globals or {}
+    eval_locals = eval_locals or {}
+
+
+    if isinstance(tax_slab, str):
+        tax_slab = frappe.get_doc("Income Tax Slab", tax_slab)
+
+    eval_locals.update({
+        "annual_taxable_earning": annual_taxable_earning,
+        "annual_taxable_amount": annual_taxable_earning, 
+    })
+
+
+    base_tax = 0
+    rebate = 0
+    surcharge = 0
+    charge_percent = 0
+    education_cess_amount = 0
+    total_tax_payable = 0
+    excess_income=0
+
+    for slab in tax_slab.slabs:
+        cond = cstr(slab.condition).strip()
+        if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+            continue
+
+        from_amt = slab.from_amount
+        to_amt = slab.to_amount or annual_taxable_earning
+        rate = slab.percent_deduction * 0.01
+
+
+        if annual_taxable_earning > from_amt:
+
+            taxable_range = min(annual_taxable_earning, to_amt) - from_amt
+            base_tax += taxable_range * rate
+
+
+    if (
+        tax_slab.custom_marginal_relief_applicable
+        and tax_slab.custom_minmum_value
+        and tax_slab.custom_maximun_value
+    ):
+        if (
+            tax_slab.custom_minmum_value
+            < annual_taxable_earning
+            < tax_slab.custom_maximun_value
+        ):
+            excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+            if base_tax > excess_income:
+                base_tax = excess_income
+
+    
+
+    for d in tax_slab.other_taxes_and_charges:
+        if d.custom_is_education_cess == 0:
+            min_value = flt(d.min_taxable_income) or 0
+            max_value = flt(d.max_taxable_income) or None
+
+            if annual_taxable_earning >= min_value and (
+                not max_value or annual_taxable_earning < max_value
+            ):
+                charge_percent = flt(d.percent)
+                surcharge = (base_tax * charge_percent) / 100.0
+
+    for d in tax_slab.other_taxes_and_charges:
+        if d.custom_is_education_cess == 1:
+            total_tax_before_cess = base_tax + surcharge
+
+            education_cess_amount = (total_tax_before_cess * flt(d.percent)) / 100.0
+
+    total_tax_payable = round(education_cess_amount + surcharge + base_tax)
+
+
+    return {
+        "base_tax": round(base_tax, 2),
+        "education_cess_amount": round(education_cess_amount, 2),
+        "surcharge": round(surcharge, 2),
+        "total_tax_payable":round(total_tax_payable,2),
+        "rebate":round(rebate,2),
+        "marginal_relief":round(excess_income,2)
+    }
 
 
 
@@ -4754,7 +4915,6 @@ def update_declaration_form(
     company=None,
     payroll_period=None
 ):
-    import frappe
 
     # ------------------ Resolve data payload safely ------------------
     if not data:
@@ -5009,6 +5169,7 @@ def update_declaration_form(
         message = "Proof Submission updated successfully"
 
         frappe.db.commit()
+
 
         return {
             "status": "success",
@@ -6589,22 +6750,22 @@ def slab_calculation(
 @frappe.whitelist()
 def download_tds_projection_pdf(declaration_id):
 
-    # 1️⃣ Get calculation data
+    
     data = calculate_tds_projection(declaration_id)
 
     if not data:
         frappe.throw("No TDS projection data found")
 
-    # 2️⃣ Render HTML template
+    
     html = frappe.render_template(
         "cn_indian_payroll/templates/includes/tds_projection_print.html",
         data
     )
 
-    # 3️⃣ Convert HTML to PDF
+    
     pdf = get_pdf(html)
 
-    # 4️⃣ Return PDF response
+    
     frappe.local.response.filename = "TDS_Projection.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
@@ -6614,22 +6775,22 @@ def download_tds_projection_pdf(declaration_id):
 @frappe.whitelist()
 def download_tds_poi_projection_pdf(proof_id):
 
-    # 1️⃣ Get calculation data
+    
     data = calculate_tds_projection_poi(proof_id)
 
     if not data:
         frappe.throw("No TDS projection data found")
 
-    # 2️⃣ Render HTML template
+   
     html = frappe.render_template(
         "cn_indian_payroll/templates/includes/tds_projection_poi_print.html",
         data
     )
 
-    # 3️⃣ Convert HTML to PDF
+    
     pdf = get_pdf(html)
 
-    # 4️⃣ Return PDF response
+
     frappe.local.response.filename = "TDS_Projection.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
@@ -6690,21 +6851,19 @@ def print_declaration_preview(employee, payroll_period, company):
     if target_employee:
         employee = target_employee
 
-    # 1️⃣ Call first function
     salary_projection = get_annual_statement(
         employee=employee,
         payroll_period=payroll_period,
         company=company
     )
 
-    # 2️⃣ Call second function
+
     existing_declaration = get_employee_declaration_investments(
         employee=employee,
         company=company,
         payroll_period=payroll_period
     )
 
-    # 3️⃣ Combine both results into ONE response
     result = {
         "salary_projection": salary_projection,
         "existing_declaration": existing_declaration
@@ -6880,38 +7039,91 @@ def get_approved_poi_category(proof_id):
 
     return result
 
+
+
     
 
 
-@frappe.whitelist()
-def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None,amount=None):
 
-    # Validate required fields
+
+# @frappe.whitelist()
+# def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None,amount=None):
+
+#     # Validate required fields
+#     if not proof_id or not sub_category or not status:
+#         frappe.throw("proof_id, sub_category, and status are required")
+
+#     # Get matching records
+#     approved_proofs = frappe.get_all(
+#         "POI Approved Category",
+#         filters={"proof_id": proof_id},
+#         fields=["name", "exemption_sub_category"]
+#     )
+
+#     updated = False
+
+#     for row in approved_proofs:
+#         if row.exemption_sub_category == sub_category:
+#             doc = frappe.get_doc("POI Approved Category", row.name)
+
+#             if doc.declared_amount!=amount:
+#                 doc.status = "Pending"
+#                 doc.command = note
+#                 if amount:
+#                     doc.declared_amount = amount
+            
+
+#             doc.save(ignore_permissions=True)
+
+#             updated = True
+
+#     if updated:
+#         frappe.db.commit()
+
+#     return {
+#         "message": "Status updated successfully",
+#         "proof_id": proof_id,
+#         "sub_category": sub_category,
+#         # "amount": amount,
+#         "status": status,
+#         "amount":doc.declared_amount
+#     }
+@frappe.whitelist()
+def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None, amount=None):
+
     if not proof_id or not sub_category or not status:
         frappe.throw("proof_id, sub_category, and status are required")
 
-    # Get matching records
     approved_proofs = frappe.get_all(
         "POI Approved Category",
-        filters={"proof_id": proof_id},
-        fields=["name", "exemption_sub_category"]
+        filters={
+            "proof_id": proof_id,
+            "exemption_sub_category": sub_category
+        },
+        fields=["name"]
     )
 
     updated = False
+    final_amount = None
 
     for row in approved_proofs:
-        if row.exemption_sub_category == sub_category:
-            doc = frappe.get_doc("POI Approved Category", row.name)
+        doc = frappe.get_doc("POI Approved Category", row.name)
 
-            doc.status = status
-            doc.command = note
-            if amount:
-                doc.declared_amount = amount
-            
+        current_amount = float(doc.declared_amount or 0)
+        new_amount = float(amount or 0)
 
-            doc.save(ignore_permissions=True)
+        if current_amount != new_amount:
+            doc.status = "Pending"
+            doc.declared_amount = new_amount
 
-            updated = True
+        else:
+            doc.status = status  
+
+        doc.command = note
+        doc.save(ignore_permissions=True)
+
+        final_amount = doc.declared_amount
+        updated = True
 
     if updated:
         frappe.db.commit()
@@ -6920,8 +7132,6 @@ def approved_poi_components(proof_id=None, sub_category=None, status=None, note=
         "message": "Status updated successfully",
         "proof_id": proof_id,
         "sub_category": sub_category,
-        "amount": amount,
-        "status": status
+        "status": status,
+        "amount": final_amount
     }
-
-

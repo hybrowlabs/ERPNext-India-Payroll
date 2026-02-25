@@ -174,6 +174,7 @@ def get_bank_accounts_by_supplier(supplier_id):
 
 @frappe.whitelist()
 def get_invoice_status(salary_slip):
+    
 
     filters = [
         ["bill_no", "=", salary_slip],
