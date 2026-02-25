@@ -1046,6 +1046,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             self.custom_hra_breakup = []
             self.annual_hra_exemption = None
             self.monthly_hra_exemption = None
+            self.custom_50_of_basic_metro=None
+            self.custom_rent_paid__10_of_basic_annual=None
+            self.custom_hra_received_annual=None
         elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 1:
             self.custom_basic_as_per_salary_structure = None
             self.salary_structure_hra = None
@@ -1053,3 +1056,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             self.custom_hra_breakup = []
             self.annual_hra_exemption = None
             self.monthly_hra_exemption = None
+            self.custom_50_of_basic_metro=None
+            self.custom_rent_paid__10_of_basic_annual=None
+            self.custom_hra_received_annual=None
