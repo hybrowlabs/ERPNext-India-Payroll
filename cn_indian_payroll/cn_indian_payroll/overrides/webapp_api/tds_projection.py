@@ -7088,6 +7088,12 @@ def get_approved_poi_category(proof_id):
 #         "status": status,
 #         "amount":doc.declared_amount
 #     }
+
+
+
+
+#http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.approved_poi_components?proof_id=HR-TAX-PRF-2026-00010&sub_category=LIC-%20Life%20Insurance%20Premium%20Directly%20Paid%20By%20Employee&status=Rejected&note=shiniln&amount=5200221
+
 @frappe.whitelist()
 def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None, amount=None):
 
@@ -7134,4 +7140,5 @@ def approved_poi_components(proof_id=None, sub_category=None, status=None, note=
         "sub_category": sub_category,
         "status": status,
         "amount": final_amount
+
     }

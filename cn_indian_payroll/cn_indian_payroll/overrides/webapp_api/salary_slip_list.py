@@ -28,6 +28,7 @@ def get_salary_slip_list(employee=None, company=None):
             "employee",
             "custom_payroll_period",
             "custom_month",
+            "custom_attach",
         ],
         order_by="end_date desc",
     )
