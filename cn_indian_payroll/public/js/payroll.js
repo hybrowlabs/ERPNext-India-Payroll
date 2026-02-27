@@ -2,8 +2,8 @@ frappe.ui.form.on('Payroll Entry', {
     refresh(frm) {
 
 
-        frm.fields_dict.custom_download_new_joinee_arrear.wrapper.innerHTML =
-            new_joinee_buttons_html();
+        // frm.fields_dict.custom_download_new_joinee_arrear.wrapper.innerHTML =
+        //     new_joinee_buttons_html();
 
             window.download_new_joinee_data = function () {
 
@@ -32,8 +32,8 @@ frappe.ui.form.on('Payroll Entry', {
 
 
 
-        frm.fields_dict.custom_download_attendance_data.wrapper.innerHTML =
-            get_attendance_action_buttons_html();
+        // frm.fields_dict.custom_download_attendance_data.wrapper.innerHTML =
+        //     get_attendance_action_buttons_html();
 
         // expose function globally (important)
         window.download_attendance_data = function () {
@@ -166,10 +166,6 @@ else{
 
 
 
-if(frm.doc.custom_offcycle_attach)
-{
-
-
 
         frm.fields_dict.custom_create_offcycle_payment.wrapper.innerHTML =
             custom_create_offcycle_payment();
@@ -205,42 +201,39 @@ if(frm.doc.custom_offcycle_attach)
 
         };
 
-}
 
-else{
-    frm.fields_dict.custom_create_offcycle_payment.wrapper.innerHTML =""
-}
+
 
 //----------------------------------------------------------------------------------------
 
 
 
-            frm.fields_dict.custom_off_cycle_download.wrapper.innerHTML =
-            custom_offcycle_payment();
-            bind_offcycle_buttons(frm);
+            // frm.fields_dict.custom_off_cycle_download.wrapper.innerHTML =
+            // custom_offcycle_payment();
+            // bind_offcycle_buttons(frm);
 
-            render_attach_button_offcycle(frm);
-
-
+            // render_attach_button_offcycle(frm);
 
 
 
 
 
-        if (frm.is_new()) {
-            frm.fields_dict.custom_attach_options.wrapper.innerHTML = "";
-            return;
-        }
+
+
+        // if (frm.is_new()) {
+        //     frm.fields_dict.custom_attach_options.wrapper.innerHTML = "";
+        //     return;
+        // }
 
 
 
-        frm.fields_dict.custom_attach_options.wrapper.innerHTML =
-            get_action_buttons_html();
+        // frm.fields_dict.custom_attach_options.wrapper.innerHTML =
+        //     get_action_buttons_html();
 
-            bind_action_buttons(frm);
+        //     bind_action_buttons(frm);
 
 
-            render_attach_button(frm);
+        //     render_attach_button(frm);
 
 
 
@@ -515,7 +508,7 @@ function get_action_buttons_html_attendance_regularise() {
             margin-top: 10px;
             margin-bottom: 10px;
         ">
-            ${make_action_btn("📥", "Download Data", "download-attendance", "#2563eb")}
+            
             ${make_action_btn("⬆️", "Process Data", "process-attendance", "#16a34a")}
         </div>
     `;
