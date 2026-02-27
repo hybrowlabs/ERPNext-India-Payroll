@@ -4169,10 +4169,10 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
     if net_taxable_income <= (tax_slab_doc.custom_taxable_income_is_less_than or 0):
     
-    rebate = min(
-        income_tax_on_net_taxable_income,
-        tax_slab_doc.custom_maximum_amount or 0
-    )
+        rebate = min(
+            income_tax_on_net_taxable_income,
+            tax_slab_doc.custom_maximum_amount or 0
+        )
     else:
         rebate = 0
 
