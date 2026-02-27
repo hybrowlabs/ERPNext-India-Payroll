@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "country",
   "state_name",
   "minimum_wages_section",
   "min_wages",
@@ -56,12 +57,20 @@
    "label": "LWF Designation",
    "mandatory_depends_on": "lwf_applicable",
    "options": "LWF Designation"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-18 15:52:32.191098",
+ "modified": "2026-02-26 12:29:29.118525",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "State Master",

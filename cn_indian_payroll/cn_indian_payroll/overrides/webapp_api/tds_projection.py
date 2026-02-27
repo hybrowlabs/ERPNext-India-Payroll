@@ -531,6 +531,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "approval_needed":"No",
                 "attach_link": "",
                 "custom_name": declaration_doc.custom_name or "",
+                "custom_proof_status": "",
+                "custom_note": ""
+
+
 
             })
 
@@ -543,13 +547,16 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
         # ------------------ Existing Declaration Map ------------------
         existing_declaration = []
         for d in declaration_doc.declarations:
-            existing_declaration.append({
-                "exemption_category": d.exemption_category,
-                "exemption_sub_category": d.exemption_sub_category,
-                "amount": d.amount,
-                "max_amount": d.max_amount,
-                "custom_attach": d.custom_attach
-            })
+            if d.custom_status in ["Approved","Not Needed"]:
+                existing_declaration.append({
+                    "exemption_category": d.exemption_category,
+                    "exemption_sub_category": d.exemption_sub_category,
+                    "amount": d.amount,
+                    "max_amount": d.max_amount,
+                    "custom_attach": d.custom_attach,
+                    "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
+                    "custom_note": d.custom_note
+                })
 
         existing_map = {
             d["exemption_sub_category"]: d for d in existing_declaration
@@ -655,7 +662,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "attach_reqd": 0,
                         "attach_proof": "",
                         "approval_needed": row.custom_approval_needed,
-                        "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                        "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                        "custom_proof_status": declaration_row["custom_proof_status"] if declaration_row else "",
+                        "custom_note": declaration_row["custom_note"] if declaration_row else "",
                     })
 
                 # ------------------ Group by Section Property (FIXED PART) ------------------
@@ -731,7 +740,11 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "attach_reqd": 0,
                         "attach_proof": "",
                         "approval_needed":row.custom_approval_needed,
-                        "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                        "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                        "custom_proof_status": declaration_row["custom_proof_status"] if declaration_row else "",
+
+                        "custom_note": declaration_row["custom_note"] if declaration_row else "",
+
                     })
 
                 final_list = []
@@ -827,7 +840,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             else row.max_amount
                         ),
                         "attach_reqd": 0,
-                        "attach_proof": ""
+                        "attach_proof": "",
+                        "custom_proof_status": "",
+                        "custom_note": "",
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -1090,7 +1105,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         else row.max_amount
                     ),
                     "attach_reqd": 0,
-                    "attach_proof": ""
+                    "attach_proof": "",
+                    "custom_proof_status": "",
+                    "custom_note": "",
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1406,7 +1423,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "attach_reqd": 0,
                     "attach_proof": "",
                     "approval_needed":row.custom_approval_needed,
-                    "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                    "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                    "custom_proof_status": "",
+                    "custom_note": "",
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1481,7 +1500,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "attach_reqd": 0,
                     "attach_proof": "",
                     "approval_needed":row.custom_approval_needed,
-                    "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                    "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                    "custom_proof_status": "",
+                    "custom_note": "",
                 })
 
             hra_exemption.append({
@@ -2617,6 +2638,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "attach_reqd": 1,
                     "attach_proof": "" ,
                     "custom_name": declaration_doc.custom_name or "",
+                    "custom_proof_status": "",
+                    "custom_note": ""
                     
                 })
 
@@ -2629,13 +2652,15 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             # ------------------ Existing Declaration Map ------------------
             existing_declaration = []
             for d in declaration_doc.declarations:
-                existing_declaration.append({
-                    "exemption_category": d.exemption_category,
-                    "exemption_sub_category": d.exemption_sub_category,
-                    "amount": d.amount,
-                    "max_amount": d.max_amount,
-                    # "custom_proof_status":d.custom_proof_status
-                })
+                if d.custom_status in ["Approved","Not Needed"]:
+                    existing_declaration.append({
+                        "exemption_category": d.exemption_category,
+                        "exemption_sub_category": d.exemption_sub_category,
+                        "amount": d.amount,
+                        "max_amount": d.max_amount,
+                        "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
+                        "custom_note": d.custom_note,
+                    })
 
             existing_map = {
                 d["exemption_sub_category"]: d for d in existing_declaration
@@ -4162,10 +4187,19 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         
         
 
-    if tax_slab_doc.custom_taxable_income_is_less_than>=income_tax_on_net_taxable_income:
-        rebate=income_tax_on_net_taxable_income
+    # if tax_slab_doc.custom_taxable_income_is_less_than>=income_tax_on_net_taxable_income:
+    #     rebate=income_tax_on_net_taxable_income
+    # else:
+    #     rebate=0
+
+    if net_taxable_income <= (tax_slab_doc.custom_taxable_income_is_less_than or 0):
+    
+        rebate = min(
+            income_tax_on_net_taxable_income,
+            tax_slab_doc.custom_maximum_amount or 0
+        )
     else:
-        rebate=0
+        rebate = 0
 
     tds_sum = 0
     salary_slips = frappe.db.get_all(
@@ -7088,6 +7122,12 @@ def get_approved_poi_category(proof_id):
 #         "status": status,
 #         "amount":doc.declared_amount
 #     }
+
+
+
+
+#http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.approved_poi_components?proof_id=HR-TAX-PRF-2026-00010&sub_category=LIC-%20Life%20Insurance%20Premium%20Directly%20Paid%20By%20Employee&status=Rejected&note=shiniln&amount=5200221
+
 @frappe.whitelist()
 def approved_poi_components(proof_id=None, sub_category=None, status=None, note=None, amount=None):
 
@@ -7134,4 +7174,5 @@ def approved_poi_components(proof_id=None, sub_category=None, status=None, note=
         "sub_category": sub_category,
         "status": status,
         "amount": final_amount
+
     }

@@ -112,6 +112,7 @@ class POIApprovedCategory(Document):
                 if row.custom_proof_status != self.status:
                     row.custom_proof_status = self.status
                     row.custom_note = self.command
+                row.custom_note = self.command
 
         # Save child table changes without triggering recursion
         submission.flags.ignore_validate = True

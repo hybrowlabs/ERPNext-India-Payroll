@@ -1,38 +1,42 @@
 [
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.876523",
+  "modified": "2026-02-26 12:29:48.290717",
   "name": "Arunachal Pradesh",
   "state_name": "Arunachal Pradesh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.858860",
+  "modified": "2026-02-26 12:29:48.305312",
   "name": "Assam",
   "state_name": "Assam"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.838626",
+  "modified": "2026-02-26 12:29:48.323816",
   "name": "Bihar",
   "state_name": "Bihar"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -46,33 +50,36 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:44:28.383349",
+  "modified": "2026-02-26 12:29:48.241343",
   "name": "Goa",
   "state_name": "Goa"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.824577",
+  "modified": "2026-02-26 12:29:48.340334",
   "name": "Himachal Pradesh",
   "state_name": "Himachal Pradesh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.809066",
+  "modified": "2026-02-26 12:29:48.354108",
   "name": "Jharkhand",
   "state_name": "Jharkhand"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -86,11 +93,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:46:53.658742",
+  "modified": "2026-02-26 12:29:48.082041",
   "name": "Karnataka",
   "state_name": "Karnataka"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -104,11 +112,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:47:20.609807",
+  "modified": "2026-02-26 12:29:48.064550",
   "name": "Madhya Pradesh",
   "state_name": "Madhya Pradesh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -122,55 +131,60 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:45:21.570371",
+  "modified": "2026-02-26 12:29:48.195209",
   "name": "Maharashtra",
   "state_name": "Maharashtra"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.791095",
+  "modified": "2026-02-26 12:29:48.367811",
   "name": "Manipur",
   "state_name": "Manipur"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.773753",
+  "modified": "2026-02-26 12:29:48.381717",
   "name": "Meghalaya",
   "state_name": "Meghalaya"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.753995",
+  "modified": "2026-02-26 12:29:48.395490",
   "name": "Mizoram",
   "state_name": "Mizoram"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.734274",
+  "modified": "2026-02-26 12:29:48.409499",
   "name": "Nagaland",
   "state_name": "Nagaland"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -184,22 +198,24 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:45:44.561764",
+  "modified": "2026-02-26 12:29:48.177879",
   "name": "Punjab",
   "state_name": "Punjab"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.688239",
+  "modified": "2026-02-26 12:29:48.435840",
   "name": "Sikkim",
   "state_name": "Sikkim"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -213,11 +229,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:47:45.064533",
+  "modified": "2026-02-26 12:29:48.026055",
   "name": "Tamil Nadu",
   "state_name": "Tamil Nadu"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -231,33 +248,36 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:45:56.009045",
+  "modified": "2026-02-26 12:29:48.161878",
   "name": "Telangana",
   "state_name": "Telangana"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.666693",
+  "modified": "2026-02-26 12:29:48.449457",
   "name": "Tripura",
   "state_name": "Tripura"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.626156",
+  "modified": "2026-02-26 12:29:48.476392",
   "name": "Uttarakhand",
   "state_name": "Uttarakhand"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -276,17 +296,18 @@
     "parent": "West Bengal",
     "parentfield": "min_wages",
     "parenttype": "State Master",
-    "skill_level": "Semi-skilled",
+    "skill_level": "Semi-Skilled",
     "total_per_day": 0.0,
     "vda_daily_wages": 0.0,
     "zone": "Zone 1"
    }
   ],
-  "modified": "2025-12-03 21:47:53.692478",
+  "modified": "2026-02-26 12:29:47.877382",
   "name": "West Bengal",
   "state_name": "West Bengal"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -300,11 +321,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:46:16.919831",
+  "modified": "2026-02-26 12:29:48.145492",
   "name": "Chandigarh",
   "state_name": "Chandigarh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -318,11 +340,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:44:04.140687",
+  "modified": "2026-02-26 12:29:48.258799",
   "name": "Chattisgarh",
   "state_name": "Chattisgarh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -336,11 +359,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:44:39.091512",
+  "modified": "2026-02-26 12:29:48.225790",
   "name": "Haryana",
   "state_name": "Haryana"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -354,33 +378,36 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:47:29.476380",
+  "modified": "2026-02-26 12:29:48.046611",
   "name": "Odisha",
   "state_name": "Odisha"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.710598",
+  "modified": "2026-02-26 12:29:48.422776",
   "name": "Rajasthan",
   "state_name": "Rajasthan"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [],
   "lwf_applicable": 0,
   "lwf_designation": null,
   "min_wages": [],
-  "modified": "2025-12-03 21:43:00.643787",
+  "modified": "2026-02-26 12:29:48.463899",
   "name": "Uttar Pradesh",
   "state_name": "Uttar Pradesh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -394,11 +421,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:43:37.707477",
+  "modified": "2026-02-26 12:29:48.275699",
   "name": "Andhra Pradesh",
   "state_name": "Andhra Pradesh"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -412,11 +440,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:46:26.742037",
+  "modified": "2026-02-26 12:29:48.125318",
   "name": "Delhi",
   "state_name": "Delhi"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -430,11 +459,12 @@
   "lwf_applicable": 1,
   "lwf_designation": "ALL EMPLOYEES",
   "min_wages": [],
-  "modified": "2025-12-03 21:44:59.040882",
+  "modified": "2026-02-26 12:29:48.210761",
   "name": "Kerala",
   "state_name": "Kerala"
  },
  {
+  "country": "India",
   "docstatus": 0,
   "doctype": "State Master",
   "frequency": [
@@ -463,7 +493,7 @@
     "parent": "Gujarat",
     "parentfield": "min_wages",
     "parenttype": "State Master",
-    "skill_level": "Semi-skilled",
+    "skill_level": "Semi-Skilled",
     "total_per_day": 507.5,
     "vda_daily_wages": 45.5,
     "zone": "Zone 1"
@@ -493,7 +523,7 @@
     "parent": "Gujarat",
     "parentfield": "min_wages",
     "parenttype": "State Master",
-    "skill_level": "Semi-skilled",
+    "skill_level": "Semi-Skilled",
     "total_per_day": 497.5,
     "vda_daily_wages": 45.5,
     "zone": "Zone 2"
@@ -509,7 +539,7 @@
     "zone": "Zone 2"
    }
   ],
-  "modified": "2025-12-03 21:46:44.051138",
+  "modified": "2026-02-26 12:29:48.099381",
   "name": "Gujarat",
   "state_name": "Gujarat"
  }
