@@ -547,15 +547,16 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
         # ------------------ Existing Declaration Map ------------------
         existing_declaration = []
         for d in declaration_doc.declarations:
-            existing_declaration.append({
-                "exemption_category": d.exemption_category,
-                "exemption_sub_category": d.exemption_sub_category,
-                "amount": d.amount,
-                "max_amount": d.max_amount,
-                "custom_attach": d.custom_attach,
-                "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
-                "custom_note": d.custom_note
-            })
+            if d.custom_status in ["Approved","Not Needed"]:
+                existing_declaration.append({
+                    "exemption_category": d.exemption_category,
+                    "exemption_sub_category": d.exemption_sub_category,
+                    "amount": d.amount,
+                    "max_amount": d.max_amount,
+                    "custom_attach": d.custom_attach,
+                    "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
+                    "custom_note": d.custom_note
+                })
 
         existing_map = {
             d["exemption_sub_category"]: d for d in existing_declaration
@@ -2637,6 +2638,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "attach_reqd": 1,
                     "attach_proof": "" ,
                     "custom_name": declaration_doc.custom_name or "",
+                    "custom_proof_status": "",
+                    "custom_note": ""
                     
                 })
 
@@ -2649,13 +2652,15 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             # ------------------ Existing Declaration Map ------------------
             existing_declaration = []
             for d in declaration_doc.declarations:
-                existing_declaration.append({
-                    "exemption_category": d.exemption_category,
-                    "exemption_sub_category": d.exemption_sub_category,
-                    "amount": d.amount,
-                    "max_amount": d.max_amount,
-                    # "custom_proof_status":d.custom_proof_status
-                })
+                if d.custom_status in ["Approved","Not Needed"]:
+                    existing_declaration.append({
+                        "exemption_category": d.exemption_category,
+                        "exemption_sub_category": d.exemption_sub_category,
+                        "amount": d.amount,
+                        "max_amount": d.max_amount,
+                        "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
+                        "custom_note": d.custom_note,
+                    })
 
             existing_map = {
                 d["exemption_sub_category"]: d for d in existing_declaration
