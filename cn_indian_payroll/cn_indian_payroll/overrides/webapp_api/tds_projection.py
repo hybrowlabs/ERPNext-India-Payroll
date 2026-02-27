@@ -531,6 +531,10 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "approval_needed":"No",
                 "attach_link": "",
                 "custom_name": declaration_doc.custom_name or "",
+                "custom_proof_status": "",
+                "custom_note": ""
+
+
 
             })
 
@@ -548,7 +552,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "exemption_sub_category": d.exemption_sub_category,
                 "amount": d.amount,
                 "max_amount": d.max_amount,
-                "custom_attach": d.custom_attach
+                "custom_attach": d.custom_attach,
+                "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
+                "custom_note": d.custom_note
             })
 
         existing_map = {
@@ -655,7 +661,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "attach_reqd": 0,
                         "attach_proof": "",
                         "approval_needed": row.custom_approval_needed,
-                        "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                        "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                        "custom_proof_status": declaration_row["custom_proof_status"] if declaration_row else "",
+                        "custom_note": declaration_row["custom_note"] if declaration_row else "",
                     })
 
                 # ------------------ Group by Section Property (FIXED PART) ------------------
@@ -731,7 +739,11 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "attach_reqd": 0,
                         "attach_proof": "",
                         "approval_needed":row.custom_approval_needed,
-                        "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                        "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                        "custom_proof_status": declaration_row["custom_proof_status"] if declaration_row else "",
+
+                        "custom_note": declaration_row["custom_note"] if declaration_row else "",
+
                     })
 
                 final_list = []
@@ -827,7 +839,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             else row.max_amount
                         ),
                         "attach_reqd": 0,
-                        "attach_proof": ""
+                        "attach_proof": "",
+                        "custom_proof_status": "",
+                        "custom_note": "",
                     })
 
                 # ------------------ Group by Section Property ------------------
@@ -1090,7 +1104,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         else row.max_amount
                     ),
                     "attach_reqd": 0,
-                    "attach_proof": ""
+                    "attach_proof": "",
+                    "custom_proof_status": "",
+                    "custom_note": "",
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1406,7 +1422,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "attach_reqd": 0,
                     "attach_proof": "",
                     "approval_needed":row.custom_approval_needed,
-                    "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                    "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                    "custom_proof_status": "",
+                    "custom_note": "",
                 })
 
             # ------------------ Group by Section Property ------------------
@@ -1481,7 +1499,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "attach_reqd": 0,
                     "attach_proof": "",
                     "approval_needed":row.custom_approval_needed,
-                    "attach_link": declaration_row["custom_attach"] if declaration_row else ""
+                    "attach_link": declaration_row["custom_attach"] if declaration_row else "",
+                    "custom_proof_status": "",
+                    "custom_note": "",
                 })
 
             hra_exemption.append({
