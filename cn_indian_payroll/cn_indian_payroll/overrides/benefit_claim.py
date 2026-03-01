@@ -11,14 +11,40 @@ from frappe.utils import add_months
 
 
 class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
+
+
+    def validate(self):
+        validate_active_employee(self.employee)
+        max_benefits = get_max_benefits(self.employee, self.claim_date)
+
+        payroll_period = get_payroll_period(
+            self.claim_date, self.claim_date, frappe.db.get_value("Employee", self.employee, "company")
+        )
+        if not payroll_period:
+            frappe.throw(
+                _("{0} is not in a valid Payroll Period").format(
+                    frappe.format(self.claim_date, dict(fieldtype="Date"))
+                )
+            )
+        self.validate_max_benefit_for_component(payroll_period)
+        self.validate_max_benefit_for_sal_struct(max_benefits)
+        self.validate_benefit_claim_amount(max_benefits, payroll_period)
+        if self.pay_against_benefit_claim:
+            self.validate_non_pro_rata_benefit_claim(max_benefits, payroll_period)
+
+        self.set_taxable_or_non_taxable()
+
+
+
+
     def on_submit(self):
         # self.insert_future_benefit()
         self.insert_additional_salary()
 
 
-    def validate(self):
-        super().validate()
-        self.set_taxable_or_non_taxable()
+    # def validate(self):
+    #     super().validate()
+    #     self.set_taxable_or_non_taxable()
 
 
     def set_taxable_or_non_taxable(self):
