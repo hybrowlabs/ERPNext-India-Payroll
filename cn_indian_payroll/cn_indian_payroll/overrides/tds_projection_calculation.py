@@ -480,14 +480,6 @@ def calculate_tds_projection(doc):
 
 
 
-
-
-        # frappe.msgprint(str(pf_max_amount))
-        # frappe.msgprint(str(pt_amount))
-        # frappe.msgprint(str(nps_amount))
-        # frappe.msgprint(str(total_old_regime_deductions))
-
-        # frappe.msgprint(str(new_regime_standard_value))
         old_regime_annual_taxable_income = max(
             round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
             - round(pt_amount)

@@ -7,13 +7,21 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
         frm.trigger("display_declaration_form");
         frm.trigger("tds_projection_html");
 
-        // if (frm.doc.docstatus === 1) {
-        //     frm.add_custom_button("Print TDS Projection", () => {
-        //         window.open(
-        //             `/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.download_tds_projection_pdf?declaration_id=${frm.doc.name}`
-        //         );
-        //     });
-        // }
+   
+
+        frm.add_custom_button("Download TDS Projection", function() {
+
+            if (!frm.doc.name) {
+                frappe.msgprint("Please save the document first");
+                return;
+            }
+
+            window.open(
+                "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.download_tds_projection_pdf?declaration_id=" 
+                + frm.doc.name
+            );
+
+        },"View");
 
 
         frm.add_custom_button("TDS Sheet", function () {

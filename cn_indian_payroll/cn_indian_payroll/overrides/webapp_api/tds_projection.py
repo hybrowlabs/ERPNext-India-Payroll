@@ -4812,12 +4812,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
 
 
-def calculate_tax_by_tax_slab(
-    annual_taxable_earning,
-    tax_slab,
-    eval_globals=None,
-    eval_locals=None,
-):
+def calculate_tax_by_tax_slab(annual_taxable_earning,tax_slab,eval_globals=None,eval_locals=None):
     eval_globals = eval_globals or {}
     eval_locals = eval_locals or {}
 
@@ -4838,6 +4833,8 @@ def calculate_tax_by_tax_slab(
     education_cess_amount = 0
     total_tax_payable = 0
     excess_income=0
+    marginal_relief=0
+
 
     for slab in tax_slab.slabs:
         cond = cstr(slab.condition).strip()
@@ -4866,10 +4863,13 @@ def calculate_tax_by_tax_slab(
             < tax_slab.custom_maximun_value
         ):
             excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+            marginal_relief = base_tax-(annual_taxable_earning- tax_slab.custom_minmum_value)
             if base_tax > excess_income:
                 base_tax = excess_income
 
+
     
+   
 
     for d in tax_slab.other_taxes_and_charges:
         if d.custom_is_education_cess == 0:
@@ -4896,8 +4896,7 @@ def calculate_tax_by_tax_slab(
         "education_cess_amount": round(education_cess_amount, 2),
         "surcharge": round(surcharge, 2),
         "total_tax_payable":round(total_tax_payable,2),
-        "rebate":round(rebate,2),
-        "marginal_relief":round(excess_income,2)
+        "marginal_relief":round(marginal_relief,2),
     }
 
 
@@ -4940,15 +4939,7 @@ def calculate_tax_by_tax_slab(
 
 
 @frappe.whitelist()
-def update_declaration_form(
-    declaration_id=None,
-    data=None,
-    doctype=None,
-    proof_id=None,
-    employee=None,
-    company=None,
-    payroll_period=None
-):
+def update_declaration_form(declaration_id=None,data=None,doctype=None,proof_id=None,employee=None,company=None,payroll_period=None):
 
     # ------------------ Resolve data payload safely ------------------
     if not data:
@@ -5227,24 +5218,6 @@ def update_declaration_form(
 @frappe.whitelist()
 def calculate_tds_projection(declaration_id):
 
-
-
-    declaration = frappe.get_doc(
-        "Employee Tax Exemption Declaration",
-        declaration_id
-    )
-
-    advance_tax_deducted=declaration.custom_tds_already_deducted_amount if declaration.custom_tds_already_deducted_amount else 0
-
-
-    company = declaration.company
-    employee = declaration.employee
-    payroll_period = declaration.payroll_period
-
-    custom_income_tax = declaration.custom_income_tax
-    custom_tax_regime = declaration.custom_tax_regime
-
-
     current_taxable_earnings_old_regime = 0
     current_taxable_earnings_new_regime = 0
     future_taxable_earnings_old_regime = 0
@@ -5270,6 +5243,37 @@ def calculate_tds_projection(declaration_id):
 
     total_new_regime_deductions = 0
     total_old_regime_deductions = 0
+
+    new_tax_slab=None
+    old_tax_slab=None
+
+    tds_income_from_previous_employer=0
+    tds_deducted_from_previuos_employer=0
+    total_tax_already_paid=0
+
+
+
+    declaration = frappe.get_doc(
+        "Employee Tax Exemption Declaration",
+        declaration_id
+    )
+
+    advance_tax_deducted=declaration.custom_tds_already_deducted_amount if declaration.custom_tds_already_deducted_amount else 0
+    tds_income_from_previous_employer=declaration.custom_total_taxable_income
+    tds_deducted_from_previuos_employer=declaration.custom_total_tds_deducted_value
+
+    company = declaration.company
+    employee = declaration.employee
+    payroll_period = declaration.payroll_period
+
+    custom_income_tax = declaration.custom_income_tax
+    custom_tax_regime = declaration.custom_tax_regime
+
+
+    
+
+
+
     if employee:
 
         latest_salary_structure = frappe.get_list(
@@ -5362,6 +5366,7 @@ def calculate_tds_projection(declaration_id):
 
         if latest_tax_slab_old_regime:
             old_regime_standard_value = latest_tax_slab_old_regime[0].standard_tax_exemption_amount
+            old_tax_slab=latest_tax_slab_old_regime[0].name
 
         latest_tax_slab_new_regime = frappe.get_list(
             "Income Tax Slab",
@@ -5378,6 +5383,7 @@ def calculate_tds_projection(declaration_id):
 
         if latest_tax_slab_new_regime:
             new_regime_standard_value = latest_tax_slab_new_regime[0].standard_tax_exemption_amount
+            new_tax_slab=latest_tax_slab_new_regime[0].name
 
 
         # return employee,payroll_period
@@ -5392,7 +5398,7 @@ def calculate_tds_projection(declaration_id):
             fields=["*"],
             order_by="end_date desc",
         )
-        if len(get_all_salary_slip)==0:
+        if not get_all_salary_slip:
 
             salary_slip_preview = make_salary_slip(
                 source_name=assignment.salary_structure,
@@ -5480,6 +5486,10 @@ def calculate_tds_projection(declaration_id):
 
 
         else:
+
+            for slip in get_all_salary_slip:
+                total_tax_already_paid += slip.get("current_month_income_tax") or 0
+
             month_count=get_all_salary_slip[0].custom_month_count
             for slip in get_all_salary_slip:
                 get_each_sslip= frappe.get_doc("Salary Slip", slip.name)
@@ -5652,8 +5662,10 @@ def calculate_tds_projection(declaration_id):
 
 
 
+
+
         old_regime_annual_taxable_income =(
-            round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
+            round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount+tds_income_from_previous_employer)
             - round(pt_amount)
             - old_regime_standard_value
             - round(total_old_regime_deductions)
@@ -5661,72 +5673,74 @@ def calculate_tds_projection(declaration_id):
         )
 
         new_regime_annual_taxable_income =(
-            round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount)
+            round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount+tds_income_from_previous_employer)
             - new_regime_standard_value
             - round(total_new_regime_deductions)
 
         )
 
+# 
 
-        old_annual_slab = old_regime_annual_taxable_income or 0
-        new_annual_slab = new_regime_annual_taxable_income or 0
 
-        slab_result = slab_calculation(
-            employee=employee,
-            company=company,
-            payroll_period=payroll_period,
-            old_annual_slab=old_annual_slab,
-            new_annual_slab=new_annual_slab
+
+        eval_globals = frappe._dict()
+        eval_locals = frappe._dict()
+
+
+        old_tax_slab_doc = frappe.get_doc("Income Tax Slab", old_tax_slab)
+
+        old_slab_result = calculate_tax_by_tax_slab(
+            old_regime_annual_taxable_income,
+            old_tax_slab_doc,
+            eval_globals,
+            eval_locals,
         )
 
 
 
+        new_tax_slab_doc = frappe.get_doc("Income Tax Slab", new_tax_slab)
 
-        old_regime_total_tax_on_income=(slab_result.get("total_sum")-slab_result.get("old_rebate_value")),
-        new_regime_total_tax_on_income=(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value")),
+        new_slab_result = calculate_tax_by_tax_slab(
+            new_regime_annual_taxable_income,
+            new_tax_slab_doc,
+            eval_globals,
+            eval_locals,
+        )
 
+        # safe_month_count = month_count if month_count else num_months
+        safe_month_count = month_count if month_count else num_months or 1
 
+        balance_tax_payable_old_regime = (
+            round(old_slab_result.get("total_tax_payable"))
+            - tds_deducted_from_previuos_employer
+            - advance_tax_deducted
+            - total_tax_already_paid
+        )
 
-        old_tax_balance = (
-            (
-                slab_result.get("old_education_cess") +
-                slab_result.get("old_surcharge_m") +
-                (slab_result.get("total_sum") - slab_result.get("old_rebate_value"))
-            )
-        ) - slab_result.get("tax_already_paid")
-
-        new_tax_balance = (
-            (
-                slab_result.get("new_education_cess") +
-                slab_result.get("new_surcharge_m") +
-                (slab_result.get("total_sum_new") - slab_result.get("new_rebate_value"))
-            )
-        ) - slab_result.get("tax_already_paid")
-
-
-
-
-
-        old_regime_tax_payable=slab_result.get("old_education_cess")+slab_result.get("old_surcharge_m")+(slab_result.get("total_sum")-slab_result.get("old_rebate_value"))
-        new_regime_tax_payable=slab_result.get("new_education_cess")+slab_result.get("new_surcharge_m")+(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value"))
-
-        # balance_tax_payable_old_regime=old_tax_balance-advance_tax
-        # balance_tax_payable_new_regime=new_tax_balance-advance_tax
-
-        safe_month_count = month_count if month_count else num_months
-
+        balance_tax_payable_new_regime = (
+            round(new_slab_result.get("total_tax_payable"))
+            - tds_deducted_from_previuos_employer
+            - advance_tax_deducted
+            - total_tax_already_paid
+        )
 
         return {
+                
+
+
                 "num_months": num_months if num_months else 0,
                 "month_count": month_count if month_count else num_months,
+                "tds_income_from_previous_employer":round(tds_income_from_previous_employer),
+                "tds_deducted_from_previuos_employer":round(tds_deducted_from_previuos_employer),
+                
                 "current_taxable_earnings_old_regime":round(current_taxable_earnings_old_regime),
                 "current_taxable_earnings_new_regime":round(current_taxable_earnings_new_regime),
                 "future_taxable_earnings_new_regime":round(future_taxable_earnings_new_regime),
                 "future_taxable_earnings_old_regime":round(future_taxable_earnings_old_regime),
                 "loan_perquisite_component":loan_perquisite_component,
                 "loan_perquisite_amount":round(loan_perquisite_amount),
-                "total_taxable_earnings_old_regime": round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount),
-                "total_taxable_earnings_new_regime": round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount),
+                "total_taxable_earnings_old_regime": round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount+tds_income_from_previous_employer),
+                "total_taxable_earnings_new_regime": round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount+tds_income_from_previous_employer),
                 "pt_amount":round(pt_amount),
 
                 "old_regime_standard_value": old_regime_standard_value,
@@ -5744,54 +5758,53 @@ def calculate_tds_projection(declaration_id):
                 "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
                 "advance_tax":advance_tax_deducted,
 
-                "old_regime_from_amounts": slab_result.get("from_amount"),
-                "old_regime_to_amounts": slab_result.get("to_amount"),
-                "old_regime_percentages": slab_result.get("percentage"),
-                "old_regime_tax_per_slab": slab_result.get("total_value"),
-                "old_regime_total_tax": slab_result.get("total_sum"),
-                "old_regime_rebate_limit": slab_result.get("rebate"),
-                "old_regime_max_amount": slab_result.get("max_amount"),
-                "old_regime_rebate_amount": slab_result.get("old_rebate_value"),
 
-                "old_regime_total_tax_on_income":old_regime_total_tax_on_income,
-                "old_regime_surcharge": slab_result.get("old_surcharge_m"),
-                "old_regime_education_cess": slab_result.get("old_education_cess"),
+                "old_regime_total_tax_on_income":round(old_slab_result.get("base_tax")),
+                "old_regime_surcharge": round(old_slab_result.get("surcharge")),
+                "old_regime_education_cess": round(old_slab_result.get("education_cess_amount")),
+                "old_regime_total_tax_payable":round(old_slab_result.get("total_tax_payable")),
+                "old_marginal_relief":round(old_slab_result.get("marginal_relief")),
+
+                "tds_deducted_from_previuos_employer":tds_deducted_from_previuos_employer,
 
 
+                "new_regime_total_tax_on_income":round(new_slab_result.get("base_tax")),
+                "new_regime_surcharge": round(new_slab_result.get("surcharge")),
+                "new_regime_education_cess": round(new_slab_result.get("education_cess_amount")),
+                "new_regime_total_tax_payable":round(new_slab_result.get("total_tax_payable")),
+                "new_marginal_relief":round(new_slab_result.get("marginal_relief")),
+                "total_tax_already_paid":round(total_tax_already_paid),
+
+                "balance_tax_payable_old_regime":round(balance_tax_payable_old_regime),
+                "balance_tax_payable_new_regime":round(balance_tax_payable_new_regime),
 
 
-                "new_regime_from_amounts": slab_result.get("from_amount_new"),
-                "new_regime_to_amounts": slab_result.get("to_amount_new"),
-                "new_regime_percentages": slab_result.get("percentage_new"),
-                "new_regime_tax_per_slab": slab_result.get("total_value_new"),
-                "new_regime_total_tax": slab_result.get("total_sum_new"),
-                "new_regime_rebate_limit": slab_result.get("rebate_new"),
-                "new_regime_max_amount": slab_result.get("max_amount_new"),
-                "new_regime_marginal_relief_min": slab_result.get("new_regime_marginal_relief_min_value"),
-                "new_regime_marginal_relief_max": slab_result.get("new_regime_marginal_relief_max_value"),
-                "old_regime_marginal_relief_min": slab_result.get("old_regime_marginal_relief_min_value"),
-                "old_regime_marginal_relief_max": slab_result.get("old_regime_marginal_relief_max_value"),
-                "new_regime_rebate_amount": slab_result.get("new_rebate_value"),
-                "new_regime_total_tax_on_income":new_regime_total_tax_on_income,
-                "new_regime_surcharge": slab_result.get("new_surcharge_m"),
-                "new_regime_education_cess": slab_result.get("new_education_cess"),
+                "balance_month":safe_month_count,
+                "old_regime_current_tax": (
+                    round(balance_tax_payable_old_regime / safe_month_count)
+                    if safe_month_count else 0
+                ),
 
-                "total_tax_payable_old_regime":old_regime_tax_payable,
-                "total_tax_payable_new_regime":new_regime_tax_payable,
-
-
-                # "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
-                # "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
-
-
-                "total_tax_already_paid": slab_result.get("tax_already_paid"),
-                "old_tax_balance": old_tax_balance,
-                "new_tax_balance":new_tax_balance,
-                "currentax_old_regime_tax": old_tax_balance / safe_month_count,
-                "currentax_new_regime_tax": new_tax_balance / safe_month_count
+                "new_regime_current_tax": (
+                    round(balance_tax_payable_new_regime / safe_month_count)
+                    if safe_month_count else 0
+                ),               
 
 
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5799,22 +5812,6 @@ def calculate_tds_projection(declaration_id):
 
 @frappe.whitelist()
 def calculate_tds_projection_poi(proof_id):
-
-
-    declaration = frappe.get_doc(
-        "Employee Tax Exemption Proof Submission",
-        proof_id
-    )
-
-    advance_tax_deducted=declaration.custom_tds_already_deducted_amount if declaration.custom_tds_already_deducted_amount else 0
-
-
-    company = declaration.company
-    employee = declaration.employee
-    payroll_period = declaration.payroll_period
-
-    custom_income_tax = declaration.custom_income_tax
-    custom_tax_regime = declaration.custom_tax_regime
 
 
     current_taxable_earnings_old_regime = 0
@@ -5842,6 +5839,29 @@ def calculate_tds_projection_poi(proof_id):
 
     total_new_regime_deductions = 0
     total_old_regime_deductions = 0
+    tds_income_from_previous_employer=0
+    tds_deducted_from_previuos_employer=0
+    total_tax_already_paid=0
+
+
+    declaration = frappe.get_doc(
+        "Employee Tax Exemption Proof Submission",
+        proof_id
+    )
+
+    advance_tax_deducted=declaration.custom_tds_already_deducted_amount if declaration.custom_tds_already_deducted_amount else 0
+    tds_income_from_previous_employer=declaration.custom_tds_from_previous_employer
+    tds_deducted_from_previuos_employer=declaration.custom_tds_deducted_from_previous_employer
+
+    company = declaration.company
+    employee = declaration.employee
+    payroll_period = declaration.payroll_period
+
+    custom_income_tax = declaration.custom_income_tax
+    custom_tax_regime = declaration.custom_tax_regime
+
+
+    
     if employee:
 
         latest_salary_structure = frappe.get_list(
@@ -5934,6 +5954,7 @@ def calculate_tds_projection_poi(proof_id):
 
         if latest_tax_slab_old_regime:
             old_regime_standard_value = latest_tax_slab_old_regime[0].standard_tax_exemption_amount
+            old_tax_slab=latest_tax_slab_old_regime[0].name
 
         latest_tax_slab_new_regime = frappe.get_list(
             "Income Tax Slab",
@@ -5950,6 +5971,7 @@ def calculate_tds_projection_poi(proof_id):
 
         if latest_tax_slab_new_regime:
             new_regime_standard_value = latest_tax_slab_new_regime[0].standard_tax_exemption_amount
+            new_tax_slab=latest_tax_slab_old_regime[0].name
 
 
         # return employee,payroll_period
@@ -5964,7 +5986,7 @@ def calculate_tds_projection_poi(proof_id):
             fields=["*"],
             order_by="end_date desc",
         )
-        if len(get_all_salary_slip)==0:
+        if not get_all_salary_slip:
 
             salary_slip_preview = make_salary_slip(
                 source_name=assignment.salary_structure,
@@ -6052,6 +6074,7 @@ def calculate_tds_projection_poi(proof_id):
 
 
         else:
+            total_tax_already_paid += slip.get("current_month_income_tax") or 0
             month_count=get_all_salary_slip[0].custom_month_count
             for slip in get_all_salary_slip:
                 get_each_sslip= frappe.get_doc("Salary Slip", slip.name)
@@ -6225,7 +6248,7 @@ def calculate_tds_projection_poi(proof_id):
 
 
         old_regime_annual_taxable_income =(
-            round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
+            round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount+tds_income_from_previous_employer)
             - round(pt_amount)
             - old_regime_standard_value
             - round(total_old_regime_deductions)
@@ -6233,59 +6256,56 @@ def calculate_tds_projection_poi(proof_id):
         )
 
         new_regime_annual_taxable_income =(
-            round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount)
+            round(current_taxable_earnings_new_regime + future_taxable_earnings_new_regime + loan_perquisite_amount+tds_income_from_previous_employer)
             - new_regime_standard_value
             - round(total_new_regime_deductions)
 
         )
 
 
-        old_annual_slab = old_regime_annual_taxable_income or 0
-        new_annual_slab = new_regime_annual_taxable_income or 0
 
-        slab_result = slab_calculation(
-            employee=employee,
-            company=company,
-            payroll_period=payroll_period,
-            old_annual_slab=old_annual_slab,
-            new_annual_slab=new_annual_slab
+       
+
+        eval_globals = frappe._dict()
+        eval_locals = frappe._dict()
+
+
+        old_tax_slab_doc = frappe.get_doc("Income Tax Slab", old_tax_slab)
+
+        old_slab_result = calculate_tax_by_tax_slab(
+            old_regime_annual_taxable_income,
+            old_tax_slab_doc,
+            eval_globals,
+            eval_locals,
         )
 
 
 
+        new_tax_slab_doc = frappe.get_doc("Income Tax Slab", new_tax_slab)
 
-        old_regime_total_tax_on_income=(slab_result.get("total_sum")-slab_result.get("old_rebate_value")),
-        new_regime_total_tax_on_income=(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value")),
+        new_slab_result = calculate_tax_by_tax_slab(
+            new_regime_annual_taxable_income,
+            new_tax_slab_doc,
+            eval_globals,
+            eval_locals,
+        )
 
+        # safe_month_count = month_count if month_count else num_months
+        safe_month_count = month_count if month_count else num_months or 1
 
+        balance_tax_payable_old_regime = (
+            round(old_slab_result.get("total_tax_payable"))
+            - tds_deducted_from_previuos_employer
+            - advance_tax_deducted
+            - total_tax_already_paid
+        )
 
-        old_tax_balance = (
-            (
-                slab_result.get("old_education_cess") +
-                slab_result.get("old_surcharge_m") +
-                (slab_result.get("total_sum") - slab_result.get("old_rebate_value"))
-            )
-        ) - slab_result.get("tax_already_paid")
-
-        new_tax_balance = (
-            (
-                slab_result.get("new_education_cess") +
-                slab_result.get("new_surcharge_m") +
-                (slab_result.get("total_sum_new") - slab_result.get("new_rebate_value"))
-            )
-        ) - slab_result.get("tax_already_paid")
-
-
-
-
-
-        old_regime_tax_payable=slab_result.get("old_education_cess")+slab_result.get("old_surcharge_m")+(slab_result.get("total_sum")-slab_result.get("old_rebate_value"))
-        new_regime_tax_payable=slab_result.get("new_education_cess")+slab_result.get("new_surcharge_m")+(slab_result.get("total_sum_new")-slab_result.get("new_rebate_value"))
-
-        # balance_tax_payable_old_regime=old_tax_balance-advance_tax
-        # balance_tax_payable_new_regime=new_tax_balance-advance_tax
-
-        safe_month_count = month_count if month_count else num_months
+        balance_tax_payable_new_regime = (
+            round(new_slab_result.get("total_tax_payable"))
+            - tds_deducted_from_previuos_employer
+            - advance_tax_deducted
+            - total_tax_already_paid
+        )
 
 
         return {
@@ -6316,51 +6336,40 @@ def calculate_tds_projection_poi(proof_id):
                 "new_regime_annual_taxable_income": round(new_regime_annual_taxable_income),
                 "advance_tax":advance_tax_deducted,
 
-                "old_regime_from_amounts": slab_result.get("from_amount"),
-                "old_regime_to_amounts": slab_result.get("to_amount"),
-                "old_regime_percentages": slab_result.get("percentage"),
-                "old_regime_tax_per_slab": slab_result.get("total_value"),
-                "old_regime_total_tax": slab_result.get("total_sum"),
-                "old_regime_rebate_limit": slab_result.get("rebate"),
-                "old_regime_max_amount": slab_result.get("max_amount"),
-                "old_regime_rebate_amount": slab_result.get("old_rebate_value"),
-
-                "old_regime_total_tax_on_income":old_regime_total_tax_on_income,
-                "old_regime_surcharge": slab_result.get("old_surcharge_m"),
-                "old_regime_education_cess": slab_result.get("old_education_cess"),
 
 
+                "old_regime_total_tax_on_income":round(old_slab_result.get("base_tax")),
+                "old_regime_surcharge": round(old_slab_result.get("surcharge")),
+                "old_regime_education_cess": round(old_slab_result.get("education_cess_amount")),
+                "old_regime_total_tax_payable":round(old_slab_result.get("total_tax_payable")),
+                "old_marginal_relief":round(old_slab_result.get("marginal_relief")),
+
+                "tds_deducted_from_previuos_employer":tds_deducted_from_previuos_employer,
 
 
-                "new_regime_from_amounts": slab_result.get("from_amount_new"),
-                "new_regime_to_amounts": slab_result.get("to_amount_new"),
-                "new_regime_percentages": slab_result.get("percentage_new"),
-                "new_regime_tax_per_slab": slab_result.get("total_value_new"),
-                "new_regime_total_tax": slab_result.get("total_sum_new"),
-                "new_regime_rebate_limit": slab_result.get("rebate_new"),
-                "new_regime_max_amount": slab_result.get("max_amount_new"),
-                "new_regime_marginal_relief_min": slab_result.get("new_regime_marginal_relief_min_value"),
-                "new_regime_marginal_relief_max": slab_result.get("new_regime_marginal_relief_max_value"),
-                "old_regime_marginal_relief_min": slab_result.get("old_regime_marginal_relief_min_value"),
-                "old_regime_marginal_relief_max": slab_result.get("old_regime_marginal_relief_max_value"),
-                "new_regime_rebate_amount": slab_result.get("new_rebate_value"),
-                "new_regime_total_tax_on_income":new_regime_total_tax_on_income,
-                "new_regime_surcharge": slab_result.get("new_surcharge_m"),
-                "new_regime_education_cess": slab_result.get("new_education_cess"),
+                "new_regime_total_tax_on_income":round(new_slab_result.get("base_tax")),
+                "new_regime_surcharge": round(new_slab_result.get("surcharge")),
+                "new_regime_education_cess": round(new_slab_result.get("education_cess_amount")),
+                "new_regime_total_tax_payable":round(new_slab_result.get("total_tax_payable")),
+                "new_marginal_relief":round(new_slab_result.get("marginal_relief")),
+                "total_tax_already_paid":round(total_tax_already_paid),
 
-                "total_tax_payable_old_regime":old_regime_tax_payable,
-                "total_tax_payable_new_regime":new_regime_tax_payable,
+                "balance_tax_payable_old_regime":round(balance_tax_payable_old_regime),
+                "balance_tax_payable_new_regime":round(balance_tax_payable_new_regime),
 
 
-                # "balance_tax_payable_old_regime":balance_tax_payable_old_regime,
-                # "balance_tax_payable_new_regime":balance_tax_payable_new_regime,
+                "balance_month":safe_month_count,
+                "old_regime_current_tax": (
+                    round(balance_tax_payable_old_regime / safe_month_count)
+                    if safe_month_count else 0
+                ),
 
+                "new_regime_current_tax": (
+                    round(balance_tax_payable_new_regime / safe_month_count)
+                    if safe_month_count else 0
+                ),               
 
-                "total_tax_already_paid": slab_result.get("tax_already_paid"),
-                "old_tax_balance": old_tax_balance,
-                "new_tax_balance":new_tax_balance,
-                "currentax_old_regime_tax": old_tax_balance / safe_month_count,
-                "currentax_new_regime_tax": new_tax_balance / safe_month_count
+                
 
 
                 }
