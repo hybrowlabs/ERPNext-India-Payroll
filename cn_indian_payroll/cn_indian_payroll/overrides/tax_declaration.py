@@ -53,11 +53,27 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def remove_amount(self):
         if self.declarations:
             for subcategory in self.declarations:
-                subcategory_doc = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
+
+                # Get the related Declaration Approved Category doc(s) for this employee and subcategory
+                approved_docs = frappe.get_list(
+                    "Declaration Approved Category",
+                    filters={
+                        "employee": self.employee,
+                        "company": self.company,
+                        "payroll_period": self.payroll_period,
+                        "exemption_sub_category": subcategory.exemption_sub_category
+                    },
+                    fields=["status"]  # Only fetch status
+                )
+
+                # If found, set child table status
+                if approved_docs:
+                    # Assuming only one doc per subcategory
+                    subcategory.custom_status = approved_docs[0].status
+
+
                 
 
-                if subcategory_doc.custom_approval_needed == "Yes" and subcategory.custom_status in ["Not Needed",""]:
-                    subcategory.amount=0
 
 
     def set_approved_status(self):

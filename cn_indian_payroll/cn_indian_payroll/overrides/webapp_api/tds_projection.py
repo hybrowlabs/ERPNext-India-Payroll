@@ -460,7 +460,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
 
 
 
-# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form?employee=HR-EMP-00001&company=Pen Pencil&payroll_period=25-26&go_head_with_new_regime=0
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.tds_declaration_form?employee=PW0220&company=Pen Pencil&payroll_period=25-26&go_head_with_new_regime=0
 
 @frappe.whitelist()
 def tds_declaration_form(employee=None, company=None, payroll_period=None, go_head_with_new_regime=None):
@@ -547,16 +547,16 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
         # ------------------ Existing Declaration Map ------------------
         existing_declaration = []
         for d in declaration_doc.declarations:
-            if d.custom_status in ["Approved","Not Needed"]:
-                existing_declaration.append({
-                    "exemption_category": d.exemption_category,
-                    "exemption_sub_category": d.exemption_sub_category,
-                    "amount": d.amount,
-                    "max_amount": d.max_amount,
-                    "custom_attach": d.custom_attach,
-                    "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
-                    "custom_note": d.custom_note
-                })
+            
+            existing_declaration.append({
+                "exemption_category": d.exemption_category,
+                "exemption_sub_category": d.exemption_sub_category,
+                "amount": d.amount,
+                "max_amount": d.max_amount,
+                "custom_attach": d.custom_attach,
+                "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected","Pending"] else "",
+                "custom_note": d.custom_note
+            })
 
         existing_map = {
             d["exemption_sub_category"]: d for d in existing_declaration
@@ -2652,15 +2652,15 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
             # ------------------ Existing Declaration Map ------------------
             existing_declaration = []
             for d in declaration_doc.declarations:
-                if d.custom_status in ["Approved","Not Needed"]:
-                    existing_declaration.append({
-                        "exemption_category": d.exemption_category,
-                        "exemption_sub_category": d.exemption_sub_category,
-                        "amount": d.amount,
-                        "max_amount": d.max_amount,
-                        "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected"] else "",
-                        "custom_note": d.custom_note,
-                    })
+                
+                existing_declaration.append({
+                    "exemption_category": d.exemption_category,
+                    "exemption_sub_category": d.exemption_sub_category,
+                    "amount": d.amount,
+                    "max_amount": d.max_amount,
+                    "custom_proof_status": d.custom_status if d.custom_status in ["Approved","Rejected","Pending"] else "",
+                    "custom_note": d.custom_note,
+                })
 
             existing_map = {
                 d["exemption_sub_category"]: d for d in existing_declaration
@@ -3734,7 +3734,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                         "deductible_amount": qualified_80d if declared_80d > qualified_80d else declared_80d
                     })
 
-                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan":
+                if not category.custom_select_section and not sub_category.custom_component_type=="LTA Reimbursement" and not sub_category.custom_component_type=="Home Loan" and d.custom_status in ["Approved","Not Needed"]:
 
                     declared_other = flt(d.amount or 0)
                     qualified_other = flt(d.max_amount or 0)

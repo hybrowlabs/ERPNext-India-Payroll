@@ -7,7 +7,7 @@ class DeclarationApprovedCategory(Document):
 
     def validate(self):
 
-        if self.status in ["Approved", "Rejected"] and self.declaration_id:
+        if self.status in ["Approved", "Rejected","Pending"] and self.declaration_id:
 
             declaration = frappe.get_doc(
                 "Employee Tax Exemption Declaration",
