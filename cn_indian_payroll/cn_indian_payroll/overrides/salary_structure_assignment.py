@@ -6,6 +6,9 @@ from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignmen
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from frappe.utils import getdate
 from frappe.utils import get_last_day, getdate
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+from frappe.utils import get_last_day, getdate
 
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
@@ -340,6 +343,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
                 if not additional_salary:
                     last_day = get_last_day(getdate(self.from_date))
+                    next_year_day = getdate(self.from_date) + relativedelta(years=1)
 
                     doc = frappe.get_doc(
                         {
@@ -351,7 +355,8 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                             "currency": frappe.db.get_value(
                                 "Company", self.company, "default_currency"
                             ),
-                            "amount": row.amount,  # assuming amount is in child table
+                            "amount": row.amount,
+                            "custom_clawback_date": next_year_day,
                         }
                     )
 

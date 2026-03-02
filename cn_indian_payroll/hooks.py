@@ -264,7 +264,7 @@ doctype_js = {
     "LOP Reversal": "public/js/lop_reversal.js",
     "Loan": "public/js/loan.js",
     "Loan Product": "public/js/loan_product.js",
-    "Salary Slip": "public/js/salary_slip.js",
+    # "Salary Slip": "public/js/salary_slip.js",
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
     "Employee Promotion": "public/js/employee_promotion.js",
