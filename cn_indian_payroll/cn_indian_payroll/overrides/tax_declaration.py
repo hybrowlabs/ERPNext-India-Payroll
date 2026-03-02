@@ -28,6 +28,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def before_save(self):
         self.update_json_data_in_declaration()
 
+    def on_submit(self):
+        self.set_approved_status()
+
 
     def before_update_after_submit(self):
 
