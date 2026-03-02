@@ -2421,3 +2421,71 @@ def override_calculate_tax_by_tax_slab(
     ) - custom_tds_already_deducted_amount
 
     return round(final_tax, 2), round(other_taxes_and_charges, 2)
+
+
+# def _safe_eval(code: str, eval_globals: dict | None = None, eval_locals: dict | None = None):
+# 	import unicodedata
+# 	code = unicodedata.normalize("NFKC", code)
+
+# 	_check_attributes(code)
+
+
+# 	whitelisted_globals = {
+# 		"int": int,
+# 		"float": float,
+# 		"long": int,
+# 		"round": round,
+# 		"sum": sum,
+# 		"min": min,
+# 		"max": max,
+# 		"next": next,
+# 		"len": len,
+# 	}
+
+# 	if not eval_globals:
+# 		eval_globals = {}
+
+# 	eval_globals["__builtins__"] = {}
+# 	eval_globals.update(whitelisted_globals)
+
+# 	return eval(code, eval_globals, eval_locals)  # nosemgrep
+
+
+# def _check_attributes(code: str) -> None:
+# 	import ast
+
+# 	from frappe.utils.safe_exec import UNSAFE_ATTRIBUTES
+
+# 	unsafe_attrs = set(UNSAFE_ATTRIBUTES).union(["__"]) - {"format"}
+
+# 	for attribute in unsafe_attrs:
+# 		if attribute in code:
+# 			raise SyntaxError(f'Illegal rule {frappe.bold(code)}. Cannot use "{attribute}"')
+
+# 	BLOCKED_NODES = (ast.NamedExpr,)
+
+# 	tree = ast.parse(code, mode="eval")
+# 	for node in ast.walk(tree):
+# 		if isinstance(node, BLOCKED_NODES):
+# 			raise SyntaxError(f"Operation not allowed: line {node.lineno} column {node.col_offset}")
+# 		if isinstance(node, ast.Attribute) and isinstance(node.attr, str) and node.attr in UNSAFE_ATTRIBUTES:
+# 			raise SyntaxError(f'Illegal rule {frappe.bold(code)}. Cannot use "{node.attr}"')
+
+# def throw_error_message(row, error, title, description=None):
+# 	data = frappe._dict(
+# 		{
+# 			"doctype": row.parenttype,
+# 			"name": row.parent,
+# 			"doclink": get_link_to_form(row.parenttype, row.parent),
+# 			"row_id": row.idx,
+# 			"error": error,
+# 			"title": title,
+# 			"description": description or "",
+# 		}
+# 	)
+
+# 	message = _(
+# 		"Error while evaluating the {doctype} {doclink} at row {row_id}. <br><br> <b>Error:</b> {error} <br><br> <b>Hint:</b> {description}"
+# 	).format(**data)
+
+# 	frappe.throw(message, title=title)

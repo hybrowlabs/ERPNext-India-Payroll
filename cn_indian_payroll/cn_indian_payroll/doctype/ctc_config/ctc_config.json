@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-02 08:23:32.736595",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "additional_earning",
+  "amount",
+  "rating"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "additional_earning",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Additional Earning",
+   "options": "\nFixed Salary\nVariable Pay\nRetention Bonus\nJoining Bonus"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "rating",
+   "fieldtype": "Select",
+   "label": "Rating",
+   "options": "\nA\nB\nC"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-02 10:22:16.959296",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "CTC Config",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

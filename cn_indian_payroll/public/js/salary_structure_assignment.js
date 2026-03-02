@@ -210,6 +210,13 @@ custom_nps_amount(frm) {
 
 
 
+
+
+
+
+
+
+
 function change_regime(frm)
 {
     if(!frm.is_new() && frm.doc.income_tax_slab)

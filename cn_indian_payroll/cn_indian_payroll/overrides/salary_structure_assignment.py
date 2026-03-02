@@ -5,6 +5,7 @@ from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignmen
 
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from frappe.utils import getdate
+from frappe.utils import get_last_day, getdate
 
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
@@ -18,10 +19,14 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def on_submit(self):
         self.insert_tax_declaration()
         self.update_employee_promotion()
+        self.insert_joining_bonus()
+        self.set_variable_pay_amount()
 
     def before_update_after_submit(self):
         self.reimbursement_amount()
         self.update_employee_promotion_from_date()
+        self.insert_joining_bonus()
+        self.set_variable_pay_amount()
 
     def update_employee_promotion_from_date(self):
         if self.custom_is_increment:
@@ -291,3 +296,64 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 total_amount += reimbursement.monthly_total_amount
 
         self.custom_statistical_amount = total_amount
+
+    def set_variable_pay_amount(self):
+        # Now calculate Variable Pay based on rating
+        for row in self.custom_other_extra_payments:
+            if row.additional_earning == "Variable Pay" and getattr(
+                row, "rating", None
+            ):
+                payroll_setting = frappe.get_doc("Payroll Settings")
+                if getattr(payroll_setting, "custom_varible_pay_config", None):
+                    for config in payroll_setting.custom_varible_pay_config:
+                        # Match the rating from config and row
+                        if getattr(config, "rating", None) == getattr(
+                            row, "rating", None
+                        ):
+                            # Calculate variable pay
+                            self.custom_variable_pay_amount = (
+                                row.amount * config.percentage
+                            ) / 100
+                            break  # Stop after first match for this row
+
+    def insert_joining_bonus(self):
+        if not self.custom_other_extra_payments:
+            return
+
+        for row in self.custom_other_extra_payments:
+            if row.additional_earning == "Joining Bonus":
+                company = frappe.get_doc("Company", self.company)
+
+                if not company.custom_joining_bonus:
+                    return
+
+                # Check if already submitted Additional Salary exists
+                additional_salary = frappe.get_list(
+                    "Additional Salary",
+                    filters={
+                        "employee": self.employee,
+                        "salary_component": company.custom_joining_bonus,
+                        "docstatus": 1,
+                    },
+                    limit=1,
+                )
+
+                if not additional_salary:
+                    last_day = get_last_day(getdate(self.from_date))
+
+                    doc = frappe.get_doc(
+                        {
+                            "doctype": "Additional Salary",
+                            "employee": self.employee,
+                            "salary_component": company.custom_joining_bonus,
+                            "payroll_date": last_day,
+                            "company": self.company,
+                            "currency": frappe.db.get_value(
+                                "Company", self.company, "default_currency"
+                            ),
+                            "amount": row.amount,  # assuming amount is in child table
+                        }
+                    )
+
+                    doc.insert()
+                    doc.submit()
