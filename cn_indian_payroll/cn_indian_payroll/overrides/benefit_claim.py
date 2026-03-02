@@ -5,20 +5,56 @@ from hrms.payroll.doctype.employee_benefit_claim.employee_benefit_claim import (
     get_payroll_period,
 )
 from frappe.utils import getdate
-
 from frappe.utils import add_months
+from frappe import _
+from frappe.utils import flt
+from hrms.hr.utils import get_previous_claimed_amount, validate_active_employee
+from frappe.utils import getdate
+
+
 
 
 
 class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
+
+
+    def validate(self):
+        validate_active_employee(self.employee)
+        max_benefits = get_max_benefits(self.employee, self.claim_date)
+
+        company = frappe.db.get_value("Employee", self.employee, "company")
+
+        claim_date = getdate(self.claim_date)
+
+        payroll_period = get_payroll_period(
+            claim_date,
+            claim_date,
+            company
+        )
+
+
+        self.custom_payroll_period=payroll_period.name
+
+        
+        self.validate_max_benefit_for_component(payroll_period)
+        self.validate_max_benefit_for_sal_struct(max_benefits)
+        self.validate_benefit_claim_amount(max_benefits, payroll_period)
+        if self.pay_against_benefit_claim:
+            self.validate_non_pro_rata_benefit_claim(max_benefits, payroll_period)
+
+        self.set_taxable_or_non_taxable()
+
+
+
+
     def on_submit(self):
         # self.insert_future_benefit()
         self.insert_additional_salary()
 
 
-    def validate(self):
-        super().validate()
-        self.set_taxable_or_non_taxable()
+    # def validate(self):
+    #     super().validate()
+    #     self.set_taxable_or_non_taxable()
 
 
     def set_taxable_or_non_taxable(self):

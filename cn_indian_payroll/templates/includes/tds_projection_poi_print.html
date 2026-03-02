@@ -137,97 +137,84 @@
             <td class="right">₹ {{ new_regime_annual_taxable_income }}</td>
         </tr>
 
-        <!-- TAX SLABS -->
-        <tr>
-            <td>
-                <b>Old Regime Tax Slab</b>
-                <table style="width:100%; margin-top:5px;">
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>%</th>
-                        <th>Tax</th>
-                    </tr>
-                    {% for i in range(old_regime_from_amounts|length) %}
-                    <tr>
-                        <td>₹ {{ old_regime_from_amounts[i] }}</td>
-                        <td>₹ {{ old_regime_to_amounts[i] }}</td>
-                        <td>{{ old_regime_percentages[i] }}%</td>
-                        <td class="right">₹ {{ old_regime_tax_per_slab[i] }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-
-                <br>
-
-                <b>New Regime Tax Slab</b>
-                <table style="width:100%; margin-top:5px;">
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>%</th>
-                        <th>Tax</th>
-                    </tr>
-                    {% for i in range(new_regime_from_amounts|length) %}
-                    <tr>
-                        <td>₹ {{ new_regime_from_amounts[i] }}</td>
-                        <td>₹ {{ new_regime_to_amounts[i] }}</td>
-                        <td>{{ new_regime_percentages[i] }}%</td>
-                        <td class="right">₹ {{ new_regime_tax_per_slab[i] }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </td>
-
-            <td class="right">₹ {{ old_regime_total_tax }}</td>
-            <td class="right">₹ {{ new_regime_total_tax }}</td>
-        </tr>
-
-        <!-- FINAL TAX -->
-        <tr>
+                <tr>
             <td>Total Tax on Income</td>
-            <td class="right">₹ {{ old_regime_total_tax - old_regime_rebate_amount }}</td>
-            <td class="right">₹ {{ new_regime_total_tax - new_regime_rebate_amount }}</td>
+            <td class="right">₹ {{old_regime_total_tax_on_income}}</td>
+            <td class="right">₹ {{new_regime_total_tax_on_income}}</td>
         </tr>
+
+        <tr>
+            <td>Rebate</td>
+            <td class="right">₹ 0</td>
+            <td class="right">₹ 0</td>
+        </tr>
+
+
 
         <tr>
             <td>Surcharge</td>
-            <td class="right">₹ {{ old_regime_surcharge }}</td>
-            <td class="right">₹ {{ new_regime_surcharge }}</td>
+            <td class="right">₹ {{old_regime_surcharge}}</td>
+            <td class="right">₹ {{new_regime_surcharge}}</td>
         </tr>
 
         <tr>
             <td>Education Cess</td>
-            <td class="right">₹ {{ old_regime_education_cess }}</td>
-            <td class="right">₹ {{ new_regime_education_cess }}</td>
+            <td class="right">₹ {{old_regime_education_cess}}</td>
+            <td class="right">₹ {{new_regime_education_cess}}</td>
         </tr>
+
+        <tr>
+            <td>Marginal Relief</td>
+            <td class="right">₹ {{old_marginal_relief}}</td>
+            <td class="right">₹ {{new_marginal_relief}}</td>
+        </tr>
+
+
+        
 
         <tr class="section">
             <td>Tax Payable</td>
-            <td class="right">₹ {{ total_tax_payable_old_regime }}</td>
-            <td class="right">₹ {{ total_tax_payable_new_regime }}</td>
+            <td class="right">₹ {{old_regime_total_tax_payable}}</td>
+            <td class="right">₹ {{new_regime_total_tax_payable}}</td>
         </tr>
+
+        <tr class="section">
+            <td>TDS Deducted Previous Employer</td>
+            <td class="right">₹ {{tds_deducted_from_previuos_employer}}</td>
+            <td class="right">₹ {{tds_deducted_from_previuos_employer}}</td>
+        </tr>
+
+       
 
 
 
         <tr class="section">
-            <td>Tax Paid	   </td>
-            <td class="right">₹ {{ total_tax_already_paid }}</td>
-            <td class="right">₹ {{ total_tax_already_paid }}</td>
+            <td>Tax Paid</td>
+            <td class="right">₹ {{total_tax_already_paid}}</td>
+            <td class="right">₹{{total_tax_already_paid}} </td>
+        </tr>
+
+         <tr class="section">
+            <td>Balance TDS Payable</td>
+            <td class="right">₹ {{balance_tax_payable_old_regime}}</td>
+            <td class="right">₹ {{balance_tax_payable_new_regime}}</td>
         </tr>
 
 
         <tr class="section">
-            <td>Future Month  </td>
-            <td class="right">₹ {{ month_count }}</td>
-            <td class="right">₹ {{ month_count }}</td>
+            <td>Remaining Month  </td>
+            <td class="right">₹ {{balance_month}}</td>
+            <td class="right">₹ {{balance_month}}</td>
         </tr>
 
         <tr class="section">
             <td>Current Tax</td>
-            <td class="right">₹ {{ currentax_old_regime_tax | round }}</td>
-            <td class="right">₹ {{ currentax_new_regime_tax | round }}</td>
+            <td class="right">₹ {{old_regime_current_tax}}</td>
+            <td class="right">₹ {{new_regime_current_tax}}</td>
         </tr>
+
+
+
     </tbody>
 </table>
 

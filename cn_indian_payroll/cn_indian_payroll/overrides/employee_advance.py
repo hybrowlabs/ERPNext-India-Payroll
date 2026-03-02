@@ -366,6 +366,13 @@ def validate(self, method):
                     f"based on attendance and salary."
                 )
 
+        deduction_component = frappe.db.get_single_value(
+            "Payroll Settings",
+            "custom_employee_advance_component"
+        )
+
+        self.custom_deduction_component = deduction_component
+
     self.custom_total_paid_amount=0
     self.custom_total_balance_amount=self.advance_amount
 
@@ -373,6 +380,9 @@ def validate(self, method):
         self.repay_unclaimed_amount_from_salary=0
     elif self.employee and self.custom_type=="Reimbursement / Expense Advance":
         self.repay_unclaimed_amount_from_salary=1
+
+
+
 
 
 

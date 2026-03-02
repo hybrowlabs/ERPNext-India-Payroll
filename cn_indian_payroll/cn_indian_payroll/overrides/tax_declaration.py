@@ -28,6 +28,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     def before_save(self):
         self.update_json_data_in_declaration()
 
+    def on_submit(self):
+        self.set_approved_status()
+
 
     def before_update_after_submit(self):
 
@@ -42,7 +45,34 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         self.set_approved_status()
 
+        self.remove_amount()
 
+
+
+
+    def remove_amount(self):
+        if self.declarations:
+            for subcategory in self.declarations:
+
+                # Get the related Declaration Approved Category doc(s) for this employee and subcategory
+                approved_docs = frappe.get_list(
+                    "Declaration Approved Category",
+                    filters={
+                        "employee": self.employee,
+                        "company": self.company,
+                        "payroll_period": self.payroll_period,
+                        "exemption_sub_category": subcategory.exemption_sub_category
+                    },
+                    fields=["status"]  # Only fetch status
+                )
+
+                # If found, set child table status
+                if approved_docs:
+                    # Assuming only one doc per subcategory
+                    subcategory.custom_status = approved_docs[0].status
+
+
+                
 
 
 
@@ -55,7 +85,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     continue
 
                 if subcategory_doc.custom_approval_needed == "Yes":
-
+                    
                     filters = {
                         "employee": self.employee,
                         "company": self.company,
@@ -75,6 +105,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             "Declaration Approved Category",
                             existing_doc_name
                         )
+
+                        if approved_doc.declared_amount != subcategory.amount:
+                            approved_doc.status = "Pending"
                     else:
                         # Create new record
                         approved_doc = frappe.new_doc("Declaration Approved Category")
@@ -83,6 +116,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         approved_doc.payroll_period = self.payroll_period
                         approved_doc.exemption_category = subcategory.exemption_category
                         approved_doc.exemption_sub_category = subcategory.exemption_sub_category
+                       
 
                     # Common fields (update or insert)
                     approved_doc.declaration_id = self.name
