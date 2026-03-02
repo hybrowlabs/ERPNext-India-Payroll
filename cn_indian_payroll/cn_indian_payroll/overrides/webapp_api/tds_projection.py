@@ -4983,6 +4983,7 @@ def update_declaration_form(declaration_id=None,data=None,doctype=None,proof_id=
         declaration.custom_address_title1 = data.get("address_title1")
         declaration.custom_address_title2 = data.get("address_title2")
         declaration.custom_name=data.get("custom_name")
+        declaration.custom_hra_proof_attach = data.get("attach_proof")
 
         # -------- Regime --------
         go_head_with_new_regime = data.get("go_head_with_new_regime", 0)
@@ -5016,6 +5017,7 @@ def update_declaration_form(declaration_id=None,data=None,doctype=None,proof_id=
                 "exemption_sub_category": row.get("exemption_sub_category"),
                 "amount": row.get("amount"),
                 "max_amount": row.get("max_amount"),
+                "custom_attach":row.get("attach_proof"),
             })
 
         declaration.save(ignore_permissions=True)
