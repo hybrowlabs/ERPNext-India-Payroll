@@ -58,6 +58,8 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     continue
 
                 if subcategory_doc.custom_approval_needed == "Yes":
+                    subcategory.custom_status = ""
+
 
                     filters = {
                         "employee": self.employee,
