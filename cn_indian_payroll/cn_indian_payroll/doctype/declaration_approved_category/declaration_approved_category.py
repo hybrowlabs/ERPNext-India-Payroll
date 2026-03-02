@@ -1,6 +1,4 @@
 
-
-
 import frappe
 from frappe.model.document import Document
 
@@ -21,10 +19,17 @@ class DeclarationApprovedCategory(Document):
                 if row.exemption_sub_category == self.exemption_sub_category:
 
                     frappe.db.set_value(
-                        row.doctype,   # Child DocType
-                        row.name,      # Row ID
+                        row.doctype,  
+                        row.name,      
                         {
                             "custom_status": self.status,
-                            "custom_note": self.note
-                        }
-                    )
+                            "custom_note": self.note,
+                            "amount":self.declared_amount,
+                        })
+
+
+
+       
+
+        
+

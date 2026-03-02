@@ -45,8 +45,19 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         self.set_approved_status()
 
+        self.remove_amount()
 
 
+
+
+    def remove_amount(self):
+        if self.declarations:
+            for subcategory in self.declarations:
+                subcategory_doc = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
+                
+
+                if subcategory_doc.custom_approval_needed == "Yes" and subcategory.custom_status in ["Not Needed",""]:
+                    subcategory.amount=0
 
 
     def set_approved_status(self):
@@ -58,9 +69,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     continue
 
                 if subcategory_doc.custom_approval_needed == "Yes":
-                    subcategory.custom_status = ""
-
-
+                    
                     filters = {
                         "employee": self.employee,
                         "company": self.company,
@@ -80,6 +89,9 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                             "Declaration Approved Category",
                             existing_doc_name
                         )
+
+                        if approved_doc.declared_amount != subcategory.amount:
+                            approved_doc.status = "Pending"
                     else:
                         # Create new record
                         approved_doc = frappe.new_doc("Declaration Approved Category")
@@ -88,6 +100,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         approved_doc.payroll_period = self.payroll_period
                         approved_doc.exemption_category = subcategory.exemption_category
                         approved_doc.exemption_sub_category = subcategory.exemption_sub_category
+                       
 
                     # Common fields (update or insert)
                     approved_doc.declaration_id = self.name

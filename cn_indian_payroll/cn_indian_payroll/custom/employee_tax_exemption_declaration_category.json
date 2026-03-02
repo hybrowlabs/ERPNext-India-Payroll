@@ -173,7 +173,7 @@
    "name": "Employee Tax Exemption Declaration Category-custom_status",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "\nNot Needed\nApproved\nRejected",
+   "options": "\nPending\nNot Needed\nApproved\nRejected",
    "owner": "Administrator",
    "permlevel": 0,
    "placeholder": null,

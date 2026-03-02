@@ -3739,13 +3739,26 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
                     declared_other = flt(d.amount or 0)
                     qualified_other = flt(d.max_amount or 0)
 
-                    other_investment.append({
+                    deductible = (
+                        declared_other
+                        if qualified_other == 0
+                        else min(declared_other, qualified_other)
+                    )
 
+                    other_investment.append({
                         "component": d.exemption_sub_category,
                         "declared_amount": declared_other,
                         "qualified_amount": qualified_other,
-                        "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
+                        "deductible_amount": deductible
                     })
+
+                    # other_investment.append({
+
+                    #     "component": d.exemption_sub_category,
+                    #     "declared_amount": declared_other,
+                    #     "qualified_amount": qualified_other,
+                    #     "deductible_amount": qualified_other if declared_other > qualified_other else declared_other
+                    # })
 
                 if sub_category.custom_component_type=="Home Loan":
 
