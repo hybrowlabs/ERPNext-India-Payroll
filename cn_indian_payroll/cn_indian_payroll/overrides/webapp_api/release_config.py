@@ -63,7 +63,7 @@ def get_individual_employee_locking_period(employee):
     child_start_date = None
     child_end_date = None
     active = 0
-    doctype_name=None
+    release_type=None
 
     # Check individual declaration child table
     for row in release_doc.individual_declaration_child:
