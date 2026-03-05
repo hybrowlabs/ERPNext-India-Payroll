@@ -241,6 +241,12 @@ fixtures = [
     {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
     {"dt":"Custom Field","filters":{"dt":"Employee","module":"cn-indian-payroll"}},
     {"dt":"Section Category"},
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["name", "=", "Payroll Settings-custom_employee_advance_component"]
+        ]
+    },
 
 
 
