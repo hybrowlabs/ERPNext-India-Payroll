@@ -3,18 +3,40 @@
 
 frappe.ui.form.on("LOP Reversal", {
 	lwp_array: [],
+
 	// additional_salary_date(frm) {
-	// 	if (
-	// 		frm.doc.additional_salary_date &&
-	// 		frm.doc.additional_salary_date < frappe.datetime.nowdate()
-	// 	) {
-	// 		frappe.msgprint({
-	// 			title: __("Invalid Date"),
-	// 			message: __("You cannot select a past date for 'Additional Salary Date'."),
-	// 			indicator: "red",
-	// 		});
-	// 		frm.set_value("additional_salary_date", undefined);
-	// 	}
+
+	// 	frappe.call({
+	// 		method: "frappe.client.get",
+	// 		args: {
+	// 			doctype: "Payroll Settings"
+	// 		},
+	// 		callback: function (r) {
+
+	// 			if (r.message && r.message.custom_lop_reversal_validation) {
+
+	// 				console.log("yes")
+
+	// 				if (
+	// 					frm.doc.additional_salary_date &&
+	// 					frm.doc.additional_salary_date < frappe.datetime.nowdate()
+	// 				) {
+	// 					frappe.msgprint({
+	// 						title: __("Invalid Date"),
+	// 						message: __("You cannot select a past date for 'Additional Salary Date'."),
+	// 						indicator: "red",
+	// 					});
+
+	// 					frm.set_value("additional_salary_date", null);
+	// 				}
+
+	// 			}
+	// 			else{
+	// 				console.log("no")
+	// 			}
+	// 		}
+	// 	});
+
 	// },
 	refresh(frm) {
 		frm.trigger("load_lwp_months");
