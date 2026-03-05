@@ -10,7 +10,8 @@
   "api_secret",
   "profile_id",
   "post_url",
-  "print_format"
+  "print_format",
+  "email_template"
  ],
  "fields": [
   {
@@ -43,13 +44,19 @@
    "fieldtype": "Link",
    "label": "Print Format",
    "options": "Print Format"
+  },
+  {
+   "fieldname": "email_template",
+   "fieldtype": "Link",
+   "label": "Email Template",
+   "options": "Email Template"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-12 10:51:06.879298",
+ "modified": "2026-03-04 17:06:22.132428",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Leegality Settings",

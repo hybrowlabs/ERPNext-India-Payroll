@@ -10,13 +10,14 @@ import json
 from frappe.utils import add_days, formatdate
 from frappe.utils.file_manager import get_file_path
 
-import frappe
-import requests
-import base64
 import tempfile
 import os
 
-from frappe.utils.file_manager import get_file_path
+
+from io import BytesIO
+from pypdf import PdfReader, PdfWriter
+
+
 
 @frappe.whitelist()
 def send_salary_slip_for_esign(salary_slip):
@@ -61,11 +62,11 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
     """
 
     leegality_setting = frappe.get_single("Leegality Settings")
-    # base_url = leegality_setting.api_base_url.rstrip("/")
+    base_url = leegality_setting.api_base_url.rstrip("/")
 
-    # API_URL = f"{base_url}/api/v3.0/sign/request"
+    API_URL = f"{base_url}/api/v3.0/sign/request"
 
-    API_URL = leegality_setting.api_base_url
+    # API_URL = leegality_setting.api_base_url
     X_AUTH_TOKEN = leegality_setting.api_key
     PROFILE_ID = leegality_setting.profile_id
 
@@ -118,11 +119,7 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 
 
-
-# import frappe
-# import json
-
-
+#webhook view================================================
 # @frappe.whitelist(allow_guest=True)
 # def leegality_webhook():
 
@@ -201,9 +198,6 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 
 
-import frappe
-import requests
-
 
 @frappe.whitelist()
 def view_signed_payslip_employee(salary_slip):
@@ -216,12 +210,12 @@ def view_signed_payslip_employee(salary_slip):
     X_AUTH_TOKEN = leegality_setting.api_key
 
 
-    # base_url = leegality_setting.api_base_url.rstrip("/")
+    base_url = leegality_setting.api_base_url.rstrip("/")
 
-    # url = f"{base_url}/api/v3.1/document/fetchDocument"
+    url = f"{base_url}/api/v3.1/document/fetchDocument"
 
 
-    url = leegality_setting.post_url
+    # url = leegality_setting.post_url
 
     headers = {
         "X-Auth-Token": X_AUTH_TOKEN
@@ -364,6 +358,9 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
     """
 
     settings = frappe.get_single("Leegality Settings")
+    base_url = settings.api_base_url.rstrip("/")
+
+    API_URL = f"{base_url}/api/v3.0/sign/request"
 
     headers = {
         "Content-Type": "application/json",
@@ -385,7 +382,7 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
     }
 
     response = requests.post(
-        settings.api_base_url,
+        API_URL,
         headers=headers,
         json=payload,
         timeout=60
@@ -406,9 +403,7 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
 
 
 
-    # slip.db_set("custom_document_id", document_id)
-    # slip.db_set("custom_e_sign_url", sign_url)
-    # slip.db_set("custom_e_sign_status", "Send")
+
     
     frappe.db.set_value(
         "Salary Slip",
@@ -423,6 +418,9 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
 
 
     frappe.db.commit()
+
+    employee = frappe.get_doc("Employee", slip.employee)
+    send_email_from_template_to_employee(slip, employee, sign_url)
 
     return {
         "document_id": result["data"]["documentId"],
@@ -760,13 +758,6 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
 
 #============================================================================================================
 
-import frappe
-import requests
-import base64
-
-from io import BytesIO
-from pypdf import PdfReader, PdfWriter
-from frappe.utils.file_manager import get_file_path
 
 
 
@@ -779,15 +770,17 @@ def view_signed_payslip(salary_slip):
     if not slip.custom_document_id:
         frappe.throw("Document ID missing in Salary Slip")
 
-    # Leegality Settings
     settings = frappe.get_single("Leegality Settings")
 
-    if not settings.api_key or not settings.post_url:
+    if not settings.api_key or not settings.api_base_url:
         frappe.throw("Leegality Settings not configured")
+
 
     document_id = slip.custom_document_id
     token = settings.api_key
-    url = settings.post_url
+    # url = settings.post_url
+    base_url = settings.api_base_url.rstrip("/")
+    url = f"{base_url}/api/v3.1/document/fetchDocument"
 
     headers = {
         "X-Auth-Token": token
@@ -1039,8 +1032,7 @@ def create_purchase_invoice(salary_slip):
                 "supplier": supplier_id,
                 "company": company_name,
                 "posting_date": posting_date,
-                # "due_date": due_date,
-                # "bill_no": "SAL-20260213-33",
+
                 "bill_no": doc_name,
                 "bill_date": posting_date,
                 "bank_account": bank_acc,
@@ -1143,3 +1135,34 @@ def upload_file_to_target(base_url, headers, file_path):
     return result["message"]["file_url"]
 
 
+
+
+
+
+def send_email_from_template_to_employee(slip, employee, sign_url=None):
+    settings = frappe.get_single("Leegality Settings")
+
+    if not settings.email_template:
+        return  # silently skip if no template configured
+
+    template = frappe.get_doc("Email Template", settings.email_template)
+
+    # Pass dynamic values to template
+    context = {
+        "employee_name": slip.employee_name,
+        "salary_slip": slip.name,
+        "company": slip.company,
+        "sign_url": sign_url
+    }
+
+    subject = frappe.render_template(template.subject or "", context)
+    message = frappe.render_template(template.response or "", context)
+
+    frappe.sendmail(
+        recipients=[employee.personal_email],
+        subject=subject,
+        message=message,
+        reference_doctype="Salary Slip",
+        reference_name=slip.name,
+        now=True
+    )
