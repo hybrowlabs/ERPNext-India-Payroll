@@ -3,19 +3,19 @@
 
 frappe.ui.form.on("LOP Reversal", {
 	lwp_array: [],
-	additional_salary_date(frm) {
-		if (
-			frm.doc.additional_salary_date &&
-			frm.doc.additional_salary_date < frappe.datetime.nowdate()
-		) {
-			frappe.msgprint({
-				title: __("Invalid Date"),
-				message: __("You cannot select a past date for 'Additional Salary Date'."),
-				indicator: "red",
-			});
-			frm.set_value("additional_salary_date", undefined);
-		}
-	},
+	// additional_salary_date(frm) {
+	// 	if (
+	// 		frm.doc.additional_salary_date &&
+	// 		frm.doc.additional_salary_date < frappe.datetime.nowdate()
+	// 	) {
+	// 		frappe.msgprint({
+	// 			title: __("Invalid Date"),
+	// 			message: __("You cannot select a past date for 'Additional Salary Date'."),
+	// 			indicator: "red",
+	// 		});
+	// 		frm.set_value("additional_salary_date", undefined);
+	// 	}
+	// },
 	refresh(frm) {
 		frm.trigger("load_lwp_months");
 	},
