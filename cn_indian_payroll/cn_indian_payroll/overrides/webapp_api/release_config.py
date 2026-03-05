@@ -2,6 +2,11 @@ import frappe
 from frappe.utils import getdate, nowdate
 
 
+
+
+
+
+
 @frappe.whitelist()
 def get_individual_employee_locking_period(employee):
 
@@ -58,14 +63,15 @@ def get_individual_employee_locking_period(employee):
     child_start_date = None
     child_end_date = None
     active = 0
+    doctype_name=None
 
     # Check individual declaration child table
     for row in release_doc.individual_declaration_child:
         if row.employee == employee:
             child_start_date = row.start_date
             child_end_date = row.end_date
-            active = row.active,
-            release_type=row.doctype_name,
+            active = row.active
+            release_type=row.doctype_name
 
             break
 
