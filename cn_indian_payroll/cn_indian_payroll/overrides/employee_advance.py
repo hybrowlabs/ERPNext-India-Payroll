@@ -20,14 +20,17 @@ from cn_leave_shift_managment.custom_apis import get_week_off_days
 
 def before_submit(self, method):
     if self.custom_type == "Salary Advance":
-        if not self.custom_note_remarks or not self.custom_deduction_component:
-            frappe.throw("Please add Note/Remarks and select a Deduction Component in the Note Section before submitting.")
-
         self.custom_total_balance_amount = (self.advance_amount or 0) - (self.custom_total_paid_amount or 0)
 
-    elif self.custom_type == "Reimbursement / Expense Advance":
-        if not self.custom_note_remarks:
-            frappe.throw("Please add Note/Remarks in the Note Section before submitting.")
+        
+    #     if not self.custom_note_remarks or not self.custom_deduction_component:
+    #         frappe.throw("Please add Note/Remarks and select a Deduction Component in the Note Section before submitting.")
+
+        
+
+    # elif self.custom_type == "Reimbursement / Expense Advance":
+    #     if not self.custom_note_remarks:
+    #         frappe.throw("Please add Note/Remarks in the Note Section before submitting.")
 
 
     if self.custom_final_status=="Pending":

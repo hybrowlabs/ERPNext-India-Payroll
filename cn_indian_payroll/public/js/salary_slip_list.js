@@ -102,5 +102,14 @@ frappe.listview_settings['Salary Slip'] = {
                 });
             }
         );
-    }
+
+
+
+                           
+
+                       
+                        }    
+    
 };
+
+

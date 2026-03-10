@@ -108,6 +108,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
                         if approved_doc.declared_amount != subcategory.amount:
                             approved_doc.status = "Pending"
+
                     else:
                         # Create new record
                         approved_doc = frappe.new_doc("Declaration Approved Category")
@@ -123,6 +124,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     approved_doc.date = self.custom_posting_date
                     approved_doc.max_amount = subcategory.max_amount
                     approved_doc.declared_amount = subcategory.amount
+                    approved_doc.attach=subcategory.custom_attach
 
                     approved_doc.save(ignore_permissions=True)
 

@@ -2,6 +2,11 @@ import frappe
 from frappe.utils import getdate, nowdate
 
 
+
+
+
+
+
 @frappe.whitelist()
 def get_individual_employee_locking_period(employee):
 
@@ -58,6 +63,7 @@ def get_individual_employee_locking_period(employee):
     child_start_date = None
     child_end_date = None
     active = 0
+    release_type=None
 
     # Check individual declaration child table
     for row in release_doc.individual_declaration_child:
@@ -65,6 +71,8 @@ def get_individual_employee_locking_period(employee):
             child_start_date = row.start_date
             child_end_date = row.end_date
             active = row.active
+            release_type=row.doctype_name
+
             break
 
     return {
@@ -77,13 +85,13 @@ def get_individual_employee_locking_period(employee):
         "individual_end_date": child_end_date,
         "active": active,
         "status": "Open" if active == 0 else "Closed",
-        "type":"Declaration"
+        "type":release_type
     }
 
 
 
 @frappe.whitelist()
-def set_individual_employee_locking_period(employee, start_date, end_date, status):
+def set_individual_employee_locking_period(employee, start_date, end_date, status,doctype_name):
 
     if not employee:
         frappe.throw("Employee is required")
@@ -148,6 +156,7 @@ def set_individual_employee_locking_period(employee, start_date, end_date, statu
             row.end_date = end_date
             row.active = active
             employee_found = True
+            doctype_name=doctype_name
             break
 
     # Insert if not exists
@@ -156,7 +165,8 @@ def set_individual_employee_locking_period(employee, start_date, end_date, statu
             "employee": employee,
             "start_date": start_date,
             "end_date": end_date,
-            "active": active
+            "active": active,
+            "doctype_name":doctype_name
         })
 
     # Save document
