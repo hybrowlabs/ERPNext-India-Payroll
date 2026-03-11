@@ -216,6 +216,9 @@ function get_accrued_components(frm) {
 
 
 
+
+
+
 function get_outstanding_benefits(frm) {
     if (frm.doc.employee) {
 

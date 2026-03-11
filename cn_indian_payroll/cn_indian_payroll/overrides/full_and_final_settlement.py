@@ -7,6 +7,7 @@ from hrms.hr.doctype.full_and_final_statement.full_and_final_statement import (
 
 from datetime import datetime
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+from frappe.utils import getdate
 
 
 class CustomFullAndFinalStatement(FullandFinalStatement):
@@ -29,10 +30,57 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
                         },
                     )
 
+    # def get_receivable_component(self):
+    #     receivables = []
+
+    #     # Get deduction-type salary components that are included in F&F and not disabled
+    #     salary_components = frappe.get_all(
+    #         "Salary Component",
+    #         filters={
+    #             "type": "Deduction",
+    #             "custom_included_in_f_and_f": 1,
+    #             "disabled": 0,
+    #         },
+    #         fields=["name"],
+    #     )
+
+    #     if salary_components:
+    #         for comp in salary_components:
+    #             if comp.name not in [d.component for d in self.payables]:
+    #                 self.append(
+    #                     "receivables",
+    #                     {
+    #                         "component": comp.name,
+    #                         "amount": 0,
+    #                         "status": "Unsettled",
+    #                         "custom_reference_component": comp.name,
+    #                     },
+    #                 )
+    #                 receivables.append(comp.name)
+
+    #     # Check if "lending" app is installed and add "Loan" if needed
+    #     if "lending" in frappe.get_installed_apps():
+    #         self.append(
+    #             "receivables",
+    #             {
+    #                 "component": "Loan",
+    #                 "amount": 0,
+    #                 "status": "Unsettled",
+    #                 "custom_reference_component": comp.name,
+    #             },
+    #         )
+    #         receivables.append("Loan")
+
+    #     return receivables
+
+    from frappe.utils import getdate
+
     def get_receivable_component(self):
         receivables = []
 
-        # Get deduction-type salary components that are included in F&F and not disabled
+        existing_components = [d.component for d in self.receivables]
+
+        # Deduction Components
         salary_components = frappe.get_all(
             "Salary Component",
             filters={
@@ -43,32 +91,65 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
             fields=["name"],
         )
 
-        if salary_components:
-            for comp in salary_components:
-                if comp.name not in [d.component for d in self.payables]:
-                    self.append(
-                        "receivables",
-                        {
-                            "component": comp.name,
-                            "amount": 0,
-                            "status": "Unsettled",
-                            "custom_reference_component": comp.name,
-                        },
-                    )
-                    receivables.append(comp.name)
+        for comp in salary_components:
+            if comp.name not in existing_components:
+                self.append(
+                    "receivables",
+                    {
+                        "component": comp.name,
+                        "amount": 0,
+                        "status": "Unsettled",
+                        "custom_reference_component": comp.name,
+                    },
+                )
+                receivables.append(comp.name)
 
-        # Check if "lending" app is installed and add "Loan" if needed
+        # Loan Recovery
         if "lending" in frappe.get_installed_apps():
-            self.append(
-                "receivables",
-                {
-                    "component": "Loan",
-                    "amount": 0,
-                    "status": "Unsettled",
-                    "custom_reference_component": comp.name,
+            if "Loan" not in existing_components:
+                self.append(
+                    "receivables",
+                    {
+                        "component": "Loan",
+                        "amount": 0,
+                        "status": "Unsettled",
+                        "custom_reference_component": "Loan",
+                    },
+                )
+                receivables.append("Loan")
+
+        # Joining Bonus Clawback
+        if self.employee and self.relieving_date:
+            relieving_date = getdate(self.relieving_date)
+
+            additional_salaries = frappe.get_all(
+                "Additional Salary",
+                filters={
+                    "employee": self.employee,
+                    "salary_component": "Joining Bonus",
+                    "docstatus": 1,
                 },
+                fields=["name", "amount", "custom_clawback_date"],
             )
-            receivables.append("Loan")
+
+            for add_sal in additional_salaries:
+                clawback_date = getdate(add_sal.custom_clawback_date)
+
+                if clawback_date and relieving_date < clawback_date:
+                    if "Joining Bonus Recovery" not in [
+                        d.component for d in self.receivables
+                    ]:
+                        self.append(
+                            "receivables",
+                            {
+                                "component": "Joining Bonus Recovery",
+                                "amount": add_sal.amount,
+                                "status": "Unsettled",
+                                "custom_reference_component": add_sal.name,
+                            },
+                        )
+
+                        receivables.append("Joining Bonus Recovery")
 
         return receivables
 
