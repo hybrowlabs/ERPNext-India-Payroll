@@ -219,37 +219,68 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         elif comp.type == "Earning" and comp.custom_is_offcycle_component:
             offcycle.append(row)
 
-        elif comp.type == "Earning":
+        elif comp.type == "Earning" and not comp.custom_perquisite:
             earnings.append(row)
 
         elif comp.type == "Deduction":
             deductions.append(row)
 
+        # perquisites = []
+        # if comp.type == "Earning":
+        #     if comp.custom_is_reimbursement:
+        #         reimbursements.append(row)
+        #     elif comp.custom_is_offcycle_component:
+        #         offcycle.append(row)
+        #     elif comp.custom_perquisite:
+        #         perquisites.append(row) 
+        #     else:
+        #         earnings.append(row)
+        # elif comp.type == "Deduction":
+        #     deductions.append(row)
+
     # ------------------------------------------------------------------
     # EXTRA PAYMENT & PERQUISITE TOTAL
     # ------------------------------------------------------------------
+
     extra_payment_grand_total = 0
-    total_perquisite_total = 0
+    # total_perquisite_total = 0
 
     for row in earnings:
         comp = frappe.db.get_value(
             "Salary Component",
             row["name"],
-            ["custom_is_extra_payment", "custom_perquisite"],
+            ["custom_is_extra_payment"],
             as_dict=True
         )
+        if comp and comp.custom_is_extra_payment:
+            extra_payment_grand_total += flt(row["total"])
 
-        if comp:
-            if comp.custom_is_extra_payment:
-                extra_payment_grand_total += flt(row["total"])
-            if comp.custom_perquisite:
-                total_perquisite_total += flt(row["total"])
+    # for row in perquisites:
+    #     total_perquisite_total += flt(row["total"])
+
+        
+    # extra_payment_grand_total = 0
+    # total_perquisite_total = 0
+
+    # for row in earnings:
+    #     comp = frappe.db.get_value(
+    #         "Salary Component",
+    #         row["name"],
+    #         ["custom_is_extra_payment", "custom_perquisite"],
+    #         as_dict=True
+    #     )
+
+    #     if comp:
+    #         if comp.custom_is_extra_payment:
+    #             extra_payment_grand_total += flt(row["total"])
+    #         if comp.custom_perquisite:
+    #             total_perquisite_total += flt(row["total"])
 
     # ------------------------------------------------------------------
     # SUMMARY CALCULATIONS
     # ------------------------------------------------------------------
     gross_earn_values = [sum(x["values"][i] for x in earnings) for i in range(len(months))]
-    total_gross_earning=sum(gross_earn_values)
+    
     earnings.append({
         "name": "Gross Earnings (A)",
         "values": gross_earn_values,
@@ -285,7 +316,40 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     reimbursements_total=sum(reimbursement_values)
 
     # ---------------- OFF CYCLE ---------------- #
-    offcycle_values = [sum(x["values"][i] for x in offcycle) for i in range(len(months))]
+    # offcycle_values = [sum(x["values"][i] for x in offcycle) for i in range(len(months))]
+
+    # ---------------- OFF CYCLE ---------------- #
+
+    offcycle_values = []
+
+    for m in months:
+
+        total = 0
+
+        if m in slip_by_month:
+
+            details = frappe.db.get_all(
+                "Salary Detail",
+                filters={
+                    "parent": slip_by_month[m],
+                    "parentfield": "earnings"
+                },
+                fields=["salary_component", "amount"]
+            )
+
+            for d in details:
+
+                comp = frappe.db.get_value(
+                    "Salary Component",
+                    d.salary_component,
+                    ["custom_is_offcycle_component"],
+                    as_dict=True
+                )
+
+                if comp and comp.custom_is_offcycle_component:
+                    total += flt(d.amount)
+
+        offcycle_values.append(round(total, 0))
 
 
 
@@ -296,6 +360,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     })
 
     total_off_cycle_payment=sum(offcycle_values)
+
 
 
 
@@ -384,6 +449,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
                     perquisite_total += flt(d.amount)
         perquisite_values.append(perquisite_total)
 
+    total_perquisite_total=sum(perquisite_values)
 
 
     offcycle.append({
@@ -402,7 +468,9 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         )
         grand_total_values.append(total_pay)
 
-        total_grand_total_payable.append(gross_earn_values[i]+offcycle_values[i])
+        total_grand_total_payable.append(gross_earn_values[i]+offcycle_values[i]+perquisite_values[i])
+
+    total_gross_earning=sum(total_grand_total_payable)
 
     offcycle.append({
         "name": "Grand Total Pay ((A-B)+C + (D-E)+F)",
@@ -426,9 +494,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "total": sum(total_grand_total_payable)
     })
 
-
-
-    # ------------------------------------------------------------------
+ 
 
     return {
         "status": "success",
@@ -449,12 +515,14 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "reimbursements": reimbursements,
         "offcycle_earnings": offcycle,
         "extra_payment_grand_total": round(extra_payment_grand_total) if extra_payment_grand_total else 0,
-        "total_perquisite_total": round(total_perquisite_total) if total_perquisite_total else 0,
+        "total_perquisite_total":round(total_perquisite_total) if total_perquisite_total else 0,
         "total_gross_earning":round(total_gross_earning) if total_gross_earning else 0,
         "total_off_cycle_payment":round(total_off_cycle_payment) if total_off_cycle_payment else 0,
-        "reimbursements_total":round(reimbursements_total) if reimbursements_total else 0
+        "reimbursements_total":round(reimbursements_total) if reimbursements_total else 0,
 
     }
+
+
 
 
 
@@ -3613,8 +3681,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=Pen Pencil
-
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=PW0220&payroll_period=25-26&company=Pen%20Pencil
 @frappe.whitelist()
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
 

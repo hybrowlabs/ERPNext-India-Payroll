@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-11 07:01:57.930517",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "variable_name",
+  "amount",
+  "part_of_ctc"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "variable_name",
+   "fieldtype": "Data",
+   "label": "Variable Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "part_of_ctc",
+   "fieldtype": "Check",
+   "label": "Part Of CTC"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-11 07:03:00.653098",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Variable Config",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

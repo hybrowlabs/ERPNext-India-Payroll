@@ -563,230 +563,711 @@ frappe.ui.form.on('Salary Structure Assignment', {
 })
 
 
+// async function processSalaryComponents(frm) {
+
+//     var total_ctc=[]
+//     var total_annual_ctc=[]
+//     const response = await frappe.call({
+//         method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
+//         args: {
+//             source_name: frm.doc.salary_structure,
+//             employee: frm.doc.employee,
+//             print_format: 'Salary Slip Standard',
+//             docstatus: frm.doc.docstatus,
+//             posting_date: frm.doc.from_date,
+//             for_preview: 1,
+//         }
+//     });
+
+//     if (response.message) {
+//         let salaryBreakup = `
+//             <table class="table table-bordered small">
+//                 <thead>
+//                     <tr>
+//                         <th style="width: 16%">Salary Component (Earnings)</th>
+//                         <th style="width: 16%" class="text-right">Monthly Amount</th>
+//                         <th style="width: 16%" class="text-right">Annual Amount</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody id="salary_breakup_body"></tbody>
+//             </table>`;
+
+//         document.getElementById("ctc_preview").innerHTML = salaryBreakup;
+//         let tableBody = document.getElementById("salary_breakup_body");
+
+//         let totalMonthlyEarnings = 0;
+//         let totalAnnualEarnings = 0;
+
+
+//         for (const v of response.message.earnings) {
+//             const res = await frappe.call({
+//                 method: "frappe.client.get",
+//                 args: {
+//                     doctype: "Salary Component",
+//                     filters: { name: v.salary_component },
+//                     fields: ["*"]
+//                 }
+//             });
+
+//             if (res.message && res.message.custom_is_part_of_ctc == 1) {
+
+//                 total_ctc.push(Math.round(v.amount))
+//                 total_annual_ctc.push(Math.round(v.amount)*12)
+//                 let newRow = tableBody.insertRow();
+
+//                 let componentCell = newRow.insertCell();
+//                 componentCell.textContent = res.message.name;
+
+//                 let roundedAmount = Math.round(v.amount);
+//                 let formattedAmount = roundedAmount.toLocaleString();
+//                 let amountCell = newRow.insertCell();
+//                 amountCell.className = "text-right";
+//                 amountCell.textContent = formattedAmount;
+
+//                 let annualAmount = Math.round(v.amount)*12;
+//                 let formattedAnnualAmount = annualAmount.toLocaleString();
+//                 let annualAmountCell = newRow.insertCell();
+//                 annualAmountCell.className = "text-right";
+//                 annualAmountCell.textContent = formattedAnnualAmount;
+
+
+//                 totalMonthlyEarnings += roundedAmount;
+//                 totalAnnualEarnings += annualAmount;
+//             }
+//         }
+
+
+//         if (frm.doc.custom_total_reimbursement_amount > 0) {
+//             let reimbursementBreakup = `
+//                 <table class="table table-bordered small">
+//                     <thead>
+//                         <tr>
+//                             <th style="width: 16%">Reimbursements</th>
+//                             <th style="width: 16%" class="text-right">Monthly Amount</th>
+//                             <th style="width: 16%" class="text-right">Annual Amount</th>
+//                         </tr>
+//                     </thead>
+//                     <tbody id="reimbursement_breakup_body"></tbody>
+//                 </table>`;
+
+//             document.getElementById("reimbursement_preview").innerHTML = reimbursementBreakup;
+//             let reimbursementTableBody = document.getElementById("reimbursement_breakup_body");
+
+//             $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
+//                 let newRow = reimbursementTableBody.insertRow();
+
+//                 let componentCell = newRow.insertCell();
+//                 componentCell.textContent = component.reimbursements;
+
+//                 let amountCell = newRow.insertCell();
+//                 amountCell.className = "text-right";
+//                 amountCell.textContent = component.monthly_total_amount.toLocaleString();
+
+//                 total_ctc.push(Math.round(component.monthly_total_amount))
+//                 total_annual_ctc.push(Math.round(component.monthly_total_amount)* 12)
+
+//                 let annualAmountCell = newRow.insertCell();
+//                 annualAmountCell.className = "text-right";
+//                 annualAmountCell.textContent = (component.monthly_total_amount * 12).toLocaleString();
+
+//                 totalMonthlyEarnings += component.monthly_total_amount;
+//                 totalAnnualEarnings += component.monthly_total_amount * 12;
+//             });
+//         }
+
+//         if (frm.doc.custom_variable_pay_components > 0) {
+
+//             let variable_include_Breakup = `
+//                 <table class="table table-bordered small">
+//                     <thead>
+//                         <tr>
+//                             <th style="width: 16%">Variable Pay</th>
+                            
+//                             <th style="width: 16%" class="text-right">Annual Amount</th>
+//                         </tr>
+//                     </thead>
+//                     <tbody id="variable_include_breakup_body"></tbody>
+//                 </table>`;
+
+//             document.getElementById("variable_pay_include_ctc").innerHTML = variable_include_Breakup;
+//             let variable_pay_includeTableBody = document.getElementById("variable_include_breakup_body");
+
+//             $.each(frm.doc.custom_variable_pay_components, function(i, component) {
+
+//                 if(component.part_of_ctc==1)
+//                 {
+
+                
+//                 let newRow = variable_pay_includeTableBody.insertRow();
+
+//                 let componentCell = newRow.insertCell();
+//                 componentCell.textContent = component.variable_name;
+
+//                 let amountCell = newRow.insertCell();
+//                 amountCell.className = "text-right";
+//                 amountCell.textContent = component.amount.toLocaleString();
+
+//                 // total_ctc.push(Math.round(component.monthly_total_amount))
+//                 // total_annual_ctc.push(Math.round(component.monthly_total_amount)* 12)
+
+//                 // let annualAmountCell = newRow.insertCell();
+//                 // annualAmountCell.className = "text-right";
+//                 // annualAmountCell.textContent = (component.monthly_total_amount * 12).toLocaleString();
+
+//                 // totalMonthlyEarnings += component.monthly_total_amount;
+//                 // totalAnnualEarnings += component.monthly_total_amount * 12;
+
+//                 }
+//             });
+//         }
+
+
+//         let deductionBreakup = `
+//             <table class="table table-bordered small">
+//                 <thead>
+//                     <tr>
+//                         <th style="width: 16%">Salary Component (Deductions)</th>
+//                         <th style="width: 16%" class="text-right">Monthly Amount</th>
+//                         <th style="width: 16%" class="text-right">Annual Amount</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody id="deduction_breakup_body"></tbody>
+
+//             </table>`;
+
+//         document.getElementById("deduction_preview").innerHTML = deductionBreakup;
+//         let deductionTableBody = document.getElementById("deduction_breakup_body");
+
+//         let totalMonthlyDeductions = 0;
+//         let totalAnnualDeductions = 0;
+
+//         for (const v of response.message.deductions) {
+//             const res = await frappe.call({
+//                 method: "frappe.client.get",
+//                 args: {
+//                     doctype: "Salary Component",
+//                     filters: { name: v.salary_component },
+//                     fields: ["*"]
+//                 }
+//             });
+
+//             if (res.message && res.message.custom_is_part_of_ctc == 1) {
+
+//                 total_ctc.push(Math.round(v.amount))
+//                 total_annual_ctc.push(Math.round(v.amount)*12)
+//                 let newRow = deductionTableBody.insertRow();
+
+//                 let componentCell = newRow.insertCell();
+//                 componentCell.textContent = res.message.name;
+
+//                 let roundedAmount = Math.round(v.amount);
+//                 let formattedAmount = roundedAmount.toLocaleString();
+//                 let amountCell = newRow.insertCell();
+//                 amountCell.className = "text-right";
+//                 amountCell.textContent = formattedAmount;
+
+//                 let annualAmount = Math.round(v.amount) * 12;
+//                 let formattedAnnualAmount = annualAmount.toLocaleString();
+//                 let annualAmountCell = newRow.insertCell();
+//                 annualAmountCell.className = "text-right";
+//                 annualAmountCell.textContent = formattedAnnualAmount;
+
+
+//                 totalMonthlyDeductions += roundedAmount;
+//                 totalAnnualDeductions += annualAmount;
+//             }
+//         }
+
+//         var sum = total_ctc.reduce(function(accumulator, currentValue) {
+//             return accumulator + currentValue;
+//         }, 0);
+
+//         console.log(sum);
+//         var sum_annual = total_annual_ctc.reduce(function(accumulator, currentValue) {
+//             return accumulator + currentValue;
+//         }, 0);
+
+
+
+
+
+
+
+
+
+
+//         if (frm.doc.base) {
+
+//             let total_ctcTable = `
+//                 <table class="table table-bordered small">
+//                     <thead>
+//                         <tr>
+//                             <th style="width: 16%">Total</th>
+//                             <th style="width: 16%" class="text-right">Monthly</th>
+//                             <th style="width: 16%" class="text-right">Annual</th>
+//                         </tr>
+//                     </thead>
+//                     <tbody id="ctc_breakup_body"></tbody>
+//                 </table>`;
+
+
+//             document.getElementById("total_ctc").innerHTML = total_ctcTable;
+//             let ctc_body = document.getElementById("ctc_breakup_body");
+
+
+//             let newRow = ctc_body.insertRow();
+
+
+//             let componentCell = newRow.insertCell();
+//             componentCell.textContent = "Total CTC";
+
+//             let monthlyAmount = Math.round(sum);
+//             let annualAmount = Math.round(sum_annual);
+
+
+
+//             let formattedMonthlyAmount = monthlyAmount.toLocaleString();
+//             let amountCell = newRow.insertCell();
+//             amountCell.className = "text-right";
+//             amountCell.textContent = formattedMonthlyAmount;
+
+//             let formattedAnnualAmount = annualAmount.toLocaleString();
+//             let annualAmountCell = newRow.insertCell();
+//             annualAmountCell.className = "text-right";
+//             annualAmountCell.textContent = formattedAnnualAmount;
+//         }
+
+
+//         if (frm.doc.custom_variable_pay_components) {
+//             let variable_exclude_Breakup = `
+//                 <table class="table table-bordered small">
+//                     <thead>
+//                         <tr>
+//                             <th style="width: 16%">Component</th>
+                           
+//                             <th style="width: 16%" class="text-right">Annual Amount</th>
+//                         </tr>
+//                     </thead>
+//                     <tbody id="variable_exclude_breakup_body"></tbody>
+//                 </table>`;
+
+//             document.getElementById("variable_pay_exclude_ctc").innerHTML = variable_exclude_Breakup;
+//             let variable_excludeTableBody = document.getElementById("variable_exclude_breakup_body");
+
+//             $.each(frm.doc.custom_variable_pay_components, function(i, component) {
+
+//                 if(component.part_of_ctc==0)
+//                 {
+
+//                     let newRow = variable_excludeTableBody.insertRow();
+
+//                     let componentCell = newRow.insertCell();
+//                     componentCell.textContent = component.variable_name;
+
+//                     let amountCell = newRow.insertCell();
+//                     amountCell.className = "text-right";
+//                     amountCell.textContent = component.amount.toLocaleString();
+
+
+//                 }
+
+
+
+                
+//             });
+//         }
+
+
+
+
+
+
+
+
+
+//     }
+// }
+
 async function processSalaryComponents(frm) {
 
-    var total_ctc=[]
-    var total_annual_ctc=[]
+    let total_ctc = [];
+    let total_annual_ctc = [];
+
     const response = await frappe.call({
         method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
         args: {
             source_name: frm.doc.salary_structure,
             employee: frm.doc.employee,
-            print_format: 'Salary Slip Standard',
+            print_format: "Salary Slip Standard",
             docstatus: frm.doc.docstatus,
             posting_date: frm.doc.from_date,
             for_preview: 1,
         }
     });
 
-    if (response.message) {
-        let salaryBreakup = `
-            <table class="table table-bordered small">
-                <thead>
-                    <tr>
-                        <th style="width: 16%">Salary Component (Earnings)</th>
-                        <th style="width: 16%" class="text-right">Monthly Amount</th>
-                        <th style="width: 16%" class="text-right">Annual Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="salary_breakup_body"></tbody>
-            </table>`;
+    if (!response.message) return;
 
-        document.getElementById("ctc_preview").innerHTML = salaryBreakup;
-        let tableBody = document.getElementById("salary_breakup_body");
+    let table = `
+        <table class="table table-bordered small">
+            <thead>
+                <tr>
+                    <th>Salary Component (Earnings)</th>
+                    <th class="text-right">Monthly Amount</th>
+                    <th class="text-right">Annual Amount</th>
+                </tr>
+            </thead>
+            <tbody id="salary_breakup_body"></tbody>
+        </table>`;
 
-        let totalMonthlyEarnings = 0;
-        let totalAnnualEarnings = 0;
+    document.getElementById("ctc_preview").innerHTML = table;
+    let tableBody = document.getElementById("salary_breakup_body");
 
+    let totalMonthlyEarnings = 0;
+    let totalAnnualEarnings = 0;
 
-        for (const v of response.message.earnings) {
-            const res = await frappe.call({
-                method: "frappe.client.get",
-                args: {
-                    doctype: "Salary Component",
-                    filters: { name: v.salary_component },
-                    fields: ["*"]
-                }
-            });
+    /* =========================
+       Earnings
+    ========================== */
 
-            if (res.message && res.message.custom_is_part_of_ctc == 1) {
+    for (const v of response.message.earnings) {
 
-                total_ctc.push(Math.round(v.amount))
-                total_annual_ctc.push(Math.round(v.amount)*12)
-                let newRow = tableBody.insertRow();
+        const component = await frappe.db.get_doc("Salary Component", v.salary_component);
 
-                let componentCell = newRow.insertCell();
-                componentCell.textContent = res.message.name;
+        if (component.custom_is_part_of_ctc == 1) {
 
-                let roundedAmount = Math.round(v.amount);
-                let formattedAmount = roundedAmount.toLocaleString();
-                let amountCell = newRow.insertCell();
-                amountCell.className = "text-right";
-                amountCell.textContent = formattedAmount;
+            let monthly = Math.round(v.amount);
+            let annual = monthly * 12;
 
-                let annualAmount = Math.round(v.amount)*12;
-                let formattedAnnualAmount = annualAmount.toLocaleString();
-                let annualAmountCell = newRow.insertCell();
-                annualAmountCell.className = "text-right";
-                annualAmountCell.textContent = formattedAnnualAmount;
+            total_ctc.push(monthly);
+            total_annual_ctc.push(annual);
 
+            let row = tableBody.insertRow();
 
-                totalMonthlyEarnings += roundedAmount;
-                totalAnnualEarnings += annualAmount;
-            }
+            row.insertCell().textContent = component.name;
+
+            let monthlyCell = row.insertCell();
+            monthlyCell.className = "text-right";
+            monthlyCell.textContent = monthly.toLocaleString();
+
+            let annualCell = row.insertCell();
+            annualCell.className = "text-right";
+            annualCell.textContent = annual.toLocaleString();
+
+            totalMonthlyEarnings += monthly;
+            totalAnnualEarnings += annual;
         }
-
-
-        if (frm.doc.custom_total_reimbursement_amount > 0) {
-            let reimbursementBreakup = `
-                <table class="table table-bordered small">
-                    <thead>
-                        <tr>
-                            <th style="width: 16%">Reimbursements</th>
-                            <th style="width: 16%" class="text-right">Monthly Amount</th>
-                            <th style="width: 16%" class="text-right">Annual Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reimbursement_breakup_body"></tbody>
-                </table>`;
-
-            document.getElementById("reimbursement_preview").innerHTML = reimbursementBreakup;
-            let reimbursementTableBody = document.getElementById("reimbursement_breakup_body");
-
-            $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
-                let newRow = reimbursementTableBody.insertRow();
-
-                let componentCell = newRow.insertCell();
-                componentCell.textContent = component.reimbursements;
-
-                let amountCell = newRow.insertCell();
-                amountCell.className = "text-right";
-                amountCell.textContent = component.monthly_total_amount.toLocaleString();
-
-                total_ctc.push(Math.round(component.monthly_total_amount))
-                total_annual_ctc.push(Math.round(component.monthly_total_amount)* 12)
-
-                let annualAmountCell = newRow.insertCell();
-                annualAmountCell.className = "text-right";
-                annualAmountCell.textContent = (component.monthly_total_amount * 12).toLocaleString();
-
-                totalMonthlyEarnings += component.monthly_total_amount;
-                totalAnnualEarnings += component.monthly_total_amount * 12;
-            });
-        }
-
-
-        let deductionBreakup = `
-            <table class="table table-bordered small">
-                <thead>
-                    <tr>
-                        <th style="width: 16%">Salary Component (Deductions)</th>
-                        <th style="width: 16%" class="text-right">Monthly Amount</th>
-                        <th style="width: 16%" class="text-right">Annual Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="deduction_breakup_body"></tbody>
-
-            </table>`;
-
-        document.getElementById("deduction_preview").innerHTML = deductionBreakup;
-        let deductionTableBody = document.getElementById("deduction_breakup_body");
-
-        let totalMonthlyDeductions = 0;
-        let totalAnnualDeductions = 0;
-
-        for (const v of response.message.deductions) {
-            const res = await frappe.call({
-                method: "frappe.client.get",
-                args: {
-                    doctype: "Salary Component",
-                    filters: { name: v.salary_component },
-                    fields: ["*"]
-                }
-            });
-
-            if (res.message && res.message.custom_is_part_of_ctc == 1) {
-
-                total_ctc.push(Math.round(v.amount))
-                total_annual_ctc.push(Math.round(v.amount)*12)
-                let newRow = deductionTableBody.insertRow();
-
-                let componentCell = newRow.insertCell();
-                componentCell.textContent = res.message.name;
-
-                let roundedAmount = Math.round(v.amount);
-                let formattedAmount = roundedAmount.toLocaleString();
-                let amountCell = newRow.insertCell();
-                amountCell.className = "text-right";
-                amountCell.textContent = formattedAmount;
-
-                let annualAmount = Math.round(v.amount) * 12;
-                let formattedAnnualAmount = annualAmount.toLocaleString();
-                let annualAmountCell = newRow.insertCell();
-                annualAmountCell.className = "text-right";
-                annualAmountCell.textContent = formattedAnnualAmount;
-
-
-                totalMonthlyDeductions += roundedAmount;
-                totalAnnualDeductions += annualAmount;
-            }
-        }
-
-        var sum = total_ctc.reduce(function(accumulator, currentValue) {
-            return accumulator + currentValue;
-        }, 0);
-
-        console.log(sum);
-        var sum_annual = total_annual_ctc.reduce(function(accumulator, currentValue) {
-            return accumulator + currentValue;
-        }, 0);
-
-
-        if (frm.doc.base) {
-
-            let total_ctcTable = `
-                <table class="table table-bordered small">
-                    <thead>
-                        <tr>
-                            <th style="width: 16%">Total</th>
-                            <th style="width: 16%" class="text-right">Monthly</th>
-                            <th style="width: 16%" class="text-right">Annual</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ctc_breakup_body"></tbody>
-                </table>`;
-
-
-            document.getElementById("total_ctc").innerHTML = total_ctcTable;
-            let ctc_body = document.getElementById("ctc_breakup_body");
-
-
-            let newRow = ctc_body.insertRow();
-
-
-            let componentCell = newRow.insertCell();
-            componentCell.textContent = "Total CTC";
-
-            let monthlyAmount = Math.round(sum);
-            let annualAmount = Math.round(sum_annual);
-
-
-
-            let formattedMonthlyAmount = monthlyAmount.toLocaleString();
-            let amountCell = newRow.insertCell();
-            amountCell.className = "text-right";
-            amountCell.textContent = formattedMonthlyAmount;
-
-            let formattedAnnualAmount = annualAmount.toLocaleString();
-            let annualAmountCell = newRow.insertCell();
-            annualAmountCell.className = "text-right";
-            annualAmountCell.textContent = formattedAnnualAmount;
-        }
-
-
-
-
-
-
     }
+
+    /* =========================
+       Reimbursements
+    ========================== */
+
+    if (frm.doc.custom_employee_reimbursements?.length) {
+
+        let reimbursementTable = `
+            <table class="table table-bordered small">
+                <thead>
+                    <tr>
+                        <th>Reimbursements</th>
+                        <th class="text-right">Monthly Amount</th>
+                        <th class="text-right">Annual Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="reimbursement_breakup_body"></tbody>
+            </table>`;
+
+        document.getElementById("reimbursement_preview").innerHTML = reimbursementTable;
+
+        let body = document.getElementById("reimbursement_breakup_body");
+
+        frm.doc.custom_employee_reimbursements.forEach(component => {
+
+            let monthly = Math.round(component.monthly_total_amount);
+            let annual = monthly * 12;
+
+            total_ctc.push(monthly);
+            total_annual_ctc.push(annual);
+
+            let row = body.insertRow();
+
+            row.insertCell().textContent = component.reimbursements;
+
+            let m = row.insertCell();
+            m.className = "text-right";
+            m.textContent = monthly.toLocaleString();
+
+            let a = row.insertCell();
+            a.className = "text-right";
+            a.textContent = annual.toLocaleString();
+        });
+    }
+
+
+
+
+    /* =========================
+       Deductions
+    ========================== */
+
+    let deductionTable = `
+        <table class="table table-bordered small">
+            <thead>
+                <tr>
+                    <th>Salary Component (Deductions)</th>
+                    <th class="text-right">Monthly Amount</th>
+                    <th class="text-right">Annual Amount</th>
+                </tr>
+            </thead>
+            <tbody id="deduction_breakup_body"></tbody>
+        </table>`;
+
+    document.getElementById("deduction_preview").innerHTML = deductionTable;
+
+    let deductionBody = document.getElementById("deduction_breakup_body");
+
+    for (const v of response.message.deductions) {
+
+        const component = await frappe.db.get_doc("Salary Component", v.salary_component);
+
+        if (component.custom_is_part_of_ctc == 1) {
+
+            let monthly = Math.round(v.amount);
+            let annual = monthly * 12;
+
+            total_ctc.push(monthly);
+            total_annual_ctc.push(annual);
+
+            let row = deductionBody.insertRow();
+
+            row.insertCell().textContent = component.name;
+
+            let m = row.insertCell();
+            m.className = "text-right";
+            m.textContent = monthly.toLocaleString();
+
+            let a = row.insertCell();
+            a.className = "text-right";
+            a.textContent = annual.toLocaleString();
+        }
+    }
+
+
+//     /* =========================
+//    Variable Pay (Include in CTC)
+// ========================= */
+
+// if (frm.doc.custom_variable_pay_components?.length) {
+
+//     let includeTable = `
+//         <table class="table table-bordered small">
+//             <thead>
+//                 <tr>
+//                     <th>Variable Pay (Included in CTC)</th>
+//                     <th class="text-right">Annual Amount</th>
+//                 </tr>
+//             </thead>
+//             <tbody id="variable_include_body"></tbody>
+//         </table>`;
+
+//     document.getElementById("variable_pay_include_ctc").innerHTML = includeTable;
+
+//     let includeBody = document.getElementById("variable_include_body");
+
+//     frm.doc.custom_variable_pay_components.forEach(component => {
+
+//         if (component.part_of_ctc == 1) {
+
+//             let amount = Math.round(component.amount);
+
+//             total_annual_ctc.push(amount);
+
+//             let row = includeBody.insertRow();
+
+//             row.insertCell().textContent = component.variable_name;
+
+//             let amountCell = row.insertCell();
+//             amountCell.className = "text-right";
+//             amountCell.textContent = amount.toLocaleString();
+//         }
+
+//     });
+// }
+
+/* =========================
+   Variable Pay (Include in CTC)
+========================= */
+
+if (frm.doc.custom_variable_pay_components?.length) {
+
+    // Check if any component should be included in CTC
+    const hasIncludedComponent = frm.doc.custom_variable_pay_components.some(
+        component => component.part_of_ctc == 1
+    );
+
+    if (hasIncludedComponent) {
+
+        let includeTable = `
+            <table class="table table-bordered small">
+                <thead>
+                    <tr>
+                        <th>Variable Pay (Included in CTC)</th>
+                        <th class="text-right">Annual Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="variable_include_body"></tbody>
+            </table>`;
+
+        document.getElementById("variable_pay_include_ctc").innerHTML = includeTable;
+
+        let includeBody = document.getElementById("variable_include_body");
+
+        frm.doc.custom_variable_pay_components.forEach(component => {
+
+            if (component.part_of_ctc == 1) {
+
+                let amount = Math.round(component.amount);
+
+                total_annual_ctc.push(amount);
+
+                let row = includeBody.insertRow();
+
+                row.insertCell().textContent = component.variable_name;
+
+                let amountCell = row.insertCell();
+                amountCell.className = "text-right";
+                amountCell.textContent = amount.toLocaleString();
+            }
+
+        });
+    }
+}
+
+
+
+
+    /* =========================
+       Total CTC
+    ========================== */
+
+    let sum = total_ctc.reduce((a, b) => a + b, 0);
+    let sumAnnual = total_annual_ctc.reduce((a, b) => a + b, 0);
+
+    if (frm.doc.base) {
+
+        let totalTable = `
+            <table class="table table-bordered small">
+                <thead>
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-right">Monthly</th>
+                        <th class="text-right">Annual</th>
+                    </tr>
+                </thead>
+                <tbody id="ctc_breakup_body"></tbody>
+            </table>`;
+
+        document.getElementById("total_ctc").innerHTML = totalTable;
+
+        let body = document.getElementById("ctc_breakup_body");
+
+        let row = body.insertRow();
+
+        row.insertCell().textContent = "Total CTC";
+
+        let m = row.insertCell();
+        m.className = "text-right";
+        m.textContent = Math.round(sum).toLocaleString();
+
+        let a = row.insertCell();
+        a.className = "text-right";
+        a.textContent = Math.round(sumAnnual).toLocaleString();
+    }
+
+
+/* =========================
+   Variable Pay (Exclude from CTC)
+========================= */
+
+// if (frm.doc.custom_variable_pay_components?.length) {
+
+//     let excludeTable = `
+//         <table class="table table-bordered small">
+//             <thead>
+//                 <tr>
+//                     <th>Variable Pay (Excluded from CTC)</th>
+//                     <th class="text-right">Annual Amount</th>
+//                 </tr>
+//             </thead>
+//             <tbody id="variable_exclude_body"></tbody>
+//         </table>`;
+
+//     document.getElementById("variable_pay_exclude_ctc").innerHTML = excludeTable;
+
+//     let excludeBody = document.getElementById("variable_exclude_body");
+
+//     frm.doc.custom_variable_pay_components.forEach(component => {
+
+//         if (component.part_of_ctc == 0) {
+
+//             let amount = Math.round(component.amount);
+
+//             let row = excludeBody.insertRow();
+
+//             row.insertCell().textContent = component.variable_name;
+
+//             let amountCell = row.insertCell();
+//             amountCell.className = "text-right";
+//             amountCell.textContent = amount.toLocaleString();
+//         }
+
+//     });
+// }
+
+/* =========================
+   Variable Pay (Exclude from CTC)
+========================= */
+
+if (frm.doc.custom_variable_pay_components?.length) {
+
+    // Check if any component is excluded from CTC
+    const hasExcludedComponent = frm.doc.custom_variable_pay_components.some(
+        component => component.part_of_ctc == 0
+    );
+
+    if (hasExcludedComponent) {
+
+        let excludeTable = `
+            <table class="table table-bordered small">
+                <thead>
+                    <tr>
+                        <th>Variable Pay (Excluded from CTC)</th>
+                        <th class="text-right">Annual Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="variable_exclude_body"></tbody>
+            </table>`;
+
+        document.getElementById("variable_pay_exclude_ctc").innerHTML = excludeTable;
+
+        let excludeBody = document.getElementById("variable_exclude_body");
+
+        frm.doc.custom_variable_pay_components.forEach(component => {
+
+            if (component.part_of_ctc == 0) {
+
+                let amount = Math.round(component.amount);
+
+                let row = excludeBody.insertRow();
+
+                row.insertCell().textContent = component.variable_name;
+
+                let amountCell = row.insertCell();
+                amountCell.className = "text-right";
+                amountCell.textContent = amount.toLocaleString();
+            }
+
+        });
+    }
+}
+
 }
