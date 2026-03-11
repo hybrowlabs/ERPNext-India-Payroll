@@ -5,10 +5,12 @@ from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignmen
 
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from frappe.utils import getdate
+import datetime
 from frappe.utils import get_last_day, getdate
-from datetime import timedelta
+import frappe
+from frappe.utils import getdate, add_months, flt
 from dateutil.relativedelta import relativedelta
-from frappe.utils import get_last_day, getdate
+from frappe.utils import flt
 
 
 class CustomSalaryStructureAssignment(SalaryStructureAssignment):
@@ -16,8 +18,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.set_cpl()
         self.reimbursement_amount()
         self.update_employee_promotion_from_date()
-
-        # self.insert_tax_declaration()
 
     def on_submit(self):
         self.insert_tax_declaration()
@@ -87,192 +87,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             get_promotion_doc.custom_status = "Payroll Configured"
             get_promotion_doc.save()
 
-            # get_promotion_doc.reload()
-
-            # frappe.db.commit()
-
-    def insert_tax_declaration(self):
-        if self.employee:
-            array = []
-            amount = []
-            max_amount_category = []
-            get_payroll_period = frappe.get_doc(
-                "Payroll Period", self.custom_payroll_period
-            )
-
-            from_date = getdate(self.from_date)
-            payroll_start_date = getdate(get_payroll_period.start_date)
-            payroll_end_date = getdate(get_payroll_period.end_date)
-            declaration_date = max(from_date, payroll_start_date)
-            start_date = declaration_date
-            end_date = payroll_end_date
-
-            if isinstance(start_date, str):
-                start = datetime.strptime(start_date, "%Y-%m-%d").date()
-            else:
-                start = start_date
-
-            if isinstance(end_date, str):
-                end = datetime.strptime(end_date, "%Y-%m-%d").date()
-            else:
-                end = end_date
-
-            num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-
-            if self.custom_tax_regime == "Old Regime":
-                # find Uniform
-                if (
-                    self.custom_is_uniform_allowance
-                    and self.custom_uniform_allowance_value
-                ):
-                    uniform_component = frappe.get_list(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"custom_component_type": "Uniform"},
-                        fields=["*"],
-                    )
-                    if len(uniform_component) > 0:
-                        for i in uniform_component:
-                            array.append(i.name)
-                            amount.append(0)
-
-                            max_amount_category.append(i.max_amount)
-
-                # find epf
-
-                if self.custom_is_epf:
-                    new_salary_slip = make_salary_slip(
-                        source_name=self.salary_structure,
-                        employee=self.employee,
-                        print_format="Salary Slip Standard for CTC",
-                        posting_date=self.from_date,
-                        for_preview=1,
-                    )
-                    for new_earning in new_salary_slip.deductions:
-                        epf_component = frappe.get_doc(
-                            "Salary Component", new_earning.salary_component
-                        )
-                        if epf_component.component_type == "EPF":
-                            epf_amount_year = new_earning.amount * num_months
-
-                            epf_component_subcategory = frappe.get_list(
-                                "Employee Tax Exemption Sub Category",
-                                filters={"custom_component_type": "EPF"},
-                                fields=["*"],
-                            )
-                            if len(epf_component_subcategory) > 0:
-                                for i in epf_component_subcategory:
-                                    array.append(i.name)
-
-                                    max_amount_category.append(i.max_amount)
-
-                                    if epf_amount_year > i.max_amount:
-                                        amount.append(i.max_amount)
-                                    else:
-                                        amount.append(epf_amount_year)
-
-                # find nps
-                if self.custom_is_nps:
-                    new_salary_slip = make_salary_slip(
-                        source_name=self.salary_structure,
-                        employee=self.employee,
-                        print_format="Salary Slip Standard for CTC",
-                        posting_date=self.from_date,
-                        for_preview=1,
-                    )
-                    for new_earning in new_salary_slip.earnings:
-                        nps_component = frappe.get_doc(
-                            "Salary Component", new_earning.salary_component
-                        )
-                        if nps_component.component_type == "NPS":
-                            nps_amount_year = new_earning.amount * num_months
-                            nps_component = frappe.get_list(
-                                "Employee Tax Exemption Sub Category",
-                                filters={"custom_component_type": "NPS"},
-                                fields=["*"],
-                            )
-
-                            if len(nps_component) > 0:
-                                for i in nps_component:
-                                    array.append(i.name)
-                                    max_amount_category.append(nps_amount_year)
-
-                                    amount.append(nps_amount_year)
-
-                if self.custom_state:
-                    pt_component = frappe.get_list(
-                        "Employee Tax Exemption Sub Category",
-                        filters={"custom_component_type": "Professional Tax"},
-                        fields=["*"],
-                    )
-
-                    if len(pt_component) > 0:
-                        for i in pt_component:
-                            array.append(i.name)
-                            max_amount_category.append(i.max_amount)
-
-                            amount.append(i.max_amount)
-
-            if self.custom_tax_regime == "New Regime":
-                if self.custom_is_nps:
-                    new_salary_slip = make_salary_slip(
-                        source_name=self.salary_structure,
-                        employee=self.employee,
-                        print_format="Salary Slip Standard for CTC",
-                        posting_date=self.from_date,
-                        for_preview=1,
-                    )
-                    for new_earning in new_salary_slip.earnings:
-                        nps_component = frappe.get_doc(
-                            "Salary Component", new_earning.salary_component
-                        )
-                        if nps_component.component_type == "NPS":
-                            nps_amount_year = new_earning.amount * num_months
-                            nps_component = frappe.get_list(
-                                "Employee Tax Exemption Sub Category",
-                                filters={"custom_component_type": "NPS"},
-                                fields=["*"],
-                            )
-
-                            if len(nps_component) > 0:
-                                for i in nps_component:
-                                    array.append(i.name)
-                                    max_amount_category.append(nps_amount_year)
-
-                                    amount.append(nps_amount_year)
-
-            get_all_declaration = frappe.get_list(
-                "Employee Tax Exemption Declaration",
-                filters={
-                    "employee": self.employee,
-                    "payroll_period": self.custom_payroll_period,
-                    "docstatus": ["in", [0, 1]],
-                },
-                fields=["*"],
-            )
-
-            if len(get_all_declaration) == 0:
-                insert_declaration = frappe.get_doc(
-                    {"doctype": "Employee Tax Exemption Declaration"}
-                )
-                insert_declaration.employee = (self.employee,)
-                insert_declaration.company = (self.company,)
-                insert_declaration.payroll_period = (self.custom_payroll_period,)
-                insert_declaration.currency = (self.currency,)
-                insert_declaration.custom_income_tax = (self.income_tax_slab,)
-                insert_declaration.custom_salary_structure_assignment = (self.name,)
-                # insert_declaration.custom_posting_date = frappe.utils.nowdate(),
-                insert_declaration.custom_posting_date = declaration_date
-
-                for x in range(len(array)):
-                    doc2_child1 = insert_declaration.append("declarations", {})
-                    doc2_child1.exemption_sub_category = array[x]
-                    doc2_child1.amount = amount[x]
-                    doc2_child1.max_amount = max_amount_category[x]
-
-                insert_declaration.insert()
-                insert_declaration.submit()
-                frappe.db.commit()
-
     def set_cpl(self):
         components = [
             "Vehicle Maintenance Reimbursement",
@@ -300,65 +114,377 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
         self.custom_statistical_amount = total_amount
 
+    def insert_tax_declaration(self):
+        if not self.employee:
+            return
+
+        sub_categories = []
+        payroll_period = frappe.get_doc("Payroll Period", self.custom_payroll_period)
+        from_date = getdate(self.from_date)
+        payroll_start_date = getdate(payroll_period.start_date)
+        payroll_end_date = getdate(payroll_period.end_date)
+
+        declaration_start_date = max(from_date, payroll_start_date)
+        start = (
+            declaration_start_date
+            if not isinstance(declaration_start_date, str)
+            else datetime.strptime(declaration_start_date, "%Y-%m-%d").date()
+        )
+        end = (
+            payroll_end_date
+            if not isinstance(payroll_end_date, str)
+            else datetime.strptime(payroll_end_date, "%Y-%m-%d").date()
+        )
+
+        num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+
+        salary_slip = make_salary_slip(
+            source_name=self.salary_structure,
+            employee=self.employee,
+            print_format="Salary Slip Standard",
+            posting_date=self.from_date,
+            for_preview=1,
+        )
+
+        def add_exemption(component_type, monthly_amount):
+            total_amount = monthly_amount * num_months
+            exemption_components = frappe.get_all(
+                "Employee Tax Exemption Sub Category",
+                filters={"custom_component_type": component_type},
+                fields=["name", "max_amount"],
+            )
+            for comp in exemption_components:
+                allowed_amount = min(total_amount, comp.max_amount or total_amount)
+                sub_categories.append(
+                    {
+                        "sub_category": comp.name,
+                        "max_amount": comp.max_amount,
+                        "amount": allowed_amount,
+                    }
+                )
+
+        if (
+            self.custom_tax_regime == "New Regime"
+            or self.custom_tax_regime == "Old Regime"
+        ):
+            for earning in salary_slip.earnings:
+                comp_doc = frappe.get_doc("Salary Component", earning.salary_component)
+                if comp_doc.component_type == "NPS":
+                    add_exemption("NPS", earning.amount)
+
+            if self.custom_tax_regime == "Old Regime":
+                for deduction in salary_slip.deductions:
+                    comp_doc = frappe.get_doc(
+                        "Salary Component", deduction.salary_component
+                    )
+                    if comp_doc.component_type in ["EPF", "Professional Tax"]:
+                        add_exemption(comp_doc.component_type, deduction.amount)
+
+        existing_declaration = frappe.get_list(
+            "Employee Tax Exemption Declaration",
+            filters={
+                "employee": self.employee,
+                "payroll_period": self.custom_payroll_period,
+                "docstatus": ["in", [0, 1]],
+            },
+            fields=["name"],
+        )
+
+        if existing_declaration:
+            return
+
+        new_declaration = frappe.get_doc(
+            {
+                "doctype": "Employee Tax Exemption Declaration",
+                "employee": self.employee,
+                "company": self.company,
+                "payroll_period": self.custom_payroll_period,
+                "currency": self.currency,
+                "custom_income_tax": self.income_tax_slab,
+                "custom_salary_structure_assignment": self.name,
+                "custom_posting_date": self.from_date,
+            }
+        )
+
+        for category in sub_categories:
+            new_declaration.append(
+                "declarations",
+                {
+                    "exemption_sub_category": category["sub_category"],
+                    "max_amount": category["max_amount"],
+                    "amount": category["amount"],
+                },
+            )
+
+        new_declaration.insert()
+        new_declaration.submit()
+        frappe.db.commit()
+
     def set_variable_pay_amount(self):
-        # Now calculate Variable Pay based on rating
         for row in self.custom_other_extra_payments:
             if row.additional_earning == "Variable Pay" and getattr(
                 row, "rating", None
             ):
                 payroll_setting = frappe.get_doc("Payroll Settings")
+
                 if getattr(payroll_setting, "custom_varible_pay_config", None):
                     for config in payroll_setting.custom_varible_pay_config:
-                        # Match the rating from config and row
                         if getattr(config, "rating", None) == getattr(
                             row, "rating", None
                         ):
-                            # Calculate variable pay
+                            amount = flt(row.amount)
+                            percentage = flt(config.percentage)
+
                             self.custom_variable_pay_amount = (
-                                row.amount * config.percentage
+                                amount * percentage
                             ) / 100
-                            break  # Stop after first match for this row
+
+                            break
+
+    # def insert_joining_bonus(self):
+    #     company = frappe.get_doc("Company", self.company)
+
+    #     if not company.custom_joining_bonus:
+    #         return
+
+    #     joining_bonus_component = company.custom_joining_bonus
+
+    #     # Check Joining Bonus in child table
+    #     joining_bonus_row = None
+    #     for row in self.custom_other_extra_payments or []:
+    #         if row.additional_earning == "Joining Bonus":
+    #             joining_bonus_row = row
+    #             break
+
+    #     # Check existing Additional Salary
+    #     additional_salary = frappe.get_list(
+    #         "Additional Salary",
+    #         filters={
+    #             "employee": self.employee,
+    #             "salary_component": joining_bonus_component,
+    #             "docstatus": ["!=", 2],
+    #         },
+    #         fields=["name", "amount"],
+    #         limit=1,
+    #     )
+
+    #     # --------------------------------------------------
+    #     # Case 1: Child table has Joining Bonus → Create/Update
+    #     # --------------------------------------------------
+    #     if joining_bonus_row:
+    #         amount = flt(joining_bonus_row.amount)
+
+    #         if additional_salary:
+    #             add_sal_doc = frappe.get_doc(
+    #                 "Additional Salary", additional_salary[0].name
+    #             )
+
+    #             # Update if amount mismatch
+    #             if flt(add_sal_doc.amount) != amount:
+    #                 add_sal_doc.amount = amount
+    #                 add_sal_doc.save()
+
+    #         else:
+    #             last_day = get_last_day(getdate(self.from_date))
+    #             next_year_day = getdate(self.from_date) + relativedelta(years=1)
+
+    #             doc = frappe.get_doc(
+    #                 {
+    #                     "doctype": "Additional Salary",
+    #                     "employee": self.employee,
+    #                     "salary_component": joining_bonus_component,
+    #                     "payroll_date": last_day,
+    #                     "company": self.company,
+    #                     "currency": frappe.db.get_value(
+    #                         "Company", self.company, "default_currency"
+    #                     ),
+    #                     "amount": amount,
+    #                     "custom_clawback_date": next_year_day,
+    #                 }
+    #             )
+
+    #             doc.insert()
+    #             doc.submit()
+
+    #     # --------------------------------------------------
+    #     # Case 2: No Joining Bonus in child table → Delete Additional Salary
+    #     # --------------------------------------------------
+    #     else:
+    #         if additional_salary:
+    #             add_sal_doc = frappe.get_doc(
+    #                 "Additional Salary", additional_salary[0].name
+    #             )
+
+    #             if add_sal_doc.docstatus == 1:
+    #                 add_sal_doc.cancel()
+
+    #             add_sal_doc.delete()
+
+    # def insert_joining_bonus(self):
+
+    #     company = frappe.get_doc("Company", self.company)
+
+    #     if not company.custom_joining_bonus:
+    #         return
+
+    #     joining_bonus_component = company.custom_joining_bonus
+
+    #     # Check Joining Bonus in child table
+    #     joining_bonus_row = None
+    #     for row in self.custom_other_extra_payments or []:
+    #         if row.additional_earning == "Joining Bonus":
+    #             joining_bonus_row = row
+    #             break
+
+    #     # Check existing Additional Salary
+    #     additional_salary = frappe.get_list(
+    #         "Additional Salary",
+    #         filters={
+    #             "employee": self.employee,
+    #             "salary_component": joining_bonus_component,
+    #             "docstatus": ["!=", 2],
+    #         },
+    #         fields=["name", "amount"],
+    #         limit=1,
+    #     )
+
+    #     # --------------------------------------------------
+    #     # Case 1: Child table has Joining Bonus → Create/Update
+    #     # --------------------------------------------------
+    #     if joining_bonus_row:
+
+    #         amount = flt(joining_bonus_row.amount)
+
+    #         if additional_salary:
+
+    #             add_sal_doc = frappe.get_doc("Additional Salary", additional_salary[0].name)
+
+    #             # Update if amount mismatch
+    #             if flt(add_sal_doc.amount) != amount:
+    #                 add_sal_doc.amount = amount
+    #                 add_sal_doc.save()
+
+    #         else:
+    #             last_day = get_last_day(getdate(self.from_date))
+    #             next_year_day = getdate(self.from_date) + relativedelta(years=1)
+
+    #             doc = frappe.get_doc(
+    #                 {
+    #                     "doctype": "Additional Salary",
+    #                     "employee": self.employee,
+    #                     "salary_component": joining_bonus_component,
+    #                     "payroll_date": last_day,
+    #                     "company": self.company,
+    #                     "currency": frappe.db.get_value(
+    #                         "Company", self.company, "default_currency"
+    #                     ),
+    #                     "amount": amount,
+    #                     "custom_clawback_date": next_year_day,
+    #                 }
+    #             )
+
+    #             doc.insert()
+    #             doc.submit()
+
+    #     # --------------------------------------------------
+    #     # Case 2: No Joining Bonus in child table → Delete Additional Salary
+    #     # --------------------------------------------------
+    #     else:
+
+    #         if additional_salary:
+
+    #             add_sal_doc = frappe.get_doc("Additional Salary", additional_salary[0].name)
+
+    #             if add_sal_doc.docstatus == 1:
+    #                 add_sal_doc.cancel()
+
+    #             add_sal_doc.delete()
+
+    from frappe.utils import get_last_day, getdate, flt
+    from dateutil.relativedelta import relativedelta
+    import frappe
 
     def insert_joining_bonus(self):
-        if not self.custom_other_extra_payments:
+        company = frappe.get_doc("Company", self.company)
+
+        if not company.custom_joining_bonus:
             return
 
-        for row in self.custom_other_extra_payments:
+        joining_bonus_component = company.custom_joining_bonus
+
+        # Get Payroll Settings
+        payroll_settings = frappe.get_single("Payroll Settings")
+        clawback_years = flt(payroll_settings.custom_clockback_year) or 1
+
+        # Check Joining Bonus in child table
+        joining_bonus_row = None
+        for row in self.custom_other_extra_payments or []:
             if row.additional_earning == "Joining Bonus":
-                company = frappe.get_doc("Company", self.company)
+                joining_bonus_row = row
+                break
 
-                if not company.custom_joining_bonus:
-                    return
+        # Check existing Additional Salary
+        additional_salary = frappe.get_list(
+            "Additional Salary",
+            filters={
+                "employee": self.employee,
+                "salary_component": joining_bonus_component,
+                "docstatus": ["!=", 2],
+            },
+            fields=["name", "amount"],
+            limit=1,
+        )
 
-                # Check if already submitted Additional Salary exists
-                additional_salary = frappe.get_list(
-                    "Additional Salary",
-                    filters={
-                        "employee": self.employee,
-                        "salary_component": company.custom_joining_bonus,
-                        "docstatus": 1,
-                    },
-                    limit=1,
+        # --------------------------------------------------
+        # Case 1: Child table has Joining Bonus → Create/Update
+        # --------------------------------------------------
+        if joining_bonus_row:
+            amount = flt(joining_bonus_row.amount)
+
+            if additional_salary:
+                add_sal_doc = frappe.get_doc(
+                    "Additional Salary", additional_salary[0].name
                 )
 
-                if not additional_salary:
-                    last_day = get_last_day(getdate(self.from_date))
-                    next_year_day = getdate(self.from_date) + relativedelta(years=1)
+                # Update if amount mismatch
+                if flt(add_sal_doc.amount) != amount:
+                    add_sal_doc.amount = amount
+                    add_sal_doc.save()
 
-                    doc = frappe.get_doc(
-                        {
-                            "doctype": "Additional Salary",
-                            "employee": self.employee,
-                            "salary_component": company.custom_joining_bonus,
-                            "payroll_date": last_day,
-                            "company": self.company,
-                            "currency": frappe.db.get_value(
-                                "Company", self.company, "default_currency"
-                            ),
-                            "amount": row.amount,
-                            "custom_clawback_date": next_year_day,
-                        }
-                    )
+            else:
+                last_day = get_last_day(getdate(self.from_date))
 
-                    doc.insert()
-                    doc.submit()
+                # Dynamic clawback year
+                clawback_date = getdate(self.from_date) + relativedelta(
+                    years=int(clawback_years)
+                )
+
+                doc = frappe.get_doc(
+                    {
+                        "doctype": "Additional Salary",
+                        "employee": self.employee,
+                        "salary_component": joining_bonus_component,
+                        "payroll_date": last_day,
+                        "company": self.company,
+                        "currency": company.default_currency,
+                        "amount": amount,
+                        "custom_clawback_date": clawback_date,
+                    }
+                )
+
+                doc.insert()
+                doc.submit()
+
+        # --------------------------------------------------
+        # Case 2: No Joining Bonus in child table → Delete Additional Salary
+        # --------------------------------------------------
+        else:
+            if additional_salary:
+                add_sal_doc = frappe.get_doc(
+                    "Additional Salary", additional_salary[0].name
+                )
+
+                if add_sal_doc.docstatus == 1:
+                    add_sal_doc.cancel()
+
+                add_sal_doc.delete()
