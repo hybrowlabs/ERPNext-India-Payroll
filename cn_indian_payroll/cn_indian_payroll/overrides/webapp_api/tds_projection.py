@@ -285,7 +285,40 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     reimbursements_total=sum(reimbursement_values)
 
     # ---------------- OFF CYCLE ---------------- #
-    offcycle_values = [sum(x["values"][i] for x in offcycle) for i in range(len(months))]
+    # offcycle_values = [sum(x["values"][i] for x in offcycle) for i in range(len(months))]
+
+    # ---------------- OFF CYCLE ---------------- #
+
+    offcycle_values = []
+
+    for m in months:
+
+        total = 0
+
+        if m in slip_by_month:
+
+            details = frappe.db.get_all(
+                "Salary Detail",
+                filters={
+                    "parent": slip_by_month[m],
+                    "parentfield": "earnings"
+                },
+                fields=["salary_component", "amount"]
+            )
+
+            for d in details:
+
+                comp = frappe.db.get_value(
+                    "Salary Component",
+                    d.salary_component,
+                    ["custom_is_offcycle_component"],
+                    as_dict=True
+                )
+
+                if comp and comp.custom_is_offcycle_component:
+                    total += flt(d.amount)
+
+        offcycle_values.append(round(total, 0))
 
 
 
@@ -296,6 +329,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     })
 
     total_off_cycle_payment=sum(offcycle_values)
+
 
 
 
@@ -426,9 +460,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "total": sum(total_grand_total_payable)
     })
 
-
-
-    # ------------------------------------------------------------------
+ 
 
     return {
         "status": "success",
@@ -452,9 +484,11 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "total_perquisite_total": round(total_perquisite_total) if total_perquisite_total else 0,
         "total_gross_earning":round(total_gross_earning) if total_gross_earning else 0,
         "total_off_cycle_payment":round(total_off_cycle_payment) if total_off_cycle_payment else 0,
-        "reimbursements_total":round(reimbursements_total) if reimbursements_total else 0
+        "reimbursements_total":round(reimbursements_total) if reimbursements_total else 0,
 
     }
+
+
 
 
 
@@ -3613,8 +3647,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
 
 
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=37001&payroll_period=25-26&company=Pen Pencil
-
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_employee_declaration_investments?employee=PW0220&payroll_period=25-26&company=Pen%20Pencil
 @frappe.whitelist()
 def get_employee_declaration_investments(employee=None, company=None, payroll_period=None):
 
