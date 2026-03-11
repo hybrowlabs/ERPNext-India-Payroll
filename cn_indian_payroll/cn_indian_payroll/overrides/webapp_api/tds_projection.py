@@ -219,7 +219,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         elif comp.type == "Earning" and comp.custom_is_offcycle_component:
             offcycle.append(row)
 
-        elif comp.type == "Earning":
+        elif comp.type == "Earning" and not comp.custom_perquisite:
             earnings.append(row)
 
         elif comp.type == "Deduction":
