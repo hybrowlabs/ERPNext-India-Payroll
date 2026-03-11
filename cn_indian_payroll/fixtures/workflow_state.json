@@ -34,5 +34,41 @@
   "name": "Pending",
   "style": "",
   "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-11 11:32:28.472238",
+  "name": "Processed",
+  "style": "",
+  "workflow_state_name": "Processed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-09 09:43:08.866808",
+  "name": "Approved2",
+  "style": "",
+  "workflow_state_name": "Approved2"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-09 09:42:20.250785",
+  "name": "Verified",
+  "style": "",
+  "workflow_state_name": "Verified"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-09 09:42:50.560977",
+  "name": "Approved1",
+  "style": "",
+  "workflow_state_name": "Approved1"
  }
 ]
