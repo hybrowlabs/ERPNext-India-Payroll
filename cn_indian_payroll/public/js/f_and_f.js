@@ -447,25 +447,103 @@ function get_tax(frm)
 //     deduction_array = [];
 // }
 
+// function deduction_component(frm) {
+//     var deduction_array = ["Notice Pay Recovery", "PF Recovery", "ESIC Recovery", "Waive off Recovery"]; // Array with deduction components
+
+//     frm.clear_table('receivables');
+
+//     frappe.call("Additional Salary")
+//     if additionalsalary.custom_clawback_date<=relieving_date:
+//      deduction Array.append("joining bonus recovery")
+//      amount=additional_salary.amount
+
+
+
+
+//     deduction_array.forEach((component) => {
+//         // Check if the component already exists in the child table
+//         let exists = frm.doc.receivables.some((row) => row.component === component);
+
+//         // Add the component if it doesn't already exist
+//         if (!exists) {
+//             let child = frm.add_child('receivables');
+//             child.component = component;
+//             child.amount = 0; // Set the amount as 0
+//         }
+//     });
+
+//     // Refresh the field after processing all components
+//     frm.refresh_field('receivables');
+// }
+
 function deduction_component(frm) {
-    var deduction_array = ["Notice Pay Recovery", "PF Recovery", "ESIC Recovery", "Waive off Recovery"]; // Array with deduction components
+
+    console.log(frm.doc.relieving_date, "relieving date");
+
+    let deduction_array = [
+        "Notice Pay Recovery",
+        "PF Recovery",
+        "ESIC Recovery",
+        "Waive off Recovery"
+    ];
 
     frm.clear_table('receivables');
 
-    deduction_array.forEach((component) => {
-        // Check if the component already exists in the child table
-        let exists = frm.doc.receivables.some((row) => row.component === component);
+    let relieving_date = frm.doc.relieving_date;
 
-        // Add the component if it doesn't already exist
-        if (!exists) {
-            let child = frm.add_child('receivables');
-            child.component = component;
-            child.amount = 0; // Set the amount as 0
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Additional Salary",
+            filters: {
+                employee: frm.doc.employee,
+                docstatus: 1
+            },
+            fields: ["salary_component", "amount", "custom_clawback_date"]
+        },
+        callback: function (r) {
+
+            if (r.message) {
+
+                r.message.forEach(function (additional_salary) {
+
+                    console.log("Relieving:", relieving_date);
+                    console.log("Clawback:", additional_salary.custom_clawback_date);
+
+                    if (
+                        additional_salary.salary_component === "Joining Bonus" &&
+                        additional_salary.custom_clawback_date &&
+                        relieving_date &&
+                        relieving_date < additional_salary.custom_clawback_date
+                    ) {
+
+                        deduction_array.push("Joining Bonus Recovery");
+
+                        let child = frm.add_child('receivables');
+                        child.component = "Joining Bonus Recovery";
+                        child.amount = additional_salary.amount;
+                    }
+
+                });
+            }
+
+            deduction_array.forEach((component) => {
+
+                let exists = frm.doc.receivables.some(
+                    (row) => row.component === component
+                );
+
+                if (!exists) {
+                    let child = frm.add_child('receivables');
+                    child.component = component;
+                    child.amount = 0;
+                }
+
+            });
+
+            frm.refresh_field('receivables');
         }
     });
-
-    // Refresh the field after processing all components
-    frm.refresh_field('receivables');
 }
 
 
