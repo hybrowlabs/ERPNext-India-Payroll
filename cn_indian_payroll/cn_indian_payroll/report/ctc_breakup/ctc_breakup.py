@@ -284,8 +284,10 @@ def get_all_employee(filters=None):
         {"label": "Effective From", "fieldname": "from_date", "fieldtype": "Date", "width": 200},
         {"label": "Fixed Gross Annual", "fieldname": "fixed_gross_annual", "fieldtype": "Currency", "width": 200},
         {"label": "Fixed Gross Monthly", "fieldname": "fixed_gross_monthly", "fieldtype": "Currency", "width": 200},
-        {"label": "Annual CTC", "fieldname": "base", "fieldtype": "Data", "width": 200},
-        {"label": "Monthly CTC", "fieldname": "monthly_ctc", "fieldtype": "Data", "width": 200},
+        {"label": "Fixed CTC Annual", "fieldname": "fixed_gross_monthly", "fieldtype": "Currency", "width": 200},
+        {"label": "Fixed CTC Monthly", "fieldname": "fixed_gross_monthly", "fieldtype": "Currency", "width": 200},
+        {"label": "Total Annual CTC", "fieldname": "base", "fieldtype": "Data", "width": 200},
+        {"label": "Total Monthly CTC", "fieldname": "monthly_ctc", "fieldtype": "Data", "width": 200},
         {"label": "Income Tax Regime", "fieldname": "regime", "fieldtype": "Data", "width": 200},
     ]
 
