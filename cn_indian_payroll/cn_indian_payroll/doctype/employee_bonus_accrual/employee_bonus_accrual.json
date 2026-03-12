@@ -159,21 +159,18 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "salary_slip.total_working_days",
    "fieldname": "working_days",
    "fieldtype": "Float",
    "label": "Working Days"
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "salary_slip.payment_days",
    "fieldname": "payment_day",
    "fieldtype": "Float",
    "label": "Payment Day"
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "salary_slip.custom_total_leave_without_pay",
    "fieldname": "total_lwp",
    "fieldtype": "Float",
    "label": "Total LWP"
@@ -182,14 +179,13 @@
    "allow_on_submit": 1,
    "fieldname": "lop_reversal_days",
    "fieldtype": "Float",
-   "label": "LOP Reversal Days",
-   "read_only": 1
+   "label": "LOP Reversal Days"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-27 11:15:20.416136",
+ "modified": "2025-11-24 09:37:43.472688",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

@@ -2,6 +2,16 @@
  {
   "docstatus": 0,
   "doctype": "State",
+  "lwf_frequency": 0,
+  "lwf_frequency_list": [],
+  "min_wages": [],
+  "modified": "2025-07-24 14:43:49.789298",
+  "name": "Chhattisgarh",
+  "state_name": "Chhattisgarh"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "State",
   "lwf_frequency": 1,
   "lwf_frequency_list": [
    {

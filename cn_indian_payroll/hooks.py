@@ -259,6 +259,7 @@ doctype_js = {
     "Loan Product": "public/js/loan_product.js",
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
+    "Employee Benefit Claim": "public/js/benefit_claim.js",
     # "Full and Final Statement": "public/js/f_and_f.js",
     # "Leave Encashment": "public/js/leave_encashment.js",
 
@@ -267,6 +268,8 @@ doctype_js = {
 }
 
 override_doctype_class = {
+    "Employee Benefit Claim": "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.CustomEmployeeBenefitClaim",
+
     "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.PayrollEntryOverride",
     "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
     "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
