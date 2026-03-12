@@ -923,7 +923,12 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
     # --------Insert HRA Breakup Table & Annual HRA and Basic----------------
 
     def calculate_hra_breakup(self):
-        if self.monthly_house_rent and self.custom_check == 0:
+        if self.monthly_house_rent and self.custom_check == 0 and self.custom_start_date and self.custom_end_date:
+            start_date = getdate(self.custom_start_date)
+            end_date = getdate(self.custom_end_date)
+
+            rent_month_count = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
+
             get_company = frappe.get_doc("Company", self.company)
             basic_component = get_company.basic_component
             hra_component = get_company.hra_component
@@ -1017,7 +1022,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     percentage_basic = (future_basic_amount * 10) / 100
                     self.custom_basic_as_per_salary_structure = round(percentage_basic)
 
-                    annual_hra_amount = self.monthly_house_rent * month_count
+                    annual_hra_amount = self.monthly_house_rent * rent_month_count
 
                     basic_rule2 = round(annual_hra_amount - percentage_basic)
                     if self.rented_in_metro_city == 0:
@@ -1072,7 +1077,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                         )
 
                     self.custom_hra_received_annual=self.salary_structure_hra
-                    self.custom_rent_paid__10_of_basic_annual=(self.monthly_house_rent * month_count)-self.custom_basic_as_per_salary_structure
+                    self.custom_rent_paid__10_of_basic_annual=(self.monthly_house_rent * rent_month_count)-self.custom_basic_as_per_salary_structure
                     self.custom_50_of_basic_metro=earned_basic
 
         elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 0:
