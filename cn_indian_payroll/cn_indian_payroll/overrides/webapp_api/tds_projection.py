@@ -594,7 +594,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "address_line1": declaration_doc.custom_address_title1 or "",
                 "address_line2": declaration_doc.custom_address_title2 or "",
                 "attach_reqd": 0,
-                "attach_proof": "",
+                "attach_proof": declaration_doc.custom_hra_proof_attach,
                 "approval_needed":"No",
                 "attach_link": "",
                 "custom_name": declaration_doc.custom_name or "",
