@@ -219,6 +219,11 @@ def get_all_employee(filters=None):
             "employee_name": each_employee.get("employee_name"),
             "from_date": each_employee.get("from_date"),
             "doj": each_employee.get("custom_date_of_joining"),
+            "pf_type":each_employee.get("custom_epf_type"),
+            "salary_structure":each_employee.get("salary_structure"),
+            "created_on": each_employee.get("creation"),
+            "created_by": each_employee.get("owner"),
+
             "fixed_gross_annual": each_employee.get("custom_fixed_gross_annual") or 0,
             "fixed_gross_monthly": round((each_employee.get("custom_fixed_gross_annual") or 0) / 12)
                 if each_employee.get("custom_fixed_gross_annual") else 0,
@@ -270,6 +275,12 @@ def get_all_employee(filters=None):
         {"label": "Employee", "fieldname": "employee", "fieldtype": "Data", "width": 150},
         {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 200},
         {"label": "Date of Joining", "fieldname": "doj", "fieldtype": "Date", "width": 200},
+        {"label": "PF Type", "fieldname": "pf_type", "fieldtype": "Data", "width": 200},
+        {"label": "Salary Structure", "fieldname": "salary_structure", "fieldtype": "Data", "width": 200},
+        {"label": "Created On", "fieldname": "created_on", "fieldtype": "Datetime", "width": 180},
+        {"label": "Created By", "fieldname": "created_by", "fieldtype": "Data", "width": 180},
+
+
         {"label": "Effective From", "fieldname": "from_date", "fieldtype": "Date", "width": 200},
         {"label": "Fixed Gross Annual", "fieldname": "fixed_gross_annual", "fieldtype": "Currency", "width": 200},
         {"label": "Fixed Gross Monthly", "fieldname": "fixed_gross_monthly", "fieldtype": "Currency", "width": 200},
