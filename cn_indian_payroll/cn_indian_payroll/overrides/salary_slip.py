@@ -137,7 +137,29 @@ class CustomSalarySlip(SalarySlip):
         self.update_total_lop()
         self.set_taxale_regime()
 
+        self.set_manual_tds_value()
 
+    
+    
+
+    def set_manual_tds_value(self):
+
+        # Reset values
+        self.custom_additional_tds_deducted_amount = 0
+        self.current_month_income_tax = 0
+
+        # Check earnings for manual TDS
+        for component in self.earnings:
+            if component.additional_salary:
+                additional_salary = frappe.get_doc("Additional Salary", component.additional_salary)
+
+                if additional_salary.custom_is_tax_manual_calculate:
+                    self.custom_additional_tds_deducted_amount += additional_salary.custom_tds_value or 0
+
+        # Get current month tax deduction
+        for deduction in self.deductions:
+            if deduction.variable_based_on_taxable_salary == 1:
+                self.current_month_income_tax = deduction.amount
 
 
     def on_cancel(self):
@@ -1179,6 +1201,7 @@ class CustomSalarySlip(SalarySlip):
         amount_exempted_from_income_tax = 0
         additional_income_with_manual_tax = 0
         additional_income_with_manual_full_tax=0
+        manual_tds_value=0
 
         tax_component = None
 
@@ -1252,6 +1275,7 @@ class CustomSalarySlip(SalarySlip):
 
                             additional_income_with_manual_tax=get_additional_salary.custom_tds_value
                             additional_income_with_manual_full_tax += additional_amount
+                            manual_tds_value=get_additional_salary.custom_tds_value
 
 
         if allow_tax_exemption:
@@ -1269,6 +1293,7 @@ class CustomSalarySlip(SalarySlip):
                         additional_income -= self.get_future_recurring_additional_amount(
                             ded.additional_salary, ded.additional_amount
                         )
+
 
         return frappe._dict(
             {

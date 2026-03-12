@@ -15,8 +15,7 @@ from frappe.utils import getdate
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 
 
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=37004&company=PW&payroll_period=25-26
-
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=PW0220&company=Pen%20Pencil&payroll_period=25-26
 @frappe.whitelist()
 def get_annual_statement(employee=None, payroll_period=None,company=None):
 

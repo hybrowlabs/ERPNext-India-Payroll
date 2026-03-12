@@ -71,6 +71,11 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 if deduction_component.custom_is_part_of_ctc == 1:
                     ctc_amount_annual += round(new_deduction.amount * 12)
 
+            if self.custom_variable_pay_components:
+                for value in self.custom_variable_pay_components:
+                    if value.part_of_ctc:
+                        ctc_amount_annual+=value.amount
+
             frappe.db.set_value(self.doctype, self.name, "base", ctc_amount_annual + reimbursement, update_modified=False)
             self.reload()
 
@@ -96,6 +101,13 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 deduction_component = frappe.get_doc("Salary Component", new_deduction.salary_component)
                 if deduction_component.custom_is_part_of_ctc == 1:
                     ctc_amount_annual += round(new_deduction.amount * 12)
+
+
+            if self.custom_variable_pay_components:
+                for value in self.custom_variable_pay_components:
+                    if value.part_of_ctc:
+                        ctc_amount_annual+=value.amount
+
 
             self.base = ctc_amount_annual + reimbursement
 
