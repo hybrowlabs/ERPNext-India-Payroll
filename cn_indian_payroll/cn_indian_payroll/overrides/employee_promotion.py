@@ -495,7 +495,6 @@
 
 #     return insert_appraisal.name
 
-
 import frappe
 from frappe.utils import nowdate
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
@@ -552,8 +551,6 @@ def create_salary_appraisal_calculation(self):
         if component.custom_is_accrual:
             new_bonus_amounts[row.salary_component] = row.amount
 
-    total_working_days_latest = 31
-
     # -----------------------------------
     # Get Salary Slips
     # -----------------------------------
@@ -577,17 +574,19 @@ def create_salary_appraisal_calculation(self):
     for slip in sal_slips:
         slip_doc = frappe.get_doc("Salary Slip", slip.name)
 
+        # -----------------------------------
         # LOP Reversal
+        # -----------------------------------
         lop_reversal_days = (
             frappe.db.sql(
                 """
-            SELECT SUM(number_of_days)
-            FROM `tabLOP Reversal`
-            WHERE employee=%s
-            AND company=%s
-            AND salary_slip=%s
-            AND docstatus=1
-        """,
+                SELECT SUM(number_of_days)
+                FROM `tabLOP Reversal`
+                WHERE employee=%s
+                AND company=%s
+                AND salary_slip=%s
+                AND docstatus=1
+                """,
                 (self.employee, self.company, slip.name),
             )[0][0]
             or 0
@@ -596,32 +595,26 @@ def create_salary_appraisal_calculation(self):
         total_payment_days = slip_doc.payment_days + lop_reversal_days
 
         # -----------------------------------
-        # Call Calculation Functions
+        # Calculate Arrears
         # -----------------------------------
         calculate_arrear_components(
             slip_doc,
             new_amounts,
             arrear_array,
-            total_working_days_latest,
             total_payment_days,
             lop_reversal_days,
         )
 
+        # -----------------------------------
+        # Calculate Bonus
+        # -----------------------------------
         calculate_bonus_components(
             slip_doc,
             new_bonus_amounts,
             bonus_array,
-            total_working_days_latest,
             total_payment_days,
             lop_reversal_days,
         )
-
-        # calculate_reimbursements(
-        #     slip_doc,
-        #     reimbursement_array,
-        #     total_payment_days,
-        #     lop_reversal_days
-        # )
 
     # -----------------------------------
     # Insert Appraisal Document
@@ -637,17 +630,17 @@ def create_salary_appraisal_calculation(self):
         }
     )
 
-    # Arrear Components
+    # Arrear
     for slip_rows in arrear_array.values():
         for row in slip_rows:
             insert_appraisal.append("arrear_breakdown", row)
 
-    # Bonus Components
+    # Bonus
     for slip_rows in bonus_array.values():
         for row in slip_rows:
             insert_appraisal.append("salary_appraisal_bonus", row)
 
-    # Reimbursements
+    # Reimbursement
     for slip_rows in reimbursement_array.values():
         for row in slip_rows:
             insert_appraisal.append("salary_appraisal_reimbursement", row)
@@ -659,7 +652,7 @@ def create_salary_appraisal_calculation(self):
 
 
 # =========================================================
-# Function 1 → Arrear Components
+# Arrear Calculation
 # =========================================================
 
 
@@ -667,27 +660,24 @@ def calculate_arrear_components(
     slip_doc,
     new_amounts,
     arrear_array,
-    total_working_days_latest,
     total_payment_days,
     lop_reversal_days,
 ):
-    old_components = {}
-
     for earning in slip_doc.earnings:
         component = frappe.get_doc("Salary Component", earning.salary_component)
 
         if not component.custom_is_part_of_appraisal:
             continue
 
+        # OLD AMOUNT
         old_amount = (
             earning.custom_actual_amount / slip_doc.total_working_days
         ) * total_payment_days
 
-        old_components[earning.salary_component] = old_amount
-
+        # NEW AMOUNT
         if earning.salary_component in new_amounts:
             new_amount = (
-                new_amounts[earning.salary_component] / total_working_days_latest
+                new_amounts[earning.salary_component] / slip_doc.total_working_days
             ) * total_payment_days
 
             difference = new_amount - old_amount
@@ -713,7 +703,7 @@ def calculate_arrear_components(
 
 
 # =========================================================
-# Function 2 → Bonus Components
+# Bonus Calculation
 # =========================================================
 
 
@@ -721,7 +711,6 @@ def calculate_bonus_components(
     slip_doc,
     new_bonus_amounts,
     bonus_array,
-    total_working_days_latest,
     total_payment_days,
     lop_reversal_days,
 ):
@@ -731,13 +720,16 @@ def calculate_bonus_components(
         if not component.custom_is_accrual:
             continue
 
+        # OLD AMOUNT
         old_amount = (
             earning.custom_actual_amount / slip_doc.total_working_days
         ) * total_payment_days
 
+        # NEW AMOUNT
         if earning.salary_component in new_bonus_amounts:
             new_amount = (
-                new_bonus_amounts[earning.salary_component] / total_working_days_latest
+                new_bonus_amounts[earning.salary_component]
+                / slip_doc.total_working_days
             ) * total_payment_days
 
             difference = new_amount - old_amount
@@ -760,93 +752,3 @@ def calculate_bonus_components(
                 "difference": difference,
             }
         )
-
-
-# =========================================================
-# Function 3 → Reimbursements
-# =========================================================
-
-# def calculate_reimbursements(
-#     slip_doc,
-#     reimbursement_array,
-#     latest_structure,
-#     total_payment_days,
-#     lop_reversal_days
-# ):
-
-#     old_components = {}
-
-#     # OLD ASSIGNMENT
-#     if slip_doc.custom_salary_structure_assignment:
-
-#         assignment = frappe.get_cached_doc(
-#             "Salary Structure Assignment",
-#             slip_doc.custom_salary_structure_assignment
-#         )
-
-#         for row in assignment.custom_employee_reimbursements:
-
-#             old_amount = (
-#                 row.monthly_total_amount /
-#                 slip_doc.total_working_days
-#             ) * total_payment_days
-
-#             old_components[row.reimbursements] = old_amount
-
-#     # NEW ASSIGNMENT
-#     new_components = {}
-
-#     latest_assignment = frappe.get_cached_doc(
-#         "Salary Structure Assignment",
-#         latest_structure.name
-#     )
-
-#     for row in latest_assignment.custom_employee_reimbursements:
-
-#         new_amount = (
-#             row.monthly_total_amount /
-#             slip_doc.total_working_days
-#         ) * total_payment_days
-
-#         new_components[row.reimbursements] = new_amount
-
-#     # Compare old components
-#     for component, old_amount in old_components.items():
-
-#         if component in new_components:
-#             expected_amount = new_components[component]
-#             difference = expected_amount - old_amount
-#         else:
-#             expected_amount = 0
-#             difference = -old_amount
-
-#         reimbursement_array.setdefault(slip_doc.name, []).append({
-#             "salary_slip_id": slip_doc.name,
-#             "salary_component": component,
-#             "month": slip_doc.custom_month,
-#             "working_days": slip_doc.total_working_days,
-#             "lop_days": slip_doc.custom_total_leave_without_pay,
-#             "payment_days": total_payment_days,
-#             "lop_reversal": lop_reversal_days,
-#             "old_amount": old_amount,
-#             "expected_amount": expected_amount,
-#             "difference": difference
-#         })
-
-#     # New components not in old
-#     for component, new_amount in new_components.items():
-
-#         if component not in old_components:
-
-#             reimbursement_array.setdefault(slip_doc.name, []).append({
-#                 "salary_slip_id": slip_doc.name,
-#                 "salary_component": component,
-#                 "month": slip_doc.custom_month,
-#                 "working_days": slip_doc.total_working_days,
-#                 "lop_days": slip_doc.custom_total_leave_without_pay,
-#                 "payment_days": total_payment_days,
-#                 "lop_reversal": lop_reversal_days,
-#                 "old_amount": 0,
-#                 "expected_amount": new_amount,
-#                 "difference": new_amount
-#             })
