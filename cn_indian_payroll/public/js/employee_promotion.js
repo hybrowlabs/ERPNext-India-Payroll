@@ -1,7 +1,6 @@
 frappe.ui.form.on('Employee Promotion', {
 	refresh(frm) {
 
-
         // if (frm.doc.docstatus === 0) {
         //     if (frm.doc.custom_status === "Completed") {
         //         frm.page.set_primary_action(__('Submit'), () => {
@@ -11,9 +10,6 @@ frappe.ui.form.on('Employee Promotion', {
         //         frm.page.clear_primary_action();
         //     }
         // }
-
-
-
 
         // if(!frm.is_new() && frm.doc.custom_status=="In Planning")
         //     {
@@ -81,7 +77,8 @@ frappe.ui.form.on('Employee Promotion', {
 
         // frm.change_custom_button_type('Calculate Appraisal Arrears', null, 'primary');
 
-	},
+
+    },
 
     onload(frm) {
         if (frm.is_new()) {
