@@ -15,6 +15,7 @@
   "company",
   "new_salary_structure_assignment_id",
   "new_from_date",
+  "status",
   "section_break_ugei",
   "old_structure_child",
   "section_break_cwor",
@@ -150,12 +151,19 @@
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Employee Name"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSubmitted"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-27 11:36:05.016528",
+ "modified": "2026-03-13 08:45:24.295923",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",

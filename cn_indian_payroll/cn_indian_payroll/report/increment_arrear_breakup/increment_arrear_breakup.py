@@ -19,7 +19,7 @@ def get_new_joinee_arrear(filters=None):
     if filters.get("company"):
         conditions["company"] = filters["company"]
 
-    elif filters.get("status"):
+    if filters.get("status"):
         conditions["status"] = filters["status"]
 
     records = frappe.get_list(
@@ -30,7 +30,7 @@ def get_new_joinee_arrear(filters=None):
             "employee",
             "employee_name",
             "company",
-            "revised_effective_date",
+            "posting_date",
             "status",
             "new_from_date",
         ],
@@ -46,7 +46,7 @@ def get_new_joinee_arrear(filters=None):
             "doc_id": row.name,
             "employee": row.employee,
             "employee_name": row.employee_name,
-            "revised_effective_date": row.new_from_date,
+            "revised_effective_date": row.posting_date,
             "company": row.company,
         }
 
@@ -89,7 +89,7 @@ def get_columns(components):
             "width": 150,
         },
         {
-            "label": "Effective From Date",
+            "label": "Date",
             "fieldname": "revised_effective_date",
             "fieldtype": "Date",
             "width": 120,
@@ -133,7 +133,7 @@ def get_columns(components):
             "width": 150,
         },
         {
-            "label": "Effective From Date",
+            "label": " Date",
             "fieldname": "revised_effective_date",
             "fieldtype": "Date",
             "width": 120,

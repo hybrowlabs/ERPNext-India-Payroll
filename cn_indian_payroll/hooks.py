@@ -267,7 +267,7 @@ doctype_js = {
     # "Salary Slip": "public/js/salary_slip.js",
     "LTA Claim": "public/js/lta_claim.js",
     "Salary Appraisal Calculation": "public/js/salary_revision.js",
-    "Employee Promotion": "public/js/employee_promotion.js",
+    # "Employee Promotion": "public/js/employee_promotion.js",
     "Full and Final Statement": "public/js/f_and_f.js",
     "Form 16": "public/js/form16.js",
     "Leave Encashment": "public/js/leave_encashment.js",
@@ -302,8 +302,8 @@ doc_events = {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_appraisal.validate",
     },
     "Employee Promotion": {
-        "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
-        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
+        # "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_cancel",
+        # "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.on_submit",
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee_promotion.validate",
     },
     "Full and Final Statement": {

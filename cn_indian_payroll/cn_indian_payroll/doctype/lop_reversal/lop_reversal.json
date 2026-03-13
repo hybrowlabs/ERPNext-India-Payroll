@@ -14,6 +14,7 @@
   "company",
   "salary_slip",
   "working_days",
+  "currency",
   "column_break_sucb",
   "lop_month_reversal",
   "additional_salary_date",
@@ -155,6 +156,13 @@
    "label": "Payroll Period",
    "options": "Payroll Period",
    "reqd": 1
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -165,11 +173,11 @@
    "link_fieldname": "custom_lop_reversal"
   }
  ],
- "modified": "2025-05-27 14:06:30.997769",
+ "modified": "2026-03-13 08:34:55.385576",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

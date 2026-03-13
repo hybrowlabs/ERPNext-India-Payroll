@@ -5,6 +5,7 @@ def on_submit(self, method):
     insert_additional_salary(self)
     update_bonus_accrual(self)
     update_reimbursement_accruals(self)
+    self.status = "Submitted"
 
 
 def on_cancel(self, method):
@@ -120,8 +121,8 @@ def update_reimbursement_accruals(self):
 def insert_additional_salary(self):
     component_array = []
 
-    if len(self.arrear_breakdown) > 0:
-        for i in self.arrear_breakdown:
+    if len(self.salary_arrear_components) > 0:
+        for i in self.salary_arrear_components:
             component_array.append(
                 {"component": i.salary_component, "amount": i.difference}
             )
