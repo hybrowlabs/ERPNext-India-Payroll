@@ -5,6 +5,7 @@ def on_submit(self, method):
     insert_additional_salary(self)
     update_bonus_accrual(self)
     update_reimbursement_accruals(self)
+    self.status = "Submitted"
 
 
 def on_cancel(self, method):

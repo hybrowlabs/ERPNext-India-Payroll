@@ -9,13 +9,12 @@
   "lop_reversal_details_section",
   "employee",
   "payroll_period",
-  "lop_reversal_request",
-  "currency",
   "payroll_entry",
   "auto_submit",
   "company",
   "salary_slip",
   "working_days",
+  "currency",
   "column_break_sucb",
   "lop_month_reversal",
   "additional_salary_date",
@@ -164,13 +163,6 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
-  },
-  {
-   "fieldname": "lop_reversal_request",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Lop Reversal Request",
-   "options": "LOP Reversal Request"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -181,11 +173,11 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-07-10 23:38:45.414985",
+ "modified": "2026-03-12 18:09:44.537719",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

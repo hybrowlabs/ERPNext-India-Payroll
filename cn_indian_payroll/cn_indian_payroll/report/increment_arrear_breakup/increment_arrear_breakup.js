@@ -18,13 +18,13 @@ frappe.query_reports["Increment Arrear Breakup"] = {
         //     "options": "Employee",
         //     "reqd": 0
         // },
-		// {
-        //     "fieldname": "status",
-        //     "label": __("Status"),
-        //     "fieldtype": "Select",
-        //     "options": ["Draft","Submitted"],
-        //     "reqd": 0
-        // },
+		{
+            "fieldname": "status",
+            "label": __("Status"),
+            "fieldtype": "Select",
+            "options": ["Draft","Submitted"],
+            "reqd": 0
+        },
 
 
 

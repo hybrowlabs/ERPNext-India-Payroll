@@ -30,6 +30,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_employee_promotion_from_date()
         self.insert_joining_bonus()
         self.set_variable_pay_amount()
+        self.update_employee_promotion()
 
     def update_employee_promotion_from_date(self):
         if self.custom_is_increment:
@@ -77,15 +78,33 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 frappe.delete_doc("Employee Tax Exemption Declaration", data_doc.name)
 
     def update_employee_promotion(self):
-        if self.custom_promotion_id:
-            get_promotion_doc = frappe.get_doc(
-                "Employee Promotion", self.custom_promotion_id
-            )
-            get_promotion_doc.custom_new_salary_structure_assignment_id = self.name
-            get_promotion_doc.custom_new_effective_from = self.from_date
-            get_promotion_doc.revised_ctc = self.base
-            get_promotion_doc.custom_status = "Payroll Configured"
-            get_promotion_doc.save()
+        if not self.custom_is_increment:
+            return
+
+        # Check if promotion already exists for this date
+        promotion_exists = frappe.get_list(
+            "Employee Promotion",
+            filters={"promotion_date": self.from_date, "employee": self.employee},
+            fields=["name"],
+            limit=1,
+        )
+
+        if promotion_exists:
+            # Promotion already exists → do nothing
+            return
+
+        # Otherwise create new promotion
+        new_promotion = frappe.get_doc(
+            {
+                "doctype": "Employee Promotion",
+                "employee": self.employee,
+                "promotion_date": self.from_date,
+                "custom_status": "Payroll Configured",
+                "custom_additional_salary_date": self.custom_payout_date,
+            }
+        )
+
+        new_promotion.insert(ignore_permissions=True)
 
     def set_cpl(self):
         components = [

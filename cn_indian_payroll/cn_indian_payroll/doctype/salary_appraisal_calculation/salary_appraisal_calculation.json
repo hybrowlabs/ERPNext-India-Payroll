@@ -125,8 +125,7 @@
    "fieldname": "arrear_breakdown",
    "fieldtype": "Table",
    "label": "Arrear Components",
-   "options": "Salary Appraisal Child",
-   "read_only": 1
+   "options": "Salary Appraisal Child"
   },
   {
    "fieldname": "promotion_reference",
@@ -178,11 +177,11 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-12-24 19:58:45.873313",
+ "modified": "2026-03-12 21:43:56.481781",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Appraisal Calculation",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
