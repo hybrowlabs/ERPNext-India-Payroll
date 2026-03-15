@@ -143,6 +143,10 @@ class CustomSalarySlip(SalarySlip):
                     total_ctc_taxable_amount += earning.default_amount
         self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
+        self.custom_additional_earning = (
+            self.current_additional_earnings if self.current_additional_earnings else 0
+        )
+
 
         
 
@@ -645,6 +649,8 @@ class CustomSalarySlip(SalarySlip):
             self.total_structured_tax_amount - self.previous_total_paid_taxes
         ) / self.remaining_sub_periods
 
+        
+
 
 
     
@@ -662,7 +668,12 @@ class CustomSalarySlip(SalarySlip):
                 self.total_tax_amount - self.total_structured_tax_amount
             )
 
-        self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0.0
+
+            self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0.0
+
+            
+
+            
 
 
         current_tax_amount = (
@@ -1389,6 +1400,8 @@ class CustomSalarySlip(SalarySlip):
 
 
 
+
+
     def get_taxable_earnings_for_prev_period(
         self, start_date, end_date, allow_tax_exemption=False
     ):
@@ -2096,9 +2109,13 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_taxable_amount__annual_taxable_income = self.annual_taxable_amount
 
+        # self.total_taxable_earnings_without_full_tax_addl_components = (
+        #     self.custom_taxable_amount__annual_taxable_income or 0
+        # )
+
         self.total_taxable_earnings_without_full_tax_addl_components = (
-            self.custom_taxable_amount__annual_taxable_income or 0
-        )
+			self.total_taxable_earnings - self.current_additional_earnings_with_full_tax
+		)
 
 
     @frappe.whitelist()

@@ -23,7 +23,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def validate(self):
         super().validate()
         self.update_min_wages()
-        # self.update_perquisite()
         self.reimbursement_amount()
         self.set_state_from_branch()
 
@@ -44,7 +43,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def before_update_after_submit(self):
         self.insert_tax_declaration_list()
         self.update_min_wages()
-        # self.update_perquisite()
         self.reimbursement_amount()
 
         self.update_ctc_value_after_update()
@@ -136,38 +134,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
         self.custom_total_reimbursement_amount = total_amount
 
-    def update_perquisite(self):
-        if not self.custom_other_perquisite_components:
-            return
-
-        employee = frappe.get_doc("Employee", self.employee)
-
-
-        self_components = {row.component: row.amount for row in self.custom_other_perquisite_components}
-        employee_components = {row.salary_component: row for row in employee.custom_other_perquisite}
-
-
-        for component, amount in self_components.items():
-            if component in employee_components:
-
-                if employee_components[component].amount != amount:
-                    employee_components[component].amount = amount
-            else:
-
-                employee.append("custom_other_perquisite", {
-                    "salary_component": component,
-                    "amount": amount
-                })
-
-
-        to_remove = [
-            row for row in employee.custom_other_perquisite
-            if row.salary_component not in self_components
-        ]
-        for row in to_remove:
-            employee.remove(row)
-
-        employee.save()
 
 
 
@@ -195,18 +161,16 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
 
-
     def cancel_declaration(self):
 
-        declarations = frappe.db.get_list(
+        declarations = frappe.get_list(
             "Employee Tax Exemption Declaration",
             filters={
                 "payroll_period": self.custom_payroll_period,
                 "employee": self.employee,
-                "custom_salary_structure_assignment": self.name,
-                "docstatus": ["in", [0, 1]]
+                "docstatus": ["in", [0, 1]],
             },
-            fields=["name", "docstatus"]
+            fields=["name", "docstatus"],
         )
 
         if declarations:
@@ -215,17 +179,31 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                 "Employee Tax Exemption Declaration", declaration.name
             )
 
+            # Cancel if submitted
             if declaration_doc.docstatus == 1:
                 declaration_doc.cancel()
 
+            # Delete declaration
             frappe.delete_doc(
                 "Employee Tax Exemption Declaration",
                 declaration_doc.name,
-                force=1
+                force=1,
             )
 
-        # recreate declaration again
-        self.insert_tax_declaration_list()
+        # Check if another Salary Structure Assignment exists
+        assignment_exists = frappe.db.exists(
+            "Salary Structure Assignment",
+            {
+                "employee": self.employee,
+                "custom_payroll_period": self.custom_payroll_period,
+                "docstatus": 1,
+                "name": ["!=", self.name],
+            },
+        )
+
+        # Recreate declaration only if another assignment exists
+        if assignment_exists:
+            self.insert_tax_declaration_list()
 
 
     def update_employee_promotion(self):
@@ -235,95 +213,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             get_promotion_doc.save()
 
 
-    # def insert_tax_declaration_list(self):
-    #     if not self.employee:
-    #         return
-
-    #     sub_categories = []
-    #     payroll_period = frappe.get_doc("Payroll Period", self.custom_payroll_period)
-    #     from_date = getdate(self.from_date)
-    #     payroll_start_date = getdate(payroll_period.start_date)
-    #     payroll_end_date = getdate(payroll_period.end_date)
-
-    #     declaration_start_date = max(from_date, payroll_start_date)
-    #     start = declaration_start_date if not isinstance(declaration_start_date, str) else datetime.strptime(declaration_start_date, "%Y-%m-%d").date()
-    #     end = payroll_end_date if not isinstance(payroll_end_date, str) else datetime.strptime(payroll_end_date, "%Y-%m-%d").date()
-
-    #     num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
-
-    #     frappe.msgprint(str(num_months))
-
-
-    #     salary_slip = make_salary_slip(
-    #         source_name=self.salary_structure,
-    #         employee=self.employee,
-    #         print_format='Salary Slip Standard',
-    #         posting_date=self.from_date,
-    #         for_preview=1,
-    #     )
-
-    #     def add_exemption(component_type, monthly_amount):
-    #         total_amount = monthly_amount * num_months
-    #         exemption_components = frappe.get_all(
-    #             'Employee Tax Exemption Sub Category',
-    #             filters={'custom_component_type': component_type,"is_active":1},
-    #             fields=['name', 'max_amount']
-    #         )
-    #         for comp in exemption_components:
-    #             allowed_amount = min(total_amount, comp.max_amount or total_amount)
-    #             sub_categories.append({
-    #                 "sub_category": comp.name,
-    #                 "max_amount": comp.max_amount or total_amount,
-    #                 "amount": allowed_amount
-    #             })
-
-
-    #     if self.custom_tax_regime == "New Regime" or self.custom_tax_regime == "Old Regime":
-    #         for earning in salary_slip.earnings:
-    #             comp_doc = frappe.get_doc("Salary Component", earning.salary_component)
-    #             if comp_doc.component_type == "NPS" and comp_doc.custom_component_sub_type == "Fixed":
-    #                 add_exemption("NPS", earning.amount)
-
-    #         if self.custom_tax_regime == "Old Regime":
-    #             for deduction in salary_slip.deductions:
-    #                 comp_doc = frappe.get_doc("Salary Component", deduction.salary_component)
-    #                 if comp_doc.component_type in ["Provident Fund", "Professional Tax"] and comp_doc.custom_component_sub_type == "Fixed":
-    #                     add_exemption(comp_doc.component_type, deduction.amount)
-
-    #     existing_declaration = frappe.get_list(
-    #         'Employee Tax Exemption Declaration',
-    #         filters={
-    #             'employee': self.employee,
-    #             'payroll_period': self.custom_payroll_period,
-    #             'docstatus': ['in', [0, 1]]
-    #         },
-    #         fields=['name']
-    #     )
-
-    #     if existing_declaration:
-    #         return
-
-    #     new_declaration = frappe.get_doc({
-    #         'doctype': 'Employee Tax Exemption Declaration',
-    #         'employee': self.employee,
-    #         'company': self.company,
-    #         'payroll_period': self.custom_payroll_period,
-    #         'currency': self.currency,
-    #         'custom_income_tax': self.income_tax_slab,
-    #         'custom_salary_structure_assignment': self.name,
-    #         'custom_posting_date': self.from_date
-    #     })
-
-    #     for category in sub_categories:
-    #         new_declaration.append("declarations", {
-    #             "exemption_sub_category": category["sub_category"],
-    #             "max_amount": category["max_amount"],
-    #             "amount": category["amount"]
-    #         })
-
-    #     new_declaration.insert()
-    #     new_declaration.submit()
-    #     frappe.db.commit()
 
 
     def insert_tax_declaration_list(self):
