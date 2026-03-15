@@ -171,10 +171,6 @@ class CustomSalarySlip(SalarySlip):
 
     def set_manual_tds_value(self):
 
-        # Reset values
-        self.custom_additional_tds_deducted_amount = 0
-        self.current_month_income_tax = 0
-
         # Check earnings for manual TDS
         for component in self.earnings:
             if component.additional_salary:
@@ -668,8 +664,12 @@ class CustomSalarySlip(SalarySlip):
                 self.total_tax_amount - self.total_structured_tax_amount
             )
 
+            self.custom_total_tax_amount=self.total_tax_amount
+            self.custom_total_structured_tax_amount=self.total_structured_tax_amount
 
-            self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0.0
+
+
+            self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0
 
             
 
