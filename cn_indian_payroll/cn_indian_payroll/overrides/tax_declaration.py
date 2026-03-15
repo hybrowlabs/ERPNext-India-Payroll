@@ -15,7 +15,7 @@ from hrms.hr.utils import (
 
 from datetime import datetime, timedelta
 from datetime import date
-
+from frappe.utils import getdate
 
 import json
 from frappe.utils import getdate
@@ -922,181 +922,324 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
     # --------Insert HRA Breakup Table & Annual HRA and Basic----------------
 
+    # def calculate_hra_breakup(self):
+    #     if self.monthly_house_rent and self.custom_start_date and self.custom_end_date:
+    #         start_date = getdate(self.custom_start_date)
+    #         end_date = getdate(self.custom_end_date)
+
+    #         rent_month_count = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
+
+    #         get_company = frappe.get_doc("Company", self.company)
+    #         basic_component = get_company.basic_component
+    #         hra_component = get_company.hra_component
+    #         basic_component_arrear = get_company.custom_basic_arrear
+    #         hra_component_arrear = get_company.custom_hra_arrear
+
+    #         ss_assignment = frappe.get_list(
+    #             "Salary Structure Assignment",
+    #             filters={
+    #                 "employee": self.employee,
+    #                 "docstatus": 1,
+    #                 "company": self.company,
+    #                 "custom_payroll_period": self.payroll_period,
+    #             },
+    #             fields=[
+    #                 "name",
+    #                 "from_date",
+    #                 "custom_payroll_period",
+    #                 "salary_structure",
+    #             ],
+    #             order_by="from_date desc",
+    #         )
+
+    #         if ss_assignment:
+    #             first_assignment = next(iter(ss_assignment))
+    #             first_assignment_date = first_assignment.get("from_date")
+    #             first_assignment_structure = first_assignment.get("salary_structure")
+
+    #             start_date = ss_assignment[-1].from_date
+    #             if ss_assignment[-1].custom_payroll_period:
+    #                 payroll_period = frappe.get_doc(
+    #                     "Payroll Period", ss_assignment[-1].custom_payroll_period
+    #                 )
+    #                 end_date = payroll_period.end_date
+    #                 month_count = (
+    #                     (end_date.year - start_date.year) * 12
+    #                     + end_date.month
+    #                     - start_date.month
+    #                     + 1
+    #                 )
+
+    #                 cur_basic_amount = 0
+    #                 cur_hra_amount = 0
+    #                 get_salary_slip = frappe.get_list(
+    #                     "Salary Slip",
+    #                     filters={
+    #                         "employee": self.employee,
+    #                         "docstatus": 1,
+    #                         "company": self.company,
+    #                         "custom_payroll_period": self.payroll_period,
+    #                     },
+    #                     fields=["name"],
+    #                 )
+    #                 if len(get_salary_slip) > 0:
+    #                     ss_slip_month_count = len(get_salary_slip)
+
+    #                     for salary_slip in get_salary_slip:
+    #                         get_salary_doc = frappe.get_doc(
+    #                             "Salary Slip", salary_slip.name
+    #                         )
+    #                         for component in get_salary_doc.earnings:
+    #                             if component.salary_component == basic_component:
+    #                                 cur_basic_amount += component.amount
+    #                             if component.salary_component == basic_component_arrear:
+    #                                 cur_basic_amount += component.amount
+    #                             if component.salary_component == hra_component:
+    #                                 cur_hra_amount += component.amount
+    #                             if component.salary_component == hra_component_arrear:
+    #                                 cur_hra_amount += component.amount
+    #                 else:
+    #                     ss_slip_month_count = 0
+    #                 futute_month_count = month_count - ss_slip_month_count
+
+    #                 new_salary_slip = make_salary_slip(
+    #                     source_name=first_assignment_structure,
+    #                     employee=self.employee,
+    #                     print_format="Salary Slip Standard for CTC",
+    #                     posting_date=first_assignment_date,
+    #                     for_preview=1,
+    #                 )
+    #                 future_basic_amount = 0
+    #                 future_hra_amount = 0
+
+    #                 for new_earning in new_salary_slip.earnings:
+    #                     if new_earning.salary_component == basic_component:
+    #                         future_basic_amount = (
+    #                             new_earning.amount * futute_month_count
+    #                         ) + cur_basic_amount
+
+    #                     if new_earning.salary_component == hra_component:
+    #                         future_hra_amount = (
+    #                             new_earning.amount * futute_month_count
+    #                         ) + cur_hra_amount
+
+    #                 self.salary_structure_hra = round(future_hra_amount)
+    #                 self.custom_basic = round(future_basic_amount)
+    #                 percentage_basic = (future_basic_amount * 10) / 100
+    #                 self.custom_basic_as_per_salary_structure = round(percentage_basic)
+
+    #                 annual_hra_amount = self.monthly_house_rent *   
+
+    #                 basic_rule2 = round(annual_hra_amount - percentage_basic)
+    #                 if self.rented_in_metro_city == 0:
+    #                     non_metro_or_metro = (future_basic_amount * 40) / 100
+    #                 elif self.rented_in_metro_city == 1:
+    #                     non_metro_or_metro = (future_basic_amount * 50) / 100
+
+    #                 final_hra_exemption = round(
+    #                     min(basic_rule2, future_hra_amount, non_metro_or_metro)
+    #                 )
+
+    #                 self.annual_hra_exemption = round(final_hra_exemption)
+    #                 self.monthly_hra_exemption = round(
+    #                     final_hra_exemption / month_count
+    #                 )
+
+
+
+    #                 months = []
+    #                 current_date = start_date
+
+    #                 while current_date <= end_date:
+    #                     month_name = current_date.strftime("%B")
+    #                     if month_name not in months:
+    #                         months.append(month_name)
+    #                     current_date = (
+    #                         current_date.replace(day=28) + timedelta(days=4)
+    #                     ).replace(day=1)
+
+    #                 earned_basic = 0
+    #                 if self.rented_in_metro_city == 1:
+    #                     earned_basic = (
+    #                         (self.custom_basic_as_per_salary_structure * 10) * 50 / 100
+    #                     )
+    #                 else:
+    #                     earned_basic = (
+    #                         (self.custom_basic_as_per_salary_structure * 10) * 40 / 100
+    #                     )
+
+    #                 self.custom_hra_breakup = []
+    #                 for i in range(len(months)):
+    #                     self.append(
+    #                         "custom_hra_breakup",
+    #                         {
+    #                             "month": months[i],
+    #                             "rent_paid": round(annual_hra_amount),
+    #                             "hra_received": round(self.salary_structure_hra),
+    #                             "earned_basic": round(earned_basic),
+    #                             "excess_of_rent_paid": round(basic_rule2),
+    #                             "exemption_amount": final_hra_exemption,
+    #                         },
+    #                     )
+
+    #                 self.custom_hra_received_annual=self.salary_structure_hra
+    #                 self.custom_rent_paid__10_of_basic_annual=(self.monthly_house_rent * rent_month_count)-self.custom_basic_as_per_salary_structure
+    #                 self.custom_50_of_basic_metro=earned_basic
+
+    #     elif self.monthly_house_rent == 0  or self.monthly_house_rent == None:
+    #         self.custom_basic_as_per_salary_structure = None
+    #         self.salary_structure_hra = None
+    #         self.custom_basic = None
+    #         self.custom_hra_breakup = []
+    #         self.annual_hra_exemption = None
+    #         self.monthly_hra_exemption = None
+    #         self.custom_50_of_basic_metro=None
+    #         self.custom_rent_paid__10_of_basic_annual=None
+    #         self.custom_hra_received_annual=None
+        # elif self.monthly_house_rent == 0  or self.monthly_house_rent == None:
+        #     self.custom_basic_as_per_salary_structure = None
+        #     self.salary_structure_hra = None
+        #     self.custom_basic = None
+        #     self.custom_hra_breakup = []
+        #     self.annual_hra_exemption = None
+        #     self.monthly_hra_exemption = None
+        #     self.custom_50_of_basic_metro=None
+        #     self.custom_rent_paid__10_of_basic_annual=None
+        #     self.custom_hra_received_annual=None
+
+
+
+
     def calculate_hra_breakup(self):
-        if self.monthly_house_rent and self.custom_check == 0 and self.custom_start_date and self.custom_end_date:
-            start_date = getdate(self.custom_start_date)
-            end_date = getdate(self.custom_end_date)
+        """
+        Calculate HRA exemption based on:
+        - Previous salary slips (submitted)
+        - Current month draft (cur_basic, cur_hra)
+        - Future months (projection)
+        """
+        if not (self.monthly_house_rent and self.custom_start_date and self.custom_end_date and self.custom_tax_regime=="Old Regime"):
+            self.custom_basic_as_per_salary_structure = None
+            self.salary_structure_hra = None
+            self.custom_basic = None
+            self.annual_hra_exemption = None
+            self.monthly_hra_exemption = None
+            self.custom_50_of_basic_metro=None
+            self.custom_rent_paid__10_of_basic_annual=None
+            self.custom_hra_received_annual=None
+            return
 
-            rent_month_count = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
+        # Initialize amounts
+        cur_basic = self.custom_current_basic or 0
+        cur_hra = self.custom_current_hra or 0
+        prev_basic = prev_hra = 0
+        future_basic = future_hra = 0
 
-            get_company = frappe.get_doc("Company", self.company)
-            basic_component = get_company.basic_component
-            hra_component = get_company.hra_component
+        start_date = getdate(self.custom_start_date)
+        end_date = getdate(self.custom_end_date)
+        rent_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
 
-            ss_assignment = frappe.get_list(
-                "Salary Structure Assignment",
-                filters={
-                    "employee": self.employee,
-                    "docstatus": 1,
-                    "company": self.company,
-                    "custom_payroll_period": self.payroll_period,
-                },
-                fields=[
-                    "name",
-                    "from_date",
-                    "custom_payroll_period",
-                    "salary_structure",
-                ],
-                order_by="from_date desc",
+        # Company salary components
+        company = frappe.get_doc("Company", self.company)
+        basic_comp = company.basic_component
+        hra_comp = company.hra_component
+        basic_arrear = company.custom_basic_arrear
+        hra_arrear = company.custom_hra_arrear
+
+        # Get latest salary structure assignment
+        assignments = frappe.get_list(
+            "Salary Structure Assignment",
+            filters={
+                "employee": self.employee,
+                "docstatus": 1,
+                "custom_payroll_period": self.payroll_period,
+            },
+            fields=["*"],
+            order_by="from_date desc",
+            limit=1
+        )
+
+        if not assignments:
+            return
+
+        assignment = assignments[0]
+        structure = assignment.salary_structure
+        assignment_date = assignment.from_date
+
+        # Get payroll period
+        payroll_period = frappe.get_doc("Payroll Period", assignment.custom_payroll_period)
+        payroll_start = getdate(payroll_period.start_date)
+        payroll_end = getdate(payroll_period.end_date)
+
+        # Calculate total months in period
+        period_start = max([start_date, payroll_start, getdate(frappe.get_value("Employee", self.employee, "date_of_joining"))])
+        num_months = (payroll_end.year - period_start.year) * 12 + (payroll_end.month - period_start.month) + 1
+
+        # Previous salary slips
+        prev_slips = frappe.get_list(
+            "Salary Slip",
+            filters={
+                "employee": self.employee,
+                "company": self.company,
+                "docstatus": 1,
+                "custom_payroll_period": self.payroll_period,
+                "name": ["!=", self.name]
+            },
+            fields=["name"]
+        )
+
+        for slip in prev_slips:
+            doc = frappe.get_doc("Salary Slip", slip.name)
+            for e in doc.earnings:
+                if e.salary_component in [basic_comp, basic_arrear]:
+                    prev_basic += e.amount
+                if e.salary_component in [hra_comp, hra_arrear]:
+                    prev_hra += e.amount
+
+        # Future projection: remaining months
+        future_count = num_months - len(prev_slips) - 1  # exclude current month
+        if future_count > 0:
+            preview_slip = make_salary_slip(
+                source_name=structure,
+                employee=self.employee,
+                print_format="Salary Slip Standard",
+                posting_date=assignment_date,
+                for_preview=1
             )
+            for e in preview_slip.earnings:
+                if e.salary_component in [basic_comp, basic_arrear]:
+                    future_basic += e.amount * future_count
+                if e.salary_component in [hra_comp, hra_arrear]:
+                    future_hra += e.amount * future_count
+                # Add current month
+                if not cur_basic:
+                    if e.salary_component in [basic_comp, basic_arrear]:
+                        cur_basic += e.amount
+                if not cur_hra:
+                    if e.salary_component in [hra_comp, hra_arrear]:
+                        cur_hra += e.amount
 
-            if ss_assignment:
-                first_assignment = next(iter(ss_assignment))
-                first_assignment_date = first_assignment.get("from_date")
-                first_assignment_structure = first_assignment.get("salary_structure")
+        # Total annual amounts
+        total_basic = cur_basic + prev_basic + future_basic
+        total_hra = cur_hra + prev_hra + future_hra
 
-                start_date = ss_assignment[-1].from_date
-                if ss_assignment[-1].custom_payroll_period:
-                    payroll_period = frappe.get_doc(
-                        "Payroll Period", ss_assignment[-1].custom_payroll_period
-                    )
-                    end_date = payroll_period.end_date
-                    month_count = (
-                        (end_date.year - start_date.year) * 12
-                        + end_date.month
-                        - start_date.month
-                        + 1
-                    )
-
-                    cur_basic_amount = 0
-                    cur_hra_amount = 0
-                    get_salary_slip = frappe.get_list(
-                        "Salary Slip",
-                        filters={
-                            "employee": self.employee,
-                            "docstatus": 1,
-                            "company": self.company,
-                            "custom_payroll_period": self.payroll_period,
-                        },
-                        fields=["name"],
-                    )
-                    if len(get_salary_slip) > 0:
-                        ss_slip_month_count = len(get_salary_slip)
-
-                        for salary_slip in get_salary_slip:
-                            get_salary_doc = frappe.get_doc(
-                                "Salary Slip", salary_slip.name
-                            )
-                            for component in get_salary_doc.earnings:
-                                if component.salary_component == basic_component:
-                                    cur_basic_amount += component.amount
-                                elif component.salary_component == hra_component:
-                                    cur_hra_amount += component.amount
-                    else:
-                        ss_slip_month_count = 0
-                    futute_month_count = month_count - ss_slip_month_count
-
-                    new_salary_slip = make_salary_slip(
-                        source_name=first_assignment_structure,
-                        employee=self.employee,
-                        print_format="Salary Slip Standard for CTC",
-                        posting_date=first_assignment_date,
-                        for_preview=1,
-                    )
-                    future_basic_amount = 0
-                    future_hra_amount = 0
-
-                    for new_earning in new_salary_slip.earnings:
-                        if new_earning.salary_component == basic_component:
-                            future_basic_amount = (
-                                new_earning.amount * futute_month_count
-                            ) + cur_basic_amount
-
-                        if new_earning.salary_component == hra_component:
-                            future_hra_amount = (
-                                new_earning.amount * futute_month_count
-                            ) + cur_hra_amount
-
-                    self.salary_structure_hra = round(future_hra_amount)
-                    self.custom_basic = round(future_basic_amount)
-                    percentage_basic = (future_basic_amount * 10) / 100
-                    self.custom_basic_as_per_salary_structure = round(percentage_basic)
-
-                    annual_hra_amount = self.monthly_house_rent * rent_month_count
-
-                    basic_rule2 = round(annual_hra_amount - percentage_basic)
-                    if self.rented_in_metro_city == 0:
-                        non_metro_or_metro = (future_basic_amount * 40) / 100
-                    elif self.rented_in_metro_city == 1:
-                        non_metro_or_metro = (future_basic_amount * 50) / 100
-
-                    final_hra_exemption = round(
-                        min(basic_rule2, future_hra_amount, non_metro_or_metro)
-                    )
-
-                    self.annual_hra_exemption = round(final_hra_exemption)
-                    self.monthly_hra_exemption = round(
-                        final_hra_exemption / month_count
-                    )
+        # frappe.msgprint(str(total_basic))
 
 
+        self.salary_structure_hra = round(total_hra)
+        self.custom_basic = round(total_basic)
+        basic_10_percent = round(total_basic * 0.10)
+        self.custom_basic_as_per_salary_structure = basic_10_percent
 
-                    months = []
-                    current_date = start_date
+        # Annual HRA exemption calculation
+        annual_rent = self.monthly_house_rent * rent_months
+        basic_rule2 = round(annual_rent - basic_10_percent)
+        metro_limit = round(total_basic * 0.5 if self.rented_in_metro_city else total_basic * 0.4)
 
-                    while current_date <= end_date:
-                        month_name = current_date.strftime("%B")
-                        if month_name not in months:
-                            months.append(month_name)
-                        current_date = (
-                            current_date.replace(day=28) + timedelta(days=4)
-                        ).replace(day=1)
+        final_exemption = round(min(total_hra, basic_rule2, metro_limit))
+        self.annual_hra_exemption = final_exemption
+        self.monthly_hra_exemption = round(final_exemption / rent_months)
 
-                    earned_basic = 0
-                    if self.rented_in_metro_city == 1:
-                        earned_basic = (
-                            (self.custom_basic_as_per_salary_structure * 10) * 50 / 100
-                        )
-                    else:
-                        earned_basic = (
-                            (self.custom_basic_as_per_salary_structure * 10) * 40 / 100
-                        )
-
-                    self.custom_hra_breakup = []
-                    for i in range(len(months)):
-                        self.append(
-                            "custom_hra_breakup",
-                            {
-                                "month": months[i],
-                                "rent_paid": round(annual_hra_amount),
-                                "hra_received": round(self.salary_structure_hra),
-                                "earned_basic": round(earned_basic),
-                                "excess_of_rent_paid": round(basic_rule2),
-                                "exemption_amount": final_hra_exemption,
-                            },
-                        )
-
-                    self.custom_hra_received_annual=self.salary_structure_hra
-                    self.custom_rent_paid__10_of_basic_annual=(self.monthly_house_rent * rent_month_count)-self.custom_basic_as_per_salary_structure
-                    self.custom_50_of_basic_metro=earned_basic
-
-        elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 0:
-            self.custom_basic_as_per_salary_structure = None
-            self.salary_structure_hra = None
-            self.custom_basic = None
-            self.custom_hra_breakup = []
-            self.annual_hra_exemption = None
-            self.monthly_hra_exemption = None
-            self.custom_50_of_basic_metro=None
-            self.custom_rent_paid__10_of_basic_annual=None
-            self.custom_hra_received_annual=None
-        elif self.monthly_house_rent == 0  or self.monthly_house_rent == None and self.custom_check == 1:
-            self.custom_basic_as_per_salary_structure = None
-            self.salary_structure_hra = None
-            self.custom_basic = None
-            self.custom_hra_breakup = []
-            self.annual_hra_exemption = None
-            self.monthly_hra_exemption = None
-            self.custom_50_of_basic_metro=None
-            self.custom_rent_paid__10_of_basic_annual=None
-            self.custom_hra_received_annual=None
+        # Other fields
+        self.custom_hra_received_annual = self.salary_structure_hra
+        self.custom_rent_paid__10_of_basic_annual = annual_rent - basic_10_percent
+        self.custom_50_of_basic_metro = metro_limit
