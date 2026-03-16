@@ -639,6 +639,9 @@ class CustomSalarySlip(SalarySlip):
             eval_locals,
         )
 
+        self.custom_annual_taxable_amount_without_additional_earning=self.total_taxable_earnings_without_full_tax_addl_components
+
+
 
 
         self.current_structured_tax_amount = (
