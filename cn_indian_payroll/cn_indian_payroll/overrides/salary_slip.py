@@ -10,6 +10,8 @@ import frappe
 from frappe.utils import getdate
 from dateutil.relativedelta import relativedelta
 from cn_indian_payroll.cn_indian_payroll.overrides.leegality import view_signed_payslip
+from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 from frappe.utils import (
@@ -85,7 +87,28 @@ class CustomSalarySlip(SalarySlip):
         ):
             view_signed_payslip(self.name)
 
+        self.basic_hra_amount()
 
+
+
+    def basic_hra_amount(self):
+        if self.employee and self.custom_tax_regime=="Old Regime":
+            declaration = frappe.get_list(
+                'Employee Tax Exemption Declaration',
+                filters={
+                    'employee': self.employee,
+                    'payroll_period': self.custom_payroll_period,
+                    'docstatus': 1,
+                    'company': self.company
+                },
+                fields=['*']
+            )
+
+            if declaration:
+                get_each_doc = frappe.get_doc("Employee Tax Exemption Declaration", declaration[0].name)
+                get_each_doc.custom_current_basic=0
+                get_each_doc.custom_current_hra=0
+                get_each_doc.save()
 
 
     def before_save(self):
@@ -120,6 +143,10 @@ class CustomSalarySlip(SalarySlip):
                     total_ctc_taxable_amount += earning.default_amount
         self.custom_ctc_taxable_earnings = total_ctc_taxable_amount
 
+        self.custom_additional_earning = (
+            self.current_additional_earnings if self.current_additional_earnings else 0
+        )
+
 
         
 
@@ -137,16 +164,12 @@ class CustomSalarySlip(SalarySlip):
         self.update_total_lop()
         self.set_taxale_regime()
 
-        self.set_manual_tds_value()
+        # self.set_manual_tds_value()
 
     
     
 
     def set_manual_tds_value(self):
-
-        # Reset values
-        self.custom_additional_tds_deducted_amount = 0
-        self.current_month_income_tax = 0
 
         # Check earnings for manual TDS
         for component in self.earnings:
@@ -616,11 +639,16 @@ class CustomSalarySlip(SalarySlip):
             eval_locals,
         )
 
+        self.custom_annual_taxable_amount_without_additional_earning=self.total_taxable_earnings_without_full_tax_addl_components
+
+
 
 
         self.current_structured_tax_amount = (
             self.total_structured_tax_amount - self.previous_total_paid_taxes
         ) / self.remaining_sub_periods
+
+        
 
 
 
@@ -639,7 +667,16 @@ class CustomSalarySlip(SalarySlip):
                 self.total_tax_amount - self.total_structured_tax_amount
             )
 
-        self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0.0
+            self.custom_total_tax_amount=self.total_tax_amount
+            self.custom_total_structured_tax_amount=self.total_structured_tax_amount
+
+
+
+            self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0
+
+            
+
+            
 
 
         current_tax_amount = (
@@ -1350,6 +1387,10 @@ class CustomSalarySlip(SalarySlip):
             self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
         )
 
+        # print("\n\n\n\n\n\n\n\n\n\n111111111111111111",self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax)
+
+
+
 
 
 
@@ -1553,122 +1594,172 @@ class CustomSalarySlip(SalarySlip):
                 row.custom_arrear_ytd = arrear_ytd_sum[row.salary_component]
 
 
-
     def update_declaration_component(self):
         if not self.employee:
             return
 
-        current_basic=current_hra=None
+        # ----------------------------
+        # Initialize values
+        # ----------------------------
+        current_nps = current_epf = current_pt = current_lta=0
+        previous_nps = previous_epf = previous_pt =previous_lta= 0
+        future_nps = future_epf = future_pt = future_lta= 0
+        
 
-        current_basic_value = current_hra_value = current_nps_value = current_epf_value = current_pt_value = 0
-        previous_basic_value = previous_hra_value = previous_nps_value = previous_epf_value = previous_pt_value = 0
-        future_basic_value = future_hra_value = future_nps_value = future_epf_value = future_pt_value = 0
-        current_lta_value= 0
-        future_lta_value = 0
-        previous_lta_value = 0
+        current_basic = current_hra = None
+        current_basic_arrear = current_hra_arrear = None
 
-        get_company = frappe.get_doc("Company", self.company)
-        if get_company.basic_component:
-            current_basic = get_company.basic_component
-        if get_company.hra_component:
-            current_hra = get_company.hra_component
+        # ----------------------------
+        # Get company component setup
+        # ----------------------------
+        company = frappe.get_doc("Company", self.company)
 
+        current_basic = company.basic_component
+        current_hra = company.hra_component
+        current_basic_arrear = company.custom_basic_arrear
+        current_hra_arrear = company.custom_hra_arrear
 
+        current_basic_amount=0
+        current_hra_amount=0
 
-        if self.earnings:
-            for earning in self.earnings:
-                earning_component_data = frappe.get_doc(
-                    "Salary Component", earning.salary_component
-                )
-                if earning_component_data.component_type == "NPS":
-                    current_nps_value += earning.amount or 0
-                    if earning_component_data.custom_is_arrear == 0 and earning_component_data.custom_component_sub_type=="Fixed":
-                        future_nps_value = (
-                            earning.custom_actual_amount or 0
-                        ) * self.custom_month_count
+        # ----------------------------
+        # Current Salary Slip Values
+        # ----------------------------
+        for earning in self.earnings or []:
 
-                if earning_component_data.component_type == "LTA Reimbursement":
-                    current_lta_value += earning.amount or 0
-                    if earning_component_data.custom_is_arrear == 0 and earning_component_data.custom_component_sub_type=="Fixed":
-                        future_lta_value = (
-                            earning.custom_actual_amount or 0
-                        ) * self.custom_month_count
+            comp_doc = frappe.get_cached_doc("Salary Component", earning.salary_component)
 
+            if comp_doc.component_type == "NPS":
+                current_nps += earning.amount or 0
+            if comp_doc.component_type == "LTA Reimbursement":
+                current_lta += earning.amount or 0
 
-                if earning.salary_component == current_basic:
-                    current_basic_value += earning.amount
-                    if earning_component_data.custom_is_arrear == 0 and earning_component_data.custom_component_sub_type=="Fixed":
-                        future_basic_value = (earning.custom_actual_amount) * (
-                            self.custom_month_count
-                        )
-                if earning.salary_component == current_hra:
-                    current_hra_value += earning.amount
-                    if earning_component_data.custom_is_arrear == 0 and earning_component_data.custom_component_sub_type=="Fixed":
-                        future_hra_value = (earning.custom_actual_amount) * (
-                            self.custom_month_count
-                        )
+            if earning.salary_component==current_basic:
+                current_basic_amount+=earning.amount
+
+            if earning.salary_component==current_basic_arrear:
+                current_basic_amount+=earning.amount
+
+            if earning.salary_component==current_hra:
+                current_hra_amount+=earning.amount
+            
+            if earning.salary_component==current_hra_arrear:
+                current_hra_amount+=earning.amount
 
 
 
-        if self.deductions:
-            for deduction in self.deductions:
-                deduction_component_data = frappe.get_doc(
-                    "Salary Component", deduction.salary_component
-                )
-                if deduction_component_data.component_type == "Provident Fund":
-                    current_epf_value += deduction.amount
-                    if deduction_component_data.custom_is_arrear == 0 and deduction_component_data.custom_component_sub_type=="Fixed":
-                        future_epf_value = (deduction.custom_actual_amount) * (
-                            self.custom_month_count
-                        )
-                if deduction_component_data.component_type == "Professional Tax":
-                    current_pt_value += deduction.amount
+        for deduction in self.deductions or []:
 
-                    if deduction_component_data.custom_is_arrear == 0 and deduction_component_data.custom_component_sub_type=="Fixed":
-                        future_pt_value = (deduction.custom_actual_amount) * (
-                            self.custom_month_count
-                        )
+            comp_doc = frappe.get_cached_doc("Salary Component", deduction.salary_component)
 
+            if comp_doc.component_type == "Provident Fund":
+                current_epf += deduction.amount or 0
 
+            if comp_doc.component_type == "Professional Tax":
+                current_pt += deduction.amount or 0
 
-
-        get_previous_salary_slip = frappe.get_list(
-            'Salary Slip',
+        # ----------------------------
+        # Previous Salary Slips
+        # ----------------------------
+        previous_slips = frappe.get_all(
+            "Salary Slip",
             filters={
-                'employee': self.employee,
-                'custom_payroll_period': self.custom_payroll_period,
-                'docstatus': 1,
-                'name': ['!=', self.name]
+                "employee": self.employee,
+                "custom_payroll_period": self.custom_payroll_period,
+                "docstatus": 1,
+                "name": ["!=", self.name],
             },
-            fields=['name',"custom_payroll_period"]
+            pluck="name",
         )
-        if get_previous_salary_slip:
-            for slip in get_previous_salary_slip:
-                previous_salary_slip = frappe.get_doc("Salary Slip", slip.name)
-                if previous_salary_slip.earnings:
-                    for earning in previous_salary_slip.earnings:
-                        component_data = frappe.get_doc(
-                            "Salary Component", earning.salary_component
-                        )
-                        if component_data.component_type == "NPS":
-                            previous_nps_value += earning.amount
-                        if earning.salary_component == current_basic:
-                            previous_basic_value += earning.amount
-                        if earning.salary_component == current_hra:
-                            previous_hra_value += earning.amount
-                        if component_data.component_type == "LTA Reimbursement":
-                            previous_lta_value += earning.amount
 
-                if previous_salary_slip.deductions:
-                    for deduction in previous_salary_slip.deductions:
-                        component_data = frappe.get_doc(
-                        "Salary Component", deduction.salary_component
-                        )
-                        if component_data.component_type == "Provident Fund":
-                            previous_epf_value += deduction.amount
-                        if component_data.component_type == "Professional Tax":
-                            previous_pt_value += deduction.amount
+        for slip_name in previous_slips:
 
+            slip = frappe.get_doc("Salary Slip", slip_name)
+
+            for earning in slip.earnings or []:
+
+                comp_doc = frappe.get_cached_doc("Salary Component", earning.salary_component)
+
+                if comp_doc.component_type == "NPS":
+                    previous_nps += earning.amount or 0
+
+                if comp_doc.component_type == "LTA Reimbursement":
+                    previous_lta += earning.amount or 0
+
+            for deduction in slip.deductions or []:
+
+                comp_doc = frappe.get_cached_doc("Salary Component", deduction.salary_component)
+
+                if comp_doc.component_type == "Provident Fund":
+                    previous_epf += deduction.amount or 0
+
+                if comp_doc.component_type == "Professional Tax":
+                    previous_pt += deduction.amount or 0
+
+        # ----------------------------
+        # Get Latest Salary Structure
+        # ----------------------------
+        assignment = frappe.get_all(
+            "Salary Structure Assignment",
+            filters={
+                "employee": self.employee,
+                "company": self.company,
+                "docstatus": 1,
+            },
+            fields=["name", "salary_structure", "from_date"],
+            order_by="from_date desc",
+            limit=1,
+        )
+
+        if not assignment:
+            return
+
+        structure = assignment[0].salary_structure
+        from_date = assignment[0].from_date
+
+        # ----------------------------
+        # Preview Future Salary Slip
+        # ----------------------------
+        preview_slip = make_salary_slip(
+            source_name=structure,
+            employee=self.employee,
+            posting_date=from_date,
+            for_preview=1,
+        )
+
+        for earning in preview_slip.earnings:
+
+            comp_doc = frappe.get_cached_doc("Salary Component", earning.salary_component)
+
+            if comp_doc.component_type == "NPS":
+                future_nps += (earning.amount or 0) * (self.custom_month_count or 0)
+            if comp_doc.component_type == "LTA Reimbursement":
+                future_lta += (earning.amount or 0) * (self.custom_month_count or 0)
+
+        for deduction in preview_slip.deductions:
+
+            comp_doc = frappe.get_cached_doc("Salary Component", deduction.salary_component)
+
+            if comp_doc.component_type == "Provident Fund":
+                future_epf += (deduction.amount or 0) * (self.custom_month_count or 0)
+
+            if comp_doc.component_type == "Professional Tax":
+                future_pt += (deduction.amount or 0) * (self.custom_month_count or 0)
+
+        # ----------------------------
+        # Final Totals
+        # ----------------------------
+        total_nps = round(current_nps + previous_nps + future_nps)
+        total_pf = min(round(current_epf + previous_epf + future_epf),150000)
+        total_pt = round(current_pt + previous_pt + future_pt)
+        total_lta=round(current_lta+previous_lta+future_lta)
+
+        # total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
+        # total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
+        # total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
+        # total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
+
+        
 
         if self.custom_tax_regime == "Old Regime":
 
@@ -1702,10 +1793,6 @@ class CustomSalarySlip(SalarySlip):
 
                     form_data = json.loads(declaration[0].custom_declaration_form_data or '[]')
 
-                    total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
-                    total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
-                    total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
-                    total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
 
                     for subcategory in get_each_doc.declarations:
                         check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
@@ -1748,115 +1835,12 @@ class CustomSalarySlip(SalarySlip):
                                 allowed_lta = min(entry.get("amount", 0), total_lta)
                                 entry["amount"] = allowed_lta
                                 entry["value"] = allowed_lta
+                    get_each_doc.custom_current_hra=current_hra_amount
+                    get_each_doc.custom_current_basic=current_basic_amount
 
                     get_each_doc.custom_posting_date = self.posting_date
                     get_each_doc.custom_declaration_form_data = json.dumps(form_data)
 
-
-
-                    if get_each_doc.monthly_house_rent>0:
-                        ss_assignment = frappe.get_list(
-                        "Salary Structure Assignment",
-                        filters={
-                            "employee": self.employee,
-                            "docstatus": 1,
-                            "company": self.company,
-                            "custom_payroll_period": self.custom_payroll_period,
-                            "from_date": ("<=", self.end_date),
-                        },
-                        fields=[
-                            "name",
-                            "from_date",
-                            "custom_payroll_period",
-                            "salary_structure",
-                        ],
-                        order_by="from_date desc",
-                        )
-
-                        if ss_assignment:
-                            first_assignment = next(iter(ss_assignment))
-                            first_assignment_date = first_assignment.get("from_date")
-                            first_assignment_structure = first_assignment.get("salary_structure")
-
-                            start_date = ss_assignment[-1].from_date
-                            if ss_assignment[-1].custom_payroll_period:
-                                payroll_period = frappe.get_doc(
-                                    "Payroll Period", ss_assignment[-1].custom_payroll_period
-                                )
-                                end_date = payroll_period.end_date
-                                month_count = (
-                                    (end_date.year - start_date.year) * 12
-                                    + end_date.month
-                                    - start_date.month
-                                    + 1
-                                )
-
-                                percentage=(previous_basic_value+future_basic_value+current_basic_value)*10/100
-                                get_each_doc.custom_check=1
-                                get_each_doc.custom_basic_as_per_salary_structure=round(percentage)
-                                get_each_doc.salary_structure_hra=round(previous_hra_value+future_hra_value+current_hra_value)
-                                get_each_doc.custom_basic=round(previous_basic_value+future_basic_value+current_basic_value)
-
-                                total_basic_amount= round(previous_basic_value + future_basic_value + current_basic_value)
-                                total_hra_amount = round(previous_hra_value + future_hra_value + current_hra_value)
-
-                                annual_hra_amount = get_each_doc.monthly_house_rent * month_count
-
-                                basic_rule2 = round(annual_hra_amount - percentage)
-                                if get_each_doc.rented_in_metro_city == 0:
-                                    non_metro_or_metro = (total_basic_amount * 40) / 100
-                                elif get_each_doc.rented_in_metro_city == 1:
-                                    non_metro_or_metro = (total_basic_amount * 50) / 100
-
-                                final_hra_exemption = round(
-                                    min(basic_rule2, annual_hra_amount, non_metro_or_metro)
-                                )
-
-
-                                get_each_doc.annual_hra_exemption = round(final_hra_exemption)
-                                get_each_doc.monthly_hra_exemption = round(
-                                    final_hra_exemption / month_count
-                                )
-
-
-                                months = []
-                                current_date = start_date
-
-                                while current_date <= end_date:
-                                    month_name = current_date.strftime("%B")
-                                    if month_name not in months:
-                                        months.append(month_name)
-                                    current_date = (
-                                        current_date.replace(day=28) + timedelta(days=4)
-                                    ).replace(day=1)
-
-                                earned_basic = 0
-                                if get_each_doc.rented_in_metro_city == 1:
-                                    earned_basic = (
-                                        (get_each_doc.custom_basic_as_per_salary_structure * 10) * 50 / 100
-                                    )
-                                else:
-                                    earned_basic = (
-                                        (get_each_doc.custom_basic_as_per_salary_structure * 10) * 40 / 100
-                                    )
-
-
-                                get_each_doc.custom_hra_breakup = []
-                                for i in range(len(months)):
-                                    get_each_doc.append(
-                                        "custom_hra_breakup",
-                                        {
-                                            "month": months[i],
-                                            "rent_paid": round(annual_hra_amount),
-                                            "hra_received": round(total_hra_amount),
-                                            "earned_basic": round(earned_basic),
-                                            "excess_of_rent_paid": round(basic_rule2),
-                                            "exemption_amount": final_hra_exemption,
-                                        },
-                                    )
-
-
-                    get_each_doc.custom_status="Approved"
 
                     get_each_doc.save()
                     frappe.db.commit()
@@ -1865,11 +1849,6 @@ class CustomSalarySlip(SalarySlip):
                 else:
 
                     proof_doc=frappe.get_doc("Employee Tax Exemption Proof Submission", proof_submission[0].name)
-
-                    total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
-                    total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150000)
-                    total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
-                    total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
 
                     for subcategory in proof_doc.tax_exemption_proofs:
                         check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
@@ -1892,112 +1871,8 @@ class CustomSalarySlip(SalarySlip):
                     
 
                     proof_doc.submission_date = self.posting_date
-
-
-                    # if proof_doc.house_rent_payment_amount>0:
-                    #     ss_assignment = frappe.get_list(
-                    #     "Salary Structure Assignment",
-                    #     filters={
-                    #         "employee": self.employee,
-                    #         "docstatus": 1,
-                    #         "company": self.company,
-                    #         "custom_payroll_period": self.payroll_period,
-                    #         "from_date": ("<=", self.end_date),
-                    #     },
-                    #     fields=[
-                    #         "name",
-                    #         "from_date",
-                    #         "custom_payroll_period",
-                    #         "salary_structure",
-                    #     ],
-                    #     order_by="from_date desc",
-                    #     )
-
-                    #     if ss_assignment:
-                    #         first_assignment = next(iter(ss_assignment))
-                    #         first_assignment_date = first_assignment.get("from_date")
-                    #         first_assignment_structure = first_assignment.get("salary_structure")
-
-                    #         start_date = ss_assignment[-1].from_date
-                    #         if ss_assignment[-1].custom_payroll_period:
-                    #             payroll_period = frappe.get_doc(
-                    #                 "Payroll Period", ss_assignment[-1].custom_payroll_period
-                    #             )
-                    #             end_date = payroll_period.end_date
-                    #             month_count = (
-                    #                 (end_date.year - start_date.year) * 12
-                    #                 + end_date.month
-                    #                 - start_date.month
-                    #                 + 1
-                    #             )
-
-                    #             percentage=(previous_basic_value+future_basic_value+current_basic_value)*10/100
-
-                    #             # proof_doc.custom_basic_as_per_salary_structure=round(percentage)
-                    #             # proof_doc.custom_hra_received_annual=round(previous_hra_value+future_hra_value+current_hra_value)
-                    #             # proof_doc.custom_basic_received_annual=round(previous_basic_value+future_basic_value+current_basic_value)
-
-                    #             total_basic_amount= round(previous_basic_value + future_basic_value + current_basic_value)
-                    #             total_hra_amount = round(previous_hra_value + future_hra_value + current_hra_value)
-
-                    #             annual_hra_amount = proof_doc.house_rent_payment_amount * month_count
-
-                    #             basic_rule2 = round(annual_hra_amount - percentage)
-                    #             if proof_doc.rented_in_metro_city == 0:
-                    #                 non_metro_or_metro = (total_basic_amount * 40) / 100
-                    #             elif proof_doc.rented_in_metro_city == 1:
-                    #                 non_metro_or_metro = (total_basic_amount * 50) / 100
-
-                    #             final_hra_exemption = round(
-                    #                 min(basic_rule2, annual_hra_amount, non_metro_or_metro)
-                    #             )
-
-
-                                # proof_doc.custom_annual_eligible_amount = round(final_hra_exemption)
-                                # proof_doc.custom_annual_hra_exemption = round(final_hra_exemption)
-                                # proof_doc.monthly_hra_exemption = round(
-                                    # final_hra_exemption / month_count
-                                # )
-
-
-                                # months = []
-                                # current_date = start_date
-
-                                # while current_date <= end_date:
-                                #     month_name = current_date.strftime("%B")
-                                #     if month_name not in months:
-                                #         months.append(month_name)
-                                #     current_date = (
-                                #         current_date.replace(day=28) + timedelta(days=4)
-                                #     ).replace(day=1)
-
-                                # earned_basic = 0
-                                # if proof_doc.rented_in_metro_city == 1:
-                                #     earned_basic = (
-                                #         (proof_doc.custom_basic_received_annual * 10) * 50 / 100
-                                #     )
-                                # else:
-                                #     earned_basic = (
-                                #         (proof_doc.custom_basic_received_annual * 10) * 40 / 100
-                                #     )
-
-
-                                # proof_doc.custom_hra_breakup = []
-                                # for i in range(len(months)):
-                                #     proof_doc.append(
-                                #         "custom_hra_breakup",
-                                #         {
-                                #             "month": months[i],
-                                #             "rent_paid": round(annual_hra_amount),
-                                #             "hra_received": round(total_hra_amount),
-                                #             "earned_basic": round(earned_basic),
-                                #             "excess_of_rent_paid": round(basic_rule2),
-                                #             "exemption_amount": final_hra_exemption,
-                                #         },
-                                #     )
-
-
-                    # get_each_doc.custom_status="Approved"
+                    proof_doc.custom_current_hra=current_hra_amount
+                    proof_doc.custom_current_basic=current_basic_amount        
 
                     proof_doc.save()
                     frappe.db.commit()
@@ -2035,7 +1910,6 @@ class CustomSalarySlip(SalarySlip):
 
                     form_data = json.loads(declaration[0].custom_declaration_form_data or '[]')
 
-                    total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
 
                     for subcategory in get_each_doc.declarations:
                         check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
@@ -2061,8 +1935,6 @@ class CustomSalarySlip(SalarySlip):
                     get_each_doc.custom_posting_date = self.posting_date
                     get_each_doc.custom_declaration_form_data = json.dumps(form_data)
 
-                    get_each_doc.custom_status="Approved"
-
                     get_each_doc.save()
                     frappe.db.commit()
                     self.tax_exemption_declaration=get_each_doc.total_exemption_amount
@@ -2070,7 +1942,6 @@ class CustomSalarySlip(SalarySlip):
 
                 else:
                     proof_doc=frappe.get_doc("Employee Tax Exemption Proof Submission", proof_submission[0].name)
-                    total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
 
                     for subcategory in proof_doc.tax_exemption_proofs:
                         check_component = frappe.get_doc("Employee Tax Exemption Sub Category", subcategory.exemption_sub_category)
@@ -2086,6 +1957,16 @@ class CustomSalarySlip(SalarySlip):
                     proof_doc.save()
                     frappe.db.commit()
                     self.tax_exemption_declaration=proof_doc.exemption_amount
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2183,6 +2064,8 @@ class CustomSalarySlip(SalarySlip):
             self.previous_taxable_earnings + exempted_amount
         )
 
+        print("\n\n\n\n\n\n\n12121212121111111111111111",self.previous_taxable_earnings)
+
         self.compute_current_and_future_taxable_earnings()
 
         
@@ -2233,9 +2116,13 @@ class CustomSalarySlip(SalarySlip):
 
         self.custom_taxable_amount__annual_taxable_income = self.annual_taxable_amount
 
+        # self.total_taxable_earnings_without_full_tax_addl_components = (
+        #     self.custom_taxable_amount__annual_taxable_income or 0
+        # )
+
         self.total_taxable_earnings_without_full_tax_addl_components = (
-            self.custom_taxable_amount__annual_taxable_income or 0
-        )
+			self.total_taxable_earnings - self.current_additional_earnings_with_full_tax
+		)
 
 
     @frappe.whitelist()
