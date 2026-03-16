@@ -164,7 +164,7 @@ class CustomSalarySlip(SalarySlip):
         self.update_total_lop()
         self.set_taxale_regime()
 
-        self.set_manual_tds_value()
+        # self.set_manual_tds_value()
 
     
     
@@ -1383,6 +1383,8 @@ class CustomSalarySlip(SalarySlip):
 
             self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
         )
+
+        # print("\n\n\n\n\n\n\n\n\n\n111111111111111111",self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax)
 
 
 
