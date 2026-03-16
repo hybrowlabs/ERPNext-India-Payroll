@@ -2064,6 +2064,8 @@ class CustomSalarySlip(SalarySlip):
             self.previous_taxable_earnings + exempted_amount
         )
 
+        print("\n\n\n\n\n\n\n12121212121111111111111111",self.previous_taxable_earnings)
+
         self.compute_current_and_future_taxable_earnings()
 
         

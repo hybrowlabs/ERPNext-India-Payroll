@@ -41,7 +41,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
 
     def before_update_after_submit(self):
-        self.insert_tax_declaration_list()
+        # self.insert_tax_declaration_list()
         self.update_min_wages()
         self.reimbursement_amount()
 
