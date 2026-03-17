@@ -371,7 +371,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
             tds = frappe.db.get_value(
                 "Salary Slip",
                 slip_by_month[m],
-                "custom_additional_tds_deducted_amount"
+                "custom_offcycle_tds_deducted_value"
             ) or 0
         else:
             tds = 0
@@ -515,7 +515,7 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "offcycle_earnings": offcycle,
         "extra_payment_grand_total": round(extra_payment_grand_total) if extra_payment_grand_total else 0,
         "total_perquisite_total":round(total_perquisite_total) if total_perquisite_total else 0,
-        "total_gross_earning":round(total_gross_earning) if total_gross_earning else 0,
+        "total_gross_earning":round(sum(gross_earn_values)) if gross_earn_values else 0,
         "total_off_cycle_payment":round(total_off_cycle_payment) if total_off_cycle_payment else 0,
         "reimbursements_total":round(reimbursements_total) if reimbursements_total else 0,
 
@@ -4342,8 +4342,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
             + 1
         )
 
-    remaining_tax=(total_tax_payable-previous_tds_deducted_value-advance_tax-tds_sum)or 0
+    remaining_tax=round((total_tax_payable-previous_tds_deducted_value-advance_tax-tds_sum)or 0)
 
+    # current_tax=remaining_tax/num_months
 
 
     # ------------------ Response ------------------
@@ -4358,6 +4359,9 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     "education_cess" :round((slab_result.get("education_cess_amount") or 0), 0),
     "total_tax_payable" : round((slab_result.get("total_tax_payable") or 0), 0),
     "marginal_relief" :round((slab_result.get("marginal_relief") or 0), 0),
+    # "current_tax":current_tax,
+    "num_months":num_months,
+    "remaining_tax":remaining_tax,
 
     
 
@@ -4881,7 +4885,8 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "monthly_tds",
             "name":"Monthly TDS",
-            "amount":remaining_tax/num_months
+            "amount":0
+            # "amount": remaining_tax / num_months if num_months else 0
         },
 
     ]

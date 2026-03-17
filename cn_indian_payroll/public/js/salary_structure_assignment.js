@@ -911,9 +911,9 @@ async function processSalaryComponents(frm) {
         <table class="table table-bordered small">
             <thead>
                 <tr>
-                    <th>Salary Component (Earnings)</th>
-                    <th class="text-right">Monthly Amount</th>
-                    <th class="text-right">Annual Amount</th>
+                     <th width="60%">Salary Component (Earnings)</th>
+                    <th width="20%" class="text-right">Monthly Amount</th>
+                    <th width="20%" class="text-right">Annual Amount</th>
                 </tr>
             </thead>
             <tbody id="salary_breakup_body"></tbody>
@@ -958,6 +958,45 @@ async function processSalaryComponents(frm) {
         }
     }
 
+    let fixed_gross_table = `
+        <table class="table table-bordered small">
+            <thead>
+                <tr>
+                    <th width="60%">Fixed Gross</th>
+                    <th width="20%" class="text-right">Monthly Amount</th>
+                    <th width="20%" class="text-right">Annual Amount</th>
+                </tr>
+            </thead>
+            <tbody id="salary_fixed_body"></tbody>
+        </table>`;
+
+    document.getElementById("fixed_gross").innerHTML = fixed_gross_table;
+    let fixedtableBody = document.getElementById("salary_fixed_body");
+
+        
+    // =========================
+    // Fixed Gross Calculation
+    // =========================
+
+    if (totalMonthlyEarnings > 0) {
+
+        let row = fixedtableBody.insertRow();
+
+        row.insertCell().textContent = "Fixed Gross";
+
+        let monthlyCell = row.insertCell();
+        monthlyCell.className = "text-right";
+        monthlyCell.textContent = Math.round(totalMonthlyEarnings).toLocaleString();
+
+        let annualCell = row.insertCell();
+        annualCell.className = "text-right";
+        annualCell.textContent = Math.round(totalAnnualEarnings).toLocaleString();
+    }
+
+
+
+
+
     /* =========================
        Reimbursements
     ========================== */
@@ -968,9 +1007,9 @@ async function processSalaryComponents(frm) {
             <table class="table table-bordered small">
                 <thead>
                     <tr>
-                        <th>Reimbursements</th>
-                        <th class="text-right">Monthly Amount</th>
-                        <th class="text-right">Annual Amount</th>
+                        <th width="60%">Reimbursements</th>
+                        <th width="20%" class="text-right">Monthly Amount</th>
+                        <th width="20%" class="text-right">Annual Amount</th>
                     </tr>
                 </thead>
                 <tbody id="reimbursement_breakup_body"></tbody>
@@ -1013,9 +1052,9 @@ async function processSalaryComponents(frm) {
         <table class="table table-bordered small">
             <thead>
                 <tr>
-                    <th>Salary Component (Deductions)</th>
-                    <th class="text-right">Monthly Amount</th>
-                    <th class="text-right">Annual Amount</th>
+                    <th width="60%">Salary Component (Deductions)</th>
+                    <th width="20%" class="text-right">Monthly Amount</th>
+                    <th width="20%" class="text-right">Annual Amount</th>
                 </tr>
             </thead>
             <tbody id="deduction_breakup_body"></tbody>
@@ -1051,47 +1090,6 @@ async function processSalaryComponents(frm) {
         }
     }
 
-
-//     /* =========================
-//    Variable Pay (Include in CTC)
-// ========================= */
-
-// if (frm.doc.custom_variable_pay_components?.length) {
-
-//     let includeTable = `
-//         <table class="table table-bordered small">
-//             <thead>
-//                 <tr>
-//                     <th>Variable Pay (Included in CTC)</th>
-//                     <th class="text-right">Annual Amount</th>
-//                 </tr>
-//             </thead>
-//             <tbody id="variable_include_body"></tbody>
-//         </table>`;
-
-//     document.getElementById("variable_pay_include_ctc").innerHTML = includeTable;
-
-//     let includeBody = document.getElementById("variable_include_body");
-
-//     frm.doc.custom_variable_pay_components.forEach(component => {
-
-//         if (component.part_of_ctc == 1) {
-
-//             let amount = Math.round(component.amount);
-
-//             total_annual_ctc.push(amount);
-
-//             let row = includeBody.insertRow();
-
-//             row.insertCell().textContent = component.variable_name;
-
-//             let amountCell = row.insertCell();
-//             amountCell.className = "text-right";
-//             amountCell.textContent = amount.toLocaleString();
-//         }
-
-//     });
-// }
 
 /* =========================
    Variable Pay (Include in CTC)
@@ -1184,48 +1182,6 @@ if (frm.doc.custom_variable_pay_components?.length) {
     }
 
 
-/* =========================
-   Variable Pay (Exclude from CTC)
-========================= */
-
-// if (frm.doc.custom_variable_pay_components?.length) {
-
-//     let excludeTable = `
-//         <table class="table table-bordered small">
-//             <thead>
-//                 <tr>
-//                     <th>Variable Pay (Excluded from CTC)</th>
-//                     <th class="text-right">Annual Amount</th>
-//                 </tr>
-//             </thead>
-//             <tbody id="variable_exclude_body"></tbody>
-//         </table>`;
-
-//     document.getElementById("variable_pay_exclude_ctc").innerHTML = excludeTable;
-
-//     let excludeBody = document.getElementById("variable_exclude_body");
-
-//     frm.doc.custom_variable_pay_components.forEach(component => {
-
-//         if (component.part_of_ctc == 0) {
-
-//             let amount = Math.round(component.amount);
-
-//             let row = excludeBody.insertRow();
-
-//             row.insertCell().textContent = component.variable_name;
-
-//             let amountCell = row.insertCell();
-//             amountCell.className = "text-right";
-//             amountCell.textContent = amount.toLocaleString();
-//         }
-
-//     });
-// }
-
-/* =========================
-   Variable Pay (Exclude from CTC)
-========================= */
 
 if (frm.doc.custom_variable_pay_components?.length) {
 
