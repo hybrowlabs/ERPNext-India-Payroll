@@ -4344,7 +4344,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
     remaining_tax=round((total_tax_payable-previous_tds_deducted_value-advance_tax-tds_sum)or 0)
 
-    current_tax=remaining_tax/num_months
+    # current_tax=remaining_tax/num_months
 
 
     # ------------------ Response ------------------
@@ -4359,7 +4359,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
     "education_cess" :round((slab_result.get("education_cess_amount") or 0), 0),
     "total_tax_payable" : round((slab_result.get("total_tax_payable") or 0), 0),
     "marginal_relief" :round((slab_result.get("marginal_relief") or 0), 0),
-    "current_tax":current_tax,
+    # "current_tax":current_tax,
     "num_months":num_months,
     "remaining_tax":remaining_tax,
 
