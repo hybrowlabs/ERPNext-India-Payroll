@@ -303,7 +303,7 @@ def format_version_data(version_data, modified, modified_by):
             })
 
     return result
-
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_structure_assignment.generate_salary_slip?employee=PW0220&payroll_period=25-26&company=Pen%20Pencil
 
 @frappe.whitelist()
 def generate_salary_slip(employee=None, payroll_period=None, company=None):

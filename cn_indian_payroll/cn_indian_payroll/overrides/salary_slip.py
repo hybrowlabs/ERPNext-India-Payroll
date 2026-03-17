@@ -194,6 +194,619 @@ class CustomSalarySlip(SalarySlip):
         self.delete_attendance_log()
 
 
+
+
+
+    def compute_taxable_earnings_for_year(self):
+        # get taxable_earnings, opening_taxable_earning, paid_taxes for previous period
+        (
+            self.previous_taxable_earnings,
+            exempted_amount,
+        ) = self.get_taxable_earnings_for_prev_period(
+            self.payroll_period.start_date,
+            self.start_date,
+            self.tax_slab.allow_tax_exemption,
+        )
+
+        self.previous_taxable_earnings_before_exemption = (
+            self.previous_taxable_earnings + exempted_amount
+        )
+
+        # print("\n\n\n\n\n\n\n12121212121111111111111111",self.previous_taxable_earnings)
+
+        self.compute_current_and_future_taxable_earnings()
+
+        
+
+        if self.employee and self.payroll_period.name:
+            proof_submission = frappe.get_list(
+                "Employee Tax Exemption Proof Submission",
+                filters={
+                    "employee": self.employee,
+                    "payroll_period": self.payroll_period.name,
+                    "docstatus": 1,
+                    "company": self.company,
+                },
+                fields=["*"],
+            )
+
+            if proof_submission:
+                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
+                self.deduct_tax_for_unclaimed_employee_benefits = 1
+            else:
+                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 0
+                self.deduct_tax_for_unclaimed_employee_benefits = 0
+
+        self.unclaimed_taxable_benefits = 0
+        if self.deduct_tax_for_unclaimed_employee_benefits:
+            self.unclaimed_taxable_benefits = (
+                self.calculate_unclaimed_taxable_benefits()
+            )
+
+        # Total exemption amount based on tax exemption declaration
+        self.total_exemption_amount = self.get_total_exemption_amount()
+
+        # Employee Other Incomes
+        self.other_incomes = self.get_income_form_other_sources() or 0.0
+
+        # Total taxable earnings including additional and other incomes
+        self.total_taxable_earnings = (
+            self.previous_taxable_earnings
+            + self.current_structured_taxable_earnings
+            + self.future_structured_taxable_earnings
+            + self.current_additional_earnings
+            + self.other_incomes
+            + self.unclaimed_taxable_benefits
+            - self.total_exemption_amount
+        )
+
+
+
+        self.custom_taxable_amount__annual_taxable_income = self.annual_taxable_amount
+
+        # self.total_taxable_earnings_without_full_tax_addl_components = (
+        #     self.custom_taxable_amount__annual_taxable_income or 0
+        # )
+
+        self.total_taxable_earnings_without_full_tax_addl_components = (
+			self.total_taxable_earnings - (self.current_additional_earnings_with_full_tax+self.current_additional_earnings_with_full_tax_manual)
+		)
+
+        # print("\n\n\n\n\n\n\n\n666666666666",self.total_taxable_earnings_without_full_tax_addl_components)
+        # print("\n\n\n\n\n\n\n\n777777777777",self.current_additional_earnings_with_full_tax_manual)
+
+        self.total_offcycle_earning_without=self.total_taxable_earnings-self.current_additional_earning_for_offcycle
+        self.total_perquisite_earning_without=self.total_taxable_earnings-self.current_additional_earning_for_perquisite
+        self.total_eatra_payment_earning_without=self.total_taxable_earnings-self.current_additional_earning_for_extra_payment
+
+        # print("\n\n\n\    n\n\n\n\n\n4444444444444444444444444444444",self.total_offcycle_earning_without)
+        
+
+
+
+
+    def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
+        taxable_earnings = 0
+        additional_income = 0
+        additional_income_with_full_tax = 0
+        flexi_benefits = 0
+        amount_exempted_from_income_tax = 0
+        additional_income_with_manual_tax = 0
+        additional_income_with_manual_full_tax=0
+        manual_tds_value=0
+
+        tax_component = None
+
+        latest_salary_structure = frappe.get_list('Salary Structure Assignment',
+                    filters={'employee': self.employee,'docstatus':1},
+                    fields=["*"],
+                    order_by='from_date desc',
+                    limit=1
+                )
+
+        if len(latest_salary_structure)>0:
+            tax_component=latest_salary_structure[0].custom_tax_regime
+
+        for earning in self.earnings:
+
+            get_tax=frappe.get_doc("Salary Component",earning.salary_component)
+
+
+            if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
+                if get_tax.custom_regime=="All":
+                    earning.is_tax_applicable=get_tax.is_tax_applicable
+                    earning.custom_regime=get_tax.custom_regime
+                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+                elif get_tax.custom_regime==tax_component:
+                    earning.is_tax_applicable=get_tax.is_tax_applicable
+                    earning.custom_regime=get_tax.custom_regime
+                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+                elif get_tax.custom_regime!=tax_component:
+                    earning.is_tax_applicable=0
+                    earning.custom_regime=get_tax.custom_regime
+                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+            elif get_tax.is_tax_applicable==0 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
+                earning.is_tax_applicable=0
+                earning.custom_regime=get_tax.custom_regime
+                earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+            elif get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
+                earning.is_tax_applicable=1
+                earning.custom_regime=get_tax.custom_regime
+                earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
+
+
+            if based_on_payment_days:
+                amount, additional_amount = self.get_amount_based_on_payment_days(earning)
+            else:
+                if earning.additional_amount:
+                    amount, additional_amount = earning.amount, earning.additional_amount
+                else:
+                    amount, additional_amount = earning.default_amount, earning.additional_amount
+            if earning.is_tax_applicable:
+                if earning.is_flexible_benefit:
+                    flexi_benefits += amount
+                else:
+
+                    taxable_earnings += amount - additional_amount
+                    additional_income += additional_amount
+
+                    if additional_amount and earning.is_recurring_additional_salary:
+                        additional_income += self.get_future_recurring_additional_amount(
+                            earning.additional_salary, earning.additional_amount
+                        )
+
+                    if earning.deduct_full_tax_on_selected_payroll_date:
+                        additional_income_with_full_tax += additional_amount
+
+                    if earning.additional_salary:
+
+                        get_additional_salary = frappe.get_doc("Additional Salary", earning.additional_salary)
+                        if get_additional_salary.custom_is_tax_manual_calculate and get_additional_salary.custom_tds_value:
+
+                            additional_income_with_manual_tax=get_additional_salary.custom_tds_value
+                            additional_income_with_manual_full_tax += additional_amount
+                            manual_tds_value=get_additional_salary.custom_tds_value
+
+
+        if allow_tax_exemption:
+            for ded in self.deductions:
+                if ded.exempted_from_income_tax:
+                    amount, additional_amount = ded.amount, ded.additional_amount
+                    if based_on_payment_days:
+                        amount, additional_amount = self.get_amount_based_on_payment_days(ded)
+
+                    taxable_earnings -= flt(amount - additional_amount)
+                    additional_income -= additional_amount
+                    amount_exempted_from_income_tax = flt(amount - additional_amount)
+
+                    if additional_amount and ded.is_recurring_additional_salary:
+                        additional_income -= self.get_future_recurring_additional_amount(
+                            ded.additional_salary, ded.additional_amount
+                        )
+
+
+        return frappe._dict(
+            {
+                "taxable_earnings": taxable_earnings,
+                "additional_income": additional_income,
+                "amount_exempted_from_income_tax": amount_exempted_from_income_tax,
+                "additional_income_with_full_tax": additional_income_with_full_tax,
+                "flexi_benefits": flexi_benefits,
+                "additional_income_with_manual_tax": additional_income_with_manual_tax,
+                "additional_income_with_manual_full_tax": additional_income_with_manual_full_tax,
+            }
+        )
+
+
+    
+
+
+    
+
+    def compute_income_tax_breakup(self):
+        self.standard_tax_exemption_amount = 0
+        self.tax_exemption_declaration = 0
+        self.deductions_before_tax_calculation = 0
+        self.custom_perquisite_amount = 0
+
+        self.non_taxable_earnings = self.compute_non_taxable_earnings()
+        self.ctc = self.compute_ctc()
+        self.income_from_other_sources = self.get_income_form_other_sources()
+        self.total_earnings = self.ctc + self.income_from_other_sources
+
+        # Fetch payroll period once
+        payroll_period = frappe.get_value(
+            "Payroll Period",
+            {"company": self.company, "name": self.payroll_period.name},
+            ["name", "start_date", "end_date"],
+            as_dict=True,
+        )
+
+        # If payroll period is not found, return without further processing
+        if not payroll_period:
+            return
+
+        # If payroll period is found, process further
+        start_date = frappe.utils.getdate(payroll_period["start_date"])
+        end_date = frappe.utils.getdate(payroll_period["end_date"])
+        fiscal_year = payroll_period["name"]
+
+        # Calculate loan perquisites within the fiscal year
+        loan_repayments = frappe.get_list(
+            "Loan Repayment Schedule",
+            filters={
+                "custom_employee": self.employee,
+                "status": "Active",
+                "docstatus": 1,
+            },
+            fields=["name"],
+        )
+
+        total_perq = 0
+        for repayment in loan_repayments:
+            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
+            for entry in repayment_doc.custom_loan_perquisite:
+                if (
+                    entry.payment_date
+                    and start_date
+                    <= frappe.utils.getdate(entry.payment_date)
+                    <= end_date
+                ):
+                    total_perq += entry.perquisite_amount
+        self.custom_perquisite_amount = total_perq
+
+        # Tax slab logic
+        if hasattr(self, "tax_slab") and self.tax_slab:
+            if self.tax_slab.allow_tax_exemption:
+                self.standard_tax_exemption_amount = (
+                    self.tax_slab.standard_tax_exemption_amount
+                )
+                self.deductions_before_tax_calculation = (
+                    self.compute_annual_deductions_before_tax_calculation()
+                )
+
+            self.tax_exemption_declaration = (
+                self.get_total_exemption_amount() - self.standard_tax_exemption_amount
+            )
+
+
+        self.annual_taxable_amount = (
+            self.ctc
+            + self.custom_perquisite_amount
+            - (
+                +self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
+            )
+        )
+
+        self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
+
+
+
+        if hasattr(self, "total_structured_tax_amount") and hasattr(
+            self, "current_structured_tax_amount"
+        ):
+            self.future_income_tax_deductions = (
+                self.total_structured_tax_amount
+                + self.get("full_tax_on_additional_earnings", 0)
+                # + self.get("full_tax_on_additional_earnings_manual",0)
+                - self.income_tax_deducted_till_date
+            )
+
+            # print("\n\n\n\n\n\n777777777777777777777",self.current_additional_earning_for_offcycle)
+
+
+            
+
+            self.current_month_income_tax = (
+                self.current_structured_tax_amount
+                + self.get("full_tax_on_additional_earnings", 0)
+                # + self.get("full_tax_on_additional_earnings_manual",0)
+            )
+            self.custom_current_tax_without_additional_earning=self.current_structured_tax_amount
+
+            self.total_income_tax = (
+                self.income_tax_deducted_till_date + self.future_income_tax_deductions
+            )
+
+
+
+
+
+    def calculate_variable_tax(self, tax_component,has_additional_salary_tax_component=False):
+
+        self.previous_total_paid_taxes = self.get_tax_paid_in_period(
+            self.payroll_period.start_date, self.start_date, tax_component
+        )
+
+       
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_taxable_earnings_without_full_tax_addl_components,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
+
+        # print("\n\n\n\n\n\n\n\n333333333333333",self.total_taxable_earnings_without_full_tax_addl_components)
+
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount_offcycle, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_offcycle_earning_without,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
+
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount_perquisite, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_perquisite_earning_without,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
+
+        eval_locals, default_data = self.get_data_for_eval()
+        self.total_structured_tax_amount_extra_payment, __ = override_calculate_tax_by_tax_slab(
+            self,
+            self.total_eatra_payment_earning_without,
+            self.tax_slab,
+            self.whitelisted_globals,
+            eval_locals,
+        )
+
+                
+
+        self.custom_annual_taxable_amount_without_additional_earning=self.total_taxable_earnings_without_full_tax_addl_components
+
+
+        self.current_structured_tax_amount = (
+            self.total_structured_tax_amount - self.previous_total_paid_taxes
+        ) / self.remaining_sub_periods
+
+
+        
+
+
+
+    
+        self.full_tax_on_additional_earnings = 0.0
+        self.total_tax_amount=0
+        
+        if self.current_additional_earnings_with_full_tax:
+
+            self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
+                self,
+                self.total_taxable_earnings,
+                self.tax_slab,
+                self.whitelisted_globals,
+                eval_locals,
+            )
+            self.full_tax_on_additional_earnings = (
+                self.total_tax_amount - self.total_structured_tax_amount
+            )
+
+            # print("\n\n\n\n\n111111111",self.current_additional_earnings_with_full_tax)
+
+
+            self.custom_total_tax_amount=self.total_tax_amount
+            self.custom_total_structured_tax_amount=self.total_structured_tax_amount
+            self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0
+
+
+            self.full_tax_on_additional_earnings_offcycle = (
+                self.total_tax_amount - self.total_structured_tax_amount_offcycle
+            )
+
+            if not flt(self.custom_offcycle_tds_deducted_value):
+
+
+                self.custom_offcycle_tds_deducted_value=self.full_tax_on_additional_earnings_offcycle
+            
+
+            self.full_tax_on_additional_earnings_perquisite = (
+                self.total_tax_amount - self.total_structured_tax_amount_perquisite
+            )
+
+            if not flt(self.custom_perquisite_tds_deducted_value):
+
+                self.custom_perquisite_tds_deducted_value=self.full_tax_on_additional_earnings_perquisite
+
+
+            self.full_tax_on_additional_earnings_extra_payment = (
+                self.total_tax_amount - self.total_structured_tax_amount_extra_payment
+            )
+
+            if not flt(self.custom_extra_payment_tds_deducted_value):            
+
+                self.custom_extra_payment_tds_deducted_value=self.full_tax_on_additional_earnings_extra_payment
+            
+
+        self.full_tax_on_additional_earnings_manual = 0.0
+        if self.current_additional_earnings_with_full_tax_manual:
+
+
+            self.full_tax_on_additional_earnings_manual = (
+                self.current_taxable_earnings_for_payment_days.additional_income_with_manual_tax
+            )
+
+
+        current_tax_amount = (
+            self.current_structured_tax_amount + self.full_tax_on_additional_earnings
+        )
+
+
+        if flt(current_tax_amount) < 0:
+            current_tax_amount = 0
+
+        self._component_based_variable_tax[tax_component].update(
+            {
+                "previous_total_paid_taxes": self.previous_total_paid_taxes,
+                "total_structured_tax_amount": self.total_structured_tax_amount,
+                "current_structured_tax_amount": self.current_structured_tax_amount,
+                "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
+                "current_tax_amount": current_tax_amount,
+
+            }
+        )
+
+        return current_tax_amount
+
+
+
+
+
+
+
+    def compute_current_and_future_taxable_earnings(self):
+
+        self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
+        self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
+            ceil(self.remaining_sub_periods) - 1
+        )
+
+        current_taxable_earnings_before_exemption = (
+            self.current_taxable_earnings.taxable_earnings
+            + self.current_taxable_earnings.amount_exempted_from_income_tax
+        )
+        self.future_structured_taxable_earnings_before_exemption = (
+            current_taxable_earnings_before_exemption * (ceil(self.remaining_sub_periods) - 1)
+        )
+
+        # get taxable_earnings, addition_earnings for current actual payment days
+        self.current_taxable_earnings_for_payment_days = self.get_taxable_earnings(
+            self.tax_slab.allow_tax_exemption, based_on_payment_days=1
+        )
+
+        self.current_structured_taxable_earnings = (
+            self.current_taxable_earnings_for_payment_days.taxable_earnings
+        )
+
+        self.current_structured_taxable_earnings_before_exemption = (
+            self.current_structured_taxable_earnings
+            + self.current_taxable_earnings_for_payment_days.amount_exempted_from_income_tax
+        )
+
+
+        self.current_additional_earnings = self.current_taxable_earnings_for_payment_days.additional_income
+
+
+
+        # self.current_additional_earnings_with_full_tax = (
+
+        #     self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
+        # )
+
+        self.current_additional_earnings_with_full_tax = (
+
+            self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax
+            )
+
+        self.current_additional_earnings_with_full_tax_manual = (
+
+            self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
+
+            )
+
+
+        self.current_additional_earning_for_offcycle = 0
+        self.current_additional_earning_for_perquisite = 0
+        self.current_additional_earning_for_extra_payment = 0
+
+        self.custom_offcycle_tds_deducted_value = 0
+        self.custom_perquisite_tds_deducted_value = 0
+        self.custom_extra_payment_tds_deducted_value = 0
+
+        if self.earnings:
+            for earning in self.earnings:
+
+                if not (earning.additional_salary and earning.is_tax_applicable):
+                    continue
+
+                earning_component = frappe.get_cached_doc("Salary Component", earning.salary_component)
+                additional_salary = frappe.get_cached_doc("Additional Salary", earning.additional_salary)
+
+                # Offcycle earnings
+                if (
+                    earning.deduct_full_tax_on_selected_payroll_date
+                    and earning_component.custom_is_offcycle_component
+                ):
+                    self.current_additional_earning_for_offcycle += earning.amount
+
+                # Perquisite earnings
+                if earning_component.custom_perquisite and earning.deduct_full_tax_on_selected_payroll_date:
+                    self.current_additional_earning_for_perquisite += earning.amount
+
+                # Extra payment earnings
+                if earning_component.custom_is_extra_payment and earning.deduct_full_tax_on_selected_payroll_date:
+                    self.current_additional_earning_for_extra_payment += earning.amount
+
+
+                # Manual TDS for Offcycle
+                if (
+                    earning.custom_is_tax_manual_calculate
+                    and earning_component.custom_is_offcycle_component
+                ):
+                    # self.current_additional_earning_for_offcycle += additional_salary.custom_tds_value or 0
+                    # self.custom_offcycle_tds_deducted_value = self.current_additional_earning_for_offcycle
+                    self.custom_offcycle_tds_deducted_value += additional_salary.custom_tds_value or 0
+# 
+                # Manual TDS for Perquisite
+                if (
+                    earning.custom_is_tax_manual_calculate
+                    and earning_component.custom_perquisite
+                ):
+                    # self.current_additional_earning_for_perquisite += additional_salary.custom_tds_value or 0
+                    # self.custom_perquisite_tds_deducted_value = self.current_additional_earning_for_perquisite
+
+                    self.custom_perquisite_tds_deducted_value += additional_salary.custom_tds_value or 0
+
+
+                # Manual TDS for Extra Payment
+                if (
+                    earning.custom_is_tax_manual_calculate
+                    and earning_component.custom_is_extra_payment
+                ):
+                    # self.current_additional_earning_for_extra_payment += additional_salary.custom_tds_value or 0
+
+                    # self.custom_extra_payment_tds_deducted_value = self.current_additional_earning_for_extra_payment
+
+                    self.custom_extra_payment_tds_deducted_value += additional_salary.custom_tds_value or 0
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def insert_attendance_log_list(self):
         payroll_setting = frappe.get_single("Payroll Settings")
 
@@ -397,11 +1010,9 @@ class CustomSalarySlip(SalarySlip):
             for log_name in attendance_logs:
                 doc = frappe.get_doc("Attendance Log", log_name)
 
-                # 1️⃣ Cancel if submitted
                 if doc.docstatus == 1:
                     doc.cancel()
 
-                # 2️⃣ Delete the document
                 frappe.delete_doc(
                     "Attendance Log",
                     log_name,
@@ -409,105 +1020,7 @@ class CustomSalarySlip(SalarySlip):
                 )
 
 
-    def compute_income_tax_breakup(self):
-        self.standard_tax_exemption_amount = 0
-        self.tax_exemption_declaration = 0
-        self.deductions_before_tax_calculation = 0
-        self.custom_perquisite_amount = 0
-
-        self.non_taxable_earnings = self.compute_non_taxable_earnings()
-        self.ctc = self.compute_ctc()
-        self.income_from_other_sources = self.get_income_form_other_sources()
-        self.total_earnings = self.ctc + self.income_from_other_sources
-
-        # Fetch payroll period once
-        payroll_period = frappe.get_value(
-            "Payroll Period",
-            {"company": self.company, "name": self.payroll_period.name},
-            ["name", "start_date", "end_date"],
-            as_dict=True,
-        )
-
-        # If payroll period is not found, return without further processing
-        if not payroll_period:
-            return
-
-        # If payroll period is found, process further
-        start_date = frappe.utils.getdate(payroll_period["start_date"])
-        end_date = frappe.utils.getdate(payroll_period["end_date"])
-        fiscal_year = payroll_period["name"]
-
-        # Calculate loan perquisites within the fiscal year
-        loan_repayments = frappe.get_list(
-            "Loan Repayment Schedule",
-            filters={
-                "custom_employee": self.employee,
-                "status": "Active",
-                "docstatus": 1,
-            },
-            fields=["name"],
-        )
-
-        total_perq = 0
-        for repayment in loan_repayments:
-            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
-            for entry in repayment_doc.custom_loan_perquisite:
-                if (
-                    entry.payment_date
-                    and start_date
-                    <= frappe.utils.getdate(entry.payment_date)
-                    <= end_date
-                ):
-                    total_perq += entry.perquisite_amount
-        self.custom_perquisite_amount = total_perq
-
-        # Tax slab logic
-        if hasattr(self, "tax_slab") and self.tax_slab:
-            if self.tax_slab.allow_tax_exemption:
-                self.standard_tax_exemption_amount = (
-                    self.tax_slab.standard_tax_exemption_amount
-                )
-                self.deductions_before_tax_calculation = (
-                    self.compute_annual_deductions_before_tax_calculation()
-                )
-
-            self.tax_exemption_declaration = (
-                self.get_total_exemption_amount() - self.standard_tax_exemption_amount
-            )
-
-
-        self.annual_taxable_amount = (
-            self.ctc
-            + self.custom_perquisite_amount
-            - (
-                +self.deductions_before_tax_calculation
-                + self.tax_exemption_declaration
-                + self.standard_tax_exemption_amount
-            )
-        )
-
-        self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
-
-
-
-        if hasattr(self, "total_structured_tax_amount") and hasattr(
-            self, "current_structured_tax_amount"
-        ):
-            self.future_income_tax_deductions = (
-                self.total_structured_tax_amount
-                + self.get("full_tax_on_additional_earnings", 0)
-                - self.income_tax_deducted_till_date
-            )
-
-            self.current_month_income_tax = (
-                self.current_structured_tax_amount
-                + self.get("full_tax_on_additional_earnings", 0)
-            )
-
-            self.total_income_tax = (
-                self.income_tax_deducted_till_date + self.future_income_tax_deductions
-            )
-
+    
 
 
     # def set_salary_structure_assignment(self):
@@ -623,82 +1136,6 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def calculate_variable_tax(self, tax_component,has_additional_salary_tax_component=False):
-
-        self.previous_total_paid_taxes = self.get_tax_paid_in_period(
-            self.payroll_period.start_date, self.start_date, tax_component
-        )
-
-       
-        eval_locals, default_data = self.get_data_for_eval()
-        self.total_structured_tax_amount, __ = override_calculate_tax_by_tax_slab(
-            self,
-            self.total_taxable_earnings_without_full_tax_addl_components,
-            self.tax_slab,
-            self.whitelisted_globals,
-            eval_locals,
-        )
-
-        self.custom_annual_taxable_amount_without_additional_earning=self.total_taxable_earnings_without_full_tax_addl_components
-
-
-
-
-        self.current_structured_tax_amount = (
-            self.total_structured_tax_amount - self.previous_total_paid_taxes
-        ) / self.remaining_sub_periods
-
-        
-
-
-
-    
-        self.full_tax_on_additional_earnings = 0.0
-        if self.current_additional_earnings_with_full_tax:
-
-            self.total_tax_amount, __ = override_calculate_tax_by_tax_slab(
-                self,
-                self.total_taxable_earnings,
-                self.tax_slab,
-                self.whitelisted_globals,
-                eval_locals,
-            )
-            self.full_tax_on_additional_earnings = (
-                self.total_tax_amount - self.total_structured_tax_amount
-            )
-
-            self.custom_total_tax_amount=self.total_tax_amount
-            self.custom_total_structured_tax_amount=self.total_structured_tax_amount
-
-
-
-            self.custom_additional_tds_deducted_amount=self.full_tax_on_additional_earnings or 0
-
-            
-
-            
-
-
-        current_tax_amount = (
-            self.current_structured_tax_amount + self.full_tax_on_additional_earnings
-        )
-
-
-        if flt(current_tax_amount) < 0:
-            current_tax_amount = 0
-
-        self._component_based_variable_tax[tax_component].update(
-            {
-                "previous_total_paid_taxes": self.previous_total_paid_taxes,
-                "total_structured_tax_amount": self.total_structured_tax_amount,
-                "current_structured_tax_amount": self.current_structured_tax_amount,
-                "full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
-                "current_tax_amount": current_tax_amount,
-
-            }
-        )
-
-        return current_tax_amount
 
 
 
@@ -1230,166 +1667,11 @@ class CustomSalarySlip(SalarySlip):
 
 
 
-    def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
-        taxable_earnings = 0
-        additional_income = 0
-        additional_income_with_full_tax = 0
-        flexi_benefits = 0
-        amount_exempted_from_income_tax = 0
-        additional_income_with_manual_tax = 0
-        additional_income_with_manual_full_tax=0
-        manual_tds_value=0
-
-        tax_component = None
-
-        latest_salary_structure = frappe.get_list('Salary Structure Assignment',
-                    filters={'employee': self.employee,'docstatus':1},
-                    fields=["*"],
-                    order_by='from_date desc',
-                    limit=1
-                )
-
-        if len(latest_salary_structure)>0:
-            tax_component=latest_salary_structure[0].custom_tax_regime
-
-        for earning in self.earnings:
-
-            get_tax=frappe.get_doc("Salary Component",earning.salary_component)
-
-
-            if get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==1:
-                if get_tax.custom_regime=="All":
-                    earning.is_tax_applicable=get_tax.is_tax_applicable
-                    earning.custom_regime=get_tax.custom_regime
-                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-
-                elif get_tax.custom_regime==tax_component:
-                    earning.is_tax_applicable=get_tax.is_tax_applicable
-                    earning.custom_regime=get_tax.custom_regime
-                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-                elif get_tax.custom_regime!=tax_component:
-                    earning.is_tax_applicable=0
-                    earning.custom_regime=get_tax.custom_regime
-                    earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-
-            elif get_tax.is_tax_applicable==0 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
-                earning.is_tax_applicable=0
-                earning.custom_regime=get_tax.custom_regime
-                earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-            elif get_tax.is_tax_applicable==1 and get_tax.custom_tax_exemption_applicable_based_on_regime==0:
-                earning.is_tax_applicable=1
-                earning.custom_regime=get_tax.custom_regime
-                earning.custom_tax_exemption_applicable_based_on_regime=get_tax.custom_tax_exemption_applicable_based_on_regime
-
-
-            if based_on_payment_days:
-                amount, additional_amount = self.get_amount_based_on_payment_days(earning)
-            else:
-                if earning.additional_amount:
-                    amount, additional_amount = earning.amount, earning.additional_amount
-                else:
-                    amount, additional_amount = earning.default_amount, earning.additional_amount
-            if earning.is_tax_applicable:
-                if earning.is_flexible_benefit:
-                    flexi_benefits += amount
-                else:
-
-                    taxable_earnings += amount - additional_amount
-                    additional_income += additional_amount
-
-                    if additional_amount and earning.is_recurring_additional_salary:
-                        additional_income += self.get_future_recurring_additional_amount(
-                            earning.additional_salary, earning.additional_amount
-                        )
-
-                    if earning.deduct_full_tax_on_selected_payroll_date:
-                        additional_income_with_full_tax += additional_amount
-
-                    if earning.additional_salary:
-
-                        get_additional_salary = frappe.get_doc("Additional Salary", earning.additional_salary)
-                        if get_additional_salary.custom_is_tax_manual_calculate and get_additional_salary.custom_tds_value:
-
-                            additional_income_with_manual_tax=get_additional_salary.custom_tds_value
-                            additional_income_with_manual_full_tax += additional_amount
-                            manual_tds_value=get_additional_salary.custom_tds_value
-
-
-        if allow_tax_exemption:
-            for ded in self.deductions:
-                if ded.exempted_from_income_tax:
-                    amount, additional_amount = ded.amount, ded.additional_amount
-                    if based_on_payment_days:
-                        amount, additional_amount = self.get_amount_based_on_payment_days(ded)
-
-                    taxable_earnings -= flt(amount - additional_amount)
-                    additional_income -= additional_amount
-                    amount_exempted_from_income_tax = flt(amount - additional_amount)
-
-                    if additional_amount and ded.is_recurring_additional_salary:
-                        additional_income -= self.get_future_recurring_additional_amount(
-                            ded.additional_salary, ded.additional_amount
-                        )
-
-
-        return frappe._dict(
-            {
-                "taxable_earnings": taxable_earnings,
-                "additional_income": additional_income,
-                "amount_exempted_from_income_tax": amount_exempted_from_income_tax,
-                "additional_income_with_full_tax": additional_income_with_full_tax,
-                "flexi_benefits": flexi_benefits,
-                "additional_income_with_manual_tax": additional_income_with_manual_tax,
-                "additional_income_with_manual_full_tax": additional_income_with_manual_full_tax,
-            }
-        )
-
-
+    
 
 # NEW DEVELOPED CODE
 
-    def compute_current_and_future_taxable_earnings(self):
-
-        self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
-        self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
-            ceil(self.remaining_sub_periods) - 1
-        )
-
-        current_taxable_earnings_before_exemption = (
-            self.current_taxable_earnings.taxable_earnings
-            + self.current_taxable_earnings.amount_exempted_from_income_tax
-        )
-        self.future_structured_taxable_earnings_before_exemption = (
-            current_taxable_earnings_before_exemption * (ceil(self.remaining_sub_periods) - 1)
-        )
-
-        # get taxable_earnings, addition_earnings for current actual payment days
-        self.current_taxable_earnings_for_payment_days = self.get_taxable_earnings(
-            self.tax_slab.allow_tax_exemption, based_on_payment_days=1
-        )
-
-        self.current_structured_taxable_earnings = (
-            self.current_taxable_earnings_for_payment_days.taxable_earnings
-        )
-
-        self.current_structured_taxable_earnings_before_exemption = (
-            self.current_structured_taxable_earnings
-            + self.current_taxable_earnings_for_payment_days.amount_exempted_from_income_tax
-        )
-
-
-        self.current_additional_earnings = self.current_taxable_earnings_for_payment_days.additional_income
-
-
-
-        self.current_additional_earnings_with_full_tax = (
-
-            self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax+self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax
-        )
-
-        # print("\n\n\n\n\n\n\n\n\n\n111111111111111111",self.current_taxable_earnings_for_payment_days.additional_income_with_manual_full_tax)
-
-
+    
 
 
 
@@ -2049,80 +2331,7 @@ class CustomSalarySlip(SalarySlip):
         return 0
 
 
-    def compute_taxable_earnings_for_year(self):
-        # get taxable_earnings, opening_taxable_earning, paid_taxes for previous period
-        (
-            self.previous_taxable_earnings,
-            exempted_amount,
-        ) = self.get_taxable_earnings_for_prev_period(
-            self.payroll_period.start_date,
-            self.start_date,
-            self.tax_slab.allow_tax_exemption,
-        )
-
-        self.previous_taxable_earnings_before_exemption = (
-            self.previous_taxable_earnings + exempted_amount
-        )
-
-        print("\n\n\n\n\n\n\n12121212121111111111111111",self.previous_taxable_earnings)
-
-        self.compute_current_and_future_taxable_earnings()
-
-        
-
-        if self.employee and self.payroll_period.name:
-            proof_submission = frappe.get_list(
-                "Employee Tax Exemption Proof Submission",
-                filters={
-                    "employee": self.employee,
-                    "payroll_period": self.payroll_period.name,
-                    "docstatus": 1,
-                    "company": self.company,
-                },
-                fields=["*"],
-            )
-
-            if proof_submission:
-                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
-                self.deduct_tax_for_unclaimed_employee_benefits = 1
-            else:
-                self.deduct_tax_for_unsubmitted_tax_exemption_proof = 0
-                self.deduct_tax_for_unclaimed_employee_benefits = 0
-
-        self.unclaimed_taxable_benefits = 0
-        if self.deduct_tax_for_unclaimed_employee_benefits:
-            self.unclaimed_taxable_benefits = (
-                self.calculate_unclaimed_taxable_benefits()
-            )
-
-        # Total exemption amount based on tax exemption declaration
-        self.total_exemption_amount = self.get_total_exemption_amount()
-
-        # Employee Other Incomes
-        self.other_incomes = self.get_income_form_other_sources() or 0.0
-
-        # Total taxable earnings including additional and other incomes
-        self.total_taxable_earnings = (
-            self.previous_taxable_earnings
-            + self.current_structured_taxable_earnings
-            + self.future_structured_taxable_earnings
-            + self.current_additional_earnings
-            + self.other_incomes
-            + self.unclaimed_taxable_benefits
-            - self.total_exemption_amount
-        )
-
-
-
-        self.custom_taxable_amount__annual_taxable_income = self.annual_taxable_amount
-
-        # self.total_taxable_earnings_without_full_tax_addl_components = (
-        #     self.custom_taxable_amount__annual_taxable_income or 0
-        # )
-
-        self.total_taxable_earnings_without_full_tax_addl_components = (
-			self.total_taxable_earnings - self.current_additional_earnings_with_full_tax
-		)
+    
 
 
     @frappe.whitelist()
