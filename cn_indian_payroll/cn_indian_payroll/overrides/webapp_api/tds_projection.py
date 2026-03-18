@@ -4344,7 +4344,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
 
     remaining_tax=round((total_tax_payable-previous_tds_deducted_value-advance_tax-tds_sum)or 0)
 
-    # current_tax=remaining_tax/num_months
+    current_tax=remaining_tax/num_months
 
 
     # ------------------ Response ------------------
@@ -4885,8 +4885,8 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "monthly_tds",
             "name":"Monthly TDS",
-            "amount":0
-            # "amount": remaining_tax / num_months if num_months else 0
+            "amount":0,
+            "amount": remaining_tax / num_months if num_months else 0
         },
 
     ]
