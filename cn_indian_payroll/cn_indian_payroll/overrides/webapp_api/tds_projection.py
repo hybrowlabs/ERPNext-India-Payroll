@@ -4885,7 +4885,7 @@ def get_employee_declaration_investments(employee=None, company=None, payroll_pe
         {
             "key": "monthly_tds",
             "name":"Monthly TDS",
-            "amount":0
+            "amount":0,
             "amount": remaining_tax / num_months if num_months else 0
         },
 
