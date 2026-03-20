@@ -13,9 +13,8 @@ from cn_leave_shift_managment.api import get_holiday_dates
 from cn_leave_shift_managment.custom_apis import get_week_off_days
 
 
-
-
-
+from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import _get_todo_info_for_doc
+from frappe import _
 
 
 def before_submit(self, method):
@@ -175,6 +174,8 @@ def get_advance_dashboard(employee):
         total_paid_amount = sum(r["payment_amount"] for r in repayment_schedule if r.get("deducted") == 1)
         final_balance = flt(advance.advance_amount) - total_paid_amount
 
+        todo_info = _get_todo_info_for_doc("Employee Advance", advance.name) or {}
+
         results.append({
             "name": advance.name,
             "advance_type": advance.custom_advance_type,
@@ -187,7 +188,12 @@ def get_advance_dashboard(employee):
             "balance_amount": final_balance,
             "employee":advance.employee,
             "employee_name":advance.employee_name,
-            "can_edit":advance.can_edit
+            "can_edit":advance.can_edit,
+
+            "allocated_to": todo_info.get("allocated_to", []),
+            "allocated_to_user": todo_info.get("allocated_to_user"),
+            "allocated_to_roles": todo_info.get("allocated_to_roles", []),
+            "username": todo_info.get("username"),
         })
 
     return results

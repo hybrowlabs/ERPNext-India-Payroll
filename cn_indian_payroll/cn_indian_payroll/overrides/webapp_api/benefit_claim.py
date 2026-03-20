@@ -9,7 +9,9 @@ from datetime import datetime
 from frappe.utils import formatdate
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
+import frappe
+from datetime import datetime
+import calendar
 
 #view and dowaload benefit payslip
 
@@ -111,7 +113,8 @@ def benefit_data_list_view(
             "custom_taxable_amount",
             "custom_is_non_taxable",
             "custom_non_taxable_amount",
-            "can_edit"
+            "can_edit",
+            # "attachments"
         ],
         order_by="claim_date desc",
         start=start,
@@ -137,6 +140,13 @@ def benefit_data_list_view(
             },
             fields=["file_url"]
         )
+
+        todo_info = _get_todo_info_for_doc("Employee Benefit Claim", row["name"])
+
+        row["allocated_to"] = todo_info.get("allocated_to")
+        row["allocated_to_user"] = todo_info.get("allocated_to_user")
+        row["allocated_to_roles"] = todo_info.get("allocated_to_roles")
+        row["username"] = todo_info.get("username")
 
     return {
         "status": "success",
@@ -1315,3 +1325,137 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
         "status": "failed",
         "message": f"The {doctype} submission window is currently closed.",
     }
+
+
+
+@frappe.whitelist()
+def benefit_data_dashboard(company=None, payroll_period=None, status=None, month=None):
+
+    filters = {
+        "docstatus": ("in", [0, 1]),
+    }
+
+    if company:
+        filters["company"] = company
+
+    if payroll_period:
+        filters["custom_payroll_period"] = payroll_period
+
+    if status:
+        filters["custom_status"] = status
+
+    from_date = None
+    to_date = None
+
+    # 🔥 FIXED MONTH LOGIC
+    if month and payroll_period:
+
+        period = frappe.db.get_value(
+            "Payroll Period",
+            payroll_period,
+            ["start_date", "end_date"],
+            as_dict=True
+        )
+
+        if period:
+
+            start_year = period.start_date.year   # 2025
+            end_year = period.end_date.year       # 2026
+
+            month_number = datetime.strptime(month, "%B").month
+
+            # ✅ FINANCIAL YEAR LOGIC
+            if month_number >= 4:
+                year = start_year
+            else:
+                year = end_year
+
+            last_day = calendar.monthrange(year, month_number)[1]
+
+            from_date = f"{year}-{month_number:02d}-01"
+            to_date = f"{year}-{month_number:02d}-{last_day}"
+
+            filters["claim_date"] = ["between", [from_date, to_date]]
+
+    # FETCH DATA
+    claims = frappe.db.get_all(
+        "Employee Benefit Claim",
+        filters=filters,
+        fields=[
+            "name",
+            "employee_name",
+            "custom_payroll_period",
+            "claim_date",
+            "custom_status",
+            "earning_component",
+            "claimed_amount",
+        ],
+        order_by="claim_date desc",
+    )
+
+    return {
+        "status": "success",
+        "data": claims,
+        "total_records": len(claims),
+        "from_date": from_date,
+        "to_date": to_date
+    }
+
+
+
+@frappe.whitelist()
+def _get_todo_info_for_doc(doctype, docname):
+    """Get allocated_to, username, allocated_to_user, and allocated_to_roles from open ToDo."""
+    info = {"allocated_to": [], "username": None, "allocated_to_user": None, "allocated_to_roles": []}
+    try:
+        todo = frappe.db.get_value(
+            "ToDo",
+            {"reference_type": doctype, "reference_name": docname, "status": "Open"},
+            ["name", "allocated_to", "role"],
+            as_dict=True
+        )
+        if not todo:
+            return info
+
+        allocated_to_names = []
+        allocated_roles = []
+
+        if todo.allocated_to:
+            full_name = frappe.db.get_value("User", todo.allocated_to, "full_name")
+            info["username"] = full_name
+            info["allocated_to_user"] = todo.allocated_to
+            allocated_to_names.append(full_name or todo.allocated_to)
+
+        if todo.role:
+            allocated_roles.append(todo.role)
+
+        try:
+            alloc_users = frappe.get_all(
+                "Nextai User Select",
+                filters={"parent": todo.name, "parentfield": "custom_allocated_to_users"},
+                fields=["user"]
+            )
+            for u in alloc_users:
+                if u.user and u.user != todo.allocated_to:
+                    uname = frappe.db.get_value("User", u.user, "full_name")
+                    allocated_to_names.append(uname or u.user)
+        except Exception:
+            pass
+
+        try:
+            assigned_roles = frappe.get_all(
+                "Nextai Role Select",
+                filters={"parent": todo.name, "parentfield": "custom_assigned_to_roles"},
+                fields=["role"]
+            )
+            for r in assigned_roles:
+                if r.role:
+                    allocated_roles.append(r.role)
+        except Exception:
+            pass
+
+        info["allocated_to"] = allocated_to_names
+        info["allocated_to_roles"] = list(dict.fromkeys(allocated_roles))
+    except Exception:
+        pass
+    return info   
