@@ -1403,7 +1403,7 @@ def benefit_data_dashboard(company=None, payroll_period=None, status=None, month
 
 
 
-
+@frappe.whitelist()
 def _get_todo_info_for_doc(doctype, docname):
     """Get allocated_to, username, allocated_to_user, and allocated_to_roles from open ToDo."""
     info = {"allocated_to": [], "username": None, "allocated_to_user": None, "allocated_to_roles": []}
