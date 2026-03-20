@@ -123,6 +123,9 @@
   <!-- Employee Info -->
   <table class="no-border" style="margin-bottom: 20px;">
     {% set employee = frappe.get_doc("Employee", doc.employee) %}
+
+    {%set designation=frappe.get_doc("Designation",employee.designation)%}
+    {%set department=frappe.get_doc("Department",employee.department)%}
     <tr>
       <td style="width:25%">Employee ID</td>
       <td style="width:25%">:&nbsp;{{ doc.employee }}</td>
@@ -137,13 +140,13 @@
     </tr>
     <tr>
       <td>Department</td>
-      <td>:&nbsp;{{ employee.department if employee.department else 'N/A' }}</td>
+      <td>:&nbsp;{{ department.department_name if department.department_name else 'N/A' }}</td>
       <td>UAN Number</td>
       <td>:&nbsp;{{ employee.custom_uan if employee.custom_uan else 'N/A' }}</td>
     </tr>
     <tr>
       <td>Designation</td>
-      <td>:&nbsp;{{ employee.designation if employee.designation else 'N/A' }}</td>
+      <td>:&nbsp;{{ designation.custom_designation if designation.custom_designation else 'N/A' }}</td>
       <td>Bank Name</td>
       <td>:&nbsp;{{ employee.bank_name if employee.bank_name else 'N/A' }}</td>
     </tr>
