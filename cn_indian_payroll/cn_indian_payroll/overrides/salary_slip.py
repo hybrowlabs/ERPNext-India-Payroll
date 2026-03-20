@@ -69,13 +69,6 @@ class CustomSalarySlip(SalarySlip):
         self.update_declaration_component()
         self.update_total_lop()
 
-        # print(self.previous_taxable_earnings_before_exemption,"self.previous_taxable_earnings_before_exemption\n\n\n")
-        # print(self.current_structured_taxable_earnings_before_exemption,"self.current_structured_taxable_earnings_before_exemption\n\n\n")
-        # print(self.future_structured_taxable_earnings_before_exemption,"self.future_structured_taxable_earnings_before_exemption\n\n\n")
-        # print(self.current_additional_earnings,"self.current_additional_earnings\n\n\n")
-        # print(self.unclaimed_taxable_benefits,"self.unclaimed_taxable_benefits\n\n\n")
-        # print(self.non_taxable_earnings,"self.non_taxable_earnings\n\n\n")
-
         # if self.custom_perquisite_amount:
         #     self.annual_taxable_amount=self.total_earnings - (
         #         self.non_taxable_earnings
@@ -101,18 +94,17 @@ class CustomSalarySlip(SalarySlip):
         self.tax_calculation()
         self.calculate_grosspay()
 
-        # self.custom_previous_taxable_earnings = (
-        #     self.previous_taxable_earnings_before_exemption
+        self.custom_previous_taxable_earnings = (
+            self.previous_taxable_earnings_before_exemption
+        )
+        self.custom_current_taxable_earnings = (
+            self.current_structured_taxable_earnings_before_exemption
+        )
 
-        # )
-        # self.custom_current_taxable_earnings = (
-        #     self.current_structured_taxable_earnings_before_exemption
-        # )
-
-        # self.custom_future_taxable_earnings = (
-        #     self.future_structured_taxable_earnings_before_exemption
-        # )
-        # self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
+        self.custom_future_taxable_earnings = (
+            self.future_structured_taxable_earnings_before_exemption
+        )
+        self.custom_annual_taxable_earnings = self.ctc - (self.non_taxable_earnings)
         # if self.earnings:
         #     total_ctc_taxable_amount = 0
         #     for earning in self.earnings:
@@ -1184,32 +1176,35 @@ class CustomSalarySlip(SalarySlip):
                     accrual_each_doc.save()
 
     def remaining_day(self):
-        fiscal_year = frappe.get_list(
-            "Payroll Period", fields=["*"], order_by="end_date desc", limit=1
-        )
+        if not self.salary_withholding:
+            fiscal_year = frappe.get_list(
+                "Payroll Period", fields=["*"], order_by="end_date desc", limit=1
+            )
 
-        if fiscal_year:
-            t1 = fiscal_year[0].end_date
-            t2 = self.end_date
+            if fiscal_year:
+                t1 = fiscal_year[0].end_date
+                t2 = self.end_date
 
-            if not isinstance(t1, str):
-                t1 = str(t1)
-            if not isinstance(t2, str):
-                t2 = str(t2)
+                if not isinstance(t1, str):
+                    t1 = str(t1)
+                if not isinstance(t2, str):
+                    t2 = str(t2)
 
-            t1_parts = t1.split("-")
-            t2_parts = t2.split("-")
+                t1_parts = t1.split("-")
+                t2_parts = t2.split("-")
 
-            t1_year = int(t1_parts[0])
-            t1_month = int(t1_parts[1])
-            t1_day = int(t1_parts[2])
+                t1_year = int(t1_parts[0])
+                t1_month = int(t1_parts[1])
+                t1_day = int(t1_parts[2])
 
-            t2_year = int(t2_parts[0])
-            t2_month = int(t2_parts[1])
-            t2_day = int(t2_parts[2])
+                t2_year = int(t2_parts[0])
+                t2_month = int(t2_parts[1])
+                t2_day = int(t2_parts[2])
 
-            months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
-            self.custom_month_count = months_t2_to_t1
+                months_t2_to_t1 = (t1_year - t2_year) * 12 + (t1_month - t2_month)
+                self.custom_month_count = months_t2_to_t1
+        else:
+            self.custom_month_count = 0
 
     def set_month(self):
         date_str = str(self.start_date)
