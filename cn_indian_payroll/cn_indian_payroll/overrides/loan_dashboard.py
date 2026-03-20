@@ -1,5 +1,9 @@
 import frappe
 
+from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import _get_todo_info_for_doc
+from frappe import _
+
+
 @frappe.whitelist()
 def print_loan_dashboard(employee):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
@@ -92,6 +96,10 @@ def print_loan_dashboard(employee):
         total_paid=sum(paid_months)
         total_unpaid=sum(unpaid_months)
 
+
+        todo_info = _get_todo_info_for_doc("Loan Application", loan.name) or {}
+
+
         results.append({
             "loan_name": loan.name,
             "employee":loan.applicant,
@@ -119,7 +127,13 @@ def print_loan_dashboard(employee):
             "total_interest_payable":total_interest_payable,
             "total_principal_paid":total_principal_paid,
             "can_edit":loan.can_edit,
-            "name":loan.name
+            "name":loan.name,
+
+
+            "allocated_to": todo_info.get("allocated_to", []),
+            "allocated_to_user": todo_info.get("allocated_to_user"),
+            "allocated_to_roles": todo_info.get("allocated_to_roles", []),
+            "username": todo_info.get("username"),
         })
 
     return results
