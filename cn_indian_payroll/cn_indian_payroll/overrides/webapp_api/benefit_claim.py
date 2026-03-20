@@ -141,6 +141,13 @@ def benefit_data_list_view(
             fields=["file_url"]
         )
 
+        todo_info = _get_todo_info_for_doc("Employee Benefit Claim", row["name"])
+
+        row["allocated_to"] = todo_info.get("allocated_to")
+        row["allocated_to_user"] = todo_info.get("allocated_to_user")
+        row["allocated_to_roles"] = todo_info.get("allocated_to_roles")
+        row["username"] = todo_info.get("username")
+
     return {
         "status": "success",
         "data": claims,
@@ -1392,4 +1399,63 @@ def benefit_data_dashboard(company=None, payroll_period=None, status=None, month
         "total_records": len(claims),
         "from_date": from_date,
         "to_date": to_date
-    }   
+    }
+
+
+
+
+def _get_todo_info_for_doc(doctype, docname):
+    """Get allocated_to, username, allocated_to_user, and allocated_to_roles from open ToDo."""
+    info = {"allocated_to": [], "username": None, "allocated_to_user": None, "allocated_to_roles": []}
+    try:
+        todo = frappe.db.get_value(
+            "ToDo",
+            {"reference_type": doctype, "reference_name": docname, "status": "Open"},
+            ["name", "allocated_to", "role"],
+            as_dict=True
+        )
+        if not todo:
+            return info
+
+        allocated_to_names = []
+        allocated_roles = []
+
+        if todo.allocated_to:
+            full_name = frappe.db.get_value("User", todo.allocated_to, "full_name")
+            info["username"] = full_name
+            info["allocated_to_user"] = todo.allocated_to
+            allocated_to_names.append(full_name or todo.allocated_to)
+
+        if todo.role:
+            allocated_roles.append(todo.role)
+
+        try:
+            alloc_users = frappe.get_all(
+                "Nextai User Select",
+                filters={"parent": todo.name, "parentfield": "custom_allocated_to_users"},
+                fields=["user"]
+            )
+            for u in alloc_users:
+                if u.user and u.user != todo.allocated_to:
+                    uname = frappe.db.get_value("User", u.user, "full_name")
+                    allocated_to_names.append(uname or u.user)
+        except Exception:
+            pass
+
+        try:
+            assigned_roles = frappe.get_all(
+                "Nextai Role Select",
+                filters={"parent": todo.name, "parentfield": "custom_assigned_to_roles"},
+                fields=["role"]
+            )
+            for r in assigned_roles:
+                if r.role:
+                    allocated_roles.append(r.role)
+        except Exception:
+            pass
+
+        info["allocated_to"] = allocated_to_names
+        info["allocated_to_roles"] = list(dict.fromkeys(allocated_roles))
+    except Exception:
+        pass
+    return info   
