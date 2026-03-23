@@ -45,6 +45,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
         // $('input[data-fieldname="custom_preview_tax_projection"]').css("background-color","#FFE4C4")
 
 
+
+
         if(frm.doc.docstatus==1)
             {
 
