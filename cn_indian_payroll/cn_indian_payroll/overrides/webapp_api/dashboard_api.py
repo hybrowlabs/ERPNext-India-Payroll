@@ -149,3 +149,151 @@ def list_arrear_details(company=None, payroll_period=None, month=None):
         "submitted": submitted_claims,
 
     }
+
+
+@frappe.whitelist()
+def list_advance_details(company=None, payroll_period=None, month=None):
+
+    import calendar
+    from datetime import datetime
+
+
+    total_filters = {"docstatus": ("in", [0, 1])}
+
+    pending_filter = {
+        "docstatus": ("in", [0, 1]),
+        "custom_final_status": "Pending"
+    }
+
+    approved_filter = {
+        "docstatus": ("in", [0, 1]),
+        "custom_final_status": "Approved"
+    }
+
+    rejected_filter = {
+        "docstatus": ("in", [0, 1]),
+        "custom_final_status": "Rejected"
+    }
+
+    from_date = None
+    to_date = None
+
+    if month:
+        month_number = datetime.strptime(month, "%B").month
+
+        # Use current year (or you can customize)
+        year = datetime.now().year
+
+        last_day = calendar.monthrange(year, month_number)[1]
+
+        from_date = f"{year}-{month_number:02d}-01"
+        to_date = f"{year}-{month_number:02d}-{last_day}"
+
+    for f in [total_filters, pending_filter, approved_filter, rejected_filter]:
+
+        if company:
+            f["company"] = company
+
+        if from_date and to_date:
+            f["posting_date"] = ["between", [from_date, to_date]]
+
+
+    total_claims = frappe.db.count("Employee Advance", filters=total_filters)
+    pending_claims = frappe.db.count("Employee Advance", filters=pending_filter)
+    approved_claims = frappe.db.count("Employee Advance", filters=approved_filter)
+    rejected_claims = frappe.db.count("Employee Advance", filters=rejected_filter)
+
+
+    
+
+
+    return {
+        "total": total_claims,
+        "pending": pending_claims,
+        "approved": approved_claims,
+        "rejected": rejected_claims,
+        "from_date": from_date,
+        "to_date": to_date,
+    }
+
+
+
+
+@frappe.whitelist()
+def list_offcycle_details(company=None, payroll_period=None, month=None):
+
+    import calendar
+    from datetime import datetime
+
+    total_filters = {"docstatus": ("in", [0, 1])}
+
+    pending_filter = {
+        "docstatus": 0,
+    }
+
+    approved_filter = {
+        "docstatus": 1,
+    }
+
+
+
+    from_date = None
+    to_date = None
+
+    if month:
+        month_number = datetime.strptime(month, "%B").month
+        year = datetime.now().year
+
+        last_day = calendar.monthrange(year, month_number)[1]
+
+        from_date = f"{year}-{month_number:02d}-01"
+        to_date = f"{year}-{month_number:02d}-{last_day}"
+
+    for f in [total_filters, pending_filter, approved_filter]:
+
+        if company:
+            f["company"] = company
+
+        if from_date and to_date:
+            f["payroll_date"] = ["between", [from_date, to_date]]
+
+    records = frappe.get_all(
+        "Additional Salary",
+        filters=total_filters,
+        fields=["name", "salary_component"]
+    )
+
+    total = 0
+    pending = 0
+    approved = 0
+
+    for r in records:
+
+        sal_comp = frappe.get_value(
+            "Salary Component",
+            r.salary_component,
+            "custom_is_offcycle_component"
+        )
+
+        if not sal_comp:
+            continue
+
+        total += 1
+
+        docstatus = frappe.db.get_value("Additional Salary", r.name, "docstatus")
+
+        if docstatus == 0:
+            pending += 1
+        elif docstatus == 1:
+            approved += 1
+
+
+    return {
+        "status": "success",
+        "total": total,
+        "pending": pending,
+        "approved": approved,
+        "from_date": from_date,
+        "to_date": to_date
+    }
+
