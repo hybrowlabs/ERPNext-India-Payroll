@@ -986,6 +986,10 @@ def create_purchase_invoice(salary_slip):
             frappe.throw("Company mapping missing")
 
 
+
+
+
+
         item_code = None
         amount = 0
 
@@ -1041,6 +1045,10 @@ def create_purchase_invoice(salary_slip):
                 "business_segment": business_segment,
                 "apply_tds":1,
                 "supplier_bill_attachment":file_challan_url,
+
+                "remarks":"test",
+                "location":"Bangalore Office",
+                "department":"Academics Fundo - PW",
 
 
                 "items": [
@@ -1164,5 +1172,5 @@ def send_email_from_template_to_employee(slip, employee, sign_url=None):
         message=message,
         reference_doctype="Salary Slip",
         reference_name=slip.name,
-        now=True
+        # now=True
     )
