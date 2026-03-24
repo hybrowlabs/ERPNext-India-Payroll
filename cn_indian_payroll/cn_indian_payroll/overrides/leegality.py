@@ -435,333 +435,6 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
 
 
 
-# import frappe
-# import requests
-# import base64
-# from io import BytesIO
-# from pypdf import PdfReader, PdfWriter
-
-
-# @frappe.whitelist()
-# def view_signed_payslip(salary_slip):
-
-#     # -----------------------------
-#     # Get Salary Slip
-#     # -----------------------------
-#     slip = frappe.get_doc("Salary Slip", salary_slip)
-
-#     if not slip.custom_document_id:
-#         frappe.throw("Document ID missing in Salary Slip")
-
-#     # -----------------------------
-#     # Get Leegality Settings
-#     # -----------------------------
-#     settings = frappe.get_single("Leegality Settings")
-
-#     if not settings.api_key or not settings.post_url:
-#         frappe.throw("Leegality Settings not configured")
-
-#     document_id = slip.custom_document_id
-#     token = settings.api_key
-#     url = settings.post_url
-
-#     # -----------------------------
-#     # Call Leegality API
-#     # -----------------------------
-#     headers = {
-#         "X-Auth-Token": token
-#     }
-
-#     params = {
-#         "documentId": document_id,
-#         "documentDownloadType": "DOCUMENT"
-#     }
-
-#     resp = requests.get(
-#         url,
-#         headers=headers,
-#         params=params,
-#         timeout=60
-#     )
-
-#     if resp.status_code != 200:
-#         frappe.throw("Failed to download signed PDF")
-
-#     if not resp.content:
-#         frappe.throw("Empty file received from Leegality")
-
-#     # -----------------------------
-#     # Handle PDF / Base64
-#     # -----------------------------
-#     content_type = resp.headers.get("Content-Type", "").lower()
-
-#     if "application/pdf" in content_type:
-
-#         pdf_bytes = resp.content
-
-#     elif "application/json" in content_type:
-
-#         data = resp.json()
-
-#         if "fileContent" not in data.get("data", {}):
-#             frappe.throw("Invalid Leegality response")
-
-#         pdf_bytes = base64.b64decode(
-#             data["data"]["fileContent"]
-#         )
-
-#     else:
-#         frappe.throw(f"Unexpected response: {content_type}")
-
-#     # -----------------------------
-#     # Normalize PDF (Important)
-#     # -----------------------------
-#     reader = PdfReader(BytesIO(pdf_bytes))
-#     writer = PdfWriter()
-
-#     for page in reader.pages:
-#         writer.add_page(page)
-
-#     final_pdf = BytesIO()
-#     writer.write(final_pdf)
-#     final_pdf.seek(0)
-
-#     final_bytes = final_pdf.getvalue()
-
-#     # -----------------------------
-#     # Save in ERP File
-#     # -----------------------------
-#     file_name = f"{slip.name}_Signed.pdf"
-
-#     file_doc = frappe.get_doc({
-#         "doctype": "File",
-#         "file_name": file_name,
-#         "attached_to_doctype": "Salary Slip",
-#         "attached_to_name": slip.name,
-#         "attached_to_field": "custom_slip_attach",  # if you want
-#         "is_private": 1,
-#         "content": final_bytes
-#     })
-
-#     file_doc.save(ignore_permissions=True)
-
-#     frappe.db.commit()
-
-#     # -----------------------------
-#     # Stream to Browser
-#     # -----------------------------
-#     frappe.local.response.filename = file_name
-#     frappe.local.response.filecontent = final_bytes
-#     frappe.local.response.type = "pdf"
-
-#     slip.db_set("custom_slip_attach", file_doc.file_url)
-
-#     return {
-#         "status": "success",
-#         "file_url": file_doc.file_url
-#     }
-
-
-#     self.create_purchase_invoice()
-
-
-
-
-
-# def get_integration_settings():
-#     """
-#     Fetch Integration Settings
-#     """
-
-#     settings = frappe.get_single("Integration Settings")
-
-#     if not settings.url or not settings.api_key or not settings.api_secret:
-#         frappe.throw("Please configure Integration Settings")
-
-#     return {
-#         "url": settings.url,
-#         "api_key": settings.api_key,
-#         "api_secret": settings.api_secret
-#     }
-
-
-# @frappe.whitelist()
-# def create_purchase_invoice(salary_slip):
-
-#     try:
-
-#         slip = frappe.get_doc("Salary Slip", salary_slip)
-
-#         config = get_integration_settings()
-
-#         base_url = config["url"]
-#         api_key = config["api_key"]
-#         api_secret = config["api_secret"]
-
-#         token = f"token {api_key}:{api_secret}"
-
-#         headers = {
-#             "Authorization": token
-#         }
-
-
-#         file_url = None
-
-#         if slip.custom_attach:
-
-#             file_path = get_file_path(slip.custom_attach)
-
-#             if not file_path:
-#                 frappe.throw("File not found")
-
-#             file_url = upload_file_to_target(
-#                 base_url,
-#                 headers,
-#                 file_path
-#             )
-
-
-#         employee = frappe.get_doc("Employee", slip.employee)
-
-#         supplier_id = employee.custom_supplier_id
-
-#         posting_date = frappe.utils.formatdate(
-#             slip.posting_date, "yyyy-mm-dd"
-#         )
-
-#         due_date = frappe.utils.add_days(posting_date, 10)
-
-#         employee_setting = frappe.get_single("Contract Employee Setting")
-
-#         # Company Mapping
-#         company_name = None
-
-#         for row in employee_setting.map_the_company:
-#             if row.company_in_oxygen == slip.company:
-#                 company_name = row.company_in_erp
-#                 break
-
-#         if not company_name:
-#             frappe.throw("Company mapping not found")
-
-#         # Component Mapping
-#         item_code = None
-#         amount = 0
-
-#         for m in employee_setting.table_peep:
-#             for e in slip.earnings:
-
-#                 if m.salary_component == e.salary_component:
-#                     item_code = m.item
-#                     amount = e.amount
-#                     break
-
-#             if item_code:
-#                 break
-
-#         if not item_code:
-#             frappe.throw("Item mapping not found")
-
-
-#         payload = {
-#             "data": {
-#                 "supplier": supplier_id,
-#                 "company": company_name,
-#                 "posting_date": posting_date,
-#                 "due_date": due_date,
-#                 "bill_no": slip.name,
-#                 "bill_date": posting_date,
-
-#                 # "custom_attach": file_url,   
-
-#                 "items": [
-#                     {
-#                         "item_code": item_code,
-#                         "qty": 1,
-#                         "rate": amount
-#                     }
-#                 ]
-#             }
-#         }
-
-
-#         pi_url = f"{base_url}/api/resource/Purchase Invoice"
-
-#         response = requests.post(
-#             pi_url,
-#             headers={
-#                 **headers,
-#                 "Content-Type": "application/json"
-#             },
-#             json=payload,
-#             timeout=30
-#         )
-
-#         if response.status_code not in (200, 201):
-
-#             frappe.log_error(response.text, "PI Create Error")
-
-#             return {
-#                 "status": "failed",
-#                 "error": response.text
-#             }
-
-#         result = response.json()
-
-#         return {
-#             "status": "success",
-#             "pi_name": result["data"]["name"],
-#             "file_url": file_url
-#         }
-
-#     except Exception as e:
-
-#         frappe.log_error(frappe.get_traceback(), "Create PI Error")
-
-#         return {
-#             "status": "error",
-#             "message": str(e)
-#         }
-
-
-
-# def upload_file_to_target(base_url, headers, file_path):
-
-#     upload_url = f"{base_url}/api/method/upload_file"
-
-#     with open(file_path, "rb") as f:
-
-#         files = {
-#             "file": f
-#         }
-
-#         data = {
-#             "is_private": 1
-#         }
-
-#         response = requests.post(
-#             upload_url,
-#             headers=headers,
-#             files=files,
-#             data=data,
-#             timeout=30
-#         )
-
-#     if response.status_code not in (200, 201):
-#         frappe.throw("File upload failed: " + response.text)
-
-#     result = response.json()
-
-#     return result["message"]["file_url"]
-
-
-
-#============================================================================================================
-
-
-
-
-
 @frappe.whitelist()
 def view_signed_payslip(salary_slip):
 
@@ -868,9 +541,6 @@ def view_signed_payslip(salary_slip):
     }
 
 
-# ==================================================
-# Integration Settings
-# ==================================================
 
 def get_integration_settings():
 
@@ -886,16 +556,14 @@ def get_integration_settings():
     }
 
 
-# ==================================================
-# Create Purchase Invoice
-# ==================================================
-
 @frappe.whitelist()
 def create_purchase_invoice(salary_slip):
 
     try:
 
         slip = frappe.get_doc("Salary Slip", salary_slip)
+
+        month=slip.custom_month
 
         config = get_integration_settings()
 
@@ -909,9 +577,6 @@ def create_purchase_invoice(salary_slip):
             "Authorization": token
         }
 
-        # ----------------------------------------
-        # Upload BOTH files
-        # ----------------------------------------
 
         file_attach_url = None
         file_challan_url = None
@@ -947,9 +612,6 @@ def create_purchase_invoice(salary_slip):
             )
 
 
-        # ----------------------------------------
-        # Employee → Supplier
-        # ----------------------------------------
 
         employee = frappe.get_doc("Employee", slip.employee)
 
@@ -967,14 +629,14 @@ def create_purchase_invoice(salary_slip):
         due_date = frappe.utils.add_days(posting_date, 10)
 
 
-        # ----------------------------------------
-        # Mapping
-        # ----------------------------------------
+
 
         employee_setting = frappe.get_single("Contract Employee Setting")
 
         # Company
         company_name = None
+        department_name=None
+        worklocation_name=None
 
         for row in employee_setting.map_the_company:
 
@@ -986,8 +648,25 @@ def create_purchase_invoice(salary_slip):
             frappe.throw("Company mapping missing")
 
 
+        for row in employee_setting.map_the_department:
+
+            if row.department_in_oxygen == employee.department:
+                department_name = row.department_in_erp
+                break      
+
+        if not department_name:
+            frappe.throw("Department mapping missing")
 
 
+
+        for row in employee_setting.map_the_work_location:
+
+            if row.location_in_oxygen == employee.branch:
+                worklocation_name = row.location_in_erp
+                break      
+
+        if not worklocation_name:
+            frappe.throw("Worklocation mapping missing")
 
 
         item_code = None
@@ -1046,9 +725,9 @@ def create_purchase_invoice(salary_slip):
                 "apply_tds":1,
                 "supplier_bill_attachment":file_challan_url,
 
-                "remarks":"test",
-                "location":"Bangalore Office",
-                "department":"Academics Fundo - PW",
+                "remarks":"invoice in the month of"+month,
+                "location":worklocation_name,
+                "department":department_name,
 
 
                 "items": [
@@ -1063,7 +742,7 @@ def create_purchase_invoice(salary_slip):
                 ],
                 "attachment_details":[{
                         "title":"Challan",
-                        "attachment":file_attach_url,
+                        "attachment": file_attach_url or ""
                     }]
             }
         }
@@ -1108,9 +787,7 @@ def create_purchase_invoice(salary_slip):
         }
 
 
-# ==================================================
-# Upload File to Target ERP
-# ==================================================
+
 
 def upload_file_to_target(base_url, headers, file_path):
 

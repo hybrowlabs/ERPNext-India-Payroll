@@ -1,4 +1,5 @@
-frappe.query_reports["Monthly Salary Record (Consultants)"] = {
+
+frappe.query_reports["Historical CTC Proration"] = {
     "filters": [
         {
             "fieldname": "company",
