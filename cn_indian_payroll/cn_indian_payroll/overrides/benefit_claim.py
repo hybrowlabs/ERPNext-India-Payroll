@@ -32,8 +32,9 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
             company
         )
 
+        if payroll_period:
 
-        self.custom_payroll_period=payroll_period.name
+            self.custom_payroll_period=payroll_period.name
 
         
         self.validate_max_benefit_for_component(payroll_period)
@@ -43,6 +44,10 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
             self.validate_non_pro_rata_benefit_claim(max_benefits, payroll_period)
 
         self.set_taxable_or_non_taxable()
+
+
+
+
 
 
 

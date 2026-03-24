@@ -1,0 +1,67 @@
+// Copyright (c) 2026, Hybrowlabs technologies and contributors
+// For license information, please see license.txt
+
+frappe.query_reports["Benefit Status Report"] = {
+	"filters": [
+
+
+
+
+		{
+            "label": "Employee",
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 200
+        },
+
+		
+
+		{
+            "label": "Company",
+			"fieldname": "company",
+            "fieldtype": "Link",
+            "options": "Company",
+            "width": 200,
+			"reqd": 1,
+			"default": frappe.defaults.get_user_default("company")
+        },
+		{
+            "label": "Payroll Period",
+			"fieldname": "payroll_period",
+            "fieldtype": "Link",
+            "options": "Payroll Period",
+            "width": 200,
+			"reqd": 1,
+        },
+
+		{
+            "label": "Status",
+			"fieldname": "status",
+            "fieldtype": "Select",
+            "options": ["All","Approved","Rejected","Pending"],
+			"default":"All",
+            "width": 200,
+			"reqd": 1,
+        },
+
+	],
+	"onload": function (report) {
+				report.set_filter_value("company", frappe.defaults.get_user_default("company"));
+
+				frappe.db.get_list("Payroll Period", {
+					limit: 1,
+					order_by: "start_date desc",
+					fields: ["name"],
+					filters: {
+
+						"company": frappe.defaults.get_user_default("company")
+					}
+				}).then(res => {
+					if (res && res.length > 0) {
+						report.set_filter_value("payroll_period", res[0].name);
+					}
+				});
+			}
+
+};
