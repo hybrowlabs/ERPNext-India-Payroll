@@ -4,6 +4,8 @@ import frappe
 from cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting import get_invoice_status
 
 
+
+
 @frappe.whitelist()
 def get_salary_slip_list(employee=None, company=None):
 
@@ -29,6 +31,7 @@ def get_salary_slip_list(employee=None, company=None):
             "custom_payroll_period",
             "custom_month",
             "custom_attach",
+            
         ],
         order_by="end_date desc",
     )
