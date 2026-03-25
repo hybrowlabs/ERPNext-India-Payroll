@@ -3966,6 +3966,79 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
   {
 
 
+if(!frm.is_new())
+{
+
+
+      frm.add_custom_button("Choose Regime",function()
+      {
+
+        let d = new frappe.ui.Dialog({
+          title: 'Enter details',
+          fields: [
+
+              {
+                  label: 'Select Regime',
+                  fieldname: 'select_regime',
+                  fieldtype: 'Select',
+                  options:['Old Regime','New Regime'],
+                  reqd:1,
+                  default:frm.doc.custom_tax_regime,
+                  description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
+
+
+              },
+
+
+
+
+          ],
+          size: 'small', // small, large, extra-large
+          primary_action_label: 'Submit',
+          primary_action(values) {
+              // console.log(values);
+
+              frappe.call({
+                "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
+                args:{
+
+                    doc_id: frm.doc.name,
+                    employee:frm.doc.employee,
+                    company:frm.doc.company,
+                    payroll_period:frm.doc.payroll_period,
+                    regime:values.select_regime
+
+
+                },
+                callback :function(res)
+                {
+                    frm.reload_doc();
+
+
+                }
+
+            })
+
+
+
+              d.hide();
+          }
+      });
+
+      d.show();
+
+
+
+
+      })
+      frm.change_custom_button_type('Choose Regime', null, 'primary');
+
+    }
+
+
+
+
+
     tds_projection_html(frm)
 
 
@@ -4109,74 +4182,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
       }
 
 
-      if(frm.doc.docstatus==1)
-          {
-              frm.add_custom_button("Choose Regime",function()
-              {
-
-                let d = new frappe.ui.Dialog({
-                  title: 'Enter details',
-                  fields: [
-
-                      {
-                          label: 'Select Regime',
-                          fieldname: 'select_regime',
-                          fieldtype: 'Select',
-                          options:['Old Regime','New Regime'],
-                          reqd:1,
-                          default:frm.doc.custom_tax_regime,
-                          description: `Your current tax regime is ${frm.doc.custom_tax_regime}`
-
-
-                      },
-
-
-
-
-                  ],
-                  size: 'small', // small, large, extra-large
-                  primary_action_label: 'Submit',
-                  primary_action(values) {
-                      // console.log(values);
-
-                      frappe.call({
-                        "method":"cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
-                        args:{
-
-                            doc_id: frm.doc.name,
-                            employee:frm.doc.employee,
-                            company:frm.doc.company,
-                            payroll_period:frm.doc.payroll_period,
-                            regime:values.select_regime
-
-
-                        },
-                        callback :function(res)
-                        {
-                            frm.reload_doc();
-
-
-                        }
-
-                    })
-
-
-
-                      d.hide();
-                  }
-              });
-
-              d.show();
-
-
-
-
-              })
-              frm.change_custom_button_type('Choose Regime', null, 'primary');
-
-
-
-          }
 
   },
 
