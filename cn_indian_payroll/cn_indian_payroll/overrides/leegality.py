@@ -735,6 +735,8 @@ def create_purchase_invoice(salary_slip):
                         "item_code": item_code,
                         "qty": 1,
                         "rate": amount,
+                        "price_list_rate":amount,
+                        "amount":amount,
                         "item_tax_template":item_tax_template if gst else None
                     }
 
