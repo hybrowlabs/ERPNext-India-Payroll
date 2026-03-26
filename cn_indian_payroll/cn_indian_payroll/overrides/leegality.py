@@ -197,8 +197,6 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 import hashlib
 
-
-
 @frappe.whitelist(allow_guest=True)
 def leegality_webhook():
 
@@ -218,6 +216,12 @@ def leegality_webhook():
         document_id = event_data.get("documentId")
         status = event_data.get("status")
 
+        # 🔥 DEBUG 1
+        frappe.log_error(
+            f"Incoming Doc ID: {document_id}",
+            "Webhook Debug"
+        )
+
         if not document_id:
             return {"status": "ignored"}
 
@@ -225,6 +229,12 @@ def leegality_webhook():
             "Salary Slip",
             {"custom_document_id": document_id},
             "name"
+        )
+
+        # 🔥 DEBUG 2
+        frappe.log_error(
+            f"Matched Salary Slip: {slip_name}",
+            "Webhook Debug"
         )
 
         if not slip_name:
@@ -235,6 +245,12 @@ def leegality_webhook():
             return {"status": "not_found"}
 
         slip = frappe.get_doc("Salary Slip", slip_name)
+
+        # 🔥 DEBUG 3
+        frappe.log_error(
+            f"Status from Leegality: {status}",
+            "Webhook Debug"
+        )
 
         if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
             slip.db_set("custom_e_sign_status", "Signed")
@@ -247,9 +263,6 @@ def leegality_webhook():
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Webhook Failed")
         return {"status": "error"}
-
-
-
 
 
 @frappe.whitelist()
@@ -388,8 +401,7 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
             "phone": phone
         }],
         "requestSignOrder": True,
-        "callbackUrl": "http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"
-    }
+        "callbackUrl": "https://dev.pwhr.in/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"    }
 
     response = requests.post(
         API_URL,
