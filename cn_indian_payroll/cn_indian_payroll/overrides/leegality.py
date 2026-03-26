@@ -251,7 +251,7 @@ def leegality_webhook():
             slip.db_set("custom_e_sign_status", "Signed")
 
         elif status in ["REJECTED", "CANCELLED"]:
-            slip.db_set("custom_e_sign_status", "Rejected")
+            slip.db_set("custom_e_sign_status", "Failed")
 
         return {"status": "ok"}
 
