@@ -195,7 +195,6 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 
 import hashlib
-
 @frappe.whitelist(allow_guest=True)
 def leegality_webhook():
 
@@ -205,23 +204,62 @@ def leegality_webhook():
         if not payload:
             frappe.throw("Empty Payload")
 
-        # 🔐 VERIFY SIGNATURE
-        signature = frappe.get_request_header("X-Leegality-Signature")
+        event_data = json.loads(payload)
 
-        settings = frappe.get_single("Leegality Settings")
-        private_salt = settings.private_salt
+        frappe.log_error(
+            json.dumps(event_data, indent=2),
+            "Leegality Webhook Received"
+        )
 
-        generated_signature = hashlib.sha256(
-            (payload + private_salt).encode()
-        ).hexdigest()
+        document_id = event_data.get("documentId")
+        status = event_data.get("status")
 
-        if signature != generated_signature:
-            frappe.log_error("Invalid Signature", "Webhook Security")
-            return {"status": "unauthorized"}
+        if not document_id:
+            return {"status": "ignored"}
 
-        # -----------------------------
-        # Process JSON
-        # -----------------------------
+        # ✅ Safe fetch
+        slip_name = frappe.db.get_value(
+            "Salary Slip",
+            {"custom_document_id": document_id},
+            "name"
+        )
+
+        if not slip_name:
+            frappe.log_error(
+                f"Doc not found for ID: {document_id}",
+                "Webhook Debug"
+            )
+            return {"status": "not_found"}
+
+        slip = frappe.get_doc("Salary Slip", slip_name)
+
+        # ✅ Safe update
+        if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
+            slip.db_set("custom_e_sign_status", "Signed")
+
+        elif status in ["REJECTED", "CANCELLED"]:
+            slip.db_set("custom_e_sign_status", "Rejected")
+
+        return {"status": "ok"}
+
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            "Leegality Webhook Failed"
+        )
+        return {"status": "error"}
+
+        
+
+@frappe.whitelist(allow_guest=True)
+def leegality_webhook():
+
+    try:
+        payload = frappe.request.get_data(as_text=True)
+
+        if not payload:
+            return {"status": "empty"}
+
         event_data = json.loads(payload)
 
         frappe.log_error(
@@ -242,64 +280,25 @@ def leegality_webhook():
         )
 
         if not slip_name:
+            frappe.log_error(
+                f"Document ID not found: {document_id}",
+                "Webhook Mapping Issue"
+            )
             return {"status": "not_found"}
 
         slip = frappe.get_doc("Salary Slip", slip_name)
 
-        # ✅ Update status
         if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
             slip.db_set("custom_e_sign_status", "Signed")
 
         elif status in ["REJECTED", "CANCELLED"]:
-            slip.db_set("custom_e_sign_status", "Failed")
+            slip.db_set("custom_e_sign_status", "Rejected")
 
         return {"status": "ok"}
 
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Webhook Failed")
         return {"status": "error"}
-
-
-
-@frappe.whitelist()
-def view_signed_payslip_employee(salary_slip):
-
-    slip = frappe.get_doc("Salary Slip", salary_slip)
-
-    documentId=slip.custom_document_id
-
-    leegality_setting = frappe.get_single("Leegality Settings")
-    X_AUTH_TOKEN = leegality_setting.api_key
-
-
-    base_url = leegality_setting.api_base_url.rstrip("/")
-
-    url = f"{base_url}/api/v3.1/document/fetchDocument"
-
-
-    # url = leegality_setting.post_url
-
-    headers = {
-        "X-Auth-Token": X_AUTH_TOKEN
-    }
-
-    params = {
-        "documentId": documentId,
-        "documentDownloadType": "DOCUMENT"
-    }
-
-    r = requests.get(url, headers=headers, params=params, timeout=60)
-
-    if r.status_code != 200 or not r.content:
-        frappe.throw("Unable to fetch signed document from Leegality")
-
-    frappe.local.response.filename = f"{slip.name}_Signed.pdf"
-    frappe.local.response.filecontent = r.content
-    frappe.local.response.type = "pdf"
-
-    return
-
-
 
 
 
