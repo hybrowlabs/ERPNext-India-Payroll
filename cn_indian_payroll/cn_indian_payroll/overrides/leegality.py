@@ -119,7 +119,6 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 
 
-#webhook view================================================
 # @frappe.whitelist(allow_guest=True)
 # def leegality_webhook():
 
@@ -195,7 +194,70 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 #         return {"status": "error"}
 
 
+import hashlib
 
+@frappe.whitelist(allow_guest=True)
+def leegality_webhook():
+
+    try:
+        payload = frappe.request.get_data(as_text=True)
+
+        if not payload:
+            frappe.throw("Empty Payload")
+
+        # 🔐 VERIFY SIGNATURE
+        signature = frappe.get_request_header("X-Leegality-Signature")
+
+        settings = frappe.get_single("Leegality Settings")
+        private_salt = settings.private_salt
+
+        generated_signature = hashlib.sha256(
+            (payload + private_salt).encode()
+        ).hexdigest()
+
+        if signature != generated_signature:
+            frappe.log_error("Invalid Signature", "Webhook Security")
+            return {"status": "unauthorized"}
+
+        # -----------------------------
+        # Process JSON
+        # -----------------------------
+        event_data = json.loads(payload)
+
+        frappe.log_error(
+            json.dumps(event_data, indent=2),
+            "Leegality Webhook Received"
+        )
+
+        document_id = event_data.get("documentId")
+        status = event_data.get("status")
+
+        if not document_id:
+            return {"status": "ignored"}
+
+        slip_name = frappe.db.get_value(
+            "Salary Slip",
+            {"custom_document_id": document_id},
+            "name"
+        )
+
+        if not slip_name:
+            return {"status": "not_found"}
+
+        slip = frappe.get_doc("Salary Slip", slip_name)
+
+        # ✅ Update status
+        if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
+            slip.db_set("custom_e_sign_status", "Signed")
+
+        elif status in ["REJECTED", "CANCELLED"]:
+            slip.db_set("custom_e_sign_status", "Rejected")
+
+        return {"status": "ok"}
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Webhook Failed")
+        return {"status": "error"}
 
 
 
@@ -378,7 +440,8 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
             "email": email,
             "phone": phone
         }],
-        "requestSignOrder": True
+        "requestSignOrder": True,
+        "callbackUrl": "http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"
     }
 
     response = requests.post(
