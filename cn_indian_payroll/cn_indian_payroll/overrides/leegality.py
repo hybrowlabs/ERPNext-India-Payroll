@@ -88,7 +88,8 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
                 "phone": phone
             }
         ],
-        "requestSignOrder": True
+        "requestSignOrder": True,
+        "callbackUrl": "https://dev.pwhr.in/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"
     }
 
     response = requests.post(
@@ -195,61 +196,8 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 
 import hashlib
-@frappe.whitelist(allow_guest=True)
-def leegality_webhook():
 
-    try:
-        payload = frappe.request.get_data(as_text=True)
 
-        if not payload:
-            frappe.throw("Empty Payload")
-
-        event_data = json.loads(payload)
-
-        frappe.log_error(
-            json.dumps(event_data, indent=2),
-            "Leegality Webhook Received"
-        )
-
-        document_id = event_data.get("documentId")
-        status = event_data.get("status")
-
-        if not document_id:
-            return {"status": "ignored"}
-
-        # ✅ Safe fetch
-        slip_name = frappe.db.get_value(
-            "Salary Slip",
-            {"custom_document_id": document_id},
-            "name"
-        )
-
-        if not slip_name:
-            frappe.log_error(
-                f"Doc not found for ID: {document_id}",
-                "Webhook Debug"
-            )
-            return {"status": "not_found"}
-
-        slip = frappe.get_doc("Salary Slip", slip_name)
-
-        # ✅ Safe update
-        if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
-            slip.db_set("custom_e_sign_status", "Signed")
-
-        elif status in ["REJECTED", "CANCELLED"]:
-            slip.db_set("custom_e_sign_status", "Rejected")
-
-        return {"status": "ok"}
-
-    except Exception:
-        frappe.log_error(
-            frappe.get_traceback(),
-            "Leegality Webhook Failed"
-        )
-        return {"status": "error"}
-
-        
 
 @frappe.whitelist(allow_guest=True)
 def leegality_webhook():
