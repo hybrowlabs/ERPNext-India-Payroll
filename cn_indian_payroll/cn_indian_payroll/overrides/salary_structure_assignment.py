@@ -128,11 +128,17 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
 
     def reimbursement_amount(self):
         total_amount = 0
+        not_included_total=0
         if len(self.custom_employee_reimbursements) > 0:
             for reimbursement in self.custom_employee_reimbursements:
-                total_amount += reimbursement.monthly_total_amount
+                component=frappe.get_doc("Salary Component",reimbursement.reimbursements)
+                if component.custom_include_ctc_total:
+                    total_amount += reimbursement.monthly_total_amount
+                else:
+                    not_included_total += reimbursement.monthly_total_amount
 
         self.custom_total_reimbursement_amount = total_amount
+        self.custom_not_included_total=not_included_total
 
 
 

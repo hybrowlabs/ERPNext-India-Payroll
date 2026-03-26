@@ -62,7 +62,7 @@ frappe.ui.form.on("Salary Slip", {
 
 
 
-        frm.add_custom_button("Create Purchase Invoice", function () {
+        frm.add_custom_button("Send Invoice to ERP", function () {
 
                 frappe.call({
                     method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",

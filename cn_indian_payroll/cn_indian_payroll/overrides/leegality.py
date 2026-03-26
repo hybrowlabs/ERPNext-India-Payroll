@@ -88,7 +88,8 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
                 "phone": phone
             }
         ],
-        "requestSignOrder": True
+        "requestSignOrder": True,
+        "callbackUrl": "https://dev.pwhr.in/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"
     }
 
     response = requests.post(
@@ -119,7 +120,6 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 
 
 
-#webhook view================================================
 # @frappe.whitelist(allow_guest=True)
 # def leegality_webhook():
 
@@ -195,52 +195,74 @@ def _push_to_leegality(pdf_base64, slip, email, phone):
 #         return {"status": "error"}
 
 
+import hashlib
 
+@frappe.whitelist(allow_guest=True)
+def leegality_webhook():
 
+    try:
+        payload = frappe.request.get_data(as_text=True)
 
+        if not payload:
+            return {"status": "empty"}
 
-@frappe.whitelist()
-def view_signed_payslip_employee(salary_slip):
+        event_data = json.loads(payload)
 
-    slip = frappe.get_doc("Salary Slip", salary_slip)
+        frappe.log_error(
+            json.dumps(event_data, indent=2),
+            "Leegality Webhook Received"
+        )
 
-    documentId=slip.custom_document_id
+        document_id = event_data.get("documentId")
+        status = event_data.get("status")
 
-    leegality_setting = frappe.get_single("Leegality Settings")
-    X_AUTH_TOKEN = leegality_setting.api_key
+        # 🔥 DEBUG 1
+        frappe.log_error(
+            f"Incoming Doc ID: {document_id}",
+            "Webhook Debug"
+        )
 
+        if not document_id:
+            return {"status": "ignored"}
 
-    base_url = leegality_setting.api_base_url.rstrip("/")
+        slip_name = frappe.db.get_value(
+            "Salary Slip",
+            {"custom_document_id": document_id},
+            "name"
+        )
 
-    url = f"{base_url}/api/v3.1/document/fetchDocument"
+        # 🔥 DEBUG 2
+        frappe.log_error(
+            f"Matched Salary Slip: {slip_name}",
+            "Webhook Debug"
+        )
 
+        if not slip_name:
+            frappe.log_error(
+                f"Document ID not found: {document_id}",
+                "Webhook Mapping Issue"
+            )
+            return {"status": "not_found"}
 
-    # url = leegality_setting.post_url
+        slip = frappe.get_doc("Salary Slip", slip_name)
 
-    headers = {
-        "X-Auth-Token": X_AUTH_TOKEN
-    }
+        # 🔥 DEBUG 3
+        frappe.log_error(
+            f"Status from Leegality: {status}",
+            "Webhook Debug"
+        )
 
-    params = {
-        "documentId": documentId,
-        "documentDownloadType": "DOCUMENT"
-    }
+        if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
+            slip.db_set("custom_e_sign_status", "Signed")
 
-    r = requests.get(url, headers=headers, params=params, timeout=60)
+        elif status in ["REJECTED", "CANCELLED"]:
+            slip.db_set("custom_e_sign_status", "Rejected")
 
-    if r.status_code != 200 or not r.content:
-        frappe.throw("Unable to fetch signed document from Leegality")
+        return {"status": "ok"}
 
-    frappe.local.response.filename = f"{slip.name}_Signed.pdf"
-    frappe.local.response.filecontent = r.content
-    frappe.local.response.type = "pdf"
-
-    return
-
-
-
-
-
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Webhook Failed")
+        return {"status": "error"}
 
 
 @frappe.whitelist()
@@ -378,8 +400,8 @@ def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
             "email": email,
             "phone": phone
         }],
-        "requestSignOrder": True
-    }
+        "requestSignOrder": True,
+        "callbackUrl": "https://dev.pwhr.in/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"    }
 
     response = requests.post(
         API_URL,
@@ -735,6 +757,8 @@ def create_purchase_invoice(salary_slip):
                         "item_code": item_code,
                         "qty": 1,
                         "rate": amount,
+                        "price_list_rate":amount,
+                        "amount":amount,
                         "item_tax_template":item_tax_template if gst else None
                     }
 

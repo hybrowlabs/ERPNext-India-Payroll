@@ -1295,7 +1295,8 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
 
         return {
             "status": "failed",
-            "message": f"The {doctype} submission window is currently closed.",
+            "message": f"The {doctype} submission window is currently closed.Yocannot select and enter the investments",
+
         }
 
     for period in locking_periods or []:
@@ -1323,7 +1324,7 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
 
     return {
         "status": "failed",
-        "message": f"The {doctype} submission window is currently closed.",
+        "message": f"The {doctype} submission window is currently closed. You cannot select or enter investments.",
     }
 
 
