@@ -20,17 +20,7 @@ from frappe import _
 def before_submit(self, method):
     if self.custom_type == "Salary Advance":
         self.custom_total_balance_amount = (self.advance_amount or 0) - (self.custom_total_paid_amount or 0)
-
-        
-    #     if not self.custom_note_remarks or not self.custom_deduction_component:
-    #         frappe.throw("Please add Note/Remarks and select a Deduction Component in the Note Section before submitting.")
-
-        
-
-    # elif self.custom_type == "Reimbursement / Expense Advance":
-    #     if not self.custom_note_remarks:
-    #         frappe.throw("Please add Note/Remarks in the Note Section before submitting.")
-
+  
 
     if self.custom_final_status=="Pending":
         frappe.throw("Please Select the Status Approved or Rejected")
@@ -189,7 +179,6 @@ def get_advance_dashboard(employee):
             "employee":advance.employee,
             "employee_name":advance.employee_name,
             "can_edit":advance.can_edit,
-
             "allocated_to": todo_info.get("allocated_to", []),
             "allocated_to_user": todo_info.get("allocated_to_user"),
             "allocated_to_roles": todo_info.get("allocated_to_roles", []),

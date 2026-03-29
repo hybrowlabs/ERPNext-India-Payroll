@@ -63,7 +63,9 @@ def benefit_data_list_view(
     company=None,
     payroll_period=None,
     start=0,
-    page_length=1
+    page_length=1,
+    custom_status=None,
+    earning_component=None,
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
@@ -82,6 +84,12 @@ def benefit_data_list_view(
 
     if payroll_period:
         filters["custom_payroll_period"] = payroll_period
+
+    if earning_component:
+        filters["earning_component"] = earning_component
+
+    if custom_status and custom_status != "All":
+        filters["custom_status"] = custom_status
 
     # -----------------------------
     # Total count (optional)
