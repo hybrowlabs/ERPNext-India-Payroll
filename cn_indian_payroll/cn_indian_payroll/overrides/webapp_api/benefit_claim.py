@@ -12,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 import frappe
 from datetime import datetime
 import calendar
+from cn_leave_shift_managment.api import get_open_approval_todos
 
 #view and dowaload benefit payslip
 
@@ -57,20 +58,123 @@ def get_benefit_payslip_pdf(id):
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_data_list_view?employee=37001&payroll_period=25-26&limit_start=0&limit_page_length=10
 
 
+# @frappe.whitelist()
+# def benefit_data_list_view(
+#     employee,
+#     company=None,
+#     payroll_period=None,
+#     start=0,
+#     page_length=1,
+#     custom_status=None,
+#     earning_component=None,
+# ):
+#     if not employee:
+#         return {"status": "failed", "message": "Employee is required"}
+
+#     # Ensure integers
+#     start = int(start)
+#     page_length = int(page_length)
+
+#     filters = {
+#         "employee": employee,
+#         "docstatus": ("in", [0, 1])
+#     }
+
+#     if company:
+#         filters["company"] = company
+
+#     if payroll_period:
+#         filters["custom_payroll_period"] = payroll_period
+
+#     if earning_component:
+#         filters["earning_component"] = earning_component
+
+#     if custom_status and custom_status != "All":
+#         filters["custom_status"] = custom_status
+
+#     # -----------------------------
+#     # Total count (optional)
+#     # -----------------------------
+#     total_count = frappe.db.count(
+#         "Employee Benefit Claim",
+#         filters=filters
+#     )
+
+#     # -----------------------------
+#     # Data with limit
+#     # -----------------------------
+#     claims = frappe.db.get_all(
+#         "Employee Benefit Claim",
+#         filters=filters,
+#         fields=[
+#             "name",
+#             "employee",
+#             "employee_name",
+#             "custom_payroll_period",
+#             "claim_date",
+#             "company",
+#             "custom_status",
+#             "earning_component",
+#             "claimed_amount",
+#             "custom_note_by_employee",
+#             "custom_note_by_approver",
+#             "custom_is_taxable",
+#             "custom_taxable_amount",
+#             "custom_is_non_taxable",
+#             "custom_non_taxable_amount",
+#             "can_edit",
+#             # "attachments"
+#         ],
+#         order_by="claim_date desc",
+#         start=start,
+#         page_length=page_length
+#     )
+
+#     if not claims:
+#         return {
+#             "status": "success",
+#             "data": [],
+#             "total_records": total_count
+#         }
+
+#     # -----------------------------
+#     # Attachments
+#     # -----------------------------
+#     for row in claims:
+#         row["attachments"] = frappe.db.get_all(
+#             "File",
+#             filters={
+#                 "attached_to_doctype": "Employee Benefit Claim",
+#                 "attached_to_name": row["name"],
+#             },
+#             fields=["file_url"]
+#         )
+
+       
+
+#     return {
+#         "status": "success",
+#         "data": claims,
+#         "total_count": total_count,
+#         "start": start,
+#         "page_length":page_length
+#     }
+
+
+
 @frappe.whitelist()
 def benefit_data_list_view(
     employee,
     company=None,
     payroll_period=None,
     start=0,
-    page_length=1,
+    page_length=10,
     custom_status=None,
     earning_component=None,
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
 
-    # Ensure integers
     start = int(start)
     page_length = int(page_length)
 
@@ -92,15 +196,7 @@ def benefit_data_list_view(
         filters["custom_status"] = custom_status
 
     # -----------------------------
-    # Total count (optional)
-    # -----------------------------
-    total_count = frappe.db.count(
-        "Employee Benefit Claim",
-        filters=filters
-    )
-
-    # -----------------------------
-    # Data with limit
+    # Claims
     # -----------------------------
     claims = frappe.db.get_all(
         "Employee Benefit Claim",
@@ -122,24 +218,52 @@ def benefit_data_list_view(
             "custom_is_non_taxable",
             "custom_non_taxable_amount",
             "can_edit",
-            # "attachments"
         ],
         order_by="claim_date desc",
         start=start,
         page_length=page_length
     )
 
+    total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
+
     if not claims:
         return {
             "status": "success",
             "data": [],
-            "total_records": total_count
+            "total_count": total_count
         }
 
     # -----------------------------
-    # Attachments
+    # Get FULL TODO DATA
+    # -----------------------------
+    todo_response = get_open_approval_todos(
+        doctype="Employee Benefit Claim",
+        page_length=1000
+    )
+
+    todo_list = todo_response.get("data", [])
+
+    # -----------------------------
+    # Map TODOS
+    # -----------------------------
+    todo_map = {}
+
+    for todo in todo_list:
+        ref_name = todo.get("reference_name")
+
+        if ref_name:
+            if ref_name not in todo_map:
+                todo_map[ref_name] = []
+
+            # ✅ FULL todo_data stored
+            todo_map[ref_name].append(todo)
+
+    # -----------------------------
+    # Attach everything
     # -----------------------------
     for row in claims:
+
+        # Attachments (claim level)
         row["attachments"] = frappe.db.get_all(
             "File",
             filters={
@@ -149,21 +273,16 @@ def benefit_data_list_view(
             fields=["file_url"]
         )
 
-        todo_info = _get_todo_info_for_doc("Employee Benefit Claim", row["name"])
-
-        row["allocated_to"] = todo_info.get("allocated_to")
-        row["allocated_to_user"] = todo_info.get("allocated_to_user")
-        row["allocated_to_roles"] = todo_info.get("allocated_to_roles")
-        row["username"] = todo_info.get("username")
+        # ✅ FULL ToDo data
+        row["todos"] = todo_map.get(row["name"], [])
 
     return {
         "status": "success",
         "data": claims,
         "total_count": total_count,
         "start": start,
-        "page_length":page_length
+        "page_length": page_length
     }
-
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_payslip_list_view?employee=37001&payroll_period=25-26&limit_start=0&limit_page_length=10
 
