@@ -12,9 +12,7 @@ from dateutil.relativedelta import relativedelta
 import frappe
 from datetime import datetime
 import calendar
-from cn_leave_shift_managment.api import get_open_approval_todos
 
-#view and dowaload benefit payslip
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_benefit_payslip_pdf?id=HR-BEN-CLM-25-12-00001
 
@@ -161,7 +159,6 @@ def get_benefit_payslip_pdf(id):
 #     }
 
 
-
 @frappe.whitelist()
 def benefit_data_list_view(
     employee,
@@ -171,6 +168,8 @@ def benefit_data_list_view(
     page_length=10,
     custom_status=None,
     earning_component=None,
+    todo_status=None,
+    # filters=None,
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
@@ -195,9 +194,7 @@ def benefit_data_list_view(
     if custom_status and custom_status != "All":
         filters["custom_status"] = custom_status
 
-    # -----------------------------
-    # Claims
-    # -----------------------------
+
     claims = frappe.db.get_all(
         "Employee Benefit Claim",
         filters=filters,
@@ -230,40 +227,12 @@ def benefit_data_list_view(
         return {
             "status": "success",
             "data": [],
-            "total_count": total_count
+            "total_count": total_count,
+            "todo_list": []
         }
 
-    # -----------------------------
-    # Get FULL TODO DATA
-    # -----------------------------
-    todo_response = get_open_approval_todos(
-        doctype="Employee Benefit Claim",
-        page_length=1000
-    )
 
-    todo_list = todo_response.get("data", [])
-
-    # -----------------------------
-    # Map TODOS
-    # -----------------------------
-    todo_map = {}
-
-    for todo in todo_list:
-        ref_name = todo.get("reference_name")
-
-        if ref_name:
-            if ref_name not in todo_map:
-                todo_map[ref_name] = []
-
-            # ✅ FULL todo_data stored
-            todo_map[ref_name].append(todo)
-
-    # -----------------------------
-    # Attach everything
-    # -----------------------------
     for row in claims:
-
-        # Attachments (claim level)
         row["attachments"] = frappe.db.get_all(
             "File",
             filters={
@@ -273,15 +242,41 @@ def benefit_data_list_view(
             fields=["file_url"]
         )
 
-        # ✅ FULL ToDo data
-        row["todos"] = todo_map.get(row["name"], [])
 
+    todo_response = get_open_approval_todos(
+        doctype="Employee Benefit Claim",
+        start=0,
+        page_length=1000,
+        include_allocated_todos=False,
+        todo_status=todo_status,
+        # filters=filters
+
+    )
+
+
+    # Create mapping: claim_name -> todos
+    todo_map = {}
+
+    if todo_response and todo_response.get("data"):
+        for todo in todo_response.get("data"):
+            ref_name = todo.get("reference_name")
+            if ref_name:
+                todo_map.setdefault(ref_name, []).append(todo)
+
+    # Attach todos to each claim
+    for row in claims:
+        row["todo_list"] = todo_map.get(row["name"], [])
+
+    # -----------------------------
+    # Final Response
+    # -----------------------------
     return {
         "status": "success",
-        "data": claims,
+        "data": claims,   
         "total_count": total_count,
         "start": start,
-        "page_length": page_length
+        "page_length": page_length,
+        
     }
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_payslip_list_view?employee=37001&payroll_period=25-26&limit_start=0&limit_page_length=10
@@ -592,175 +587,6 @@ def benefit_claim(doc=None, employee=None, claim_date=None):
 
 
 
-
-
-
-
-# http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_all_accrued_reimbursements?employee=37001&company=PW&payroll_period=25-26
-
-# @frappe.whitelist()
-# def get_all_accrued_reimbursements(filters=None):
-#     if not filters:
-#         filters = {}
-
-#     from datetime import datetime
-
-
-#     ssa_map = {}  # key → (employee, component)
-
-#     ssa_filters = {}
-#     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
-#     if target_employee:
-#         filters["employee"] = target_employee
-#     if filters.get("employee"):
-#         ssa_filters["employee"] = filters["employee"]
-#     if filters.get("payroll_period"):
-#         ssa_filters["payroll_period"] = filters["payroll_period"]
-
-#     salary_slips = frappe.get_list(
-#         "Salary Slip",
-#         filters=ssa_filters,
-#         fields=["name", "employee", "custom_salary_structure_assignment"]
-#     )
-
-#     for slip in salary_slips:
-#         if not slip.custom_salary_structure_assignment:
-#             continue
-
-#         ssa = frappe.get_doc("Salary Structure Assignment", slip.custom_salary_structure_assignment)
-
-#         for row in ssa.custom_employee_reimbursements:
-#             advance_period = (
-#                 frappe.db.get_value("Salary Component", row.reimbursements, "custom_advance_period")
-#                 or 0
-#             )
-
-#             ssa_map[(slip.employee, row.reimbursements)] = {
-#                 "periodic_original_amount": row.monthly_total_amount or 0,
-#                 "advance_period": advance_period,
-#                 "advance_amount": (row.monthly_total_amount or 0) * advance_period,
-#             }
-
-
-#     accrual_filters = {"docstatus": 1}
-#     if filters.get("employee"):
-#         accrual_filters["employee"] = filters["employee"]
-#     if filters.get("payroll_period"):
-#         accrual_filters["payroll_period"] = filters["payroll_period"]
-#     if filters.get("company"):
-#         accrual_filters["company"] = filters["company"]
-
-#     accrual_records = frappe.get_list(
-#         "Employee Benefit Accrual",
-#         filters=accrual_filters,
-#         fields=["*"],
-#         order_by="benefit_accrual_date"
-#     )
-
-
-#     claim_filters = {"docstatus": 1}
-#     if filters.get("employee"):
-#         claim_filters["employee"] = filters["employee"]
-#     if filters.get("company"):
-#         claim_filters["company"] = filters["company"]
-
-#     claim_records = frappe.get_list(
-#         "Employee Benefit Claim",
-#         filters=claim_filters,
-#         fields=[
-#             "employee",
-#             "company",
-#             "custom_payroll_period",
-#             "claim_date",
-#             "earning_component",
-#             "custom_paid_amount",
-#             "claimed_amount",
-#         ]
-#     )
-
-
-
-
-
-#     grouped = {}
-
-#     for accrual in accrual_records:
-#         # Convert date → "April 2025"
-#         dt = datetime.strptime(str(accrual.benefit_accrual_date), "%Y-%m-%d")
-#         month_label = dt.strftime("%B %Y")
-
-#         # Find matching monthly claim amount
-#         paid_amount = 0
-#         claimed_amount=0
-#         for claim in claim_records:
-#             if (
-#                 claim.employee == accrual.employee
-#                 and claim.company == accrual.company
-#                 and claim.custom_payroll_period == accrual.payroll_period
-#                 and claim.earning_component == accrual.salary_component
-#             ):
-
-#                 if claim.claim_date:
-#                     cdt = datetime.strptime(str(claim.claim_date), "%Y-%m-%d")
-#                     if cdt.month == dt.month and cdt.year == dt.year:
-#                         claimed_amount += round(claim.claimed_amount or 0)
-#                         paid_amount += round(claim.custom_paid_amount or 0)
-
-
-#         # SSA values
-#         ssa_key = (accrual.employee, accrual.salary_component)
-#         periodic_original_amount = ssa_map.get(ssa_key, {}).get("periodic_original_amount", 0)
-#         advance_period = ssa_map.get(ssa_key, {}).get("advance_period", 0)
-#         advance_amount = ssa_map.get(ssa_key, {}).get("advance_amount", 0)
-
-#         # Initialise group per component
-#         if accrual.salary_component not in grouped:
-#             grouped[accrual.salary_component] = {
-#                 "salary_component": accrual.salary_component,
-#                 "carry_forward_amount": 0,
-#                 "total_accrued_amount": 0,
-#                 "periodic_original_amount": periodic_original_amount,
-#                 "advance_period": advance_period,
-#                 "advance_amount": advance_amount,
-#                 "total_claimed_amount": 0,
-#                 "total_balance_amount": 0,
-#                 "details": []
-#             }
-
-#         # Calculate closing balance
-#         closing_balance = (accrual.bill_amount or 0) - (paid_amount or 0)
-
-
-#         grouped[accrual.salary_component]["details"].append({
-#             "month": month_label,
-#             "amount": accrual.amount,
-#             "working_days": accrual.working_days,
-#             "payment_days": accrual.payment_days,
-#             "periodic_original_amount": periodic_original_amount,
-#             "lop_days": accrual.lwp_days,
-#             "arrear_days": accrual.lop_reversal_days,
-#             "claimed_amount": round(claimed_amount),
-#             "paid_amount": round(paid_amount),
-#             "bill_amount": 0,
-#             "balance_bill_amount": 0,
-#             # "closing_balance": closing_balance,
-#             "closing_balance": 0,
-#         })
-
-#         # Update summary totals
-#         grouped[accrual.salary_component]["total_accrued_amount"] += accrual.amount
-#         grouped[accrual.salary_component]["total_claimed_amount"] += paid_amount
-
-
-#     for comp, row in grouped.items():
-#         row["total_balance_amount"] = (
-#             row["total_accrued_amount"]
-#             - row["total_claimed_amount"]
-#             + row["carry_forward_amount"]
-#         )
-
-
-#     return {"data": list(grouped.values())}
 
 
 
@@ -1587,3 +1413,612 @@ def _get_todo_info_for_doc(doctype, docname):
     except Exception:
         pass
     return info   
+
+
+
+
+@frappe.whitelist()
+def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, page_length=20, include_allocated_todos=False, date=None, todo_status=None, search_term=None, order_by=None):
+    current_user = frappe.session.user
+
+    print("\n\n\n\n\n\n","testing","\n\n\n")
+    # Check if target employee is passed in header
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+
+
+    # If target employee is provided, use it; otherwise fall back to session user's employee
+    if target_employee:
+        # Validate that target employee exists
+        if not frappe.db.exists("Employee", target_employee):
+            return {"data": [], "total_count": 0, "error": "Target employee not found"}
+        employee = target_employee
+    else:
+        employee = frappe.get_value("Employee", {"user_id": current_user}, "name")
+        
+        if not employee:
+            return {"data": [], "total_count": 0}
+        
+
+    user_roles = frappe.get_roles(current_user)
+
+    print("\n\n\n\n\n\n",employee,"\n\n\n")
+
+    # Get direct reportees for team todos filtering
+    direct_reportees = set()
+    if employee:
+        direct_reportees = set(
+            frappe.get_all("Employee", filters={"reports_to": employee, "status": "Active"}, pluck="name")
+        )
+
+    if isinstance(filters, str):
+        try:
+            filters = frappe.parse_json(filters)
+        except:
+            filters = {}
+    elif not filters:
+        filters = {}
+
+    # Convert search_term to lowercase for case-insensitive search
+    if search_term:
+        search_term = str(search_term).lower().strip()
+
+    todo_filters = {
+        "custom_approval_type": "Approval Matrix"
+    }
+
+    if doctype:
+        todo_filters["reference_type"] = doctype
+
+    if date:
+        date_parts = [d.strip() for d in date.split(",") if d.strip()]
+        if len(date_parts) >= 2:
+            start_date, end_date = date_parts[0], date_parts[1]
+            todo_filters["date"] = ["Between", [start_date, end_date]]
+        elif len(date_parts) == 1:
+            todo_filters["date"] = ["=", date_parts[0]]
+
+
+    start = int(start) if start else 0
+    page_length = int(page_length) if page_length else 20
+
+    if isinstance(include_allocated_todos, str):
+        include_allocated_todos = include_allocated_todos.lower() in ['true', '1', 'yes']
+    else:
+        include_allocated_todos = bool(include_allocated_todos)
+
+    print("\n\n\n\n\n\n",todo_filters,"\n\n\n\n\n\n")
+
+    all_todos = frappe.db.get_all(
+        "ToDo",
+        filters=todo_filters,
+        fields=[
+            "name",
+            "allocated_to",
+            "role",
+            "reference_type",
+            "reference_name",
+            "custom_doctype_actions",
+            "custom_allow_revoke",
+            "date",
+            "description",
+            "custom_doctype_actions_with_form",
+            "custom_approval_type",
+            "status",
+            "modified",
+            "custom_selected_doctype_action"
+        ]
+    )
+
+    
+
+    reference_todos_map = {}
+    for todo in all_todos:
+        if todo.reference_type and todo.reference_name:
+            ref_key = f"{todo.reference_type}::{todo.reference_name}"
+            if ref_key not in reference_todos_map:
+                reference_todos_map[ref_key] = []
+            reference_todos_map[ref_key].append(todo)
+
+    filtered_unique_todos = []
+    for ref_key, todos in reference_todos_map.items():
+        if todo_status:
+            filtered_unique_todos.extend(todos)
+        elif include_allocated_todos:
+            open_todos = [t for t in todos if t.status == "Open"]
+            if open_todos:
+                filtered_unique_todos.extend(open_todos)
+            else:
+                filtered_unique_todos.extend(todos)
+        else:
+            latest_todo = max(todos, key=lambda t: t.modified)
+            filtered_unique_todos.append(latest_todo)
+
+    filtered_todos = []
+
+    # Build a set of permitted document references using frappe.get_list (respects user permissions)
+    permitted_docs = set()
+    reference_types = list(set([t.reference_type for t in filtered_unique_todos if t.reference_type]))
+
+    for ref_type in reference_types:
+        # Get all document names of this type that current_user has permission to read
+        ref_names_for_type = [t.reference_name for t in filtered_unique_todos if t.reference_type == ref_type and t.reference_name]
+        if ref_names_for_type:
+            # frappe.get_list automatically applies user permissions
+            permitted_list = frappe.db.get_all(
+                ref_type,
+                filters={"name": ["in", ref_names_for_type]},
+                fields=["name"],
+                ignore_ifnull=True
+            )
+            for doc in permitted_list:
+                permitted_docs.add(f"{ref_type}::{doc.name}")
+
+
+    for todo in filtered_unique_todos:
+        if todo.reference_type and todo.reference_name:
+            try:
+                # Permission check: Only include documents the session user has permission to read (using get_list result)
+                ref_key = f"{todo.reference_type}::{todo.reference_name}"
+                if ref_key not in permitted_docs:
+                    continue
+
+                reference_doc = frappe.get_doc(todo.reference_type, todo.reference_name)
+                meta = frappe.get_meta(todo.reference_type)
+
+                employee_fields = []
+                for field in meta.get("fields"):
+                    if field.fieldtype == "Link" and field.options == "Employee":
+                        employee_fields.append(field.fieldname)
+
+                should_include = False
+                is_allocated_todo = False
+
+                # If target_employee is provided via header, skip allocation check and just match employee field
+                if target_employee:
+                    for field_name in employee_fields:
+                        field_value = reference_doc.get(field_name)
+                        if field_value == employee:
+                            should_include = True
+                            break
+                else:
+                    # Original allocation logic when no target_employee header
+                    if todo.allocated_to == current_user:
+                        is_allocated_todo = True
+                    elif todo.get("role") and todo.role in user_roles:
+                        is_allocated_todo = True
+
+                    if not is_allocated_todo:
+                        try:
+                            allocated_users = frappe.get_all(
+                                "Nextai User Select",
+                                filters={"parent": todo.name, "parentfield": "custom_allocated_to_users"},
+                                fields=["user"]
+                            )
+                            if any(u.user == current_user for u in allocated_users):
+                                is_allocated_todo = True
+                        except Exception:
+                            pass
+
+                    if not is_allocated_todo:
+                        try:
+                            assigned_roles = frappe.get_all(
+                                "Nextai Role Select",
+                                filters={"parent": todo.name, "parentfield": "custom_assigned_to_roles"},
+                                fields=["role"]
+                            )
+                            if any(r.role in user_roles for r in assigned_roles):
+                                is_allocated_todo = True
+                        except Exception:
+                            pass
+
+                    is_own_document = False
+                    if todo.reference_type == "Employee":
+                        if reference_doc.name == employee:
+                            is_own_document = True
+                    else:
+                        for field_name in employee_fields:
+                            field_value = reference_doc.get(field_name)
+                            if field_value == employee:
+                                is_own_document = True
+                                break
+
+                    if is_own_document:
+                        if not include_allocated_todos:
+                            should_include = True
+                    elif is_allocated_todo:
+                        if include_allocated_todos:
+                            # Only show team todos for direct reportees
+                            doc_employee = None
+                            if todo.reference_type == "Employee":
+                                doc_employee = reference_doc.name
+                            else:
+                                for field_name in employee_fields:
+                                    field_value = reference_doc.get(field_name)
+                                    if field_value:
+                                        doc_employee = field_value
+                                        break
+                            if doc_employee and doc_employee in direct_reportees:
+                                should_include = True
+
+                if should_include:
+                    passes_all_filters = True
+
+                    if status and not filters.get("status"):
+                        filters["status"] = status
+
+                    for field_name, filter_condition in filters.items():
+                        field_value = None
+
+                        if hasattr(reference_doc, field_name):
+                            field_value = reference_doc.get(field_name)
+                        elif hasattr(todo, field_name):
+                            field_value = getattr(todo, field_name)
+
+                        if not evaluate_filter_condition(field_value, filter_condition):
+                            passes_all_filters = False
+                            break
+
+                    # Apply global search term across all searchable fields
+                    if passes_all_filters and search_term:
+                        found_match = False
+
+                        # Define searchable field types
+                        searchable_fieldtypes = ["Data", "Text", "Small Text", "Long Text",
+                                                "Select", "Link", "Dynamic Link", "Read Only"]
+
+                        # Search in reference document fields
+                        for field in meta.get("fields"):
+                            if field.fieldtype in searchable_fieldtypes:
+                                field_value = reference_doc.get(field.fieldname)
+                                if field_value:
+                                    # Convert to string and lowercase for comparison
+                                    field_str = str(field_value).lower()
+                                    # Check if search term is in field value (partial match)
+                                    if search_term in field_str:
+                                        found_match = True
+                                        break
+
+                        # Also search in common standard fields
+                        if not found_match:
+                            standard_fields = ["name", "owner", "modified_by"]
+                            for field_name in standard_fields:
+                                if hasattr(reference_doc, field_name):
+                                    field_value = reference_doc.get(field_name)
+                                    if field_value:
+                                        field_str = str(field_value).lower()
+                                        if search_term in field_str:
+                                            found_match = True
+                                            break
+
+                        # Also search in todo description
+                        if not found_match and todo.description:
+                            if search_term in str(todo.description).lower():
+                                found_match = True
+
+                        # If no match found, filter out this record
+                        if not found_match:
+                            passes_all_filters = False
+
+                    if passes_all_filters:
+                        filtered_todos.append({
+                            "todo": todo,
+                            "reference_doc": reference_doc,
+                            "is_allocated_todo": is_allocated_todo
+                        })
+
+            except (frappe.DoesNotExistError, Exception):
+                continue
+
+
+    if todo_status:
+        if isinstance(todo_status, str):
+            try:
+                todo_status = frappe.parse_json(todo_status)
+            except:
+                pass
+        filtered_todos = [t for t in filtered_todos if evaluate_filter_condition(t["todo"].status, todo_status)]
+
+    # Apply order_by sorting on reference document fields before pagination
+    # Supports format: "field_name" (asc) or "field_name desc" / "field_name asc"
+    if order_by:
+        parts = order_by.strip().split()
+        sort_field = parts[0]
+        sort_desc = len(parts) > 1 and parts[1].lower() == "desc"
+
+        def get_sort_value(item):
+            val = item["reference_doc"].get(sort_field)
+            return val if val is not None else ""
+
+        filtered_todos = sorted(filtered_todos, key=get_sort_value, reverse=sort_desc)
+
+    total_filtered_count = len(filtered_todos)
+    paginated_todos = filtered_todos[start:start + page_length]
+
+    result = []
+    for item in paginated_todos:
+        todo = item["todo"]
+        reference_doc = item["reference_doc"]
+        is_allocated_todo = item.get("is_allocated_todo", False)
+
+        allocated_to_full_name = frappe.get_value("User", todo.allocated_to, "full_name") if todo.allocated_to else None
+        allocated_to_emp_id = frappe.get_value("Employee", {"user_id": todo.allocated_to}, "name") if todo.allocated_to else None
+
+        status_value = reference_doc.get("status") if hasattr(reference_doc, "status") else None
+
+
+        has_send_back = False
+        send_back_user = None
+        can_edit = False
+
+        if todo.custom_doctype_actions:
+            try:
+                actions = frappe.parse_json(todo.custom_doctype_actions) if isinstance(todo.custom_doctype_actions, str) else todo.custom_doctype_actions
+                if isinstance(actions, list) and "Send Back" in actions:
+                    has_send_back = True
+            except:
+                if isinstance(todo.custom_doctype_actions, str) and "Send Back" in todo.custom_doctype_actions:
+                    has_send_back = True
+
+        if not has_send_back and todo.custom_doctype_actions_with_form:
+            try:
+                actions_with_form = frappe.parse_json(todo.custom_doctype_actions_with_form) if isinstance(todo.custom_doctype_actions_with_form, str) else todo.custom_doctype_actions_with_form
+                if isinstance(actions_with_form, list) and "Send Back" in actions_with_form:
+                    has_send_back = True
+            except:
+                if isinstance(todo.custom_doctype_actions_with_form, str) and "Send Back" in todo.custom_doctype_actions_with_form:
+                    has_send_back = True
+
+        if has_send_back:
+            try:
+                approval_tracker = frappe.get_all(
+                    "Approval Tracker",
+                    filters={
+                        "doc_type": todo.reference_type,
+                        "doc_name": todo.reference_name,
+                        "status": "Send Back"
+                    },
+                    fields=["name"],
+                    limit=1
+                )
+
+                if approval_tracker:
+                    tracker_doc = frappe.get_doc("Approval Tracker", approval_tracker[0].name)
+
+                    for log_entry in tracker_doc.get("approval_logs", []):
+                        if log_entry.status == "Send Back" and log_entry.todo_reference == todo.name:
+                            send_back_user = log_entry.send_back_user
+                            if send_back_user == current_user:
+                                can_edit = True
+                            break
+
+                    if not send_back_user:
+                        for log_entry in tracker_doc.get("approval_logs", []):
+                            if log_entry.status == "Send Back" and log_entry.send_back_user:
+                                send_back_user = log_entry.send_back_user
+                                if send_back_user == current_user:
+                                    can_edit = True
+                                break
+            except Exception as e:
+                frappe.log_error(f"Error finding Approval Tracker for todo {todo.name}: {str(e)}")
+
+        approval_tracker_doc = None
+        mapped_stages_status = []
+        try:
+            approval_tracker_name_list = frappe.db.sql(
+                """
+                SELECT name FROM `tabApproval Tracker`
+                WHERE doc_name = %s AND doc_type = %s
+                LIMIT 1
+                """,
+                (todo.reference_name, todo.reference_type),
+                as_dict=True
+            )
+            if approval_tracker_name_list:
+                approval_tracker_name = approval_tracker_name_list[0]['name']
+                approval_tracker_doc = frappe.get_doc("Approval Tracker", approval_tracker_name).as_dict()
+
+                approval_stages = approval_tracker_doc.get("approval_stages", [])
+                approval_logs = approval_tracker_doc.get("approval_logs", [])
+                log_count = len(approval_logs)
+
+                for idx, stage in enumerate(approval_stages):
+                    stage_role = stage.get("role")
+                    
+                    final_user = None
+                    final_user_id = None
+                    stage_status = "Pending"
+                    approval_response_data = None
+                    form_json = None
+                    approval_time = None
+                    if idx < log_count:
+                        log_user = approval_logs[idx].get("user")
+                        stage_status = approval_logs[idx].get("status", "Pending")
+                        log_entry = approval_logs[idx]
+                        approval_time = log_entry.get("approval_time")
+                        if log_user:
+                            final_user = frappe.get_value("User", log_user, "full_name")
+                            final_user_id = log_user
+
+                        form_for_approval = log_entry.get("form_for_approval")
+                        if form_for_approval:
+                            approval_response_data = log_entry.get("approval_response_data")
+                            try:
+                                custom_form_data = frappe.db.get_value(
+                                    "Microapp Form Widget",
+                                    form_for_approval,
+                                    "custom_form_data"
+                                )
+                                if custom_form_data:
+                                    parsed_form = frappe.parse_json(custom_form_data) if isinstance(custom_form_data, str) else custom_form_data
+                                    if parsed_form and isinstance(parsed_form, dict) and "components" in parsed_form:
+                                        parsed_form["components"] = [c for c in parsed_form["components"] if c.get("type") != "button"]
+                                    form_json = parsed_form
+                            except Exception:
+                                pass
+
+                    if not final_user:
+                        stage_user = stage.get("user")
+                        if stage_user:
+                            final_user = frappe.get_value("User", stage_user, "full_name")
+                            final_user_id = stage_user
+
+                    stage_entry = {
+                        "stage_name": stage.get("approval_name"),
+                        "user_id": final_user_id,
+                        "user": final_user,
+                        "role": stage_role,
+                        "status": stage_status,
+                        "approval_time": approval_time
+                    }
+                    if approval_response_data is not None:
+                        stage_entry["approval_response_data"] = approval_response_data
+                    if form_json is not None:
+                        stage_entry["form_json"] = form_json
+                    mapped_stages_status.append(stage_entry)
+        except Exception as e:
+            frappe.log_error(f"Error fetching linked Approval Tracker for todo ref {todo.reference_type} {todo.reference_name}: {str(e)}")
+
+        attachments = frappe.get_all("File", filters={
+            "attached_to_doctype": todo.reference_type,
+            "attached_to_name": todo.reference_name
+        }
+        , fields=["file_url"])
+
+        allocated_to_names = []
+        allocated_roles = []
+        if todo.allocated_to:
+            aname = frappe.db.get_value("User", todo.allocated_to, "full_name")
+            allocated_to_names.append(aname or todo.allocated_to)
+        if todo.role:
+            allocated_roles.append(todo.role)
+        try:
+            alloc_users = frappe.get_all(
+                "Nextai User Select",
+                filters={"parent": todo.name, "parentfield": "custom_allocated_to_users"},
+                fields=["user"]
+            )
+            for u in alloc_users:
+                if u.user and u.user != todo.allocated_to:
+                    uname = frappe.db.get_value("User", u.user, "full_name")
+                    allocated_to_names.append(uname or u.user)
+        except Exception:
+            pass
+        try:
+            assigned_roles = frappe.get_all(
+                "Nextai Role Select",
+                filters={"parent": todo.name, "parentfield": "custom_assigned_to_roles"},
+                fields=["role"]
+            )
+            for r in assigned_roles:
+                if r.role:
+                    allocated_roles.append(r.role)
+        except Exception:
+            pass
+        allocated_roles = list(dict.fromkeys(allocated_roles))
+
+        # For Leave Application, add reason name to reference document
+        reference_doc_dict = reference_doc.as_dict()
+        if todo.reference_type == "Leave Application":
+            custom_reason_id = reference_doc_dict.get("custom_reason")
+            if custom_reason_id:
+                try:
+                    reason_name = frappe.db.get_value("Reason", custom_reason_id, "reason")
+                    if reason_name:
+                        reference_doc_dict["reason_name"] = reason_name
+                except Exception:
+                    pass
+
+        todo_data = {
+            "todo_id": todo.name,
+            "allocated_to": allocated_to_names,
+            "allocated_roles": allocated_roles,
+            "allocated_to_emp_id": allocated_to_emp_id,
+            "role": todo.role,
+            "username": allocated_to_full_name,
+            "reference_type": todo.reference_type,
+            "reference_name": todo.reference_name,
+            "custom_doctype_actions": todo.custom_doctype_actions ,
+            "custom_allow_revoke": todo.custom_allow_revoke,
+            "status": status_value,
+            "due_date": frappe.utils.formatdate(todo.date) if todo.date else None,
+            "description": todo.description,
+            "custom_doctype_actions_with_form": todo.custom_doctype_actions_with_form,
+            "is_allocated_todo": is_allocated_todo,
+            "custom_approval_type": todo.custom_approval_type,
+            "send_back_user": send_back_user,
+            "can_edit": can_edit,
+            "todo_status": todo.status,
+            "reference_document": reference_doc_dict,
+            "approval_stages_status": mapped_stages_status,
+            "attachments":attachments,
+            "custom_selected_doctype_action": todo.custom_selected_doctype_action
+        }
+        result.append(todo_data)
+
+    return {
+        "data": result,
+        "total_count": total_filtered_count,
+        "start": start,
+        "page_length": page_length
+    }
+
+
+
+def evaluate_filter_condition(field_value, filter_condition):
+
+    if not filter_condition:
+        return True
+
+    def parse_date_value(val):
+        try:
+            from frappe.utils import getdate
+            return getdate(val)
+        except:
+            return val
+
+    if isinstance(filter_condition, list) and len(filter_condition) == 2:
+        operator, value = filter_condition
+
+        if operator in [">", ">=", "<", "<=", "between"]:
+            try:
+                field_value = parse_date_value(field_value)
+                if operator == "between" and isinstance(value, (list, tuple)) and len(value) == 2:
+                    value = [parse_date_value(v) for v in value]
+                else:
+                    value = parse_date_value(value)
+            except:
+                pass 
+
+        if operator == "=":
+            return field_value == value
+        elif operator == "!=":
+            return field_value != value
+        elif operator == "in":
+            return field_value in value if isinstance(value, (list, tuple)) else field_value == value
+        elif operator == "not in":
+            return field_value not in value if isinstance(value, (list, tuple)) else field_value != value
+        elif operator == "like":
+            return value.lower() in str(field_value).lower() if field_value else False
+        elif operator == "not like":
+            return value.lower() not in str(field_value).lower() if field_value else True
+        elif operator == ">":
+            return field_value > value if field_value else False
+        elif operator == ">=":
+            return field_value >= value if field_value else False
+        elif operator == "<":
+            return field_value < value if field_value else False
+        elif operator == "<=":
+            return field_value <= value if field_value else False
+        elif operator == "between":
+            if isinstance(value, (list, tuple)) and len(value) == 2:
+                start_val, end_val = value
+                return start_val <= field_value <= end_val if field_value else False
+            return False
+        elif operator == "is":
+            return field_value is None if value == "null" else field_value == value
+        elif operator == "is not":
+            return field_value is not None if value == "null" else field_value != value
+    else:
+        return field_value == filter_condition
+
+    return True
