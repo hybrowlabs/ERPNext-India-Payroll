@@ -548,12 +548,140 @@ frappe.ui.form.on('Salary Structure Assignment', {
                         frm.set_value("custom_lwf_state", r.message);
 
 
+                    }
+                }
+            });
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.fetch_last_ctc_details",
+                args: {
+
+                        employee: frm.doc.employee,
+                        company: frm.doc.company,
+                        doctype:"Salary Structure Assignment",
+
+                },
+                callback: function (r) {
+                    if (r.message) {
+                   
+                        let data = r.message.response;
+                        let reimbursements = r.message.response.custom_employee_reimbursements || [];
+
+                        frm.set_value("salary_structure",data.salary_structure)
+                        frm.set_value("from_date",data.from_date)
+                        frm.set_value("income_tax_slab",data.income_tax_slab)
+                        frm.set_value("custom_payroll_period",data.custom_payroll_period)
+                        frm.set_value("custom_fixed_gross_annual",data.custom_fixed_gross_annual)
+                        frm.set_value("custom_basic",data.custom_basic)
+                        frm.set_value("custom_basic_annual",data.custom_basic_annual)
+
+                        frm.set_value("custom_special_allowance",data.custom_special_allowance)
+                        frm.set_value("custom_special_allowance_annual",data.custom_special_allowance_annual)
+                        frm.set_value("custom_esic_employee",data.custom_esic_employee)
+                        frm.set_value("custom_esic_employee_annual",data.custom_esic_employee_annual)
+
+                        frm.set_value("custom_hra",data.custom_hra)
+                        frm.set_value("custom_hra_annual",data.custom_hra_annual)
+
+                        frm.set_value("custom_epf_employee",data.custom_epf_employee)
+                        frm.set_value("custom_epf_employee_annual",data.custom_epf_employee_annual)
+
+                        frm.set_value("custom_esic_employer",data.custom_esic_employer)
+                        frm.set_value("custom_esic_employer_annual",data.custom_esic_employer_annual)
+
+                        frm.set_value("custom_lta",data.custom_lta)
+                        frm.set_value("custom_lta_annual",data.custom_lta_annual)
+
+                        frm.set_value("custom_epf_employer",data.custom_epf_employer)
+                        frm.set_value("custom_epf_employer_annual",data.custom_epf_employer_annual)
+
+                        frm.set_value("custom_nps_value",data.custom_nps_value)
+                        frm.set_value("custom_nps_annual",data.custom_nps_annual)
+
+                        frm.set_value("custom_meal_card",data.custom_meal_card)
+                        frm.set_value("custom_meal_card_amount_annual",data.custom_meal_card_amount_annual)
+
+                        frm.set_value("custom_telecom_wallet",data.custom_telecom_wallet)
+                        frm.set_value("custom_telecom_wallet_amount_annual",data.custom_telecom_wallet_amount_annual)
+                        frm.set_value("custom_fuel_wallet",data.custom_fuel_wallet)
+                        frm.set_value("custom_fuel_wallet_amount_annual",data.custom_fuel_wallet_amount_annual)
+                        
+                        frm.set_value("custom_attire_wallet",data.custom_attire_wallet)
+                        frm.set_value("custom_attire_wallet_amountannual",data.custom_attire_wallet_amountannual)
+
+                        frm.set_value("custom_gift_wallet",data.custom_gift_wallet)
+                        frm.set_value("custom_gift_wallet_amountannual",data.custom_gift_wallet_amountannual)
+
+                        frm.set_value("custom_is_epf",data.custom_is_epf)
+                        frm.set_value("custom_epf_type",data.custom_epf_type)
+
+                        frm.set_value("custom_is_nps",data.custom_is_nps)
+                        frm.set_value("custom_nps_percentage",data.custom_nps_percentage)
+
+                        frm.set_value("custom_lwf",data.custom_lwf)
+                        frm.set_value("custom_lwf_state",data.custom_lwf_state)
+
+                        frm.set_value("custom_frequency",data.custom_frequency)
+                        frm.set_value("custom_lwf_designation",data.custom_lwf_designation)
+
+                        frm.set_value("custom_state",data.custom_state)
+                        
+                        frm.clear_table("custom_employee_reimbursements");
+
+                        frm.clear_table("custom_employee_reimbursements");
+
+                        reimbursements.forEach(row => {
+
+                            let child = frm.add_child("custom_employee_reimbursements");
+
+                            child.reimbursements = row.reimbursements;
+                            child.monthly_total_amount = row.monthly_total_amount;
+
+                           
+                        });
+
+                        frm.refresh_field("custom_employee_reimbursements");
+
 
 
                     }
                 }
             });
 
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.fetch_gst_details",
+                args: {
+
+                        employee: frm.doc.employee,
+                        company: frm.doc.company,
+                        
+
+                },
+                callback: function (r) {
+                    if (r.message) {
+
+                        if(r.message.status=="No")
+                        {
+                            frm.set_value("custom_gst_eligible",0)
+
+                        }
+                        else
+                        {
+                            frm.set_value("custom_gst_eligible",1)
+
+
+                        }
+
+
+
+                    }
+                }
+            });
+
+            
+
+
+        
 
     }
     }

@@ -969,3 +969,46 @@ def slab_calculation(
         "new_education_cess": new_education_cess,
         "tax_already_paid": tax_already_paid,
     }
+
+
+
+
+
+@frappe.whitelist()
+def fetch_last_ctc_details(employee, doctype, company):
+
+    last_ctc = frappe.get_all(
+        "Salary Structure Assignment",
+        filters={
+            "employee": employee,
+            "company": company,
+            "docstatus": 1
+        },
+        fields=["name"],
+        order_by="from_date desc",
+        limit=1
+    )
+
+    if last_ctc:
+        ssa = frappe.get_doc("Salary Structure Assignment", last_ctc[0].name)
+
+
+        return {
+            "response": ssa.as_dict(),
+            "reimbursements": ssa.custom_employee_reimbursements
+        }
+    else:
+        return {}
+
+
+
+@frappe.whitelist()
+def fetch_gst_details(employee, company):
+
+    emp_type = frappe.db.get_value("Employee", employee, "employment_type")
+
+    config = frappe.get_single("Payroll Settings").custom_hide_salary_structure_configuration or []
+
+    is_allowed = any(row.employment_type == emp_type for row in config)
+
+    return {"status": "Yes" if is_allowed else "No"}

@@ -1,11 +1,12 @@
 import frappe
 
-from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import _get_todo_info_for_doc
+# from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import _get_todo_info_for_doc
 from frappe import _
+from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import get_open_approval_todos
 
 
 @frappe.whitelist()
-def print_loan_dashboard(employee):
+def print_loan_dashboard(employee,todo_status=None):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
         employee = target_employee
@@ -21,6 +22,24 @@ def print_loan_dashboard(employee):
         },
         fields=["*"]
     )
+
+
+    todo_response = get_open_approval_todos(
+        doctype="Loan Application",
+        start=0,
+        page_length=1000,
+        include_allocated_todos=False,
+        todo_status=todo_status
+    )
+
+    # 🔹 Create mapping: loan_name -> todos
+    todo_map = {}
+
+    if todo_response and todo_response.get("data"):
+        for todo in todo_response.get("data"):
+            ref_name = todo.get("reference_name")
+            if ref_name:
+                todo_map.setdefault(ref_name, []).append(todo)
 
     results = []
 
@@ -97,7 +116,7 @@ def print_loan_dashboard(employee):
         total_unpaid=sum(unpaid_months)
 
 
-        todo_info = _get_todo_info_for_doc("Loan Application", loan.name) or {}
+       loan_todos = todo_map.get(loan.name, [])
 
 
         results.append({
@@ -128,12 +147,9 @@ def print_loan_dashboard(employee):
             "total_principal_paid":total_principal_paid,
             "can_edit":loan.can_edit,
             "name":loan.name,
+            "todo_list": loan_todos
 
 
-            "allocated_to": todo_info.get("allocated_to", []),
-            "allocated_to_user": todo_info.get("allocated_to_user"),
-            "allocated_to_roles": todo_info.get("allocated_to_roles", []),
-            "username": todo_info.get("username"),
         })
 
     return results
