@@ -220,24 +220,40 @@ def benefit_data_list_view(
             "can_edit",
         ],
         order_by="claim_date desc",
-        start=start,
-        page_length=page_length
+        # start=start,
+        # page_length=page_length
     )
 
-    if search_term:
-        search_term = search_term.lower()
+    # if search_term:
+    #     search_term = search_term.lower()
 
+    #     claims = [
+    #         row for row in claims
+    #         if any([
+    #             search_term in (row.get("name") or "").lower(),
+    #             search_term in (row.get("employee_name") or "").lower(),
+    #             search_term in (row.get("earning_component") or "").lower(),
+                
+    #         ])
+    #     ]
+
+    # total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
+
+
+    if search_term:
+        search = search_term.lower()
         claims = [
             row for row in claims
             if any([
-                search_term in (row.get("name") or "").lower(),
-                search_term in (row.get("employee_name") or "").lower(),
-                search_term in (row.get("earning_component") or "").lower(),
-                
+                search in (row.get("name") or "").lower(),
+                search in (row.get("employee_name") or "").lower(),
+                search in (row.get("earning_component") or "").lower(),
             ])
         ]
 
-    total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
+    # Step 3: apply pagination from frontend
+    total_count = len(claims)
+    claims = claims[start:start + page_length]
 
     if not claims:
         return {
