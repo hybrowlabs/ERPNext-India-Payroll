@@ -296,6 +296,11 @@ def get_salary_slip_for_esign(month, company, employment_type,payroll_period):
         ]
     )
 
+    if not salary_slips:
+        frappe.throw(
+            f"No Salary Slips found for Company: {company}, Month: {month}, Payroll Period: {payroll_period} with e-sign status 'Not Send'"
+        )
+
     return salary_slips
 
 
@@ -726,12 +731,12 @@ def create_purchase_invoice(salary_slip):
             frappe.throw(f"Challan is not attached. Please attach challan before proceeding for {slip.name}")
 
 
-        item_tax_template = None
-        if gst:
-            for row in employee_setting.map_the_company:
-                if row.company_in_oxygen == slip.company:
-                    item_tax_template = row.item_tax_template
-                    break
+        # item_tax_template = None
+        # if gst:
+        #     for row in employee_setting.map_the_company:
+        #         if row.company_in_oxygen == slip.company:
+        #             item_tax_template = row.item_tax_template
+        #             break
   
 
 
@@ -741,8 +746,7 @@ def create_purchase_invoice(salary_slip):
                 "company": company_name,
                 "posting_date": posting_date,
                 "bill_no": doc_name,
-                "bill_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
-                # "bill_date":"2026-04-30",
+                "bill_date": frappe.utils.formatdate(end_date, "yyyy-mm-dd") if end_date else None,
                 "bank_account": bank_acc,
                 "workflow_policy": work_flow_policy,
                 "business_category": business_category,
@@ -765,7 +769,7 @@ def create_purchase_invoice(salary_slip):
                         "rate": amount,
                         "price_list_rate": amount,
                         "amount": amount,
-                        "item_tax_template": item_tax_template if gst else None
+                        # "item_tax_template": item_tax_template if gst else None
                     }
                 ]
             }
@@ -945,6 +949,10 @@ def send_bulk_salary_slip_to_erp(month, company, payroll_period):
         fields=["name", "employee"]
     )
 
+    if not salary_slips:
+        frappe.throw(
+            f"No Salary Slips found for Company: {company}, Month: {month}, Payroll Period: {payroll_period} with e-sign status 'Send'"
+        )
     for slip in salary_slips:
 
         employee = frappe.get_doc("Employee", slip.employee)
@@ -984,10 +992,16 @@ def send_bulk_salary_slip_to_erp(month, company, payroll_period):
             signed_resp.get("status") == "success" and 
             pi_resp.get("status") in ["success", "skipped"]
         ):
-            frappe.db.set_value("Salary Slip", slip.name, {
-                "custom_erp_status": "Success",
-                "custom_note": pi_resp.get("message", "")
-            })
+            slip_doc = frappe.get_doc("Salary Slip", slip.name)
+
+            slip_doc.custom_erp_status = "Success"
+            slip_doc.custom_note = pi_resp.get("message", "")
+
+            slip_doc.save(ignore_permissions=True)
+
+            if slip_doc.docstatus == 0:
+                slip_doc.submit()
+
         else:
             frappe.db.set_value("Salary Slip", slip.name, {
                 "custom_erp_status": "Failed",

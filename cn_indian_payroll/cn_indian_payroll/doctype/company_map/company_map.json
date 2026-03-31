@@ -28,16 +28,19 @@
   {
    "fieldname": "item_tax_template",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Item Tax Template"
   },
   {
    "fieldname": "purchase_tax_template",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Purchase Tax Template"
   },
   {
    "fieldname": "tax_with_holding_category",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax With Holding Category"
   }
  ],
@@ -45,7 +48,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-30 18:29:20.144861",
+ "modified": "2026-03-31 08:26:24.727822",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Company Map",

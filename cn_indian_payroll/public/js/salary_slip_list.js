@@ -50,7 +50,11 @@ frappe.listview_settings['Salary Slip'] = {
                                     label: __('Company'),
                                     fieldtype: 'Link',
                                     options: 'Company',
-                                    reqd: 1
+                                    reqd: 1,
+                                    onchange: function () {
+                                            dialog.set_value('payroll_period', null);
+                                            dialog.fields_dict.payroll_period.refresh();
+                                        }
                                 },
 
                                 {
@@ -58,7 +62,14 @@ frappe.listview_settings['Salary Slip'] = {
                                     label: __('Payroll Period'),
                                     fieldtype: 'Link',
                                     options: 'Payroll Period',
-                                    reqd: 1
+                                    reqd: 1,
+                                    get_query: function () {
+                                        return {
+                                            filters: {
+                                                company: dialog.get_value('company')
+                                            }
+                                        };
+                                    }
                                 },
                                 {
                                     fieldname: 'employment_type',
@@ -126,7 +137,11 @@ frappe.listview_settings['Salary Slip'] = {
                                     label: __('Company'),
                                     fieldtype: 'Link',
                                     options: 'Company',
-                                    reqd: 1
+                                    reqd: 1,
+                                    onchange: function () {
+                                            dialog.set_value('payroll_period', null);
+                                            dialog.fields_dict.payroll_period.refresh();
+                                        }
                                 },
 
                                 {
@@ -134,7 +149,14 @@ frappe.listview_settings['Salary Slip'] = {
                                     label: __('Payroll Period'),
                                     fieldtype: 'Link',
                                     options: 'Payroll Period',
-                                    reqd: 1
+                                    reqd: 1,
+                                    get_query: function () {
+                                        return {
+                                            filters: {
+                                                company: dialog.get_value('company')
+                                            }
+                                        };
+                                    }
                                 },
                                
                             ],
