@@ -5,6 +5,8 @@ from frappe import _
 from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import get_open_approval_todos
 
 
+
+
 @frappe.whitelist()
 def print_loan_dashboard(employee,todo_status=None):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
@@ -110,13 +112,12 @@ def print_loan_dashboard(employee,todo_status=None):
                     if not entry.custom_deducted:
                         unpaid_months.append(entry.total_payment)
 
-        paid_months_count=len(paid_months)
-        unpaid_months_count=len(unpaid_months)
-        total_paid=sum(paid_months)
-        total_unpaid=sum(unpaid_months)
+        paid_months_count = len(paid_months)
+        unpaid_months_count = len(unpaid_months)
+        total_paid = sum(paid_months)
+        total_unpaid = sum(unpaid_months)
 
-
-       loan_todos = todo_map.get(loan.name, [])
+        loan_todos = todo_map.get(loan.name, [])
 
 
         results.append({
