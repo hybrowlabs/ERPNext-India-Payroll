@@ -949,6 +949,29 @@ def send_bulk_salary_slip_to_erp(month, company, payroll_period):
 
         employee = frappe.get_doc("Employee", slip.employee)
 
+        missing_fields = []
+
+        if not employee.custom_supplier_id:
+            missing_fields.append("Supplier ID")
+
+        if not employee.custom_business_category:
+            missing_fields.append("Business Category")
+
+        if not employee.custom_business_segment:
+            missing_fields.append("Business Segment")
+
+        if not employee.custom_work_flow_policy:
+            missing_fields.append("Workflow Policy")
+
+        if not employee.custom_bank_account_in_erp:
+            missing_fields.append("Bank Account in ERP")
+
+        # If any missing → THROW / PRINT
+        if missing_fields:
+            frappe.throw(
+                f"Employee {employee.name} is missing fields: {', '.join(missing_fields)}"
+            )
+            
         if employment_types and employee.employment_type not in employment_types:
             continue
 

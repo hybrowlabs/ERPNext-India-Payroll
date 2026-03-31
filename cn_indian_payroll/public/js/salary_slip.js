@@ -43,33 +43,38 @@ frappe.ui.form.on("Salary Slip", {
                                     });
                                 }
 
-                                // View signed PDF button
-                                // View signed PDF button
-if (frm.doc.custom_e_sign_status === "Send") {
-    frm.add_custom_button("⬇️ View Signed PDF", () => {
+                                                            // View signed PDF button
+                                                            // View signed PDF button
+                            if (frm.doc.custom_e_sign_status === "Send") {
+                                frm.add_custom_button("⬇️ View Signed PDF", () => {
 
-        frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
-            args: {
-                salary_slip: frm.doc.name
-            },
-            freeze: true,
-            callback: function (r) {
-                if (!r.exc && r.message.status === "success") {
+                                    frappe.call({
+                                        method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
+                                        args: {
+                                            salary_slip: frm.doc.name
+                                        },
+                                        freeze: true,
+                                        callback: function (r) {
+                                            if (!r.exc && r.message.status === "success") {
 
-                    const file_url = r.message.file_url;
+                                                const file_url = r.message.file_url;
 
-                    // ✅ open PDF
-                    window.open(file_url, "_blank");
+                                                
+                                                window.open(file_url, "_blank");
 
-                } else {
-                    frappe.msgprint("Failed to fetch signed PDF");
-                }
-            }
-        });
+                                            } else {
+                                                frappe.msgprint("Failed to fetch signed PDF");
+                                            }
+                                        }
+                                    });
 
-    });
-}
+                                });
+                            }
+
+
+
+
+
                             }
                         }
                     );
@@ -79,25 +84,25 @@ if (frm.doc.custom_e_sign_status === "Send") {
 
 
 
-        frm.add_custom_button("Send Invoice to ERP", function () {
+        // frm.add_custom_button("Send Invoice to ERP", function () {
 
-                frappe.call({
-                    method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
-                    args: {
-                        salary_slip: frm.doc.name
-                    },
-                    freeze: true,
-                    callback: function (r) {
+        //         frappe.call({
+        //             method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
+        //             args: {
+        //                 salary_slip: frm.doc.name
+        //             },
+        //             freeze: true,
+        //             callback: function (r) {
 
-                        if (r.message && r.message.status === "success") {
-                            frappe.msgprint("Purchase Invoice Created Successfully");
-                        } else {
-                            frappe.msgprint("Error while creating Purchase Invoice");
-                        }
-                    }
-                });
+        //                 if (r.message && r.message.status === "success") {
+        //                     frappe.msgprint("Purchase Invoice Created Successfully");
+        //                 } else {
+        //                     frappe.msgprint("Error while creating Purchase Invoice");
+        //                 }
+        //             }
+        //         });
 
-            });
+        //     });
 
 
 
