@@ -74,11 +74,9 @@ frappe.ui.form.on('LOP Reversal', {
 
                                                         month_array.forEach(function(date_str) {
                                                             var date = new Date(date_str);
-                                                            var month_name = month_map[date.getMonth()];
+                                                            var month_name = month_map[date.getMonth()] + " " + date.getFullYear();
                                                             month_names.push(month_name);
                                                         });
-
-                                                         console.log(month_names,"22222")
 
                                                         frm.set_df_property('lop_month_reversal', 'options', month_names.join('\n'));
                                                         frm.refresh_field('lop_month_reversal');
@@ -110,14 +108,22 @@ frappe.ui.form.on('LOP Reversal', {
 
     lop_month_reversal:function(frm)
     {
-        var month = frm.doc.lop_month_reversal;
+        var parts = frm.doc.lop_month_reversal.split(" ");
+        var month = parts[0];
+        var year = parts[1];
 
                 frappe.call({
 
                     method: "frappe.client.get_list",
                     args: {
                         doctype: "Salary Slip",
-                        filters: { "employee": frm.doc.employee,"docstatus":1,"custom_month":month},
+                        filters: [
+                            ["employee", "=", frm.doc.employee],
+                            ["docstatus", "=", 1],
+                            ["custom_month", "=", month],
+                            ["start_date", ">=", year + "-01-01"],
+                            ["start_date", "<=", year + "-12-31"]
+                        ],
                         fields: ["*"],
 
 
@@ -161,6 +167,10 @@ frappe.ui.form.on('LOP Reversal', {
                                             frm.set_value("absent_days",res.message[0].absent_days)
                                             frm.set_value("lop_days",res.message[0].leave_without_pay)
 
+                                            if((total_lop - days) <= 0) {
+                                                frappe.msgprint(__("LOP Reversal can't be done for this month. \nEither all LOP days have already been reversed or there are no LOP days eligible for reversal. \nPlease have a Re-Check"));
+                                            }
+
 
 
 
@@ -194,13 +204,16 @@ frappe.ui.form.on('LOP Reversal', {
 
     number_of_days:function(frm)
     {
-        if(frm.doc.number_of_days && frm.doc.number_of_days>frm.doc.max_lop_days)
+        if (!frm.doc.lop_month_reversal) {
+            frappe.msgprint(__("Please select LOP Month Reversal first"));
+            frm.set_value("number_of_days", undefined);
+            return;
+        }
+        if(frm.doc.number_of_days && frm.doc.max_lop_days != null && frm.doc.number_of_days>frm.doc.max_lop_days)
             {
-                msgprint("You can't enter days greater than maximum LOP days")
+                frappe.msgprint(__("You can't enter more than {0} days (maximum LOP days)", [frm.doc.max_lop_days]));
                 frm.set_value("number_of_days",undefined)
             }
-
-
     },
 
     refresh:function(frm)
@@ -240,7 +253,7 @@ frappe.ui.form.on('LOP Reversal', {
 
                             month_array.forEach(function(date_str) {
                                 var date = new Date(date_str);
-                                var month_name = month_map[date.getMonth()];
+                                var month_name = month_map[date.getMonth()] + " " + date.getFullYear();
                                 month_names.push(month_name);
                             });
 
