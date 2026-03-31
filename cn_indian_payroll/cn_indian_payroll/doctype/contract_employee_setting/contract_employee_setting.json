@@ -15,6 +15,7 @@
  ],
  "fields": [
   {
+   "allow_bulk_edit": 1,
    "fieldname": "table_peep",
    "fieldtype": "Table",
    "options": "Salary Component Config"
@@ -24,6 +25,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "map_the_department",
    "fieldtype": "Table",
    "label": "Map The Department",
@@ -34,6 +36,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "map_the_work_location",
    "fieldtype": "Table",
    "label": "Map The Work Location",
@@ -44,6 +47,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "map_the_company",
    "fieldtype": "Table",
    "label": "Map The Company",
@@ -54,7 +58,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-30 18:39:02.196489",
+ "modified": "2026-03-31 14:56:41.356267",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Contract Employee Setting",
