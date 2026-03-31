@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:item",
  "creation": "2026-03-30 16:37:37.824329",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -17,16 +18,18 @@
   {
    "fieldname": "item",
    "fieldtype": "Data",
-   "label": "Item"
+   "label": "Item",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-30 16:37:54.955461",
+ "modified": "2026-03-31 08:59:16.259778",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "ERP Item",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
