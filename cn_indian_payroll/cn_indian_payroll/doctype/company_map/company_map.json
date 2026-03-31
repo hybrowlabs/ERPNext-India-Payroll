@@ -22,34 +22,30 @@
   },
   {
    "fieldname": "company_in_erp",
-   "fieldtype": "Select",
-   "label": "Company in ERP",
-   "options": ""
+   "fieldtype": "Data",
+   "label": "Company in ERP"
   },
   {
    "fieldname": "item_tax_template",
-   "fieldtype": "Select",
-   "label": "Item Tax Template",
-   "options": ""
+   "fieldtype": "Data",
+   "label": "Item Tax Template"
   },
   {
    "fieldname": "purchase_tax_template",
-   "fieldtype": "Select",
-   "label": "Purchase Tax Template",
-   "options": ""
+   "fieldtype": "Data",
+   "label": "Purchase Tax Template"
   },
   {
    "fieldname": "tax_with_holding_category",
-   "fieldtype": "Select",
-   "label": "Tax With Holding Category",
-   "options": ""
+   "fieldtype": "Data",
+   "label": "Tax With Holding Category"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-13 23:04:49.773819",
+ "modified": "2026-03-30 18:29:20.144861",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Company Map",

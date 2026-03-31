@@ -44,15 +44,32 @@ frappe.ui.form.on("Salary Slip", {
                                 }
 
                                 // View signed PDF button
-                                if (frm.doc.custom_e_sign_status === "Send") {
-                                    frm.add_custom_button("⬇️ View Signed PDF", () => {
-                                        const url =
-                                            "/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip_employee"
-                                            + "?salary_slip=" + encodeURIComponent(frm.doc.name);
+                                // View signed PDF button
+if (frm.doc.custom_e_sign_status === "Send") {
+    frm.add_custom_button("⬇️ View Signed PDF", () => {
 
-                                        window.open(url, "_blank");
-                                    });
-                                }
+        frappe.call({
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.view_signed_payslip",
+            args: {
+                salary_slip: frm.doc.name
+            },
+            freeze: true,
+            callback: function (r) {
+                if (!r.exc && r.message.status === "success") {
+
+                    const file_url = r.message.file_url;
+
+                    // ✅ open PDF
+                    window.open(file_url, "_blank");
+
+                } else {
+                    frappe.msgprint("Failed to fetch signed PDF");
+                }
+            }
+        });
+
+    });
+}
                             }
                         }
                     );

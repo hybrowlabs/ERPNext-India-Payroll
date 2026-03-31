@@ -549,13 +549,11 @@ def view_signed_payslip(salary_slip):
 
     file_doc.insert(ignore_permissions=True)
 
-    # Update field
     slip.db_set("custom_slip_attach", file_doc.file_url)
 
     frappe.db.commit()
 
-    # Create Purchase Invoice
-    create_purchase_invoice(slip.name)
+    # create_purchase_invoice(slip.name)
 
     return {
         "status": "success",
@@ -609,9 +607,6 @@ def create_purchase_invoice(salary_slip):
 
             file_path = get_file_path(slip.custom_attach)
 
-            if not file_path:
-                frappe.throw("custom_attach file not found")
-
             file_attach_url = upload_file_to_target(
                 base_url,
                 headers,
@@ -649,6 +644,9 @@ def create_purchase_invoice(salary_slip):
         doc_name=slip.name
 
         due_date = frappe.utils.add_days(posting_date, 10)
+
+        start_date = slip.start_date
+        end_date = slip.end_date
 
 
 
@@ -724,6 +722,10 @@ def create_purchase_invoice(salary_slip):
                 gst = component.name
                 break
 
+        if gst and not slip.custom_attach:
+            frappe.throw(f"Challan is not attached. Please attach challan before proceeding for {slip.name}")
+
+
         item_tax_template = None
         if gst:
             for row in employee_setting.map_the_company:
@@ -732,46 +734,76 @@ def create_purchase_invoice(salary_slip):
                     break
   
 
+
         payload = {
             "data": {
                 "supplier": supplier_id,
                 "company": company_name,
                 "posting_date": posting_date,
-
                 "bill_no": doc_name,
-                "bill_date": posting_date,
+                # "bill_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
+                "bill_date":"2026-04-30",
                 "bank_account": bank_acc,
-                "workflow_policy":work_flow_policy ,
+                "workflow_policy": work_flow_policy,
                 "business_category": business_category,
                 "business_segment": business_segment,
-                "apply_tds":1,
+                "apply_tds": 1,
+                "remarks": "invoice in the month of " + str(month),
+                "location": worklocation_name,
+                "department": department_name,
                 "supplier_bill_attachment":file_challan_url,
-
-                "remarks":"invoice in the month of"+month,
-                "location":worklocation_name,
-                "department":department_name,
+                "custom_service_start_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
+                "custom_service_end_date": frappe.utils.formatdate(end_date, "yyyy-mm-dd") if end_date else None,
 
 
+
+                
                 "items": [
                     {
                         "item_code": item_code,
                         "qty": 1,
                         "rate": amount,
-                        "price_list_rate":amount,
-                        "amount":amount,
-                        "item_tax_template":item_tax_template if gst else None
+                        "price_list_rate": amount,
+                        "amount": amount,
+                        "item_tax_template": item_tax_template if gst else None
                     }
-
-                
-                ],
-                "attachment_details":[{
-                        "title":"Challan",
-                        "attachment": file_attach_url or ""
-                    }]
+                ]
             }
         }
 
+
+
+        if file_attach_url:
+            payload["data"]["attachment_details"] = [
+                {
+                    "title": "Challan",
+                    "attachment": file_attach_url
+                }
+            ]
+
         pi_url = f"{base_url}/api/resource/Purchase Invoice"
+
+
+
+
+        existing_pi = requests.get(
+            f"{base_url}/api/resource/Purchase Invoice",
+            headers=headers,
+            params={
+                "filters": json.dumps([["bill_no", "=", doc_name]]),
+                "fields": json.dumps(["name"])
+            },
+            timeout=15
+        )
+
+        if existing_pi.status_code == 200:
+            existing_data = existing_pi.json().get("data", [])
+            if existing_data:
+                return {
+                    "status": "skipped",
+                    "message": f"Purchase Invoice already exists for {doc_name}",
+                    "pi_name": existing_data[0]["name"]
+                }
 
         response = requests.post(
             pi_url,
@@ -849,6 +881,17 @@ def upload_file_to_target(base_url, headers, file_path):
 
 
 def send_email_from_template_to_employee(slip, employee, sign_url=None):
+    gst = None
+    for earning in slip.earnings:
+        component = frappe.get_doc("Salary Component", earning.salary_component)
+
+        if component.component_type == "GST":
+            gst = earning.salary_component
+            break
+
+    if not gst:
+        return
+
     settings = frappe.get_single("Leegality Settings")
 
     if not settings.email_template:
@@ -873,5 +916,69 @@ def send_email_from_template_to_employee(slip, employee, sign_url=None):
         message=message,
         reference_doctype="Salary Slip",
         reference_name=slip.name,
-        # now=True
+        now=True
     )
+
+@frappe.whitelist()
+def send_bulk_salary_slip_to_erp(month, company, payroll_period):
+
+    results = []
+
+    payroll_setting = frappe.get_single("Payroll Settings")
+
+    employment_types = []
+    if payroll_setting.custom_hide_salary_structure_configuration:
+        employment_types = [
+            row.employment_type 
+            for row in payroll_setting.custom_hide_salary_structure_configuration
+        ]
+
+    salary_slips = frappe.get_all(
+        "Salary Slip",
+        filters={
+            "company": company,
+            "custom_month": month,
+            "custom_payroll_period": payroll_period,
+            "docstatus": ["in", [0, 1]],
+            "custom_e_sign_status": "Send"
+        },
+        fields=["name", "employee"]
+    )
+
+    for slip in salary_slips:
+
+        employee = frappe.get_doc("Employee", slip.employee)
+
+        if employment_types and employee.employment_type not in employment_types:
+            continue
+
+
+        signed_resp = view_signed_payslip(slip.name)
+
+        pi_resp = create_purchase_invoice(slip.name)
+
+        if (
+            signed_resp.get("status") == "success" and 
+            pi_resp.get("status") in ["success", "skipped"]
+        ):
+            frappe.db.set_value("Salary Slip", slip.name, {
+                "custom_erp_status": "Success",
+                "custom_note": pi_resp.get("message", "")
+            })
+        else:
+            frappe.db.set_value("Salary Slip", slip.name, {
+                "custom_erp_status": "Failed",
+                "custom_note": f"Sign: {signed_resp.get('status')} | PI: {pi_resp.get('status')}"
+            })
+
+        results.append({
+            "salary_slip": slip.name,
+            "sign_response": signed_resp,
+            "pi_response": pi_resp
+        })
+
+    return {
+        "status": "completed",
+        "processed": len(results),
+        "details": results
+    }
