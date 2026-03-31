@@ -741,8 +741,8 @@ def create_purchase_invoice(salary_slip):
                 "company": company_name,
                 "posting_date": posting_date,
                 "bill_no": doc_name,
-                # "bill_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
-                "bill_date":"2026-04-30",
+                "bill_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
+                # "bill_date":"2026-04-30",
                 "bank_account": bank_acc,
                 "workflow_policy": work_flow_policy,
                 "business_category": business_category,
@@ -971,7 +971,7 @@ def send_bulk_salary_slip_to_erp(month, company, payroll_period):
             frappe.throw(
                 f"Employee {employee.name} is missing fields: {', '.join(missing_fields)}"
             )
-            
+
         if employment_types and employee.employment_type not in employment_types:
             continue
 
