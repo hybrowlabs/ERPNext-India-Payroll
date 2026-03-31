@@ -224,6 +224,19 @@ def benefit_data_list_view(
         page_length=page_length
     )
 
+    if search_term:
+        search_term = search_term.lower()
+
+        claims = [
+            row for row in claims
+            if any([
+                search_term in (row.get("name") or "").lower(),
+                search_term in (row.get("employee_name") or "").lower(),
+                search_term in (row.get("earning_component") or "").lower(),
+                
+            ])
+        ]
+
     total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
 
     if not claims:
@@ -256,6 +269,11 @@ def benefit_data_list_view(
         search_term=search_term
 
     )
+
+    print("\n\n\n\n\n\n",todo_response,"\n\n\n\n\n\n")
+
+
+
 
 
     # Create mapping: claim_name -> todos
