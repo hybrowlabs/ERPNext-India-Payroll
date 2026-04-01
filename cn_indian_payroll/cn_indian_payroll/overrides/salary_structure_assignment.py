@@ -66,19 +66,20 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             for new_earning in ctc_salary_slip.earnings:
                 earning_component = frappe.get_doc("Salary Component", new_earning.salary_component)
                 if earning_component.custom_is_part_of_ctc == 1:
-                    ctc_amount_annual += round(new_earning.amount * 12)
-                    fixed_ctc_annual += round(new_earning.amount * 12)
+                    ctc_amount_annual += round(new_earning.amount) * 12
+                    fixed_ctc_annual += round(new_earning.amount) * 12
 
             for new_deduction in ctc_salary_slip.deductions:
                 deduction_component = frappe.get_doc("Salary Component", new_deduction.salary_component)
                 if deduction_component.custom_is_part_of_ctc == 1:
-                    ctc_amount_annual += round(new_deduction.amount * 12)
-                    fixed_ctc_annual += round(new_deduction.amount * 12)
+                    ctc_amount_annual += round(new_deduction.amount) * 12
+                    fixed_ctc_annual += round(new_deduction.amount) * 12
 
             if self.custom_variable_pay_components:
                 for value in self.custom_variable_pay_components:
                     if value.part_of_ctc:
                         ctc_amount_annual+=value.amount
+
 
             frappe.db.set_value(self.doctype, self.name, "base", ctc_amount_annual + reimbursement, update_modified=False)
             frappe.db.set_value(self.doctype, self.name, "custom_fixed_ctc_annual", fixed_ctc_annual + reimbursement, update_modified=False)
@@ -89,7 +90,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         if self.custom_fixed_gross_annual:
             ctc_amount_annual = 0
             fixed_ctc_annual=0
-            reimbursement = round(self.custom_total_reimbursement_amount * 12 or 0)
+            reimbursement = round(self.custom_total_reimbursement_amount )* 12
 
             ctc_salary_slip = make_salary_slip(
                 source_name=self.salary_structure,
@@ -102,14 +103,18 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             for new_earning in ctc_salary_slip.earnings:
                 earning_component = frappe.get_doc("Salary Component", new_earning.salary_component)
                 if earning_component.custom_is_part_of_ctc == 1:
-                    ctc_amount_annual += round(new_earning.amount * 12)
-                    fixed_ctc_annual+=round(new_earning.amount * 12)
+                    ctc_amount_annual += round(new_earning.amount) * 12
+                    fixed_ctc_annual+=round(new_earning.amount) * 12
+
+                    
 
             for new_deduction in ctc_salary_slip.deductions:
                 deduction_component = frappe.get_doc("Salary Component", new_deduction.salary_component)
                 if deduction_component.custom_is_part_of_ctc == 1:
-                    ctc_amount_annual += round(new_deduction.amount * 12)
-                    fixed_ctc_annual+=round(new_deduction.amount * 12)
+                    ctc_amount_annual += round(new_deduction.amount) * 12
+                    fixed_ctc_annual+=round(new_deduction.amount) * 12
+
+                   
 
 
             if self.custom_variable_pay_components:
@@ -117,10 +122,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                     if value.part_of_ctc:
                         ctc_amount_annual+=value.amount
 
-
+            
             self.base = ctc_amount_annual + reimbursement
             self.custom_fixed_ctc_annual=fixed_ctc_annual+reimbursement
-
+            # self.reload()
 
 
 
