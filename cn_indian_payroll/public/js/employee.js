@@ -7,7 +7,6 @@ frappe.ui.form.on("Employee", {
         // Run toggle logic
         // frm.trigger("toggle_fields");
 
-        // Load bank accounts if supplier already selected
         // if (frm.doc.custom_supplier_id) {
         //     fetch_bank_accounts(frm);
         // }

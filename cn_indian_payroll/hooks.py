@@ -379,7 +379,7 @@ doc_events = {
     # },
 
     "Employee": {
-        "after_insert":"cn_indian_payroll.cn_indian_payroll.overrides.employee.after_insert",
+        "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.employee.before_save",
     },
 
 
