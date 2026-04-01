@@ -77,16 +77,6 @@ class CustomSalarySlip(SalarySlip):
         self.update_employee_advance_amount()
         self.update_loan_deducted_amount()
         self.insert_attendance_log_list()
-
-        employee=frappe.get_doc("Employee",self.employee)
-        payroll_setting = frappe.get_single("Payroll Settings")
-
-        if any(
-            row.employment_type == employee.employment_type
-            for row in payroll_setting.custom_hide_salary_structure_configuration
-        ):
-            view_signed_payslip(self.name)
-
         self.basic_hra_amount()
 
 

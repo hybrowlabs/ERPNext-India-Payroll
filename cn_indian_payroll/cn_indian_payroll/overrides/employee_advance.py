@@ -29,15 +29,20 @@ def before_submit(self, method):
 
 
 
+
+
 @frappe.whitelist()
-def get_advance_dashboard(employee, todo_status=None):
+def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,page_length=10):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
         employee = target_employee
 
     if not employee:
-        return []
+        return {"data": [], "total_count": 0}
+
+    start = int(start)
+    page_length = int(page_length)
 
     advance_details = frappe.get_all(
         "Employee Advance",
@@ -45,13 +50,31 @@ def get_advance_dashboard(employee, todo_status=None):
         fields=["*"]
     )
 
+    if search_term:
+        search = search_term.lower()
+
+        advance_details = [
+            adv for adv in advance_details
+            if any([
+                search in (adv.get("name") or "").lower(),
+                search in (adv.get("employee_name") or "").lower(),
+                search in (adv.get("custom_advance_type") or "").lower(),
+                search in (adv.get("status") or "").lower(),
+            ])
+        ]
+
+    total_count = len(advance_details)
+
+    advance_details = advance_details[start:start + page_length]
+
 
     todo_response = get_open_approval_todos(
         doctype="Employee Advance",
         start=0,
         page_length=1000,
         include_allocated_todos=False,
-        todo_status=todo_status
+        todo_status=todo_status,
+        search_term=search_term
     )
 
     todo_map = {}

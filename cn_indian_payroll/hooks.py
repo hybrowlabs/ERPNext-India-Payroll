@@ -237,9 +237,8 @@ fixtures = [
     {"dt":"Frequency"},
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
-    # {"dt": "Custom DocPerm", "filters": {"parent": "Employee Advance","role": "Payroll Manager"}},
     {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
-    {"dt":"Custom Field","filters":{"dt":"Employee","module":"cn-indian-payroll"}},
+    
     {"dt":"Section Category"},
     {
         "dt": "Custom Field",
@@ -247,6 +246,22 @@ fixtures = [
             ["name", "=", "Payroll Settings-custom_employee_advance_component"]
         ]
     },
+
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["dt", "=", "Employee"],
+            ["name", "in", [
+                "Employee-custom_business_category",
+                "Employee-custom_business_segment",
+                "Employee-custom_work_flow_policy",
+                "Employee-custom_bank_account_in_erp",
+                "Employee-custom_supplier_id",
+                "Employee-custom_trade_name",
+                "Employee-custom_gst_number",
+            ]]
+        ]
+    }
 
 
 
@@ -364,7 +379,7 @@ doc_events = {
     # },
 
     "Employee": {
-        "after_insert":"cn_indian_payroll.cn_indian_payroll.overrides.employee.after_insert",
+        "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.employee.before_save",
     },
 
 

@@ -5,13 +5,18 @@ from frappe import _
 from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import get_open_approval_todos
 
 
+
+
 @frappe.whitelist()
-def print_loan_dashboard(employee,todo_status=None):
+def print_loan_dashboard(employee,todo_status=None,todo_status=None,search_term=None,start=0,page_length=10):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
         employee = target_employee
     if not employee:
         return []
+
+    start = int(start)
+    page_length = int(page_length)
 
     loan_details = frappe.get_all(
         "Loan Application",
@@ -23,13 +28,31 @@ def print_loan_dashboard(employee,todo_status=None):
         fields=["*"]
     )
 
+    if search_term:
+        search = search_term.lower()
+
+        loan_details = [
+            loan for loan in loan_details
+            if any([
+                search in (loan.get("name") or "").lower(),
+                search in (loan.get("applicant_name") or "").lower(),
+                search in (loan.get("loan_product") or "").lower(),
+                search in (loan.get("status") or "").lower(),
+            ])
+        ]
+
+    total_count = len(loan_details)
+
+    loan_details = loan_details[start:start + page_length]
+
 
     todo_response = get_open_approval_todos(
         doctype="Loan Application",
         start=0,
         page_length=1000,
         include_allocated_todos=False,
-        todo_status=todo_status
+        todo_status=todo_status,
+        search_term=search_term
     )
 
     # 🔹 Create mapping: loan_name -> todos
@@ -110,13 +133,12 @@ def print_loan_dashboard(employee,todo_status=None):
                     if not entry.custom_deducted:
                         unpaid_months.append(entry.total_payment)
 
-        paid_months_count=len(paid_months)
-        unpaid_months_count=len(unpaid_months)
-        total_paid=sum(paid_months)
-        total_unpaid=sum(unpaid_months)
+        paid_months_count = len(paid_months)
+        unpaid_months_count = len(unpaid_months)
+        total_paid = sum(paid_months)
+        total_unpaid = sum(unpaid_months)
 
-
-       loan_todos = todo_map.get(loan.name, [])
+        loan_todos = todo_map.get(loan.name, [])
 
 
         results.append({

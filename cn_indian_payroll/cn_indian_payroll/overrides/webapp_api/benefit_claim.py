@@ -159,6 +159,8 @@ def get_benefit_payslip_pdf(id):
 #     }
 
 
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_data_list_view?employee=PW0220&payroll_period=25-26&limit_start=0&limit_page_length=10&todo_status=Open&serach_term=HR-BEN-CLM-26-03-00009
+
 @frappe.whitelist()
 def benefit_data_list_view(
     employee,
@@ -170,6 +172,7 @@ def benefit_data_list_view(
     earning_component=None,
     todo_status=None,
     # filters=None,
+    search_term=None,
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
@@ -217,11 +220,40 @@ def benefit_data_list_view(
             "can_edit",
         ],
         order_by="claim_date desc",
-        start=start,
-        page_length=page_length
+        # start=start,
+        # page_length=page_length
     )
 
-    total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
+    # if search_term:
+    #     search_term = search_term.lower()
+
+    #     claims = [
+    #         row for row in claims
+    #         if any([
+    #             search_term in (row.get("name") or "").lower(),
+    #             search_term in (row.get("employee_name") or "").lower(),
+    #             search_term in (row.get("earning_component") or "").lower(),
+                
+    #         ])
+    #     ]
+
+    # total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
+
+
+    if search_term:
+        search = search_term.lower()
+        claims = [
+            row for row in claims
+            if any([
+                search in (row.get("name") or "").lower(),
+                search in (row.get("employee_name") or "").lower(),
+                search in (row.get("earning_component") or "").lower(),
+            ])
+        ]
+
+    # Step 3: apply pagination from frontend
+    total_count = len(claims)
+    claims = claims[start:start + page_length]
 
     if not claims:
         return {
@@ -250,8 +282,14 @@ def benefit_data_list_view(
         include_allocated_todos=False,
         todo_status=todo_status,
         # filters=filters
+        search_term=search_term
 
     )
+
+    print("\n\n\n\n\n\n",todo_response,"\n\n\n\n\n\n")
+
+
+
 
 
     # Create mapping: claim_name -> todos
@@ -1421,7 +1459,6 @@ def _get_todo_info_for_doc(doctype, docname):
 def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, page_length=20, include_allocated_todos=False, date=None, todo_status=None, search_term=None, order_by=None):
     current_user = frappe.session.user
 
-    print("\n\n\n\n\n\n","testing","\n\n\n")
     # Check if target employee is passed in header
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
 
@@ -1441,7 +1478,6 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
 
     user_roles = frappe.get_roles(current_user)
 
-    print("\n\n\n\n\n\n",employee,"\n\n\n")
 
     # Get direct reportees for team todos filtering
     direct_reportees = set()
@@ -1486,7 +1522,6 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
     else:
         include_allocated_todos = bool(include_allocated_todos)
 
-    print("\n\n\n\n\n\n",todo_filters,"\n\n\n\n\n\n")
 
     all_todos = frappe.db.get_all(
         "ToDo",

@@ -18,16 +18,16 @@
   },
   {
    "fieldname": "item",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Item",
-   "options": ""
+   "options": "ERP Item"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-18 09:59:42.192389",
+ "modified": "2026-03-30 18:27:29.290608",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Salary Component Config",

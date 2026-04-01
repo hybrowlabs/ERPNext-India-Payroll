@@ -50,7 +50,11 @@ frappe.listview_settings['Salary Slip'] = {
                                     label: __('Company'),
                                     fieldtype: 'Link',
                                     options: 'Company',
-                                    reqd: 1
+                                    reqd: 1,
+                                    onchange: function () {
+                                            dialog.set_value('payroll_period', null);
+                                            dialog.fields_dict.payroll_period.refresh();
+                                        }
                                 },
 
                                 {
@@ -58,7 +62,14 @@ frappe.listview_settings['Salary Slip'] = {
                                     label: __('Payroll Period'),
                                     fieldtype: 'Link',
                                     options: 'Payroll Period',
-                                    reqd: 1
+                                    reqd: 1,
+                                    get_query: function () {
+                                        return {
+                                            filters: {
+                                                company: dialog.get_value('company')
+                                            }
+                                        };
+                                    }
                                 },
                                 {
                                     fieldname: 'employment_type',
@@ -103,13 +114,83 @@ frappe.listview_settings['Salary Slip'] = {
             }
         );
 
+         listview.page.add_inner_button(
+            __('Send Invoice to ERP'),
+            function () {
+
+                 let dialog = new frappe.ui.Dialog({
+                            title: __('Send Bulk E-Sign'),
+                            fields: [
+                                {
+                                    fieldname: 'month',
+                                    label: __('Month'),
+                                    fieldtype: 'Select',
+                                    options: [
+                                        'January', 'February', 'March', 'April',
+                                        'May', 'June', 'July', 'August',
+                                        'September', 'October', 'November', 'December'
+                                    ],
+                                    reqd: 1
+                                },
+                                {
+                                    fieldname: 'company',
+                                    label: __('Company'),
+                                    fieldtype: 'Link',
+                                    options: 'Company',
+                                    reqd: 1,
+                                    onchange: function () {
+                                            dialog.set_value('payroll_period', null);
+                                            dialog.fields_dict.payroll_period.refresh();
+                                        }
+                                },
+
+                                {
+                                    fieldname: 'payroll_period',
+                                    label: __('Payroll Period'),
+                                    fieldtype: 'Link',
+                                    options: 'Payroll Period',
+                                    reqd: 1,
+                                    get_query: function () {
+                                        return {
+                                            filters: {
+                                                company: dialog.get_value('company')
+                                            }
+                                        };
+                                    }
+                                },
+                               
+                            ],
+                            primary_action_label: __('Send'),
+                            primary_action(values) {
+
+                                frappe.call({
+                                    method: "cn_indian_payroll.cn_indian_payroll.overrides.leegality.send_bulk_salary_slip_to_erp",
+                                    args: {
+                                        month: values.month,
+                                        company: values.company,
+                                        payroll_period: values.payroll_period
+                                    },
+                                    freeze: true,
+                                    callback: function (r) {
+                                        if (!r.exc) {
+                                            if(r.message && r.message.status === "completed"){
+                                                frappe.msgprint(__('Bulk Invoice sent to ERP successfully'));
+                                            }
+                                            dialog.hide();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        dialog.show();
 
 
-                           
 
-                       
-                        }    
-    
-};
+
+            });
+
+    },
+}
 
 
