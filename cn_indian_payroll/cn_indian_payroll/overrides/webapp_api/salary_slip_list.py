@@ -1,9 +1,6 @@
 
 import frappe
-
 from cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting import get_invoice_status
-
-
 
 
 @frappe.whitelist()
