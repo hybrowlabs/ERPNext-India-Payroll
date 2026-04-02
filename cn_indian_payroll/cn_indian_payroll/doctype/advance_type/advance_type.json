@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "active",
+  "advance_type",
   "title",
   "policy_based_type",
   "percentage"
@@ -37,11 +38,17 @@
    "fieldname": "active",
    "fieldtype": "Check",
    "label": "Active"
+  },
+  {
+   "fieldname": "advance_type",
+   "fieldtype": "Select",
+   "label": "Advance Type",
+   "options": "Salary\nExpense"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-12 11:14:39.248469",
+ "modified": "2026-04-02 10:20:28.238668",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Advance Type",
