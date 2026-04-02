@@ -1203,12 +1203,12 @@ class CustomSalarySlip(SalarySlip):
         holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
         working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
 
-        if not cint(payroll_settings.include_holidays_in_total_working_days):
-            working_days_list = [i for i in working_days_list if i not in holidays]
+        # if not cint(payroll_settings.include_holidays_in_total_working_days):
+        #     working_days_list = [i for i in working_days_list if i not in holidays]
 
-            working_days -= len(holidays)
-            if working_days < 0:
-                frappe.throw(_("There are more holidays than working days this month."))
+        #     working_days -= len(holidays)
+        #     if working_days < 0:
+        #         frappe.throw(_("There are more holidays than working days this month."))
 
         if not payroll_settings.payroll_based_on:
             frappe.throw(_("Please set Payroll based on in Payroll settings"))

@@ -366,6 +366,7 @@ doc_events = {
         "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.before_submit",
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.validate",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.on_submit",
+        
     },
 
     "Loan Application": {

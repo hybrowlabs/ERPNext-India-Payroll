@@ -8,7 +8,7 @@ from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim impo
 
 
 @frappe.whitelist()
-def print_loan_dashboard(employee,todo_status=None,todo_status=None,search_term=None,start=0,page_length=10):
+def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page_length=10):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
         employee = target_employee
@@ -106,32 +106,29 @@ def print_loan_dashboard(employee,todo_status=None,todo_status=None,search_term=
                 fields=["*"]
             )
 
-            loan_repayment=repayment_entries[0].name
 
-            get_doc=frappe.get_doc("Loan Repayment Schedule",loan_repayment)
+            if repayment_entries:
+                loan_repayment = repayment_entries[0].name
+                get_doc = frappe.get_doc("Loan Repayment Schedule", loan_repayment)
 
-            if get_doc.docstatus == 1 and get_doc.status in ["Initiated", "Active"]:
-                loan_tenure=get_doc.repayment_periods
-                monthly_repayment=get_doc.monthly_repayment_amount
-                total_loan_amount=get_doc.loan_amount
-                loan_end_date = None
+                if get_doc.docstatus == 1 and get_doc.status in ["Initiated", "Active"]:
+                    loan_tenure = get_doc.repayment_periods
+                    monthly_repayment = get_doc.monthly_repayment_amount
+                    total_loan_amount = get_doc.loan_amount
 
-                # if get_doc.repayment_schedule:
-                #     loan_end_date = get_doc.repayment_schedule[-1].payment_date
-                for entry in get_doc.repayment_schedule:
-                    repayment_schedule.append({
-                        "payment_date": entry.payment_date,
-                        "principal_amount": entry.principal_amount,
-                        "interest_amount": entry.interest_amount,
-                        "total_payment": entry.total_payment,
-                        "balance_loan_amount": entry.balance_loan_amount
-                    })
-                    if entry.custom_deducted:
-                        paid_months.append(
-                            entry.total_payment
-                        )
-                    if not entry.custom_deducted:
-                        unpaid_months.append(entry.total_payment)
+                    for entry in get_doc.repayment_schedule:
+                        repayment_schedule.append({
+                            "payment_date": entry.payment_date,
+                            "principal_amount": entry.principal_amount,
+                            "interest_amount": entry.interest_amount,
+                            "total_payment": entry.total_payment,
+                            "balance_loan_amount": entry.balance_loan_amount
+                        })
+
+                        if entry.custom_deducted:
+                            paid_months.append(entry.total_payment)
+                        else:
+                            unpaid_months.append(entry.total_payment)
 
         paid_months_count = len(paid_months)
         unpaid_months_count = len(unpaid_months)
