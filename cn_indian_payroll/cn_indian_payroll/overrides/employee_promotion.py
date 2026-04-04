@@ -520,7 +520,15 @@ def get_paid_from_appraisals(
         doc = frappe.get_doc("Salary Appraisal Calculation", app.name)
 
         for row in doc.arrear_breakdown:
-            key = (row.salary_slip_id, row.salary_component)
+            # key = (row.salary_slip_id, row.salary_component)
+            component_key = (
+                frappe.get_value(
+                    "Salary Component", row.salary_component, "custom_component"
+                )
+                or row.salary_component
+            )
+
+            key = (row.salary_slip_id, component_key)
             paid_map[key] = paid_map.get(key, 0) + row.difference
 
     return paid_map
@@ -550,7 +558,16 @@ def calculate_arrear_components(
         # -----------------------------------
         # ADD ALREADY PAID ARREARS
         # -----------------------------------
-        already_paid = paid_map.get((slip_doc.name, row.salary_component), 0)
+        # already_paid = paid_map.get((slip_doc.name, row.salary_component), 0)
+
+        component_key = (
+            frappe.get_value(
+                "Salary Component", row.salary_component, "custom_component"
+            )
+            or row.salary_component
+        )
+
+        already_paid = paid_map.get((slip_doc.name, component_key), 0)
 
         old_amount = base_old_amount + already_paid
 
