@@ -795,9 +795,10 @@ def create_purchase_invoice(salary_slip):
             headers=headers,
             params={
                 "filters": json.dumps([["bill_no", "=", doc_name]]),
-                "fields": json.dumps(["name"])
+                "fields": json.dumps(["name"]),
+                "limit_page_length": 1
             },
-            timeout=15
+            timeout=120
         )
 
         if existing_pi.status_code == 200:
@@ -816,7 +817,7 @@ def create_purchase_invoice(salary_slip):
                 "Content-Type": "application/json"
             },
             json=payload,
-            timeout=30
+            timeout=120
         )
 
         if response.status_code not in (200, 201):
@@ -868,7 +869,7 @@ def upload_file_to_target(base_url, headers, file_path):
             headers=headers,
             files=files,
             data=data,
-            timeout=30
+            timeout=120
         )
 
     if response.status_code not in (200, 201):
