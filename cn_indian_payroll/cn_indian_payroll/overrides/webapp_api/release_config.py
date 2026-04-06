@@ -3,10 +3,6 @@ from frappe.utils import getdate, nowdate
 
 
 
-
-
-
-
 @frappe.whitelist()
 def get_individual_employee_locking_period(employee):
 
@@ -75,6 +71,9 @@ def get_individual_employee_locking_period(employee):
 
             break
 
+    if release_type == "Income Tax Slab":
+        release_type = "Tax Regime"
+
     return {
         "employee": employee,
         "company": company,
@@ -98,6 +97,10 @@ def set_individual_employee_locking_period(employee, start_date, end_date, statu
 
     if not start_date or not end_date:
         frappe.throw("Start Date and End Date are required")
+
+
+    if doctype_name == "Tax Regime":
+        doctype_name = "Income Tax Slab"
 
     # Convert status to active flag
     active = 0 if status == "Open" else 1

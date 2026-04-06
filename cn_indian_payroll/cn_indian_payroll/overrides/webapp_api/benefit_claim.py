@@ -1,17 +1,15 @@
-import frappe
 from frappe.utils import getdate
+import frappe
 
 from frappe.utils import add_months
-import frappe
 from frappe import _
-from datetime import datetime
 
 from frappe.utils import formatdate
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import frappe
 from datetime import datetime
 import calendar
+
+from frappe.utils import getdate, formatdate
 
 
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_benefit_payslip_pdf?id=HR-BEN-CLM-25-12-00001
@@ -52,111 +50,6 @@ def get_benefit_payslip_pdf(id):
         }
 
 
-#benefit claim list view
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_data_list_view?employee=37001&payroll_period=25-26&limit_start=0&limit_page_length=10
-
-
-# @frappe.whitelist()
-# def benefit_data_list_view(
-#     employee,
-#     company=None,
-#     payroll_period=None,
-#     start=0,
-#     page_length=1,
-#     custom_status=None,
-#     earning_component=None,
-# ):
-#     if not employee:
-#         return {"status": "failed", "message": "Employee is required"}
-
-#     # Ensure integers
-#     start = int(start)
-#     page_length = int(page_length)
-
-#     filters = {
-#         "employee": employee,
-#         "docstatus": ("in", [0, 1])
-#     }
-
-#     if company:
-#         filters["company"] = company
-
-#     if payroll_period:
-#         filters["custom_payroll_period"] = payroll_period
-
-#     if earning_component:
-#         filters["earning_component"] = earning_component
-
-#     if custom_status and custom_status != "All":
-#         filters["custom_status"] = custom_status
-
-#     # -----------------------------
-#     # Total count (optional)
-#     # -----------------------------
-#     total_count = frappe.db.count(
-#         "Employee Benefit Claim",
-#         filters=filters
-#     )
-
-#     # -----------------------------
-#     # Data with limit
-#     # -----------------------------
-#     claims = frappe.db.get_all(
-#         "Employee Benefit Claim",
-#         filters=filters,
-#         fields=[
-#             "name",
-#             "employee",
-#             "employee_name",
-#             "custom_payroll_period",
-#             "claim_date",
-#             "company",
-#             "custom_status",
-#             "earning_component",
-#             "claimed_amount",
-#             "custom_note_by_employee",
-#             "custom_note_by_approver",
-#             "custom_is_taxable",
-#             "custom_taxable_amount",
-#             "custom_is_non_taxable",
-#             "custom_non_taxable_amount",
-#             "can_edit",
-#             # "attachments"
-#         ],
-#         order_by="claim_date desc",
-#         start=start,
-#         page_length=page_length
-#     )
-
-#     if not claims:
-#         return {
-#             "status": "success",
-#             "data": [],
-#             "total_records": total_count
-#         }
-
-#     # -----------------------------
-#     # Attachments
-#     # -----------------------------
-#     for row in claims:
-#         row["attachments"] = frappe.db.get_all(
-#             "File",
-#             filters={
-#                 "attached_to_doctype": "Employee Benefit Claim",
-#                 "attached_to_name": row["name"],
-#             },
-#             fields=["file_url"]
-#         )
-
-       
-
-#     return {
-#         "status": "success",
-#         "data": claims,
-#         "total_count": total_count,
-#         "start": start,
-#         "page_length":page_length
-#     }
 
 
 # http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_data_list_view?employee=PW0220&payroll_period=25-26&limit_start=0&limit_page_length=10&todo_status=Open&serach_term=HR-BEN-CLM-26-03-00009
@@ -224,22 +117,7 @@ def benefit_data_list_view(
         # page_length=page_length
     )
 
-    # if search_term:
-    #     search_term = search_term.lower()
-
-    #     claims = [
-    #         row for row in claims
-    #         if any([
-    #             search_term in (row.get("name") or "").lower(),
-    #             search_term in (row.get("employee_name") or "").lower(),
-    #             search_term in (row.get("earning_component") or "").lower(),
-                
-    #         ])
-    #     ]
-
-    # total_count = frappe.db.count("Employee Benefit Claim", filters=filters)
-
-
+   
     if search_term:
         search = search_term.lower()
         claims = [
@@ -251,7 +129,6 @@ def benefit_data_list_view(
             ])
         ]
 
-    # Step 3: apply pagination from frontend
     total_count = len(claims)
     claims = claims[start:start + page_length]
 
@@ -286,13 +163,7 @@ def benefit_data_list_view(
 
     )
 
-    print("\n\n\n\n\n\n",todo_response,"\n\n\n\n\n\n")
 
-
-
-
-
-    # Create mapping: claim_name -> todos
     todo_map = {}
 
     if todo_response and todo_response.get("data"):
@@ -301,13 +172,9 @@ def benefit_data_list_view(
             if ref_name:
                 todo_map.setdefault(ref_name, []).append(todo)
 
-    # Attach todos to each claim
     for row in claims:
         row["todo_list"] = todo_map.get(row["name"], [])
 
-    # -----------------------------
-    # Final Response
-    # -----------------------------
     return {
         "status": "success",
         "data": claims,   
@@ -349,17 +216,13 @@ def benefit_payslip_list_view(
     if payroll_period:
         filters["custom_payroll_period"] = payroll_period
 
-    # -----------------------------
-    # Total count (optional)
-    # -----------------------------
+    
     total_count = frappe.db.count(
         "Employee Benefit Claim",
         filters=filters
     )
 
-    # -----------------------------
-    # Data with limit
-    # -----------------------------
+
     claims = frappe.db.get_all(
         "Employee Benefit Claim",
         filters=filters,
@@ -392,9 +255,7 @@ def benefit_payslip_list_view(
             "total_records": total_count
         }
 
-    # -----------------------------
-    # Attachments
-    # -----------------------------
+
     for row in claims:
         row["attachments"] = frappe.db.get_all(
             "File",
@@ -1197,6 +1058,10 @@ def benefit_claim_locking_period_visibility(employee, payroll_period, posting_da
 
 
 
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.declaration_locking_period_visibility?employee=PW0220&payroll_period=25-26&posting_date=2026-01-15&doctype=Employee%20Tax%20Exemption%20Declaration
+
+
+
 def _declaration_window_message(start_date, end_date, doctype):
     return (
         f"For this month, {doctype} can be submitted between "
@@ -1210,11 +1075,16 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
 
     if not (employee and payroll_period and posting_date and doctype):
         return {
-            "status": "failed",
-            "message": "The declaration form is not valid because no Salary Structure Assignment is assigned to the employee.",
+            "message": {
+                "status": "failed",
+                "message": "Invalid input. Missing required fields.",
+                "declaration_enabled": 0,
+                "income_tax_enabled": 0,
+            }
         }
 
     posting_date = getdate(posting_date)
+
 
     payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
     period_start_date = getdate(payroll_period_doc.start_date)
@@ -1229,23 +1099,117 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
         else "Monthly"
     )
 
-    release_configs = frappe.get_list(
+
+    release_config_name = frappe.get_value(
         "Release Config",
-        filters={
+        {
             "company": company,
             "payroll_period": payroll_period,
             "frequency_type": frequency_type,
         },
-        pluck="name",
+        "name",
     )
 
-    if not release_configs:
+    if not release_config_name:
         return {
-            "status": "failed",
-            "message": f"No {doctype} restrictions configured for Current Release Config.",
+            "message": {
+                "status": "failed",
+                "message": f"No {doctype} restrictions configured.",
+                "declaration_enabled": 0,
+                "income_tax_enabled": 0,
+            }
         }
 
-    config_doc = frappe.get_doc("Release Config", release_configs[0])
+    config_doc = frappe.get_doc("Release Config", release_config_name)
+
+
+    declaration_enabled = 0
+    income_tax_enabled = 0
+
+    for row in (config_doc.locking_doctypes or []):
+        if row.declaration_type == doctype:
+            declaration_enabled = 1
+        if row.declaration_type == "Income Tax Slab":
+            income_tax_enabled = 1
+
+
+    if not declaration_enabled:
+        return {
+            "message": {
+                "status": "failed",
+                "message": f"{doctype} is not enabled for locking.",
+                "declaration_enabled": 0,
+                "income_tax_enabled": income_tax_enabled,
+            }
+        }
+
+
+    if config_doc.user_assignment:
+
+        is_authorized = False
+
+        for row in config_doc.user_assignment:
+            if not row.select_visibility_restriction:
+                continue
+
+            assignment_doc = frappe.get_doc(
+                "Dynamic User Assignment",
+                row.select_visibility_restriction
+            )
+
+            for user in assignment_doc.assigned_users or []:
+                if user.employee_id == employee:
+                    is_authorized = True
+                    break
+
+            if is_authorized:
+                break
+
+        if not is_authorized:
+            return {
+                "message": {
+                    "status": "failed",
+                    "message": f"You are not authorized to submit {doctype}.",
+                    "declaration_enabled": 1,
+                    "income_tax_enabled": income_tax_enabled,
+                }
+            }
+
+
+    individual_rows = [
+        row for row in (config_doc.individual_declaration_child or [])
+        if row.employee == employee and row.active
+    ]
+
+    if individual_rows:
+        latest_row = sorted(
+            individual_rows,
+            key=lambda x: x.start_date or "1900-01-01",
+            reverse=True
+        )[0]
+
+        start = getdate(latest_row.start_date)
+        end = getdate(latest_row.end_date)
+
+        if start <= posting_date <= end:
+            return {
+                "message": {
+                    "status": "success",
+                    "message": _declaration_window_message(start, end, doctype),
+                    "declaration_enabled": 1,
+                    "income_tax_enabled": income_tax_enabled,
+                }
+            }
+        else:
+            return {
+                "message": {
+                    "status": "failed",
+                    "message": f"The {doctype} window is closed as per your individual declaration period.",
+                    "declaration_enabled": 1,
+                    "income_tax_enabled": income_tax_enabled,
+                }
+            }
+
 
     locking_periods = (
         config_doc.locking_period_months_new_joining
@@ -1253,70 +1217,141 @@ def declaration_locking_period_visibility(employee, payroll_period, posting_date
         else config_doc.locking_period_months
     )
 
+    for row in (locking_periods or []):
+        if not row.enable:
+            continue
 
-    if not config_doc.user_assignment:
+        start = getdate(row.start_date)
+        end = getdate(row.end_date)
 
-        for entry in config_doc.individual_benefit_claim_child or []:
-            if entry.employee == employee:
-                start = getdate(entry.start_date)
-                end = getdate(entry.end_date)
-
-                if entry.active and start <= posting_date <= end:
-                    return {
-                        "status": "success",
-                        "message": _declaration_window_message(start, end, doctype),
-                    }
-
-                return {
-                    "status": "failed",
+        if start <= posting_date <= end:
+            return {
+                "message": {
+                    "status": "success",
                     "message": _declaration_window_message(start, end, doctype),
+                    "declaration_enabled": 1,
+                    "income_tax_enabled": income_tax_enabled,
                 }
+            }
 
-        # Common locking period
-        for period in locking_periods or []:
-            if period.enable:
-                start = getdate(period.start_date)
-                end = getdate(period.end_date)
-
-                if start <= posting_date <= end:
-                    return {
-                        "status": "success",
-                        "message": _declaration_window_message(start, end, doctype),
-                    }
-
-        return {
-            "status": "failed",
-            "message": f"The {doctype} submission window is currently closed.Yocannot select and enter the investments",
-
-        }
-
-    for period in locking_periods or []:
-        if period.enable:
-            start = getdate(period.start_date)
-            end = getdate(period.end_date)
-
-            if start <= posting_date <= end:
-                for assignment in config_doc.user_assignment:
-                    assignment_doc = frappe.get_doc(
-                        "Dynamic User Assignment",
-                        assignment.select_visibility_restriction,
-                    )
-                    for user in assignment_doc.assigned_users or []:
-                        if user.employee_id == employee:
-                            return {
-                                "status": "success",
-                                "message": _declaration_window_message(start, end, doctype),
-                            }
-
-                return {
-                    "status": "failed",
-                    "message": f"You are not authorized to submit {doctype} during this period.",
-                }
 
     return {
-        "status": "failed",
-        "message": f"The {doctype} submission window is currently closed. You cannot select or enter investments.",
+        "message": {
+            "status": "failed",
+            "message": f"The {doctype} submission window is currently closed.",
+            "declaration_enabled": 1,
+            "income_tax_enabled": income_tax_enabled,
+        }
     }
+
+# def _declaration_window_message(start_date, end_date, doctype):
+#     return (
+#         f"For this month, {doctype} can be submitted between "
+#         f"{formatdate(start_date)} and {formatdate(end_date)}. "
+#         f"Please submit your {doctype} before the end date."
+#     )
+
+
+
+
+
+# @frappe.whitelist()
+# def declaration_locking_period_visibility(employee, payroll_period, posting_date, doctype):
+
+#     if not (employee and payroll_period and posting_date and doctype):
+#         return {
+#             "status": "failed",
+#             "message": "The declaration form is not valid because no Salary Structure Assignment is assigned to the employee.",
+#         }
+
+#     posting_date = getdate(posting_date)
+
+#     payroll_period_doc = frappe.get_doc("Payroll Period", payroll_period)
+#     period_start_date = getdate(payroll_period_doc.start_date)
+#     company = payroll_period_doc.company
+
+#     employee_doc = frappe.get_doc("Employee", employee)
+#     date_of_joining = getdate(employee_doc.date_of_joining)
+
+#     frequency_type = (
+#         "New Joinee"
+#         if date_of_joining and date_of_joining > period_start_date
+#         else "Monthly"
+#     )
+
+
+#     release_configs = frappe.get_list(
+#         "Release Config",
+#         filters={
+#             "company": company,
+#             "payroll_period": payroll_period,
+#             "frequency_type": frequency_type,
+#         },
+#         pluck="name",
+#     )
+
+#     if not release_configs:
+#         return {
+#             "status": "failed",
+#             "message": f"No {doctype} restrictions configured for Current Release Config.",
+#         }
+
+#     config_doc = frappe.get_doc("Release Config", release_configs[0])
+
+#     locking_periods = (
+#         config_doc.locking_period_months_new_joining
+#         if frequency_type == "New Joinee"
+#         else config_doc.locking_period_months
+#     )
+
+
+#     if not config_doc.user_assignment:
+
+#         for period in locking_periods or []:
+#             if period.enable:
+#                 start = getdate(period.start_date)
+#                 end = getdate(period.end_date)
+
+#                 if start <= posting_date <= end:
+#                     return {
+#                         "status": "success",
+#                         "message": _declaration_window_message(start, end, doctype),
+#                     }
+
+#         return {
+#             "status": "failed",
+#             "message": f"The {doctype} submission window is currently closed.Yocannot select and enter the investments",
+
+#         }
+
+
+#     for period in locking_periods or []:
+#         if period.enable:
+#             start = getdate(period.start_date)
+#             end = getdate(period.end_date)
+
+#             if start <= posting_date <= end:
+#                 for assignment in config_doc.user_assignment:
+#                     assignment_doc = frappe.get_doc(
+#                         "Dynamic User Assignment",
+#                         assignment.select_visibility_restriction,
+#                     )
+#                     for user in assignment_doc.assigned_users or []:
+#                         if user.employee_id == employee:
+#                             return {
+#                                 "status": "success",
+#                                 "message": _declaration_window_message(start, end, doctype),
+#                             }
+
+#                 return {
+#                     "status": "failed",
+#                     "message": f"You are not authorized to submit {doctype} during this period.",
+#                 }
+
+#     return {
+#         "status": "failed",
+#         "message": f"The {doctype} submission window is currently closed. You cannot select or enter investments.",
+#     }
 
 
 
@@ -1356,7 +1391,6 @@ def benefit_data_dashboard(company=None, payroll_period=None, status=None, month
 
             month_number = datetime.strptime(month, "%B").month
 
-            # ✅ FINANCIAL YEAR LOGIC
             if month_number >= 4:
                 year = start_year
             else:
@@ -1753,8 +1787,7 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
                 pass
         filtered_todos = [t for t in filtered_todos if evaluate_filter_condition(t["todo"].status, todo_status)]
 
-    # Apply order_by sorting on reference document fields before pagination
-    # Supports format: "field_name" (asc) or "field_name desc" / "field_name asc"
+
     if order_by:
         parts = order_by.strip().split()
         sort_field = parts[0]
