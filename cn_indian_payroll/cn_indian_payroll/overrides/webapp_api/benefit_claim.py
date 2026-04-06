@@ -1,4 +1,5 @@
 from frappe.utils import getdate
+import frappe
 
 from frappe.utils import add_months
 from frappe import _
