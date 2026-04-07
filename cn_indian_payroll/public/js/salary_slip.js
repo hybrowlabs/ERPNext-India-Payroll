@@ -2,6 +2,9 @@ frappe.ui.form.on("Salary Slip", {
     refresh(frm) {
 
 
+        hide_consultant_fields(frm);
+
+
         frappe.call({
             method: "frappe.client.get",
             args: {
@@ -43,8 +46,7 @@ frappe.ui.form.on("Salary Slip", {
                                     });
                                 }
 
-                                                            // View signed PDF button
-                                                            // View signed PDF button
+                                                            
                             if (frm.doc.custom_e_sign_status === "Send") {
                                 frm.add_custom_button("⬇️ View Signed PDF", () => {
 
@@ -221,14 +223,7 @@ frappe.ui.form.on("Salary Slip", {
             }
         });
 
-      //   frappe.call({
-      //     method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_payslip_pdf_json",
-      //     args: { id: frm.doc.name },
-      //     callback: function(r) {
-      //         const w = window.open("", "_blank");
-      //         w.document.write(r.message.html);
-      //     }
-      // });
+     
 
     }, "View");
 
@@ -312,44 +307,41 @@ frappe.ui.form.on("Salary Slip", {
 
 
 
+function hide_consultant_fields(frm) {
 
-// frappe.ui.form.on("Salary Slip", {
-//     refresh(frm) {
-//       frm.add_custom_button("Annual Statement", function () {
-//         if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
-//           frappe.msgprint(__('Please set Employee and Payroll Period first.'));
-//           return;
-//         }
+    let fields_to_hide = [
+        "custom_e_sign_status",
+        "custom_attach",
+        "custom_slip_attach",
+        "custom_document_id",
+        "custom_e_sign_url",
 
-//         frappe.call({
-//           method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_annual_statement_pdf",
-//           args: {
-//             employee: frm.doc.employee,
-//             payroll_period: frm.doc.custom_payroll_period
-//           },
-//           callback: function (r) {
-//             if (!r.message || !r.message.html) {
-//               frappe.msgprint(__('No HTML generated'));
-//               return;
-//             }
+    ];
 
-//             // Open new window and inject HTML
-//             const w = window.open("", "_blank");
-//             w.document.open();
-//             w.document.write(r.message.html);
+    frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Payroll Settings",
+            name: "Payroll Settings"
+        },
+        callback: function (r) {
 
-//             // Add print trigger after content is loaded
-//             w.document.write(`
-//               <script>
-//                 window.onload = function() {
-//                   window.print();
-//                 };
-//               <\/script>
-//             `);
+            if (!r.message) return;
 
-//             w.document.close();
-//           }
-//         });
-//       });
-//     }
-//   });
+            let payroll_settings = r.message;
+
+            let employment_types = [];
+
+            if (payroll_settings.custom_hide_salary_structure_configuration) {
+                employment_types = payroll_settings.custom_hide_salary_structure_configuration.map(row => row.employment_type);
+            }
+
+            
+            let should_hide = employment_types.includes(frm.doc.custom_employment_type);
+
+            fields_to_hide.forEach(field => {
+                frm.set_df_property(field, "hidden", should_hide ? 0 : 1);
+            });
+        }
+    });
+}

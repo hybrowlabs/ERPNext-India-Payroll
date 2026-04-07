@@ -68,8 +68,6 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
     has_salary_slips = len(slips)
 
 
-
-
     slip_by_month = {}
     for s in slips:
         month = getdate(s.start_date).strftime("%B-%Y")
