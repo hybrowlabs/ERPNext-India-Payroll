@@ -4,12 +4,18 @@ frappe.ui.form.on("Employee", {
 
     refresh(frm) {
 
+            hide_consultant_fields(frm);
+
         // Run toggle logic
         // frm.trigger("toggle_fields");
 
         // if (frm.doc.custom_supplier_id) {
         //     fetch_bank_accounts(frm);
         // }
+    },
+
+    employment_type(frm) {
+        hide_consultant_fields(frm);
     },
 
     // employment_type(frm) {
@@ -51,8 +57,45 @@ frappe.ui.form.on("Employee", {
     //     });
     // }
 });
+function hide_consultant_fields(frm) {
 
+    let fields_to_hide = [
+        "custom_gst_number",
+        "custom_trade_name",
+        "custom_supplier_id",
+        "custom_business_category",
+        "custom_business_segment",
+        "custom_work_flow_policy",
+        "custom_bank_account_in_erp"
+    ];
 
+    frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Payroll Settings",
+            name: "Payroll Settings"
+        },
+        callback: function (r) {
+
+            if (!r.message) return;
+
+            let payroll_settings = r.message;
+
+            let employment_types = [];
+
+            if (payroll_settings.custom_hide_salary_structure_configuration) {
+                employment_types = payroll_settings.custom_hide_salary_structure_configuration.map(row => row.employment_type);
+            }
+
+            
+            let should_hide = employment_types.includes(frm.doc.employment_type);
+
+            fields_to_hide.forEach(field => {
+                frm.set_df_property(field, "hidden", should_hide ? 0 : 1);
+            });
+        }
+    });
+}
 
 
 function apply_settings(frm, settings) {
