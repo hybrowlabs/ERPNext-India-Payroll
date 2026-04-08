@@ -60,7 +60,6 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
     
     )
 
-    # 🔹 Create mapping: loan_name -> todos
     todo_map = {}
 
     if todo_response and todo_response.get("data"):

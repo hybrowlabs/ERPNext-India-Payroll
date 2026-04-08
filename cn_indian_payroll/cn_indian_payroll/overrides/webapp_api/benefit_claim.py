@@ -63,10 +63,13 @@ def benefit_data_list_view(
     page_length=10,
     custom_status=None,
     earning_component=None,
-    todo_status=None,
-    
+    todo_status=None,    
     search_term=None,
     order_by=None,
+    status=None,
+    filters=None,
+    include_allocated_todos=False,
+    date=None
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
@@ -159,8 +162,11 @@ def benefit_data_list_view(
         page_length=1000,
         include_allocated_todos=False,
         todo_status=todo_status,
-        # filters=filters
-        search_term=search_term
+        search_term=search_term,
+        status=status,
+        filters=filters,
+        date=date,
+        order_by=order_by
 
     )
 
