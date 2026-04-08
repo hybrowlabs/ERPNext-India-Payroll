@@ -77,7 +77,6 @@ def get_perquisite_payment_list(employee=None, company=None, payroll_period=None
             )
         ]
 
-    # ----------- PAGINATION -----------
     total_count = len(extra_payments)
     extra_payments = extra_payments[start:start + page_length]
 

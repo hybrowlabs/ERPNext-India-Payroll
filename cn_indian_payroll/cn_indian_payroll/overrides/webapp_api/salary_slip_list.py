@@ -3,8 +3,9 @@ import frappe
 from cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting import get_invoice_status
 
 
+
 @frappe.whitelist()
-def get_salary_slip_list(employee=None, company=None):
+def get_salary_slip_list(employee=None, company=None,start=0,page_length=10,order_by=None,search_term=None):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
@@ -30,8 +31,25 @@ def get_salary_slip_list(employee=None, company=None):
             "custom_attach",
             
         ],
-        order_by="end_date desc",
+        # order_by="end_date desc",
+        order_by=order_by
     )
+
+
+    if search_term:
+        search = search_term.lower()
+
+        salary_slips = [
+            row for row in salary_slips
+            if (
+                search in (row.get("name") or "").lower()
+                or search in (row.get("employee_name") or "").lower()
+                or search in (row.get("custom_month") or "").lower()
+            )
+        ]
+
+    total_count = len(salary_slips)
+    salary_slips = salary_slips[start:start + page_length]
 
     result = []
 
@@ -45,7 +63,13 @@ def get_salary_slip_list(employee=None, company=None):
 
         result.append(slip)
 
-    return result
+    return {
+        "status": "success",
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        "data": result
+    }
 
 
 

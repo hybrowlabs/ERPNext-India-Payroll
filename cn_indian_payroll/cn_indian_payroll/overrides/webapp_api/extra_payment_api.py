@@ -4,7 +4,7 @@ from frappe.utils import getdate
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.extra_payment_api.get_extra_payment_list?employee=37001&company=PW&payroll_period=25-26
 
 @frappe.whitelist()
-def get_extra_payment_list(employee=None, company=None,payroll_period=None):
+def get_extra_payment_list(employee=None, company=None,payroll_period=None,start=0,page_length=10,order_by=None,search_term=None):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
@@ -49,7 +49,7 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None):
             "amount",
             "payroll_date"
         ],
-        order_by="payroll_date desc"
+        order_by=order_by
     )
 
     if not additional_salary_list:
@@ -80,13 +80,30 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None):
                 "is_tax_applicable": comp.is_tax_applicable
             })
 
+    if search_term:
+        search = search_term.lower()
+
+        extra_payments = [
+            row for row in extra_payments
+            if (
+                search in (row.get("name") or "").lower()
+                or search in (row.get("salary_component") or "").lower()
+            )
+        ]
+
+    total_records = len(extra_payments)
+
+    paginated_data = extra_payments[start:start + page_length]
+
     return {
         "status": "success",
         "employee": employee,
         "company": company,
         "payroll_period": payroll_period_name,
         "total_records": len(extra_payments),
-        "extra_payments": extra_payments
+        "extra_payments": extra_payments,
+        "start": start,
+        "page_length": page_length,
     }
 
 

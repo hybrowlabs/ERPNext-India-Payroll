@@ -218,10 +218,17 @@ def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,pa
             "balance_amount": final_balance,
             "employee": advance.employee,
             "employee_name": advance.employee_name,
-            "todo_list": advance_todos   
+            "todo_list": advance_todos,
+            
         })
 
-    return results
+    return {
+        "status": "success",
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        "data": results
+    }
 
 
 

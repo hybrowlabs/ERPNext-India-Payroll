@@ -172,7 +172,13 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
 
         })
 
-    return results
+    return {
+        "status": "success",
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        "data": results
+    }
 
 @frappe.whitelist()
 def print_loan_dashboard_erp(employee,id):
