@@ -64,8 +64,9 @@ def benefit_data_list_view(
     custom_status=None,
     earning_component=None,
     todo_status=None,
-    # filters=None,
+    
     search_term=None,
+    order_by=None,
 ):
     if not employee:
         return {"status": "failed", "message": "Employee is required"}
@@ -112,7 +113,7 @@ def benefit_data_list_view(
             "custom_non_taxable_amount",
             "can_edit",
         ],
-        order_by="claim_date desc",
+        order_by=order_by,
         # start=start,
         # page_length=page_length
     )
