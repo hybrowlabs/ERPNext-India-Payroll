@@ -5,7 +5,7 @@ from cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contr
 
 
 @frappe.whitelist()
-def get_salary_slip_list(employee=None, company=None,start=0,page_length=10,order_by=None,search_term=None):
+def get_salary_slip_list(employee=None, company=None,start=0,page_length=10,order_by=None,search_term=None,payroll_period=None):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
@@ -17,6 +17,7 @@ def get_salary_slip_list(employee=None, company=None,start=0,page_length=10,orde
             "employee": employee,
             "company": company,
             "docstatus": ["in", [0, 1]],
+            "custom_payroll_period": payroll_period
         },
         fields=[
             "name",
