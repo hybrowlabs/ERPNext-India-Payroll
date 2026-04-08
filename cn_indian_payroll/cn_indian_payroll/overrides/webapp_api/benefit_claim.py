@@ -1495,14 +1495,12 @@ def _get_todo_info_for_doc(doctype, docname):
 
 
 
-
 @frappe.whitelist()
 def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, page_length=20, include_allocated_todos=False, date=None, todo_status=None, search_term=None, order_by=None):
     current_user = frappe.session.user
 
     # Check if target employee is passed in header
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
-
 
     # If target employee is provided, use it; otherwise fall back to session user's employee
     if target_employee:
@@ -1512,13 +1510,10 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
         employee = target_employee
     else:
         employee = frappe.get_value("Employee", {"user_id": current_user}, "name")
-        
         if not employee:
             return {"data": [], "total_count": 0}
-        
 
     user_roles = frappe.get_roles(current_user)
-
 
     # Get direct reportees for team todos filtering
     direct_reportees = set()
@@ -1563,7 +1558,6 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
     else:
         include_allocated_todos = bool(include_allocated_todos)
 
-
     all_todos = frappe.db.get_all(
         "ToDo",
         filters=todo_filters,
@@ -1584,8 +1578,6 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
             "custom_selected_doctype_action"
         ]
     )
-
-    
 
     reference_todos_map = {}
     for todo in all_todos:
@@ -1794,15 +1786,42 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
                 pass
         filtered_todos = [t for t in filtered_todos if evaluate_filter_condition(t["todo"].status, todo_status)]
 
-
+    # Apply order_by sorting before pagination.
+    # Supported formats:
+    #   "field_name"                   → Reference Doctype field, then Todo field fallback
+    #   "field_name desc"              → same, descending
+    #   "child_table.field_name"       → first row of child table field on Reference Doctype
+    #   "child_table.field_name desc"  → same, descending
     if order_by:
-        parts = order_by.strip().split()
-        sort_field = parts[0]
-        sort_desc = len(parts) > 1 and parts[1].lower() == "desc"
+        parts = order_by.strip().rsplit(None, 1)
+        if len(parts) == 2 and parts[1].lower() in ("asc", "desc"):
+            sort_expr, sort_dir = parts[0], parts[1].lower()
+        else:
+            sort_expr, sort_dir = parts[0], "asc"
+        sort_desc = sort_dir == "desc"
 
-        def get_sort_value(item):
-            val = item["reference_doc"].get(sort_field)
-            return val if val is not None else ""
+        # Detect child table sort: "child_fieldname.field"
+        if "." in sort_expr:
+            child_table_field, child_field = sort_expr.split(".", 1)
+
+            def get_sort_value(item):
+                ref_doc = item["reference_doc"]
+                rows = ref_doc.get(child_table_field) or []
+                if rows:
+                    val = rows[0].get(child_field)
+                    return val if val is not None else ""
+                return ""
+        else:
+            sort_field = sort_expr
+
+            def get_sort_value(item):
+                # 1. Reference Doctype field
+                val = item["reference_doc"].get(sort_field)
+                if val is not None:
+                    return val
+                # 2. Todo Doctype field
+                val = item["todo"].get(sort_field)
+                return val if val is not None else ""
 
         filtered_todos = sorted(filtered_todos, key=get_sort_value, reverse=sort_desc)
 
@@ -1820,6 +1839,40 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
 
         status_value = reference_doc.get("status") if hasattr(reference_doc, "status") else None
 
+        # Get the employee from the reference document for relationship check
+        doc_employee = None
+        meta = frappe.get_meta(todo.reference_type)
+        for field in meta.get("fields"):
+            if field.fieldtype == "Link" and field.options == "Employee":
+                doc_employee = reference_doc.get(field.fieldname)
+                if doc_employee:
+                    break
+        if not doc_employee and todo.reference_type == "Employee":
+            doc_employee = reference_doc.name
+
+        # Cache employee relationship fields
+        _emp_rel_data = None
+        if doc_employee:
+            _emp_rel_data = frappe.db.get_value("Employee", doc_employee,
+                ["reports_to", "custom_hrbp", "custom_cxo", "custom_dotted_line_manager", "custom_hod"],
+                as_dict=True
+            )
+
+        def _get_relationship(approver_emp_id):
+            """Get relationship between approver and document employee."""
+            if not _emp_rel_data or not approver_emp_id:
+                return None
+            rel_map = {
+                "reports_to": "Manager",
+                "custom_hrbp": "HRBP",
+                "custom_cxo": "CXO",
+                "custom_dotted_line_manager": "Dotted Line Manager",
+                "custom_hod": "HOD",
+            }
+            for field_name, label in rel_map.items():
+                if _emp_rel_data.get(field_name) == approver_emp_id:
+                    return label
+            return None
 
         has_send_back = False
         send_back_user = None
@@ -1937,10 +1990,18 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
                             final_user = frappe.get_value("User", stage_user, "full_name")
                             final_user_id = stage_user
 
+                    designation_name = None
+                    stage_employee_id = None
+                    if final_user_id:
+                        stage_employee_id = frappe.db.get_value("Employee", {"user_id": final_user_id}, "name")
+                        designation_name = _get_relationship(stage_employee_id)
+
                     stage_entry = {
                         "stage_name": stage.get("approval_name"),
                         "user_id": final_user_id,
                         "user": final_user,
+                        "employee_id": stage_employee_id,
+                        "designation_name": designation_name,
                         "role": stage_role,
                         "status": stage_status,
                         "approval_time": approval_time
@@ -1959,11 +2020,18 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
         }
         , fields=["file_url"])
 
-        allocated_to_names = []
+        allocated_to_list = []
         allocated_roles = []
+
+        def _get_user_info(user_id):
+            """Get name, employee ID and relationship for a user."""
+            full_name = frappe.db.get_value("User", user_id, "full_name") or user_id
+            employee_id = frappe.db.get_value("Employee", {"user_id": user_id}, "name")
+            designation_name = _get_relationship(employee_id)
+            return {"name": full_name, "employee": employee_id, "designation_name": designation_name}
+
         if todo.allocated_to:
-            aname = frappe.db.get_value("User", todo.allocated_to, "full_name")
-            allocated_to_names.append(aname or todo.allocated_to)
+            allocated_to_list.append(_get_user_info(todo.allocated_to))
         if todo.role:
             allocated_roles.append(todo.role)
         try:
@@ -1974,8 +2042,7 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
             )
             for u in alloc_users:
                 if u.user and u.user != todo.allocated_to:
-                    uname = frappe.db.get_value("User", u.user, "full_name")
-                    allocated_to_names.append(uname or u.user)
+                    allocated_to_list.append(_get_user_info(u.user))
         except Exception:
             pass
         try:
@@ -2003,13 +2070,23 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
                 except Exception:
                     pass
 
+        # For Shift Assignment, add shift name
+        if todo.reference_type == "Shift Request":
+            shift_type = reference_doc_dict.get("shift_type")
+            if shift_type:
+                try:
+                    shift_name = frappe.db.get_value("Shift Type", shift_type, "custom_shift_name")
+                    reference_doc_dict["shift_name"] = shift_name or shift_type
+                except Exception:
+                    pass
+
         todo_data = {
             "todo_id": todo.name,
-            "allocated_to": allocated_to_names,
+            "allocated_to": allocated_to_list,
             "allocated_roles": allocated_roles,
             "allocated_to_emp_id": allocated_to_emp_id,
             "role": todo.role,
-            "username": allocated_to_full_name,
+            "username": None,
             "reference_type": todo.reference_type,
             "reference_name": todo.reference_name,
             "custom_doctype_actions": todo.custom_doctype_actions ,
@@ -2036,6 +2113,7 @@ def get_open_approval_todos(doctype=None, status=None, filters=None, start=0, pa
         "start": start,
         "page_length": page_length
     }
+
 
 
 
