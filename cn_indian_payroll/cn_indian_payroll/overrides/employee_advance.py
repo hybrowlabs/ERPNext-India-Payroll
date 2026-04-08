@@ -31,7 +31,7 @@ def before_submit(self, method):
 
 
 @frappe.whitelist()
-def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,page_length=10):
+def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,page_length=10,order_by=None):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
@@ -46,7 +46,8 @@ def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,pa
     advance_details = frappe.get_all(
         "Employee Advance",
         filters={"employee": employee, "docstatus": ["in", [0, 1]]},
-        fields=["*"]
+        fields=["*"],
+        order_by=order_by
     )
 
     if search_term:

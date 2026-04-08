@@ -8,7 +8,7 @@ from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim impo
 
 
 @frappe.whitelist()
-def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page_length=10):
+def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page_length=10,order_by=None):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
         employee = target_employee
@@ -25,7 +25,8 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
             "applicant": employee,
             "docstatus": ["in", [0, 1]]
         },
-        fields=["*"]
+        fields=["*"],
+        order_by=order_by
     )
 
     if search_term:
