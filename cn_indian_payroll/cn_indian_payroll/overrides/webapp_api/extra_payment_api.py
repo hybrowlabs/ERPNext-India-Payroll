@@ -101,7 +101,7 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None,start
         "company": company,
         "payroll_period": payroll_period_name,
         "total_records": len(extra_payments),
-        "extra_payments": extra_payments,
+        "extra_payments": paginated_data
         "start": start,
         "page_length": page_length,
     }
