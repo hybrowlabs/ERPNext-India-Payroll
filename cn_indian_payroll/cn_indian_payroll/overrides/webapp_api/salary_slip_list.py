@@ -118,6 +118,9 @@ def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, 
     if payroll_period:
         filters["custom_payroll_period"] = payroll_period
 
+
+    total_count = frappe.db.count("Salary Slip", filters)
+
     salary_slips = frappe.get_all(
         "Salary Slip",
         filters=filters,
@@ -185,4 +188,11 @@ def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, 
             )
         ]
 
-    return result
+    return {
+        "status": "success",
+        "data": result,   
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        
+    }
