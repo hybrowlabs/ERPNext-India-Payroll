@@ -146,6 +146,8 @@ def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, 
 
     for sal in salary_slips:
         salary_slip_type = "Regular"
+        regular_payslip_exists = 1
+        off_payslip_exists=0
 
         sal_slip = frappe.get_doc("Salary Slip", sal.name)
 
@@ -154,7 +156,9 @@ def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, 
 
             if component.custom_is_offcycle_component:
                 salary_slip_type = "Regular + Offcycle"
+                off_payslip_exists = 1
                 break  
+
 
         if sal.status == "Submitted":
             status = "Paid"
@@ -172,7 +176,9 @@ def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, 
             "custom_payroll_period": sal.custom_payroll_period,
             "custom_month": sal.custom_month,
             "status": status,
-            "salary_slip_type": salary_slip_type
+            "salary_slip_type": salary_slip_type,
+            "off_payslip_exists": off_payslip_exists,
+            "regular_payslip_exists": regular_payslip_exists
         })
 
     if search_term:
