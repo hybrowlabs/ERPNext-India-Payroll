@@ -185,6 +185,8 @@ def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, 
                 or search in (row.get("custom_month") or "").lower()
                 or search in (row.get("gross_pay") or "").lower()
                 or search in (row.get("net_pay") or "").lower()
+                or search in (row.get("start_date") or "").lower()
+                or search in (row.get("end_date") or "").lower()
             )
         ]
 
