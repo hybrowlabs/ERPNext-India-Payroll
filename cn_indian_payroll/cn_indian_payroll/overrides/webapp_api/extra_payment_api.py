@@ -4,7 +4,7 @@ from frappe.utils import getdate
 #http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.extra_payment_api.get_extra_payment_list?employee=37001&company=PW&payroll_period=25-26
 
 @frappe.whitelist()
-def get_extra_payment_list(employee=None, company=None,payroll_period=None,start=0,page_length=10,order_by=None,search_term=None):
+def get_extra_payment_list(employee=None, company=None, payroll_period=None, start=0, page_length=10, order_by=None, search_term=None):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
@@ -22,6 +22,9 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None,start
             "message": "Company is required."
         }
 
+    start = int(start)
+    page_length = int(page_length)
+
     filters = {
         "employee": employee,
         "company": company,
@@ -29,7 +32,6 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None,start
     }
 
     payroll_period_name = None
-
 
     if payroll_period:
         pp_doc = frappe.get_doc("Payroll Period", payroll_period)
@@ -40,7 +42,7 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None,start
             [getdate(pp_doc.start_date), getdate(pp_doc.end_date)]
         ]
 
-    additional_salary_list = frappe.db.get_all(
+    additional_salary_list = frappe.get_all(
         "Additional Salary",
         filters=filters,
         fields=[
@@ -49,63 +51,46 @@ def get_extra_payment_list(employee=None, company=None,payroll_period=None,start
             "amount",
             "payroll_date"
         ],
-        order_by=order_by
+        order_by=order_by or "creation desc"
     )
 
-    if not additional_salary_list:
-        return {
-            "status": "success",
-            "employee": employee,
-            "company": company,
-            "payroll_period": payroll_period_name,
-            "total_records": 0,
-            "extra_payments": []
-        }
-
-
-    extra_payments = []
+    result = []
 
     for entry in additional_salary_list:
-        comp = frappe.get_cached_doc(
-            "Salary Component",
-            entry.salary_component
-        )
+        comp = frappe.get_doc("Salary Component", entry.salary_component)
 
         if comp.custom_is_extra_payment:
-            extra_payments.append({
+            result.append({
                 "name": entry.name,
                 "salary_component": entry.salary_component,
-                "amount": entry.amount,
+                "amount": round(entry.amount or 0),
                 "payment_date": entry.payroll_date,
-                "is_tax_applicable": comp.is_tax_applicable
+                "is_tax_applicable": comp.is_tax_applicable,
+                "status":"Paid"
             })
 
     if search_term:
         search = search_term.lower()
-
-        extra_payments = [
-            row for row in extra_payments
+        result = [
+            row for row in result
             if (
-                search in (row.get("name") or "").lower()
-                or search in (row.get("salary_component") or "").lower()
+                search in (str(row.get("name") or "").lower())
+                or search in (str(row.get("salary_component") or "").lower())
+                or search in (str(row.get("amount") or "").lower())
             )
         ]
 
-    total_records = len(extra_payments)
+    total_count = len(result)
 
-    paginated_data = extra_payments[start:start + page_length]
+    paginated_data = result[start:start + page_length]
 
     return {
         "status": "success",
-        "employee": employee,
-        "company": company,
-        "payroll_period": payroll_period_name,
-        "total_records": len(extra_payments),
-        "extra_payments": paginated_data
+        "total_count": total_count,
         "start": start,
         "page_length": page_length,
+        "data": paginated_data
     }
-
 
 
 
