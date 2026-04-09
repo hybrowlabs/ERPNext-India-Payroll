@@ -78,7 +78,6 @@ def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,pa
         order_by=order_by,
         status=status,
         filters=filters,
-        include_allocated_todos=False,
         date=date
     )
 
