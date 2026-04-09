@@ -41,7 +41,7 @@ def get_perquisite_payment_list(employee=None, company=None, payroll_period=None
     additional_salary_list = frappe.get_all(
         "Additional Salary",
         filters=filters,
-        fields=["name", "salary_component", "amount", "payroll_date"],
+        fields=["name", "salary_component", "amount", "payroll_date","employee","employee_name"],
         order_by=order_by or "creation desc"
     )
 
@@ -52,6 +52,8 @@ def get_perquisite_payment_list(employee=None, company=None, payroll_period=None
 
         if comp.custom_perquisite:
             result.append({
+                "employee":entry.employee,
+                "employee_name":entry.employee_name,
                 "name": entry.name,
                 "salary_component": entry.salary_component,
                 "amount": round(entry.amount or 0),
