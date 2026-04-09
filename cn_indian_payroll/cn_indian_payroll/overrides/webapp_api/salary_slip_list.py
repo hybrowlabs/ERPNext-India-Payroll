@@ -91,3 +91,98 @@ def get_consultant_payslip_pdf(slip_id):
     )
 
     return {"html": html}
+
+
+
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_slip_list.salary_slip_list_view?employee=PW0220&company=Pen%20Pencil&payroll_period=25-26
+
+
+@frappe.whitelist()
+def salary_slip_list_view(employee=None, company=None, start=0, page_length=10, order_by=None, search_term=None, payroll_period=None):
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
+    start = int(start)
+    page_length = int(page_length)
+
+    filters = {
+        "docstatus": ["in", [0, 1]]
+    }
+
+    if employee:
+        filters["employee"] = employee
+    if company:
+        filters["company"] = company
+    if payroll_period:
+        filters["custom_payroll_period"] = payroll_period
+
+    salary_slips = frappe.get_all(
+        "Salary Slip",
+        filters=filters,
+        fields=[
+            "name",
+            "employee_name",
+            "start_date",
+            "end_date",
+            "gross_pay",
+            "net_pay",
+            "employee",
+            "custom_payroll_period",
+            "custom_month",
+            "custom_attach",
+            "status"
+        ],
+        order_by=order_by,
+        start=start,
+        page_length=page_length
+    )
+
+    result = []
+
+    for sal in salary_slips:
+        salary_slip_type = "Regular"
+
+        sal_slip = frappe.get_doc("Salary Slip", sal.name)
+
+        for i in sal_slip.earnings:
+            component = frappe.get_doc("Salary Component", i.salary_component)
+
+            if component.custom_is_offcycle_component:
+                salary_slip_type = "Regular + Offcycle"
+                break  
+
+        if sal.status == "Submitted":
+            status = "Paid"
+        else:
+            status = "Draft"
+
+        result.append({
+            "salary_slip_id": sal.name,
+            "employee_name": sal.employee_name,
+            "start_date": sal.start_date,
+            "end_date": sal.end_date,
+            "gross_pay": round(sal.gross_pay),
+            "net_pay": round(sal.net_pay),
+            "employee": sal.employee,
+            "custom_payroll_period": sal.custom_payroll_period,
+            "custom_month": sal.custom_month,
+            "status": status,
+            "salary_slip_type": salary_slip_type
+        })
+
+    if search_term:
+        search = search_term.lower()
+        result = [
+            row for row in result
+            if (
+                search in (row.get("salary_slip_id") or "").lower()
+                or search in (row.get("employee_name") or "").lower()
+                or search in (row.get("custom_month") or "").lower()
+                or search in (row.get("gross_pay") or "").lower()
+                or search in (row.get("net_pay") or "").lower()
+            )
+        ]
+
+    return result
