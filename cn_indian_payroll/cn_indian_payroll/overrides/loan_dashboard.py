@@ -8,7 +8,7 @@ from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim impo
 
 
 @frappe.whitelist()
-def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page_length=10):
+def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page_length=10,order_by=None,status=None,filters=None,include_allocated_todos=False,date=None):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
         employee = target_employee
@@ -25,7 +25,8 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
             "applicant": employee,
             "docstatus": ["in", [0, 1]]
         },
-        fields=["*"]
+        fields=["*"],
+        order_by=order_by
     )
 
     if search_term:
@@ -49,13 +50,16 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
     todo_response = get_open_approval_todos(
         doctype="Loan Application",
         start=0,
-        page_length=1000,
-        include_allocated_todos=False,
+        page_length=20,
         todo_status=todo_status,
-        search_term=search_term
+        search_term=search_term,
+        filters=filters,
+        date=date,
+        status=status,
+        include_allocated_todos=include_allocated_todos
+    
     )
 
-    # 🔹 Create mapping: loan_name -> todos
     todo_map = {}
 
     if todo_response and todo_response.get("data"):
@@ -171,7 +175,13 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
 
         })
 
-    return results
+    return {
+        "status": "success",
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        "data": results
+    }
 
 @frappe.whitelist()
 def print_loan_dashboard_erp(employee,id):

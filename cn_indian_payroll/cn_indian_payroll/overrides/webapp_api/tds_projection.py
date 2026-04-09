@@ -812,14 +812,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
                     })
 
-                final_list = []
+                lta_exemption = []
+
                 for category, items in grouped.items():
-                    final_list.append({
+                    lta_exemption.append({
                         "category_name": category,
                         "items": items
                     })
-
-                hra_exemption.append({"items": final_list})
 
                 return {
                     "status": "success",
@@ -828,7 +827,8 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "proof_id":"",
                     "current_tax_regime": current_tax_regime,
                     "go_head_with_new_regime": current_flag,
-                    "hra_exemption": hra_exemption,
+                    "hra_exemption": hra_exemption,\
+                    "lta_exemption": lta_exemption,
                     "categories": final_categories
                 }
 
@@ -1570,15 +1570,15 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "custom_note": "",
                 })
 
-            hra_exemption.append({
-                "items": [
-                    {
-                        "category_name": category,
-                        "items": items
-                    }
-                    for category, items in grouped.items()
-                ]
-            })
+            lta_exemption = []
+
+            for category, items in grouped.items():
+                lta_exemption.append({
+                    "category_name": category,
+                    "items": items
+                })
+
+                
 
             return {
                 "status": "success",
@@ -1590,6 +1590,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                 "message": "User switched from New Regime to Old Regime",
                 "categories": final_categories,
                 "hra_exemption": hra_exemption,
+                "lta_exemption": lta_exemption
             }
 
 
@@ -1895,14 +1896,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
 
                         })
 
-                    final_list = []
+                    lta_exemption = []
+
                     for category, items in grouped.items():
-                        final_list.append({
+                        lta_exemption.append({
                             "category_name": category,
                             "items": items
                         })
-
-                    hra_exemption.append({"items": final_list})
 
                     return {
                         "status": "success",
@@ -1913,6 +1913,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "current_tax_regime": current_tax_regime,
                         "go_head_with_new_regime": current_flag,
                         "hra_exemption": hra_exemption,
+                        "lta_exemption": lta_exemption,
                         "categories": final_categories,
 
                     }
@@ -2652,15 +2653,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "custom_note": "",
                     })
 
-                hra_exemption.append({
-                    "items": [
-                        {
-                            "category_name": category,
-                            "items": items
-                        }
-                        for category, items in grouped.items()
-                    ]
-                })
+                lta_exemption = []
+
+                for category, items in grouped.items():
+                    lta_exemption.append({
+                        "category_name": category,
+                        "items": items
+                    })
 
                 return {
                     "status": "success",
@@ -2672,6 +2671,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "message": "User switched from New Regime to Old Regime",
                     "categories": final_categories,
                     "hra_exemption": hra_exemption,
+                    "lta_exemption": lta_exemption
                 }
 
 
@@ -2909,14 +2909,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                             # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                         })
 
-                    final_list = []
+                    lta_exemption = []
+
                     for category, items in grouped.items():
-                        final_list.append({
+                        lta_exemption.append({
                             "category_name": category,
                             "items": items
                         })
-
-                    hra_exemption.append({"items": final_list})
 
                     return {
                         "status": "success",
@@ -2927,7 +2926,9 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         "current_tax_regime": current_tax_regime,
                         "go_head_with_new_regime": current_flag,
                         "hra_exemption": hra_exemption,
+                        "lta_exemption": lta_exemption,
                         "categories": final_categories
+                        
                     }
 
 
@@ -3651,15 +3652,13 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                         # "custom_proof_status": declaration_row.get("custom_proof_status") if declaration_row else ""
                     })
 
-                hra_exemption.append({
-                    "items": [
-                        {
-                            "category_name": category,
-                            "items": items
-                        }
-                        for category, items in grouped.items()
-                    ]
-                })
+                lta_exemption = []
+
+                for category, items in grouped.items():
+                    lta_exemption.append({
+                        "category_name": category,
+                        "items": items
+                    })
 
                 return {
                     "status": "success",
@@ -3671,6 +3670,7 @@ def tds_declaration_form(employee=None, company=None, payroll_period=None, go_he
                     "message": "User switched from New Regime to Old Regime",
                     "categories": final_categories,
                     "hra_exemption": hra_exemption,
+                    "lta_exemption": lta_exemption
                 }
 
 

@@ -64,10 +64,12 @@ def format_version_data(version_data, modified, modified_by):
             })
 
     return result
+
+
 # http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.salary_structure_assignment.generate_salary_slip?employee=PW0220&payroll_period=25-26&company=Pen%20Pencil
 
 @frappe.whitelist()
-def generate_salary_slip(employee=None, payroll_period=None, company=None):
+def generate_salary_slip(employee=None, payroll_period=None, company=None,order_by=None,start=0,page_length=10,search_term=None):
     try:
 
         if not employee:
@@ -101,7 +103,7 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "custom_fixed_gross_annual",
                 "custom_variable_pay"
             ],
-            order_by="from_date desc"
+            order_by=order_by
         )
 
         if not salary_structures:
@@ -109,6 +111,32 @@ def generate_salary_slip(employee=None, payroll_period=None, company=None):
                 "status": "failed",
                 "message": "No active Salary Structure Assignments found"
             }
+
+
+        if search_term:
+            search = search_term.lower()
+            salary_structures = [
+                row for row in salary_structures
+                if any([
+                    search in (row.get("name") or "").lower(),
+                    search in (row.get("salary_structure") or "").lower(),
+                ])
+            ]
+
+
+        total_count = len(salary_structures)
+        salary_structures = salary_structures[start:start + page_length]
+
+        if not salary_structures:
+            return {
+                "status": "success",
+                "data": [],
+                "total_count": total_count
+            }
+
+        response_data = []
+
+        
 
         response_data = []
 

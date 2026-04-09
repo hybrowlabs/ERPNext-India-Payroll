@@ -31,7 +31,7 @@ def before_submit(self, method):
 
 
 @frappe.whitelist()
-def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,page_length=10):
+def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,page_length=10,order_by=None,status=None,filters=None,include_allocated_todos=False,date=None):
 
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
     if target_employee:
@@ -46,7 +46,8 @@ def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,pa
     advance_details = frappe.get_all(
         "Employee Advance",
         filters={"employee": employee, "docstatus": ["in", [0, 1]]},
-        fields=["*"]
+        fields=["*"],
+        order_by=order_by
     )
 
     if search_term:
@@ -73,7 +74,11 @@ def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,pa
         page_length=1000,
         include_allocated_todos=False,
         todo_status=todo_status,
-        search_term=search_term
+        search_term=search_term,
+        order_by=order_by,
+        status=status,
+        filters=filters,
+        date=date
     )
 
     todo_map = {}
@@ -217,10 +222,17 @@ def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,pa
             "balance_amount": final_balance,
             "employee": advance.employee,
             "employee_name": advance.employee_name,
-            "todo_list": advance_todos   
+            "todo_list": advance_todos,
+            
         })
 
-    return results
+    return {
+        "status": "success",
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        "data": results
+    }
 
 
 
