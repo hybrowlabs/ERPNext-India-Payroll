@@ -33,7 +33,6 @@ def get_salary_slip_list(employee=None, company=None,start=0,page_length=10,orde
             "status",
             
         ],
-        # order_by="end_date desc",
         order_by=order_by
     )
 
@@ -57,10 +56,8 @@ def get_salary_slip_list(employee=None, company=None,start=0,page_length=10,orde
 
     for slip in salary_slips:
 
-        # Call imported function
         invoice_status = get_invoice_status(slip["name"])
 
-        # Add status to response
         slip["invoice_status"] = invoice_status
 
         result.append(slip)

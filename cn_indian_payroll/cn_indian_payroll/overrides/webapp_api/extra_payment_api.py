@@ -49,7 +49,9 @@ def get_extra_payment_list(employee=None, company=None, payroll_period=None, sta
             "name",
             "salary_component",
             "amount",
-            "payroll_date"
+            "payroll_date",
+            "employee",
+            "employee_name"
         ],
         order_by=order_by or "creation desc"
     )
@@ -61,6 +63,8 @@ def get_extra_payment_list(employee=None, company=None, payroll_period=None, sta
 
         if comp.custom_is_extra_payment:
             result.append({
+                "employee":entry.employee,
+                "employee_name":entry.employee_name,
                 "name": entry.name,
                 "salary_component": entry.salary_component,
                 "amount": round(entry.amount or 0),
