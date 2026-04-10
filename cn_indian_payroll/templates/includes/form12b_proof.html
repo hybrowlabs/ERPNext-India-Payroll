@@ -300,8 +300,9 @@
             text-align:center;
         ">
             
-I, XXXXX YYYYY ZZZZZ son/daughter of PPPPP YYYYY UUUUU do hereby certify that the information given above is
-complete and correct.
+    {% set employee = frappe.get_doc("Employee", doc.employee) if doc.employee else None %}
+            
+        I, {{ employee.employee_name if employee else "" }} do hereby certify that the information given above is complete and correct.
         </td>
     </tr>
 
