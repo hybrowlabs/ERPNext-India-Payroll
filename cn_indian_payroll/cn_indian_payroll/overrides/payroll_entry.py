@@ -403,6 +403,9 @@ class PayrollEntryOverride(PayrollEntry):
 
         payroll_setting = frappe.get_single("Payroll Settings")
 
+
+        
+
         for config in payroll_setting.custom_field_config:
             if config.missing_field_config:
                 config_array.append(config.missing_field_config)
