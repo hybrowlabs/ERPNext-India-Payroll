@@ -29,6 +29,13 @@ frappe.query_reports["EPF Challan Report"] = {
             "options": "Payroll Period",
             "width": 200,
             "reqd": 1
+        },
+        {
+            "label": "School",
+            "fieldname": "school",
+            "fieldtype": "Link",
+            "options": "Branch",
+            "width": 200
         }
     ],
 
@@ -45,7 +52,14 @@ frappe.query_reports["EPF Challan Report"] = {
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
                         a.href = url;
-                        a.download = "epf_ecr.txt";
+
+                        const parts = ["EPFO"];
+                        if (filters.month) parts.push(filters.month);
+                        if (filters.company) parts.push(filters.company);
+                        if (filters.payroll_period) parts.push(filters.payroll_period);
+                        if (filters.school) parts.push(filters.school);
+                        a.download = parts.join("_") + ".txt";
+
                         a.click();
                         URL.revokeObjectURL(url);
                     } else {
