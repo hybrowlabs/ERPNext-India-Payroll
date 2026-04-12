@@ -1051,12 +1051,6 @@ frappe.ui.form.on('Payroll Entry', {
     },
 
 
-
-   
-
-
-
-
     refresh(frm) {
 
 
@@ -1092,8 +1086,51 @@ frappe.ui.form.on('Payroll Entry', {
 
         }, 100);
 
+hide_consultant_fields(frm)
+        
 
-    }
+
+    },
+
+
+   
 
 })
 
+
+function hide_consultant_fields(frm) {
+
+    let fields_to_hide = ["custom_attendance_regularize_details", 
+        "custom_off_cycle_payment", 
+        "custom_missing_datas", 
+        "custom_attendance_regularize_child",
+        "custom_offcycle_data",
+        "custom_process_regularize",
+        "custom_create_offcycle",
+       ];
+
+    frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Payroll Settings",
+            name: "Payroll Settings"
+        },
+        callback: function (r) {
+
+            if (!r.message) return;
+
+            let employment_types = (r.message.custom_hide_salary_structure_configuration || [])
+                .map(row => row.employment_type);
+
+            let should_hide = employment_types.includes(frm.doc.custom_employment_type);
+
+            console.log("should_hide:", should_hide);
+
+            setTimeout(() => {
+                fields_to_hide.forEach(field => {
+                    frm.toggle_display(field, !should_hide);  // 🔥 KEY LINE
+                });
+            }, 200);
+        }
+    });
+}

@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import getdate
 
-#http://127.0.0.1:8000/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.extra_payment_api.get_extra_payment_list?employee=37001&company=PW&payroll_period=25-26
+# http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.extra_payment_api.get_extra_payment_list?employee=PW0220&company=Pen%20Pencil&payroll_period=25-26
 
 @frappe.whitelist()
 def get_extra_payment_list(employee=None, company=None, payroll_period=None, start=0, page_length=10, order_by=None, search_term=None):
@@ -49,7 +49,9 @@ def get_extra_payment_list(employee=None, company=None, payroll_period=None, sta
             "name",
             "salary_component",
             "amount",
-            "payroll_date"
+            "payroll_date",
+            "employee",
+            "employee_name"
         ],
         order_by=order_by or "creation desc"
     )
@@ -61,6 +63,8 @@ def get_extra_payment_list(employee=None, company=None, payroll_period=None, sta
 
         if comp.custom_is_extra_payment:
             result.append({
+                "employee":entry.employee,
+                "employee_name":entry.employee_name,
                 "name": entry.name,
                 "salary_component": entry.salary_component,
                 "amount": round(entry.amount or 0),
