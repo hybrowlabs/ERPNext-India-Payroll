@@ -283,11 +283,20 @@ def get_salary_components(salary_slips):
 def get_salary_component_type(salary_component):
 	return frappe.db.get_value("Salary Component", salary_component, "type", cache=True)
 
-
 def get_salary_slips(filters, company_currency):
 	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
 
-	query = frappe.qb.from_(salary_slip).select(salary_slip.star)
+	employee = frappe.qb.DocType("Employee")
+
+	query = (
+		frappe.qb.from_(salary_slip)
+		.join(employee)
+		.on(salary_slip.employee == employee.name)
+		.select(
+			salary_slip.star,
+			employee.branch.as_("branch")  # ✅ Fetch branch from Employee
+		)
+	)
 
 	if filters.get("docstatus"):
 		query = query.where(salary_slip.docstatus == doc_status[filters.get("docstatus")])
@@ -304,13 +313,14 @@ def get_salary_slips(filters, company_currency):
 	if filters.get("employee"):
 		query = query.where(salary_slip.employee == filters.get("employee"))
 
+	# ✅ Branch filter (from Employee)
+	if filters.get("branch"):
+		query = query.where(employee.branch == filters.get("branch"))
+
 	if filters.get("currency") and filters.get("currency") != company_currency:
 		query = query.where(salary_slip.currency == filters.get("currency"))
 
-	salary_slips = query.run(as_dict=1)
-
-	return salary_slips or []
-
+	return query.run(as_dict=1) or []
 
 def get_employee_doj_map():
 	employee = frappe.qb.DocType("Employee")
