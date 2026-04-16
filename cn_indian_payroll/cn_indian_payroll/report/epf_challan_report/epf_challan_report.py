@@ -1,175 +1,298 @@
-
-
-
 import frappe
-from datetime import datetime
+from frappe import _
+from frappe.utils import flt
+
+EPF_WAGE_CEILING = 15000
+
+
+def _validate_filters(filters):
+	"""Validate mandatory filters and return basic_component from Company Master."""
+	if not filters.get("company"):
+		frappe.throw(_("Company is a mandatory filter."))
+
+	company_doc = frappe.get_cached_doc("Company", filters["company"])
+
+	if not company_doc.basic_component:
+		frappe.throw(
+			_("Please configure the Basic Component in Company Master before running this report.")
+		)
+
+	return company_doc.basic_component
+
+
+def _build_sql_conditions(filters):
+	"""Return (WHERE clause string, values dict) for the main Salary Slip query."""
+	conditions = ["ss.docstatus = 1", "ss.company = %(company)s"]
+	values = {"company": filters["company"]}
+
+	if filters.get("month"):
+		conditions.append("ss.custom_month = %(month)s")
+		values["month"] = filters["month"]
+
+	if filters.get("payroll_period"):
+		conditions.append("ss.custom_payroll_period = %(payroll_period)s")
+		values["payroll_period"] = filters["payroll_period"]
+
+	if filters.get("branch"):
+		conditions.append("e.branch = %(branch)s")
+		values["branch"] = filters["branch"]
+
+	return " AND ".join(conditions), values
+
+
+def _get_salary_slip_rows(where_clause, values, basic_component):
+	"""
+	Single optimised query:
+	  - Joins Salary Slip → Employee
+	  - Joins to the SSA linked on the salary slip (custom_salary_structure_assignment)
+	    as the primary source; falls back to the most-recent submitted SSA for the
+	    employee/company if the slip-level link is absent.
+	  - Uses a correlated sub-select to sum only the basic-component earnings rows.
+
+	Only submitted slips (docstatus = 1) are returned so that the report is
+	consistent with what was actually processed in payroll.
+	"""
+	values["basic_component"] = basic_component
+
+	return frappe.db.sql(
+		"""
+		SELECT
+			ss.name                                        AS slip_name,
+			ss.employee,
+			ss.employee_name,
+			ss.custom_total_leave_without_pay              AS ncp_days,
+			e.custom_uan                                   AS uan,
+
+			/* EPF / EPS eligibility flags from the SSA used for this salary slip.
+			   COALESCE falls back to the latest submitted SSA if the slip-level
+			   link (custom_salary_structure_assignment) is not populated. */
+			COALESCE(
+				slip_ssa.custom_is_epf,
+				fallback_ssa.custom_is_epf,
+				0
+			)                                              AS is_epf,
+			COALESCE(
+				slip_ssa.custom_is_eps,
+				fallback_ssa.custom_is_eps,
+				0
+			)                                              AS is_eps,
+
+			/* Sum of basic-component earnings rows for this slip */
+			COALESCE((
+				SELECT SUM(sd.amount)
+				FROM   `tabSalary Detail` sd
+				WHERE  sd.parent      = ss.name
+				  AND  sd.parentfield = 'earnings'
+				  AND  sd.salary_component = %(basic_component)s
+			), 0)                                          AS basic_amount
+
+		FROM `tabSalary Slip` ss
+
+		INNER JOIN `tabEmployee` e
+			ON  e.name = ss.employee
+
+		/* SSA directly linked on the salary slip (most accurate) */
+		LEFT JOIN `tabSalary Structure Assignment` slip_ssa
+			ON  slip_ssa.name     = ss.custom_salary_structure_assignment
+			AND slip_ssa.docstatus = 1
+
+		/* Latest submitted SSA for the employee as a fallback */
+		LEFT JOIN `tabSalary Structure Assignment` fallback_ssa
+			ON  fallback_ssa.employee  = ss.employee
+			AND fallback_ssa.company   = ss.company
+			AND fallback_ssa.docstatus = 1
+			AND fallback_ssa.from_date = (
+				SELECT MAX(inner_ssa.from_date)
+				FROM   `tabSalary Structure Assignment` inner_ssa
+				WHERE  inner_ssa.employee  = ss.employee
+				  AND  inner_ssa.company   = ss.company
+				  AND  inner_ssa.docstatus = 1
+			)
+
+		WHERE {where_clause}
+
+		ORDER BY ss.employee, ss.name
+		""".format(where_clause=where_clause),
+		values,
+		as_dict=True,
+	)
+
+
+def _compute_row(slip):
+	"""
+	Apply EPF contribution rules to a single salary slip row and return a
+	report-ready dict, or None if the employee is not EPF-eligible.
+
+	Rules (per EPFO Regular Return format):
+	  - Gross        : Basic component amount (no ceiling)
+	  - Wage EPF     : min(Basic, 15000)
+	  - Wage EPS     : min(Basic, 15000) if custom_is_eps = 1 else 0
+	  - Wage EDLI    : min(Basic, 15000)
+	  - CR EE        : round(Wage EPF × 12 / 100)
+	  - CR EPS       : round(Wage EPS × 8.33 / 100) if custom_is_eps = 1 else 0
+	  - CR ER        : CR EE − CR EPS  →  guarantees CR EPS + CR ER = CR EE always
+	  - NCP Days     : custom_total_leave_without_pay from Salary Slip
+	  - Refunds      : 0  (no advance refunds in scope)
+	"""
+	if not slip.get("is_epf"):
+		return None
+
+	basic = flt(slip.basic_amount)
+	is_eps = bool(slip.get("is_eps"))
+
+	wage_epf = min(basic, EPF_WAGE_CEILING)
+	wage_eps = min(basic, EPF_WAGE_CEILING) if is_eps else 0
+	wage_edli = min(basic, EPF_WAGE_CEILING)
+
+	cr_ee = round(wage_epf * 12 / 100)
+	cr_eps = round(wage_eps * 8.33 / 100) if is_eps else 0
+	# CR ER is derived so that CR EPS + CR ER == CR EE always (audit invariant)
+	cr_er = cr_ee - cr_eps
+
+	return {
+		"uan": slip.uan or "",
+		"employee_name": (slip.employee_name or "").upper(),
+		"gross": round(basic),
+		"wage_epf": round(wage_epf),
+		"wage_eps": round(wage_eps),
+		"wage_edli": round(wage_edli),
+		"cr_ee": cr_ee,
+		"cr_eps": cr_eps,
+		"cr_er": cr_er,
+		"ncp_days": flt(slip.ncp_days) or 0,
+		"refunds": 0,
+	}
+
 
 def get_salary_slips(filters=None):
-    basic_component=None
-    da_component=None
-    if filters is None:
-        filters = {}
+	"""Entry point consumed by execute() and download_ecr_txt()."""
+	if filters is None:
+		filters = {}
 
-    conditions = {"docstatus": ["in", [0, 1]]}
+	basic_component = _validate_filters(filters)
+	where_clause, values = _build_sql_conditions(filters)
 
-    if filters.get("month"):
-        conditions["custom_month"] = filters["month"]
+	rows = _get_salary_slip_rows(where_clause, values, basic_component)
 
-    if filters.get("payroll_period"):
-        conditions["custom_payroll_period"] = filters["payroll_period"]
+	result = []
+	for slip in rows:
+		computed = _compute_row(slip)
+		if computed:
+			result.append(computed)
 
-    if filters.get("company"):
-        conditions["company"] = filters["company"]
-
-        try:
-            company_doc = frappe.get_doc("Company", filters["company"])
-        except frappe.DoesNotExistError:
-            frappe.throw("Invalid company specified.")
-
-        if not company_doc.basic_component or not company_doc.custom_da_component:
-            frappe.throw("Please set Basic Component and DA Component in Company Master.")
-
-        basic_component = company_doc.basic_component
-        da_component = company_doc.custom_da_component
-    else:
-        frappe.throw("Company is a mandatory filter.")
-
-    salary_slips = frappe.get_list(
-        'Salary Slip',
-        fields=["name", "employee", "custom_month", "custom_payroll_period", "company", "gross_pay"],
-        filters=conditions,
-        order_by="name DESC",
-    )
-
-    detailed_salary_slips = []
-
-    for slip in salary_slips:
-        each_salary_slip = frappe.get_doc('Salary Slip', slip["name"])
-        each_employee = frappe.get_doc("Employee", each_salary_slip.employee)
-
-        pf_account = frappe.get_value(
-            "Salary Structure Assignment",
-            {"employee": each_salary_slip.employee},
-            ["name", "custom_is_epf"],
-            as_dict=True
-        )
-
-        if not pf_account or not pf_account.custom_is_epf:
-            continue  # Skip if not EPF eligible
-
-        basic = 0
-        da = 0
-        epf_amount_employee = 0
-        epf_amount_employer = 0
-        eps_amount = 0
-
-        for earning in each_salary_slip.earnings:
-            if earning.salary_component == basic_component:
-                basic += earning.amount
-            get_doc = frappe.get_doc("Salary Component", earning.salary_component)
-            if get_doc.arrear_component == 1:
-                basic += earning.amount
-            if earning.salary_component == da_component:
-                da += earning.amount
-            if get_doc.arrear_component == 1:
-                da += earning.amount
-
-        for deduction in each_salary_slip.deductions:
-            get_epf_component = frappe.get_doc("Salary Component", deduction.salary_component)
-            if get_epf_component.component_type == "Provident Fund":
-                epf_amount_employee += deduction.amount
-
-        epf_edli_eligible_wage = round(float(basic or 0) + float(da or 0))
-
-        # EPS eligibility check
-        joining_date = getattr(each_employee, "date_of_joining", None)
-        is_eps_applicable = True
-
-        if joining_date and epf_edli_eligible_wage > 15000:
-            if joining_date > datetime(2014, 9, 1).date():
-                is_eps_applicable = False
-
-        if is_eps_applicable:
-            eps_eligible_wage = min(epf_edli_eligible_wage, 15000)
-            epf_amount_employer = eps_eligible_wage * 8.33 / 100
-            eps_amount = epf_edli_eligible_wage * 3.67 / 100
-        else:
-            eps_eligible_wage = 0
-            epf_amount_employer = 0
-            eps_amount = epf_edli_eligible_wage * 12 / 100  # Full to EPF
-
-        detailed_salary_slips.append({
-            "employee": each_salary_slip.employee,
-            "employee_name": each_salary_slip.employee_name,
-            "custom_month": each_salary_slip.custom_month,
-            "custom_payroll_period": each_salary_slip.custom_payroll_period,
-            "company": each_salary_slip.company,
-            "uan": getattr(each_employee, "custom_uan", None),
-            "gross_pay": round(each_salary_slip.gross_pay),
-            "epf_wages": epf_edli_eligible_wage,
-            "eps_wages": eps_eligible_wage,
-            "edli_wages": epf_edli_eligible_wage,
-            "ncp_days": each_salary_slip.custom_total_leave_without_pay or 0,
-            "refund": 0,
-            "epf_amount_employee": round(epf_amount_employee),
-            "epf_amount_employer": round(epf_amount_employer),
-            "eps_amount": round(eps_amount),
-        })
-
-    return detailed_salary_slips
+	return result
 
 
 def execute(filters=None):
-    columns = [
-        {"fieldname": "uan", "label": "UAN", "fieldtype": "Data", "width": 150},
-        {"fieldname": "employee", "label": "Employee", "fieldtype": "Link", "options": "Employee", "width": 150},
-        {"fieldname": "employee_name", "label": "Employee Name", "fieldtype": "Data", "width": 200},
-        {"fieldname": "custom_month", "label": "Month", "fieldtype": "Data", "width": 100},
-        {"fieldname": "custom_payroll_period", "label": "Payroll Period", "fieldtype": "Data", "width": 150},
-        {"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company", "width": 150},
-        {"fieldname": "gross_pay", "label": "Gross Pay", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_wages", "label": "EPF Wages", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "eps_wages", "label": "EPS Wages", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "edli_wages", "label": "EDLI Wages", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_amount_employee", "label": "EPF Contribution (12%)", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_amount_employer", "label": "EPS Contribution(8.33%)", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "eps_amount", "label": "EDLI Contribution", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "ncp_days", "label": "NCP Days", "fieldtype": "Float", "width": 120},
-        {"fieldname": "refund", "label": "Refund Of Advances", "fieldtype": "Currency", "width": 150},
-    ]
+	columns = [
+		{
+			"fieldname": "uan",
+			"label": _("UAN"),
+			"fieldtype": "Data",
+			"width": 150,
+		},
+		{
+			"fieldname": "employee_name",
+			"label": _("Employee Name"),
+			"fieldtype": "Data",
+			"width": 220,
+		},
+		{
+			"fieldname": "gross",
+			"label": _("Gross"),
+			"fieldtype": "Int",
+			"width": 120,
+		},
+		{
+			"fieldname": "wage_epf",
+			"label": _("Wage EPF"),
+			"fieldtype": "Int",
+			"width": 120,
+		},
+		{
+			"fieldname": "wage_eps",
+			"label": _("Wage EPS"),
+			"fieldtype": "Int",
+			"width": 120,
+		},
+		{
+			"fieldname": "wage_edli",
+			"label": _("Wage EDLI"),
+			"fieldtype": "Int",
+			"width": 120,
+		},
+		{
+			"fieldname": "cr_ee",
+			"label": _("CR EE"),
+			"fieldtype": "Int",
+			"width": 100,
+		},
+		{
+			"fieldname": "cr_eps",
+			"label": _("CR EPS"),
+			"fieldtype": "Int",
+			"width": 100,
+		},
+		{
+			"fieldname": "cr_er",
+			"label": _("CR ER"),
+			"fieldtype": "Int",
+			"width": 100,
+		},
+		{
+			"fieldname": "ncp_days",
+			"label": _("NCP Days"),
+			"fieldtype": "Float",
+			"width": 110,
+		},
+		{
+			"fieldname": "refunds",
+			"label": _("Refunds"),
+			"fieldtype": "Int",
+			"width": 100,
+		},
+	]
 
-    data = get_salary_slips(filters)
-
-    return columns, data
-
+	data = get_salary_slips(filters)
+	return columns, data
 
 
 @frappe.whitelist()
 def download_ecr_txt(filters=None):
-    import json
-    if isinstance(filters, str):
-        filters = json.loads(filters)
+	"""
+	Generate the EPFO ECR (Electronic Challan-cum-Return) text file.
 
-    salary_data = get_salary_slips(filters)
-    lines = []
+	Format: fields separated by '#~#', one employee per line.
+	Column order matches the EPFO upload portal:
+	  UAN #~# Member Name #~# Gross Wages #~# EPF Wages #~# EPS Wages #~#
+	  EDLI Wages #~# EPF Contri Remitted (CR EE) #~# EPS Contri Remitted (CR EPS) #~#
+	  EPF Contri Due from ER (CR ER) #~# NCP Days #~# Refunds
+	"""
+	import json
 
-    def r(value):
-        return str(round(value or 0))
+	if isinstance(filters, str):
+		filters = json.loads(filters)
 
-    for row in salary_data:
-        line = "#~#".join([
-            str(row.get("uan") or "0"),
-            row.get("employee_name") or "",
-            r(row.get("gross_pay")),
-            r(row.get("epf_wages")),
-            r(row.get("eps_wages")),
-            r(row.get("edli_wages")),
-            r(row.get("epf_amount_employee")),
-            r(row.get("epf_amount_employer")),
-            r(row.get("eps_amount")),
-            r(row.get("ncp_days")),
-            r(row.get("refund")),
-        ])
-        lines.append(line)
+	salary_data = get_salary_slips(filters)
 
-    return "\n".join(lines)
+	def r(value):
+		return str(round(flt(value) or 0))
+
+	lines = []
+	for row in salary_data:
+		line = "#~#".join([
+			str(row.get("uan") or "0"),
+			row.get("employee_name") or "",
+			r(row.get("gross")),
+			r(row.get("wage_epf")),
+			r(row.get("wage_eps")),
+			r(row.get("wage_edli")),
+			r(row.get("cr_ee")),
+			r(row.get("cr_eps")),
+			r(row.get("cr_er")),
+			r(row.get("ncp_days")),
+			r(row.get("refunds")),
+		])
+		lines.append(line)
+
+	return "\n".join(lines)
