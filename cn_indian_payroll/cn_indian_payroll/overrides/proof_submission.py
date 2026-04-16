@@ -43,6 +43,20 @@ class CNEmployeeTaxExemptionProofSubmission(EmployeeTaxExemptionProofSubmission)
         frappe.db.commit()
 
 
+    def on_trash(self):
+
+        approved_categories = frappe.get_list(
+            "POI Approved Category",
+            filters={"proof_id": self.name},
+            fields=["name"]
+        )
+
+        for category in approved_categories:
+            frappe.delete_doc("POI Approved Category", category.name, force=1)
+
+        frappe.db.commit()
+
+
     def calculate_hra_breakup(self):
         """
         Calculate HRA exemption based on:
