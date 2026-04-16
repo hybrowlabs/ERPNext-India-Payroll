@@ -42,6 +42,7 @@ def execute(filters=None):
 			"employee_name": ss.employee_name,
 			"data_of_joining": doj_map.get(ss.employee),
 			"branch": ss.branch,
+			"calendar": ss.custom__calendar_,
 			"department": ss.department,
 			"designation": ss.designation,
 			"company": ss.company,
@@ -53,6 +54,9 @@ def execute(filters=None):
 			"payment_days": ss.payment_days,
 			"currency": currency or company_currency,
 			"total_loan_repayment": ss.total_loan_repayment,
+			"hijri_start_date": ss.custom_hijri_start_date,
+			"hijri_end_date": ss.custom_hijri_end_date,
+			"hijri_months": ss.custom_hijri_months,
 		}
 
 		update_column_width(ss, columns)
@@ -166,11 +170,39 @@ def get_columns(earning_types, ded_types):
 			"width": 120,
 		},
 		{
-			"label": _("End Date"),
+			"label": _("	End Date"),
 			"fieldname": "end_date",
 			"fieldtype": "Data",
 			"width":120,
 		},
+
+		{
+			"label": _("Hijri Start Date"),
+			"fieldname": "hijri_start_date",
+			"fieldtype": "Data",
+			"width": 120,
+		},
+		{
+			"label": _("Hijri End Date"),
+			"fieldname": "hijri_end_date",
+			"fieldtype": "Data",
+			"width":120,
+		},
+		{
+			"label": _("Hijri Months"),
+			"fieldname": "hijri_months",
+			"fieldtype": "Data",
+			"width":120,
+		},
+
+		{
+			"label": _("Calendar"),
+			"fieldname": "calendar",
+			"fieldtype": "Data",
+			"width":120,
+		},
+
+
 		{
 			"label": _("Total Working Days"),
 			"fieldname": "total_working_days",
@@ -267,16 +299,16 @@ def get_columns(earning_types, ded_types):
 
 
 def get_salary_components(salary_slips):
-    return (
-        frappe.qb.from_(salary_detail)
-        .where(
-            (salary_detail.amount != 0)
-            & (salary_detail.parent.isin([d.name for d in salary_slips]))
-            & (salary_detail.do_not_include_in_total == 0)  # Exclude components where this is 1
-        )
-        .select(salary_detail.salary_component)
-        .distinct()
-    ).run(pluck=True)
+	return (
+		frappe.qb.from_(salary_detail)
+		.where(
+			(salary_detail.amount != 0)
+			& (salary_detail.parent.isin([d.name for d in salary_slips]))
+			& (salary_detail.do_not_include_in_total == 0)  # Exclude components where this is 1
+		)
+		.select(salary_detail.salary_component)
+		.distinct()
+	).run(pluck=True)
 
 
 
@@ -294,6 +326,7 @@ def get_salary_slips(filters, company_currency):
 		.on(salary_slip.employee == employee.name)
 		.select(
 			salary_slip.star,
+			# salary_slip.custom__calendar_.as_("calendar"),
 			employee.branch.as_("branch")  # ✅ Fetch branch from Employee
 		)
 	)
@@ -309,6 +342,9 @@ def get_salary_slips(filters, company_currency):
 
 	if filters.get("company"):
 		query = query.where(salary_slip.company == filters.get("company"))
+
+	if filters.get("calendar"):
+		query = query.where(salary_slip.custom__calendar_ == filters.get("calendar"))
 
 	if filters.get("employee"):
 		query = query.where(salary_slip.employee == filters.get("employee"))
@@ -330,34 +366,34 @@ def get_employee_doj_map():
 	return frappe._dict(result)
 
 def get_salary_slip_details(salary_slips, currency, company_currency, component_type):
-    salary_slips = [ss.name for ss in salary_slips]
+	salary_slips = [ss.name for ss in salary_slips]
 
-    result = (
-        frappe.qb.from_(salary_slip)
-        .join(salary_detail)
-        .on(salary_slip.name == salary_detail.parent)
-        .where(
-            (salary_detail.parent.isin(salary_slips)) &
-            (salary_detail.parentfield == component_type) &
-            (salary_detail.do_not_include_in_total == 0)  # Ensure we only get components where this is 0
-        )
-        .select(
-            salary_detail.parent,
-            salary_detail.salary_component,
-            salary_detail.amount,
-            salary_slip.exchange_rate,
-        )
-    ).run(as_dict=1)
+	result = (
+		frappe.qb.from_(salary_slip)
+		.join(salary_detail)
+		.on(salary_slip.name == salary_detail.parent)
+		.where(
+			(salary_detail.parent.isin(salary_slips)) &
+			(salary_detail.parentfield == component_type) &
+			(salary_detail.do_not_include_in_total == 0)  # Ensure we only get components where this is 0
+		)
+		.select(
+			salary_detail.parent,
+			salary_detail.salary_component,
+			salary_detail.amount,
+			salary_slip.exchange_rate,
+		)
+	).run(as_dict=1)
 
-    ss_map = {}
+	ss_map = {}
 
-    for d in result:
-        ss_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, 0.0)
-        if currency == company_currency:
-            ss_map[d.parent][d.salary_component] += flt(d.amount) * flt(
-                d.exchange_rate if d.exchange_rate else 1
-            )
-        else:
-            ss_map[d.parent][d.salary_component] += flt(d.amount)
+	for d in result:
+		ss_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, 0.0)
+		if currency == company_currency:
+			ss_map[d.parent][d.salary_component] += flt(d.amount) * flt(
+				d.exchange_rate if d.exchange_rate else 1
+			)
+		else:
+			ss_map[d.parent][d.salary_component] += flt(d.amount)
 
-    return ss_map
+	return ss_map

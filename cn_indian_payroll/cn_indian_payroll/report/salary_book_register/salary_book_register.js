@@ -59,5 +59,13 @@ frappe.query_reports["Salary Book Register"] = {
 			default: "Submitted",
 			width: "100px",
 		},
+
+		{
+			fieldname: "calendar",   // ✅ FIXED
+			label: __("Calendar"),
+			fieldtype: "Select",
+			options: ["","Hijri", "Gregorian"],
+			width: "100px",
+		}
 	],
 };
