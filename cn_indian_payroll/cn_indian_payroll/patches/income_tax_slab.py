@@ -55,7 +55,7 @@ def execute():
         {
             "custom_is_education_cess": 0,
             "custom_is_surcharge": 0,
-            "description": "Surcharge 55%",
+            "description": "Surcharge 25%",
             "max_taxable_income": 50000000.0,
             "min_taxable_income": 20000000.0,
             "parent": "New Regime 25-26",
@@ -167,7 +167,7 @@ def execute():
         {
             "custom_is_education_cess": 0,
             "custom_is_surcharge": 0,
-            "description": "Surcharge 55%",
+            "description": "Surcharge 25%",
             "max_taxable_income": 50000000.0,
             "min_taxable_income": 20000000.0,
             "parent": "Old Regime 25-26",
@@ -211,18 +211,14 @@ def execute():
         insert_record(i)
 
 def insert_record(i):
-
     if not frappe.db.exists("Income Tax Slab", i["name"]):
-
         for company in frappe.db.get_list('Company', fields=['name']):
             combined_name = f"{i['name']} - ({company['name']})"
             if not frappe.db.exists("Income Tax Slab", combined_name):
                 doc = frappe.new_doc("Income Tax Slab")
                 doc.company = company["name"]
                 doc.name = combined_name
-
                 for key, value in i.items():
                     if key != "company" and key != "name":
                         doc.set(key, value)
-
                 doc.save()

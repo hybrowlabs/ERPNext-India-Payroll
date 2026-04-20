@@ -10,29 +10,21 @@ def execute():
             "amount": 0.0,
             "amount_based_on_formula": 1,
             "arrear_component": 0,
-            "component_type": "",
-            
-            
+            "component_type": "",            
             "custom_component_sequence": 0,
             "custom_component_sub_type": "Fixed",
-            "custom_included_in_f_and_f": 0,
             "custom_is_accrual": 0,
             "custom_is_arrear": 0,
             "custom_is_part_of_appraisal": 0,
             "custom_is_part_of_ctc": 0,
             "custom_is_part_of_gross_pay": 0,
-            "custom_is_reimbursement": 0,
-            
-            
-            
+            "custom_is_reimbursement": 0,            
             "custom_perquisite": 0,
-            
             "custom_sequence": "1",
             "custom_sub_category": "",
             "custom_tax_exemption_applicable_based_on_regime": 0,
             "deduct_full_tax_on_selected_payroll_date": 0,
             "depends_on_payment_days": 1,
-            
             "disabled": 0,
             "do_not_include_in_accounts": 0,
             "do_not_include_in_total": 0,
@@ -62,29 +54,21 @@ def execute():
             "amount": 0.0,
             "amount_based_on_formula": 1,
             "arrear_component": 0,
-            "component_type": "",
-            
-            
+            "component_type": "",            
             "custom_component_sequence": 0,
             "custom_component_sub_type": "Fixed",
-            "custom_included_in_f_and_f": 0,
             "custom_is_accrual": 0,
             "custom_is_arrear": 0,
             "custom_is_part_of_appraisal": 0,
             "custom_is_part_of_ctc": 0,
             "custom_is_part_of_gross_pay": 0,
-            "custom_is_reimbursement": 0,
-            
-            
-            
-            "custom_perquisite": 0,
-            
+            "custom_is_reimbursement": 0,            
+            "custom_perquisite": 0,            
             "custom_sequence": "1",
             "custom_sub_category": "",
             "custom_tax_exemption_applicable_based_on_regime": 0,
             "deduct_full_tax_on_selected_payroll_date": 0,
-            "depends_on_payment_days": 1,
-            
+            "depends_on_payment_days": 1,            
             "disabled": 0,
             "do_not_include_in_accounts": 0,
             "do_not_include_in_total": 0,
@@ -114,29 +98,21 @@ def execute():
             "amount": 0.0,
             "amount_based_on_formula": 1,
             "arrear_component": 0,
-            "component_type": "",
-            
-            
+            "component_type": "",            
             "custom_component_sequence": 0,
             "custom_component_sub_type": "Fixed",
-            "custom_included_in_f_and_f": 0,
             "custom_is_accrual": 0,
             "custom_is_arrear": 0,
             "custom_is_part_of_appraisal": 0,
             "custom_is_part_of_ctc": 0,
             "custom_is_part_of_gross_pay": 0,
-            "custom_is_reimbursement": 0,
-            
-            
-            
+            "custom_is_reimbursement": 0,            
             "custom_perquisite": 0,
-            
             "custom_sequence": "1",
             "custom_sub_category": "",
             "custom_tax_exemption_applicable_based_on_regime": 0,
             "deduct_full_tax_on_selected_payroll_date": 0,
-            "depends_on_payment_days": 1,
-            
+            "depends_on_payment_days": 1,            
             "disabled": 0,
             "do_not_include_in_accounts": 0,
             "do_not_include_in_total": 0,
@@ -150,23 +126,99 @@ def execute():
             "is_tax_applicable": 0,
             "max_benefit_amount": 0.0,
             "modified": "2026-02-22 19:51:28.547645",
-            "name": "PT",
+            "name": "Professional Tax",
             "payout_method": "",
             "remove_if_zero_valued": 1,
             "round_to_the_nearest_integer": 0,
-            "salary_component": "PT",
-            "salary_component_abbr": "PT_1",
+            "salary_component": "Professional Tax",
+            "salary_component_abbr": "PT",
+            "statistical_component": 0,
+            "type": "Deduction",
+            "variable_based_on_taxable_salary": 0
+            },
+                        {
+            "accounts": [],
+            "accrual_component": 0,
+            "amount": 0.0,
+            "amount_based_on_formula": 1,
+            "arrear_component": 0,
+            "component_type": "",            
+            "custom_component_sequence": 0,
+            "custom_component_sub_type": "Fixed",
+            "custom_is_accrual": 0,
+            "custom_is_arrear": 0,
+            "custom_is_part_of_appraisal": 0,
+            "custom_is_part_of_ctc": 0,
+            "custom_is_part_of_gross_pay": 0,
+            "custom_is_reimbursement": 0,            
+            "custom_perquisite": 0,
+            "custom_sequence": "1",
+            "custom_sub_category": "",
+            "custom_tax_exemption_applicable_based_on_regime": 0,
+            "deduct_full_tax_on_selected_payroll_date": 0,
+            "depends_on_payment_days": 1,            
+            "disabled": 0,
+            "do_not_include_in_accounts": 0,
+            "do_not_include_in_total": 0,
+            "docstatus": 0,
+            "doctype": "Salary Component",
+            "exempted_from_income_tax": 0,
+            "final_cycle_accrual_payout": 0,
+            "is_flexible_benefit": 0,
+            "is_income_tax_component": 0,
+            "is_tax_applicable": 0,
+            "max_benefit_amount": 0.0,
+            "modified": "2026-02-22 19:51:28.547645",
+            "name": "Provident Fund",
+            "payout_method": "",
+            "remove_if_zero_valued": 1,
+            "round_to_the_nearest_integer": 0,
+            "salary_component": "Provident Fund",
+            "salary_component_abbr": "PF",
             "statistical_component": 0,
             "type": "Deduction",
             "variable_based_on_taxable_salary": 0
             }
             ]
 
-    for i in data:
-        insert_record(i)
+#     for i in data:
+#         insert_record(i)
 
-def insert_record(i):
-    if not frappe.db.exists("Salary Component", i["name"]):
+# def insert_record(i):
+#     exist_component=["Professional Tax","Provident Fund"]
+#     if not frappe.db.exists("Salary Component", i["name"]):
+#         doc = frappe.new_doc("Salary Component")
+#         doc.update(i)
+#         doc.save()
+#     else:
+#         doc = frappe.get_doc("Salary Component", exist_component)
+#         doc.component_type = i["exist_component"]
+#         if doc.component_type == i["Professional Tax"]:
+#             "formula": "((300 if gross_pay > 250000 and getdate(start_date).month == 2 else 200 if gross_pay > 250000 else 0) if custom_state == \"Karnataka\" else\n(200 if gross_pay > 302400 else 0) if custom_state == \"Punjab\" else\n0 if custom_state == \"Rajasthan\" else\n(0 if gross_pay <= 18750 else 125 if gross_pay <= 25000 else (174 if getdate(start_date).month == 2 else 166) if gross_pay <= 33333 else (212 if getdate(start_date).month == 2 else 208)) if custom_state == \"Madhya Pradesh\" else\n(0 if gross_pay <= 15000 else 150 if gross_pay <= 20000 else 200) if custom_state == \"Telangana\" else\n(0 if gross_pay <= 25000 else 100 if gross_pay <= 41666 else 150 if gross_pay <= 66666 else 175 if gross_pay <= 83333 else 208) if custom_state == \"Jharkhand\" else\n(0 if gross_pay <= 40000 else 30 if gross_pay <= 50000 else 60 if gross_pay <= 60000 else 90 if gross_pay <= 80000 else 100 if gross_pay <= 100000 else 120 if gross_pay <= 150000 else 150 if gross_pay <= 200000 else 180 if gross_pay <= 250000 else 190 if gross_pay <= 300000 else 200) if custom_state == \"Chhattisgarh\" else\n(0 if gross_pay <= 25000 else (87 if getdate(start_date).month == 2 else 83) if gross_pay <= 41667 else (163 if getdate(start_date).month == 2 else 167) if gross_pay <= 83333 else (212 if getdate(start_date).month == 2 else 208)) if custom_state == \"Bihar\" else\n(0 if gross_pay <= 10000 else 150 if gross_pay <= 14999 else 180 if gross_pay <= 24999 else 208) if custom_state == \"Assam\" else\n(1250/6) if custom_state == \"Tamil Nadu\" else\n(0 if ((gender == \"Male\" and gross_pay <= 7500) or (gender == \"Female\" and gross_pay <= 25000)) else 175 if (gender == \"Male\" and gross_pay <= 10000) else (300 if getdate(start_date).month == 2 else 200)) if custom_state == \"Maharashtra\" else\n(0 if custom_fixed_gross_annual/12 <= 10000 else 110 if custom_fixed_gross_annual/12 <= 15000 else 130 if custom_fixed_gross_annual/12 <= 25000 else 150 if custom_fixed_gross_annual/12 <= 40000 else 200) if custom_state == \"West Bengal\" else\n(0 if gross_pay <= 15000 else 150 if gross_pay <= 20000 else 200) if custom_state == \"Andhra Pradesh\" else\n(0 if gross_pay <= 25000 else 200) if custom_state == \"Gujarat\" else\n0)",
+
+#         doc.update(i)
+#         doc.save()
+
+
+    for d in data:
+        insert_or_update(d)
+
+
+def insert_or_update(d):
+
+    if not frappe.db.exists("Salary Component", d["name"]):
+
         doc = frappe.new_doc("Salary Component")
-        doc.update(i)
+        doc.update(d)
+        doc.insert()
+
+    else:
+        doc = frappe.get_doc("Salary Component", d["name"])
+        doc.update({
+            "formula": d.get("formula"),
+            "type": d.get("type"),
+            "component_type": d.get("component_type"),
+            "depends_on_payment_days": d.get("depends_on_payment_days"),
+        })
+
         doc.save()

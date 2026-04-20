@@ -237,15 +237,7 @@ fixtures = [
     {"dt":"Zone"},
     {"dt":"Skill Level"},
     {"dt":"Role","filters":{"name":"Payroll Manager"}},
-    
-
-
-
-
 ]
-
-
-
 
 doctype_js = {
 
@@ -256,9 +248,6 @@ doctype_js = {
     "Loan": "public/js/loan.js",
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
-
-
-
 
 }
 
