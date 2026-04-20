@@ -8,8 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "state_name",
-  "minimum_wages_section",
-  "min_wages",
   "lwf_frequency_section",
   "lwf_frequency",
   "lwf_frequency_list"
@@ -18,19 +16,10 @@
   {
    "fieldname": "state_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "State Name",
+   "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "minimum_wages_section",
-   "fieldtype": "Section Break",
-   "label": "Minimum Wages"
-  },
-  {
-   "fieldname": "min_wages",
-   "fieldtype": "Table",
-   "label": "Min Wages",
-   "options": "Minimum Wages"
   },
   {
    "fieldname": "lwf_frequency_section",
@@ -41,19 +30,21 @@
    "default": "0",
    "fieldname": "lwf_frequency",
    "fieldtype": "Check",
-   "label": "LWF Frequency"
+   "label": "Active LWF Frequency "
   },
   {
+   "depends_on": "lwf_frequency",
    "fieldname": "lwf_frequency_list",
    "fieldtype": "Table",
    "label": "LWF Frequency List",
+   "mandatory_depends_on": "lwf_frequency",
    "options": "LWF Frequency Child"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-13 10:44:30.574969",
+ "modified": "2026-04-20 10:55:44.829915",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "India Payroll State",

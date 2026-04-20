@@ -6,6 +6,6 @@
 # Patches added in this section will be executed after doctypes are migrated
 
 cn_indian_payroll.cn_indian_payroll.patches.income_tax_slab 23-10-2025345
-cn_indian_payroll.cn_indian_payroll.patches.salary_component 23-10-2025255511122      
+cn_indian_payroll.cn_indian_payroll.patches.salary_component 23-10   122  
 cn_indian_payroll.cn_indian_payroll.patches.category #23-10-20253666
 cn_indian_payroll.cn_indian_payroll.patches.sub_category #23-10-20253555
