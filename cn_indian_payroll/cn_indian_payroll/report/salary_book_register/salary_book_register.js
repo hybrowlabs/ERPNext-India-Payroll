@@ -2,6 +2,18 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Salary Book Register"] = {
+
+
+	onload: function(report) {
+        let company = frappe.defaults.get_user_default("Company");
+
+        if (company) {
+            report.set_filter_value("company", company);
+			console.log("Default company set to:", company);
+        }
+    },
+
+
 	filters: [
 		{
 			fieldname: "from_date",
