@@ -48,6 +48,20 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         self.remove_amount()
 
 
+    def on_cancel(self):
+
+        approved_categories = frappe.get_list(
+            "Declaration Approved Category",
+            filters={"declaration_id": self.name},
+            fields=["name"]
+        )
+
+        for category in approved_categories:
+            frappe.delete_doc("Declaration Approved Category", category.name, force=1)
+
+        frappe.db.commit()
+
+
 
 
     def remove_amount(self):
