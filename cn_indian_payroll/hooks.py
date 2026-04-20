@@ -269,9 +269,9 @@ doc_events = {
 
     },
 
-    "Employee": {
-        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee.validate",
-    },
+    # "Salary Component": {
+    #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_component.validate",
+    # },
 
 
 

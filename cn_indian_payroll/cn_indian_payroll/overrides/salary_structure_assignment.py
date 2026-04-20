@@ -17,23 +17,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
     def on_cancel(self):
         self.cancel_declaration()
 
-    def validate(self):
-        super().validate()
-        self.update_min_wages()
-
-
-    def before_update_after_submit(self):
-        self.update_min_wages()
-
-
-
-    def update_min_wages(self):
-        if self.custom_minimum_wages_applicable:
-
-            employee=frappe.get_doc("Employee",self.employee)
-            if not employee.custom_skill_level and not employee.custom_zone:
-                frappe.throw(_("Please set Zone and Skill Level in Employee Minimum Wages calculation."))
-
 
 
     def cancel_declaration(self):
@@ -179,11 +162,11 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
             amount = e.amount or 0
             earnings_list.append({
                 "salary_component": e.salary_component,
-                "monthly_amount": amount,
-                "annual_amount": amount * 12
+                "monthly_amount": round(amount),
+                "annual_amount": round(amount) * 12
             })
-            total_monthly_earnings += amount
-            total_annual_earnings += amount * 12
+            total_monthly_earnings += round(amount)
+            total_annual_earnings += round(amount) * 12
 
     deduction_list = []
     total_monthly_ded = 0
@@ -194,12 +177,11 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
             amount = d.amount or 0
             deduction_list.append({
                 "salary_component": d.salary_component,
-                "monthly_amount": amount,
-                "annual_amount": amount * 12
+                "monthly_amount": round(amount),
+                "annual_amount": round(amount) * 12
             })
-            total_monthly_ded += amount
-            total_annual_ded += amount * 12
-
+            total_monthly_ded += round(amount)
+            total_annual_ded += round(amount) * 12
 
 
     if employee_benefits:
@@ -230,11 +212,14 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
     total_monthly_ctc = total_monthly_earnings + total_monthly_reim + total_monthly_ded
     total_annual_ctc = total_annual_earnings + total_annual_reim + total_annual_ded
 
+
+    employee_doc = frappe.get_doc("Employee", employee)
+
     context = {
         "employee": employee,
-        "employee_name": slip.get("employee_name") or "",
-        "department": slip.get("department") or "",
-        "designation": slip.get("designation") or "",
+        "employee_name": employee_doc.employee_name if employee_doc else "",
+        "department": employee_doc.department if employee_doc else "",
+        "designation": employee_doc.designation if employee_doc else "",
         "company": slip.get("company") or "",
         "posting_date": slip.get("posting_date") or "",
         "salary_structure": slip.get("salary_structure") or "",
