@@ -326,19 +326,12 @@ def get_salary_slips(filters, company_currency):
 		.on(salary_slip.employee == employee.name)
 		.select(
 			salary_slip.star,
-			# salary_slip.custom__calendar_.as_("calendar"),
-			employee.branch.as_("branch")  # ✅ Fetch branch from Employee
+			employee.branch.as_("branch")
 		)
 	)
 
 	if filters.get("docstatus"):
 		query = query.where(salary_slip.docstatus == doc_status[filters.get("docstatus")])
-
-	if filters.get("from_date"):
-		query = query.where(salary_slip.start_date >= filters.get("from_date"))
-
-	if filters.get("to_date"):
-		query = query.where(salary_slip.end_date <= filters.get("to_date"))
 
 	if filters.get("company"):
 		query = query.where(salary_slip.company == filters.get("company"))
@@ -346,10 +339,17 @@ def get_salary_slips(filters, company_currency):
 	if filters.get("calendar"):
 		query = query.where(salary_slip.custom__calendar_ == filters.get("calendar"))
 
+	if filters.get("month") and filters.get("calendar"):
+
+		if filters.get("calendar") == "Hijri":
+			query = query.where(salary_slip.custom_hijri_months == filters.get("month"))
+
+		elif filters.get("calendar") == "Gregorian":
+			query = query.where(salary_slip.custom_month == filters.get("month"))
+
 	if filters.get("employee"):
 		query = query.where(salary_slip.employee == filters.get("employee"))
 
-	# ✅ Branch filter (from Employee)
 	if filters.get("branch"):
 		query = query.where(employee.branch == filters.get("branch"))
 
