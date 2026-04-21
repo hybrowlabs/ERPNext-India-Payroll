@@ -237,7 +237,7 @@ fixtures = [
     {"dt":"Frequency"},
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
-    {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
+    # {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
     
     {"dt":"Section Category"},
     # {

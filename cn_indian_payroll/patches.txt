@@ -9,3 +9,4 @@ cn_indian_payroll.cn_indian_payroll.patches.income_tax_slab 22-4-202542
 cn_indian_payroll.cn_indian_payroll.patches.salary_component 78y42
 #cn_indian_payroll.cn_indian_payroll.patches.category #21qw33@2
 #cn_indian_payroll.cn_indian_payroll.patches.sub_category #21qw33@2
+cn_indian_payroll.cn_indian_payroll.patches.custom_field #21qw33@21
