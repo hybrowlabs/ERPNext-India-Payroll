@@ -240,28 +240,28 @@ fixtures = [
     {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
     
     {"dt":"Section Category"},
-    {
-        "dt": "Custom Field",
-        "filters": [
-            ["name", "=", "Payroll Settings-custom_employee_advance_component"]
-        ]
-    },
+    # {
+    #     "dt": "Custom Field",
+    #     "filters": [
+    #         ["name", "=", "Payroll Settings-custom_employee_advance_component"]
+    #     ]
+    # },
 
-    {
-        "dt": "Custom Field",
-        "filters": [
-            ["dt", "=", "Employee"],
-            ["name", "in", [
-                "Employee-custom_business_category",
-                "Employee-custom_business_segment",
-                "Employee-custom_work_flow_policy",
-                "Employee-custom_bank_account_in_erp",
-                "Employee-custom_supplier_id",
-                "Employee-custom_trade_name",
-                "Employee-custom_gst_number",
-            ]]
-        ]
-    }
+    # {
+    #     "dt": "Custom Field",
+    #     "filters": [
+    #         ["dt", "=", "Employee"],
+    #         ["name", "in", [
+    #             "Employee-custom_business_category",
+    #             "Employee-custom_business_segment",
+    #             "Employee-custom_work_flow_policy",
+    #             "Employee-custom_bank_account_in_erp",
+    #             "Employee-custom_supplier_id",
+    #             "Employee-custom_trade_name",
+    #             "Employee-custom_gst_number",
+    #         ]]
+    #     ]
+    # }
 
 
 
