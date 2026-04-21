@@ -330,15 +330,19 @@ def get_salary_slips(filters, company_currency):
 		)
 	)
 
+	# ✅ Docstatus
 	if filters.get("docstatus"):
 		query = query.where(salary_slip.docstatus == doc_status[filters.get("docstatus")])
 
+	# ✅ Company
 	if filters.get("company"):
 		query = query.where(salary_slip.company == filters.get("company"))
 
+	# ✅ Calendar
 	if filters.get("calendar"):
 		query = query.where(salary_slip.custom__calendar_ == filters.get("calendar"))
 
+	# ✅ Month Filter
 	if filters.get("month") and filters.get("calendar"):
 
 		if filters.get("calendar") == "Hijri":
@@ -347,6 +351,20 @@ def get_salary_slips(filters, company_currency):
 		elif filters.get("calendar") == "Gregorian":
 			query = query.where(salary_slip.custom_month == filters.get("month"))
 
+	# ✅ Year Filter (🔥 THIS IS WHAT YOU NEED)
+	if filters.get("calendar"):
+
+		if filters.get("calendar") == "Hijri" and filters.get("hijri_year"):
+			query = query.where(
+				salary_slip.custom_hijri_year == filters.get("hijri_year")
+			)
+
+		elif filters.get("calendar") == "Gregorian" and filters.get("year"):
+			query = query.where(
+				salary_slip.custom_gregorian_year == filters.get("year")
+			)
+
+	# ✅ Other filters
 	if filters.get("employee"):
 		query = query.where(salary_slip.employee == filters.get("employee"))
 
