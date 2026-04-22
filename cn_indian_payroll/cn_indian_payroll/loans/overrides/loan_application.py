@@ -4,6 +4,8 @@ from frappe.utils import add_months, flt, getdate
 
 @frappe.whitelist()
 def hold_installments(employee, payment_date, company, type, number_of_months, doc_id):
+    frappe.only_for("HR Manager")
+
     if not (doc_id and company):
         return
 
@@ -145,9 +147,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
 def edit_installment(
     employee, payment_date, company, hold_option, number_of_months, repayment_amount, doc_id
 ):
-    """
-    Edit loan installment for partial payment and redistribute balance to future months.
-    """
+    frappe.only_for("HR Manager")
 
     loan = frappe.get_doc("Loan", doc_id)
 

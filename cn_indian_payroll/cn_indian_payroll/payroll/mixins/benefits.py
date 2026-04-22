@@ -51,32 +51,15 @@ class BenefitsMixin:
         if not self.employee:
             return
 
-        current_basic = current_hra = None
-        (
-            current_basic_value,
-            current_hra_value,
-            current_nps_value,
-            current_epf_value,
-            current_pt_value,
-        ) = 0, 0, 0, 0, 0
-        (
-            previous_basic_value,
-            previous_hra_value,
-            previous_nps_value,
-            previous_epf_value,
-            previous_pt_value,
-        ) = 0, 0, 0, 0, 0
-        (
-            future_basic_value,
-            future_hra_value,
-            future_nps_value,
-            future_epf_value,
-            future_pt_value,
-        ) = 0, 0, 0, 0, 0
-
-        company_doc = frappe.get_doc("Company", self.company)
+        company_doc = frappe.get_cached_doc("Company", self.company)
         current_basic = company_doc.basic_component
         current_hra = company_doc.hra_component
+
+        # Accumulate current-slip values
+        current_basic_value = current_hra_value = current_nps_value = 0
+        current_epf_value = current_pt_value = 0
+        future_basic_value = future_hra_value = future_nps_value = 0
+        future_epf_value = future_pt_value = 0
 
         for earning in self.earnings or []:
             sc = frappe.get_cached_doc("Salary Component", earning.salary_component)
@@ -84,29 +67,31 @@ class BenefitsMixin:
                 current_nps_value += earning.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
                     future_nps_value = (earning.default_amount or 0) * self.custom_month_count
-
             if earning.salary_component == current_basic:
-                current_basic_value += earning.amount
+                current_basic_value += earning.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
                     future_basic_value = (earning.default_amount or 0) * self.custom_month_count
-
             if earning.salary_component == current_hra:
-                current_hra_value += earning.amount
+                current_hra_value += earning.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
                     future_hra_value = (earning.default_amount or 0) * self.custom_month_count
 
         for deduction in self.deductions or []:
             sc = frappe.get_cached_doc("Salary Component", deduction.salary_component)
             if sc.component_type == "Provident Fund":
-                current_epf_value += deduction.amount
+                current_epf_value += deduction.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
                     future_epf_value = (deduction.default_amount or 0) * self.custom_month_count
             if sc.component_type == "Professional Tax":
-                current_pt_value += deduction.amount
+                current_pt_value += deduction.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
                     future_pt_value = (deduction.default_amount or 0) * self.custom_month_count
 
-        prev_slips = frappe.get_list(
+        # Batch-fetch all previous submitted slip details — one query per table instead of N get_doc calls
+        previous_basic_value = previous_hra_value = previous_nps_value = 0
+        previous_epf_value = previous_pt_value = 0
+
+        prev_slip_names = frappe.get_all(
             "Salary Slip",
             filters={
                 "employee": self.employee,
@@ -114,28 +99,38 @@ class BenefitsMixin:
                 "docstatus": 1,
                 "name": ["!=", self.name],
             },
-            fields=["name"],
+            pluck="name",
         )
 
-        for slip_meta in prev_slips:
-            prev_slip = frappe.get_doc("Salary Slip", slip_meta.name)
-            for earning in prev_slip.earnings or []:
+        if prev_slip_names:
+            prev_earnings = frappe.get_all(
+                "Salary Detail",
+                filters={"parent": ["in", prev_slip_names], "parentfield": "earnings"},
+                fields=["salary_component", "amount"],
+            )
+            prev_deductions = frappe.get_all(
+                "Salary Detail",
+                filters={"parent": ["in", prev_slip_names], "parentfield": "deductions"},
+                fields=["salary_component", "amount"],
+            )
+
+            for earning in prev_earnings:
                 sc = frappe.get_cached_doc("Salary Component", earning.salary_component)
                 if sc.component_type == "NPS":
-                    previous_nps_value += earning.amount
+                    previous_nps_value += earning.amount or 0
                 if earning.salary_component == current_basic:
-                    previous_basic_value += earning.amount
+                    previous_basic_value += earning.amount or 0
                 if earning.salary_component == current_hra:
-                    previous_hra_value += earning.amount
+                    previous_hra_value += earning.amount or 0
 
-            for deduction in prev_slip.deductions or []:
+            for deduction in prev_deductions:
                 sc = frappe.get_cached_doc("Salary Component", deduction.salary_component)
                 if sc.component_type == "Provident Fund":
-                    previous_epf_value += deduction.amount
+                    previous_epf_value += deduction.amount or 0
                 if sc.component_type == "Professional Tax":
-                    previous_pt_value += deduction.amount
+                    previous_pt_value += deduction.amount or 0
 
-        declaration_list = frappe.get_list(
+        declaration_list = frappe.get_all(
             "Employee Tax Exemption Declaration",
             filters={
                 "employee": self.employee,
@@ -143,7 +138,9 @@ class BenefitsMixin:
                 "docstatus": 1,
                 "company": self.company,
             },
-            fields=["*"],
+            fields=["name", "custom_declaration_form_data"],
+            order_by="name desc",
+            limit=1,
         )
         if not declaration_list:
             return
@@ -161,23 +158,29 @@ class BenefitsMixin:
             sub_cat_doc = frappe.get_cached_doc(
                 "Employee Tax Exemption Sub Category", subcategory.exemption_sub_category
             )
-            if sub_cat_doc.custom_component_type in component_type_map:
-                if self.custom_tax_regime == "New Regime" and sub_cat_doc.custom_component_type != "NPS":
-                    continue
-                subcategory.amount = component_type_map[sub_cat_doc.custom_component_type]
+            ctype = sub_cat_doc.custom_component_type
+            if ctype not in component_type_map:
+                continue
+            if self.custom_tax_regime == "New Regime" and ctype != "NPS":
+                continue
+            subcategory.amount = component_type_map[ctype]
+
+        # Pre-fetch all sub-category types referenced in form_data — one query instead of N
+        subcat_names = [entry.get("sub_category") or entry.get("id") for entry in form_data]
+        subcat_names = [n for n in subcat_names if n]
+        subcat_type_map = {}
+        if subcat_names:
+            for row in frappe.get_all(
+                "Employee Tax Exemption Sub Category",
+                filters={"name": ["in", subcat_names]},
+                fields=["name", "custom_component_type"],
+            ):
+                subcat_type_map[row.name] = row.custom_component_type
 
         for entry in form_data:
             subcat_name = entry.get("sub_category") or entry.get("id")
-            component = frappe.get_all(
-                "Employee Tax Exemption Sub Category",
-                filters={"name": subcat_name},
-                fields=["custom_component_type"],
-                limit=1,
-            )
-            if not component:
-                continue
-            ctype = component[0].custom_component_type
-            if ctype not in component_type_map:
+            ctype = subcat_type_map.get(subcat_name)
+            if not ctype or ctype not in component_type_map:
                 continue
             if self.custom_tax_regime == "New Regime" and ctype != "NPS":
                 continue
@@ -201,7 +204,6 @@ class BenefitsMixin:
 
         decl_doc.custom_status = "Approved"
         decl_doc.save()
-        frappe.db.commit()
         self.tax_exemption_declaration = decl_doc.total_exemption_amount
 
     # ------------------------------------------------------------------
@@ -218,7 +220,7 @@ class BenefitsMixin:
         curr_hra,
         fut_hra,
     ) -> None:
-        ss_assignments = frappe.get_list(
+        ss_assignments = frappe.get_all(
             "Salary Structure Assignment",
             filters={
                 "employee": self.employee,
@@ -238,7 +240,7 @@ class BenefitsMixin:
         if not last_assignment.custom_payroll_period:
             return
 
-        payroll_period = frappe.get_doc("Payroll Period", last_assignment.custom_payroll_period)
+        payroll_period = frappe.get_cached_doc("Payroll Period", last_assignment.custom_payroll_period)
         end_date = payroll_period.end_date
         month_count = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
 

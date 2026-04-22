@@ -57,6 +57,7 @@ class PayrollEntryOverride(PayrollEntry):
 
     @frappe.whitelist()
     def fill_employee_details(self):
+        frappe.only_for("HR Manager")
         filters = self.make_filters()
         self.set("employees", [])
 

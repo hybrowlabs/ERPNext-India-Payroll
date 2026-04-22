@@ -511,12 +511,12 @@ class CustomSalarySlip(SalarySlip):
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
             filters={"employee": self.employee, "docstatus": 1},
-            fields=["*"],
+            fields=["custom_tax_regime"],
             order_by="from_date desc",
             limit=1,
         )
 
-        if len(latest_salary_structure) > 0:
+        if latest_salary_structure:
             tax_component = latest_salary_structure[0].custom_tax_regime
 
         for earning in self.earnings:
@@ -617,6 +617,9 @@ class CustomSalarySlip(SalarySlip):
             order_by="from_date desc",
             limit=1,
         )
+
+        if not latest_salary_structure:
+            return {}
 
         custom_tax_regime = latest_salary_structure[0].custom_tax_regime
 
