@@ -114,6 +114,6 @@ jobs:
       - name: Run tests
         run: |
           cd frappe-bench
-          bench --site test.localhost run-tests --app cn_indian_payroll --verbose
+          bench --site test.localhost run-tests --app cn_indian_payroll
         env:
           CI: true
