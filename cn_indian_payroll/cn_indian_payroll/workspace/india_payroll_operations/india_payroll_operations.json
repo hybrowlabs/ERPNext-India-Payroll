@@ -104,7 +104,14 @@
  "owner": "Administrator",
  "parent_page": "Payroll",
  "public": 1,
- "roles": [],
+ "roles": [
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  }
+ ],
  "sequence_id": 1,
  "shortcuts": [
   {
