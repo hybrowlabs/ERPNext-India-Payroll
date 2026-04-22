@@ -6,16 +6,14 @@ regime-aware component flagging, and the custom tax-slab child table.
 """
 
 import frappe
-from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
-
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
-
 
 # ---------------------------------------------------------------------------
 # Module-level helpers (used by the mixin and by CustomSalarySlip directly)
 # ---------------------------------------------------------------------------
+
 
 def override_calculate_tax_by_tax_slab(
     self, annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
@@ -63,8 +61,8 @@ def override_calculate_tax_by_tax_slab(
 # Mixin
 # ---------------------------------------------------------------------------
 
-class TaxMixin:
 
+class TaxMixin:
     def set_taxable_regime(self) -> None:
         """Stamp each earning row with the regime flags from its Salary Component."""
         for earning in self.earnings:
@@ -104,9 +102,7 @@ class TaxMixin:
                 self.whitelisted_globals,
                 eval_locals,
             )
-            self.full_tax_on_additional_earnings = (
-                self.total_tax_amount - self.total_structured_tax_amount
-            )
+            self.full_tax_on_additional_earnings = self.total_tax_amount - self.total_structured_tax_amount
 
         current_tax_amount = max(
             0.0,
@@ -209,9 +205,7 @@ class TaxMixin:
             }
         )
 
-    def get_taxable_earnings_for_prev_period(
-        self, start_date, end_date, allow_tax_exemption=False
-    ):
+    def get_taxable_earnings_for_prev_period(self, start_date, end_date, allow_tax_exemption=False):
         exempted_amount = 0
 
         latest_ssa = frappe.get_list(
@@ -223,9 +217,7 @@ class TaxMixin:
         )
         custom_tax_regime = latest_ssa[0].custom_tax_regime if latest_ssa else None
 
-        regime_matched = any(
-            e.custom_regime in (custom_tax_regime, "All") for e in self.earnings
-        )
+        regime_matched = any(e.custom_regime in (custom_tax_regime, "All") for e in self.earnings)
 
         if regime_matched:
             taxable_earnings = self.get_salary_slip_details(
@@ -260,9 +252,7 @@ class TaxMixin:
                 exempted_from_income_tax=1,
             )
 
-        opening_taxable_earning = self.get_opening_for(
-            "taxable_earnings_till_date", start_date, end_date
-        )
+        opening_taxable_earning = self.get_opening_for("taxable_earnings_till_date", start_date, end_date)
 
         return (taxable_earnings + opening_taxable_earning) - exempted_amount, exempted_amount
 
@@ -353,10 +343,7 @@ class TaxMixin:
         for repayment in loan_repayments:
             repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
             for entry in repayment_doc.custom_loan_perquisite:
-                if (
-                    entry.payment_date
-                    and start_date <= frappe.utils.getdate(entry.payment_date) <= end_date
-                ):
+                if entry.payment_date and start_date <= frappe.utils.getdate(entry.payment_date) <= end_date:
                     total_perq += entry.perquisite_amount
         self.custom_perquisite_amount = total_perq
 
@@ -370,39 +357,36 @@ class TaxMixin:
                 self.get_total_exemption_amount() - self.standard_tax_exemption_amount
             )
 
-        self.annual_taxable_amount = self.total_earnings + self.custom_perquisite_amount - (
-            self.non_taxable_earnings
-            + self.deductions_before_tax_calculation
-            + self.tax_exemption_declaration
-            + self.standard_tax_exemption_amount
+        self.annual_taxable_amount = (
+            self.total_earnings
+            + self.custom_perquisite_amount
+            - (
+                self.non_taxable_earnings
+                + self.deductions_before_tax_calculation
+                + self.tax_exemption_declaration
+                + self.standard_tax_exemption_amount
+            )
         )
 
         self.income_tax_deducted_till_date = self.get_income_tax_deducted_till_date()
 
-        if hasattr(self, "total_structured_tax_amount") and hasattr(
-            self, "current_structured_tax_amount"
-        ):
+        if hasattr(self, "total_structured_tax_amount") and hasattr(self, "current_structured_tax_amount"):
             self.future_income_tax_deductions = (
                 self.total_structured_tax_amount
                 + self.get("full_tax_on_additional_earnings", 0)
                 - self.income_tax_deducted_till_date
             )
-            self.current_month_income_tax = (
-                self.current_structured_tax_amount
-                + self.get("full_tax_on_additional_earnings", 0)
+            self.current_month_income_tax = self.current_structured_tax_amount + self.get(
+                "full_tax_on_additional_earnings", 0
             )
-            self.total_income_tax = (
-                self.income_tax_deducted_till_date + self.future_income_tax_deductions
-            )
+            self.total_income_tax = self.income_tax_deducted_till_date + self.future_income_tax_deductions
 
     def tax_calculation(self) -> None:
         if self.annual_taxable_amount:
             self.custom_taxable_amount = round(self.annual_taxable_amount)
 
         if self.ctc and self.non_taxable_earnings:
-            self.custom_total_income_with_taxable_component = round(
-                self.ctc - self.non_taxable_earnings
-            )
+            self.custom_total_income_with_taxable_component = round(self.ctc - self.non_taxable_earnings)
 
         latest_ssa = frappe.get_list(
             "Salary Structure Assignment",

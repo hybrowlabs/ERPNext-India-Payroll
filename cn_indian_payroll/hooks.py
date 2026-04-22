@@ -237,7 +237,6 @@ fixtures = [
 ]
 
 doctype_js = {
-
     "Payroll Entry": "public/js/payroll.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
     "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
@@ -245,7 +244,6 @@ doctype_js = {
     "Loan": "public/js/loan.js",
     "Structure Setting": "public/js/structure_setting.js",
     "Salary Component": "public/js/salary_component.js",
-
 }
 
 override_doctype_class = {
@@ -261,16 +259,11 @@ doc_events = {
         "before_save": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_save",
         "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_update_after_submit",
     },
-
     # "Salary Component": {
     #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_component.validate",
     # },
-
-
-
-
-
-
 }
 
-website_route_rules = [{'from_route': '/tax-exemptions/<path:app_path>', 'to_route': 'tax-exemptions'}, ]
+website_route_rules = [
+    {"from_route": "/tax-exemptions/<path:app_path>", "to_route": "tax-exemptions"},
+]

@@ -1,5 +1,3 @@
-
-
 import frappe
 
 
@@ -79,8 +77,20 @@ def get_new_joinee_arrear(filters=None):
 
 def get_columns(components):
     base_columns = [
-        {"label": "Document ID", "fieldname": "doc_id", "fieldtype": "Link", "options": "New Joining Arrear", "width": 120},
-        {"label": "Employee", "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 120},
+        {
+            "label": "Document ID",
+            "fieldname": "doc_id",
+            "fieldtype": "Link",
+            "options": "New Joining Arrear",
+            "width": 120,
+        },
+        {
+            "label": "Employee",
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 120,
+        },
         {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 150},
         {"label": "Department", "fieldname": "department", "fieldtype": "Data", "width": 150},
         {"label": "Designation", "fieldname": "designation", "fieldtype": "Data", "width": 150},
@@ -90,32 +100,9 @@ def get_columns(components):
         {"label": "Payout Date", "fieldname": "payout_date", "fieldtype": "Date", "width": 120},
     ]
 
-    component_columns = [
-        {"label": comp, "fieldname": comp, "fieldtype": "Currency", "width": 120}
-        for comp in components
-    ]
-
-    return base_columns + component_columns
-
-
-
-def get_columns(components):
-    base_columns = [
-		{"label": "Document ID", "fieldname": "doc_id", "fieldtype": "Link", "options": "New Joining Arrear", "width": 120},
-        {"label": "Employee", "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 120},
-        {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 150},
-		{"label": "Department", "fieldname": "department", "fieldtype": "Data", "width": 150},
-		{"label": "Designation", "fieldname": "designation", "fieldtype": "Data", "width": 150},
-        {"label": "Company", "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 150},
-        {"label": "Joining Date", "fieldname": "joining_date", "fieldtype": "Date", "width": 120},
-        {"label": "Present Days", "fieldname": "number_of_present_days", "fieldtype": "Float", "width": 120},
-        {"label": "Payout Date", "fieldname": "payout_date", "fieldtype": "Date", "width": 120},
-    ]
-
     # Dynamically add each salary component as a column
     component_columns = [
-        {"label": comp, "fieldname": comp, "fieldtype": "Currency", "width": 120}
-        for comp in components
+        {"label": comp, "fieldname": comp, "fieldtype": "Currency", "width": 120} for comp in components
     ]
 
     return base_columns + component_columns

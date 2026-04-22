@@ -571,7 +571,7 @@ LOAN_FIELDS = [
         "label": "Loan Perquisite Rate of Interest",
         "fieldtype": "Float",
         "insert_after": "is_term_loan",
-        "depends_on": "eval:doc.applicant_type==\"Employee\"",
+        "depends_on": 'eval:doc.applicant_type=="Employee"',
     },
     {
         "fieldname": "custom_loan_dashboard",
@@ -800,7 +800,7 @@ SALARY_COMPONENT_FIELDS = [
         "fieldtype": "Check",
         "insert_after": "custom_perquisite",
         "default": "1",
-        "depends_on": "eval:doc.type==\"Earning\" && doc.is_tax_applicable",
+        "depends_on": 'eval:doc.type=="Earning" && doc.is_tax_applicable',
     },
     {
         "fieldname": "custom_regime",
@@ -1298,8 +1298,7 @@ SALARY_STRUCTURE_ASSIGNMENT_FIELDS = [
         "insert_after": "custom_column_break_pwobk",
         "depends_on": "custom_is_epf",
         "description": (
-            "EPF Actual: contribution on full Basic. "
-            "EPF Restricted: contribution capped at ₹1,800/month."
+            "EPF Actual: contribution on full Basic. EPF Restricted: contribution capped at ₹1,800/month."
         ),
     },
     {

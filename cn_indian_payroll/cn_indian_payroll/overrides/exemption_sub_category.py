@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 
+
 def validate(self, method):
     if not self.custom_component_type:
         return
@@ -10,12 +11,14 @@ def validate(self, method):
         filters={
             "custom_component_type": self.custom_component_type,
             "is_active": 1,
-            "name": ["!=", self.name]
+            "name": ["!=", self.name],
         },
-        fields=["name"]
+        fields=["name"],
     )
 
     if validate_doc:
         frappe.throw(
-            _("An active Exemption Sub Category with component type '{0}' already exists.").format(self.custom_component_type)
+            _("An active Exemption Sub Category with component type '{0}' already exists.").format(
+                self.custom_component_type
+            )
         )

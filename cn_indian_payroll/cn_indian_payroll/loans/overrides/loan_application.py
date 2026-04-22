@@ -1,6 +1,5 @@
 import frappe
-import frappe
-from frappe.utils import add_months, getdate,flt
+from frappe.utils import add_months, flt, getdate
 
 
 @frappe.whitelist()
@@ -8,12 +7,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
     if not (doc_id and company):
         return
 
-
-    loan_repayment = frappe.get_all(
-        "Loan Repayment Schedule",
-        filters={"loan":doc_id },
-        fields=["*"]
-    )
+    loan_repayment = frappe.get_all("Loan Repayment Schedule", filters={"loan": doc_id}, fields=["*"])
 
     if not loan_repayment:
         return
@@ -64,7 +58,9 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
                     break
 
         if not skipped_rows:
-            frappe.throw(f"No repayment found for date {payment_date} and subsequent {number_of_months} months")
+            frappe.throw(
+                f"No repayment found for date {payment_date} and subsequent {number_of_months} months"
+            )
 
         target_date = add_months(skip_date, number_of_months)
         target_row = None
@@ -109,13 +105,17 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
                     break
 
         if not skipped_rows:
-            frappe.throw(f"No repayment found for date {payment_date} and subsequent {number_of_months} month(s)")
+            frappe.throw(
+                f"No repayment found for date {payment_date} and subsequent {number_of_months} month(s)"
+            )
 
         for r in skipped_rows:
             repayment_doc.remove(r)
 
         last_skip_date = add_months(skip_date, number_of_months - 1)
-        future_rows = [r for r in repayment_doc.repayment_schedule if getdate(r.payment_date) > last_skip_date]
+        future_rows = [
+            r for r in repayment_doc.repayment_schedule if getdate(r.payment_date) > last_skip_date
+        ]
 
         if not future_rows:
             frappe.throw("No future rows to distribute amounts")
@@ -144,20 +144,17 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
         return "success"
 
 
-
 @frappe.whitelist()
-def edit_installment(employee, payment_date, company, hold_option, number_of_months, repayment_amount, doc_id):
+def edit_installment(
+    employee, payment_date, company, hold_option, number_of_months, repayment_amount, doc_id
+):
     """
     Edit loan installment for partial payment and redistribute balance to future months.
     """
 
     loan = frappe.get_doc("Loan", doc_id)
 
-    repayment_schedules = frappe.get_all(
-        "Loan Repayment Schedule",
-        filters={"loan": loan.name},
-        fields=["*"]
-    )
+    repayment_schedules = frappe.get_all("Loan Repayment Schedule", filters={"loan": loan.name}, fields=["*"])
     if not repayment_schedules:
         frappe.throw("Repayment schedule not found")
 

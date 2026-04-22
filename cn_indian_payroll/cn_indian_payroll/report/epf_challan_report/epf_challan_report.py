@@ -1,12 +1,11 @@
-
-
-
-import frappe
 from datetime import datetime
 
+import frappe
+
+
 def get_salary_slips(filters=None):
-    basic_component=None
-    da_component=None
+    basic_component = None
+    da_component = None
     if filters is None:
         filters = {}
 
@@ -35,7 +34,7 @@ def get_salary_slips(filters=None):
         frappe.throw("Company is a mandatory filter.")
 
     salary_slips = frappe.get_list(
-        'Salary Slip',
+        "Salary Slip",
         fields=["name", "employee", "custom_month", "custom_payroll_period", "company", "gross_pay"],
         filters=conditions,
         order_by="name DESC",
@@ -44,14 +43,14 @@ def get_salary_slips(filters=None):
     detailed_salary_slips = []
 
     for slip in salary_slips:
-        each_salary_slip = frappe.get_doc('Salary Slip', slip["name"])
+        each_salary_slip = frappe.get_doc("Salary Slip", slip["name"])
         each_employee = frappe.get_doc("Employee", each_salary_slip.employee)
 
         pf_account = frappe.get_value(
             "Salary Structure Assignment",
             {"employee": each_salary_slip.employee},
             ["name", "custom_is_epf"],
-            as_dict=True
+            as_dict=True,
         )
 
         if not pf_account or not pf_account.custom_is_epf:
@@ -85,9 +84,8 @@ def get_salary_slips(filters=None):
         joining_date = getattr(each_employee, "date_of_joining", None)
         is_eps_applicable = True
 
-        if joining_date and epf_edli_eligible_wage > 15000:
-            if joining_date > datetime(2014, 9, 1).date():
-                is_eps_applicable = False
+        if joining_date and epf_edli_eligible_wage > 15000 and joining_date > datetime(2014, 9, 1).date():
+            is_eps_applicable = False
 
         if is_eps_applicable:
             eps_eligible_wage = min(epf_edli_eligible_wage, 15000)
@@ -98,23 +96,25 @@ def get_salary_slips(filters=None):
             epf_amount_employer = 0
             eps_amount = epf_edli_eligible_wage * 12 / 100  # Full to EPF
 
-        detailed_salary_slips.append({
-            "employee": each_salary_slip.employee,
-            "employee_name": each_salary_slip.employee_name,
-            "custom_month": each_salary_slip.custom_month,
-            "custom_payroll_period": each_salary_slip.custom_payroll_period,
-            "company": each_salary_slip.company,
-            "uan": getattr(each_employee, "custom_uan", None),
-            "gross_pay": round(each_salary_slip.gross_pay),
-            "epf_wages": epf_edli_eligible_wage,
-            "eps_wages": eps_eligible_wage,
-            "edli_wages": epf_edli_eligible_wage,
-            "ncp_days": each_salary_slip.custom_total_leave_without_pay or 0,
-            "refund": 0,
-            "epf_amount_employee": round(epf_amount_employee),
-            "epf_amount_employer": round(epf_amount_employer),
-            "eps_amount": round(eps_amount),
-        })
+        detailed_salary_slips.append(
+            {
+                "employee": each_salary_slip.employee,
+                "employee_name": each_salary_slip.employee_name,
+                "custom_month": each_salary_slip.custom_month,
+                "custom_payroll_period": each_salary_slip.custom_payroll_period,
+                "company": each_salary_slip.company,
+                "uan": getattr(each_employee, "custom_uan", None),
+                "gross_pay": round(each_salary_slip.gross_pay),
+                "epf_wages": epf_edli_eligible_wage,
+                "eps_wages": eps_eligible_wage,
+                "edli_wages": epf_edli_eligible_wage,
+                "ncp_days": each_salary_slip.custom_total_leave_without_pay or 0,
+                "refund": 0,
+                "epf_amount_employee": round(epf_amount_employee),
+                "epf_amount_employer": round(epf_amount_employer),
+                "eps_amount": round(eps_amount),
+            }
+        )
 
     return detailed_salary_slips
 
@@ -122,7 +122,13 @@ def get_salary_slips(filters=None):
 def execute(filters=None):
     columns = [
         {"fieldname": "uan", "label": "UAN", "fieldtype": "Data", "width": 150},
-        {"fieldname": "employee", "label": "Employee", "fieldtype": "Link", "options": "Employee", "width": 150},
+        {
+            "fieldname": "employee",
+            "label": "Employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 150,
+        },
         {"fieldname": "employee_name", "label": "Employee Name", "fieldtype": "Data", "width": 200},
         {"fieldname": "custom_month", "label": "Month", "fieldtype": "Data", "width": 100},
         {"fieldname": "custom_payroll_period", "label": "Payroll Period", "fieldtype": "Data", "width": 150},
@@ -131,8 +137,18 @@ def execute(filters=None):
         {"fieldname": "epf_wages", "label": "EPF Wages", "fieldtype": "Currency", "width": 150},
         {"fieldname": "eps_wages", "label": "EPS Wages", "fieldtype": "Currency", "width": 150},
         {"fieldname": "edli_wages", "label": "EDLI Wages", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_amount_employee", "label": "EPF Contribution (12%)", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_amount_employer", "label": "EPS Contribution(8.33%)", "fieldtype": "Currency", "width": 150},
+        {
+            "fieldname": "epf_amount_employee",
+            "label": "EPF Contribution (12%)",
+            "fieldtype": "Currency",
+            "width": 150,
+        },
+        {
+            "fieldname": "epf_amount_employer",
+            "label": "EPS Contribution(8.33%)",
+            "fieldtype": "Currency",
+            "width": 150,
+        },
         {"fieldname": "eps_amount", "label": "EDLI Contribution", "fieldtype": "Currency", "width": 150},
         {"fieldname": "ncp_days", "label": "NCP Days", "fieldtype": "Float", "width": 120},
         {"fieldname": "refund", "label": "Refund Of Advances", "fieldtype": "Currency", "width": 150},
@@ -143,10 +159,10 @@ def execute(filters=None):
     return columns, data
 
 
-
 @frappe.whitelist()
 def download_ecr_txt(filters=None):
     import json
+
     if isinstance(filters, str):
         filters = json.loads(filters)
 
@@ -157,19 +173,21 @@ def download_ecr_txt(filters=None):
         return str(round(value or 0))
 
     for row in salary_data:
-        line = "#~#".join([
-            str(row.get("uan") or "0"),
-            row.get("employee_name") or "",
-            r(row.get("gross_pay")),
-            r(row.get("epf_wages")),
-            r(row.get("eps_wages")),
-            r(row.get("edli_wages")),
-            r(row.get("epf_amount_employee")),
-            r(row.get("epf_amount_employer")),
-            r(row.get("eps_amount")),
-            r(row.get("ncp_days")),
-            r(row.get("refund")),
-        ])
+        line = "#~#".join(
+            [
+                str(row.get("uan") or "0"),
+                row.get("employee_name") or "",
+                r(row.get("gross_pay")),
+                r(row.get("epf_wages")),
+                r(row.get("eps_wages")),
+                r(row.get("edli_wages")),
+                r(row.get("epf_amount_employee")),
+                r(row.get("epf_amount_employer")),
+                r(row.get("eps_amount")),
+                r(row.get("ncp_days")),
+                r(row.get("refund")),
+            ]
+        )
         lines.append(line)
 
     return "\n".join(lines)

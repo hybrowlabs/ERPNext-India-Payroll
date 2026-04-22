@@ -1,12 +1,12 @@
-from frappe.utils import getdate,today,add_months,get_last_day
 import datetime
 
 import frappe
 from frappe import _
+from frappe.utils import add_months, get_last_day, getdate, today
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry
 
-class PayrollEntryOverride(PayrollEntry):
 
+class PayrollEntryOverride(PayrollEntry):
     def on_submit(self):
         super().on_submit()
         self.submit_new_joinee_arrear()
@@ -16,19 +16,22 @@ class PayrollEntryOverride(PayrollEntry):
         self.cancel_new_joinee_arrear()
 
     def cancel_new_joinee_arrear(self):
-        joinee_arrear=frappe.get_all("New Joining Arrear",filters={"payroll_entry":self.name,"docstatus":1},pluck="name")
+        joinee_arrear = frappe.get_all(
+            "New Joining Arrear", filters={"payroll_entry": self.name, "docstatus": 1}, pluck="name"
+        )
         if joinee_arrear:
             for doc in joinee_arrear:
-                doc=frappe.get_doc("New Joining Arrear",doc)
+                doc = frappe.get_doc("New Joining Arrear", doc)
                 doc.cancel()
                 frappe.db.commit()
 
-
     def submit_new_joinee_arrear(self):
-        joinee_arrear=frappe.get_all("New Joining Arrear",filters={"payroll_entry":self.name,"docstatus":0},pluck="name")
+        joinee_arrear = frappe.get_all(
+            "New Joining Arrear", filters={"payroll_entry": self.name, "docstatus": 0}, pluck="name"
+        )
         if joinee_arrear:
             for doc in joinee_arrear:
-                doc=frappe.get_doc("New Joining Arrear",doc)
+                doc = frappe.get_doc("New Joining Arrear", doc)
                 doc.submit()
                 frappe.db.commit()
 
@@ -54,8 +57,6 @@ class PayrollEntryOverride(PayrollEntry):
 
         return filters
 
-
-
     @frappe.whitelist()
     def fill_employee_details(self):
         filters = self.make_filters()
@@ -74,18 +75,18 @@ class PayrollEntryOverride(PayrollEntry):
                 },
                 fields=["name", "from_date", "salary_structure"],
                 order_by="from_date desc",
-                limit=1
+                limit=1,
             )
 
             if not ssa:
                 continue
 
-            ssa_doc = ssa[0]
+            ssa[0]
             employee_doc = frappe.get_doc("Employee", emp.employee)
             date_of_joinee = getdate(employee_doc.date_of_joining)
 
             payroll_setting = frappe.get_doc("Payroll Settings")
-            start_date = getdate(self.start_date)
+            getdate(self.start_date)
             end_date = getdate(self.end_date)
 
             if payroll_setting.custom_configure_attendance_cycle:
@@ -94,11 +95,12 @@ class PayrollEntryOverride(PayrollEntry):
 
                 attendance_final_end_date = datetime.date(end_date.year, end_date.month, attendance_end_day)
                 next_month_end_date = get_last_day(add_months(end_date, 1))
-                next_month_attendance_end_date = datetime.date(next_month_end_date.year, next_month_end_date.month, attendance_start_day)
+                next_month_attendance_end_date = datetime.date(
+                    next_month_end_date.year, next_month_end_date.month, attendance_start_day
+                )
                 diff_days = (next_month_end_date - next_month_attendance_end_date).days + 1
 
                 if attendance_final_end_date < date_of_joinee <= end_date:
-
                     if payroll_setting.payroll_based_on == "Attendance":
                         days_diff = (end_date - date_of_joinee).days + 1
                         present_day = 0
@@ -142,54 +144,61 @@ class PayrollEntryOverride(PayrollEntry):
                         total_payment_days = days_diff - total_lop_days
 
                         if total_payment_days > 0:
-
-                            existing_doc=frappe.db.exists("New Joining Arrear", {
-                                "employee": emp.employee,
-                                "company": self.company,
-                                "payroll_entry": self.name
-                            })
-                            if not existing_doc:
-                                arrear_doc = frappe.get_doc({
-                                    "doctype": "New Joining Arrear",
+                            existing_doc = frappe.db.exists(
+                                "New Joining Arrear",
+                                {
                                     "employee": emp.employee,
                                     "company": self.company,
-                                    "number_of_present_days": total_payment_days,
-                                    "posting_date": today(),
-                                    "payout_date": get_last_day(add_months(end_date, 1)),
-                                    "payroll_entry": self.name
-                                })
+                                    "payroll_entry": self.name,
+                                },
+                            )
+                            if not existing_doc:
+                                arrear_doc = frappe.get_doc(
+                                    {
+                                        "doctype": "New Joining Arrear",
+                                        "employee": emp.employee,
+                                        "company": self.company,
+                                        "number_of_present_days": total_payment_days,
+                                        "posting_date": today(),
+                                        "payout_date": get_last_day(add_months(end_date, 1)),
+                                        "payroll_entry": self.name,
+                                    }
+                                )
                                 arrear_doc.insert(ignore_permissions=True)
                                 frappe.db.commit()
 
                     elif payroll_setting.payroll_based_on == "Leave":
-                        existing_doc=frappe.db.exists("New Joining Arrear", {
-                                "employee": emp.employee,
-                                "company": self.company,
-                                "payroll_entry": self.name
-                            })
+                        existing_doc = frappe.db.exists(
+                            "New Joining Arrear",
+                            {"employee": emp.employee, "company": self.company, "payroll_entry": self.name},
+                        )
                         if not existing_doc:
-                            arrear_doc = frappe.get_doc({
-                                "doctype": "New Joining Arrear",
-                                "employee": emp.employee,
-                                "company": self.company,
-                                "number_of_present_days": diff_days,
-                                "posting_date": today(),
-                                "payout_date": get_last_day(add_months(end_date, 1)),
-                                "payroll_entry": self.name
-                            })
+                            arrear_doc = frappe.get_doc(
+                                {
+                                    "doctype": "New Joining Arrear",
+                                    "employee": emp.employee,
+                                    "company": self.company,
+                                    "number_of_present_days": diff_days,
+                                    "posting_date": today(),
+                                    "payout_date": get_last_day(add_months(end_date, 1)),
+                                    "payroll_entry": self.name,
+                                }
+                            )
                             arrear_doc.insert(ignore_permissions=True)
                             frappe.db.commit()
 
                     continue
 
-            valid_employees.append({
-                "employee": emp.employee,
-                "employee_name": emp.employee_name,
-                "department": emp.department,
-                "designation": emp.designation,
-                "custom_new_joinee": 0,
-                "custom_new_joinee_with_salary_arrear": 0
-            })
+            valid_employees.append(
+                {
+                    "employee": emp.employee,
+                    "employee_name": emp.employee_name,
+                    "department": emp.department,
+                    "designation": emp.designation,
+                    "custom_new_joinee": 0,
+                    "custom_new_joinee_with_salary_arrear": 0,
+                }
+            )
 
         if not valid_employees:
             error_msg = _(
@@ -210,7 +219,9 @@ class PayrollEntryOverride(PayrollEntry):
             if self.end_date:
                 error_msg += "<br>" + _("End Date: {0}").format(frappe.bold(self.end_date))
             if self.custom_employment_type:
-                error_msg += "<br>" + _("Employment Type: {0}").format(frappe.bold(self.custom_employment_type))
+                error_msg += "<br>" + _("Employment Type: {0}").format(
+                    frappe.bold(self.custom_employment_type)
+                )
 
             frappe.throw(error_msg, title=_("No Employees Found"))
 
@@ -220,8 +231,6 @@ class PayrollEntryOverride(PayrollEntry):
         self.number_of_employees = len(valid_employees)
         self.update_employees_with_withheld_salaries()
         return self.get_employees_with_unmarked_attendance()
-
-
 
 
 def get_filtered_employees_with_employment_type(filters):
@@ -238,18 +247,13 @@ def get_filtered_employees_with_employment_type(filters):
     if filters.get("employment_type"):
         optional_filters.append(["employment_type", "=", filters.employment_type])
 
-
-    active_filters = [
-        ["company", "=", filters.company],
-        ["status", "=", "Active"]
-    ] + optional_filters
+    active_filters = [["company", "=", filters.company], ["status", "=", "Active"]] + optional_filters
 
     active_employees = frappe.get_all(
         "Employee",
         filters=active_filters,
-        fields=["name as employee", "employee_name", "department", "designation"]
+        fields=["name as employee", "employee_name", "department", "designation"],
     )
-
 
     left_filters = [
         ["company", "=", filters.company],
@@ -261,7 +265,7 @@ def get_filtered_employees_with_employment_type(filters):
     left_employees = frappe.get_all(
         "Employee",
         filters=left_filters,
-        fields=["name as employee", "employee_name", "department", "designation"]
+        fields=["name as employee", "employee_name", "department", "designation"],
     )
 
     return active_employees + left_employees

@@ -6,4 +6,4 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestIndiaPayrollState(FrappeTestCase):
-	pass
+    pass

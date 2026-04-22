@@ -10,10 +10,10 @@ from collections.abc import Iterable
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
-
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _normalise(doctypes_or_str: str | tuple, fields: list | dict) -> tuple[tuple, list]:
     """Return (tuple-of-doctypes, list-of-fields) regardless of input shape."""
@@ -27,6 +27,7 @@ def _normalise(doctypes_or_str: str | tuple, fields: list | dict) -> tuple[tuple
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def make_custom_fields(
     custom_fields: dict,

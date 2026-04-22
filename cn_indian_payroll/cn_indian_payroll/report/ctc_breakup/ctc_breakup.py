@@ -123,7 +123,6 @@
 #     return columns, data
 
 
-
 import frappe
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
@@ -141,9 +140,7 @@ def get_all_employee(filters=None):
     if filters.get("from_date"):
         conditions1["from_date"] = (">=", filters["from_date"])
 
-    get_all_ssa = frappe.get_all(
-        "Salary Structure Assignment", filters=conditions1, fields=["*"]
-    )
+    get_all_ssa = frappe.get_all("Salary Structure Assignment", filters=conditions1, fields=["*"])
 
     all_matched_components = set()
     component_sequence_map = {}
@@ -199,8 +196,6 @@ def get_all_employee(filters=None):
         for comp in all_matched_components:
             row.setdefault(comp, 0)
 
-
-
         # Reimbursements
         reimbursements = frappe.get_all(
             "Employee Reimbursements",
@@ -223,9 +218,7 @@ def get_all_employee(filters=None):
         data.append(row)
 
     # Sort matched components by sequence
-    sorted_components = sorted(
-        all_matched_components, key=lambda x: component_sequence_map.get(x, 9999)
-    )
+    sorted_components = sorted(all_matched_components, key=lambda x: component_sequence_map.get(x, 9999))
 
     # Columns
     columns = [
@@ -282,8 +275,6 @@ def get_all_employee(filters=None):
                 "width": 150,
             }
         )
-
-
 
     for comp in sorted(reimbursement_components):
         columns.append(

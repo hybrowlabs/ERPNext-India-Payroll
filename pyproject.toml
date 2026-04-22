@@ -22,6 +22,13 @@ build-backend = "flit_core.buildapi"
 [tool.ruff]
 target-version = "py311"
 line-length = 110
+exclude = [
+    # Legacy flat overrides — superseded by payroll/, compliance/, loans/, hr/ domain packages.
+    # Will be removed once the migration is fully validated.
+    "cn_indian_payroll/cn_indian_payroll/overrides",
+    "cn_indian_payroll/cn_indian_payroll/monkey_patches",
+    "cn_indian_payroll/monkey_patches",
+]
 
 [tool.ruff.lint]
 select = [

@@ -1,10 +1,9 @@
-
-
 import frappe
+
 
 def before_save(self, method):
     if self.loan:
-        loan = frappe.get_doc('Loan', self.loan)
+        loan = frappe.get_doc("Loan", self.loan)
         if loan.applicant_type == "Employee":
             self.custom_employee = loan.applicant
             self.custom_loan_perquisite_interest_rate = loan.custom_loan_perquisite_rate_of_interest
@@ -15,7 +14,7 @@ def before_save(self, method):
 
                 for repayment in self.repayment_schedule:
                     payment_date_str = repayment.payment_date
-                    year, month, day = map(int, payment_date_str.split('-'))
+                    year, month, day = map(int, payment_date_str.split("-"))
 
                     if month in [1, 3, 5, 7, 8, 10, 12]:
                         last_day_of_month = 31
@@ -32,11 +31,12 @@ def before_save(self, method):
                         (repayment.balance_loan_amount * self.custom_loan_perquisite_interest_rate) / 1200
                     )
 
-                    self.append("custom_loan_perquisite", {
-                        "payment_date": repayment.payment_date,
-                        "balance_amount": repayment.balance_loan_amount,
-                        "perquisite_amount": perquisite_amount,
-                        "payroll_date": payroll_date
-                    })
-
-
+                    self.append(
+                        "custom_loan_perquisite",
+                        {
+                            "payment_date": repayment.payment_date,
+                            "balance_amount": repayment.balance_loan_amount,
+                            "perquisite_amount": perquisite_amount,
+                            "payroll_date": payroll_date,
+                        },
+                    )

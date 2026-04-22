@@ -3,10 +3,12 @@
 
 import frappe
 
+
 def execute(filters=None):
     columns = get_columns()
     data = get_all_esic(filters)
     return columns, data
+
 
 def get_all_esic(filters=None):
     if filters is None:
@@ -29,11 +31,20 @@ def get_all_esic(filters=None):
         "Salary Slip",
         filters=conditions,
         fields=[
-            "name", "employee", "employee_name", "company",
-            "custom_payroll_period", "custom_month", "branch",
-            "department", "designation", "total_working_days",
-            "custom_total_leave_without_pay", "payment_days", "gross_pay",
-        ]
+            "name",
+            "employee",
+            "employee_name",
+            "company",
+            "custom_payroll_period",
+            "custom_month",
+            "branch",
+            "department",
+            "designation",
+            "total_working_days",
+            "custom_total_leave_without_pay",
+            "payment_days",
+            "gross_pay",
+        ],
     )
 
     for slip in salary_slips:
@@ -53,39 +64,75 @@ def get_all_esic(filters=None):
                 esic_employer_amount += deduction.amount
 
         if esic_employee_amount or esic_employer_amount:
-            data.append({
-                "salary_slip": slip.name,
-                "ip_number": employee_doc.custom_esic_number,
-                "employee": slip.employee,
-                "employee_name": slip.employee_name,
-                "company": slip.company,
-                "payroll_period": slip.custom_payroll_period,
-                "month": slip.custom_month,
-                "working_days": slip.total_working_days,
-                "total_lwp": slip.custom_total_leave_without_pay,
-                "payment_day": slip.payment_days,
-                "gross_pay": slip.gross_pay,
-                "employee_amount": esic_employee_amount,
-                "employer_amount": esic_employer_amount,
-				"total_contribution":esic_employee_amount+esic_employer_amount
-            })
+            data.append(
+                {
+                    "salary_slip": slip.name,
+                    "ip_number": employee_doc.custom_esic_number,
+                    "employee": slip.employee,
+                    "employee_name": slip.employee_name,
+                    "company": slip.company,
+                    "payroll_period": slip.custom_payroll_period,
+                    "month": slip.custom_month,
+                    "working_days": slip.total_working_days,
+                    "total_lwp": slip.custom_total_leave_without_pay,
+                    "payment_day": slip.payment_days,
+                    "gross_pay": slip.gross_pay,
+                    "employee_amount": esic_employee_amount,
+                    "employer_amount": esic_employer_amount,
+                    "total_contribution": esic_employee_amount + esic_employer_amount,
+                }
+            )
 
     return data
 
+
 def get_columns():
     return [
-        {"label": "Salary Slip", "fieldname": "salary_slip", "fieldtype": "Link", "options": "Salary Slip", "width": 150},
+        {
+            "label": "Salary Slip",
+            "fieldname": "salary_slip",
+            "fieldtype": "Link",
+            "options": "Salary Slip",
+            "width": 150,
+        },
         {"label": "IP Number (ESIC No)", "fieldname": "ip_number", "fieldtype": "Data", "width": 180},
-        {"label": "Employee", "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 150},
+        {
+            "label": "Employee",
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 150,
+        },
         {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 180},
         {"label": "Company", "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 150},
-        {"label": "Payroll Period", "fieldname": "payroll_period", "fieldtype": "Link", "options": "Payroll Period", "width": 150},
+        {
+            "label": "Payroll Period",
+            "fieldname": "payroll_period",
+            "fieldtype": "Link",
+            "options": "Payroll Period",
+            "width": 150,
+        },
         {"label": "Month", "fieldname": "month", "fieldtype": "Data", "width": 100},
         {"label": "Working Days", "fieldname": "working_days", "fieldtype": "Float", "width": 120},
         {"label": "LWP Days", "fieldname": "total_lwp", "fieldtype": "Float", "width": 120},
         {"label": "Payment Days", "fieldname": "payment_day", "fieldtype": "Float", "width": 120},
         {"label": "Gross Pay", "fieldname": "gross_pay", "fieldtype": "Currency", "width": 150},
-        {"label": "ESIC Employee Contribution", "fieldname": "employee_amount", "fieldtype": "Currency", "width": 200},
-        {"label": "ESIC Employer Contribution", "fieldname": "employer_amount", "fieldtype": "Currency", "width": 200},
-		{"label": "Total Contribution", "fieldname": "total_contribution", "fieldtype": "Currency", "width": 200},
+        {
+            "label": "ESIC Employee Contribution",
+            "fieldname": "employee_amount",
+            "fieldtype": "Currency",
+            "width": 200,
+        },
+        {
+            "label": "ESIC Employer Contribution",
+            "fieldname": "employer_amount",
+            "fieldtype": "Currency",
+            "width": 200,
+        },
+        {
+            "label": "Total Contribution",
+            "fieldname": "total_contribution",
+            "fieldtype": "Currency",
+            "width": 200,
+        },
     ]

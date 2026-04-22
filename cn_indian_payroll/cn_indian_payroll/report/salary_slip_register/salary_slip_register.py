@@ -4,17 +4,9 @@
 # import frappe
 
 
-
-
-
-
-
-
-
 # columns = [
 
 #     {"fieldname": "ss_id", "label": "Salary Slip ID", "fieldtype": "Data", "width": 150},
-
 
 
 #     {"fieldname": "employee", "label": "Employee ID", "fieldtype": "Data", "width": 150},
@@ -68,21 +60,7 @@
 #     {"fieldname": "total_deduction", "label": "Total Deduction", "fieldtype": "Currency", "width": 150},
 
 
-
-
-
-
-
 # ]
-
-
-
-
-
-
-
-
-
 
 
 # def get_salary_slips(filters=None):
@@ -104,8 +82,6 @@
 
 
 # frappe.msgprint(str(conditions))
-
-
 
 
 #     # data = frappe.get_list(
@@ -249,10 +225,6 @@
 # #             pt_kar.append(deduction.amount)
 
 
-
-
-
-
 # # max_length = max(len(employee), len(employee_name), len(basic), len(hra), len(twa),
 # #                  len(uniform), len(medical), len(food_coupon), len(heema))
 
@@ -283,11 +255,6 @@
 # # pt_an.extend([0] * (max_length - len(pt_an)))
 # # pt_w.extend([0] * (max_length - len(pt_w)))
 # # pt_kar.extend([0] * (max_length - len(pt_kar)))
-
-
-
-
-
 
 
 # # for k in range(len(employee)):

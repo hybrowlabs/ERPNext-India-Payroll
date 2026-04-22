@@ -1,6 +1,7 @@
 import frappe
 from hrms.payroll.doctype.additional_salary.additional_salary import AdditionalSalary
 
+
 class CustomAdditionalSalary(AdditionalSalary):
     def validate(self):
 
@@ -13,28 +14,22 @@ class CustomAdditionalSalary(AdditionalSalary):
 
     def on_cancel(self):
         salary_slips = frappe.get_list(
-            'Salary Slip',
+            "Salary Slip",
             filters={
-                'docstatus': 0,
-                'start_date': ['<=', self.payroll_date],
-                'end_date': ['>=', self.payroll_date],
-                'employee': self.employee,
+                "docstatus": 0,
+                "start_date": ["<=", self.payroll_date],
+                "end_date": [">=", self.payroll_date],
+                "employee": self.employee,
             },
-            fields=['name']
+            fields=["name"],
         )
 
         for slip in salary_slips:
-            ss_doc = frappe.get_doc('Salary Slip', slip.name)
-            updated_earnings = [
-                d for d in ss_doc.earnings
-                if d.additional_salary != self.name
-            ]
-            updated_deductions = [
-                d for d in ss_doc.deductions
-                if d.additional_salary != self.name
-            ]
+            ss_doc = frappe.get_doc("Salary Slip", slip.name)
+            updated_earnings = [d for d in ss_doc.earnings if d.additional_salary != self.name]
+            updated_deductions = [d for d in ss_doc.deductions if d.additional_salary != self.name]
 
-            ss_doc.set('earnings', updated_earnings)
-            ss_doc.set('deductions', updated_deductions)
+            ss_doc.set("earnings", updated_earnings)
+            ss_doc.set("deductions", updated_deductions)
 
             ss_doc.save()

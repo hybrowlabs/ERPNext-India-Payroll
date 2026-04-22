@@ -6,13 +6,13 @@ variant of get_working_days_details().
 """
 
 import frappe
+from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, getdate
-from dateutil.relativedelta import relativedelta
+from hrms.payroll.doctype.salary_slip.salary_slip import verify_lwp_days_corrected
 
 
 class LOPMixin:
-
     def insert_lopreversal_days(self) -> None:
         arrear_days = frappe.get_list(
             "Payroll Correction",
@@ -23,9 +23,7 @@ class LOPMixin:
             },
             fields=["days_to_reverse"],
         )
-        self.custom_lop_reversal_days = (
-            sum(d["days_to_reverse"] for d in arrear_days) if arrear_days else 0
-        )
+        self.custom_lop_reversal_days = sum(d["days_to_reverse"] for d in arrear_days) if arrear_days else 0
 
     def update_total_lop(self) -> None:
         self.custom_total_leave_without_pay = (self.absent_days or 0) + self.leave_without_pay
@@ -51,9 +49,7 @@ class LOPMixin:
             payroll_settings.include_holidays_in_total_working_days
             and payroll_settings.consider_marked_attendance_on_holidays
         )
-        daily_wages_fraction_for_half_day = (
-            flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
-        )
+        daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
 
         working_days = date_diff(self.end_date, self.start_date) + 1
         if for_preview:
@@ -62,9 +58,7 @@ class LOPMixin:
             return
 
         holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-        working_days_list = [
-            add_days(getdate(self.start_date), days=day) for day in range(0, working_days)
-        ]
+        working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
 
         if not cint(payroll_settings.include_holidays_in_total_working_days):
             working_days_list = [i for i in working_days_list if i not in holidays]
@@ -86,11 +80,13 @@ class LOPMixin:
                 )
             self.absent_days = absent
 
-        if payroll_settings.payroll_based_on == "Leave":
-            if not payroll_settings.custom_configure_attendance_cycle:
-                actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
-                    holidays, working_days_list, daily_wages_fraction_for_half_day
-                )
+        if (
+            payroll_settings.payroll_based_on == "Leave"
+            and not payroll_settings.custom_configure_attendance_cycle
+        ):
+            actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
+                holidays, working_days_list, daily_wages_fraction_for_half_day
+            )
 
         if not lwp:
             lwp = actual_lwp
@@ -112,9 +108,7 @@ class LOPMixin:
             if payroll_settings.payroll_based_on == "Attendance":
                 self.payment_days -= flt(absent)
 
-            consider_unmarked_attendance_as = (
-                payroll_settings.consider_unmarked_attendance_as or "Present"
-            )
+            consider_unmarked_attendance_as = payroll_settings.consider_unmarked_attendance_as or "Present"
 
             if payroll_settings.payroll_based_on == "Attendance":
                 if consider_unmarked_attendance_as == "Absent":
@@ -123,17 +117,18 @@ class LOPMixin:
                     )
                     self.absent_days += unmarked_days
                     self.payment_days -= unmarked_days
-                half_absent_days = self.get_half_absent_days(
-                    consider_marked_attendance_on_holidays, holidays
-                )
+                half_absent_days = self.get_half_absent_days(consider_marked_attendance_on_holidays, holidays)
                 self.absent_days += half_absent_days * daily_wages_fraction_for_half_day
                 self.payment_days -= half_absent_days * daily_wages_fraction_for_half_day
         else:
             self.payment_days = 0
 
-        if lwp_days_corrected and lwp_days_corrected > 0:
-            if verify_lwp_days_corrected(self.employee, self.start_date, self.end_date, lwp_days_corrected):
-                self.payment_days += lwp_days_corrected
+        if (
+            lwp_days_corrected
+            and lwp_days_corrected > 0
+            and verify_lwp_days_corrected(self.employee, self.start_date, self.end_date, lwp_days_corrected)
+        ):
+            self.payment_days += lwp_days_corrected
 
     def calculate_lwp_ppl_and_absent_days_based_on_attendance_cycle(
         self, holidays, daily_wages_fraction_for_half_day, consider_marked_attendance_on_holidays
@@ -162,23 +157,18 @@ class LOPMixin:
         )
 
         for d in attendance_details:
-            if (
-                d.status in ("Half Day", "On Leave")
-                and d.leave_type
-                and d.leave_type not in leave_type_map
-            ):
+            if d.status in ("Half Day", "On Leave") and d.leave_type and d.leave_type not in leave_type_map:
                 continue
 
-            if (
-                not consider_marked_attendance_on_holidays
-                and getdate(d.attendance_date) in holidays
-            ):
-                if d.status in ["Absent", "Half Day"] or (
+            if (not consider_marked_attendance_on_holidays and getdate(d.attendance_date) in holidays) and (
+                d.status in ["Absent", "Half Day"]
+                or (
                     d.leave_type
                     and d.leave_type in leave_type_map
                     and not leave_type_map[d.leave_type]["include_holiday"]
-                ):
-                    continue
+                )
+            ):
+                continue
 
             if d.leave_type:
                 fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type][

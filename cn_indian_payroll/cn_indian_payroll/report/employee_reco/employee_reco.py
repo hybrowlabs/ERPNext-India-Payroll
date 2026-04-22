@@ -1,5 +1,6 @@
 import frappe
 
+
 def get_salary_slips(filters=None):
     if filters is None:
         filters = {}
@@ -14,6 +15,7 @@ def get_salary_slips(filters=None):
 
     if "custom_month" in conditions and "custom_payroll_period" in conditions:
         frappe.msgprint(str(conditions))
+
 
 def execute(filters=None):
     columns = []

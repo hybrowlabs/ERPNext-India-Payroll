@@ -1,11 +1,9 @@
+from datetime import datetime
+
 import frappe
-
-
 from hrms.hr.doctype.full_and_final_statement.full_and_final_statement import (
     FullandFinalStatement,
 )
-
-from datetime import datetime
 
 
 class CustomFullAndFinalStatement(FullandFinalStatement):
@@ -75,9 +73,7 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
         pass
 
     def on_submit(self):
-        transaction_date = datetime.strptime(
-            str(self.transaction_date), "%Y-%m-%d"
-        ).date()
+        datetime.strptime(str(self.transaction_date), "%Y-%m-%d").date()
         original_payable_component = []
         original_receivable_component = []
 
@@ -103,9 +99,7 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
                         additional_salary.insert()
                         additional_salary.submit()
 
-                        original_payable_component.append(
-                            {"salary_component": component, "amount": amount}
-                        )
+                        original_payable_component.append({"salary_component": component, "amount": amount})
 
         if self.receivables:
             for receivable in self.receivables:
@@ -128,15 +122,10 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
                     additional_salary.insert()
                     additional_salary.submit()
 
-                    original_receivable_component.append(
-                        {"salary_component": component, "amount": amount}
-                    )
+                    original_receivable_component.append({"salary_component": component, "amount": amount})
 
         for payable in self.payables:
-            if (
-                payable.reference_document_type == "Salary Slip"
-                and payable.reference_document
-            ):
+            if payable.reference_document_type == "Salary Slip" and payable.reference_document:
                 salary_slip = frappe.get_doc("Salary Slip", payable.reference_document)
 
                 salary_slip.custom_f_and_f_updated = 1
@@ -145,8 +134,9 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
 
 @frappe.whitelist()
 def get_accrued_components(employee, company, relieving_date):
-    from frappe.utils import getdate, flt
     from collections import defaultdict
+
+    from frappe.utils import flt, getdate
 
     relieving_date = getdate(relieving_date)
     bonus_list = []
@@ -187,9 +177,7 @@ def get_accrued_components(employee, company, relieving_date):
             for slip in get_salary_slip:
                 get_each_sl = frappe.get_doc("Salary Slip", slip.name)
                 for deduction in get_each_sl.deductions:
-                    get_pt = frappe.get_doc(
-                        "Salary Component", deduction.salary_component
-                    )
+                    get_pt = frappe.get_doc("Salary Component", deduction.salary_component)
                     if get_pt.component_type == "Professional Tax":
                         tax_list.append(
                             {
@@ -200,10 +188,7 @@ def get_accrued_components(employee, company, relieving_date):
                                 "payment_days": get_each_sl.payment_days,
                             }
                         )
-                    if (
-                        get_pt.is_income_tax_component
-                        and get_pt.variable_based_on_taxable_salary
-                    ):
+                    if get_pt.is_income_tax_component and get_pt.variable_based_on_taxable_salary:
                         tax_list.append(
                             {
                                 "salary_component": deduction.salary_component,
@@ -277,9 +262,7 @@ def get_accrued_components(employee, company, relieving_date):
 
         # Get accrual-type earnings
         for earning in salary_slip_doc.earnings:
-            salary_component_doc = frappe.get_doc(
-                "Salary Component", earning.salary_component
-            )
+            salary_component_doc = frappe.get_doc("Salary Component", earning.salary_component)
             if salary_component_doc.custom_is_accrual == 1:
                 bonus_list.append(
                     {
@@ -327,8 +310,7 @@ def get_accrued_components(employee, company, relieving_date):
                     daily_amount = 0
                     if salary_slip_doc.total_working_days:
                         daily_amount = (
-                            flt(component.monthly_total_amount)
-                            / salary_slip_doc.total_working_days
+                            flt(component.monthly_total_amount) / salary_slip_doc.total_working_days
                         )
 
                     reimbursement_list.append(
@@ -337,8 +319,7 @@ def get_accrued_components(employee, company, relieving_date):
                             "payment_days": salary_slip_doc.payment_days,
                             "salary_slip_id": salary_slip_doc.name,
                             "salary_component": component.reimbursements,
-                            "accrued_amount": round(flt(daily_amount))
-                            * salary_slip_doc.payment_days,
+                            "accrued_amount": round(flt(daily_amount)) * salary_slip_doc.payment_days,
                         }
                     )
 

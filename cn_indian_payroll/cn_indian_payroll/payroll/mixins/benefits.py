@@ -10,11 +10,9 @@ import json
 from datetime import timedelta
 
 import frappe
-from frappe.utils import flt, getdate
 
 
 class BenefitsMixin:
-
     def update_benefit_claim_amount(self) -> None:
         if not self.earnings:
             return
@@ -55,16 +53,25 @@ class BenefitsMixin:
 
         current_basic = current_hra = None
         (
-            current_basic_value, current_hra_value, current_nps_value,
-            current_epf_value, current_pt_value,
+            current_basic_value,
+            current_hra_value,
+            current_nps_value,
+            current_epf_value,
+            current_pt_value,
         ) = 0, 0, 0, 0, 0
         (
-            previous_basic_value, previous_hra_value, previous_nps_value,
-            previous_epf_value, previous_pt_value,
+            previous_basic_value,
+            previous_hra_value,
+            previous_nps_value,
+            previous_epf_value,
+            previous_pt_value,
         ) = 0, 0, 0, 0, 0
         (
-            future_basic_value, future_hra_value, future_nps_value,
-            future_epf_value, future_pt_value,
+            future_basic_value,
+            future_hra_value,
+            future_nps_value,
+            future_epf_value,
+            future_pt_value,
         ) = 0, 0, 0, 0, 0
 
         company_doc = frappe.get_doc("Company", self.company)
@@ -184,8 +191,12 @@ class BenefitsMixin:
         if self.custom_tax_regime == "Old Regime" and decl_doc.monthly_house_rent > 0:
             self._compute_hra_exemption(
                 decl_doc,
-                previous_basic_value, current_basic_value, future_basic_value,
-                previous_hra_value, current_hra_value, future_hra_value,
+                previous_basic_value,
+                current_basic_value,
+                future_basic_value,
+                previous_hra_value,
+                current_hra_value,
+                future_hra_value,
             )
 
         decl_doc.custom_status = "Approved"
@@ -200,8 +211,12 @@ class BenefitsMixin:
     def _compute_hra_exemption(
         self,
         decl_doc,
-        prev_basic, curr_basic, fut_basic,
-        prev_hra, curr_hra, fut_hra,
+        prev_basic,
+        curr_basic,
+        fut_basic,
+        prev_hra,
+        curr_hra,
+        fut_hra,
     ) -> None:
         ss_assignments = frappe.get_list(
             "Salary Structure Assignment",

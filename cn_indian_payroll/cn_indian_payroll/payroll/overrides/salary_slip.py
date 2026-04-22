@@ -12,7 +12,6 @@ import frappe
 from frappe import _
 from frappe.query_builder import Order
 from frappe.utils import get_link_to_form
-
 from hrms.payroll.doctype.payroll_period.payroll_period import get_period_factor
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
@@ -112,9 +111,9 @@ class CustomSalarySlip(LOPMixin, TaxMixin, BenefitsMixin, ESICMixin, SalarySlip)
 
         self.salary_structure = None
         frappe.msgprint(
-            _(
-                "No active or default Salary Structure found for employee {0} for the given dates"
-            ).format(self.employee),
+            _("No active or default Salary Structure found for employee {0} for the given dates").format(
+                self.employee
+            ),
             title=_("Salary Structure Missing"),
         )
 
@@ -128,9 +127,7 @@ class CustomSalarySlip(LOPMixin, TaxMixin, BenefitsMixin, ESICMixin, SalarySlip)
                 return None
 
             if struct_row.amount_based_on_formula and formula:
-                amount = float(
-                    _safe_eval(formula, self.whitelisted_globals, data)
-                )
+                amount = float(_safe_eval(formula, self.whitelisted_globals, data))
                 amount = round(amount, struct_row.precision("amount"))
 
             if amount:
@@ -139,17 +136,27 @@ class CustomSalarySlip(LOPMixin, TaxMixin, BenefitsMixin, ESICMixin, SalarySlip)
             return amount
 
         except NameError as ne:
-            _throw_error_message(struct_row, ne, _("Name error"), _("This error can be due to missing or deleted field."))
+            _throw_error_message(
+                struct_row, ne, _("Name error"), _("This error can be due to missing or deleted field.")
+            )
         except SyntaxError as se:
-            _throw_error_message(struct_row, se, _("Syntax error"), _("This error can be due to invalid syntax."))
+            _throw_error_message(
+                struct_row, se, _("Syntax error"), _("This error can be due to invalid syntax.")
+            )
         except Exception as exc:
-            _throw_error_message(struct_row, exc, _("Error in formula or condition"), _("This error can be due to invalid formula or condition."))
+            _throw_error_message(
+                struct_row,
+                exc,
+                _("Error in formula or condition"),
+                _("This error can be due to invalid formula or condition."),
+            )
             raise
 
 
 # ---------------------------------------------------------------------------
 # Module-level helpers
 # ---------------------------------------------------------------------------
+
 
 def _safe_eval(
     code: str,
@@ -162,8 +169,15 @@ def _safe_eval(
     _check_attributes(code)
 
     whitelisted_globals = {
-        "int": int, "float": float, "long": int, "round": round,
-        "sum": sum, "min": min, "max": max, "next": next, "len": len,
+        "int": int,
+        "float": float,
+        "long": int,
+        "round": round,
+        "sum": sum,
+        "min": min,
+        "max": max,
+        "next": next,
+        "len": len,
     }
 
     if not eval_globals:
@@ -176,29 +190,20 @@ def _safe_eval(
 
 def _check_attributes(code: str) -> None:
     import ast
+
     from frappe.utils.safe_exec import UNSAFE_ATTRIBUTES
 
     unsafe_attrs = set(UNSAFE_ATTRIBUTES).union(["__"]) - {"format"}
     for attribute in unsafe_attrs:
         if attribute in code:
-            raise SyntaxError(
-                f'Illegal rule {frappe.bold(code)}. Cannot use "{attribute}"'
-            )
+            raise SyntaxError(f'Illegal rule {frappe.bold(code)}. Cannot use "{attribute}"')
 
     tree = ast.parse(code, mode="eval")
     for node in ast.walk(tree):
         if isinstance(node, ast.NamedExpr):
-            raise SyntaxError(
-                f"Operation not allowed: line {node.lineno} column {node.col_offset}"
-            )
-        if (
-            isinstance(node, ast.Attribute)
-            and isinstance(node.attr, str)
-            and node.attr in UNSAFE_ATTRIBUTES
-        ):
-            raise SyntaxError(
-                f'Illegal rule {frappe.bold(code)}. Cannot use "{node.attr}"'
-            )
+            raise SyntaxError(f"Operation not allowed: line {node.lineno} column {node.col_offset}")
+        if isinstance(node, ast.Attribute) and isinstance(node.attr, str) and node.attr in UNSAFE_ATTRIBUTES:
+            raise SyntaxError(f'Illegal rule {frappe.bold(code)}. Cannot use "{node.attr}"')
 
 
 def _throw_error_message(row, error, title, description=None):
