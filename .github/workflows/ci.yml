@@ -48,6 +48,12 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install Redis
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y redis-server
+          sudo systemctl start redis-server
+
       - name: Install bench CLI
         run: pip install frappe-bench
 
@@ -58,7 +64,6 @@ jobs:
             --frappe-path https://github.com/frappe/frappe \
             --no-procfile \
             --no-backups \
-            --skip-redis-config-generation \
             frappe-bench
 
       - name: Get ERPNext & HRMS
@@ -82,10 +87,11 @@ jobs:
             FLUSH PRIVILEGES;
           "
 
-      - name: Setup Redis (config only)
+      - name: Setup Redis config
         run: |
           cd frappe-bench
           bench setup redis
+          sudo service redis-server start || true
 
       - name: Create site & install apps
         run: |
