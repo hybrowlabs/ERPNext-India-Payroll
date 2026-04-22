@@ -66,11 +66,12 @@ jobs:
             --no-backups \
             frappe-bench
 
-      - name: Get ERPNext & HRMS
+      - name: Get ERPNext, HRMS & Lending
         run: |
           cd frappe-bench
           bench get-app --branch version-16 erpnext https://github.com/frappe/erpnext
           bench get-app --branch version-16 hrms https://github.com/frappe/hrms
+          bench get-app lending https://github.com/frappe/lending
 
       - name: Get cn_indian_payroll
         run: |
@@ -105,6 +106,7 @@ jobs:
             --no-mariadb-socket
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app lending
           bench --site test.localhost install-app cn_indian_payroll
         env:
           CI: true

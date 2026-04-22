@@ -11,6 +11,9 @@ dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
 ]
 
+[tool.bench.required_apps]
+lending = "https://github.com/frappe/lending"
+
 [build-system]
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
