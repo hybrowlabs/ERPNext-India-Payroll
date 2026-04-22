@@ -8,6 +8,7 @@ from frappe.utils.background_jobs import enqueue
 
 @frappe.whitelist()
 def create_salary_structure_assignment(company, payroll_period, income_tax_slab, effective_date):
+    triggered_by = frappe.session.user
     enqueue(
         method=create_salary_structure_assignment_worker,
         queue="default",
@@ -17,11 +18,12 @@ def create_salary_structure_assignment(company, payroll_period, income_tax_slab,
         payroll_period=payroll_period,
         income_tax_slab=income_tax_slab,
         effective_date=effective_date,
+        triggered_by=triggered_by,
     )
     return "queued"
 
 
-def create_salary_structure_assignment_worker(company, payroll_period, income_tax_slab, effective_date):
+def create_salary_structure_assignment_worker(company, payroll_period, income_tax_slab, effective_date, triggered_by=None):
     try:
         effective_date = datetime.strptime(effective_date, "%Y-%m-%d").date()
 
@@ -29,7 +31,7 @@ def create_salary_structure_assignment_worker(company, payroll_period, income_ta
         total = len(employees)
 
         for idx, emp in enumerate(employees):
-            frappe.publish_realtime("ssa_progress", {"progress": int((idx + 1) / total * 100)})
+            frappe.publish_realtime("ssa_progress", {"progress": int((idx + 1) / total * 100)}, user=triggered_by)
 
             if frappe.db.exists(
                 "Salary Structure Assignment",
@@ -88,8 +90,8 @@ def create_salary_structure_assignment_worker(company, payroll_period, income_ta
                 new_ssa.insert()
                 new_ssa.submit()
 
-        frappe.publish_realtime("ssa_progress", {"progress": 100})
+        frappe.publish_realtime("ssa_progress", {"progress": 100}, user=triggered_by)
 
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Salary Structure Assignment Creation Failed")
-        frappe.publish_realtime("ssa_progress", {"progress": 100})
+        frappe.publish_realtime("ssa_progress", {"progress": 100}, user=triggered_by)
