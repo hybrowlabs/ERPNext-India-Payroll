@@ -65,7 +65,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 )
 
                 for new_earning in new_salary_slip.earnings:
-                    nps_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                    nps_component = frappe.get_cached_doc("Salary Component", new_earning.salary_component)
                     if (
                         nps_component.component_type == "NPS"
                         and nps_component.custom_component_sub_type == "Fixed"
@@ -131,7 +131,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 for slip in get_all_salary_slip:
                     get_each_salary_slip = frappe.get_doc("Salary Slip", slip.name)
                     for each_slip_doc in get_each_salary_slip.earnings:
-                        nps_component = frappe.get_doc("Salary Component", each_slip_doc.salary_component)
+                        nps_component = frappe.get_cached_doc("Salary Component", each_slip_doc.salary_component)
                         if nps_component.component_type == "NPS":
                             previous_nps_amount += each_slip_doc.amount
 
@@ -144,7 +144,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 )
 
                 for new_earning in new_salary_slip.earnings:
-                    nps_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                    nps_component = frappe.get_cached_doc("Salary Component", new_earning.salary_component)
                     if (
                         nps_component.component_type == "NPS"
                         and nps_component.custom_component_sub_type == "Fixed"
@@ -231,12 +231,12 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 pt_amount = 0
 
                 for new_earning in new_salary_slip.earnings:
-                    component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                    component = frappe.get_cached_doc("Salary Component", new_earning.salary_component)
                     if component.component_type == "NPS" and component.custom_component_sub_type == "Fixed":
                         nps_component += new_earning.amount
 
                 for deduction in new_salary_slip.deductions:
-                    component = frappe.get_doc("Salary Component", deduction.salary_component)
+                    component = frappe.get_cached_doc("Salary Component", deduction.salary_component)
                     if (
                         component.component_type == "Provident Fund"
                         and component.custom_component_sub_type == "Fixed"
@@ -370,7 +370,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                     get_each_salary_slip = frappe.get_doc("Salary Slip", slip.name)
 
                     for earning in get_each_salary_slip.earnings:
-                        get_earning_component = frappe.get_doc("Salary Component", earning.salary_component)
+                        get_earning_component = frappe.get_cached_doc("Salary Component", earning.salary_component)
                         if get_earning_component.component_type == "NPS":
                             current_nps_amount += earning.amount
 
@@ -392,7 +392,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 )
 
                 for new_earning in new_salary_slip.earnings:
-                    new_earning_component = frappe.get_doc("Salary Component", new_earning.salary_component)
+                    new_earning_component = frappe.get_cached_doc("Salary Component", new_earning.salary_component)
                     if (
                         new_earning_component.component_type == "NPS"
                         and new_earning_component.custom_component_sub_type == "Fixed"
