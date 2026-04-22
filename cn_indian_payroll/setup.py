@@ -8,21 +8,16 @@ duplicating code.
 
 import click
 import frappe
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from cn_indian_payroll.cn_indian_payroll.constants.custom_fields import CUSTOM_FIELDS
-from cn_indian_payroll.cn_indian_payroll.utils.custom_fields import (
-    delete_custom_fields,
-    get_custom_fields_creator,
-)
-
-_MODULE = "Indian Payroll"
-_create = get_custom_fields_creator(_MODULE)
+from cn_indian_payroll.cn_indian_payroll.utils.custom_fields import delete_custom_fields
 
 
 def after_install() -> None:
-    """Create all custom fields stamped with the Indian Payroll module."""
+    """Create all custom fields for the Indian Payroll app."""
     try:
-        _create(CUSTOM_FIELDS, ignore_validate=True)
+        create_custom_fields(CUSTOM_FIELDS, ignore_validate=True)
         frappe.db.commit()
         click.secho("Indian Payroll — custom fields installed.", fg="green")
     except Exception:
