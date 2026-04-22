@@ -67,12 +67,12 @@ app_license = "mit"
 # Installation
 # ------------
 
-after_install = "cn_indian_payroll.cn_indian_payroll.install.after_install"
+after_install = "cn_indian_payroll.install.after_install"
 
 # Uninstallation
 # ------------
 
-before_uninstall = "cn_indian_payroll.cn_indian_payroll.uninstall.before_uninstall"
+before_uninstall = "cn_indian_payroll.uninstall.before_uninstall"
 
 # Integration Setup
 # ------------------
