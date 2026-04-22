@@ -1,4 +1,4 @@
-# cn_indian_payroll
+# Chatnext India Payroll
 
 A Frappe/HRMS app that extends ERPNext payroll for Indian statutory compliance — EPF, EPS, ESIC, Professional Tax, LWF, TDS, and Form 16.
 
