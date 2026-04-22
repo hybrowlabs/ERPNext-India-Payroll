@@ -1,10 +1,13 @@
 import frappe
+from frappe import _
 from frappe.utils import add_months, flt, getdate
 
 
 @frappe.whitelist()
 def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regime, id, income_tax_slab):
     frappe.has_permission("Salary Slip", "read", throw=True)
+    if not frappe.has_permission("Employee", "read", employee):
+        frappe.throw(_("Not permitted to access this employee data."), frappe.PermissionError)
 
     end_date = getdate(end_date)
 

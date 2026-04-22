@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 
 
 @frappe.whitelist()
@@ -6,9 +7,12 @@ def print_loan_dashboard_erp(employee, id, loan_product):
     if not employee:
         return []
 
-    employee_user = frappe.db.get_value("Employee", employee, "user_id")
-    if frappe.session.user != employee_user:
-        frappe.only_for("HR Manager")
+    if not frappe.has_permission("Employee", "read", employee):
+        frappe.throw(_("Not permitted to access this employee."), frappe.PermissionError)
+    if not frappe.has_permission("Loan", "read", id):
+        frappe.throw(_("Not permitted to access this loan."), frappe.PermissionError)
+    if not frappe.has_permission("Loan Product", "read", loan_product):
+        frappe.throw(_("Not permitted to access this loan product."), frappe.PermissionError)
 
     loan_product = frappe.get_doc("Loan Product", loan_product)
 
