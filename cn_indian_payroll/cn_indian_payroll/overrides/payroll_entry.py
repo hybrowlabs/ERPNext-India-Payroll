@@ -23,7 +23,6 @@ class PayrollEntryOverride(PayrollEntry):
             for doc in joinee_arrear:
                 doc = frappe.get_doc("New Joining Arrear", doc)
                 doc.cancel()
-                frappe.db.commit()
 
     def submit_new_joinee_arrear(self):
         joinee_arrear = frappe.get_all(
@@ -33,7 +32,6 @@ class PayrollEntryOverride(PayrollEntry):
             for doc in joinee_arrear:
                 doc = frappe.get_doc("New Joining Arrear", doc)
                 doc.submit()
-                frappe.db.commit()
 
     def make_filters(self):
         filters = frappe._dict(
@@ -165,7 +163,6 @@ class PayrollEntryOverride(PayrollEntry):
                                     }
                                 )
                                 arrear_doc.insert(ignore_permissions=True)
-                                frappe.db.commit()
 
                     elif payroll_setting.payroll_based_on == "Leave":
                         existing_doc = frappe.db.exists(
@@ -185,7 +182,6 @@ class PayrollEntryOverride(PayrollEntry):
                                 }
                             )
                             arrear_doc.insert(ignore_permissions=True)
-                            frappe.db.commit()
 
                     continue
 

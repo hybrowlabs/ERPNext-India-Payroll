@@ -37,7 +37,6 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
                 repayment.db_update()
 
         repayment_doc.save(ignore_permissions=True)
-        frappe.db.commit()
 
         return "success"
 
@@ -84,7 +83,6 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
             repayment_doc.remove(r)
 
         repayment_doc.save(ignore_permissions=True)
-        frappe.db.commit()
 
         return "success"
 
@@ -140,7 +138,6 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
             prev_balance = repayment.balance_loan_amount
 
         repayment_doc.save(ignore_permissions=True)
-        frappe.db.commit()
         return "success"
 
 

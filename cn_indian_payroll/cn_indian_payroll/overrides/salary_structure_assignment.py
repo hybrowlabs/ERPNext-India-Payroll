@@ -256,7 +256,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             declaration.insert()
             declaration.submit()
 
-        frappe.db.commit()
 
 
 @frappe.whitelist()
