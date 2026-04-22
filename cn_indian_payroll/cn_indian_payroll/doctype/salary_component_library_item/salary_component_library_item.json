@@ -109,7 +109,7 @@
    "depends_on": "eval:doc.type==\"Earning\"",
    "fieldname": "is_tax_applicable",
    "fieldtype": "Check",
-   "label": "Is Tax Applicable"
+   "label": "Tax Applicable"
   },
   {
    "default": "0",
@@ -121,7 +121,7 @@
    "default": "0",
    "fieldname": "is_income_tax_component",
    "fieldtype": "Check",
-   "label": "Is Income Tax Component"
+   "label": "Income Tax Component"
   },
   {
    "default": "0",
@@ -151,14 +151,14 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "label": "Inactive"
   },
   {
    "default": "0",
    "depends_on": "eval:doc.type==\"Earning\"",
    "fieldname": "is_part_of_ctc",
    "fieldtype": "Check",
-   "label": "Is Part of CTC"
+   "label": "Part of CTC"
   },
   {
    "default": "0",
@@ -209,7 +209,7 @@
    "default": "0",
    "fieldname": "is_flexible_benefit",
    "fieldtype": "Check",
-   "label": "Is Flexible Benefit"
+   "label": "Flexible Benefit"
   },
   {
    "fieldname": "max_benefit_amount_yearly",
