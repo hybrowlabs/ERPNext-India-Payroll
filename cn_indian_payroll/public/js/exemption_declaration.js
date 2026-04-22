@@ -429,7 +429,7 @@ window.open_regime_dialog = function(docname) {
                 callback: function(r) {
                     if (!r.exc) {
 
-                        frappe.msgprint("Regime updated successfully");
+                        frappe.msgprint(__("Regime updated successfully"));
 
                         dialog.hide();
 

@@ -1,5 +1,4 @@
 import frappe
-from frappe import _
 from frappe.utils import add_months, flt, getdate
 
 
@@ -10,7 +9,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
     if not (doc_id and company):
         return
 
-    loan_repayment = frappe.get_all("Loan Repayment Schedule", filters={"loan": doc_id}, fields=["name"])
+    loan_repayment = frappe.get_all("Loan Repayment Schedule", filters={"loan": doc_id}, fields=["*"])
 
     if not loan_repayment:
         return
@@ -24,7 +23,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
         try:
             number_of_months = int(number_of_months)
         except Exception:
-            frappe.throw(_("Number of months must be a valid integer"))
+            frappe.throw(frappe._("Number of months must be a valid integer"))
 
         skip_date = getdate(payment_date)
         skip_started = False
@@ -47,7 +46,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
         try:
             number_of_months = int(number_of_months)
         except Exception:
-            frappe.throw(_("Number of months must be a valid integer"))
+            frappe.throw(frappe._("Number of months must be a valid integer"))
 
         skip_date = getdate(payment_date)
         skipped_rows = []
@@ -61,9 +60,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
 
         if not skipped_rows:
             frappe.throw(
-                _("No repayment found for date {0} and subsequent {1} months").format(
-                    payment_date, number_of_months
-                )
+                frappe._("No repayment found for date {0} and subsequent {1} months").format(payment_date, number_of_months)
             )
 
         target_date = add_months(skip_date, number_of_months)
@@ -74,7 +71,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
                 break
 
         if not target_row:
-            frappe.throw(_("No repayment found for target date {0}").format(target_date))
+            frappe.throw(frappe._("No repayment found for target date {0}").format(target_date))
 
         total_principal = sum(r.principal_amount or 0 for r in skipped_rows)
         total_interest = sum(r.interest_amount or 0 for r in skipped_rows)
@@ -95,7 +92,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
         try:
             number_of_months = int(number_of_months)
         except Exception:
-            frappe.throw(_("Number of months must be a valid integer"))
+            frappe.throw(frappe._("Number of months must be a valid integer"))
 
         skip_date = getdate(payment_date)
         skipped_rows = []
@@ -109,9 +106,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
 
         if not skipped_rows:
             frappe.throw(
-                _("No repayment found for date {0} and subsequent {1} month(s)").format(
-                    payment_date, number_of_months
-                )
+                frappe._("No repayment found for date {0} and subsequent {1} month(s)").format(payment_date, number_of_months)
             )
 
         for r in skipped_rows:
@@ -123,7 +118,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
         ]
 
         if not future_rows:
-            frappe.throw(_("No future rows to distribute amounts"))
+            frappe.throw(frappe._("No future rows to distribute amounts"))
 
         total_principal = sum(flt(r.principal_amount) for r in skipped_rows)
         total_interest = sum(flt(r.interest_amount) for r in skipped_rows)
@@ -156,17 +151,15 @@ def edit_installment(
 
     loan = frappe.get_doc("Loan", doc_id)
 
-    repayment_schedules = frappe.get_all(
-        "Loan Repayment Schedule", filters={"loan": loan.name}, fields=["name"]
-    )
+    repayment_schedules = frappe.get_all("Loan Repayment Schedule", filters={"loan": loan.name}, fields=["*"])
     if not repayment_schedules:
-        frappe.throw(_("Repayment schedule not found"))
+        frappe.throw(frappe._("Repayment schedule not found"))
 
     repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment_schedules[0].name)
     schedule = repayment_doc.repayment_schedule
 
     if not schedule:
-        frappe.throw(_("No repayment rows found"))
+        frappe.throw(frappe._("No repayment rows found"))
 
     payment_idx = None
     for idx, row in enumerate(schedule):
@@ -175,7 +168,7 @@ def edit_installment(
             break
 
     if payment_idx is None:
-        frappe.throw(_("Payment date not found in schedule"))
+        frappe.throw(frappe._("Payment date not found in schedule"))
 
     repayment_amount = flt(repayment_amount)
     number_of_months = int(number_of_months)

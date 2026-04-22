@@ -89,7 +89,7 @@ function initialize_tds_return_challan_logic(page) {
             $('#ddo_registration_number').val(doc.custom_ddo_registration_number || '');
             $('#pao_code').val(doc.custom_poa_code || '');
             $('#pao_registration_number').val(doc.custom_poa_registration_number || '');
-        }).catch(() => frappe.msgprint('Error fetching company details.'));
+        }).catch(() => frappe.msgprint(__('Error fetching company details.')));
     };
     company_field.refresh_input();
 
@@ -102,7 +102,7 @@ company_address_field.df.onchange = () => {
     frappe.db.get_doc('Address', address_name)
         .then(doc => {
             if (!doc) {
-                frappe.msgprint("Address not found.");
+                frappe.msgprint(__("Address not found."));
                 return;
             }
 
@@ -133,7 +133,7 @@ company_address_field.df.onchange = () => {
         })
         .catch(err => {
             console.error("❌ Error fetching address:", err);
-            frappe.msgprint("Error fetching address details.");
+            frappe.msgprint(__("Error fetching address details."));
         });
 };
 
@@ -171,7 +171,7 @@ company_address_field.refresh_input();
         const quarter_ended = $("#quarter_ended").val();
 
         if (!company || !fiscal_year) {
-            frappe.msgprint("Please select both Company and Fiscal Year.");
+            frappe.msgprint(__("Please select both Company and Fiscal Year."));
             return;
         }
 
@@ -325,21 +325,21 @@ company_address_field.refresh_input();
                 });
 
                 frappe.msgprint({
-                    title: "Success",
-                    message: "✅ Annexure table populated successfully!",
+                    title: __("Success"),
+                    message: __("✅ Annexure table populated successfully!"),
                     indicator: "green"
                 });
             } else {
                 frappe.msgprint({
-                    title: "Error",
-                    message: "❌ Failed to fetch annexure data",
+                    title: __("Error"),
+                    message: __("❌ Failed to fetch annexure data"),
                     indicator: "red"
                 });
 
 
                     frappe.msgprint({
-                        title: "Success",
-                        message: "✅ Both Challan and Annexure tables populated successfully!",
+                        title: __("Success"),
+                        message: __("✅ Both Challan and Annexure tables populated successfully!"),
                         indicator: "green"
                     });
                 }
@@ -375,7 +375,7 @@ company_address_field.refresh_input();
         $(page.body).on("click", "#other-submit", function () {
             // 1️⃣ Validate CSI file
             if (!selectedCSIFile) {
-                frappe.msgprint("Please attach a CSI file before saving.");
+                frappe.msgprint(__("Please attach a CSI file before saving."));
                 return;
             }
 
