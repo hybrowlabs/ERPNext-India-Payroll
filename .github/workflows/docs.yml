@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - version-16
+      - refactor/app-domain-structure
+      - v2/dev/india_payroll
     paths:
       - "docs/**"
   workflow_dispatch:
