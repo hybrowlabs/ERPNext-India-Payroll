@@ -9,6 +9,7 @@ on:
       - v2/dev/india_payroll
     paths:
       - "docs/**"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
