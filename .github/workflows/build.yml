@@ -25,12 +25,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # full history required for accurate SonarQube blame/analysis
-      - uses: sonarsource/sonarqube-scan-action@master
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        continue-on-error: true   # non-blocking: infra/cert issues must not fail the build
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # Uncomment to enforce Quality Gate as a PR merge gate:
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
+          # Use the system CA trust store so private/self-signed certs are accepted.
+          # If the SonarQube server uses a custom CA, add its cert to the
+          # SONAR_CA_CERT secret and import it in a step before this one.
+          SONAR_SCANNER_OPTS: >-
+            -Dsonar.scanner.truststorePath=/etc/ssl/certs/java/cacerts
+            -Dsonar.scanner.truststorePassword=changeit
+
+      # Uncomment to enforce Quality Gate as a PR merge gate (requires cert to be trusted):
+      # - name: SonarQube Quality Gate
+      #   uses: sonarsource/sonarqube-quality-gate-action@master
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
