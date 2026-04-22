@@ -222,7 +222,7 @@
   },
   {
    "default": "0",
-   "description": "It will decide whether the abbr and component name field is read-only or editable. If multi select is checked, we can edit the abbrevation and component name",
+   "description": "It will decide whether the abbr and component name field is read-only or editable. If multi select is checked, we can edit the abbreviation and component name",
    "fieldname": "multi_select",
    "fieldtype": "Check",
    "in_standard_filter": 1,

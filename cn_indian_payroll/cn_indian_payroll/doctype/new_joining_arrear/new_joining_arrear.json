@@ -104,7 +104,7 @@
   {
    "fieldname": "payout_date",
    "fieldtype": "Date",
-   "label": "Payout Date  / Addional Salary date",
+   "label": "Payout Date / Additional Salary Date",
    "reqd": 1
   },
   {

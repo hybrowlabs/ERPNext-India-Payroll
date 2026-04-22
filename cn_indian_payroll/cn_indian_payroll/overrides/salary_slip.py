@@ -149,7 +149,7 @@ class CustomSalarySlip(SalarySlip):
                 frappe.throw(_("There are more holidays than working days this month."))
 
         if not payroll_settings.payroll_based_on:
-            frappe.throw(_("Please set Payroll based on in Payroll settings"))
+            frappe.throw(_('Please set "Payroll Based On" in Payroll Settings.'))
 
         if payroll_settings.payroll_based_on == "Attendance":
             if payroll_settings.custom_configure_attendance_cycle:

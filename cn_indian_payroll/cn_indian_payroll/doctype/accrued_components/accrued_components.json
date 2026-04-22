@@ -13,7 +13,7 @@
    "fieldname": "accrued_componets",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Accrued Componets",
+   "label": "Accrued Components",
    "options": "Salary Component"
   }
  ],
