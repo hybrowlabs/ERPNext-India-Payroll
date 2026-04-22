@@ -87,11 +87,14 @@ jobs:
             FLUSH PRIVILEGES;
           "
 
-      - name: Setup Redis config
+      - name: Setup and start Redis
         run: |
           cd frappe-bench
           bench setup redis
-          sudo service redis-server start || true
+          redis-server config/redis_queue.conf &
+          redis-server config/redis_cache.conf &
+          redis-server config/redis_socketio.conf &
+          sleep 3
 
       - name: Create site & install apps
         run: |
