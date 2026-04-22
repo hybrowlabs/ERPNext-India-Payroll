@@ -48,6 +48,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
+ "description": "Configure default payroll structure parameters such as company, tax slab, and effective payroll period.",
  "links": [],
  "modified": "2025-10-13 09:47:20.410199",
  "modified_by": "Administrator",
