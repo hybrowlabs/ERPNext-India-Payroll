@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - version-16
+      - "v2/dev/**"
+      - "refactor/**"
+      - "feat/**"
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+      - version-16
+      - "v2/dev/**"
+
+jobs:
+  tests:
+    name: Frappe Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_HOST: "%"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install bench CLI
+        run: pip install frappe-bench
+
+      - name: Init bench (Frappe v16)
+        run: |
+          bench init \
+            --frappe-branch version-16 \
+            --frappe-path https://github.com/frappe/frappe \
+            --no-procfile \
+            --no-backups \
+            --skip-redis-config-generation \
+            frappe-bench
+
+      - name: Get ERPNext & HRMS
+        run: |
+          cd frappe-bench
+          bench get-app --branch version-16 erpnext https://github.com/frappe/erpnext
+          bench get-app --branch version-16 hrms https://github.com/frappe/hrms
+
+      - name: Get cn_indian_payroll
+        run: |
+          cd frappe-bench
+          bench get-app cn_indian_payroll "$GITHUB_WORKSPACE"
+
+      - name: Configure MariaDB
+        run: |
+          mysql -h 127.0.0.1 -u root -proot -e "
+            SET GLOBAL character_set_server = 'utf8mb4';
+            SET GLOBAL collation_server     = 'utf8mb4_unicode_ci';
+            CREATE USER IF NOT EXISTS 'frappe'@'%' IDENTIFIED BY 'frappe';
+            GRANT ALL PRIVILEGES ON \`%\`.* TO 'frappe'@'%';
+            FLUSH PRIVILEGES;
+          "
+
+      - name: Setup Redis (config only)
+        run: |
+          cd frappe-bench
+          bench setup redis
+
+      - name: Create site & install apps
+        run: |
+          cd frappe-bench
+          bench new-site test.localhost \
+            --db-root-password root \
+            --admin-password admin \
+            --no-mariadb-socket
+          bench --site test.localhost install-app erpnext
+          bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app cn_indian_payroll
+        env:
+          CI: true
+
+      - name: Run tests
+        run: |
+          cd frappe-bench
+          bench --site test.localhost run-tests --app cn_indian_payroll --verbose
+        env:
+          CI: true

@@ -18,3 +18,33 @@ build-backend = "flit_core.buildapi"
 # These dependencies are only installed when developer mode is enabled
 [tool.bench.dev-dependencies]
 # package_name = "~=1.1.0"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 110
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (undefined names, unused imports)
+    "I",   # isort (import ordering)
+    "UP",  # pyupgrade (modern Python syntax)
+    "B",   # flake8-bugbear (likely bugs)
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long — handled by formatter
+    "B008",  # function calls in default args (common in Frappe)
+    "SIM108", # ternary instead of if-else — often less readable
+]
+# Never auto-fix these; flag for manual review
+unfixable = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cn_indian_payroll"]
+known-third-party = ["frappe", "erpnext", "hrms"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

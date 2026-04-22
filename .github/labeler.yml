@@ -1,0 +1,44 @@
+# Auto-label PRs based on branch name and changed files.
+# Matches the branch strategy defined in README.md.
+
+"feature":
+  - head-branch: ["^feat/", "^feature/"]
+
+"bug":
+  - head-branch: ["^fix/", "^bugfix/", "^hotfix/"]
+
+"refactor":
+  - head-branch: ["^refactor/"]
+
+"documentation":
+  - changed-files:
+      - any-glob-to-any-file: ["*.md", "docs/**"]
+
+"CI/CD":
+  - changed-files:
+      - any-glob-to-any-file: [".github/**"]
+
+"payroll":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cn_indian_payroll/cn_indian_payroll/payroll/**"
+          - "cn_indian_payroll/cn_indian_payroll/overrides/salary_slip*"
+          - "cn_indian_payroll/cn_indian_payroll/overrides/payroll_entry*"
+
+"compliance":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cn_indian_payroll/cn_indian_payroll/compliance/**"
+          - "cn_indian_payroll/cn_indian_payroll/report/tds*"
+          - "cn_indian_payroll/cn_indian_payroll/report/epf*"
+          - "cn_indian_payroll/cn_indian_payroll/report/esic*"
+
+"loans":
+  - changed-files:
+      - any-glob-to-any-file: ["cn_indian_payroll/cn_indian_payroll/loans/**"]
+
+"migration":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cn_indian_payroll/cn_indian_payroll/patches/**"
+          - "cn_indian_payroll/patches.txt"
