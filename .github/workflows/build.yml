@@ -4,23 +4,32 @@ on:
   push:
     branches:
       - main
+      - version-16
+      - "v2/dev/**"
+      - "refactor/**"
+      - "feat/**"
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+      - version-16
+      - "v2/dev/**"
 
 
 jobs:
   build:
-    name: Build
+    name: SonarQube Scan
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0  # full history required for accurate SonarQube blame/analysis
       - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
+      # Uncomment to enforce Quality Gate as a PR merge gate:
       # - uses: sonarsource/sonarqube-quality-gate-action@master
       #   timeout-minutes: 5
       #   env:

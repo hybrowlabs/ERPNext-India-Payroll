@@ -67,14 +67,12 @@ app_license = "mit"
 # Installation
 # ------------
 
-# before_install = "cn_indian_payroll.install.before_install"
-# after_install = "cn_indian_payroll.install.after_install"
+after_install = "cn_indian_payroll.cn_indian_payroll.install.after_install"
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "cn_indian_payroll.uninstall.before_uninstall"
-# after_uninstall = "cn_indian_payroll.uninstall.after_uninstall"
+before_uninstall = "cn_indian_payroll.cn_indian_payroll.uninstall.before_uninstall"
 
 # Integration Setup
 # ------------------
@@ -229,14 +227,13 @@ app_license = "mit"
 
 fixtures = [
     {"dt": "Print Format", "filters": {"module": "cn-indian-payroll"}},
-    {"dt":"Income Tax Regime"},
-    {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}},
-    {"dt":"Salary Component Library Item"},
-    {"dt":"India Payroll State"},
-    {"dt":"Frequency"},
-    {"dt":"Zone"},
-    {"dt":"Skill Level"},
-    {"dt":"Role","filters":{"name":"Payroll Manager"}},
+    {"dt": "Income Tax Regime"},
+    {"dt": "Salary Component Library Item"},
+    {"dt": "India Payroll State"},
+    {"dt": "Frequency"},
+    {"dt": "Zone"},
+    {"dt": "Skill Level"},
+    {"dt": "Role", "filters": {"name": "Payroll Manager"}},
 ]
 
 doctype_js = {
@@ -252,21 +249,17 @@ doctype_js = {
 }
 
 override_doctype_class = {
-    "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.PayrollEntryOverride",
-    "Salary Slip": "cn_indian_payroll.cn_indian_payroll.overrides.salary_slip.CustomSalarySlip",
-    "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
-    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
-    "Additional Salary": "cn_indian_payroll.cn_indian_payroll.overrides.employee_additional_salary.CustomAdditionalSalary",
-    
+    "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.payroll_entry.PayrollEntryOverride",
+    "Salary Slip": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_slip.CustomSalarySlip",
+    "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
+    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.compliance.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
+    "Additional Salary": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.additional_salary.CustomAdditionalSalary",
 }
 
 doc_events = {
-
-
     "Loan Repayment Schedule": {
-        "before_save": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_save",
-        "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.loan_repayment.before_update_after_submit",
-
+        "before_save": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_save",
+        "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_update_after_submit",
     },
 
     # "Salary Component": {
