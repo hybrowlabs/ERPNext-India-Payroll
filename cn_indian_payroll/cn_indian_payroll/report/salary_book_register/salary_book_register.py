@@ -7,10 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-salary_slip = frappe.qb.DocType("Salary Slip")
-salary_detail = frappe.qb.DocType("Salary Detail")
-salary_component = frappe.qb.DocType("Salary Component")
-
 
 def execute(filters=None):
     if not filters:
@@ -264,12 +260,13 @@ def get_columns(earning_types, ded_types):
 
 
 def get_salary_components(salary_slips):
+    salary_detail = frappe.qb.DocType("Salary Detail")
     return (
         frappe.qb.from_(salary_detail)
         .where(
             (salary_detail.amount != 0)
             & (salary_detail.parent.isin([d.name for d in salary_slips]))
-            & (salary_detail.do_not_include_in_total == 0)  # Exclude components where this is 1
+            & (salary_detail.do_not_include_in_total == 0)
         )
         .select(salary_detail.salary_component)
         .distinct()
@@ -281,6 +278,7 @@ def get_salary_component_type(salary_component):
 
 
 def get_salary_slips(filters, company_currency):
+    salary_slip = frappe.qb.DocType("Salary Slip")
     doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
 
     query = frappe.qb.from_(salary_slip).select(salary_slip.star)
@@ -317,6 +315,8 @@ def get_employee_doj_map():
 
 
 def get_salary_slip_details(salary_slips, currency, company_currency, component_type):
+    salary_slip = frappe.qb.DocType("Salary Slip")
+    salary_detail = frappe.qb.DocType("Salary Detail")
     salary_slips = [ss.name for ss in salary_slips]
 
     result = (

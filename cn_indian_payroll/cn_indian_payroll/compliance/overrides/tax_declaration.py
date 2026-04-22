@@ -242,7 +242,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     )
 
                 each_doc.save()
-                frappe.db.commit()
 
     def update_tax_declaration(self):
         if len(self.declarations) > 0:
@@ -321,7 +320,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     )
 
                 each_doc.save()
-                frappe.db.commit()
 
             else:
                 insert_history = frappe.get_doc(
@@ -365,7 +363,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 )
 
                 insert_history.insert()
-                frappe.db.commit()
 
     def insert_declaration_history(self):
         if self.employee:
