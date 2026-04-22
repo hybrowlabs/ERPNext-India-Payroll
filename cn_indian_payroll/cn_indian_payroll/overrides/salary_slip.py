@@ -1041,19 +1041,19 @@ class CustomSalarySlip(SalarySlip):
                                 )
 
 
-                            get_each_doc.custom_hra_breakup = []
-                            for i in range(len(months)):
-                                get_each_doc.append(
-                                    "custom_hra_breakup",
-                                    {
-                                        "month": months[i],
-                                        "rent_paid": round(annual_hra_amount),
-                                        "hra_received": round(total_hra_amount),
-                                        "earned_basic": round(earned_basic),
-                                        "excess_of_rent_paid": round(basic_rule2),
-                                        "exemption_amount": final_hra_exemption,
-                                    },
-                                )
+                            # get_each_doc.custom_hra_breakup = []
+                            # for i in range(len(months)):
+                            #     get_each_doc.append(
+                            #         "custom_hra_breakup",
+                            #         {
+                            #             "month": months[i],
+                            #             "rent_paid": round(annual_hra_amount),
+                            #             "hra_received": round(total_hra_amount),
+                            #             "earned_basic": round(earned_basic),
+                            #             "excess_of_rent_paid": round(basic_rule2),
+                            #             "exemption_amount": final_hra_exemption,
+                            #         },
+                            #     )
 
 
                 get_each_doc.custom_status="Approved"

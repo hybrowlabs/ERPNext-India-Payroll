@@ -187,7 +187,7 @@ def choose_regime(doc_id, employee,payroll_period,company,regime):
                     get_declaration.custom_basic_as_per_salary_structure=None
                     get_declaration.annual_hra_exemption=None
                     get_declaration.monthly_hra_exemption=None
-                    get_declaration.custom_hra_breakup=[]
+                    # get_declaration.custom_hra_breakup=[]
                 get_declaration.save()
 
                 get_assignment_doc = frappe.get_doc("Salary Structure Assignment", latest_structure_assignment)
