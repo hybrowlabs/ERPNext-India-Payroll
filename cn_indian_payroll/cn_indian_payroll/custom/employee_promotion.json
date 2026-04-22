@@ -387,28 +387,7 @@
  ],
  "custom_perms": [],
  "doctype": "Employee Promotion",
- "links": [
-  {
-   "creation": "2025-05-13 10:14:28.229921",
-   "custom": 1,
-   "docstatus": 0,
-   "group": null,
-   "hidden": 0,
-   "idx": 0,
-   "is_child_table": 0,
-   "link_doctype": "Salary Appraisal Calculation",
-   "link_fieldname": "promotion_reference",
-   "modified": "2025-05-13 15:32:10.535833",
-   "modified_by": "Administrator",
-   "name": "3dqf7djk49",
-   "owner": "Administrator",
-   "parent": "Employee Promotion",
-   "parent_doctype": null,
-   "parentfield": "links",
-   "parenttype": "Customize Form",
-   "table_fieldname": null
-  }
- ],
+ "links": [],
  "property_setters": [
   {
    "_assign": null,
