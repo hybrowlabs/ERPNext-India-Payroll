@@ -14,9 +14,23 @@ from cn_indian_payroll.cn_indian_payroll.constants.custom_fields import CUSTOM_F
 from cn_indian_payroll.cn_indian_payroll.utils.custom_fields import delete_custom_fields
 
 
+def _ensure_payroll_manager_role() -> None:
+    """Create the Payroll Manager role if it does not already exist.
+
+    Using an idempotent patch here (instead of a fixtures export) prevents
+    the role from being overwritten on every bench migrate, which would risk
+    permission drift in environments that have customised it post-install.
+    """
+    if not frappe.db.exists("Role", "Payroll Manager"):
+        role = frappe.new_doc("Role")
+        role.role_name = "Payroll Manager"
+        role.insert(ignore_permissions=True)
+
+
 def after_install() -> None:
     """Create all custom fields for the Indian Payroll app."""
     try:
+        _ensure_payroll_manager_role()
         create_custom_fields(CUSTOM_FIELDS, ignore_validate=True)
         frappe.db.commit()
         click.secho("Indian Payroll — custom fields installed.", fg="green")

@@ -233,7 +233,6 @@ fixtures = [
     {"dt": "Frequency"},
     {"dt": "Zone"},
     {"dt": "Skill Level"},
-    {"dt": "Role", "filters": {"name": "Payroll Manager"}},
 ]
 
 doctype_js = {
