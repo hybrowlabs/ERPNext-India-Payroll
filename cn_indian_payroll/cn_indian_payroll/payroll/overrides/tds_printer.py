@@ -92,10 +92,7 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
 
     # TDS per month — now from the slips query, no extra get_doc calls
     slip_tds_map = {s.name: flt(s.custom_additional_tds_deducted_amount or 0) for s in slips}
-    tds_amounts = [
-        slip_tds_map.get(month_slip_map[m], 0) if month_slip_map.get(m) else 0
-        for m in months
-    ]
+    tds_amounts = [slip_tds_map.get(month_slip_map[m], 0) if month_slip_map.get(m) else 0 for m in months]
 
     earnings = []
     deductions = []
@@ -122,14 +119,16 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
             and comp.custom_tax_exemption_applicable_based_on_regime
             and not comp.is_flexible_benefit
         ):
-            earnings.append({
-                "name": comp.name,
-                "values": [flt(v, 0) for v in values],
-                "total": flt(sum(values), 0),
-                "sub_type": comp.custom_component_sub_type,
-                "component_type": comp.component_type,
-                "type": comp.type,
-            })
+            earnings.append(
+                {
+                    "name": comp.name,
+                    "values": [flt(v, 0) for v in values],
+                    "total": flt(sum(values), 0),
+                    "sub_type": comp.custom_component_sub_type,
+                    "component_type": comp.component_type,
+                    "type": comp.type,
+                }
+            )
 
         if (
             comp.type == "Earning"
@@ -137,30 +136,31 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
             and not comp.custom_tax_exemption_applicable_based_on_regime
             and not comp.is_flexible_benefit
         ):
-            reimbursements.append({
-                "name": comp.name,
-                "values": [flt(v, 0) for v in values],
-                "total": flt(sum(values), 0),
-                "sub_type": comp.custom_component_sub_type,
-                "component_type": comp.component_type,
-                "type": comp.type,
-            })
-
-        if (
-            comp.type == "Deduction"
-            and (
-                comp.component_type in ["Professional Tax", "Provident Fund"]
-                or comp.variable_based_on_taxable_salary
+            reimbursements.append(
+                {
+                    "name": comp.name,
+                    "values": [flt(v, 0) for v in values],
+                    "total": flt(sum(values), 0),
+                    "sub_type": comp.custom_component_sub_type,
+                    "component_type": comp.component_type,
+                    "type": comp.type,
+                }
             )
+
+        if comp.type == "Deduction" and (
+            comp.component_type in ["Professional Tax", "Provident Fund"]
+            or comp.variable_based_on_taxable_salary
         ):
-            deductions.append({
-                "name": comp.name,
-                "values": [flt(v, 0) for v in values],
-                "total": flt(sum(values), 0),
-                "sub_type": comp.custom_component_sub_type,
-                "component_type": comp.component_type,
-                "type": comp.type,
-            })
+            deductions.append(
+                {
+                    "name": comp.name,
+                    "values": [flt(v, 0) for v in values],
+                    "total": flt(sum(values), 0),
+                    "sub_type": comp.custom_component_sub_type,
+                    "component_type": comp.component_type,
+                    "type": comp.type,
+                }
+            )
 
     monthly_totals = [
         sum(row["values"][i] for row in earnings) - sum(row["values"][i] for row in deductions)
@@ -210,20 +210,26 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
 
             for i in section.declaration_details:
                 if i.exemption_sub_category == lta_component:
-                    lta_array.append({"component": i.exemption_sub_category, "amount": i.maximum_exempted_amount})
+                    lta_array.append(
+                        {"component": i.exemption_sub_category, "amount": i.maximum_exempted_amount}
+                    )
                 else:
                     eligible_amount = min(i.maximum_exempted_amount, i.declared_amount or 0)
-                    declaration.append({
-                        "component": i.exemption_sub_category,
-                        "eligible_amount": eligible_amount,
-                        "declared_amount": i.declared_amount or 0,
-                    })
+                    declaration.append(
+                        {
+                            "component": i.exemption_sub_category,
+                            "eligible_amount": eligible_amount,
+                            "declared_amount": i.declared_amount or 0,
+                        }
+                    )
 
             hra_received = section.hra_as_per_salary_structure or 0
             basic_as_per_salary_structure_10 = section.basic_as_per_salary_structure_10 or 0
             hra_exemption = section.annual_hra_exemption or 0
             hra_percentage = section.hra_breakup[0].earned_basic if section.hra_breakup else 0
-            standard_amount = frappe.get_cached_doc("Income Tax Slab", income_tax_slab).standard_tax_exemption_amount
+            standard_amount = frappe.get_cached_doc(
+                "Income Tax Slab", income_tax_slab
+            ).standard_tax_exemption_amount
             total_declaration = section.total_exemption_amount
 
     lta_sum = sum(item["amount"] for item in lta_array)

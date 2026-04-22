@@ -30,8 +30,16 @@ def get_salary_slips(filters=None):
     salary_slips = frappe.get_all(
         "Salary Slip",
         filters=conditions,
-        fields=["name", "employee", "employee_name", "custom_month", "custom_payroll_period",
-                "company", "gross_pay", "custom_total_leave_without_pay"],
+        fields=[
+            "name",
+            "employee",
+            "employee_name",
+            "custom_month",
+            "custom_payroll_period",
+            "company",
+            "gross_pay",
+            "custom_total_leave_without_pay",
+        ],
         order_by="name DESC",
     )
     if not salary_slips:
@@ -116,9 +124,7 @@ def get_salary_slips(filters=None):
         epf_edli_eligible_wage = round(float(basic) + float(da))
 
         is_eps_applicable = not (
-            joining_date
-            and epf_edli_eligible_wage > 15000
-            and joining_date > datetime(2014, 9, 1).date()
+            joining_date and epf_edli_eligible_wage > 15000 and joining_date > datetime(2014, 9, 1).date()
         )
 
         if is_eps_applicable:
@@ -156,7 +162,13 @@ def get_salary_slips(filters=None):
 def execute(filters=None):
     columns = [
         {"fieldname": "uan", "label": "UAN", "fieldtype": "Data", "width": 150},
-        {"fieldname": "employee", "label": "Employee", "fieldtype": "Link", "options": "Employee", "width": 150},
+        {
+            "fieldname": "employee",
+            "label": "Employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 150,
+        },
         {"fieldname": "employee_name", "label": "Employee Name", "fieldtype": "Data", "width": 200},
         {"fieldname": "custom_month", "label": "Month", "fieldtype": "Data", "width": 100},
         {"fieldname": "custom_payroll_period", "label": "Payroll Period", "fieldtype": "Data", "width": 150},
@@ -165,8 +177,18 @@ def execute(filters=None):
         {"fieldname": "epf_wages", "label": "EPF Wages", "fieldtype": "Currency", "width": 150},
         {"fieldname": "eps_wages", "label": "EPS Wages", "fieldtype": "Currency", "width": 150},
         {"fieldname": "edli_wages", "label": "EDLI Wages", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_amount_employee", "label": "EPF Contribution (12%)", "fieldtype": "Currency", "width": 150},
-        {"fieldname": "epf_amount_employer", "label": "EPS Contribution(8.33%)", "fieldtype": "Currency", "width": 150},
+        {
+            "fieldname": "epf_amount_employee",
+            "label": "EPF Contribution (12%)",
+            "fieldtype": "Currency",
+            "width": 150,
+        },
+        {
+            "fieldname": "epf_amount_employer",
+            "label": "EPS Contribution(8.33%)",
+            "fieldtype": "Currency",
+            "width": 150,
+        },
         {"fieldname": "eps_amount", "label": "EDLI Contribution", "fieldtype": "Currency", "width": 150},
         {"fieldname": "ncp_days", "label": "NCP Days", "fieldtype": "Float", "width": 120},
         {"fieldname": "refund", "label": "Refund Of Advances", "fieldtype": "Currency", "width": 150},
@@ -190,19 +212,21 @@ def download_ecr_txt(filters=None):
         return str(round(value or 0))
 
     lines = [
-        "#~#".join([
-            str(row.get("uan") or "0"),
-            row.get("employee_name") or "",
-            r(row.get("gross_pay")),
-            r(row.get("epf_wages")),
-            r(row.get("eps_wages")),
-            r(row.get("edli_wages")),
-            r(row.get("epf_amount_employee")),
-            r(row.get("epf_amount_employer")),
-            r(row.get("eps_amount")),
-            r(row.get("ncp_days")),
-            r(row.get("refund")),
-        ])
+        "#~#".join(
+            [
+                str(row.get("uan") or "0"),
+                row.get("employee_name") or "",
+                r(row.get("gross_pay")),
+                r(row.get("epf_wages")),
+                r(row.get("eps_wages")),
+                r(row.get("edli_wages")),
+                r(row.get("epf_amount_employee")),
+                r(row.get("epf_amount_employer")),
+                r(row.get("eps_amount")),
+                r(row.get("ncp_days")),
+                r(row.get("refund")),
+            ]
+        )
         for row in salary_data
     ]
 

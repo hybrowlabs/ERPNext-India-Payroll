@@ -37,8 +37,15 @@ def get_salary_slips(filters=None):
     for slip in slips:
         key = (slip.custom_month, slip.custom_payroll_period)
         if key not in aggregated:
-            aggregated[key] = {"no_of_employee": 0, "ctc_pa": 0, "ctc_pm": 0,
-                               "gross_pay": 0, "total_income": 0, "total_deduction": 0, "total_net_pay": 0}
+            aggregated[key] = {
+                "no_of_employee": 0,
+                "ctc_pa": 0,
+                "ctc_pm": 0,
+                "gross_pay": 0,
+                "total_income": 0,
+                "total_deduction": 0,
+                "total_net_pay": 0,
+            }
         agg = aggregated[key]
         agg["no_of_employee"] += 1
         agg["ctc_pa"] += slip.custom_annual_ctc or 0
@@ -49,8 +56,7 @@ def get_salary_slips(filters=None):
         agg["total_net_pay"] += slip.custom_net_pay_amount or 0
 
     return [
-        {"month": month, "payroll_period": period, **values}
-        for (month, period), values in aggregated.items()
+        {"month": month, "payroll_period": period, **values} for (month, period), values in aggregated.items()
     ]
 
 

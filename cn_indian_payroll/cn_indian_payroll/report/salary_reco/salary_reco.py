@@ -1,7 +1,13 @@
 import frappe
 
 columns = [
-    {"fieldname": "employee", "label": "Employee ID", "fieldtype": "Link", "width": 150, "options": "Employee"},
+    {
+        "fieldname": "employee",
+        "label": "Employee ID",
+        "fieldtype": "Link",
+        "width": 150,
+        "options": "Employee",
+    },
     {"fieldname": "employee_name", "label": "Employee Name", "fieldtype": "Data", "width": 150},
     {"fieldname": "current_month", "label": "Current Month", "fieldtype": "Data", "width": 150},
     {"fieldname": "current_gross_pay", "label": "Gross Pay", "fieldtype": "Data", "width": 150},
@@ -12,8 +18,21 @@ columns = [
     {"fieldname": "status", "label": "Status", "fieldtype": "Data", "width": 150},
 ]
 
-_MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"]
+_MONTH_NAMES = [
+    "",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+]
 
 
 def get_salary_slips(filters=None):
@@ -33,8 +52,14 @@ def get_salary_slips(filters=None):
     current_month_name = _MONTH_NAMES[month_number]
     previous_month_name = _MONTH_NAMES[previous_month_number]
 
-    conditions1 = {"docstatus": ["in", [0, 1]], "custom_month": filters.get("previous_month") or previous_month_name}
-    conditions2 = {"docstatus": ["in", [0, 1]], "custom_month": filters.get("current_month") or current_month_name}
+    conditions1 = {
+        "docstatus": ["in", [0, 1]],
+        "custom_month": filters.get("previous_month") or previous_month_name,
+    }
+    conditions2 = {
+        "docstatus": ["in", [0, 1]],
+        "custom_month": filters.get("current_month") or current_month_name,
+    }
 
     if filters.get("employee"):
         conditions1["employee"] = filters["employee"]
@@ -46,14 +71,20 @@ def get_salary_slips(filters=None):
 
     slip_fields = ["name", "employee", "employee_name", "custom_month", "custom_statutory_grosspay"]
 
-    prev_slips = frappe.get_list("Salary Slip", fields=slip_fields, filters=conditions1, order_by="name desc", limit_page_length=0)
-    curr_slips = frappe.get_list("Salary Slip", fields=slip_fields, filters=conditions2, order_by="name desc", limit_page_length=0)
+    prev_slips = frappe.get_list(
+        "Salary Slip", fields=slip_fields, filters=conditions1, order_by="name desc", limit_page_length=0
+    )
+    curr_slips = frappe.get_list(
+        "Salary Slip", fields=slip_fields, filters=conditions2, order_by="name desc", limit_page_length=0
+    )
 
     # Batch-fetch employee status — one query instead of N
     all_emp_ids = list({s.employee for s in prev_slips} | {s.employee for s in curr_slips})
     emp_status_map = {}
     if all_emp_ids:
-        for row in frappe.get_all("Employee", filters={"name": ["in", all_emp_ids]}, fields=["name", "status"]):
+        for row in frappe.get_all(
+            "Employee", filters={"name": ["in", all_emp_ids]}, fields=["name", "status"]
+        ):
             emp_status_map[row.name] = row.status
 
     final_data_map = {}

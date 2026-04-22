@@ -275,8 +275,10 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
         frappe.throw("Unable to generate salary breakup. Check Salary Structure or Employee.")
 
     # Batch-fetch all salary components referenced in the slip
-    all_comp_names = list({e.salary_component for e in slip.get("earnings", [])} |
-                         {d.salary_component for d in slip.get("deductions", [])})
+    all_comp_names = list(
+        {e.salary_component for e in slip.get("earnings", [])}
+        | {d.salary_component for d in slip.get("deductions", [])}
+    )
     comp_map = {}
     if all_comp_names:
         for row in frappe.get_all(
@@ -292,11 +294,13 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
         comp = comp_map.get(e.salary_component)
         if comp and comp.custom_is_part_of_ctc:
             amount = round(e.amount or 0)
-            earnings_list.append({
-                "salary_component": e.salary_component,
-                "monthly_amount": amount,
-                "annual_amount": amount * 12,
-            })
+            earnings_list.append(
+                {
+                    "salary_component": e.salary_component,
+                    "monthly_amount": amount,
+                    "annual_amount": amount * 12,
+                }
+            )
             total_monthly_earnings += amount
             total_annual_earnings += amount * 12
 
@@ -306,11 +310,13 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
         comp = comp_map.get(d.salary_component)
         if comp and comp.custom_is_part_of_ctc:
             amount = round(d.amount or 0)
-            deduction_list.append({
-                "salary_component": d.salary_component,
-                "monthly_amount": amount,
-                "annual_amount": amount * 12,
-            })
+            deduction_list.append(
+                {
+                    "salary_component": d.salary_component,
+                    "monthly_amount": amount,
+                    "annual_amount": amount * 12,
+                }
+            )
             total_monthly_ded += amount
             total_annual_ded += amount * 12
 
@@ -322,15 +328,17 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
 
     reimbursement_list = []
     total_monthly_reim = total_annual_reim = 0
-    for r in (employee_benefits or []):
+    for r in employee_benefits or []:
         comp_name = r.get("salary_component")
         amount = r.get("amount", 0) or 0
         if comp_name:
-            reimbursement_list.append({
-                "salary_component": comp_name,
-                "monthly_amount": amount / 12,
-                "annual_amount": amount,
-            })
+            reimbursement_list.append(
+                {
+                    "salary_component": comp_name,
+                    "monthly_amount": amount / 12,
+                    "annual_amount": amount,
+                }
+            )
             total_monthly_reim += amount / 12
             total_annual_reim += amount
 
@@ -363,14 +371,16 @@ def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_ben
     html = frappe.render_template("cn_indian_payroll/templates/ctc_breakup_pdf.html", context)
     pdf_bytes = get_pdf(html)
 
-    file_doc = frappe.get_doc({
-        "doctype": "File",
-        "file_name": f"CTC_Breakup_{employee}.pdf",
-        "attached_to_doctype": "Employee",
-        "attached_to_name": employee,
-        "content": pdf_bytes,
-        "is_private": 1,
-    })
+    file_doc = frappe.get_doc(
+        {
+            "doctype": "File",
+            "file_name": f"CTC_Breakup_{employee}.pdf",
+            "attached_to_doctype": "Employee",
+            "attached_to_name": employee,
+            "content": pdf_bytes,
+            "is_private": 1,
+        }
+    )
     file_doc.insert(ignore_permissions=True)
 
     return {"pdf_url": file_doc.file_url}

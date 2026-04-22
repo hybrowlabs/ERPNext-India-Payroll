@@ -26,7 +26,15 @@ def get_all_net_pay(filters=None):
     salary_slips = frappe.get_all(
         "Salary Slip",
         filters=conditions,
-        fields=["name", "employee", "employee_name", "company", "custom_payroll_period", "custom_month", "net_pay"],
+        fields=[
+            "name",
+            "employee",
+            "employee_name",
+            "company",
+            "custom_payroll_period",
+            "custom_month",
+            "net_pay",
+        ],
     )
 
     if not salary_slips:
@@ -61,13 +69,31 @@ def get_all_net_pay(filters=None):
 
 def get_columns():
     return [
-        {"label": "Salary Slip", "fieldname": "salary_slip", "fieldtype": "Link", "options": "Salary Slip", "width": 150},
+        {
+            "label": "Salary Slip",
+            "fieldname": "salary_slip",
+            "fieldtype": "Link",
+            "options": "Salary Slip",
+            "width": 150,
+        },
         {"label": "Account Number", "fieldname": "account_number", "fieldtype": "Data", "width": 150},
         {"label": "IFSC Code", "fieldname": "ifsc_code", "fieldtype": "Data", "width": 150},
-        {"label": "Employee", "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 150},
+        {
+            "label": "Employee",
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 150,
+        },
         {"label": "Employee Name", "fieldname": "employee_name", "fieldtype": "Data", "width": 180},
         {"label": "Company", "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 150},
-        {"label": "Payroll Period", "fieldname": "payroll_period", "fieldtype": "Link", "options": "Payroll Period", "width": 150},
+        {
+            "label": "Payroll Period",
+            "fieldname": "payroll_period",
+            "fieldtype": "Link",
+            "options": "Payroll Period",
+            "width": 150,
+        },
         {"label": "Month", "fieldname": "month", "fieldtype": "Data", "width": 100},
         {"label": "Amount Paid", "fieldname": "net_pay", "fieldtype": "Currency", "width": 200},
     ]
