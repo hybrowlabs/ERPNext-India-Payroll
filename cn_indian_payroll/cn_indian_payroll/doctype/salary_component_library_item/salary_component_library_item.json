@@ -264,6 +264,9 @@
   }
  ],
  "index_web_pages_for_search": 1,
+ "title_field": "salary_component",
+ "search_fields": "salary_component,abbr,type,component_type",
+ "description": "Maintain reusable salary component templates with tax, formula, and payout behavior metadata.",
  "links": [],
  "modified": "2025-10-27 22:44:12.834737",
  "modified_by": "Administrator",

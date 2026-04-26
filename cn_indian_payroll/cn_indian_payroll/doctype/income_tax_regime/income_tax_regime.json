@@ -17,6 +17,9 @@
   }
  ],
  "index_web_pages_for_search": 1,
+ "title_field": "title",
+ "search_fields": "title",
+ "description": "Define available income tax regimes used in payroll calculations and employee declarations.",
  "links": [],
  "modified": "2025-01-30 16:13:53.418216",
  "modified_by": "Administrator",

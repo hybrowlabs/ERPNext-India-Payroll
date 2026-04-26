@@ -167,6 +167,9 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
+ "title_field": "employee_name",
+ "search_fields": "employee,employee_name,company,payroll_period",
+ "description": "Manage joining arrears for employees for a payroll period with earning, deduction, and reimbursement components.",
  "links": [
   {
    "link_doctype": "Additional Salary",
