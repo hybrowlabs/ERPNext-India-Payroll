@@ -16,10 +16,10 @@ frappe.listview_settings["Employee Bonus Accrual"] = {
 
 	formatters: {
 		accrual_date(value) {
-			return format_relative_date(value);
+			return cn_payroll_format_relative_date(value);
 		},
 		bonus_paid_date(value) {
-			return format_relative_date(value);
+			return cn_payroll_format_relative_date(value);
 		},
 	},
 };
@@ -43,15 +43,5 @@ function add_quick_filters(listview) {
 		}
 	});
 
-	if (default_company) {
-		listview.page.add_action_item(__("My Company"), () => {
-			listview.filter_area.clear();
-			listview.filter_area.add([["Employee Bonus Accrual", "company", "=", default_company]]);
-		});
-	}
-}
-
-function format_relative_date(value) {
-	if (!value) return "";
-	return comment_when(`${value} 00:00:00`) || frappe.datetime.str_to_user(value);
+	cn_payroll_add_company_quick_filter(listview, "Employee Bonus Accrual");
 }

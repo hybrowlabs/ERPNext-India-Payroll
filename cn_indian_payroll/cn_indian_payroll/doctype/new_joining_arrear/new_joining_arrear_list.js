@@ -22,10 +22,10 @@ frappe.listview_settings["New Joining Arrear"] = {
 
 	formatters: {
 		posting_date(value) {
-			return format_relative_date(value);
+			return cn_payroll_format_relative_date(value);
 		},
 		payout_date(value) {
-			return format_relative_date(value);
+			return cn_payroll_format_relative_date(value);
 		},
 	},
 };
@@ -49,16 +49,5 @@ function add_quick_filters(listview) {
 		}
 	});
 
-	if (default_company) {
-		listview.page.add_action_item(__("My Company"), () => {
-			listview.filter_area.clear();
-			listview.filter_area.add([["New Joining Arrear", "company", "=", default_company]]);
-		});
-	}
-}
-
-function format_relative_date(value) {
-	if (!value) return "";
-	// comment_when expects datetime; Date fields can be treated as midnight.
-	return comment_when(`${value} 00:00:00`) || frappe.datetime.str_to_user(value);
+	cn_payroll_add_company_quick_filter(listview, "New Joining Arrear");
 }
