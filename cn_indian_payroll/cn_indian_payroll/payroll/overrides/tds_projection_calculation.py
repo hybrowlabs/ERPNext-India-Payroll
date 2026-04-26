@@ -15,6 +15,9 @@ def calculate_tds_projection(doc):
         if not doc.get("employee"):
             frappe.throw(frappe._("Employee is required to calculate TDS projection."))
 
+        if not frappe.has_permission("Employee", "read", doc.get("employee")):
+            frappe.throw(frappe._("Not permitted to access this employee's data."), frappe.PermissionError)
+
         current_taxable_earnings_old_regime = 0
         current_taxable_earnings_new_regime = 0
         future_taxable_earnings_old_regime = 0
@@ -52,7 +55,7 @@ def calculate_tds_projection(doc):
                 "custom_payroll_period": doc.get("payroll_period"),
                 "company": doc.get("company"),
             },
-            fields=["*"],
+            fields=["name"],
             order_by="from_date asc",
             limit=1,
         )
@@ -290,7 +293,7 @@ def calculate_tds_projection(doc):
                 "custom_component_type": "Provident Fund",
                 "is_active": 1,
             },
-            fields=["*"],
+            fields=["name", "max_amount"],
         )
         if get_exemption_sub_category:
             eighty_c_maximum_limit = get_exemption_sub_category[0].max_amount

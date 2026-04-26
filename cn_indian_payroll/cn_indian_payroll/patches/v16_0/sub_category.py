@@ -125,7 +125,6 @@ def execute():
             "max_amount": 0.0,
             "modified": "2025-07-09 14:22:20.364387",
             "name": "LTA U/s 10 (5)",
-
         },
         {
             "custom_description": "Uniform Allowance",

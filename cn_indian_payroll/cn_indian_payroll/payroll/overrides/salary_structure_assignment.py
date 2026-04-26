@@ -254,8 +254,6 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         if doc.docstatus == 0:
             doc.submit()
 
-        frappe.db.commit()
-
 
 @frappe.whitelist()
 def generate_ctc_pdf(employee, salary_structure, posting_date=None, employee_benefits=None):

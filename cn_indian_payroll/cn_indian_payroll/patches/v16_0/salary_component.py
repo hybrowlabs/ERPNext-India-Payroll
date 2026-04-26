@@ -384,7 +384,6 @@ def execute():
             "statistical_component": 0,
             "type": "Earning",
             "variable_based_on_taxable_salary": 0,
-
         },
     ]
 

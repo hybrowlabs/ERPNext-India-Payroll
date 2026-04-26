@@ -5,6 +5,7 @@ import frappe
 
 @frappe.whitelist()
 def get_salary_component(data=None, component=None):
+    frappe.only_for("HR Manager")
     try:
         data = json.loads(data)
 
@@ -19,7 +20,7 @@ def get_salary_component(data=None, component=None):
                     "disabled": 0,
                     "type": data.get("component_type"),
                 },
-                fields=["*"],
+                fields=["name"],
             )
 
             if len(existing_components) > 0:
@@ -53,7 +54,7 @@ def get_salary_component(data=None, component=None):
                         "disabled": 0,
                         "salary_component_abbr": data.get("abbr"),
                     },
-                    fields=["*"],
+                    fields=["name"],
                 )
 
                 if len(get_abbr_component) > 0:
@@ -102,7 +103,7 @@ def get_salary_component(data=None, component=None):
                         "disabled": 0,
                         "salary_component_abbr": data.get("abbr"),
                     },
-                    fields=["*"],
+                    fields=["name"],
                 )
 
                 if len(get_abbr_component) > 0:

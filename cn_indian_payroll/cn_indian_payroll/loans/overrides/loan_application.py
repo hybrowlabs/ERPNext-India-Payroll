@@ -9,7 +9,7 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
     if not (doc_id and company):
         return
 
-    loan_repayment = frappe.get_all("Loan Repayment Schedule", filters={"loan": doc_id}, fields=["*"])
+    loan_repayment = frappe.get_all("Loan Repayment Schedule", filters={"loan": doc_id}, fields=["name"])
 
     if not loan_repayment:
         return
@@ -155,7 +155,9 @@ def edit_installment(
 
     loan = frappe.get_doc("Loan", doc_id)
 
-    repayment_schedules = frappe.get_all("Loan Repayment Schedule", filters={"loan": loan.name}, fields=["*"])
+    repayment_schedules = frappe.get_all(
+        "Loan Repayment Schedule", filters={"loan": loan.name}, fields=["name"]
+    )
     if not repayment_schedules:
         frappe.throw(frappe._("Repayment schedule not found"))
 
