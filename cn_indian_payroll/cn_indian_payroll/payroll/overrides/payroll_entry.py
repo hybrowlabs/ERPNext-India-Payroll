@@ -199,7 +199,8 @@ class PayrollEntryOverride(PayrollEntry):
 
         if not valid_employees:
             error_msg = _(
-                "No employees found for the mentioned criteria:<br>Company: {0}<br>Currency: {1}<br>Payroll Payable Account: {2}"
+                "No employees found for the mentioned criteria:<br>"  # noqa: E501
+                "Company: {0}<br>Currency: {1}<br>Payroll Payable Account: {2}"
             ).format(
                 frappe.bold(self.company),
                 frappe.bold(self.currency),

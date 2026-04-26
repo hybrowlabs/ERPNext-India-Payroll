@@ -6,6 +6,10 @@ def print_loan_dashboard_erp(employee, id, loan_product):
     if not employee:
         return []
 
+    employee_user = frappe.db.get_value("Employee", employee, "user_id")
+    if frappe.session.user != employee_user:
+        frappe.only_for("HR Manager")
+
     loan_product = frappe.get_doc("Loan Product", loan_product)
 
     loan_docs = frappe.get_doc("Loan", id)
@@ -19,7 +23,7 @@ def print_loan_dashboard_erp(employee, id, loan_product):
     total_loan_amount = 0
     if loan_docs:
         repayment_entries = frappe.get_list(
-            "Loan Repayment Schedule", filters={"loan": loan_docs.name}, fields=["*"]
+            "Loan Repayment Schedule", filters={"loan": loan_docs.name}, fields=["name"]
         )
 
         if repayment_entries:

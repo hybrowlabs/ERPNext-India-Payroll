@@ -60,12 +60,10 @@ def get_new_joinee_arrear(filters=None):
             "payout_date": row.payout_date,
         }
 
-        # Add earnings
         for e in arrear_doc.earning_component or []:
             row_data[e.salary_component] = e.amount
             all_components.add(e.salary_component)
 
-        # Add deductions
         for d in arrear_doc.deduction_component or []:
             row_data[d.salary_component] = d.amount
             all_components.add(d.salary_component)

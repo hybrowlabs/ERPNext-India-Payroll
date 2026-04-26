@@ -15,17 +15,13 @@ during `bench remove-app` (uninstall.py → setup.py).
 Only include non-null / non-zero / non-false attributes to keep dicts concise.
 """
 
-# ---------------------------------------------------------------------------
 # Helper – month select options (DRY)
-# ---------------------------------------------------------------------------
 from cn_indian_payroll.cn_indian_payroll.constants import MONTH_NAMES
 
 _MONTH_OPTIONS = "\n".join(MONTH_NAMES)
 
 
-# ===========================================================================
 # Company
-# ===========================================================================
 
 COMPANY_FIELDS = [
     {
@@ -92,9 +88,7 @@ COMPANY_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee
-# ===========================================================================
 
 EMPLOYEE_FIELDS = [
     {
@@ -112,9 +106,7 @@ EMPLOYEE_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Advance
-# ===========================================================================
 
 EMPLOYEE_ADVANCE_FIELDS = [
     {
@@ -126,9 +118,7 @@ EMPLOYEE_ADVANCE_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Benefit Claim
-# ===========================================================================
 
 EMPLOYEE_BENEFIT_CLAIM_FIELDS = [
     {
@@ -141,9 +131,7 @@ EMPLOYEE_BENEFIT_CLAIM_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Promotion
-# ===========================================================================
 
 EMPLOYEE_PROMOTION_FIELDS = [
     {
@@ -194,9 +182,7 @@ EMPLOYEE_PROMOTION_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Tax Exemption Category
-# ===========================================================================
 
 EMPLOYEE_TAX_EXEMPTION_CATEGORY_FIELDS = [
     {
@@ -208,9 +194,7 @@ EMPLOYEE_TAX_EXEMPTION_CATEGORY_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Tax Exemption Declaration
-# ===========================================================================
 
 EMPLOYEE_TAX_EXEMPTION_DECLARATION_FIELDS = [
     {
@@ -393,9 +377,7 @@ EMPLOYEE_TAX_EXEMPTION_DECLARATION_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Tax Exemption Proof Submission
-# ===========================================================================
 
 EMPLOYEE_TAX_EXEMPTION_PROOF_SUBMISSION_FIELDS = [
     {
@@ -414,9 +396,7 @@ EMPLOYEE_TAX_EXEMPTION_PROOF_SUBMISSION_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Employee Tax Exemption Sub Category
-# ===========================================================================
 
 EMPLOYEE_TAX_EXEMPTION_SUB_CATEGORY_FIELDS = [
     {
@@ -449,9 +429,7 @@ EMPLOYEE_TAX_EXEMPTION_SUB_CATEGORY_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Full and Final Outstanding Statement
-# ===========================================================================
 
 FULL_AND_FINAL_OUTSTANDING_STATEMENT_FIELDS = [
     {
@@ -463,9 +441,7 @@ FULL_AND_FINAL_OUTSTANDING_STATEMENT_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Income Tax Slab
-# ===========================================================================
 
 INCOME_TAX_SLAB_FIELDS = [
     {
@@ -509,7 +485,7 @@ INCOME_TAX_SLAB_FIELDS = [
         "allow_on_submit": 1,
     },
     {
-        "fieldname": "custom_minmum_value",
+        "fieldname": "custom_minimum_value",
         "label": "Minimum Value (Marginal Relief)",
         "fieldtype": "Float",
         "insert_after": "custom_marginal_relief_applicable",
@@ -517,18 +493,16 @@ INCOME_TAX_SLAB_FIELDS = [
         "allow_on_submit": 1,
     },
     {
-        "fieldname": "custom_maximun_value",
+        "fieldname": "custom_maximum_value",
         "label": "Maximum Value (Marginal Relief)",
         "fieldtype": "Float",
-        "insert_after": "custom_minmum_value",
+        "insert_after": "custom_minimum_value",
         "depends_on": "custom_marginal_relief_applicable",
         "allow_on_submit": 1,
     },
 ]
 
-# ===========================================================================
 # Income Tax Slab Other Charges (child table)
-# ===========================================================================
 
 INCOME_TAX_SLAB_OTHER_CHARGES_FIELDS = [
     {
@@ -547,9 +521,7 @@ INCOME_TAX_SLAB_OTHER_CHARGES_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Leave Encashment
-# ===========================================================================
 
 LEAVE_ENCASHMENT_FIELDS = [
     {
@@ -561,9 +533,7 @@ LEAVE_ENCASHMENT_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Loan
-# ===========================================================================
 
 LOAN_FIELDS = [
     {
@@ -581,9 +551,7 @@ LOAN_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Loan Application
-# ===========================================================================
 
 LOAN_APPLICATION_FIELDS = [
     {
@@ -629,9 +597,7 @@ LOAN_APPLICATION_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Loan Product
-# ===========================================================================
 
 LOAN_PRODUCT_FIELDS = [
     {
@@ -654,9 +620,7 @@ LOAN_PRODUCT_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Loan Repayment Schedule
-# ===========================================================================
 
 LOAN_REPAYMENT_SCHEDULE_FIELDS = [
     {
@@ -694,9 +658,7 @@ LOAN_REPAYMENT_SCHEDULE_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Payroll Correction Child (child table)
-# ===========================================================================
 
 PAYROLL_CORRECTION_CHILD_FIELDS = [
     {
@@ -707,9 +669,7 @@ PAYROLL_CORRECTION_CHILD_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Payroll Employee Detail (child table)
-# ===========================================================================
 
 PAYROLL_EMPLOYEE_DETAIL_FIELDS = [
     {
@@ -720,9 +680,7 @@ PAYROLL_EMPLOYEE_DETAIL_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Payroll Entry
-# ===========================================================================
 
 PAYROLL_ENTRY_FIELDS = [
     {
@@ -742,9 +700,7 @@ PAYROLL_ENTRY_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Repayment Schedule (child table of Loan)
-# ===========================================================================
 
 REPAYMENT_SCHEDULE_FIELDS = [
     {
@@ -757,9 +713,7 @@ REPAYMENT_SCHEDULE_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Salary Component
-# ===========================================================================
 
 SALARY_COMPONENT_FIELDS = [
     {
@@ -819,9 +773,7 @@ SALARY_COMPONENT_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Salary Detail (child table of Salary Slip)
-# ===========================================================================
 
 SALARY_DETAIL_FIELDS = [
     {
@@ -865,9 +817,7 @@ SALARY_DETAIL_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Salary Slip
-# ===========================================================================
 
 SALARY_SLIP_FIELDS = [
     # --- Identification / linking ---
@@ -1164,9 +1114,7 @@ SALARY_SLIP_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Salary Structure Assignment
-# ===========================================================================
 
 SALARY_STRUCTURE_ASSIGNMENT_FIELDS = [
     {
@@ -1549,9 +1497,7 @@ SALARY_STRUCTURE_ASSIGNMENT_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Additional Salary
-# ===========================================================================
 
 ADDITIONAL_SALARY_FIELDS = [
     {
@@ -1594,9 +1540,7 @@ ADDITIONAL_SALARY_FIELDS = [
     },
 ]
 
-# ===========================================================================
 # Master dict — consumed by setup.py / install.py
-# ===========================================================================
 
 CUSTOM_FIELDS: dict = {
     "Additional Salary": ADDITIONAL_SALARY_FIELDS,

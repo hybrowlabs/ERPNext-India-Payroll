@@ -29,9 +29,7 @@ class CustomSalarySlip(LOPMixin, TaxMixin, BenefitsMixin, ESICMixin, SalarySlip)
     MRO: LOPMixin → TaxMixin → BenefitsMixin → ESICMixin → SalarySlip → Document
     """
 
-    # ------------------------------------------------------------------
     # Lifecycle hooks
-    # ------------------------------------------------------------------
 
     def validate(self):
         super().validate()
@@ -46,9 +44,7 @@ class CustomSalarySlip(LOPMixin, TaxMixin, BenefitsMixin, ESICMixin, SalarySlip)
         self.update_declaration_component()
         self.tax_calculation()
 
-    # ------------------------------------------------------------------
     # Utility methods that don't fit a single domain mixin
-    # ------------------------------------------------------------------
 
     def set_month(self) -> None:
         month_number = int(str(self.start_date)[5:7])
@@ -153,9 +149,7 @@ class CustomSalarySlip(LOPMixin, TaxMixin, BenefitsMixin, ESICMixin, SalarySlip)
             raise
 
 
-# ---------------------------------------------------------------------------
 # Module-level helpers
-# ---------------------------------------------------------------------------
 
 
 def _safe_eval(

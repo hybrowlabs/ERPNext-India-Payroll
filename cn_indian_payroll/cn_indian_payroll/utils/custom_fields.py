@@ -10,9 +10,7 @@ from collections.abc import Iterable
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
-# ---------------------------------------------------------------------------
 # Internal helpers
-# ---------------------------------------------------------------------------
 
 
 def _normalise(doctypes_or_str: str | tuple, fields: list | dict) -> tuple[tuple, list]:
@@ -24,9 +22,7 @@ def _normalise(doctypes_or_str: str | tuple, fields: list | dict) -> tuple[tuple
     return doctypes_or_str, fields
 
 
-# ---------------------------------------------------------------------------
 # Public API
-# ---------------------------------------------------------------------------
 
 
 def make_custom_fields(

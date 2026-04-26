@@ -5,9 +5,7 @@ All magic numbers, ceiling values, regime identifiers and lookup tables
 live here so that business logic never has raw literals scattered across it.
 """
 
-# ---------------------------------------------------------------------------
 # EPF / EPS / EDLI
-# ---------------------------------------------------------------------------
 
 EPF_WAGE_CEILING: int = 15_000
 """Statutory wage ceiling (₹) above which EPF contributions are capped."""
@@ -29,9 +27,7 @@ ESIC_EMPLOYER_RATE: float = 3.25
 ESIC_WAGE_CEILING: int = 21_000
 """Monthly wage ceiling (₹) above which ESIC is not applicable."""
 
-# ---------------------------------------------------------------------------
 # Tax
-# ---------------------------------------------------------------------------
 
 EDUCATION_CESS_RATE: float = 4.0
 """Education & health cess rate (%) applied on income tax + surcharge."""
@@ -45,9 +41,7 @@ REBATE_87A_LIMIT_OLD_REGIME: int = 500_000
 TAX_REGIME_NEW: str = "New Regime"
 TAX_REGIME_OLD: str = "Old Regime"
 
-# ---------------------------------------------------------------------------
 # LWF
-# ---------------------------------------------------------------------------
 
 LWF_STATES: tuple[str, ...] = (
     "Andhra Pradesh",
@@ -62,9 +56,7 @@ LWF_STATES: tuple[str, ...] = (
     "Telangana",
 )
 
-# ---------------------------------------------------------------------------
 # Professional Tax
-# ---------------------------------------------------------------------------
 
 PT_EXEMPT_STATES: frozenset[str] = frozenset(
     {
@@ -80,9 +72,7 @@ PT_EXEMPT_STATES: frozenset[str] = frozenset(
     }
 )
 
-# ---------------------------------------------------------------------------
 # Months
-# ---------------------------------------------------------------------------
 
 MONTH_NAMES: tuple[str, ...] = (
     "January",
@@ -101,9 +91,7 @@ MONTH_NAMES: tuple[str, ...] = (
 
 MONTH_NUMBER: dict[str, int] = {name: i + 1 for i, name in enumerate(MONTH_NAMES)}
 
-# ---------------------------------------------------------------------------
 # Payroll
-# ---------------------------------------------------------------------------
 
 SUBMITTED: int = 1
 DRAFT: int = 0
@@ -111,9 +99,7 @@ CANCELLED: int = 2
 
 PAYROLL_FREQUENCY_MONTHLY: str = "Monthly"
 
-# ---------------------------------------------------------------------------
 # Perquisite
-# ---------------------------------------------------------------------------
 
 CAR_PERQUISITE_OPTIONS: tuple[str, ...] = (
     "Car > 1600 CC",

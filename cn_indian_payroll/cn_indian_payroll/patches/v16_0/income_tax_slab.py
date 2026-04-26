@@ -17,8 +17,8 @@ def execute():
             "modified": "2025-04-09 16:27:54.415010",
             "name": "New Regime 25-26",
             "custom_marginal_relief_applicable": 1,
-            "custom_maximun_value": 1270000.0,
-            "custom_minmum_value": 1200000.0,
+            "custom_maximum_value": 1270000.0,
+            "custom_minimum_value": 1200000.0,
             "other_taxes_and_charges": [
                 {
                     "custom_is_education_cess": 1,

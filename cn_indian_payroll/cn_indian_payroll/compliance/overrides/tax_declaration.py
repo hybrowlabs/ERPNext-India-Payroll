@@ -35,7 +35,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             if not subcategory.exemption_sub_category:
                 continue
 
-            check_component = frappe.get_doc(
+            check_component = frappe.get_cached_doc(
                 "Employee Tax Exemption Sub Category", subcategory.exemption_sub_category
             )
 
@@ -50,7 +50,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
         total_pt = 0
 
         for subcategory in self.declarations:
-            check_component = frappe.get_doc(
+            check_component = frappe.get_cached_doc(
                 "Employee Tax Exemption Sub Category", subcategory.exemption_sub_category
             )
 
@@ -101,8 +101,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         self.custom_declaration_form_data = json.dumps(form_data)
 
-    # -----------validate section10 components on employee is eligible or not----------------
-
     def validation_on_section10(self):
         validation_sub_categories = []
         component_sub_category = []
@@ -112,7 +110,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         if self.declarations:
             for declaration in self.declarations:
-                sub_category_doc = frappe.get_doc(
+                sub_category_doc = frappe.get_cached_doc(
                     "Employee Tax Exemption Sub Category", declaration.exemption_sub_category
                 )
                 component_type = sub_category_doc.custom_component_type
@@ -152,7 +150,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
 
         if salary_slip_preview:
             for component in salary_slip_preview.earnings:
-                salary_component = frappe.get_doc("Salary Component", component.salary_component)
+                salary_component = frappe.get_cached_doc("Salary Component", component.salary_component)
                 if salary_component.component_type == "Tax Exemption":
                     sub_category = salary_component.custom_sub_category
                     if sub_category:
@@ -164,12 +162,12 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                 unmatched.append(declared_sub.strip())
 
         if unmatched:
-            frappe.throw(
-                _(
-                    "The following Section 10 components are not part of your salary (CTC), so you cannot claim exemption for them:<br><br>"
-                    + "<br>".join(f"<b>{u}</b>" for u in unmatched)
-                )
+            msg = (
+                "The following Section 10 components are not part of your salary"
+                " (CTC), so you cannot claim exemption for them:<br><br>"
+                + "<br>".join(f"<b>{u}</b>" for u in unmatched)
             )
+            frappe.throw(_(msg))
 
     def set_total_exemption_amount(self):
 
@@ -177,7 +175,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             get_total_exemption_amount(self.declarations),
             self.precision("total_exemption_amount"),
         )
-        # frappe.msgprint(str(self.total_exemption_amount))
         if self.annual_hra_exemption:
             self.total_exemption_amount = self.total_exemption_amount + self.annual_hra_exemption
 
@@ -187,7 +184,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             filters={
                 "tax_exemption": self.name,
             },
-            fields=["*"],
+            fields=["name"],
         )
 
         if len(history_data) > 0:
@@ -212,7 +209,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             get_latest_history = frappe.get_list(
                 "Tax Declaration History",
                 filters={"employee": self.employee},
-                fields=["*"],
+                fields=["name"],
                 order_by="posting_date desc",
                 limit=1,
             )
@@ -275,7 +272,7 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
                     "employee": self.employee,
                     "posting_date": self.custom_posting_date,
                 },
-                fields=["*"],
+                fields=["name"],
                 limit=1,
             )
 
@@ -414,8 +411,6 @@ class CustomEmployeeTaxExemptionDeclaration(EmployeeTaxExemptionDeclaration):
             )
 
             insert_doc.insert()
-
-    # --------Insert HRA Breakup Table & Annual HRA and Basic----------------
 
     def calculate_hra_breakup(self):
         if self.monthly_house_rent and self.custom_check == 0:

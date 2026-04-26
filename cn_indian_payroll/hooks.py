@@ -246,17 +246,17 @@ doctype_js = {
 }
 
 override_doctype_class = {
-    "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.payroll_entry.PayrollEntryOverride",
+    "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.payroll_entry.PayrollEntryOverride",  # noqa: E501
     "Salary Slip": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_slip.CustomSalarySlip",
-    "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",
-    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.compliance.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",
-    "Additional Salary": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.additional_salary.CustomAdditionalSalary",
+    "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",  # noqa: E501
+    "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.compliance.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",  # noqa: E501
+    "Additional Salary": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.additional_salary.CustomAdditionalSalary",  # noqa: E501
 }
 
 doc_events = {
     "Loan Repayment Schedule": {
         "before_save": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_save",
-        "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_update_after_submit",
+        "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_update_after_submit",  # noqa: E501
     },
     # "Salary Component": {
     #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_component.validate",

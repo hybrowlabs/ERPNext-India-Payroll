@@ -28,7 +28,24 @@ def get_all_accrued_bonus(filters=None):
     if filters.get("loan_product"):
         conditions["loan_product"] = filters["loan_product"]
 
-    records = frappe.get_all("Loan Repayment Schedule", filters=conditions, fields=["*"])
+    records = frappe.get_all(
+        "Loan Repayment Schedule",
+        filters=conditions,
+        fields=[
+            "name",
+            "loan",
+            "custom_employee",
+            "custom_employee_name",
+            "company",
+            "loan_product",
+            "repayment_method",
+            "repayment_start_date",
+            "loan_amount",
+            "monthly_repayment_amount",
+            "repayment_periods",
+            "rate_of_interest",
+        ],
+    )
     data = []
 
     for row in records:

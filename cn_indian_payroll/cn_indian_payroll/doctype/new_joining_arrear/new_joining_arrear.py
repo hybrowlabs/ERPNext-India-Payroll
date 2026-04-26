@@ -93,7 +93,7 @@ class NewJoiningArrear(Document):
                 "company": self.company,
                 "docstatus": 1,
             },
-            fields=["*"],
+            fields=["name", "salary_structure", "from_date", "custom_payroll_period"],
             order_by="from_date desc",
             limit=1,
         )
@@ -121,7 +121,7 @@ class NewJoiningArrear(Document):
         reimbursement_components = []
 
         for accrued_benefit in new_salary_slip.accrued_benefits:
-            salary_component_doc = frappe.get_doc("Salary Component", accrued_benefit.salary_component)
+            salary_component_doc = frappe.get_cached_doc("Salary Component", accrued_benefit.salary_component)
 
             if salary_component_doc.arrear_component == 1 and salary_component_doc.is_flexible_benefit != 1:
                 reimbursement_components.append(

@@ -175,7 +175,6 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
     offcycle_net_pay = []
     tds_net_sum = 0
 
-    # Fetch the salary slip for id — used both for salary_slip_doc context and tax fields
     salary_slip_doc = frappe.get_doc("Salary Slip", id)
 
     sub_category = frappe.get_all(
@@ -297,6 +296,8 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
 
 @frappe.whitelist()
 def get_payslip_pdf(id):
+    frappe.has_permission("Salary Slip", "read", id, throw=True)
+
     try:
         slip = frappe.get_doc("Salary Slip", id)
     except frappe.DoesNotExistError:

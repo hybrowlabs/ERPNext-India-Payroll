@@ -7,12 +7,19 @@ from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_s
 
 @frappe.whitelist()
 def choose_regime(doc_id, employee, payroll_period, company, regime):
+    if not employee:
+        return
+
+    employee_user = frappe.db.get_value("Employee", employee, "user_id")
+    if frappe.session.user != employee_user:
+        frappe.only_for("HR Manager")
+
     if employee:
         selected_regime = None
         get_income_tax = frappe.get_list(
             "Income Tax Slab",
             filters={"company": company, "docstatus": 1, "disabled": 0, "custom_select_regime": regime},
-            fields=["*"],
+            fields=["name"],
             order_by="effective_from desc",
         )
         if len(get_income_tax) > 0:
@@ -28,7 +35,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
         latest_salary_structure = frappe.get_list(
             "Salary Structure Assignment",
             filters={"employee": employee, "docstatus": 1, "custom_payroll_period": payroll_period},
-            fields=["*"],
+            fields=["name", "salary_structure", "from_date"],
             order_by="from_date desc",
             limit=1,
         )
@@ -49,7 +56,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                     "custom_payroll_period": payroll_period,
                     "docstatus": ["in", [0, 1]],
                 },
-                fields=["*"],
+                fields=["name", "custom_month_count"],
                 order_by="end_date desc",
             )
             new_regime_month_count = get_all_salary_slip[0].custom_month_count if get_all_salary_slip else 0
@@ -213,7 +220,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                     "custom_payroll_period": payroll_period,
                     "docstatus": ["in", [0, 1]],
                 },
-                fields=["*"],
+                fields=["name", "custom_month_count"],
                 order_by="end_date desc",
             )
 
@@ -378,7 +385,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                             current_nps_amount += earning.amount
 
                     for deduction in get_each_salary_slip.deductions:
-                        get_deduction_component = frappe.get_doc(
+                        get_deduction_component = frappe.get_cached_doc(
                             "Salary Component", deduction.salary_component
                         )
                         if get_deduction_component.component_type == "Provident Fund":
@@ -405,7 +412,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                         future_nps_amount += new_earning.amount * old_regime_month_count
 
                 for old_deduction in new_salary_slip.deductions:
-                    new_deduction_component = frappe.get_doc(
+                    new_deduction_component = frappe.get_cached_doc(
                         "Salary Component", old_deduction.salary_component
                     )
                     if (

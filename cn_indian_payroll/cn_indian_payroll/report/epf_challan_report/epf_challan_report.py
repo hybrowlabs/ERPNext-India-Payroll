@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import frappe
+from frappe import _
 
 
 def get_salary_slips(filters=None):
@@ -8,15 +9,15 @@ def get_salary_slips(filters=None):
         filters = {}
 
     if not filters.get("company"):
-        frappe.throw("Company is a mandatory filter.")
+        frappe.throw(_("Company is a mandatory filter."))
 
     try:
         company_doc = frappe.get_cached_doc("Company", filters["company"])
     except frappe.DoesNotExistError:
-        frappe.throw("Invalid company specified.")
+        frappe.throw(_("Invalid company specified."))
 
     if not company_doc.basic_component or not company_doc.custom_da_component:
-        frappe.throw("Please set Basic Component and DA Component in Company Master.")
+        frappe.throw(_("Please set Basic Component and DA Component in Company Master."))
 
     basic_component = company_doc.basic_component
     da_component = company_doc.custom_da_component

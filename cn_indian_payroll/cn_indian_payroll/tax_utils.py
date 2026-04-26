@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 
 
 def calculate_regime_tax(is_new=0, taxable_amount=0):
@@ -29,7 +30,7 @@ def calculate_regime_tax(is_new=0, taxable_amount=0):
 @frappe.whitelist()
 def calculate_tax(doc_name=None, totalincome=None):
     if not frappe.has_permission("Employee Tax Exemption Declaration", "read", doc_name):
-        frappe.throw("Not permitted.", frappe.PermissionError)
+        frappe.throw(_("Not permitted."), frappe.PermissionError)
 
     emp_id, deduction = frappe.db.get_value(
         "Employee Tax Exemption Declaration", doc_name, ["employee", "total_declared_amount"]
@@ -76,7 +77,7 @@ def calculate_tax(doc_name=None, totalincome=None):
 @frappe.whitelist()
 def calculate_hra_exemption(emp_id, monthly_house_rent):
     if not frappe.has_permission("Employee", "read", emp_id):
-        frappe.throw("Not permitted.", frappe.PermissionError)
+        frappe.throw(_("Not permitted."), frappe.PermissionError)
 
     sm_doc_name = frappe.db.get_list(
         "Employee Salary Master",
@@ -102,6 +103,7 @@ def calculate_hra_exemption(emp_id, monthly_house_rent):
 
 @frappe.whitelist()
 def income_tax_calculator_template(total_income, deduction):
+    frappe.only_for("HR Manager")
     taxable_income = float(total_income) - float(deduction)
     if taxable_income > 0:
         old_regime_tax = calculate_regime_tax(0, float(taxable_income))

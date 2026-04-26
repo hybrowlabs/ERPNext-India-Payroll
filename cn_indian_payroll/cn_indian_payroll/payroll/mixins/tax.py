@@ -10,9 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 
-# ---------------------------------------------------------------------------
 # Module-level helpers (used by the mixin and by CustomSalarySlip directly)
-# ---------------------------------------------------------------------------
 
 
 def override_calculate_tax_by_tax_slab(
@@ -38,11 +36,11 @@ def override_calculate_tax_by_tax_slab(
 
     if (
         tax_slab.custom_marginal_relief_applicable
-        and tax_slab.custom_minmum_value
-        and tax_slab.custom_maximun_value
-        and tax_slab.custom_minmum_value < annual_taxable_earning < tax_slab.custom_maximun_value
+        and tax_slab.custom_minimum_value
+        and tax_slab.custom_maximum_value
+        and tax_slab.custom_minimum_value < annual_taxable_earning < tax_slab.custom_maximum_value
     ):
-        excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
+        excess_income = annual_taxable_earning - tax_slab.custom_minimum_value
         if base_tax > excess_income:
             rebate = base_tax - excess_income
             base_tax -= rebate
@@ -57,9 +55,7 @@ def override_calculate_tax_by_tax_slab(
     return round(base_tax + other_taxes_and_charges, 2), round(other_taxes_and_charges, 2)
 
 
-# ---------------------------------------------------------------------------
 # Mixin
-# ---------------------------------------------------------------------------
 
 
 class TaxMixin:
@@ -71,9 +67,6 @@ class TaxMixin:
                 sc.custom_tax_exemption_applicable_based_on_regime
             )
             earning.custom_regime = sc.custom_regime
-
-    # kept the original misspelled name as an alias so existing calls don't break
-    set_taxale_regime = set_taxable_regime
 
     def calculate_variable_tax(self, tax_component: str) -> float:
         self.previous_total_paid_taxes = self.get_tax_paid_in_period(

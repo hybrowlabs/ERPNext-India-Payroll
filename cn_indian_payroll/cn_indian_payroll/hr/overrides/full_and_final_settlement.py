@@ -29,7 +29,6 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
     def get_receivable_component(self):
         receivables = []
 
-        # Get deduction-type salary components that are included in F&F and not disabled
         salary_components = frappe.get_all(
             "Salary Component",
             filters={
@@ -54,7 +53,6 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
                     )
                     receivables.append(comp.name)
 
-        # Check if "lending" app is installed and add "Loan" if needed
         if "lending" in frappe.get_installed_apps():
             self.append(
                 "receivables",
@@ -62,7 +60,6 @@ class CustomFullAndFinalStatement(FullandFinalStatement):
                     "component": "Loan",
                     "amount": 0,
                     "status": "Unsettled",
-                    # "custom_reference_component": comp.name,
                 },
             )
             receivables.append("Loan")
@@ -138,6 +135,8 @@ def get_accrued_components(employee, company, relieving_date):
 
     from frappe.utils import flt, getdate
 
+    frappe.has_permission("Employee", "read", employee, throw=True)
+
     relieving_date = getdate(relieving_date)
     bonus_list = []
     reimbursement_list = []
@@ -145,7 +144,6 @@ def get_accrued_components(employee, company, relieving_date):
 
     tax_list = []
 
-    # Get latest Salary Structure Assignment
     get_latest_ssa = frappe.get_list(
         "Salary Structure Assignment",
         filters={
@@ -177,7 +175,7 @@ def get_accrued_components(employee, company, relieving_date):
             for slip in get_salary_slip:
                 get_each_sl = frappe.get_doc("Salary Slip", slip.name)
                 for deduction in get_each_sl.deductions:
-                    get_pt = frappe.get_doc("Salary Component", deduction.salary_component)
+                    get_pt = frappe.get_cached_doc("Salary Component", deduction.salary_component)
                     if get_pt.component_type == "Professional Tax":
                         tax_list.append(
                             {
@@ -205,7 +203,7 @@ def get_accrued_components(employee, company, relieving_date):
             "employee": employee,
             "docstatus": 1,
         },
-        fields=["*"],
+        fields=["leave_type", "encashment_days", "custom_basic_amount", "encashment_amount"],
     )
     for encashment in leave_encashment:
         leave_encashment_list.append(
@@ -217,7 +215,6 @@ def get_accrued_components(employee, company, relieving_date):
             }
         )
 
-    # Fetch bonus accruals
     bonuses = frappe.get_all(
         "Employee Bonus Accrual",
         filters={
@@ -246,7 +243,6 @@ def get_accrued_components(employee, company, relieving_date):
             }
         )
 
-    # Fetch withheld salary slips
     salary_slips = frappe.get_all(
         "Salary Slip",
         filters={
@@ -260,9 +256,8 @@ def get_accrued_components(employee, company, relieving_date):
     for slip in salary_slips:
         salary_slip_doc = frappe.get_doc("Salary Slip", slip.name)
 
-        # Get accrual-type earnings
         for earning in salary_slip_doc.earnings:
-            salary_component_doc = frappe.get_doc("Salary Component", earning.salary_component)
+            salary_component_doc = frappe.get_cached_doc("Salary Component", earning.salary_component)
             if salary_component_doc.custom_is_accrual == 1:
                 bonus_list.append(
                     {
@@ -289,7 +284,13 @@ def get_accrued_components(employee, company, relieving_date):
                     "docstatus": ["in", [0, 1]],
                     "payroll_period": payroll_period,
                 },
-                fields=["*"],
+                fields=[
+                    "benefit_accrual_date",
+                    "payment_days",
+                    "salary_slip",
+                    "salary_component",
+                    "amount",
+                ],
             )
 
             for accrual in accruals:
@@ -303,7 +304,6 @@ def get_accrued_components(employee, company, relieving_date):
                     }
                 )
 
-        # Reimbursements from custom_employee_reimbursements
         if structure_assignment.custom_employee_reimbursements:
             for component in structure_assignment.custom_employee_reimbursements:
                 if component.reimbursements:
@@ -323,16 +323,13 @@ def get_accrued_components(employee, company, relieving_date):
                         }
                     )
 
-    # Aggregate accrued_amount by salary_component
     component_totals = defaultdict(float)
     for item in bonus_list + reimbursement_list:
         component_totals[item["salary_component"]] += item["accrued_amount"]
 
-    # Prepare final array
     final_array = []
 
     for component, amount in component_totals.items():
-        # Get the total claimed amount for this component
         benefit_claims = frappe.get_all(
             "Employee Benefit Claim",
             filters={
@@ -345,10 +342,8 @@ def get_accrued_components(employee, company, relieving_date):
             fields=["custom_paid_amount"],
         )
 
-        # Sum up the claimed amounts
         claimed_amount = sum(flt(claim.custom_paid_amount) for claim in benefit_claims)
 
-        # Append the final result
         final_array.append(
             {
                 "component": component,

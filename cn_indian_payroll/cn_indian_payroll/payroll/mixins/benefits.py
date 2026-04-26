@@ -206,9 +206,7 @@ class BenefitsMixin:
         decl_doc.save()
         self.tax_exemption_declaration = decl_doc.total_exemption_amount
 
-    # ------------------------------------------------------------------
     # Private helpers
-    # ------------------------------------------------------------------
 
     def _compute_hra_exemption(
         self,

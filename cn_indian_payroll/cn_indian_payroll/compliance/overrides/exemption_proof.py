@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 
 
 def on_submit(doc, method):
@@ -6,7 +7,7 @@ def on_submit(doc, method):
 
 
 def insert_form_16(doc):
-    frappe.msgprint(f"Inserting Form 16 for proof {doc.name}")
+    frappe.msgprint(_("Inserting Form 16 for proof {0}").format(doc.name))
 
     if not frappe.db.exists("Form 16", {"proof_id": doc.name}):
         form16 = frappe.get_doc(
