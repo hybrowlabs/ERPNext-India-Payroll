@@ -8,5 +8,7 @@ def validate(self, method):
         and not self.custom_regime
     ):
         frappe.throw(
-            frappe._("Please select the tax regime for this salary component as it is marked as tax applicable.")
+            frappe._(
+                "Please select the tax regime for this salary component as it is marked as tax applicable."
+            )
         )

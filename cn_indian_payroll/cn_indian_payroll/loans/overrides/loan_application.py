@@ -60,7 +60,9 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
 
         if not skipped_rows:
             frappe.throw(
-                frappe._("No repayment found for date {0} and subsequent {1} months").format(payment_date, number_of_months)
+                frappe._("No repayment found for date {0} and subsequent {1} months").format(
+                    payment_date, number_of_months
+                )
             )
 
         target_date = add_months(skip_date, number_of_months)
@@ -106,7 +108,9 @@ def hold_installments(employee, payment_date, company, type, number_of_months, d
 
         if not skipped_rows:
             frappe.throw(
-                frappe._("No repayment found for date {0} and subsequent {1} month(s)").format(payment_date, number_of_months)
+                frappe._("No repayment found for date {0} and subsequent {1} month(s)").format(
+                    payment_date, number_of_months
+                )
             )
 
         for r in skipped_rows:
