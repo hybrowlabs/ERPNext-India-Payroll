@@ -1,0 +1,57 @@
+name: Semgrep (Frappe Rules)
+
+on:
+  push:
+    branches:
+      - main
+      - version-16
+      - "v2/dev/**"
+      - "refactor/**"
+      - "feat/**"
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+      - version-16
+      - "v2/dev/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep-frappe:
+    name: Semgrep (frappe/semgrep-rules)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Fetch Frappe semgrep rules
+        run: |
+          git clone --depth 1 https://github.com/frappe/semgrep-rules.git /tmp/semgrep-rules
+
+      - name: Run Semgrep with Frappe rules
+        run: |
+          semgrep --config /tmp/semgrep-rules/rules --sarif --output semgrep-frappe.sarif .
+          semgrep --config /tmp/semgrep-rules/rules --json --output semgrep-frappe.json .
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-frappe.sarif
+
+      - name: Upload raw Semgrep JSON artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-frappe-json
+          path: semgrep-frappe.json
