@@ -151,7 +151,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Inactive"
+   "label": "Disabled"
   },
   {
    "default": "0",
