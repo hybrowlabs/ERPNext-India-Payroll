@@ -177,7 +177,7 @@ company_address_field.refresh_input();
 
 
         frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.month_wise_tds_value",
+            method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.tds_file.month_wise_tds_value",
             args: {
                 company: company,
                 fiscal_year: fiscal_year,
@@ -423,7 +423,7 @@ company_address_field.refresh_input();
             fieldData["branch"] = branch_value;
 
             frappe.call({
-                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.insert_tds_details",
+                method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.tds_file.insert_tds_details",
                 args: {
                     challan_data: challanRows,
                     annexure_data: annexureRows,
@@ -461,11 +461,11 @@ company_address_field.refresh_input();
 
 
                 frappe.call({
-                    method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.upload_csi_file",
+                    method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.tds_file.upload_csi_file",
                     args: {
                         file_name: file.name,
                         file_data: base64Data,
-                        attached_to_doctype: "TDS RETURN",
+                        attached_to_doctype: "TDS Return",
                         attached_to_name: tds_return_name,
                     },
                     freeze: true,
@@ -484,7 +484,7 @@ company_address_field.refresh_input();
 
         function create_txt_file(fieldData, tds_return_name) {
             frappe.call({
-                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_file.create_txt_file",
+                method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.tds_file.create_txt_file",
                 args: {
                     basic_data: fieldData,
                     attached_to_name: tds_return_name

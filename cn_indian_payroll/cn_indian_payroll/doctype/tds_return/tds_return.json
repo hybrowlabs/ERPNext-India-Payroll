@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "format:TDS-RET-{YYYY}-{MM}-{####}",
+ "creation": "2026-04-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "fiscal_year",
+  "quarter",
+  "payroll_period",
+  "branch",
+  "column_break_1",
+  "tan_number",
+  "deductor_name",
+  "status",
+  "section_break_data",
+  "challan_data",
+  "annexure_data",
+  "form_data"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "quarter",
+   "fieldtype": "Data",
+   "label": "Quarter",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "payroll_period",
+   "fieldtype": "Link",
+   "label": "Payroll Period",
+   "options": "Payroll Period"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tan_number",
+   "fieldtype": "Data",
+   "label": "TAN Number"
+  },
+  {
+   "fieldname": "deductor_name",
+   "fieldtype": "Data",
+   "label": "Deductor Name"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSaved\nFiled",
+   "default": "Draft",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_break_data",
+   "fieldtype": "Section Break",
+   "label": "Return Data"
+  },
+  {
+   "fieldname": "challan_data",
+   "fieldtype": "Long Text",
+   "label": "Challan Data (JSON)"
+  },
+  {
+   "fieldname": "annexure_data",
+   "fieldtype": "Long Text",
+   "label": "Annexure Data (JSON)"
+  },
+  {
+   "fieldname": "form_data",
+   "fieldtype": "Long Text",
+   "label": "Form Data (JSON)"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-04-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "TDS Return",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "HR User"
+  }
+ ],
+ "search_fields": "company,fiscal_year,quarter",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "fiscal_year",
+ "track_changes": 1
+}
