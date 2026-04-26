@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 import frappe
+from frappe import _
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
 
@@ -15,6 +16,10 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
         frappe.only_for("HR Manager")
 
     if employee:
+        if not frappe.has_permission("Employee", "read", employee):
+            frappe.throw(_("Not permitted to access this employee."), frappe.PermissionError)
+        if not frappe.has_permission("Employee Tax Exemption Declaration", "write", doc_id):
+            frappe.throw(_("Not permitted to update this tax declaration."), frappe.PermissionError)
         selected_regime = None
         get_income_tax = frappe.get_list(
             "Income Tax Slab",
