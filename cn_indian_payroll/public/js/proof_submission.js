@@ -2,7 +2,6 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
     onload(frm) {
 
         if(frm.doc.custom_declaration_id) {
-            console.log("Fetching declaration data for ID:", frm.doc.custom_declaration_id);
             frappe.db.get_value(
                 'Employee Tax Exemption Declaration',
                 frm.doc.custom_declaration_id,
@@ -11,7 +10,6 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
                     if(r ) {
 
 
-                        console.log("Declaration Data:", r);
                         const data = r;
                         frm.set_value("house_rent_payment_amount", data.monthly_house_rent);
                         frm.set_value("custom_annual_hra_exemption", data.annual_hra_exemption);

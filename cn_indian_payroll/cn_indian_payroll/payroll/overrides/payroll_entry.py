@@ -64,29 +64,42 @@ class PayrollEntryOverride(PayrollEntry):
         employees = get_filtered_employees_with_employment_type(filters)
         valid_employees = []
 
-        for emp in employees:
-            ssa = frappe.get_all(
-                "Salary Structure Assignment",
-                filters={
-                    "employee": emp.employee,
-                    "docstatus": 1,
-                    "from_date": ["<=", self.end_date],
-                },
-                fields=["name", "from_date", "salary_structure"],
-                order_by="from_date desc",
-                limit=1,
-            )
+        if not employees:
+            emp_ids = []
+        else:
+            emp_ids = [e.employee for e in employees]
 
-            if not ssa:
+        # Batch: latest submitted SSA per employee (one query for all employees)
+        all_ssa = frappe.get_all(
+            "Salary Structure Assignment",
+            filters={"employee": ["in", emp_ids], "docstatus": 1, "from_date": ["<=", self.end_date]},
+            fields=["name", "employee", "from_date", "salary_structure"],
+            order_by="employee, from_date desc",
+        )
+        ssa_map: dict = {}
+        for ssa in all_ssa:
+            if ssa.employee not in ssa_map:
+                ssa_map[ssa.employee] = ssa
+
+        # Batch: employee joining dates (one query for all employees)
+        emp_join_dates: dict = {
+            row.name: row.date_of_joining
+            for row in frappe.get_all(
+                "Employee",
+                filters={"name": ["in", emp_ids]},
+                fields=["name", "date_of_joining"],
+            )
+        }
+
+        # Payroll Settings fetched once outside the loop
+        payroll_setting = frappe.get_cached_doc("Payroll Settings")
+        end_date = getdate(self.end_date)
+
+        for emp in employees:
+            if emp.employee not in ssa_map:
                 continue
 
-            ssa[0]
-            employee_doc = frappe.get_doc("Employee", emp.employee)
-            date_of_joinee = getdate(employee_doc.date_of_joining)
-
-            payroll_setting = frappe.get_doc("Payroll Settings")
-            getdate(self.start_date)
-            end_date = getdate(self.end_date)
+            date_of_joinee = getdate(emp_join_dates.get(emp.employee))
 
             if payroll_setting.custom_configure_attendance_cycle:
                 attendance_end_day = int(payroll_setting.custom_attendance_end_date)
@@ -125,14 +138,14 @@ class PayrollEntryOverride(PayrollEntry):
                             elif status == "Absent":
                                 absent_day += 1
                             elif status == "Half Day" and leave_type:
-                                leave_doc = frappe.get_doc("Leave Type", leave_type)
+                                leave_doc = frappe.get_cached_doc("Leave Type", leave_type)
                                 half_day += 0.5 if leave_doc.is_lwp else 0
                                 if not leave_doc.is_lwp:
                                     present_day += 1
                             elif status == "Half Day" and not leave_type:
                                 half_day += 1
                             elif status == "On Leave" and leave_type:
-                                leave_doc = frappe.get_doc("Leave Type", leave_type)
+                                leave_doc = frappe.get_cached_doc("Leave Type", leave_type)
                                 absent_day += 1 if leave_doc.is_lwp else 0
                                 if not leave_doc.is_lwp:
                                     present_day += 1

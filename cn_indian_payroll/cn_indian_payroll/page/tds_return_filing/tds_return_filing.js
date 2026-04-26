@@ -106,7 +106,6 @@ company_address_field.df.onchange = () => {
                 return;
             }
 
-            console.log("📦 Address Details:", doc);
 
             // Fill address details
             $('#flat_no_responsible').val(doc.address_line1 || '');
@@ -160,7 +159,6 @@ company_address_field.refresh_input();
             const id = $(this).attr('id') || 'unnamed_field';
             data[id] = $(this).val();
         });
-        console.log(`--- ${tabId} data ---`, data);
         // Removed unnecessary msgprint
     });
 
@@ -191,7 +189,6 @@ company_address_field.refresh_input();
             callback: function (r) {
                 if (r.message && !r.message.error) {
                     const data = r.message.data || [];
-                    console.log("✅ TDS Data:", data);
 
                     // -----------------------------
                     // 1️⃣ Populate Challan Table
@@ -366,7 +363,6 @@ company_address_field.refresh_input();
             if (file) {
                 selectedCSIFile = file;
                 fileNameSpan.textContent = file.name;
-                console.log("CSI file selected:", file);
             } else {
                 selectedCSIFile = null;
                 fileNameSpan.textContent = "";
@@ -391,7 +387,6 @@ company_address_field.refresh_input();
                 fieldData[id] = $(this).val();
             });
 
-            // console.log("All Form Fields:11111111111111111", fieldData);
 
             // 3️⃣ Collect Challan Table Data
             const challanRows = [];
@@ -404,7 +399,6 @@ company_address_field.refresh_input();
                 challanRows.push(rowData);
             });
 
-            // console.log("Challan Table Data:", challanRows);
 
             // 4️⃣ Collect Annexure Table Data
             const annexureRows = [];
@@ -417,7 +411,6 @@ company_address_field.refresh_input();
                 annexureRows.push(rowData);
             });
 
-            // console.log("Annexure Table Data:", annexureRows);
 
             const company_value = company_field.get_value();
             const fiscal_year_value = fiscal_field.get_value();
@@ -465,9 +458,6 @@ company_address_field.refresh_input();
             reader.onload = function (event) {
                 const base64Data = event.target.result.split(",")[1];
 
-                // console.log(file.name,"file.namefile.name")
-                // console.log(base64Data,"base64Databas64Data")
-                // console.log(tds_return_name,"tds_return_nametds_return_name")
 
 
                 frappe.call({
@@ -483,7 +473,6 @@ company_address_field.refresh_input();
                     callback: function (r) {
                         if (r.message) {
 
-                            console.log("CSI file upload response:", r.message);
 
                         }
                     },
@@ -504,7 +493,6 @@ company_address_field.refresh_input();
                 freeze_message: "Creating .txt file...",
                 callback: function (r) {
                     if (r.message) {
-                        console.log("TXT file created:", r.message);
                     }
                 },
             });

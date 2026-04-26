@@ -28,7 +28,9 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                     if (frm.doc.custom_declaration_form_data) {
                         try {
                             stored_data = JSON.parse(frm.doc.custom_declaration_form_data);
-                        } catch (e) {}
+                        } catch (e) {
+                            console.error("Failed to parse declaration form data:", e);
+                        }
                     }
 
                     let rows_html = '';
@@ -189,7 +191,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                         if (res.message) {
                             let data = res.message;
 
-                            console.log(data);
 
 
                         const html = `

@@ -1,4 +1,4 @@
-frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
+frappe.pages['payroll-configuration'].on_page_load = function(wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Component Library',
@@ -117,7 +117,6 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
                             };
 
-							console.log("Row Data: ", rowData);
 
                             const salary_component_array = [{
                                 component: rowData.salary_component,

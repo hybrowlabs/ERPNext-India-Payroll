@@ -13,11 +13,11 @@
  "modified": "2025-04-14 16:13:00.951228",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
- "name": "TDS  Register",
+ "name": "TDS Register",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Salary Slip",
- "report_name": "TDS  Register",
+ "report_name": "TDS Register",
  "report_type": "Script Report",
  "roles": [
   {

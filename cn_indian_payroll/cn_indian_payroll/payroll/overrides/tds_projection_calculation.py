@@ -103,12 +103,15 @@ def calculate_tds_projection(doc):
             fields=["name"],
         )
 
-        for repayment in loan_repayments:
-            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
-
-            for perquisite in repayment_doc.custom_loan_perquisite or []:
+        if loan_repayments:
+            repayment_names = [r.name for r in loan_repayments]
+            all_perquisites = frappe.get_all(
+                "Loan Perquisite Child",
+                filters={"parent": ["in", repayment_names]},
+                fields=["payment_date", "perquisite_amount"],
+            )
+            for perquisite in all_perquisites:
                 payment_date = getdate(perquisite.payment_date)
-
                 if payroll_start_date <= payment_date <= payroll_end_date:
                     loan_perquisite_amount += perquisite.perquisite_amount or 0
 

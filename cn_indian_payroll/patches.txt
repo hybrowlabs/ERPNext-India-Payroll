@@ -11,3 +11,4 @@ cn_indian_payroll.cn_indian_payroll.patches.v16_0.category #23-10-2025
 cn_indian_payroll.cn_indian_payroll.patches.v16_0.sub_category #23-10-2025
 cn_indian_payroll.cn_indian_payroll.patches.v16_0.rename_marginal_relief_fields #26-04-2026
 cn_indian_payroll.cn_indian_payroll.patches.v16_0.rename_accrued_componets_field #26-04-2026
+cn_indian_payroll.cn_indian_payroll.patches.v16_0.rename_perquisit_information_doctype #26-04-2026

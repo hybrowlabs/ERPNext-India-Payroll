@@ -134,14 +134,16 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
             else:
                 previous_nps_amount = future_nps_amount = 0
-                for slip in get_all_salary_slip:
-                    get_each_salary_slip = frappe.get_doc("Salary Slip", slip.name)
-                    for each_slip_doc in get_each_salary_slip.earnings:
-                        nps_component = frappe.get_cached_doc(
-                            "Salary Component", each_slip_doc.salary_component
-                        )
-                        if nps_component.component_type == "NPS":
-                            previous_nps_amount += each_slip_doc.amount
+                slip_names = [s.name for s in get_all_salary_slip]
+                past_earnings = frappe.get_all(
+                    "Salary Detail",
+                    filters={"parent": ["in", slip_names], "parentfield": "earnings"},
+                    fields=["salary_component", "amount"],
+                )
+                for row in past_earnings:
+                    comp = frappe.get_cached_doc("Salary Component", row.salary_component)
+                    if comp.component_type == "NPS":
+                        previous_nps_amount += row.amount
 
                 new_salary_slip = make_salary_slip(
                     source_name=salary_structure,
@@ -374,24 +376,24 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 current_epf_amount = future_epf_amount = 0
                 current_pt_amount = future_pt_amount = 0
 
-                for slip in get_all_salary_slip:
-                    get_each_salary_slip = frappe.get_doc("Salary Slip", slip.name)
-
-                    for earning in get_each_salary_slip.earnings:
-                        get_earning_component = frappe.get_cached_doc(
-                            "Salary Component", earning.salary_component
-                        )
-                        if get_earning_component.component_type == "NPS":
-                            current_nps_amount += earning.amount
-
-                    for deduction in get_each_salary_slip.deductions:
-                        get_deduction_component = frappe.get_cached_doc(
-                            "Salary Component", deduction.salary_component
-                        )
-                        if get_deduction_component.component_type == "Provident Fund":
-                            current_epf_amount += deduction.amount
-                        if get_deduction_component.component_type == "Professional Tax":
-                            current_pt_amount += deduction.amount
+                slip_names = [s.name for s in get_all_salary_slip]
+                past_details = frappe.get_all(
+                    "Salary Detail",
+                    filters={
+                        "parent": ["in", slip_names],
+                        "parentfield": ["in", ["earnings", "deductions"]],
+                    },
+                    fields=["parentfield", "salary_component", "amount"],
+                )
+                for row in past_details:
+                    comp = frappe.get_cached_doc("Salary Component", row.salary_component)
+                    if row.parentfield == "earnings" and comp.component_type == "NPS":
+                        current_nps_amount += row.amount
+                    elif row.parentfield == "deductions":
+                        if comp.component_type == "Provident Fund":
+                            current_epf_amount += row.amount
+                        elif comp.component_type == "Professional Tax":
+                            current_pt_amount += row.amount
 
                 new_salary_slip = make_salary_slip(
                     source_name=salary_structure,
