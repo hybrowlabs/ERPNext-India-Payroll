@@ -23,7 +23,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     if (r.message && r.message.pdf_url) {
                         window.open(r.message.pdf_url, '_blank');
                     } else {
-                        frappe.msgprint("Failed to generate PDF");
+                        frappe.msgprint(__("Failed to generate PDF"));
                     }
                 }
             });

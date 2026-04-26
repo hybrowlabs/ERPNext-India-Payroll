@@ -1,13 +1,10 @@
 import json
 
 import frappe
-from frappe import _
 
 
 @frappe.whitelist()
 def get_salary_component(data=None, component=None):
-    frappe.only_for("HR Manager")
-
     try:
         data = json.loads(data)
 
@@ -22,7 +19,7 @@ def get_salary_component(data=None, component=None):
                     "disabled": 0,
                     "type": data.get("component_type"),
                 },
-                fields=["name"],
+                fields=["*"],
             )
 
             if len(existing_components) > 0:
@@ -56,11 +53,11 @@ def get_salary_component(data=None, component=None):
                         "disabled": 0,
                         "salary_component_abbr": data.get("abbr"),
                     },
-                    fields=["name"],
+                    fields=["*"],
                 )
 
                 if len(get_abbr_component) > 0:
-                    frappe.msgprint(_("Another component uses the same abbreviation, please change it"))
+                    frappe.msgprint(frappe._("Another component uses same abbr, please change the abbr"))
 
                 else:
                     get_each_doc = frappe.new_doc("Salary Component")
@@ -94,9 +91,9 @@ def get_salary_component(data=None, component=None):
                         get_library_item = frappe.get_doc("Salary Component Library Item", salary_component)
                         get_library_item.component_added = 1
                         get_library_item.save()
-                        frappe.msgprint(_("Salary Component Added"))
+                        frappe.msgprint(frappe._("Salary Component added"))
                     else:
-                        frappe.msgprint(_("Salary Component Added"))
+                        frappe.msgprint(frappe._("Salary Component added"))
 
             else:
                 get_abbr_component = frappe.get_list(
@@ -105,11 +102,11 @@ def get_salary_component(data=None, component=None):
                         "disabled": 0,
                         "salary_component_abbr": data.get("abbr"),
                     },
-                    fields=["name"],
+                    fields=["*"],
                 )
 
                 if len(get_abbr_component) > 0:
-                    frappe.msgprint(_("Another component uses the same abbreviation, please change it"))
+                    frappe.msgprint(frappe._("Another component uses same abbr, please change the abbr"))
 
                 else:
                     get_each_doc = frappe.new_doc("Salary Component")
@@ -148,9 +145,9 @@ def get_salary_component(data=None, component=None):
                         get_library_item = frappe.get_doc("Salary Component Library Item", salary_component)
                         get_library_item.component_added = 1
                         get_library_item.save()
-                        frappe.msgprint(_("Salary Component Added"))
+                        frappe.msgprint(frappe._("Salary Component added"))
                     else:
-                        frappe.msgprint(_("Salary Component Added"))
+                        frappe.msgprint(frappe._("Salary Component added"))
 
     except Exception as e:
         frappe.log_error(f"Error in get_salary_component: {e}")

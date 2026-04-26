@@ -1,7 +1,6 @@
 import json
 
 import frappe
-from frappe import _
 from frappe.utils import cstr, flt, getdate
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
@@ -14,9 +13,7 @@ def calculate_tds_projection(doc):
         doc = frappe._dict(json.loads(doc))
 
         if not doc.get("employee"):
-            frappe.throw(_("Employee is required to calculate TDS projection."))
-
-        frappe.has_permission("Salary Slip", "read", throw=True)
+            frappe.throw(frappe._("Employee is required to calculate TDS projection."))
 
         current_taxable_earnings_old_regime = 0
         current_taxable_earnings_new_regime = 0
@@ -55,24 +52,13 @@ def calculate_tds_projection(doc):
                 "custom_payroll_period": doc.get("payroll_period"),
                 "company": doc.get("company"),
             },
-            fields=[
-                "name",
-                "employee",
-                "salary_structure",
-                "from_date",
-                "currency",
-                "custom_payroll_period",
-                "income_tax_slab",
-                "custom_tax_regime",
-                "taxable_earnings_till_date",
-                "tax_deducted_till_date",
-            ],
+            fields=["*"],
             order_by="from_date asc",
             limit=1,
         )
 
         if not salary_assignment:
-            frappe.throw(_("No active Salary Structure Assignment found."))
+            frappe.throw(frappe._("No active Salary Structure Assignment found."))
 
         assignment = frappe.get_doc("Salary Structure Assignment", salary_assignment[0].name)
 
@@ -103,15 +89,12 @@ def calculate_tds_projection(doc):
             fields=["name"],
         )
 
-        if loan_repayments:
-            repayment_names = [r.name for r in loan_repayments]
-            all_perquisites = frappe.get_all(
-                "Loan Perquisite Child",
-                filters={"parent": ["in", repayment_names]},
-                fields=["payment_date", "perquisite_amount"],
-            )
-            for perquisite in all_perquisites:
+        for repayment in loan_repayments:
+            repayment_doc = frappe.get_doc("Loan Repayment Schedule", repayment.name)
+
+            for perquisite in repayment_doc.custom_loan_perquisite or []:
                 payment_date = getdate(perquisite.payment_date)
+
                 if payroll_start_date <= payment_date <= payroll_end_date:
                     loan_perquisite_amount += perquisite.perquisite_amount or 0
 
@@ -193,6 +176,7 @@ def calculate_tds_projection(doc):
                     if component.custom_regime == "All" and component.component_type == "NPS":
                         nps_amount += earning.amount
 
+                # Deductions
                 for deduction in salary_slip.deductions:
                     component = frappe.get_cached_doc("Salary Component", deduction.salary_component)
 
@@ -306,7 +290,7 @@ def calculate_tds_projection(doc):
                 "custom_component_type": "Provident Fund",
                 "is_active": 1,
             },
-            fields=["name", "max_amount"],
+            fields=["*"],
         )
         if get_exemption_sub_category:
             eighty_c_maximum_limit = get_exemption_sub_category[0].max_amount
@@ -442,10 +426,10 @@ def calculate_tax_by_tax_slab(
 
     if (
         tax_slab.custom_marginal_relief_applicable
-        and tax_slab.custom_minimum_value
-        and tax_slab.custom_maximum_value
-    ) and (tax_slab.custom_minimum_value < annual_taxable_earning < tax_slab.custom_maximum_value):
-        excess_income = annual_taxable_earning - tax_slab.custom_minimum_value
+        and tax_slab.custom_minmum_value
+        and tax_slab.custom_maximun_value
+    ) and (tax_slab.custom_minmum_value < annual_taxable_earning < tax_slab.custom_maximun_value):
+        excess_income = annual_taxable_earning - tax_slab.custom_minmum_value
         if base_tax > excess_income:
             base_tax = excess_income
 
