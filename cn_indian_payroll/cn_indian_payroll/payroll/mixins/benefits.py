@@ -60,6 +60,7 @@ class BenefitsMixin:
         current_epf_value = current_pt_value = 0
         future_basic_value = future_hra_value = future_nps_value = 0
         future_epf_value = future_pt_value = 0
+        current_lta_value = previous_lta_value = future_lta_value = 0
 
         for earning in self.earnings or []:
             sc = frappe.get_cached_doc("Salary Component", earning.salary_component)
@@ -67,6 +68,10 @@ class BenefitsMixin:
                 current_nps_value += earning.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
                     future_nps_value = (earning.default_amount or 0) * self.custom_month_count
+            if sc.component_type == "LTA":
+                current_lta_value += earning.amount or 0
+                if sc.custom_component_sub_type == "Fixed":
+                    future_lta_value = (earning.default_amount or 0) * self.custom_month_count
             if earning.salary_component == current_basic:
                 current_basic_value += earning.amount or 0
                 if sc.custom_component_sub_type == "Fixed":
@@ -118,6 +123,8 @@ class BenefitsMixin:
                 sc = frappe.get_cached_doc("Salary Component", earning.salary_component)
                 if sc.component_type == "NPS":
                     previous_nps_value += earning.amount or 0
+                if sc.component_type == "LTA":
+                    previous_lta_value += earning.amount or 0
                 if earning.salary_component == current_basic:
                     previous_basic_value += earning.amount or 0
                 if earning.salary_component == current_hra:
@@ -151,8 +158,14 @@ class BenefitsMixin:
         total_nps = round(previous_nps_value + future_nps_value + current_nps_value)
         total_pf = min(round(previous_epf_value + future_epf_value + current_epf_value), 150_000)
         total_pt = round(previous_pt_value + future_pt_value + current_pt_value)
+        total_lta = round(previous_lta_value + future_lta_value + current_lta_value)
 
-        component_type_map = {"NPS": total_nps, "Provident Fund": total_pf, "Professional Tax": total_pt}
+        component_type_map = {
+            "NPS": total_nps,
+            "Provident Fund": total_pf,
+            "Professional Tax": total_pt,
+            "LTA": total_lta,
+        }
 
         for subcategory in decl_doc.declarations:
             sub_cat_doc = frappe.get_cached_doc(
@@ -202,8 +215,10 @@ class BenefitsMixin:
                 future_hra_value,
             )
 
-        decl_doc.custom_status = "Approved"
-        decl_doc.save()
+        # decl_doc.save()
+        decl_doc.flags.ignore_validate = True
+        decl_doc.flags.ignore_mandatory = True
+        decl_doc.save(ignore_permissions=True)
         self.tax_exemption_declaration = decl_doc.total_exemption_amount
 
     # Private helpers
@@ -267,19 +282,3 @@ class BenefitsMixin:
             if month_name not in months:
                 months.append(month_name)
             current_date = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
-
-        earned_basic = (basic_10_pct * 10) * metro_pct / 100
-
-        decl_doc.custom_hra_breakup = []
-        for month in months:
-            decl_doc.append(
-                "custom_hra_breakup",
-                {
-                    "month": month,
-                    "rent_paid": round(annual_hra),
-                    "hra_received": round(total_hra),
-                    "earned_basic": round(earned_basic),
-                    "excess_of_rent_paid": round(rule2),
-                    "exemption_amount": final_hra_exemption,
-                },
-            )

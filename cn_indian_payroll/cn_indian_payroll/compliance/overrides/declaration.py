@@ -128,6 +128,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
                         get_declaration.custom_declaration_form_data = json.dumps(json_data)
                         get_declaration.custom_income_tax = selected_regime
+                        get_declaration.custom_tax_regime = regime
                         get_declaration.save()
 
                         get_assignment_doc = frappe.get_doc(
@@ -201,6 +202,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
                 get_declaration.custom_declaration_form_data = json.dumps(json_data)
                 get_declaration.custom_income_tax = selected_regime
+                get_declaration.custom_tax_regime = regime
 
                 if get_declaration.monthly_house_rent:
                     get_declaration.get_declaration = None
@@ -367,6 +369,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
 
                 get_declaration.custom_declaration_form_data = json.dumps(json_data)
                 get_declaration.custom_income_tax = selected_regime
+                get_declaration.custom_tax_regime = regime
                 get_declaration.save()
 
                 get_assignment_doc = frappe.get_doc(
@@ -534,6 +537,7 @@ def choose_regime(doc_id, employee, payroll_period, company, regime):
                 get_declaration.custom_declaration_form_data = json.dumps(json_data)
 
                 get_declaration.custom_income_tax = selected_regime
+                get_declaration.custom_tax_regime = regime
                 get_declaration.save()
 
                 get_assignment_doc = frappe.get_doc(

@@ -231,8 +231,6 @@ fixtures = [
     {"dt": "Salary Component Library Item"},
     {"dt": "India Payroll State"},
     {"dt": "Frequency"},
-    {"dt": "Zone"},
-    {"dt": "Skill Level"},
 ]
 
 doctype_js = {
@@ -259,9 +257,6 @@ doc_events = {
         "before_save": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_save",
         "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.loans.overrides.loan_repayment.before_update_after_submit",  # noqa: E501
     },
-    # "Salary Component": {
-    #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_component.validate",
-    # },
 }
 
 website_route_rules = [
