@@ -40,5 +40,8 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "title",
+ "search_fields": "title",
+ "description": "Configures slab mapping for Old Regime and New Regime income tax computation."
 }

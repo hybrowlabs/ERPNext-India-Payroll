@@ -1,0 +1,137 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"shortcuts\",\"type\":\"header\",\"data\":{\"text\":\"Shortcuts\",\"col\":12}},{\"id\":\"shortcut-1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payroll Entry\",\"col\":3}},{\"id\":\"shortcut-2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Slip\",\"col\":3}},{\"id\":\"shortcut-3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Joining Arrear\",\"col\":3}},{\"id\":\"shortcut-4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Component Library Item\",\"col\":3}},{\"id\":\"cards\",\"type\":\"header\",\"data\":{\"text\":\"Configuration\",\"col\":12}},{\"id\":\"card-1\",\"type\":\"card\",\"data\":{\"card_name\":\"Configuration\",\"col\":4}},{\"id\":\"card-2\",\"type\":\"card\",\"data\":{\"card_name\":\"Tax & Compliance\",\"col\":4}},{\"id\":\"card-3\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "creation": "2026-04-26 00:00:00.000000",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "is_hidden": 0,
+ "label": "India Payroll Operations",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Configuration",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Structure Setting",
+   "link_to": "Structure Setting",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Income Tax Regime",
+   "link_to": "Income Tax Regime",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "India Payroll State",
+   "link_to": "India Payroll State",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tax & Compliance",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tax Declaration History",
+   "link_to": "Tax Declaration History",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Form 16",
+   "link_to": "Form 16",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "EPF Challan Report",
+   "link_to": "EPF Challan Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "New Joinee Arrear Report",
+   "link_to": "New Joinee Arrear Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-04-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "India Payroll Operations",
+ "owner": "Administrator",
+ "parent_page": "Payroll",
+ "public": 1,
+ "roles": [],
+ "sequence_id": 1,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "format": "{} Active",
+   "label": "Payroll Entry",
+   "link_to": "Payroll Entry",
+   "stats_filter": "{\"docstatus\": [\"!=\", 2]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "label": "Salary Slip",
+   "link_to": "Salary Slip",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "label": "New Joining Arrear",
+   "link_to": "New Joining Arrear",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "label": "Salary Component Library Item",
+   "link_to": "Salary Component Library Item",
+   "type": "DocType"
+  }
+ ]
+}

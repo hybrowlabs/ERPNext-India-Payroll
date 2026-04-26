@@ -154,7 +154,7 @@ frappe.pages['payroll-configuratio'].on_page_load = function(wrapper) {
 
                             function callCreateComponentAPI() {
                                 frappe.call({
-                                    method: "cn_indian_payroll.cn_indian_payroll.overrides.payroll_configuration.get_salary_component",
+                                    method: "cn_indian_payroll.cn_indian_payroll.compliance.overrides.payroll_configuration.get_salary_component",
                                     args: {
                                         data: rowData,
                                         component: salary_component_array,

@@ -69,5 +69,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "description": "Single doctype to mass-create Salary Structure Assignments for all active employees at a given effective date."
 }

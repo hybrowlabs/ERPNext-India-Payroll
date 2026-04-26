@@ -67,5 +67,8 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "state_name",
+ "search_fields": "state_name",
+ "description": "India payroll state configuration including Professional Tax and LWF settings."
 }

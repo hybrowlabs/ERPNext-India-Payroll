@@ -181,7 +181,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
     tds_projection_html(frm) {
         if (frm.doc.docstatus === 1) {
                 frappe.call({
-                    method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_projection_calculation.calculate_tds_projection",
+                    method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.tds_projection_calculation.calculate_tds_projection",
                     args: {
                         doc: frm.doc
                     },
@@ -416,7 +416,7 @@ window.open_regime_dialog = function(docname) {
             
 
             frappe.call({
-                method: "cn_indian_payroll.cn_indian_payroll.overrides.declaration.choose_regime",
+                method: "cn_indian_payroll.cn_indian_payroll.compliance.overrides.declaration.choose_regime",
                 args: {
 
                     doc_id: cur_frm.doc.name,

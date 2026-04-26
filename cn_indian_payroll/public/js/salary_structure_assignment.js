@@ -11,7 +11,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
         frm.add_custom_button(__('View CTC BreakUp'), async function() {
             frappe.call({
-                method: "cn_indian_payroll.cn_indian_payroll.overrides.salary_structure_assignment.generate_ctc_pdf",
+                method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_structure_assignment.generate_ctc_pdf",
                 args: {
                     employee: frm.doc.employee,
                     salary_structure: frm.doc.salary_structure,

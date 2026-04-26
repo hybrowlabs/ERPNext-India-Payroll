@@ -10,7 +10,7 @@ frappe.ui.form.on("Salary Slip", {
               }
 
               frappe.call({
-                method: "cn_indian_payroll.cn_indian_payroll.overrides.tds_printer.get_annual_statement_pdf",
+                method: "cn_indian_payroll.cn_indian_payroll.payroll.overrides.tds_printer.get_annual_statement_pdf",
                 args: {
                   employee: frm.doc.employee,
                   payroll_period: frm.doc.custom_payroll_period,

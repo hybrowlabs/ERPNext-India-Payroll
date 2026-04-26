@@ -199,5 +199,8 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "employee_name",
+ "search_fields": "employee,employee_name,company",
+ "description": "Arrear payment for a new employee covering their joining-month portion."
 }

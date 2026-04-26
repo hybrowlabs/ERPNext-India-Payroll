@@ -251,6 +251,7 @@ override_doctype_class = {
     "Salary Structure Assignment": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.salary_structure_assignment.CustomSalaryStructureAssignment",  # noqa: E501
     "Employee Tax Exemption Declaration": "cn_indian_payroll.cn_indian_payroll.compliance.overrides.tax_declaration.CustomEmployeeTaxExemptionDeclaration",  # noqa: E501
     "Additional Salary": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.additional_salary.CustomAdditionalSalary",  # noqa: E501
+    "Payroll Correction": "cn_indian_payroll.cn_indian_payroll.payroll.overrides.payroll_correction.CustomPayrollCorrection",  # noqa: E501
 }
 
 doc_events = {

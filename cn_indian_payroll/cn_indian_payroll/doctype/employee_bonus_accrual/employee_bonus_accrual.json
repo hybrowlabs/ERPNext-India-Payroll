@@ -118,7 +118,7 @@
    "default": "0",
    "fieldname": "is_paid",
    "fieldtype": "Check",
-   "label": "Is Paid"
+   "label": "Paid"
   },
   {
    "allow_on_submit": 1,

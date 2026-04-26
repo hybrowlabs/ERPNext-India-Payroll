@@ -6,11 +6,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "accrued_componets"
+  "accrued_components"
  ],
  "fields": [
   {
-   "fieldname": "accrued_componets",
+   "fieldname": "accrued_components",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Accrued Components",
