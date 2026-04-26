@@ -182,7 +182,7 @@ def get_annual_statement_pdf(employee, payroll_period, end_date, month, tax_regi
 
     sub_category = frappe.get_all(
         "Employee Tax Exemption Sub Category",
-        filters={"custom_component_type": "LTA Reimbursement"},
+        filters={"custom_component_type": "LTA"},
         fields=["name"],
         limit=1,
     )

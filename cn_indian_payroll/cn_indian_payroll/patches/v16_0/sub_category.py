@@ -117,6 +117,7 @@ def execute():
         {
             "custom_description": "LTA U/s 10 (5)",
             "custom_sequence": 45,
+            "custom_component_type": "LTA",
             "docstatus": 0,
             "doctype": "Employee Tax Exemption Sub Category",
             "exemption_category": "Section 10(14)",
@@ -124,6 +125,7 @@ def execute():
             "max_amount": 0.0,
             "modified": "2025-07-09 14:22:20.364387",
             "name": "LTA U/s 10 (5)",
+
         },
         {
             "custom_description": "Uniform Allowance",

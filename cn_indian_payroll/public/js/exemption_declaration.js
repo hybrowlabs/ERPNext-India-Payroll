@@ -3,7 +3,7 @@
 frappe.ui.form.on('Employee Tax Exemption Declaration', {
     refresh(frm) {
         frm.trigger("display_declaration_form");
-        // frm.trigger("tds_projection_html");
+        frm.trigger("tds_projection_html");
     },
 
 
@@ -350,7 +350,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                             </tr>
 
                                             <tr style="font-weight: bold; background-color: #e9ecef;">
-                                                <td style="padding: 10px; border: 1px solid #ddd;">Selected Regime</td>
+                                                <td style="padding: 10px; border: 1px solid #ddd;">Opted Regime</td>
                                                 <td colspan="2"><div style="text-align: right"><center>${data.selected_regime}</div></td>
                                                 
                                             </tr>
@@ -360,17 +360,6 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
                                                 Change Regime
                                             </button></td>
                                             </tr>
-
-                                            
-
-
-
-
-
-
-
-
-
 
                                         </tbody>
                                     </table>
@@ -433,7 +422,8 @@ window.open_regime_dialog = function(docname) {
 
                         dialog.hide();
 
-                        // reload form properly
+                        frm.set_value("custom_tax_regime", values.tax_regime);
+
                         cur_frm.reload_doc();
                     }
                 }

@@ -25,7 +25,6 @@ def get_salary_slips(filters=None):
             "custom_month",
             "custom_payroll_period",
             "custom_annual_ctc",
-            "custom_statutory_grosspay",
             "custom_total_income",
             "custom_total_deduction_amount",
             "custom_net_pay_amount",
@@ -50,7 +49,7 @@ def get_salary_slips(filters=None):
         agg["no_of_employee"] += 1
         agg["ctc_pa"] += slip.custom_annual_ctc or 0
         agg["ctc_pm"] += (slip.custom_annual_ctc or 0) / 12
-        agg["gross_pay"] += slip.custom_statutory_grosspay or 0
+        agg["gross_pay"] += slip.gross_pay or 0
         agg["total_income"] += slip.custom_total_income or 0
         agg["total_deduction"] += slip.custom_total_deduction_amount or 0
         agg["total_net_pay"] += slip.custom_net_pay_amount or 0

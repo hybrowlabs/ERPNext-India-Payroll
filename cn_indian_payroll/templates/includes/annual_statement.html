@@ -206,26 +206,14 @@
 
 
       <tr>
-        <td>Deducted Amount</td>
+        <td>Additional TDS Deducted Amount</td>
         {% for val in tds_amounts %}
           <td>{{ "{:,.0f}".format(val) }}</td>
         {% endfor %}
         <td>{{ "{:,.0f}".format(tds_amounts_sum) }}</td>
       </tr>
 
-      <tr>
-        <td>Net Amount</td>
-        {% for val in offcycle_net_pay %}
-          <td>{{ "{:,.0f}".format(val) }}</td>
-        {% endfor %}
-        <td>{{ "{:,.0f}".format(tds_net_sum) }}</td>
-      </tr>
-
-
-
-
-
-
+    
 
     </tbody>
 
@@ -477,22 +465,6 @@
         {{tds}}
       </td>
     </tr>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

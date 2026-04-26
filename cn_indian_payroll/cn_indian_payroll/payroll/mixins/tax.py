@@ -376,7 +376,7 @@ class TaxMixin:
 
     def tax_calculation(self) -> None:
         if self.annual_taxable_amount:
-            self.custom_taxable_amount = round(self.annual_taxable_amount)
+            self.custom_taxable_amount = round(self.annual_taxable_amount or 0)
 
         if self.ctc and self.non_taxable_earnings:
             self.custom_total_income_with_taxable_component = round(self.ctc - self.non_taxable_earnings)
@@ -407,7 +407,7 @@ class TaxMixin:
         self.custom_tax_slab = []
         from_amount, to_amount, percentage, difference, total_value = [], [], [], [], []
 
-        taxable = round(self.annual_taxable_amount)
+        taxable = round(self.annual_taxable_amount or 0)
 
         for slab in total_array:
             if slab["to"] == 0.0:
@@ -449,7 +449,7 @@ class TaxMixin:
 
         total_sum = sum(total_value)
 
-        if self.custom_taxable_amount < rebate:
+        if (self.custom_taxable_amount or 0) < rebate:
             self.custom_tax_on_total_income = total_sum
             self.custom_rebate_under_section_87a = total_sum
             self.custom_total_tax_on_income = 0
@@ -458,7 +458,7 @@ class TaxMixin:
             self.custom_tax_on_total_income = total_sum
             self.custom_total_tax_on_income = total_sum
 
-        if self.custom_taxable_amount > 5_000_000:
+        if (self.custom_taxable_amount or 0) > 5_000_000:
             self.custom_surcharge = round(self.custom_total_tax_on_income * 10 / 100)
         else:
             self.custom_surcharge = 0
