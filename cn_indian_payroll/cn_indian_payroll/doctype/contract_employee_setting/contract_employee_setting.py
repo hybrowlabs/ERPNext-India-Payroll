@@ -15,47 +15,82 @@ class ContractEmployeeSetting(Document):
 
 
 
+@frappe.whitelist()
+def get_workflow_policy_details(policy_name):
 
-# # def fetch_from_remote(resource, filters=None):
+    settings = frappe.get_single("Integration Settings")
 
-# #     settings = frappe.get_single("Integration Settings")
+    url = f"{settings.url}/api/resource/Workflow Policy/{policy_name}"
 
-# #     if not settings.url or not settings.api_key or not settings.api_secret:
-# #         frappe.throw("Integration Settings is incomplete")
+    headers = {
+        "Authorization": f"token {settings.api_key}:{settings.api_secret}",
+        "Accept": "application/json"
+    }
 
-# #     url = urljoin(
-# #         settings.url,
-# #         f"/api/resource/{resource}"
-# #     )
+    try:
+        resp = requests.get(url, headers=headers, timeout=30)
+    except Exception as e:
+        frappe.throw(f"Connection failed: {str(e)}")
 
-# #     headers = {
-# #         "Authorization": f"token {settings.api_key}:{settings.api_secret}",
-# #         "Accept": "application/json"
-# #     }
+    if resp.status_code != 200:
+        frappe.throw(f"API failed: {resp.text}")
 
-# #     params = {
-# #         "limit_page_length": 0
-# #     }
+    data = resp.json().get("data", {})
 
-# #     # ✅ Apply filters if provided
-# #     if filters:
-# #         params["filters"] = frappe.as_json(filters)
+    categories = data.get("applicable_business_category", [])
 
-# #     try:
-# #         resp = requests.get(
-# #             url,
-# #             headers=headers,
-# #             params=params,
-# #             timeout=30
-# #         )
+    segments = data.get("applicable_business_segment", [])
 
-# #     except Exception as e:
-# #         frappe.throw(f"Connection failed: {str(e)}")
+    department = data.get("applicable_department", [])
 
-# #     if resp.status_code != 200:
-# #         frappe.throw(f"{resource} API failed: {resp.text}")
 
-# #     return resp.json().get("data", [])
+    return {
+    "categories": categories,
+    "segments": segments,
+    "department": department
+    }
+
+
+def fetch_from_remote(resource, filters=None):
+
+    settings = frappe.get_single("Integration Settings")
+
+    if not settings.url or not settings.api_key or not settings.api_secret:
+        frappe.throw("Integration Settings is incomplete")
+
+    url = urljoin(
+        settings.url,
+        f"/api/resource/{resource}"
+    )
+
+    headers = {
+        "Authorization": f"token {settings.api_key}:{settings.api_secret}",
+        "Accept": "application/json"
+    }
+
+    params = {
+        "limit_page_length": 0
+    }
+
+    # ✅ Apply filters if provided
+    if filters:
+        params["filters"] = frappe.as_json(filters)
+
+    try:
+        resp = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            timeout=30
+        )
+
+    except Exception as e:
+        frappe.throw(f"Connection failed: {str(e)}")
+
+    if resp.status_code != 200:
+        frappe.throw(f"{resource} API failed: {resp.text}")
+
+    return resp.json().get("data", [])
 
 
 # # @frappe.whitelist()
@@ -63,74 +98,16 @@ class ContractEmployeeSetting(Document):
 # #     return fetch_from_remote("Item")
 
 
-# # @frappe.whitelist()
-# # def get_company_list():
-# #     return fetch_from_remote("Company")
 
 
-# # @frappe.whitelist()
-# # def get_item_tax_template():
-# #     return fetch_from_remote("Item Tax Template")
+@frappe.whitelist()
+def get_workflow_policy_list():
+    return fetch_from_remote("Workflow Policy")
 
+@frappe.whitelist()
+def get_business_location_list():
+    return fetch_from_remote("Location")
 
-# # @frappe.whitelist()
-# # def get_payment_terms_template():
-# #     return fetch_from_remote("Purchase Taxes and Charges Template")
-
-
-
-# # @frappe.whitelist()
-# # def get_department_list():
-# #     return fetch_from_remote("Department")
-
-
-# # @frappe.whitelist()
-# # def get_worklocation_list():
-# #     return fetch_from_remote("Branch")
-
-
-# # @frappe.whitelist()
-# # def get_tax_with_hold_category_list():
-# #     return fetch_from_remote("Tax Withholding Category")
-
-
-
-# # @frappe.whitelist()
-# # def get_business_category_list():
-# #     return fetch_from_remote("Business Category")
-
-
-# # @frappe.whitelist()
-# # def get_business_segment_list():
-# #     return fetch_from_remote("Business Segment")
-
-
-
-# # @frappe.whitelist()
-# # def get_workflow_policy_list():
-# #     return fetch_from_remote("Workflow Policy")
-
-
-# @frappe.whitelist()
-# def get_bank_accounts_by_supplier(supplier_id):
-
-#     if not supplier_id:
-#         return []
-
-#     filters = [
-#         ["party_type", "=", "Supplier"],
-#         ["party", "=", supplier_id]
-#     ]
-
-#     data = fetch_from_remote("Bank Account", filters)
-
-#     # Return only names (for dropdown)
-#     bank_accounts = []
-
-#     for d in data:
-#         bank_accounts.append(d.get("name"))
-
-#     return bank_accounts
 
 
 

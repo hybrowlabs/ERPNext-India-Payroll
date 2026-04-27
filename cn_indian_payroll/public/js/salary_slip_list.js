@@ -34,17 +34,7 @@ frappe.listview_settings['Salary Slip'] = {
                         let dialog = new frappe.ui.Dialog({
                             title: __('Send Bulk E-Sign'),
                             fields: [
-                                {
-                                    fieldname: 'month',
-                                    label: __('Month'),
-                                    fieldtype: 'Select',
-                                    options: [
-                                        'January', 'February', 'March', 'April',
-                                        'May', 'June', 'July', 'August',
-                                        'September', 'October', 'November', 'December'
-                                    ],
-                                    reqd: 1
-                                },
+                               
                                 {
                                     fieldname: 'company',
                                     label: __('Company'),
@@ -84,7 +74,18 @@ frappe.listview_settings['Salary Slip'] = {
                                             }
                                         };
                                     }
-                                }
+                                },
+                                 {
+                                    fieldname: 'month',
+                                    label: __('Month'),
+                                    fieldtype: 'Select',
+                                    options: [
+                                        'January', 'February', 'March', 'April',
+                                        'May', 'June', 'July', 'August',
+                                        'September', 'October', 'November', 'December'
+                                    ],
+                                    reqd: 1
+                                },
                             ],
                             primary_action_label: __('Send'),
                             primary_action(values) {
@@ -119,19 +120,9 @@ frappe.listview_settings['Salary Slip'] = {
             function () {
 
                  let dialog = new frappe.ui.Dialog({
-                            title: __('Send Bulk E-Sign'),
+                            title: __('Send Bulk Invoice to ERP'),
                             fields: [
-                                {
-                                    fieldname: 'month',
-                                    label: __('Month'),
-                                    fieldtype: 'Select',
-                                    options: [
-                                        'January', 'February', 'March', 'April',
-                                        'May', 'June', 'July', 'August',
-                                        'September', 'October', 'November', 'December'
-                                    ],
-                                    reqd: 1
-                                },
+                                
                                 {
                                     fieldname: 'company',
                                     label: __('Company'),
@@ -158,8 +149,20 @@ frappe.listview_settings['Salary Slip'] = {
                                         };
                                     }
                                 },
+                                {
+                                    fieldname: 'month',
+                                    label: __('Month'),
+                                    fieldtype: 'Select',
+                                    options: [
+                                        'January', 'February', 'March', 'April',
+                                        'May', 'June', 'July', 'August',
+                                        'September', 'October', 'November', 'December'
+                                    ],
+                                    reqd: 1
+                                },
                                
                             ],
+                            
                             primary_action_label: __('Send'),
                             primary_action(values) {
 

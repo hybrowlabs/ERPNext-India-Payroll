@@ -4,58 +4,55 @@ frappe.ui.form.on("Employee", {
 
     refresh(frm) {
 
-            hide_consultant_fields(frm);
+        hide_consultant_fields(frm);
 
-        // Run toggle logic
-        // frm.trigger("toggle_fields");
+        frm.trigger("toggle_fields");
+        fetch_business_categories(frm);
 
-        // if (frm.doc.custom_supplier_id) {
-        //     fetch_bank_accounts(frm);
-        // }
+
+        
     },
 
+   custom_work_flow_policy(frm) {
+
+   fetch_business_categories(frm);
+},
     employment_type(frm) {
         hide_consultant_fields(frm);
     },
 
-    // employment_type(frm) {
-    //     // Re-check when employment type changes
-    //     frm.trigger("toggle_fields");
-    // },
+    employment_type(frm) {
+        frm.trigger("toggle_fields");
+    },
 
-    // custom_supplier_id(frm) {
-    //     if (frm.doc.custom_supplier_id) {
-    //         fetch_bank_accounts(frm);
-    //     }
-    // },
 
-    // toggle_fields(frm) {
+    toggle_fields(frm) {
 
-    //     if (frm._payroll_settings) {
-    //         apply_settings(frm, frm._payroll_settings);
-    //         return;
-    //     }
+        if (frm._payroll_settings) {
+            apply_settings(frm, frm._payroll_settings);
+            return;
+        }
 
-    //     frappe.call({
-    //         method: "frappe.client.get",
-    //         args: {
-    //             doctype: "Payroll Settings",
-    //             name: "Payroll Settings"
-    //         },
-    //         callback(r) {
+        frappe.call({
+            method: "frappe.client.get",
+            args: {
+                doctype: "Payroll Settings",
+                name: "Payroll Settings"
+            },
+            callback(r) {
 
-    //             if (!r.message) return;
+                if (!r.message) return;
 
-    //             // Cache settings in form object
-    //             frm._payroll_settings = r.message;
+                // Cache settings in form object
+                frm._payroll_settings = r.message;
 
-    //             apply_settings(frm, r.message);
-    //         },
-    //         error() {
-    //             frappe.msgprint("Unable to load Payroll Settings");
-    //         }
-    //     });
-    // }
+                apply_settings(frm, r.message);
+            },
+            error() {
+                frappe.msgprint("Unable to load Payroll Settings");
+            }
+        });
+    }
 });
 function hide_consultant_fields(frm) {
 
@@ -112,9 +109,9 @@ function apply_settings(frm, settings) {
 
     toggle_custom_fields(frm, is_match);
 
-    // if (is_match) {
-    //     load_select_options(frm);
-    // }
+    if (is_match) {
+        load_select_options(frm);
+    }
 }
 
 
@@ -128,11 +125,13 @@ function toggle_custom_fields(frm, show) {
         "custom_business_category",
         "custom_business_segment",
         "custom_work_flow_policy",
-        "custom_bank_account_in_erp"
+        "custom_business_department",
+        "custom_location_in_erp",
     ];
 
     fields.forEach(field => {
         frm.set_df_property(field, "hidden", show ? 0 : 1);
+        frm.set_df_property(field, "reqd", show ? 1 : 0);
     });
 
     frm.refresh_fields(fields);
@@ -143,19 +142,18 @@ function toggle_custom_fields(frm, show) {
 
 function load_select_options(frm) {
 
-    fetch_options(
-        "cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting.get_business_segment_list",
-        opts => set_options(frm, "custom_business_segment", opts)
-    );
 
-    fetch_options(
-        "cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting.get_business_category_list",
-        opts => set_options(frm, "custom_business_category", opts)
-    );
 
     fetch_options(
         "cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting.get_workflow_policy_list",
         opts => set_options(frm, "custom_work_flow_policy", opts)
+    );
+
+
+
+    fetch_options(
+        "cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting.get_business_location_list",
+        opts => set_options(frm, "custom_location_in_erp", opts)
     );
 }
 
@@ -213,6 +211,75 @@ function fetch_bank_accounts(frm) {
 
                 frm.refresh_field("custom_bank_account_in_erp");
             }
+        }
+    });
+}
+
+
+function fetch_business_categories(frm) {
+
+    if (!frm.doc.custom_work_flow_policy) return;
+
+    frappe.call({
+        method: "cn_indian_payroll.cn_indian_payroll.doctype.contract_employee_setting.contract_employee_setting.get_workflow_policy_details",
+        args: {
+            policy_name: frm.doc.custom_work_flow_policy
+        },
+
+        callback: function (r) {
+
+            if (!r.message) {
+                frappe.msgprint("No data found");
+                return;
+            }
+
+            let categories = r.message.categories || [];
+            let segments = r.message.segments || [];
+            let departments = r.message.department || [];
+
+            let category_options = categories.map(d => d.business_category || "");
+            category_options.unshift("");
+
+            frm.fields_dict.custom_business_category.grid.update_docfield_property(
+                "business_category",
+                "options",
+                category_options.join("\n")
+            );
+
+            
+
+            let department_options = departments.map(d => d.department || "");
+            department_options.unshift("");
+
+            console.log("Department Options:", department_options);
+
+            if (frm.fields_dict.custom_business_department) {
+                frm.fields_dict.custom_business_department.grid.update_docfield_property(
+                    "department",
+                    "options",
+                    department_options.join("\n")
+                );
+                frm.refresh_field("custom_business_department");
+            }
+
+            let segment_options = segments.map(d => d.business_segment || "");
+            segment_options.unshift("");
+
+            if (frm.fields_dict.custom_business_segment) {
+                frm.fields_dict.custom_business_segment.grid.update_docfield_property(
+                    "business_segment",
+                    "options",
+                    segment_options.join("\n")
+                );
+
+                frm.refresh_field("custom_business_segment");
+            }
+
+            frm.refresh_field("custom_business_category");
+        },
+
+        error: function () {
+            frappe.msgprint("Server error while loading data");
         }
     });
 }
