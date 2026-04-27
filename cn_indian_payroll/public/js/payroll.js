@@ -1,4 +1,44 @@
 frappe.ui.form.on('Payroll Entry', {
+    setup(frm) {
+        frappe.templates["employees_with_unmarked_attendance"] = `
+{% if (data.length) { %}
+<div class="form-message yellow">
+    <div>
+        {{
+            __(
+                "Attendance is pending for these employees between the selected payroll dates. Mark attendance to proceed. Refer {0} for details.",
+                ["<a href='/app/query-report/Monthly%20Attendance%20Sheet'>Monthly Attendance Sheet</a>"]
+            )
+        }}
+    </div>
+</div>
+<table class="table table-bordered small">
+    <thead>
+        <tr>
+            <th style="width: 14%" class="text-left">{{ __("Employee") }}</th>
+            <th style="width: 18%" class="text-left">{{ __("Employee Name") }}</th>
+            <th style="width: 10%" class="text-left">{{ __("Unmarked Days") }}</th>
+            <th style="width: 30%" class="text-left">{{ __("Unmarked Dates") }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for (var i = 0, l = data.length; i < l; i++) { %}
+            <tr>
+                <td class="text-left"> {{ data[i].employee }} </td>
+                <td class="text-left"> {{ data[i].employee_name }} </td>
+                <td class="text-left"> {{ data[i].unmarked_days }} </td>
+                <td class="text-left"> {{ data[i].unmarked_dates || "" }} </td>
+            </tr>
+        {% } %}
+    </tbody>
+</table>
+{% } else { %}
+<div class="form-message green">
+    <div>{{ __("Attendance has been marked for all the employees between the selected payroll dates.") }}</div>
+</div>
+{% } %}
+        `;
+    },
 
     refresh(frm)
     {
