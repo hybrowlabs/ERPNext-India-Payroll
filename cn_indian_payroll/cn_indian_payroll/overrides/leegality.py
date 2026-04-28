@@ -606,6 +606,11 @@ def create_purchase_invoice(salary_slip):
         file_attach_url = None
         file_challan_url = None
 
+        # Company
+        company_name = None
+        department_name=None
+        worklocation_name=None
+
 
         # Upload custom_attach
         if slip.custom_attach:
@@ -637,11 +642,21 @@ def create_purchase_invoice(salary_slip):
 
         employee = frappe.get_doc("Employee", slip.employee)
 
+
+
         supplier_id = employee.custom_supplier_id
-        business_category=employee.custom_business_category
-        business_segment=employee.custom_business_segment
-        bank_acc=employee.custom_bank_account_in_erp
-        work_flow_policy=employee.custom_work_flow_policy
+
+        department_name=employee.custom_business_department[0].department if employee.custom_business_department else None
+        business_category=employee.custom_business_category[0].business_category if employee.custom_business_category else None
+        business_segment=employee.custom_business_segment[0].business_segment if employee.custom_business_segment else None
+        bank_acc=employee.custom_bank_account_in_erp if employee.custom_bank_account_in_erp else None
+        work_flow_policy=employee.custom_work_flow_policy if employee.custom_work_flow_policy else None
+        worklocation_name=employee.custom_location_in_erp if employee.custom_location_in_erp else None
+
+
+        departments = [d.department for d in employee.custom_business_department] if employee.custom_business_department else []
+        categories = [c.business_category for c in employee.custom_business_category] if employee.custom_business_category else []
+        segments = [s.business_segment for s in employee.custom_business_segment] if employee.custom_business_segment else []
 
         posting_date = frappe.utils.formatdate(
             slip.posting_date, "yyyy-mm-dd"
@@ -658,10 +673,7 @@ def create_purchase_invoice(salary_slip):
 
         employee_setting = frappe.get_single("Contract Employee Setting")
 
-        # Company
-        company_name = None
-        department_name=None
-        worklocation_name=None
+        
 
         for row in employee_setting.map_the_company:
 
@@ -673,45 +685,52 @@ def create_purchase_invoice(salary_slip):
             frappe.throw("Company mapping missing")
 
 
-        for row in employee_setting.map_the_department:
 
-            if row.department_in_oxygen == employee.department:
-                department_name = row.department_in_erp
-                break      
+        earning_map = {e.salary_component: e.amount for e in slip.earnings}
 
-        if not department_name:
-            frappe.throw("Department mapping missing")
+        items = []
 
+        for idx, m in enumerate(employee_setting.table_peep):
 
+            if m.salary_component in earning_map:
 
-        for row in employee_setting.map_the_work_location:
+                items.append({
+                    "item_code": m.item,
+                    "qty": 1,
+                    "rate": earning_map[m.salary_component],
+                    "price_list_rate": earning_map[m.salary_component],
+                    "amount": earning_map[m.salary_component],
 
-            if row.location_in_oxygen == employee.branch:
-                worklocation_name = row.location_in_erp
-                break      
+                    "department": departments[idx] if idx < len(departments) else None,
+                    "business_category": categories[idx] if idx < len(categories) else None,
+                    "business_segment": segments[idx] if idx < len(segments) else None,
+                    "location": worklocation_name
+                })
 
-        if not worklocation_name:
-            frappe.throw("Worklocation mapping missing")
+        # items = []
+        # index = 0
+        # for m in employee_setting.table_peep:
+        #     for e in slip.earnings:
 
+        #         if m.salary_component == e.salary_component:
 
-        item_code = None
-        amount = 0
+        #             items.append({
+        #                 "item_code": m.item,
+        #                 "qty": 1,
+        #                 "rate": e.amount,
+        #                 "price_list_rate": e.amount,
+        #                 "amount": e.amount,
+                        
 
-        for m in employee_setting.table_peep:
-
-            for e in slip.earnings:
-
-                if m.salary_component == e.salary_component:
-
-                    item_code = m.item
-                    amount = e.amount
-                    break                
-
-            if item_code:
-                break
+        #                 "department": departments[index] if index < len(departments) else None,
+        #                 "business_category": categories[index] if index < len(categories) else None,
+        #                 "business_segment": segments[index] if index < len(segments) else None,
+        #                 "location": worklocation_name
+        #             })
+        #             index += 1
                 
 
-        if not item_code:
+        if not items:
             frappe.throw("Item mapping missing")
 
 
@@ -758,20 +777,8 @@ def create_purchase_invoice(salary_slip):
                 "supplier_bill_attachment":file_challan_url,
                 "custom_service_start_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
                 "custom_service_end_date": frappe.utils.formatdate(end_date, "yyyy-mm-dd") if end_date else None,
-
-
-
                 
-                "items": [
-                    {
-                        "item_code": item_code,
-                        "qty": 1,
-                        "rate": amount,
-                        "price_list_rate": amount,
-                        "amount": amount,
-                        # "item_tax_template": item_tax_template if gst else None
-                    }
-                ]
+                "items": items
             }
         }
 
@@ -780,7 +787,7 @@ def create_purchase_invoice(salary_slip):
         if file_attach_url:
             payload["data"]["attachment_details"] = [
                 {
-                    "title": "Challan",
+                    "title": "GST Challan",
                     "attachment": file_attach_url
                 }
             ]
@@ -975,6 +982,12 @@ def send_bulk_salary_slip_to_erp(month, company, payroll_period):
         if not employee.custom_bank_account_in_erp:
             missing_fields.append("Bank Account in ERP")
 
+        if not employee.custom_business_department:
+            missing_fields.append("Department")
+
+        if not employee.custom_location_in_erp:
+            missing_fields.append("Location")
+
         # If any missing → THROW / PRINT
         if missing_fields:
             frappe.throw(
@@ -995,8 +1008,14 @@ def send_bulk_salary_slip_to_erp(month, company, payroll_period):
         ):
             slip_doc = frappe.get_doc("Salary Slip", slip.name)
 
+            message = pi_resp.get("message", "")
+            pi_name = pi_resp.get("pi_name", "")
+
             slip_doc.custom_erp_status = "Success"
-            slip_doc.custom_note = pi_resp.get("message", "")
+            slip_doc.custom_note = f"{message} | PI Name: {pi_name}"
+
+            # slip_doc.custom_erp_status = "Success"
+            # slip_doc.custom_note = pi_resp.get("message", "",pi_name: {pi_resp.get('pi_name', '')}")
 
             slip_doc.save(ignore_permissions=True)
 
