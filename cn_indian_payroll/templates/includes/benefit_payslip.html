@@ -88,7 +88,6 @@
 
   <button class="print-btn" onclick="window.print()">🖨 Print / Download</button>
 
-  <!-- Company Header -->
   {% if doc.company %}
     {% set company = frappe.get_doc("Company", doc.company) %}
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -129,29 +128,22 @@
       <td>Member Code:{{employee.name}}</td>
     </tr>
     <tr>
-      <td colspan="2">Designation:{{doc.designation}}</td>
-      <td colspan="2"></td>
-    </tr>
-    <tr>
-      <td colspan="2">Department:{{doc.department}}</td>
-      <td colspan="2">No of Days in the Month:{{doc.total_working_days}}</td>
-    </tr>
-    <tr>
+      <td colspan="2">Designation:{{employee.designation}}</td>
       <td colspan="2">Date of Joining:{{employee.date_of_joining}}</td>
-      <td colspan="2">Working Days:{{doc.payment_days}}</td>
+
+
     </tr>
+    <tr>
+      <td colspan="2">Department:{{employee.department}}</td>
+      <td colspan="2">Current Office Location:{{employee.branch}}</td>
+    </tr>
+
     <tr>
       <td colspan="2">Provident Fund Acc No.:{{employee.provident_fund_account}}</td>
       <td colspan="2">ESIC Number:{{employee.custom_esic_number}}</td>
     </tr>
-    <tr>
-      <td colspan="2">Current Office Location:{{employee.branch}}</td>
-      <td colspan="2">Increment Arrear Days:{{doc.custom_lop_reversal_days}}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Total Arrear Days:{{doc.custom_lop_reversal_days}}</td>
-      <td colspan="2">LOP:{{doc.custom_total_leave_without_pay}}</td>
-    </tr>
+
+
     <tr>
       <td>Bank Name:{{employee.bank_name}}</td>
       <td>Account No.:{{employee.bank_ac_no}}</td>
@@ -170,34 +162,22 @@
     </tr>
     <tr>
       <th>Component</th>
-      <th>Monthly Accrued Amount</th>
-      <th>Amount</th>
-      <th>Taxable Amount</th>
-      <th>Total Approved Amount</th>
+
+      <th>Total Non-Taxable Amount</th>
     </tr>
 
-    {% set ns = namespace(total_reimbursement=0) %}
 
-    {% for e in doc.earnings %}
-      {% set sc = frappe.get_doc("Salary Component", e.salary_component) %}
-      {% if sc.custom_is_reimbursement %}
         <tr>
-          <td>{{ e.salary_component }}</td>
-          <td style="text-align:right;">{{ e.amount or '' }}</td>
-          <td style="text-align:right;">{{ e.amount or '' }}</td>
-          <td>0</td>
-          <td style="text-align:right;">{{ e.amount or '' }}</td>
+          <td>{{doc.earning_component}}</td>
+
+          <td style="text-align:right;">{{doc.custom_max_amount}}</td>
         </tr>
-        {% set ns.total_reimbursement = ns.total_reimbursement + (e.amount or 0) %}
-      {% endif %}
-    {% endfor %}
+
 
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+
       <td><b>Total</b></td>
-      <td style="text-align:right;"><b>{{ ns.total_reimbursement }}</b></td>
+      <td style="text-align:right;"><b>{{doc.custom_max_amount}}</b></td>
     </tr>
 
   </table>

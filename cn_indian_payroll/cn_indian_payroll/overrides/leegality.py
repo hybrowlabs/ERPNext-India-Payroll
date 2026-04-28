@@ -1,0 +1,1041 @@
+
+
+
+import frappe
+import base64
+import requests
+from frappe.utils.pdf import get_pdf
+   
+import json
+from frappe.utils import add_days, formatdate
+from frappe.utils.file_manager import get_file_path
+
+import tempfile
+import os
+
+
+from io import BytesIO
+from pypdf import PdfReader, PdfWriter
+
+
+
+@frappe.whitelist()
+def send_salary_slip_for_esign(salary_slip):
+    """
+    Button click entry point
+    Generates PDF dynamically and sends to Leegality
+    """
+
+
+    slip = frappe.get_doc("Salary Slip", salary_slip)
+
+
+    employee = frappe.get_doc("Employee", slip.employee)
+
+    if not employee.personal_email or not employee.cell_number:
+        frappe.throw("Please fill Employee Personal Email and Mobile Number")
+
+
+
+    email = employee.personal_email
+    phone = employee.cell_number
+
+    html = frappe.get_print(
+        doctype="Salary Slip",
+        name=salary_slip,
+        print_format="Consultant",
+        doc=slip,
+        as_pdf=False
+    )
+
+    pdf_bytes = get_pdf(html)
+
+
+    pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    return _push_to_leegality(pdf_base64, slip, email, phone)
+
+
+def _push_to_leegality(pdf_base64, slip, email, phone):
+    """
+    Internal helper
+    """
+
+    leegality_setting = frappe.get_single("Leegality Settings")
+    base_url = leegality_setting.api_base_url.rstrip("/")
+
+    API_URL = f"{base_url}/api/v3.0/sign/request"
+
+    # API_URL = leegality_setting.api_base_url
+    X_AUTH_TOKEN = leegality_setting.api_key
+    PROFILE_ID = leegality_setting.profile_id
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Auth-Token": X_AUTH_TOKEN
+    }
+
+    payload = {
+        "profileId": PROFILE_ID,
+        "file": {
+            "name": f"{slip.name}.pdf",
+            "file": pdf_base64
+        },
+        "invitees": [
+            {
+                "name": slip.employee_name,
+                "email": email,
+                "phone": phone
+            }
+        ],
+        "requestSignOrder": True,
+        "callbackUrl": "https://dev.pwhr.in/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"
+    }
+
+    response = requests.post(
+        API_URL,
+        headers=headers,
+        json=payload,
+        timeout=60
+    )
+
+
+    frappe.log_error(
+        f"STATUS: {response.status_code}\nRESPONSE: {response.text}",
+        "Leegality v3.0 Test"
+    )
+
+    response.raise_for_status()
+    result = response.json()
+
+
+    slip.db_set("custom_document_id", result["data"]["documentId"])
+    slip.db_set("custom_e_sign_status", "Send")
+
+    return {
+        "result": result,
+        "documentId": result["data"]["documentId"],
+        "signUrl": result["data"]["invitees"][0]["signUrl"]
+    }
+
+
+
+# @frappe.whitelist(allow_guest=True)
+# def leegality_webhook():
+
+#     try:
+
+#         data = frappe.local.form_dict
+
+#         # Raw JSON (important)
+#         payload = frappe.request.get_data(as_text=True)
+
+#         if not payload:
+#             frappe.throw("Empty Payload")
+
+#         event_data = json.loads(payload)
+
+#         frappe.log_error(
+#             json.dumps(event_data, indent=2),
+#             "Leegality Webhook Received"
+#         )
+
+#         # -----------------------------
+#         # Extract Values
+#         # -----------------------------
+
+#         document_id = event_data.get("documentId")
+
+#         status = event_data.get("status")  # COMPLETED / SIGNED / etc
+
+#         if not document_id:
+#             return {"status": "ignored"}
+
+#         # -----------------------------
+#         # Find Salary Slip
+#         # -----------------------------
+
+#         slip_name = frappe.db.get_value(
+#             "Salary Slip",
+#             {"custom_document_id": document_id},
+#             "name"
+#         )
+
+#         if not slip_name:
+#             frappe.log_error(
+#                 f"Doc ID Not Found: {document_id}",
+#                 "Leegality Webhook Error"
+#             )
+
+#             return {"status": "not_found"}
+
+#         slip = frappe.get_doc("Salary Slip", slip_name)
+
+#         # -----------------------------
+#         # Update Status
+#         # -----------------------------
+
+#         if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
+
+#             slip.db_set("custom_e_sign_status", "Signed")
+
+#         elif status in ["REJECTED", "CANCELLED"]:
+
+#             slip.db_set("custom_e_sign_status", "Rejected")
+
+#         return {"status": "ok"}
+
+#     except Exception:
+
+#         frappe.log_error(
+#             frappe.get_traceback(),
+#             "Leegality Webhook Failed"
+#         )
+
+#         return {"status": "error"}
+
+
+import hashlib
+
+@frappe.whitelist(allow_guest=True)
+def leegality_webhook():
+
+    try:
+        payload = frappe.request.get_data(as_text=True)
+
+        if not payload:
+            return {"status": "empty"}
+
+        event_data = json.loads(payload)
+
+        frappe.log_error(
+            json.dumps(event_data, indent=2),
+            "Leegality Webhook Received"
+        )
+
+        document_id = event_data.get("documentId")
+        status = event_data.get("status")
+
+        # 🔥 DEBUG 1
+        frappe.log_error(
+            f"Incoming Doc ID: {document_id}",
+            "Webhook Debug"
+        )
+
+        if not document_id:
+            return {"status": "ignored"}
+
+        slip_name = frappe.db.get_value(
+            "Salary Slip",
+            {"custom_document_id": document_id},
+            "name"
+        )
+
+        # 🔥 DEBUG 2
+        frappe.log_error(
+            f"Matched Salary Slip: {slip_name}",
+            "Webhook Debug"
+        )
+
+        if not slip_name:
+            frappe.log_error(
+                f"Document ID not found: {document_id}",
+                "Webhook Mapping Issue"
+            )
+            return {"status": "not_found"}
+
+        slip = frappe.get_doc("Salary Slip", slip_name)
+
+        # 🔥 DEBUG 3
+        frappe.log_error(
+            f"Status from Leegality: {status}",
+            "Webhook Debug"
+        )
+
+        if status in ["COMPLETED", "SIGNED", "SUCCESS"]:
+            slip.db_set("custom_e_sign_status", "Signed")
+
+        elif status in ["REJECTED", "CANCELLED"]:
+            slip.db_set("custom_e_sign_status", "Rejected")
+
+        return {"status": "ok"}
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Webhook Failed")
+        return {"status": "error"}
+
+
+@frappe.whitelist()
+def get_salary_slip_for_esign(month, company, employment_type,payroll_period):
+    """
+    Fetch salary slips based on month, company, and employment type
+    """
+
+
+
+    filters = {
+        "company": company,
+        "custom_employment_type": employment_type,
+        "docstatus": 0  ,
+        "custom_month":month,
+        "custom_payroll_period":payroll_period,
+        "custom_e_sign_status":"Not Send"
+    }
+
+    salary_slips = frappe.get_all(
+        "Salary Slip",
+        filters=filters,
+        fields=[
+            "name",
+            "employee",
+            "employee_name",
+            "start_date",
+            "end_date",
+            "posting_date",
+            "net_pay"
+        ]
+    )
+
+    if not salary_slips:
+        frappe.throw(
+            f"No Salary Slips found for Company: {company}, Month: {month}, Payroll Period: {payroll_period} with e-sign status 'Not Send'"
+        )
+
+    return salary_slips
+
+
+
+
+@frappe.whitelist()
+def send_bulk_salary_slip_for_esign(month, company, employment_type,payroll_period):
+    """
+    Send multiple salary slips for e-sign
+    """
+
+    salary_slips = get_salary_slip_for_esign(
+        month=month,
+        company=company,
+        employment_type=employment_type,
+        payroll_period=payroll_period
+    )
+
+    if not salary_slips:
+        frappe.throw("No Salary Slips found for the given criteria")
+
+    success = []
+    failed = []
+
+    for slip in salary_slips:
+        try:
+            send_salary_slip_for_esign_bulk(slip["name"])
+            success.append(slip["name"])
+        except Exception as e:
+            failed.append({
+                "salary_slip": slip["name"],
+                "error": str(e)
+            })
+
+
+    return {
+        "total": len(salary_slips),
+        "success_count": len(success),
+        "failed_count": len(failed),
+        "success": success,
+        "failed": failed
+    }
+
+
+
+@frappe.whitelist()
+def send_salary_slip_for_esign_bulk(salary_slip):
+    """
+    Generate Salary Slip PDF and send to Leegality
+    """
+
+    slip = frappe.get_doc("Salary Slip", salary_slip)
+    employee = frappe.get_doc("Employee", slip.employee)
+
+    if not employee.personal_email or not employee.cell_number:
+        frappe.throw(
+            f"Employee {slip.employee_name} is missing Personal Email or Mobile Number"
+        )
+
+    html = frappe.get_print(
+        doctype="Salary Slip",
+        name=salary_slip,
+        print_format="Consultant",
+        doc=slip,
+        as_pdf=False
+    )
+
+    pdf_bytes = get_pdf(html)
+    pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    return _push_to_leegality_bulk(
+        pdf_base64=pdf_base64,
+        slip=slip,
+        email=employee.personal_email,
+        phone=employee.cell_number
+    )
+
+
+def _push_to_leegality_bulk(pdf_base64, slip, email, phone):
+    """
+    Internal helper to send document to Leegality
+    """
+
+    settings = frappe.get_single("Leegality Settings")
+    base_url = settings.api_base_url.rstrip("/")
+
+    API_URL = f"{base_url}/api/v3.0/sign/request"
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Auth-Token": settings.api_key
+    }
+
+    payload = {
+        "profileId": settings.profile_id,
+        "file": {
+            "name": f"{slip.name}.pdf",
+            "file": pdf_base64
+        },
+        "invitees": [{
+            "name": slip.employee_name,
+            "email": email,
+            "phone": phone
+        }],
+        "requestSignOrder": True,
+        "callbackUrl": "https://dev.pwhr.in/api/method/cn_indian_payroll.cn_indian_payroll.overrides.leegality.leegality_webhook"    }
+
+    response = requests.post(
+        API_URL,
+        headers=headers,
+        json=payload,
+        timeout=60
+    )
+
+    frappe.log_error(
+        f"STATUS: {response.status_code}\nRESPONSE: {response.text}",
+        "Leegality Bulk e-Sign"
+    )
+
+    response.raise_for_status()
+    result = response.json()
+
+
+
+    document_id = result["data"]["documentId"]
+    sign_url = result["data"]["invitees"][0].get("signUrl")
+
+
+
+
+    
+    frappe.db.set_value(
+        "Salary Slip",
+        slip.name,
+        {
+            "custom_document_id": document_id,
+            "custom_e_sign_url": sign_url,
+            "custom_e_sign_status": "Send"
+        },
+        
+    )
+
+
+    frappe.db.commit()
+
+    employee = frappe.get_doc("Employee", slip.employee)
+    send_email_from_template_to_employee(slip, employee, sign_url)
+
+    return {
+        "document_id": result["data"]["documentId"],
+        "sign_url": result["data"]["invitees"][0]["signUrl"]
+    }
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def view_signed_payslip(salary_slip):
+
+    slip = frappe.get_doc("Salary Slip", salary_slip)
+
+    if not slip.custom_document_id:
+        frappe.throw("Document ID missing in Salary Slip")
+
+    settings = frappe.get_single("Leegality Settings")
+
+    if not settings.api_key or not settings.api_base_url:
+        frappe.throw("Leegality Settings not configured")
+
+
+    document_id = slip.custom_document_id
+    token = settings.api_key
+    # url = settings.post_url
+    base_url = settings.api_base_url.rstrip("/")
+    url = f"{base_url}/api/v3.1/document/fetchDocument"
+
+    headers = {
+        "X-Auth-Token": token
+    }
+
+    params = {
+        "documentId": document_id,
+        "documentDownloadType": "DOCUMENT"
+    }
+
+    # Call Leegality API
+    resp = requests.get(
+        url,
+        headers=headers,
+        params=params,
+        timeout=60
+    )
+
+    if resp.status_code != 200:
+        frappe.throw("Failed to download signed PDF")
+
+    if not resp.content:
+        frappe.throw("Empty file received")
+
+    # Handle PDF / Base64
+    content_type = resp.headers.get("Content-Type", "").lower()
+
+    if "application/pdf" in content_type:
+
+        pdf_bytes = resp.content
+
+    elif "application/json" in content_type:
+
+        data = resp.json()
+
+        if "fileContent" not in data.get("data", {}):
+            frappe.throw("Invalid response")
+
+        pdf_bytes = base64.b64decode(
+            data["data"]["fileContent"]
+        )
+
+    else:
+        frappe.throw("Unexpected response format")
+
+    # Normalize PDF
+    reader = PdfReader(BytesIO(pdf_bytes))
+    writer = PdfWriter()
+
+    for page in reader.pages:
+        writer.add_page(page)
+
+    output = BytesIO()
+    writer.write(output)
+    output.seek(0)
+
+    final_bytes = output.getvalue()
+
+    # Save File in ERP
+    file_name = f"{slip.name}_Signed.pdf"
+
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "file_name": file_name,
+        "attached_to_doctype": "Salary Slip",
+        "attached_to_name": slip.name,
+        "attached_to_field": "custom_slip_attach",
+        "is_private": 1,
+        "content": final_bytes
+    })
+
+    file_doc.insert(ignore_permissions=True)
+
+    slip.db_set("custom_slip_attach", file_doc.file_url)
+
+    frappe.db.commit()
+
+    # create_purchase_invoice(slip.name)
+
+    return {
+        "status": "success",
+        "file_url": file_doc.file_url
+    }
+
+
+
+def get_integration_settings():
+
+    settings = frappe.get_single("Integration Settings")
+
+    if not settings.url or not settings.api_key or not settings.api_secret:
+        frappe.throw("Configure Integration Settings")
+
+    return {
+        "url": settings.url,
+        "api_key": settings.api_key,
+        "api_secret": settings.api_secret
+    }
+
+
+@frappe.whitelist()
+def create_purchase_invoice(salary_slip):
+
+    try:
+
+        slip = frappe.get_doc("Salary Slip", salary_slip)
+
+        month=slip.custom_month
+
+        config = get_integration_settings()
+
+        base_url = config["url"]
+        api_key = config["api_key"]
+        api_secret = config["api_secret"]
+
+        token = f"token {api_key}:{api_secret}"
+
+        headers = {
+            "Authorization": token
+        }
+
+
+        file_attach_url = None
+        file_challan_url = None
+
+        # Company
+        company_name = None
+        department_name=None
+        worklocation_name=None
+
+
+        # Upload custom_attach
+        if slip.custom_attach:
+
+            file_path = get_file_path(slip.custom_attach)
+
+            file_attach_url = upload_file_to_target(
+                base_url,
+                headers,
+                file_path
+            )
+
+
+        # Upload custom_slip_attach
+        if slip.custom_slip_attach:
+
+            file_path = get_file_path(slip.custom_slip_attach)
+
+            if not file_path:
+                frappe.throw("custom_slip_attach file not found")
+
+            file_challan_url = upload_file_to_target(
+                base_url,
+                headers,
+                file_path
+            )
+
+
+
+        employee = frappe.get_doc("Employee", slip.employee)
+
+
+
+        supplier_id = employee.custom_supplier_id
+
+        department_name=employee.custom_business_department[0].department if employee.custom_business_department else None
+        business_category=employee.custom_business_category[0].business_category if employee.custom_business_category else None
+        business_segment=employee.custom_business_segment[0].business_segment if employee.custom_business_segment else None
+        bank_acc=employee.custom_bank_account_in_erp if employee.custom_bank_account_in_erp else None
+        work_flow_policy=employee.custom_work_flow_policy if employee.custom_work_flow_policy else None
+        worklocation_name=employee.custom_location_in_erp if employee.custom_location_in_erp else None
+
+
+        departments = [d.department for d in employee.custom_business_department] if employee.custom_business_department else []
+        categories = [c.business_category for c in employee.custom_business_category] if employee.custom_business_category else []
+        segments = [s.business_segment for s in employee.custom_business_segment] if employee.custom_business_segment else []
+
+        posting_date = frappe.utils.formatdate(
+            slip.posting_date, "yyyy-mm-dd"
+        )
+        doc_name=slip.name
+
+        due_date = frappe.utils.add_days(posting_date, 10)
+
+        start_date = slip.start_date
+        end_date = slip.end_date
+
+
+
+
+        employee_setting = frappe.get_single("Contract Employee Setting")
+
+        
+
+        for row in employee_setting.map_the_company:
+
+            if row.company_in_oxygen == slip.company:
+                company_name = row.company_in_erp
+                break      
+
+        if not company_name:
+            frappe.throw("Company mapping missing")
+
+
+
+        earning_map = {e.salary_component: e.amount for e in slip.earnings}
+
+        items = []
+
+        for idx, m in enumerate(employee_setting.table_peep):
+
+            if m.salary_component in earning_map:
+
+                items.append({
+                    "item_code": m.item,
+                    "qty": 1,
+                    "rate": earning_map[m.salary_component],
+                    "price_list_rate": earning_map[m.salary_component],
+                    "amount": earning_map[m.salary_component],
+
+                    "department": departments[idx] if idx < len(departments) else None,
+                    "business_category": categories[idx] if idx < len(categories) else None,
+                    "business_segment": segments[idx] if idx < len(segments) else None,
+                    "location": worklocation_name
+                })
+
+        # items = []
+        # index = 0
+        # for m in employee_setting.table_peep:
+        #     for e in slip.earnings:
+
+        #         if m.salary_component == e.salary_component:
+
+        #             items.append({
+        #                 "item_code": m.item,
+        #                 "qty": 1,
+        #                 "rate": e.amount,
+        #                 "price_list_rate": e.amount,
+        #                 "amount": e.amount,
+                        
+
+        #                 "department": departments[index] if index < len(departments) else None,
+        #                 "business_category": categories[index] if index < len(categories) else None,
+        #                 "business_segment": segments[index] if index < len(segments) else None,
+        #                 "location": worklocation_name
+        #             })
+        #             index += 1
+                
+
+        if not items:
+            frappe.throw("Item mapping missing")
+
+
+
+        gst = None
+        for e in slip.earnings:
+            component = frappe.get_cached_doc(
+                "Salary Component",
+                e.salary_component
+            )
+
+            if component.component_type == "GST":
+                gst = component.name
+                break
+
+        if gst and not slip.custom_attach:
+            frappe.throw(f"Challan is not attached. Please attach challan before proceeding for {slip.name}")
+
+
+        # item_tax_template = None
+        # if gst:
+        #     for row in employee_setting.map_the_company:
+        #         if row.company_in_oxygen == slip.company:
+        #             item_tax_template = row.item_tax_template
+        #             break
+  
+
+
+        payload = {
+            "data": {
+                "supplier": supplier_id,
+                "company": company_name,
+                "posting_date": posting_date,
+                "bill_no": doc_name,
+                "bill_date": frappe.utils.formatdate(end_date, "yyyy-mm-dd") if end_date else None,
+                "bank_account": bank_acc,
+                "workflow_policy": work_flow_policy,
+                "business_category": business_category,
+                "business_segment": business_segment,
+                "apply_tds": 1,
+                "remarks": "invoice in the month of " + str(month),
+                "location": worklocation_name,
+                "department": department_name,
+                "supplier_bill_attachment":file_challan_url,
+                "custom_service_start_date": frappe.utils.formatdate(start_date, "yyyy-mm-dd") if start_date else None,
+                "custom_service_end_date": frappe.utils.formatdate(end_date, "yyyy-mm-dd") if end_date else None,
+                
+                "items": items
+            }
+        }
+
+
+
+        if file_attach_url:
+            payload["data"]["attachment_details"] = [
+                {
+                    "title": "GST Challan",
+                    "attachment": file_attach_url
+                }
+            ]
+
+        pi_url = f"{base_url}/api/resource/Purchase Invoice"
+
+
+
+
+        existing_pi = requests.get(
+            f"{base_url}/api/resource/Purchase Invoice",
+            headers=headers,
+            params={
+                "filters": json.dumps([["bill_no", "=", doc_name]]),
+                "fields": json.dumps(["name"]),
+                "limit_page_length": 1
+            },
+            timeout=120
+        )
+
+        if existing_pi.status_code == 200:
+            existing_data = existing_pi.json().get("data", [])
+            if existing_data:
+                return {
+                    "status": "skipped",
+                    "message": f"Purchase Invoice already exists for {doc_name}",
+                    "pi_name": existing_data[0]["name"]
+                }
+
+        response = requests.post(
+            pi_url,
+            headers={
+                **headers,
+                "Content-Type": "application/json"
+            },
+            json=payload,
+            timeout=120
+        )
+
+        if response.status_code not in (200, 201):
+
+            frappe.log_error(response.text, "PI Create Error")
+
+            return {
+                "status": "failed",
+                "error": response.text
+            }
+
+        result = response.json()
+
+        return {
+            "status": "success",
+            "pi_name": result["data"]["name"],
+            "attach_url": file_attach_url,
+            "challan_url": file_challan_url
+        }
+
+    except Exception as e:
+
+        frappe.log_error(frappe.get_traceback(), "Create PI Error")
+
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+
+
+def upload_file_to_target(base_url, headers, file_path):
+
+    upload_url = f"{base_url}/api/method/upload_file"
+
+    with open(file_path, "rb") as f:
+
+        files = {
+            "file": f
+        }
+
+        data = {
+            "is_private": 1
+        }
+
+        response = requests.post(
+            upload_url,
+            headers=headers,
+            files=files,
+            data=data,
+            timeout=120
+        )
+
+    if response.status_code not in (200, 201):
+
+        frappe.throw("File upload failed: " + response.text)
+
+    result = response.json()
+
+    return result["message"]["file_url"]
+
+
+
+
+
+
+def send_email_from_template_to_employee(slip, employee, sign_url=None):
+    gst = None
+    for earning in slip.earnings:
+        component = frappe.get_doc("Salary Component", earning.salary_component)
+
+        if component.component_type == "GST":
+            gst = earning.salary_component
+            break
+
+    if not gst:
+        return
+
+    settings = frappe.get_single("Leegality Settings")
+
+    if not settings.email_template:
+        return  # silently skip if no template configured
+
+    template = frappe.get_doc("Email Template", settings.email_template)
+
+    # Pass dynamic values to template
+    context = {
+        "employee_name": slip.employee_name,
+        "salary_slip": slip.name,
+        "company": slip.company,
+        "sign_url": sign_url
+    }
+
+    subject = frappe.render_template(template.subject or "", context)
+    message = frappe.render_template(template.response or "", context)
+
+    frappe.sendmail(
+        recipients=[employee.personal_email],
+        subject=subject,
+        message=message,
+        reference_doctype="Salary Slip",
+        reference_name=slip.name,
+        now=True
+    )
+
+@frappe.whitelist()
+def send_bulk_salary_slip_to_erp(month, company, payroll_period):
+
+    results = []
+
+    payroll_setting = frappe.get_single("Payroll Settings")
+
+    employment_types = []
+    if payroll_setting.custom_hide_salary_structure_configuration:
+        employment_types = [
+            row.employment_type 
+            for row in payroll_setting.custom_hide_salary_structure_configuration
+        ]
+
+    salary_slips = frappe.get_all(
+        "Salary Slip",
+        filters={
+            "company": company,
+            "custom_month": month,
+            "custom_payroll_period": payroll_period,
+            "docstatus": ["in", [0, 1]],
+            "custom_e_sign_status": "Send"
+        },
+        fields=["name", "employee"]
+    )
+
+    if not salary_slips:
+        frappe.throw(
+            f"No Salary Slips found for Company: {company}, Month: {month}, Payroll Period: {payroll_period} with e-sign status 'Send'"
+        )
+    for slip in salary_slips:
+
+        employee = frappe.get_doc("Employee", slip.employee)
+
+        missing_fields = []
+
+        if not employee.custom_supplier_id:
+            missing_fields.append("Supplier ID")
+
+        if not employee.custom_business_category:
+            missing_fields.append("Business Category")
+
+        if not employee.custom_business_segment:
+            missing_fields.append("Business Segment")
+
+        if not employee.custom_work_flow_policy:
+            missing_fields.append("Workflow Policy")
+
+        if not employee.custom_bank_account_in_erp:
+            missing_fields.append("Bank Account in ERP")
+
+        if not employee.custom_business_department:
+            missing_fields.append("Department")
+
+        if not employee.custom_location_in_erp:
+            missing_fields.append("Location")
+
+        # If any missing → THROW / PRINT
+        if missing_fields:
+            frappe.throw(
+                f"Employee {employee.name} is missing fields: {', '.join(missing_fields)}"
+            )
+
+        if employment_types and employee.employment_type not in employment_types:
+            continue
+
+
+        signed_resp = view_signed_payslip(slip.name)
+
+        pi_resp = create_purchase_invoice(slip.name)
+
+        if (
+            signed_resp.get("status") == "success" and 
+            pi_resp.get("status") in ["success", "skipped"]
+        ):
+            slip_doc = frappe.get_doc("Salary Slip", slip.name)
+
+            message = pi_resp.get("message", "")
+            pi_name = pi_resp.get("pi_name", "")
+
+            slip_doc.custom_erp_status = "Success"
+            slip_doc.custom_note = f"{message} | PI Name: {pi_name}"
+
+            # slip_doc.custom_erp_status = "Success"
+            # slip_doc.custom_note = pi_resp.get("message", "",pi_name: {pi_resp.get('pi_name', '')}")
+
+            slip_doc.save(ignore_permissions=True)
+
+            if slip_doc.docstatus == 0:
+                slip_doc.submit()
+
+        else:
+            frappe.db.set_value("Salary Slip", slip.name, {
+                "custom_erp_status": "Failed",
+                "custom_note": f"Sign: {signed_resp.get('status')} | PI: {pi_resp.get('status')}"
+            })
+
+        results.append({
+            "salary_slip": slip.name,
+            "sign_response": signed_resp,
+            "pi_response": pi_resp
+        })
+
+    return {
+        "status": "completed",
+        "processed": len(results),
+        "details": results
+    }

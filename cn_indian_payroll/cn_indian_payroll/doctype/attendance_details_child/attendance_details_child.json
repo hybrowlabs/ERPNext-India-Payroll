@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-27 09:25:43.298451",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "working_days",
+  "present_days",
+  "absent_days",
+  "lwp_days",
+  "half_days",
+  "on_leave",
+  "payment_days",
+  "total_lwf_days"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "columns": 1,
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Working Days"
+  },
+  {
+   "columns": 1,
+   "fieldname": "absent_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Absent Days"
+  },
+  {
+   "columns": 1,
+   "fieldname": "lwp_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "LWP Days"
+  },
+  {
+   "columns": 1,
+   "fieldname": "half_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Half Days"
+  },
+  {
+   "columns": 1,
+   "fieldname": "on_leave",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "On Leave"
+  },
+  {
+   "columns": 1,
+   "fieldname": "payment_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Payment Days"
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_lwf_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total LWF Days"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name"
+  },
+  {
+   "columns": 1,
+   "fieldname": "present_days",
+   "fieldtype": "Float",
+   "label": "Present Days"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-01 15:57:27.509942",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Attendance Details Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

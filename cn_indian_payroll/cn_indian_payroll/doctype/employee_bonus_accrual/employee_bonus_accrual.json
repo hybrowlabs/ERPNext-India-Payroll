@@ -148,7 +148,8 @@
    "fieldname": "payroll_period",
    "fieldtype": "Link",
    "label": "Payroll Period",
-   "options": "Payroll Period"
+   "options": "Payroll Period",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -162,34 +163,37 @@
    "fetch_from": "salary_slip.total_working_days",
    "fieldname": "working_days",
    "fieldtype": "Float",
-   "label": "Working Days"
+   "label": "Working Days",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fetch_from": "salary_slip.payment_days",
    "fieldname": "payment_day",
    "fieldtype": "Float",
-   "label": "Payment Day"
+   "label": "Payment Day",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fetch_from": "salary_slip.custom_total_leave_without_pay",
    "fieldname": "total_lwp",
    "fieldtype": "Float",
-   "label": "Total LWP"
+   "label": "Total LWP",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "lop_reversal_days",
    "fieldtype": "Float",
-   "label": "LOP Reversal Days",
+   "label": "Arrear Days",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-29 07:37:21.789068",
+ "modified": "2025-12-10 09:58:12.751541",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Employee Bonus Accrual",

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form 12B</title>
+
+    <style>
+       
+    </style>
+</head>
+
+<body>
+
+
+
+<p style="font-size:24px; text-align:center; font-weight:bold;">
+    FORM No. 12BB
+</p>
+
+
+<p style="font-size:20px; text-align:center; ">(See Rule 26C)</p>
+
+<p style="font-size:20px; text-align:center; ">
+    Statement Showing Particulars of Claims by an Employee for Deduction of Tax under Section 192
+</p>
+
+
+
+    {# Get Employee Document #}
+    {% set employee = frappe.get_doc("Employee", doc.employee) %}
+
+    {# Get Employee Address #}
+    {% set address = frappe.get_list(
+        "Address",
+        filters={"custom_employee": doc.employee},
+        fields=["address_line1", "address_line2", "city", "state", "pincode"],
+        limit=1
+    ) %}
+
+
+    {% if address %}
+
+        <p class="field">
+            <span class="label">1. Name and Address of the Employee:</span><br>
+
+            {{ employee.employee_name }} ({{ employee.name }})<br>
+
+            {{ address[0].address_line1 }}<br>
+
+            {% if address[0].address_line2 %}
+                {{ address[0].address_line2 }}<br>
+            {% endif %}
+
+            {{ address[0].city }},
+            {{ address[0].state }},
+            {{ address[0].pincode }}
+        </p>
+
+    {% else %}
+
+        <p style="font-size:15px;font-weight:bold;">
+            1. Name and Address of the Employee:
+
+            {{ employee.employee_name }} ({{ employee.name }})<br>
+            Address Not Available
+        </p>
+
+    {% endif %}
+
+
+    <p style="font-size:15px;font-weight:bold;">
+        2. Permanent Account Number of the Employee:
+        {{ employee.pan_number or "-" }}
+    </p>
+
+
+    <p style="font-size:15px;font-weight:bold;">
+        3. Financial Year:
+        {{ doc.payroll_period }}
+    </p>
+
+
+    <p style="font-size:15px;font-weight:bold;">
+        4. Submission Stage:
+        Declared
+    </p>
+
+
+
+<table style="width:100%; border-collapse: collapse; margin:0;">
+
+    <tr>
+        <td style="
+            border:1px solid #000;
+            padding:8px;
+            font-weight:bold;
+            text-align:center;
+        ">
+            Details of Claims and Evidence Thereof
+        </td>
+    </tr>
+
+</table>
+
+
+<!-- Claims Data Table -->
+
+<table style="width:100%; border-collapse: collapse; margin:0;">
+
+    <thead>
+        <tr>
+            <td style="border:1px solid #000; padding:8px; width:5%;">Sl.No.</td>
+            <td style="border:1px solid #000; padding:8px; width:55%;">Nature of claim</td>
+            <td style="border:1px solid #000; padding:8px; width:20%;">Amount(Rs.)</td>
+            <td style="border:1px solid #000; padding:8px; width:20%;">Evidence/particulars</td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #000; padding:8px;">(1)</td>
+            <td style="border:1px solid #000; padding:8px;">(2)</td>
+            <td style="border:1px solid #000; padding:8px; text-align:right;">(3)</td>
+            <td style="border:1px solid #000; padding:8px; text-align:right;">(4)</td>
+        </tr>
+        
+        
+        <tr>
+    <td style="border:1px solid #000; padding:8px;">1.</td>
+
+    <td style="border:1px solid #000; padding:8px;">
+        <b>House Rent Allowance:</b>
+
+        <p>Rent 1</p>
+
+        <p>
+            (i) Rent paid to the landlord:
+            ₹{{ doc.monthly_house_rent or 0 }}
+        </p>
+
+        <p>
+            (ii) Name of the landlord:
+            {{ doc.custom_name or "-" }}
+        </p>
+
+        <p>
+            (iii) Address of the landlord:
+            {{ doc.custom_address_title1 or "-" }}
+        </p>
+
+        <p>
+            (iv) Permanent Account Number of the landlord:
+            {{ doc.custom_pan or "-" }}
+        </p>
+
+        <br>
+
+        <p style="font-size:11px;">
+            <i>
+                Note: Permanent Account Number shall be furnished if the
+                aggregate rent paid during the previous year exceeds one lakh
+                rupees.
+            </i>
+        </p>
+    </td>
+
+    <td style="border:1px solid #000; padding:8px; text-align:right;">
+        ₹{{ doc.annual_hra_exemption or 0 }}
+    </td>
+
+    <td style="border:1px solid #000; padding:8px; text-align:right;">
+        &nbsp;
+    </td>
+</tr>
+
+        
+        
+        
+        
+    </thead>
+
+{% set rows = [] %}
+
+{% for d in doc.declarations %}
+
+    {# Skip only fake/default values #}
+    {% if d.exemption_category
+        and d.exemption_sub_category
+        and d.exemption_sub_category != "exemption_sub_category"
+        and d.exemption_category != "exemption_category"
+    %}
+
+        {% set cat = frappe.get_doc(
+            "Employee Tax Exemption Category",
+            d.exemption_category
+        ) %}
+
+        {% set _ = rows.append({
+            "category": d.exemption_category,
+            "sub_category": d.exemption_sub_category,
+            "amount": d.amount or 0,
+            "sequence": cat.custom_sequence or 0
+        }) %}
+
+    {% endif %}
+
+{% endfor %}
+
+
+{# Sort by sequence ASC #}
+{% set rows = rows | sort(attribute="sequence") %}
+
+
+
+{# Group by Category #}
+{% set grouped = {} %}
+
+{% for r in rows %}
+
+    {% if r.category not in grouped %}
+        {% set _ = grouped.update({ r.category: [] }) %}
+    {% endif %}
+
+    {% set _ = grouped[r.category].append(r) %}
+
+{% endfor %}
+
+
+
+{% for category, items in grouped.items() %}
+
+<tr>
+
+    <!-- Sl No -->
+    <td style="border:1px solid #000; padding:8px;">
+        {{ loop.index }}
+    </td>
+
+
+    <!-- Nature of Claim -->
+    <td style="border:1px solid #000; padding:8px;">
+
+        <b>{{ category }}</b><br>
+
+        {% for item in items %}
+
+            <p style="margin:2px 0;">
+                {{ loop.index }}. {{ item.sub_category }}
+                — ₹{{ "%.2f"|format(item.amount) }}
+            </p>
+
+        {% endfor %}
+
+    </td>
+
+
+    <!-- Total Amount -->
+    <td style="border:1px solid #000; padding:8px; text-align:right;">
+
+        ₹{{ "%.2f"|format(items | sum(attribute="amount")) }}
+
+    </td>
+
+
+    <!-- Evidence -->
+    <td style="border:1px solid #000; padding:8px;">
+        &nbsp;
+    </td>
+
+</tr>
+
+
+
+
+{% endfor %}
+
+
+
+</table>
+
+<table style="width:100%; border-collapse: collapse; margin:0;">
+
+    <tr>
+        <td style="
+            border:1px solid #000;
+            padding:8px;
+            font-weight:bold;
+            text-align:center;
+        ">
+            Verification
+        </td>
+    </tr>
+
+</table>
+
+<table style="width:100%; border-collapse: collapse; margin:0;">
+
+    <tr>
+        <td style="
+            border:1px solid #000;
+            padding:8px;
+            
+            text-align:center;
+        ">
+
+        {% set employee = frappe.get_doc("Employee", doc.employee) if doc.employee else None %}
+            
+        I, {{ employee.employee_name if employee else "" }} do hereby certify that the information given above is complete and correct.
+        </td>
+    </tr>
+
+</table>
+
+
+<table style="width:100%; border-collapse: collapse; margin:0;">
+
+    <tr>
+        <td style="
+            border:1px solid #000;
+            
+            font-weight:bold;
+            
+        ">
+            <br>Place:Corporate - KLJ Noida One - Noida - UP, Noida
+            <br>Date:{{doc.custom_posting_date}}
+            <br>Designation:
+        </td>
+        
+        <td style="
+            border:1px solid #000;
+            
+            font-weight:bold;
+            
+        ">
+            Verification
+        </td>
+    </tr>
+
+</table>
+
+
+
+
+<table style="width:100%; border-collapse: collapse; margin:0;">
+
+    <tr>
+        <td style="
+            border:1px solid #000;
+            padding:8px;
+
+            text-align:center;
+        ">
+            
+: This is a system generated form 12BB, hence signature not required.
+        </td>
+    </tr>
+
+</table>
+
+
+
+
+
+</body>
+</html>

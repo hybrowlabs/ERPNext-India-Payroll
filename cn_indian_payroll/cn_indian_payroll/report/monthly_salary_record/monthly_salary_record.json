@@ -11,7 +11,7 @@
  "is_standard": "Yes",
  "letter_head": "43rr",
  "letterhead": null,
- "modified": "2025-08-19 00:10:33.668676",
+ "modified": "2025-09-26 10:17:24.251280",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Monthly Salary Record",
@@ -35,6 +35,12 @@
   },
   {
    "role": "Guest"
+  },
+  {
+   "role": "Payroll Admin"
+  },
+  {
+   "role": "Payroll Manager"
   }
  ],
  "timeout": 0

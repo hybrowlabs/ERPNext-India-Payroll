@@ -5,6 +5,67 @@ from frappe import _
 import json
 from dateutil.relativedelta import relativedelta
 
+import calendar
+from datetime import date
+from frappe.utils import getdate
+
+
+@frappe.whitelist()
+def get_state_from_branch(employee, company):
+
+
+    emp_doc = frappe.get_doc("Employee", employee)
+    branch = emp_doc.branch
+
+    if not branch:
+        frappe.throw("Branch not found for the employee")
+
+    branch_doc = frappe.get_doc("Branch", branch)
+    state = branch_doc.custom_state
+
+    if not state:
+        frappe.throw("State not found for the branch")
+
+
+    return state
+
+
+
+
+
+@frappe.whitelist()
+def get_payroll_period_dates_on_month(month, posting_date):
+
+
+    if not month:
+        frappe.throw("Month is required")
+
+    if not posting_date:
+        frappe.throw("Posting Date is required")
+
+    posting_date = getdate(posting_date)
+    year = posting_date.year  # ✅ Correct year from posting_date
+
+    # Convert month name → month number
+    month_number = list(calendar.month_name).index(month)
+    if month_number == 0:
+        frappe.throw("Invalid month")
+
+    start_date = date(year, month_number, 1)
+    end_date = date(
+        year,
+        month_number,
+        calendar.monthrange(year, month_number)[1]
+    )
+
+    return {
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
+    }
+
+
+
+
 
 
 
@@ -64,7 +125,6 @@ def calculate_tds_projection(doc):
 
             num_months = (end.year - start.year) * 12 + (end.month - start.month) + 1
 
-            # frappe.msgprint(str(num_months))
 
             loan_repayments = frappe.get_list(
                 "Loan Repayment Schedule",
@@ -420,14 +480,6 @@ def calculate_tds_projection(doc):
 
 
 
-
-
-        # frappe.msgprint(str(pf_max_amount))
-        # frappe.msgprint(str(pt_amount))
-        # frappe.msgprint(str(nps_amount))
-        # frappe.msgprint(str(total_old_regime_deductions))
-
-        # frappe.msgprint(str(new_regime_standard_value))
         old_regime_annual_taxable_income = max(
             round(current_taxable_earnings_old_regime + future_taxable_earnings_old_regime + loan_perquisite_amount)
             - round(pt_amount)
@@ -917,3 +969,46 @@ def slab_calculation(
         "new_education_cess": new_education_cess,
         "tax_already_paid": tax_already_paid,
     }
+
+
+
+
+
+@frappe.whitelist()
+def fetch_last_ctc_details(employee, doctype, company):
+
+    last_ctc = frappe.get_all(
+        "Salary Structure Assignment",
+        filters={
+            "employee": employee,
+            "company": company,
+            "docstatus": 1
+        },
+        fields=["name"],
+        order_by="from_date desc",
+        limit=1
+    )
+
+    if last_ctc:
+        ssa = frappe.get_doc("Salary Structure Assignment", last_ctc[0].name)
+
+
+        return {
+            "response": ssa.as_dict(),
+            "reimbursements": ssa.custom_employee_reimbursements
+        }
+    else:
+        return {}
+
+
+
+@frappe.whitelist()
+def fetch_gst_details(employee, company):
+
+    emp_type = frappe.db.get_value("Employee", employee, "employment_type")
+
+    config = frappe.get_single("Payroll Settings").custom_hide_salary_structure_configuration or []
+
+    is_allowed = any(row.employment_type == emp_type for row in config)
+
+    return {"status": "Yes" if is_allowed else "No"}

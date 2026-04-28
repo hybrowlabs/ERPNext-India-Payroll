@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:employee_id",
+ "creation": "2026-01-21 13:35:23.966864",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_id",
+  "vendor_id",
+  "vendor_name",
+  "bank_name",
+  "bank_account",
+  "ifsc",
+  "column_break_hrpe",
+  "trade_name",
+  "pan",
+  "gst_number",
+  "test",
+  "section_break_ebwh",
+  "business_segment",
+  "locationbranch",
+  "column_break_ciho",
+  "business_category",
+  "department",
+  "section_break_qwzd",
+  "payment_terms_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "vendor_id",
+   "fieldtype": "Data",
+   "label": "Vendor ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "vendor_name",
+   "fieldtype": "Data",
+   "label": "Vendor Name"
+  },
+  {
+   "fieldname": "column_break_hrpe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trade_name",
+   "fieldtype": "Data",
+   "label": "Trade Name"
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "label": "PAN"
+  },
+  {
+   "fieldname": "gst_number",
+   "fieldtype": "Data",
+   "label": "GST Number"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Data",
+   "label": "Bank Account No."
+  },
+  {
+   "fieldname": "ifsc",
+   "fieldtype": "Data",
+   "label": "IFSC"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name"
+  },
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Link",
+   "label": "Employee ID",
+   "options": "Employee",
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_ebwh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "business_segment",
+   "fieldtype": "Data",
+   "label": "Business Segment"
+  },
+  {
+   "fieldname": "column_break_ciho",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "business_category",
+   "fieldtype": "Data",
+   "label": "Business Category"
+  },
+  {
+   "fieldname": "locationbranch",
+   "fieldtype": "Data",
+   "label": "Location/Branch"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fieldname": "section_break_qwzd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Data",
+   "label": "Payment Terms Template"
+  },
+  {
+   "fieldname": "test",
+   "fieldtype": "Select",
+   "label": "TEST"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-29 10:00:35.267027",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Vendor",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

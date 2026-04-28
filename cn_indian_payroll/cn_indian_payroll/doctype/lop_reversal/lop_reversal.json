@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "lop_reversal_details_section",
+  "attendance_log",
   "employee",
   "employee_name",
   "department",
@@ -41,6 +42,7 @@
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee",
    "reqd": 1
@@ -66,6 +68,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "number_of_days",
    "fieldtype": "Float",
    "label": "Number of Days Planning to Reverse",
@@ -85,14 +88,16 @@
    "fieldname": "lop_month_reversal",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "LOP Month Reversal",
-   "reqd": 1
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
   },
   {
    "fieldname": "section_break_apdq",
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "arrear_breakup",
    "fieldtype": "Table",
    "label": "Arrear Breakup",
@@ -109,6 +114,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "arrear_deduction_breakup",
    "fieldtype": "Table",
    "label": "Arrear Deduction BreakUp",
@@ -118,6 +124,7 @@
    "allow_on_submit": 1,
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -125,8 +132,7 @@
   {
    "fieldname": "salary_slip",
    "fieldtype": "Data",
-   "label": "Salary Slip",
-   "read_only": 1
+   "label": "Salary Slip"
   },
   {
    "fieldname": "max_lop_days",
@@ -149,6 +155,7 @@
   {
    "fieldname": "payroll_period",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Payroll Period",
    "options": "Payroll Period",
    "reqd": 1
@@ -176,6 +183,7 @@
    "fetch_from": "employee.department",
    "fieldname": "department",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Department",
    "options": "Department"
   },
@@ -183,8 +191,15 @@
    "fetch_from": "employee.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Designation",
    "options": "Designation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "attendance_log",
+   "fieldtype": "Data",
+   "label": "Attendance Log"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -195,11 +210,11 @@
    "link_fieldname": "ref_docname"
   }
  ],
- "modified": "2025-09-23 17:07:32.242088",
+ "modified": "2026-03-23 16:15:50.101812",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "LOP Reversal",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

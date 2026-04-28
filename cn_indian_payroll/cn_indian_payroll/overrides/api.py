@@ -6,6 +6,9 @@ from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_s
 
 @frappe.whitelist(allow_guest=True)
 def generate_salary_slip(employee):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
     earning_component_part_of_ctc = []
     deduction_component_part_of_ctc = []
 
@@ -80,3 +83,36 @@ def generate_salary_slip(employee):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Error in generate_salary_slip")
         return {"error": str(e)}
+
+
+
+@frappe.whitelist()
+def get_eligible_payslips(employee, salary_slip_id):
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+    if not employee or not salary_slip_id:
+        return {"error": "Employee or Salary Slip ID not provided"}
+
+    off_payslip_exists = 0
+
+    regular_payslip_exists = 0
+
+
+    ss = frappe.get_doc("Salary Slip", salary_slip_id)
+
+    if ss.gross_pay:
+        regular_payslip_exists = 1
+
+
+    for earning in ss.earnings:
+        salary_component = frappe.get_doc("Salary Component", earning.salary_component)
+
+        if salary_component.custom_is_offcycle_component == 1:
+            off_payslip_exists = 1
+
+
+    return {
+        "off_payslip_exists": off_payslip_exists,
+        "regular_payslip_exists": regular_payslip_exists
+    }
