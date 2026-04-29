@@ -7,6 +7,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
+
     custom_meal_card:function(frm)
     {
         if(frm.doc.custom_meal_card)
@@ -623,6 +624,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
                         frm.set_value("custom_frequency",data.custom_frequency)
                         frm.set_value("custom_lwf_designation",data.custom_lwf_designation)
+
+                        frm.set_value("currency","INR")
 
                         frm.set_value("custom_state",data.custom_state)
                         
