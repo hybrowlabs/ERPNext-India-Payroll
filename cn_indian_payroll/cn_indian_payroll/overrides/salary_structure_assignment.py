@@ -25,6 +25,7 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_min_wages()
         self.reimbursement_amount()
         self.set_state_from_branch()
+        self.validate_manual_values()
 
 
 
@@ -45,7 +46,11 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_min_wages()
         self.reimbursement_amount()
 
+        
+
+    def on_update_after_submit(self):
         self.update_ctc_value_after_update()
+        self.validate_manual_values()
         
 
 
@@ -123,9 +128,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         ctc_amount_annual+=value.amount
 
             
-            self.base = ctc_amount_annual + reimbursement
-            self.custom_fixed_ctc_annual=fixed_ctc_annual+reimbursement
-            # self.reload()
+            # self.base = ctc_amount_annual + reimbursement
+            # self.custom_fixed_ctc_annual=fixed_ctc_annual+reimbursement
+            self.db_set("base", ctc_amount_annual + reimbursement)
+            self.db_set("custom_fixed_ctc_annual", fixed_ctc_annual + reimbursement)
 
 
 
@@ -366,3 +372,24 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
             declaration.submit()
 
         frappe.db.commit()
+
+    def validate_manual_values(self):
+        if not self.custom_fixed_gross_annual:
+            return
+
+        fields = [
+            ("custom_basic", "custom_basic_annual", "Annual Basic"),
+            ("custom_hra", "custom_hra_annual", "Annual HRA"),
+            ("custom_lta", "custom_lta_annual", "Annual LTA"),
+            ("custom_special_allowance", "custom_special_allowance_annual", "Annual Special Allowance"),
+            ("custom_epf_employee", "custom_epf_employee_annual", "Annual EPF Employee Contribution"),
+            ("custom_epf_employer", "custom_epf_employer_annual", "Annual EPF Employer Contribution"),
+            ("custom_esic_employee", "custom_esic_employee_annual", "Annual ESIC Employee Contribution"),
+            ("custom_esic_employer", "custom_esic_employer_annual", "Annual ESIC Employer Contribution"),
+            ("custom_nps_value", "custom_nps_annual", "Annual NPS Contribution"),
+        ]
+
+        for flag_field, annual_field, label in fields:
+            if getattr(self, flag_field) and getattr(self, annual_field):
+                if getattr(self, annual_field) > self.custom_fixed_gross_annual:
+                    frappe.throw(_(f"{label} cannot be greater than Annual Fixed Gross."))

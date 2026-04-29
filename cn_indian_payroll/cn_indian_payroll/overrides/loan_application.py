@@ -5,8 +5,8 @@ from frappe.utils import add_months, getdate,flt
 
 
 def before_submit(self, method):
-    if  not self.custom_note_remark:
-        frappe.throw("Please add Note/Remarks before Submit")
+    # if  not self.custom_note_remark:
+    #     frappe.throw("Please add Note/Remarks before Submit")
 
     if self.status=="Open":
         frappe.throw("Cannot Submit Loan Application with status 'Open'")
@@ -43,7 +43,6 @@ def on_submit(self, method):
 
         loan_doc.insert(ignore_permissions=True)
         loan_doc.submit()
-        frappe.db.commit()
 
         if loan_doc:
             disburse_doc = frappe.get_doc({
@@ -58,7 +57,6 @@ def on_submit(self, method):
             })
             disburse_doc.insert(ignore_permissions=True)
             disburse_doc.submit()
-            frappe.db.commit()
 
 
 

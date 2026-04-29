@@ -7,6 +7,7 @@ from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim impo
 
 
 
+
 @frappe.whitelist()
 def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page_length=10,order_by=None,status=None,filters=None,include_allocated_todos=False,date=None):
     target_employee = frappe.request.headers.get("X-Target-Employee-Id")
@@ -149,11 +150,13 @@ def print_loan_dashboard(employee,todo_status=None,search_term=None,start=0,page
             "loan_type": loan.loan_product,
             "emi_type": loan.repayment_method,
             "loan_requested_amount": loan.loan_amount,
-            "loan_approved_amount": loan_doc.loan_amount if loan_doc else None,
-            "rate_of_interest": loan_doc.rate_of_interest if loan_doc else None,
-            "standard_interest": loan_product.rate_of_interest if loan_product else None,
-            "loan_start_date": loan_doc.repayment_start_date if loan_doc else None,
-            "loan_end_date": "",
+
+            "loan_approved_amount": loan.loan_amount or 0,
+            "rate_of_interest": loan.rate_of_interest or 0,
+            "standard_interest": loan_product.rate_of_interest or 0,
+            "loan_start_date": loan.custom_repayment_start_date or None,
+            "loan_end_date": None,
+
             "loan_tenure": loan_tenure,
             "status": loan.status,
             "monthly_repayment_amount": monthly_repayment,

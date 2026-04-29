@@ -27,7 +27,13 @@ def send_salary_slip_for_esign(salary_slip):
     """
 
 
+    settings = frappe.get_single("Leegality Settings")
+
+    print_format=settings.print_format
+
     slip = frappe.get_doc("Salary Slip", salary_slip)
+
+
 
 
     employee = frappe.get_doc("Employee", slip.employee)
@@ -43,7 +49,7 @@ def send_salary_slip_for_esign(salary_slip):
     html = frappe.get_print(
         doctype="Salary Slip",
         name=salary_slip,
-        print_format="Consultant",
+        print_format=print_format,
         doc=slip,
         as_pdf=False
     )
@@ -351,7 +357,9 @@ def send_salary_slip_for_esign_bulk(salary_slip):
     """
     Generate Salary Slip PDF and send to Leegality
     """
+    settings = frappe.get_single("Leegality Settings")
 
+    print_format=settings.print_format
     slip = frappe.get_doc("Salary Slip", salary_slip)
     employee = frappe.get_doc("Employee", slip.employee)
 
@@ -363,7 +371,7 @@ def send_salary_slip_for_esign_bulk(salary_slip):
     html = frappe.get_print(
         doctype="Salary Slip",
         name=salary_slip,
-        print_format="Consultant",
+        print_format=print_format,
         doc=slip,
         as_pdf=False
     )
