@@ -45,6 +45,9 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
         self.update_min_wages()
         self.reimbursement_amount()
 
+        
+
+    def on_update_after_submit(self):
         self.update_ctc_value_after_update()
         
 
@@ -123,9 +126,10 @@ class CustomSalaryStructureAssignment(SalaryStructureAssignment):
                         ctc_amount_annual+=value.amount
 
             
-            self.base = ctc_amount_annual + reimbursement
-            self.custom_fixed_ctc_annual=fixed_ctc_annual+reimbursement
-            # self.reload()
+            # self.base = ctc_amount_annual + reimbursement
+            # self.custom_fixed_ctc_annual=fixed_ctc_annual+reimbursement
+            self.db_set("base", ctc_amount_annual + reimbursement)
+            self.db_set("custom_fixed_ctc_annual", fixed_ctc_annual + reimbursement)
 
 
 
