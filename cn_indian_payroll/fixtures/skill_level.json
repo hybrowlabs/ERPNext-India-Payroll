@@ -22,5 +22,13 @@
   "modified": "2025-10-09 20:30:27.700138",
   "name": "Skilled",
   "skill_level": "Skilled"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Skill Level",
+  "modified": "2025-07-17 11:42:08.253212",
+  "name": "Highly Skilled",
+  "skill_level": "Highly Skilled"
  }
 ]
