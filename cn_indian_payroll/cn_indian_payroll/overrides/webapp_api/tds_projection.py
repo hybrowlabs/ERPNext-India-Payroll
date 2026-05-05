@@ -13,6 +13,7 @@ from frappe.utils import cint
 from frappe.utils import cstr
 from frappe.utils import getdate
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
+from frappe.utils import nowdate
 
 
 # http://127.0.0.1:8002/api/method/cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.tds_projection.get_annual_statement?employee=PW0220&company=Pen%20Pencil&payroll_period=25-26
@@ -518,9 +519,6 @@ def get_annual_statement(employee=None, payroll_period=None,company=None):
         "reimbursements_total":round(reimbursements_total) if reimbursements_total else 0,
 
     }
-
-
-
 
 
 
@@ -5124,84 +5122,6 @@ def update_declaration_form(declaration_id=None,data=None,doctype=None,proof_id=
         }
 
 
-    # elif doctype == "Employee Tax Exemption Proof Submission" and declaration_id and not proof_id:
-
-
-    #     declaration = frappe.get_doc(
-    #         "Employee Tax Exemption Declaration",
-    #         declaration_id
-    #     )
-
-    #     company = declaration.company
-    #     employee = declaration.employee
-    #     payroll_period = declaration.payroll_period
-
-    #     # -------- Regime --------
-    #     go_head_with_new_regime = data.get("go_head_with_new_regime", 0)
-    #     selected_regime = "New Regime" if go_head_with_new_regime == 1 else "Old Regime"
-
-    #     # -------- Income Tax Slab --------
-    #     income_tax_slab = frappe.get_list(
-    #         "Income Tax Slab",
-    #         filters={
-    #             "disabled": 0,
-    #             "company": company,
-    #             "custom_select_regime": selected_regime,
-    #             "docstatus": 1,
-    #         },
-    #         fields=["name"],
-    #         order_by="effective_from desc",
-    #         limit=1,
-    #     )
-
-    #     if not income_tax_slab:
-    #         frappe.throw(f"No active Income Tax Slab found for {selected_regime}")
-
-    #     # -------- Create Proof Submission --------
-    #     proof_doc = frappe.new_doc("Employee Tax Exemption Proof Submission")
-    #     proof_doc.custom_declaration_id = declaration_id
-    #     proof_doc.company = company
-    #     proof_doc.employee = employee
-    #     proof_doc.payroll_period = payroll_period
-    #     proof_doc.custom_income_tax = income_tax_slab[0].name
-    #     proof_doc.custom_tax_regime = selected_regime
-    #     proof_doc.submission_date = frappe.utils.nowdate()
-
-    #     # -------- HRA fields --------
-    #     proof_doc.house_rent_payment_amount = data.get("monthly_house_rent")
-    #     proof_doc.rented_in_metro_city = data.get("rented_in_metro_city")
-    #     proof_doc.rented_from_date = data.get("start_date")
-    #     proof_doc.rented_to_date = data.get("end_date")
-    #     proof_doc.custom_pan = data.get("pan")
-    #     proof_doc.custom_address_title1 = data.get("address_title1")
-    #     proof_doc.custom_address_title2 = data.get("address_title2")
-    #     proof_doc.custom_hra_proof_attach = data.get("attach_proof")
-    #     proof_doc.custom_name=data.get("custom_name")
-
-    #     # -------- Child table --------
-    #     proof_doc.set("tax_exemption_proofs", [])
-
-    #     for row in data.get("declarations", []):
-    #         proof_doc.append("tax_exemption_proofs", {
-    #             "exemption_category": row.get("exemption_category"),
-    #             "exemption_sub_category": row.get("exemption_sub_category"),
-    #             "amount": row.get("amount"),
-    #             "max_amount": row.get("max_amount"),
-    #             "attach_proof": row.get("attach_proof"),
-    #             "custom_note": row.get("custom_note"),
-    #         })
-
-
-    #     proof_doc.insert()
-    #     # proof_doc.submit()
-    #     frappe.db.commit()
-
-    #     return {
-    #         "status": "success",
-    #         "message": "Proof Submission created successfully",
-    #         "proof_id": proof_doc.name,
-    #     }
-
 
     elif doctype == "Employee Tax Exemption Proof Submission" and declaration_id and not proof_id:
         declaration = frappe.get_doc(
@@ -5379,10 +5299,6 @@ def update_declaration_form(declaration_id=None,data=None,doctype=None,proof_id=
             "message": message,
             "proof_id": proof_doc.name,
         }
-
-
-
-
 
 
 
