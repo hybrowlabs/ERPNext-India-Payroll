@@ -11,7 +11,7 @@
  "is_standard": "Yes",
  "letter_head": "43rr",
  "letterhead": null,
- "modified": "2025-09-25 12:15:16.120006",
+ "modified": "2025-09-26 10:15:52.877051",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "Loan Repayment Schedule Report",
@@ -29,6 +29,12 @@
   },
   {
    "role": "Guest"
+  },
+  {
+   "role": "Payroll Admin"
+  },
+  {
+   "role": "Payroll Manager"
   }
  ],
  "timeout": 0

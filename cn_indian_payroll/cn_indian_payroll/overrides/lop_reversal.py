@@ -5,7 +5,7 @@ from frappe import _
 
 
 def validate(self, method):
-    validate_days(self)
+    # validate_days(self)
     insert_breakup_table(self)
 
 
@@ -17,6 +17,63 @@ def on_submit(self, method):
 def on_cancel(self, method):
     cancel_benefit_accrual(self)
     cancel_bonus_accrual(self)
+
+def before_update_after_submit(self, method):
+    insert_breakup_table(self)
+    update_additional_salary(self)
+
+# def on_update_after_submit(self,method):
+#     update_additional_salary(self)
+
+
+
+
+
+def update_additional_salary(self):
+
+
+    if self.number_of_days:
+
+        for row in self.arrear_breakup:
+
+            additional_salaries = frappe.get_all(
+                "Additional Salary",
+                filters={
+                    "ref_docname": self.name,
+                    "ref_doctype": "LOP Reversal",
+                    "salary_component": row.salary_component
+                },
+                fields=["name", "amount"]
+            )
+
+            for rec in additional_salaries:
+                additional_salary = frappe.get_doc("Additional Salary", rec.name)
+
+                additional_salary.amount = row.amount
+                additional_salary.save(ignore_permissions=True)
+
+
+
+        for row in self.arrear_deduction_breakup:
+
+            additional_salaries = frappe.get_all(
+                "Additional Salary",
+                filters={
+                    "ref_docname": self.name,
+                    "ref_doctype": "LOP Reversal",
+                    "salary_component": row.salary_component
+                },
+                fields=["name", "amount"]
+            )
+
+            for rec in additional_salaries:
+                additional_salary = frappe.get_doc("Additional Salary", rec.name)
+
+                additional_salary.amount = row.amount
+                additional_salary.save(ignore_permissions=True)
+
+        frappe.db.commit()
+
 
 
 def bonus_accrual_update(self):
@@ -68,7 +125,6 @@ def reimbursement_accrual_update(self):
         component = frappe.get_doc("Salary Component", record.salary_component)
 
         if component.depends_on_payment_days == 1:
-            frappe.msgprint(str(component.name))
             reversal_amount = (record.amount / record.payment_days) * self.number_of_days
             updated_amount = record.amount + reversal_amount
 
@@ -110,41 +166,43 @@ def validate_days(self):
 
 
 def insert_breakup_table(self):
-    salary_slip = frappe.get_doc("Salary Slip", self.salary_slip)
-    if not salary_slip:
-        frappe.throw(_("Salary Slip not found."))
 
-    self.set("arrear_breakup", [])
-    self.set("arrear_deduction_breakup", [])
+    if self.salary_slip :
+        salary_slip = frappe.get_doc("Salary Slip", self.salary_slip)
+        if not salary_slip:
+            frappe.throw(_("Salary Slip not found."))
 
-    total_working_days = max(salary_slip.total_working_days, 1)
-    for section, fieldname in [
-        ("earnings", "arrear_breakup"),
-        ("deductions", "arrear_deduction_breakup"),
-    ]:
-        for item in getattr(salary_slip, section, []):
-            components = frappe.get_all(
-                "Salary Component",
-                filters={
-                    "custom_is_arrear": 1,
-                    "custom_component": item.salary_component,
-                    "disabled": 0,
-                    "type": "Earning" if section == "earnings" else "Deduction",
-                },
-                fields=["name"],
-            )
+        self.set("arrear_breakup", [])
+        self.set("arrear_deduction_breakup", [])
 
-            if not components:
-                continue
-
-            one_day_amount = (item.default_amount or 0) / total_working_days
-            arrear_amount = round(one_day_amount * self.number_of_days)
-
-            for component in components:
-                self.append(
-                    fieldname,
-                    {"salary_component": component.name, "amount": arrear_amount},
+        total_working_days = max(salary_slip.total_working_days, 1)
+        for section, fieldname in [
+            ("earnings", "arrear_breakup"),
+            ("deductions", "arrear_deduction_breakup"),
+        ]:
+            for item in getattr(salary_slip, section, []):
+                components = frappe.get_all(
+                    "Salary Component",
+                    filters={
+                        "custom_is_arrear": 1,
+                        "custom_component": item.salary_component,
+                        "disabled": 0,
+                        "type": "Earning" if section == "earnings" else "Deduction",
+                    },
+                    fields=["name"],
                 )
+
+                if not components:
+                    continue
+
+                one_day_amount = (item.default_amount or 0) / total_working_days
+                arrear_amount = round(one_day_amount * self.number_of_days)
+
+                for component in components:
+                    self.append(
+                        fieldname,
+                        {"salary_component": component.name, "amount": arrear_amount},
+                    )
 
 
 def insert_additional_salary(self):

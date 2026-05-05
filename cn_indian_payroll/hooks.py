@@ -233,12 +233,29 @@ fixtures = [
     # {"dt":"Employee Tax Exemption Sub Category"},
     # {"dt":"Employee Tax Exemption Category"},
     {"dt":"Salary Component Library Item"},
-    {"dt":"State"},
+    {"dt":"State Master"},
     {"dt":"Frequency"},
     {"dt":"LWF Designation"},
     {"dt":"Role", "filters": {"name": ["in", ["Payroll Admin", "Payroll Manager"]]}},
-    {"dt": "Custom DocPerm", "filters": {"parent": "Employee Advance","role": "Payroll Manager"}},
-    {"dt":"Custom Field","filters":{"dt":"Payroll Settings"}}
+    # {"dt":"Custom Field","filters":{"module":"cn-indian-payroll","dt":"Employee"}},
+    
+    {"dt":"Section Category"},
+    
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["dt", "=", "Employee"],
+            ["name", "in", [
+                "Employee-custom_business_category",
+                "Employee-custom_business_segment",
+                "Employee-custom_work_flow_policy",
+                "Employee-custom_bank_account_in_erp",
+                "Employee-custom_supplier_id",
+                "Employee-custom_trade_name",
+                "Employee-custom_gst_number",
+            ]]
+        ]
+    }
 
 
 
@@ -249,6 +266,8 @@ fixtures = [
 doctype_list_js = {
     "Employee Bonus Accrual": "public/js/employee_bonus_accrual_list.js",
     "Employee Benefit Accrual": "public/js/employee_benefit_accrual_list.js",
+    "Payroll Entry": "public/js/payroll_entry_list.js",
+    "Salary Slip": "public/js/salary_slip_list.js",
 }
 
 doctype_js = {
@@ -257,9 +276,8 @@ doctype_js = {
     "Employee Benefit Claim": "public/js/benefit_claim.js",
     "Employee": "public/js/employee.js",
     "Salary Structure Assignment": "public/js/salary_structure_assignment.js",
-    # "Employee Tax Exemption Declaration": "public/js/tax_declaration.js",
     "Employee Tax Exemption Declaration": "public/js/exemption_declaration.js",
-
+    "Employee Tax Exemption Proof Submission": "public/js/proof_submission.js",
     "LOP Reversal": "public/js/lop_reversal.js",
     "Loan": "public/js/loan.js",
     "Loan Product": "public/js/loan_product.js",
@@ -289,6 +307,8 @@ override_doctype_class = {
     "Full and Final Statement": "cn_indian_payroll.cn_indian_payroll.overrides.full_and_final_settlement.CustomFullAndFinalStatement",
     "Payroll Entry": "cn_indian_payroll.cn_indian_payroll.overrides.payroll_entry.PayrollEntryOverride",
 
+    "Employee Tax Exemption Proof Submission":"cn_indian_payroll.cn_indian_payroll.overrides.proof_submission.CNEmployeeTaxExemptionProofSubmission"
+
 }
 
 doc_events = {
@@ -296,7 +316,7 @@ doc_events = {
 
     "Attendance": {
         "on_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.attendance_sync.on_update_after_submit",
-
+        "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.attendance_sync.on_submit",
 
     },
 
@@ -304,6 +324,8 @@ doc_events = {
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_submit",
         "on_cancel": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.on_cancel",
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.validate",
+        "before_update_after_submit": "cn_indian_payroll.cn_indian_payroll.overrides.lop_reversal.before_update_after_submit",
+
 
     },
 
@@ -326,9 +348,9 @@ doc_events = {
     "Employee Tax Exemption Sub Category": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_sub_category.validate",
     },
-    "Employee Tax Exemption Category": {
-        "validate": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_category.validate",
-    },
+    # "Employee Tax Exemption Category": {
+    #     "validate": "cn_indian_payroll.cn_indian_payroll.overrides.exemption_category.validate",
+    # },
 
     "Salary Component": {
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.salary_component.validate",
@@ -338,11 +360,21 @@ doc_events = {
         "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.before_submit",
         "validate": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.validate",
         "on_submit": "cn_indian_payroll.cn_indian_payroll.overrides.employee_advance.on_submit",
+        
     },
 
     "Loan Application": {
         "before_submit": "cn_indian_payroll.cn_indian_payroll.overrides.loan_application.before_submit",
-        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.validate"
+        "validate":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.validate",
+        "on_submit":"cn_indian_payroll.cn_indian_payroll.overrides.loan_application.on_submit",
+    },
+
+    # "Attendance Request": {
+    #     "validate":"cn_indian_payroll.cn_indian_payroll.overrides.attendance_request.validate"
+    # },
+
+    "Employee": {
+        "before_save":"cn_indian_payroll.cn_indian_payroll.overrides.employee.before_save",
     },
 
 

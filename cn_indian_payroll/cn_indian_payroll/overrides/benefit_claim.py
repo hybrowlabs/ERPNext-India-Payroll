@@ -1,14 +1,81 @@
 import frappe
 from hrms.payroll.doctype.employee_benefit_claim.employee_benefit_claim import (
-    EmployeeBenefitClaim,
+    EmployeeBenefitClaim,validate_active_employee,
+    get_max_benefits,
+    get_payroll_period,
 )
+from frappe.utils import getdate
+from frappe.utils import add_months
+from frappe import _
+from frappe.utils import flt
+from hrms.hr.utils import get_previous_claimed_amount, validate_active_employee
 from frappe.utils import getdate
 
 
+
+
+
 class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
+
+
+    def validate(self):
+        validate_active_employee(self.employee)
+        max_benefits = get_max_benefits(self.employee, self.claim_date)
+
+        company = frappe.db.get_value("Employee", self.employee, "company")
+
+        claim_date = getdate(self.claim_date)
+
+        payroll_period = get_payroll_period(
+            claim_date,
+            claim_date,
+            company
+        )
+
+        if payroll_period:
+
+            self.custom_payroll_period=payroll_period.name
+
+        
+        # self.validate_max_benefit_for_component(payroll_period)
+        # self.validate_max_benefit_for_sal_struct(max_benefits)
+        # self.validate_benefit_claim_amount(max_benefits, payroll_period)
+        # if self.pay_against_benefit_claim:
+        #     self.validate_non_pro_rata_benefit_claim(max_benefits, payroll_period)
+
+        self.set_taxable_or_non_taxable()
+
+
+
+
+
+
+
+
     def on_submit(self):
-        self.insert_future_benefit()
+        # self.insert_future_benefit()
         self.insert_additional_salary()
+
+
+    # def validate(self):
+    #     super().validate()
+    #     self.set_taxable_or_non_taxable()
+
+
+    def set_taxable_or_non_taxable(self):
+        if self.earning_component and self.claimed_amount:
+            component=frappe.get_doc("Salary Component",self.earning_component)
+            if component.is_tax_applicable==1:
+                self.custom_is_taxable=1
+                self.custom_taxable_amount=self.claimed_amount
+            else:
+                self.custom_is_non_taxable=1
+                self.custom_non_taxable_amount=self.claimed_amount
+
+
+
+
+
 
     def insert_future_benefit(self):
         if self.custom_max_amount:
@@ -65,143 +132,3 @@ class CustomEmployeeBenefitClaim(EmployeeBenefitClaim):
     def before_submit(self):
         if self.custom_status=="Pending":
             frappe.throw("Please Select the Status Approved or Rejected")
-
-
-@frappe.whitelist()
-def benefit_claim(doc):
-    doc = frappe.get_doc(frappe.parse_json(doc))
-    component_array = []
-
-
-    lta_component_list = frappe.get_list(
-        "Salary Component",
-        filters={"component_type": "LTA Reimbursement"},
-        fields=["name"],
-        limit=1,
-    )
-    lta_component = lta_component_list[0].name if lta_component_list else None
-
-
-    get_ssa = frappe.get_list(
-        "Salary Structure Assignment",
-        filters={
-            "employee": doc.employee,
-            "docstatus": 1,
-            "from_date": ["<=", getdate(doc.claim_date)],
-        },
-        fields=["name", "custom_payroll_period"],
-        order_by="from_date desc",
-        limit=1,
-    )
-
-    payroll_period = None
-
-    if get_ssa:
-        ssa_doc = frappe.get_doc("Salary Structure Assignment", get_ssa[0].name)
-        payroll_period = get_ssa[0].custom_payroll_period
-
-        for component in ssa_doc.custom_employee_reimbursements:
-            if component.reimbursements != lta_component:
-                salary_component=frappe.get_doc("Salary Component",component.reimbursements)
-                if salary_component.pay_against_benefit_claim==1:
-                    component_array.append(component.reimbursements)
-
-    return {"component_array": component_array, "payroll_period": payroll_period}
-
-
-@frappe.whitelist()
-def get_max_amount(doc):
-    doc = frappe.get_doc(frappe.parse_json(doc))
-
-
-    get_ssa = frappe.get_list(
-        "Salary Structure Assignment",
-        filters={
-            "employee": doc.employee,
-            "docstatus": 1,
-            "from_date": ["<=", getdate(doc.claim_date)],
-        },
-        fields=["name", "custom_payroll_period"],
-        order_by="from_date desc",
-        limit=1,
-    )
-
-    if not get_ssa:
-        return 0
-
-    ssa_doc = frappe.get_doc("Salary Structure Assignment", get_ssa[0].name)
-    payroll_period = get_ssa[0].custom_payroll_period
-
-    for component in ssa_doc.custom_employee_reimbursements:
-        if component.reimbursements == doc.earning_component:
-            eligible_amount = component.monthly_total_amount or 0
-            salary_component = frappe.get_doc(
-                "Salary Component", component.reimbursements
-            )
-
-
-            claims = frappe.get_all(
-                "Employee Benefit Claim",
-                filters={
-                    "employee": doc.employee,
-                    "earning_component": doc.earning_component,
-                    "docstatus": 1,
-                    "custom_payroll_period": payroll_period,
-                },
-                fields=["*"],
-            )
-            claimed_total = sum([row.custom_paid_amount for row in claims])
-
-
-            if salary_component.custom_claim_based_on == "Monthly":
-                accruals = frappe.get_all(
-                    "Employee Benefit Accrual",
-                    filters={
-                        "employee": doc.employee,
-                        "salary_component": doc.earning_component,
-                        "docstatus": 1,
-                        "payroll_period": payroll_period,
-                    },
-                    fields=["amount"],
-                )
-                accrued_total = sum([row.amount for row in accruals])
-
-                max_amount = (accrued_total + eligible_amount) - claimed_total
-
-                return max_amount
-
-            elif salary_component.custom_claim_based_on == "Yearly":
-                accruals = frappe.get_all(
-                    "Employee Benefit Accrual",
-                    filters={
-                        "employee": doc.employee,
-                        "salary_component": doc.earning_component,
-                        "docstatus": 1,
-                        "payroll_period": payroll_period,
-                    },
-                    fields=["amount"],
-                )
-                accrued_total = sum([row.amount for row in accruals])
-                accrued_months = len(accruals)
-
-                payroll_doc = frappe.get_doc("Payroll Period", payroll_period)
-                start_date = getdate(payroll_doc.start_date)
-                end_date = getdate(payroll_doc.end_date)
-                from_date = getdate(ssa_doc.from_date)
-
-                effective_start_date = max(start_date, from_date)
-
-
-                year_diff = end_date.year - effective_start_date.year
-                month_diff = end_date.month - effective_start_date.month
-                total_months = (year_diff * 12 + month_diff) + 1
-
-
-                future_eligible = (total_months - accrued_months) * eligible_amount
-
-                # Final max amount = accrued + future - claimed
-                max_amount = (accrued_total + future_eligible) - claimed_total
-
-                return max_amount
-
-    return 0

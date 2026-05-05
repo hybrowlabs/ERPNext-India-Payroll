@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-31 11:18:11.892907",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "status",
+  "count",
+  "regularize",
+  "regularized_status",
+  "regularized_count"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "count",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Count"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "regularize",
+   "fieldtype": "Check",
+   "label": "Regularize"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "regularized_status",
+   "fieldtype": "Select",
+   "label": "Regularized Status",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "regularized_count",
+   "fieldtype": "Float",
+   "label": "Regularized Count"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 19:57:48.949959",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Attendance Log Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

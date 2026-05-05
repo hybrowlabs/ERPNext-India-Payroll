@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-29 12:29:35.469637",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "table_peep",
+  "section_break_evwm",
+  "map_the_department",
+  "section_break_vnqu",
+  "map_the_work_location",
+  "section_break_byjy",
+  "map_the_company"
+ ],
+ "fields": [
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "table_peep",
+   "fieldtype": "Table",
+   "options": "Salary Component Config"
+  },
+  {
+   "fieldname": "section_break_evwm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "map_the_department",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Map The Department",
+   "options": "Department Map"
+  },
+  {
+   "fieldname": "section_break_vnqu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "map_the_work_location",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Map The Work Location",
+   "options": "Work Location Map"
+  },
+  {
+   "fieldname": "section_break_byjy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "map_the_company",
+   "fieldtype": "Table",
+   "label": "Map The Company",
+   "options": "Company Map"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-04-27 08:18:48.853745",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "Contract Employee Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

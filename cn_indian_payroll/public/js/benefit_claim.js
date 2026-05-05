@@ -26,6 +26,35 @@ frappe.ui.form.on('Employee Benefit Claim', {
 
     },
 
+    refresh: function(frm) {
+       if(frm.doc.docstatus==1)
+       {
+        frm.add_custom_button("Benefit Payslip", function () {
+            if (!frm.doc.employee || !frm.doc.custom_payroll_period) {
+                frappe.msgprint(__('Please set Employee and Payroll Period first.'));
+                return;
+            }
+
+            frappe.call({
+                method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_benefit_payslip_pdf",
+                args: {
+                    id: frm.doc.name
+                },
+                callback: function (r) {
+                    if (!r.message || !r.message.html) {
+                        frappe.msgprint(__('No HTML generated'));
+                        return;
+                    }
+                    const w = window.open("", "_blank");
+                    w.document.open();
+                    w.document.write(r.message.html);
+                    w.document.close();
+                }
+            });
+        });
+       }
+    },
+
     // claim_date: function(frm) {
     //     if (frm.doc.claim_date < frappe.datetime.now_date()) {
     //         frm.set_value("claim_date", undefined);
@@ -37,7 +66,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
 function get_employee_details(frm) {
     if (frm.doc.employee) {
         frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.benefit_claim",
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.benefit_claim",
             args: {
                 doc: frm.doc
             },
@@ -72,15 +101,36 @@ function get_max_amount(frm)
 {
     if (frm.doc.employee) {
         frappe.call({
-            method: "cn_indian_payroll.cn_indian_payroll.overrides.benefit_claim.get_max_amount",
+            method: "cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim.get_max_amount",
             args: {
                 doc: frm.doc
             },
             callback: function(response) {
                 if (response.message) {
 
-                    let amount = response.message;
-                    frm.set_value("custom_max_amount", amount);
+                    console.log(response.message,"44444444444444")
+
+                    if (response.message.status === "success") {
+
+                        console.log("SUCCESS");
+
+                        let amount = response.message.data.currently_allowed;
+                        let monthly_amount = response.message.data.monthly_reimbursement;
+
+                        frm.set_value("custom_max_amount", amount);
+                        frm.set_value("custom_reimbursement_amount_as_per_ctc",monthly_amount)
+                    }
+
+                    else if (response.message.status === "failed") {
+
+                        msgprint(response.message.message);
+                        frm.set_value("custom_max_amount", 0);
+                        frm.set_value("claimed_amount", 0);
+                    }
+
+
+
+
                 }
             }
         });

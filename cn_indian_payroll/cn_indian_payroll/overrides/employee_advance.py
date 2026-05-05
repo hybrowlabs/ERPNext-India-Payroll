@@ -13,41 +13,85 @@ from cn_leave_shift_managment.api import get_holiday_dates
 from cn_leave_shift_managment.custom_apis import get_week_off_days
 
 
-
-
-
+from cn_indian_payroll.cn_indian_payroll.overrides.webapp_api.benefit_claim import get_open_approval_todos
+from frappe import _
 
 
 def before_submit(self, method):
     if self.custom_type == "Salary Advance":
-        if not self.custom_note_remarks or not self.custom_deduction_component:
-            frappe.throw("Please add Note/Remarks and select a Deduction Component in the Note Section before submitting.")
-
         self.custom_total_balance_amount = (self.advance_amount or 0) - (self.custom_total_paid_amount or 0)
-
-    elif self.custom_type == "Reimbursement / Expense Advance":
-        if not self.custom_note_remarks:
-            frappe.throw("Please add Note/Remarks in the Note Section before submitting.")
-
+  
 
     if self.custom_final_status=="Pending":
         frappe.throw("Please Select the Status Approved or Rejected")
 
+   
+
+
+
 
 @frappe.whitelist()
-def get_advance_dashboard(employee):
+def get_advance_dashboard(employee, todo_status=None,search_term=None,start=0,page_length=10,order_by=None,status=None,filters=None,include_allocated_todos=False,date=None):
+
+    target_employee = frappe.request.headers.get("X-Target-Employee-Id")
+    if target_employee:
+        employee = target_employee
+
     if not employee:
-        return []
+        return {"data": [], "total_count": 0}
+
+    start = int(start)
+    page_length = int(page_length)
 
     advance_details = frappe.get_all(
         "Employee Advance",
         filters={"employee": employee, "docstatus": ["in", [0, 1]]},
-        fields=["*"]
+        fields=["*"],
+        order_by=order_by
     )
+
+    if search_term:
+        search = search_term.lower()
+
+        advance_details = [
+            adv for adv in advance_details
+            if any([
+                search in (adv.get("name") or "").lower(),
+                search in (adv.get("employee_name") or "").lower(),
+                search in (adv.get("custom_advance_type") or "").lower(),
+                search in (adv.get("status") or "").lower(),
+            ])
+        ]
+
+    total_count = len(advance_details)
+
+    advance_details = advance_details[start:start + page_length]
+
+
+    todo_response = get_open_approval_todos(
+        doctype="Employee Advance",
+        start=0,
+        page_length=1000,
+        include_allocated_todos=False,
+        todo_status=todo_status,
+        search_term=search_term,
+        order_by=order_by,
+        status=status,
+        filters=filters,
+        date=date
+    )
+
+    todo_map = {}
+    if todo_response and todo_response.get("data"):
+        for todo in todo_response.get("data"):
+            ref_name = todo.get("reference_name")
+            if ref_name:
+                todo_map.setdefault(ref_name, []).append(todo)
 
     results = []
 
     for advance in advance_details:
+
         repayment_schedule = []
         balance_amount = float(advance.advance_amount or 0)
         start_date = advance.custom_repayment_start_date
@@ -62,50 +106,41 @@ def get_advance_dashboard(employee):
                 "ref_docname": advance.name,
                 "docstatus": 1
             },
-            fields=['name', 'from_date', 'to_date', 'amount','payroll_date'],
-            order_by='from_date asc'
+            fields=['name', 'payroll_date', 'amount'],
+            order_by='payroll_date asc'
         )
 
         if get_additional_salary:
             for rec in get_additional_salary:
-                from_date = getdate(rec.payroll_date)
-                to_date = getdate(rec.payroll_date)
+                current_date = getdate(rec.payroll_date)
 
-                total_months = ((to_date.year - from_date.year) * 12 +
-                                (to_date.month - from_date.month)) + 1
+                idx += 1
+                pay_amount = min(balance_amount, flt(rec.amount))
+                balance_amount -= pay_amount
 
-                current_date = from_date
-                for i in range(total_months):
-                    idx += 1
-                    pay_amount = min(balance_amount, flt(rec.amount))
-                    balance_amount -= pay_amount
+                salary_slips = frappe.db.get_all(
+                    "Salary Slip",
+                    filters=[
+                        ["employee", "=", employee],
+                        ["company", "=", advance.company],
+                        ["docstatus", "=", 1],
+                        ["start_date", "<=", current_date],
+                        ["end_date", ">=", current_date],
+                    ],
+                    fields=["name"],
+                    limit=1,
+                )
 
+                deducted = 1 if salary_slips else 0
 
-                    salary_slips = frappe.db.get_all(
-                        "Salary Slip",
-                        filters=[
-                            ["employee", "=", employee],
-                            ["company", "=", advance.company],
-                            ["docstatus", "=", 1],
-                            ["start_date", "<=", current_date],
-                            ["end_date", ">=", current_date],
-                        ],
-                        fields=["name"],
-                        limit=1,
-                    )
-
-                    deducted = 1 if salary_slips else 0
-
-                    repayment_schedule.append({
-                        "idx": idx,
-                        "payment_date": current_date,
-                        "payment_amount": pay_amount,
-                        "balance_amount": balance_amount,
-                        "deducted": deducted,
-                        "additional_salary_id": rec.name
-                    })
-
-                    current_date = add_months(current_date, 1)
+                repayment_schedule.append({
+                    "idx": idx,
+                    "payment_date": current_date,
+                    "payment_amount": pay_amount,
+                    "balance_amount": balance_amount,
+                    "deducted": deducted,
+                    "additional_salary_id": rec.name
+                })
 
         else:
             if advance.custom_repayment_type == "One Time":
@@ -153,6 +188,7 @@ def get_advance_dashboard(employee):
                             idx += 1
                             payment_date = add_months(start_date, i)
                             balance_amount -= emi
+
                             repayment_schedule.append({
                                 "idx": idx,
                                 "payment_date": payment_date,
@@ -164,22 +200,39 @@ def get_advance_dashboard(employee):
 
         end_date = repayment_schedule[-1]["payment_date"] if repayment_schedule else None
 
-        total_paid_amount = sum(r["payment_amount"] for r in repayment_schedule if r.get("deducted") == 1)
+        total_paid_amount = sum(
+            r["payment_amount"] for r in repayment_schedule if r.get("deducted") == 1
+        )
+
         final_balance = flt(advance.advance_amount) - total_paid_amount
 
+
+        advance_todos = todo_map.get(advance.name, [])
+
         results.append({
+            "name": advance.name,
             "advance_type": advance.custom_advance_type,
-            "status": advance.status,
+            "status": advance.custom_final_status,
             "total_advance_amount": advance.advance_amount,
+            "no_of_installments": len(repayment_schedule),
             "start_date": start_date,
             "end_date": end_date,
             "repayments": repayment_schedule,
             "total_paid_amount": total_paid_amount,
-            "balance_amount": final_balance
+            "balance_amount": final_balance,
+            "employee": advance.employee,
+            "employee_name": advance.employee_name,
+            "todo_list": advance_todos,
+            
         })
 
-    return results
-
+    return {
+        "status": "success",
+        "total_count": total_count,
+        "start": start,
+        "page_length": page_length,
+        "data": results
+    }
 
 
 
@@ -357,6 +410,13 @@ def validate(self, method):
                     f"based on attendance and salary."
                 )
 
+        deduction_component = frappe.db.get_single_value(
+            "Payroll Settings",
+            "custom_employee_advance_component"
+        )
+
+        self.custom_deduction_component = deduction_component
+
     self.custom_total_paid_amount=0
     self.custom_total_balance_amount=self.advance_amount
 
@@ -365,8 +425,15 @@ def validate(self, method):
     elif self.employee and self.custom_type=="Reimbursement / Expense Advance":
         self.repay_unclaimed_amount_from_salary=1
 
+
+
+
+
+
+
 @frappe.whitelist()
 def get_advance_amount_checking(employee, advance_type, posting_date,company):
+
     if not (employee and advance_type and posting_date):
         return None
 
@@ -465,6 +532,7 @@ def get_advance_amount_checking(employee, advance_type, posting_date,company):
 
 
 def on_submit(self, method):
+    
     if self.custom_type=="Salary Advance":
         if self.custom_final_status=="Approved" and self.custom_repayment_type=="One Time":
             frappe.get_doc({
@@ -545,6 +613,8 @@ def on_submit(self, method):
                         "ref_doctype": "Employee Advance",
                         "ref_docname": self.name
                     }).insert(ignore_permissions=True).submit()
+
+
 
 
 @frappe.whitelist()

@@ -9,8 +9,8 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "letterhead": null,
- "modified": "2025-04-14 16:12:04.438385",
+ "letter_head": null,
+ "modified": "2026-03-24 10:38:38.519372",
  "modified_by": "Administrator",
  "module": "cn-indian-payroll",
  "name": "ESIC Register",
@@ -25,9 +25,6 @@
   },
   {
    "role": "HR Manager"
-  },
-  {
-   "role": "Employee"
   }
  ],
  "timeout": 0

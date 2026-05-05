@@ -97,6 +97,7 @@ def execute(filters=None):
     data = get_all_accrued_reimbursements(filters)
     return columns, data
 
+@frappe.whitelist()
 
 def get_all_accrued_reimbursements(filters=None):
     if filters is None:
@@ -173,6 +174,8 @@ def get_all_accrued_reimbursements(filters=None):
             ):
                 claim_month = datetime.strptime(str(claim.claim_date), "%Y-%m-%d").month
                 claim_year = datetime.strptime(str(claim.claim_date), "%Y-%m-%d").year
+
+                # frappe.msgprint(str(claim_month) + " " + str(claim_year))
 
                 if claim_month == accrual_month and claim_year == accrual_year:
                     paid_amount += claim.custom_paid_amount or 0.0

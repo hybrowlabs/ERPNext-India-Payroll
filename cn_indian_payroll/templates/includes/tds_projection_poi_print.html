@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>TDS Projection</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        th {
+            background: rgba(3, 9, 15, 0.68);
+            color: white;
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .section {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>TDS Projection Statement</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Old Regime</th>
+            <th>New Regime</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Taxable Earnings (Current)</td>
+            <td class="right">₹ {{ current_taxable_earnings_old_regime }}</td>
+            <td class="right">₹ {{ current_taxable_earnings_new_regime }}</td>
+        </tr>
+
+        <tr>
+            <td>Taxable Earnings (Future)</td>
+            <td class="right">₹ {{ future_taxable_earnings_old_regime }}</td>
+            <td class="right">₹ {{ future_taxable_earnings_new_regime }}</td>
+        </tr>
+
+        <tr>
+            <td>Loan Perquisite</td>
+            <td class="right">₹ {{ loan_perquisite_amount }}</td>
+            <td class="right">₹ {{ loan_perquisite_amount }}</td>
+        </tr>
+
+        <tr class="section">
+            <td>Total Taxable Earnings</td>
+            <td class="right">₹ {{ total_taxable_earnings_old_regime }}</td>
+            <td class="right">₹ {{ total_taxable_earnings_new_regime }}</td>
+        </tr>
+
+        <!-- Allowances -->
+        <tr>
+            <td>
+                <b>Less: Allowances Exempted U/s 16</b>
+                <table style="width:100%; margin-top:5px;">
+                    <tr>
+                        <th>Title</th>
+                        <th>Old</th>
+                        <th>New</th>
+                    </tr>
+                    <tr>
+                        <td>Standard Deduction</td>
+                        <td class="right">₹ {{ old_regime_standard_value }}</td>
+                        <td class="right">₹ {{ new_regime_standard_value }}</td>
+                    </tr>
+                    <tr>
+                        <td>Professional Tax</td>
+                        <td class="right">₹ {{ pt_amount }}</td>
+                        <td class="right">₹ 0</td>
+                    </tr>
+                </table>
+            </td>
+
+            <td class="right">₹ {{ old_regime_standard_value + pt_amount }}</td>
+            <td class="right">₹ {{ new_regime_standard_value }}</td>
+        </tr>
+
+        <tr>
+            <td>HRA Exemptions</td>
+            <td class="right">₹ {{ hra_exemptions }}</td>
+            <td class="right">₹ 0</td>
+        </tr>
+
+        <tr>
+            <td>Total Exemptions / Deductions</td>
+            <td class="right">₹ {{ total_old_regime_deductions }}</td>
+            <td class="right">₹ {{ total_new_regime_deductions }}</td>
+        </tr>
+
+        <tr class="section">
+            <td>Annual Taxable Income</td>
+            <td class="right">₹ {{ old_regime_annual_taxable_income }}</td>
+            <td class="right">₹ {{ new_regime_annual_taxable_income }}</td>
+        </tr>
+
+                <tr>
+            <td>Total Tax on Income</td>
+            <td class="right">₹ {{old_regime_total_tax_on_income}}</td>
+            <td class="right">₹ {{new_regime_total_tax_on_income}}</td>
+        </tr>
+
+        <tr>
+            <td>Rebate</td>
+            <td class="right">₹ 0</td>
+            <td class="right">₹ 0</td>
+        </tr>
+
+
+
+        <tr>
+            <td>Surcharge</td>
+            <td class="right">₹ {{old_regime_surcharge}}</td>
+            <td class="right">₹ {{new_regime_surcharge}}</td>
+        </tr>
+
+        <tr>
+            <td>Education Cess</td>
+            <td class="right">₹ {{old_regime_education_cess}}</td>
+            <td class="right">₹ {{new_regime_education_cess}}</td>
+        </tr>
+
+        <tr>
+            <td>Marginal Relief</td>
+            <td class="right">₹ {{old_marginal_relief}}</td>
+            <td class="right">₹ {{new_marginal_relief}}</td>
+        </tr>
+
+
+        
+
+        <tr class="section">
+            <td>Tax Payable</td>
+            <td class="right">₹ {{old_regime_total_tax_payable}}</td>
+            <td class="right">₹ {{new_regime_total_tax_payable}}</td>
+        </tr>
+
+        <tr class="section">
+            <td>TDS Deducted Previous Employer</td>
+            <td class="right">₹ {{tds_deducted_from_previuos_employer}}</td>
+            <td class="right">₹ {{tds_deducted_from_previuos_employer}}</td>
+        </tr>
+
+       
+
+
+
+        <tr class="section">
+            <td>Tax Paid</td>
+            <td class="right">₹ {{total_tax_already_paid}}</td>
+            <td class="right">₹{{total_tax_already_paid}} </td>
+        </tr>
+
+         <tr class="section">
+            <td>Balance TDS Payable</td>
+            <td class="right">₹ {{balance_tax_payable_old_regime}}</td>
+            <td class="right">₹ {{balance_tax_payable_new_regime}}</td>
+        </tr>
+
+
+        <tr class="section">
+            <td>Remaining Month  </td>
+            <td class="right">₹ {{balance_month}}</td>
+            <td class="right">₹ {{balance_month}}</td>
+        </tr>
+
+        <tr class="section">
+            <td>Current Tax</td>
+            <td class="right">₹ {{old_regime_current_tax}}</td>
+            <td class="right">₹ {{new_regime_current_tax}}</td>
+        </tr>
+
+
+
+    </tbody>
+</table>
+
+</body>
+</html>

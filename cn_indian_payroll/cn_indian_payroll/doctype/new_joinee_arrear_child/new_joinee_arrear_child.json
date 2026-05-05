@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-16 10:14:09.907326",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "working_days",
+  "arrear_days",
+  "date_of_joining",
+  "total_earning_arrear",
+  "total_deduction_arrear",
+  "total_benefit",
+  "new_joining_arrear_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "arrear_days",
+   "fieldtype": "Float",
+   "label": "Arrear Days"
+  },
+  {
+   "fieldname": "date_of_joining",
+   "fieldtype": "Date",
+   "label": "Date Of Joining"
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Float",
+   "label": "Working Days"
+  },
+  {
+   "fieldname": "total_earning_arrear",
+   "fieldtype": "Float",
+   "label": "Total Earning Arrear"
+  },
+  {
+   "fieldname": "total_deduction_arrear",
+   "fieldtype": "Float",
+   "label": "Total Deduction Arrear"
+  },
+  {
+   "fieldname": "total_benefit",
+   "fieldtype": "Float",
+   "label": "Total Benefit"
+  },
+  {
+   "fieldname": "new_joining_arrear_id",
+   "fieldtype": "Link",
+   "label": "New Joining Arrear ID",
+   "options": "New Joining Arrear"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-01 21:28:56.532149",
+ "modified_by": "Administrator",
+ "module": "cn-indian-payroll",
+ "name": "New Joinee Arrear Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
